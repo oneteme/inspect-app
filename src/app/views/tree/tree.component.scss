@@ -1,0 +1,73 @@
+
+
+#container {
+   height: calc(100vh - 56px - 48px - 0.5em);
+   overflow-x: hidden;
+   display: flex; 
+   flex-direction: column;
+}
+
+.header-filter {
+   display: flex;
+   flex-direction: row;
+   align-items: center;
+   gap: 0.5em;
+   margin-top: 0.5em;
+}
+
+#fixed-width-container {
+   border: 1px solid #000;
+   width: 100%;
+   position: relative;
+   height: 100%;
+   overflow: hidden;
+}
+
+#detail-element {
+  // border: 1px solid blue;
+   width: 100%;
+   word-wrap: break-word;
+   height:10%;
+   overflow: auto;
+}
+.zoom{
+    position: absolute;
+    min-width: 28px;
+    z-index: 1;
+}
+
+.progress{
+   height: 20px;
+}
+
+.progress-bar {
+   display: flex;
+   flex-direction: column;
+   justify-content: center;
+   overflow: hidden;
+   color: #fff;
+   text-align: center;
+   white-space: nowrap;
+}
+
+.dbfailed {
+   background-color: red!important;
+}
+
+ .md-chips {
+   .md-chip {
+     margin: 0 5px 3px 0;
+   } 
+ }
+
+ .md-chip {
+   display: inline-block;
+   padding: 0 12px;
+   background-color: #ccc;
+   border-radius: 32px;
+   font-size: 13px;
+   color:white;
+   &.md-chip-hover:hover {
+     background: #ccc;
+   }
+ }

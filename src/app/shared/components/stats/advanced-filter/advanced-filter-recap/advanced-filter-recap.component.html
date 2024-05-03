@@ -1,0 +1,9 @@
+<mat-chip-set>
+    <mat-chip *ngFor="let option of advancedParams | keyvalue; let j = index" (click)="openFilterDialog(option.key)" (removed)="remove(option.key)" 
+        [removable]="true" >
+        <span style="cursor: pointer;"><b>{{option.key}} : </b>{{[option.value].join(',').length > 10 ?  ([option.value].join(',') | slice:0:20)+"...":[option.value]}}</span>
+        <button matChipRemove aria-label="'remove ' + keyword">
+        <mat-icon>cancel</mat-icon>
+        </button>
+    </mat-chip>
+</mat-chip-set>

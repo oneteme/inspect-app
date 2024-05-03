@@ -1,0 +1,15 @@
+<div class="title-container">
+    <div class="title-icon">
+        <mat-icon class="material-symbols-outlined" [fontIcon]="titleIcon"></mat-icon>
+    </div>
+    <div class="title">
+        <div *ngIf="title" class="main">{{title}}</div>
+        <div *ngIf="subTitle || templateSubTitle" class="sub">
+            <span *ngIf="subTitle">{{subTitle}}</span>
+            <ng-container *ngIf="templateSubTitle" [ngTemplateOutlet]="templateSubTitle"></ng-container>
+        </div>
+    </div>
+</div>
+<div class="right">
+    <ng-content></ng-content>
+</div>

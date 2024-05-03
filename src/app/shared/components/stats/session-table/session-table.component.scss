@@ -1,0 +1,16 @@
+.loading {
+    height: 212px;
+    display: flex;
+    align-items: center; 
+    justify-content: center; 
+    font-size: 14px;
+}
+
+table {
+    width: 100%;
+    table-layout: fixed;
+}
+
+.mat-mdc-table .mdc-data-table__header-row {
+    background-color: #d1d1d1;
+}

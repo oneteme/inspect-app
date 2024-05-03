@@ -1,0 +1,158 @@
+/* You can add global styles to this file, and also import other style files */
+/* You can add global styles to this file, and also import other style files */
+@use '@angular/material' as mat;
+@import '~@angular/material/prebuilt-themes/indigo-pink.css';
+
+
+body {
+  margin: 0;
+}
+  
+.blue-gradient {
+  background: -webkit-linear-gradient(50deg, #45cafc, #303f9f);
+  background: linear-gradient(40deg, #45cafc, #4285f4);
+}
+
+.white-space{
+  white-space: pre-line;
+}
+
+.noDataMessage{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+ // background-color:  white;
+  color:gray
+}
+
+.fullwidth{
+  width: 100%;
+}
+
+
+.mat-mdc-raised-button.mat-primary {
+  --mdc-protected-button-container-color: #1423DC;
+  --mdc-protected-button-label-text-color: #fff;
+}
+
+.table-column-content {
+  display: inline;
+}
+
+.ellipsis {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.ellipsis:hover {
+  text-overflow: clip;
+  white-space: normal;
+  word-break: break-all;
+}
+
+mat-form-field.no-subscript {
+  .mat-mdc-form-field-subscript-wrapper {
+      display: none;
+  }
+}
+
+.md-1 {
+  @include mat.all-component-densities(-1);
+}
+
+.md-2 {
+  @include mat.all-component-densities(-2);
+}
+
+.md-3 {
+  @include mat.all-component-densities(-3);
+}
+
+.mdc-data-table__cell:has(#pie-chart) {
+  overflow: visible !important;
+}
+
+.flow {
+  stroke-dasharray: 8;
+  animation: dash 0.5s linear;
+  animation-iteration-count: infinite;
+}
+
+@keyframes dash {
+  to {
+     stroke-dashoffset: -16;
+  }
+}
+
+
+.mxTooltip{
+  background-color: #f9f9f9!important;
+  border: 1px solid #d3d3d3!important;
+  border-radius:  4px!important;
+  padding: 8px!important;
+  font-size: 14px!important;
+  color: #333!important;
+}
+
+
+
+.vis-item.rest{
+  background-color: rgb(20, 35, 220);
+  border-color: #040730;
+  color:white;
+  cursor: pointer;
+}
+.vis-item.bdd{
+  background-color: #008080; //rgb(150, 205, 50);
+  border-color: #002e2e;//rgb(150, 205, 50);
+  color:white;
+}
+
+.vis-custom-time { // makes markers not draggable 
+  pointer-events: none;
+}
+
+
+/*.vis-item.vis-selected{
+  background-color: orange;
+  border-color: orangered;
+}*/
+
+.mat-mdc-table .mdc-data-table__header-row {
+  height: 40px;
+}
+
+mat-form-field.loading {
+
+  mat-select {
+    pointer-events: none;
+  }
+
+  .mat-mdc-select-arrow {
+    opacity: 0;
+  }
+  
+  mat-spinner.mdc-circular-progress {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translate(0, -50%);
+  }
+}
+
+.empty-row {
+  display: flex;
+  gap: .5em;
+  margin: 2.5rem auto;
+  color: #707070;
+  font-weight: 500;
+  width: fit-content;
+  font-size: 12px;
+}
+
+
+
+
+

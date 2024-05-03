@@ -1,0 +1,27 @@
+<nav>
+  <mat-toolbar color="primary" style="display: flex; align-items: center; height: 48px;">
+    <span style="margin-right: 1em;">Trace Api</span>
+
+    <a style="color: inherit" [routerLink]="['session/api']" routerLinkActive="item-selected"
+      [queryParams]="{env: env.value}">
+      <button mat-button>Liste des API</button>
+    </a>
+    <a style="color: inherit" [routerLink]="['session/main']" routerLinkActive="item-selected"
+      [queryParams]="{env: env.value}">
+      <button mat-button>Liste des Sessions</button>
+    </a>
+
+    <span style="flex-grow: 1;"></span>
+    <mat-form-field appearance="fill" class="md-2 no-subscript" [class.loading]="isLoadingEnv">
+      <mat-select [formControl]="env">
+        <mat-option *ngFor="let e of envs" [value]="e">{{e}}</mat-option>
+      </mat-select>
+      <mat-spinner *ngIf="isLoadingEnv" [diameter]="18"></mat-spinner>
+    </mat-form-field>
+  </mat-toolbar>
+</nav>
+<mat-drawer-container>
+  <mat-drawer-content style="overflow-x: hidden; padding: 0.5em">
+    <router-outlet></router-outlet>
+  </mat-drawer-content>
+</mat-drawer-container>

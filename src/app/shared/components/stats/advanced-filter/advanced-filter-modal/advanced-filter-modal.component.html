@@ -1,0 +1,73 @@
+<h2 mat-dialog-title color="primary" style="background-color:#3f51b5;color:white;">Filtres</h2>
+<mat-dialog-content class="mat-typography">
+    <div class="filter-container">
+
+        <form [formGroup]="form" class="filter-fields md-2">
+            <div *ngFor="let row of data.filterConfig | groupByRow; let i = index" style="display: flex; gap: 1em;">
+                <div *ngFor="let col of row.filters; let j = index" [style]="'order: ' + col.col" [style.flex]="col.width ? '0 0 calc('+ col.width + '%)': '1 0 auto'">
+                        <ng-container [ngSwitch]="col.type">
+                            <mat-form-field *ngSwitchCase="'input'" appearance="outline" class="no-subscript"
+                                style="width: 100%;">
+                                <mat-label>{{col.label}}</mat-label>
+                                <input [id]="col.key" matInput [formControlName]="col.key" [type]="col.type">
+                                <mat-icon matSuffix [matTooltip]="col.op.display">compare</mat-icon>
+                            </mat-form-field>
+
+                            <mat-form-field *ngSwitchCase="'select'" appearance="outline" class="no-subscript"
+                                [class.loading]="col.isLoading" style="width: 100%;">
+                                <mat-label>{{col.label}}</mat-label>
+                                <mat-select [id]="col.key" matInput [formControlName]="col.key" multiple>
+                                    <mat-option *ngFor="let option of col.options"
+                                        [value]="option[col.key]">{{option[col.key]}}</mat-option>
+                                </mat-select>
+                                <mat-spinner *ngIf="col.isLoading" [diameter]="18"></mat-spinner>
+                            </mat-form-field>
+
+                            <!--
+                            <mat-form-field  *ngSwitchCase="'chip'"  appearance="outline" class="field no-subscript">
+                                <mat-label>{{field.label}}</mat-label>
+                                    <mat-chip-grid #id [formControlName]="field.key">
+                                        <mat-chip-row *ngFor="let option of form.controls[field.key].value; let j = index" (removed)="remove(j,field.key)"
+                                            [removable]="true" >
+                                            {{option}}
+                                            <button matChipRemove aria-label="'remove ' + keyword">
+                                            <mat-icon>cancel</mat-icon>
+                                            </button>
+                                        </mat-chip-row>
+    
+                                    </mat-chip-grid>
+                                    <input  [matChipInputFor]="id"
+                                            (matChipInputTokenEnd)="add($event,field)"/>
+                            </mat-form-field>
+                            -->
+                        </ng-container>
+                </div>
+
+            </div>
+            <!-- <button type="submit" mat-raised-button color="primary">Valider</button>-->
+        </form>
+    </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <!--<mat-form-field  appearance="outline" class="md-3 no-subscript">
+        <mat-label>Presets</mat-label>
+        <input type="text"
+               placeholder="Pick one"
+               [formControl]="presetControl"
+               matInput
+               [matAutocomplete]="auto">
+        <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onPresetSelected($event)">
+            <mat-option *ngFor="let preset of presets" [value]="preset.name">{{preset.name}}</mat-option>
+        </mat-autocomplete>
+      </mat-form-field>
+    <button mat-button (click)="savePreset()" [disabled]="presetControl.value===''" [disabled]="isFormEmpty">Enregistrer</button>
+    -->
+    <button *ngIf="selectedPreset" mat-button (click)="removePreset()" color="warn">Supprimer</button>
+    <div class="dialog-actions">
+        <button mat-raised-button mat-dialog-close>Annuler</button>
+        <button mat-raised-button (click)="resetForm()">Réinitialiser</button>
+        <button mat-raised-button [mat-dialog-close]="removeNullEntries(form.value)" color="primary"
+            cdkFocusInitial>Valider</button>
+    </div>
+
+</mat-dialog-actions>

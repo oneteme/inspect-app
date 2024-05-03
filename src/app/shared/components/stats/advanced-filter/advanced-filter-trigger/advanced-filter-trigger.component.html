@@ -1,0 +1,46 @@
+<button mat-mini-fab color="primary" [matMenuTriggerFor]="menu">
+    <mat-icon>more_vert</mat-icon>
+</button>
+
+
+<mat-menu #menu="matMenu" xPosition="after">
+    <button mat-menu-item   (click)="HandleOpenFilterDialog()">
+        <mat-icon>tune</mat-icon>
+        <span>Recherche avancée</span>
+    </button>
+    <button mat-menu-item [matMenuTriggerFor]="save">
+        <mat-icon>saved_search</mat-icon>
+        <span>Enregistrer</span>
+    </button>
+    <button mat-menu-item [matMenuTriggerFor]="presets" *ngIf="presetsFilter.length > 0">
+        <mat-icon>star_border</mat-icon>
+        <span>Favoris</span>
+    </button>
+    <button mat-menu-item (click)="resetFilters()">
+        <mat-icon>restart_alt</mat-icon>
+        <span>Réinitialiser les filtres</span>
+    </button>
+</mat-menu>
+
+<mat-menu #presets="matMenu" >
+    <button mat-menu-item *ngFor="let preset of presetsFilter" (click)="onPresetSelected(preset.name)">
+        <mat-icon *ngIf="preset.name == selectedPreset?.name">check</mat-icon>
+        <span>{{preset.name}} </span>
+    </button>
+</mat-menu>
+
+<mat-menu #save="matMenu" [overlapTrigger]="false">
+    <div (click)="$event.stopPropagation()" class="save-dropdown">
+        <mat-form-field appearance="outline" class="md-2 no-subscript">
+            <mat-label>Presets</mat-label>
+            <input type="text" placeholder="Pick one" matInput [(ngModel)]="currentPreset" >
+        </mat-form-field>
+        <button mat-mini-fab color="primary" (click)="savePreset()" [disabled]="!currentPreset">
+            <mat-icon *ngIf="!selectedPreset || selectedPreset?.name != currentPreset" >add</mat-icon>
+            <mat-icon *ngIf="selectedPreset && selectedPreset.name == currentPreset">edit</mat-icon>
+        </button>
+        <button *ngIf="selectedPreset" mat-mini-fab color="warn" (click)="removePreset(selectedPreset.name,pageName,true)" >
+            <mat-icon>delete</mat-icon>
+        </button>
+    </div>
+</mat-menu>

@@ -1,0 +1,34 @@
+.header-filter {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.5em;
+}   
+
+table 
+{
+    table-layout: fixed;
+}
+
+.mat-mdc-row .mat-mdc-cell {
+    cursor: pointer;
+}
+
+.mat-mdc-row:hover .mat-mdc-cell {
+    background-color: rgb(206, 206, 206);
+}
+
+.mat-mdc-table .mdc-data-table__header-row {
+    background-color: #d1d1d1;
+}
+
+.example-container {
+    position: relative;
+}
+
+.example-table-container {
+    max-height: calc(100vh - 96px - 56px - 48px - 1.5em);
+    overflow: auto;
+}
+
+  

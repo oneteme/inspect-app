@@ -1,0 +1,29 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "baseUrl": "./",
+    "outDir": "./dist/out-tsc",
+    "sourceMap": true,
+    "declaration": false,
+    "module": "es2015",
+    "moduleResolution": "node",
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitAny": true,
+    "target": "ES2022",
+    "strictPropertyInitialization": false,
+    "typeRoots": [
+      "node_modules/@types",
+      "node_modules/@typed-mxgraph",
+      "node_modules/mxgraph-type-definitions"
+
+    ],
+    "lib": [
+      "es2019",
+      "dom"
+    ],
+    "useDefineForClassFields": false
+  }
+}

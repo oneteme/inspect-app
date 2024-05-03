@@ -1,0 +1,25 @@
+
+.filter-fields {
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+}
+
+.filter-container{
+    margin-top: 20px;
+}
+
+.title{
+    width: max-content;
+    margin-right: 10px;
+}
+
+.dialog-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dialog-actions{
+    margin-left: auto;
+}
