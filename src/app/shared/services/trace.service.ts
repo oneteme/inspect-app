@@ -29,4 +29,8 @@ export class TraceService {
     getTreeRequestById(id: string) {
         return this.http.get(`${localStorage.getItem('server')}/trace/session/request/${id}/tree`);
     }
+
+    getDbRequestById(id: number){
+        return this.http.get(`${localStorage.getItem('server')}/trace/db/request/${id}`);
+    }
 }

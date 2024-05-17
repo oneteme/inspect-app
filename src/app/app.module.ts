@@ -23,6 +23,7 @@ import { StatsDatabaseComponent } from './views/stats-database/stats-database.co
 import { StatsAppComponent } from './views/stats-app/stats-app.component';
 import { StatsApiComponent } from './views/stats-api/stats-api.component';
 import { StatsUserComponent } from './views/stats-user/stats-user.component';
+import { DbRequestDetailComponent } from './views/db-request-detail/db-request-detail.component';
 
 registerLocaleData(localeFr, 'fr-FR');
 const routes: Route[] = [
@@ -52,6 +53,11 @@ const routes: Route[] = [
           } 
           return 'Detail de l\'API';
         }
+      },
+      {
+        path: 'api/:id/db/:dbid',
+        component: DbRequestDetailComponent,
+        title: 'Detail de la requête SQL'
       },
       { path: '**', pathMatch: 'full', redirectTo: `/session/api` }
     ]

@@ -1,0 +1,138 @@
+<div *ngIf="!isLoading" class="header-card">
+    <mat-card style="width: 60vw; min-width: 60vw;" *ngIf="selectedSession"
+        [matTooltip]="getSessionStatusTooltip(selectedSession)" matTooltipPosition="before"
+        [ngStyle]="getSessionDetailBorder(selectedSession)">
+
+        <mat-card-title>
+            <a style="display: flex; align-items: center; gap: 0.5em"
+                [routerLink]="'/dashboard/api/'+ selectedSession?.name"
+                [queryParams]="{'env': selectedSession?.application?.env}"
+                [style.pointer-events]="selectedSession.launchMode =='WEBAPP' ? 'none' : 'all'"
+                matTooltip="Statistique API">
+                <mat-icon>settings_suggest</mat-icon>
+                {{selectedSession?.type=='api' || selectedSession?.type =='outcoming' ? (selectedSession?.name|| 'N/A') : '['
+                + selectedSession?.launchMode + '] ' + selectedSession?.name || 'N/A'}}
+            </a>
+            <div class="right">
+                <button mat-icon-button (click)="navigate($event,'tree')" matTooltip="Arbre d'appels API">
+                    <mat-icon>lan</mat-icon>
+                </button>
+            </div>
+
+        </mat-card-title>
+        <mat-card-content>
+            <div *ngIf="selectedSession?.type=='api' || selectedSession?.type =='outcoming'">
+                <div class="ellipsis">
+                    <a class="url" [href]="getSessionUrl(selectedSession)" target="_blank">
+                        [{{selectedSession?.method}}]
+                        {{getSessionUrl(selectedSession)}}
+                    </a>
+                </div>
+
+                <div class="ellipsis"
+                    style="display: flex; gap: 0.5em; color: red; font-weight: 500; margin-top: 0.5em;"
+                    *ngIf="selectedSession?.exception?.classname || selectedSession?.exception?.message "
+                    [matTooltip]="selectedSession?.exception.classname" TooltipPosition="below">
+                    <mat-icon class="material-symbols-outlined">warning</mat-icon>{{selectedSession?.exception.message || selectedSession?.exception?.classname}} 
+                </div>
+            </div>
+
+            <div *ngIf="selectedSession?.type=='main'">
+                <span *ngIf="selectedSession.location">
+                    <a class="url" [href]="selectedSession?.location" target="_blank">
+                        {{selectedSession?.location}}
+                    </a>
+                </span>
+            </div>
+
+        </mat-card-content>
+        <mat-card-footer>
+            <mat-icon style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
+            <div style="display: flex; align-items: center; gap: 0.5em">
+                <a  [style.pointer-events]="selectedSession?.user? 'auto' : 'none'"
+                    [routerLink]="'/dashboard/user/'+ selectedSession?.user"
+                    [queryParams]="{'env': env}" matTooltip="Statistique Utilisateur">
+                    {{selectedSession?.user || "N/A"}} 
+                </a>
+                le {{( selectedSession?.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
+            </div>
+            <div class="right">
+                {{selectedSession?.inDataSize || 0}}o
+                <mat-icon style="width: 20px; height: 20px; font-size: 20px;">swap_vert</mat-icon>
+                {{selectedSession?.outDataSize}}o en {{ getElapsedTime(selectedSession?.end, selectedSession?.start) |
+                number :'1.2-3'}}s
+            </div>
+        </mat-card-footer>
+    </mat-card>
+    <mat-card style="width: 40vw;">
+        <mat-card-title>
+            <a style="display: flex; align-items: center; gap: 0.5em"
+                [routerLink]="'/dashboard/app/'+ selectedSession?.application?.name"
+                [style.pointer-events]="selectedSession.launchMode =='WEBAPP' ? 'none' : 'all'"
+                [queryParams]="{'env': selectedSession?.application?.env}" matTooltip="Statistique Serveur">
+                <mat-icon>storage</mat-icon>
+                {{selectedSession?.application?.name}}
+            </a>
+            <div style="height: 48px">
+
+            </div>
+        </mat-card-title>
+        <mat-card-content>
+
+            <div style="display: flex; align-items: center;" *ngFor="let item of queryBySchema | keyvalue ">
+                <div style="display: flex; margin-right: 1em; margin-left: 1em;" *ngIf="item.key != 'null'">
+                    <mat-icon class="material-symbols-outlined">Database</mat-icon>
+                </div>
+                <div *ngIf="item.key != 'null'">
+                    <a style="font-weight: 500; font-size: 14px;" [routerLink]="'/dashboard/database/'+ item.key"
+                        [queryParams]="{'env': selectedSession?.application?.env}"
+                        matTooltip="Statistique Base de donnée">
+                        {{ item.key }}
+                    </a>
+                    <div style="font-style: italic; font-size: 12px;">{{ item.value[0].databaseName }} v.{{
+                        item.value[0].databaseVersion}}</div>
+                </div>
+            </div>
+
+
+        </mat-card-content>
+        <mat-card-footer>
+            <div style="font-style: italic; font-size: 14px;">
+                {{selectedSession?.application?.address}} en {{selectedSession?.application?.env}}
+            </div>
+            <span style="margin-left: auto;">
+                {{selectedSession?.application?.os}}
+            </span>
+            <span style="margin-left: auto;">
+                {{selectedSession?.application?.re}}
+            </span>
+        </mat-card-footer>
+    </mat-card>
+</div>
+
+
+<div [hidden]="isLoading">
+    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center;">
+        <mat-divider style="margin-right: 1em; flex: 1 1 0%"></mat-divider>
+        <div
+            style="display: flex; align-items: center; gap: 0.5em; margin-bottom:  0.5em; font-size: 20px; font-weight: 500;">
+            <mat-icon class="material-symbols-outlined">view_timeline</mat-icon>
+            Chronologie
+        </div>
+        <mat-divider style="margin-left: 1em; flex: 1 1 0%"></mat-divider>
+    </div>
+    
+</div>
+<div #timeline id="timeline"></div>
+
+
+<div *ngIf="!isLoading && !isComplete" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">
+    <h2>
+        Aucun détail disponible .. <br>
+        <span *ngIf="selectedSession">Vérifiez que TraceAPI est bien configuré sur <b>{{
+                selectedSession?.host}}</b></span>
+    </h2>
+</div>
+<div *ngIf="isLoading" style="width: 100%; height: calc(100vh - 50px - 1em); display: flex; flex-direction: row; align-items: center; justify-content: center; font-style: italic; gap: 0.5em">
+    <mat-progress-spinner diameter="30" mode="indeterminate"></mat-progress-spinner> Chargement en cours...
+</div>

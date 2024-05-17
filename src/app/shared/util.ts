@@ -50,10 +50,10 @@ export class Utils {
         return "gray"
     }
 
-    getStateColorBool(failed: boolean) {
-        if (failed)
-            return 'red'
-        return 'green';
+    getStateColorBool(completed: boolean) {
+        if (completed)
+            return 'green'
+        return 'red';
     }
 
     statusBorder(param: any): { [key: string]: string } {

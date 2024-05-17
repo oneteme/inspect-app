@@ -21,21 +21,14 @@ export interface UserData {
 }
 
 @Component({
-    templateUrl: './session-detail.component.html',
-    styleUrls: ['./session-detail.component.scss'],
+    templateUrl: './db-request-detail.component.html',
+    styleUrls: ['./db-request-detail.component.scss'],
 
 })
-export class SessionDetailComponent implements AfterContentInit, OnDestroy {
+export class DbRequestDetailComponent implements AfterContentInit, OnDestroy {
 
     UtilInstance: Utils = new Utils();
-    outcomingRequestDisplayedColumns: string[] = ['Status', 'host', 'path', 'start', 'duree'];
-    outcomingQueryDisplayedColumns: string[] = ['Status', 'host', 'schema', 'start', 'duree', 'db']
-    outcomingRequestdataSource: MatTableDataSource<OutcomingRequest> = new MatTableDataSource();
-    outcomingQuerydataSource: MatTableDataSource<any>;
-    selectedSession: any // IncomingRequest | Mainrequest | OutcomingRequest;
-    selectedSessionType: string;
-    outcomingRequestList: any;
-    outcomingQueryList: any;
+    selectedQuery: any;
     isComplete: boolean = true;
     isLoading: boolean = false;
     data: any[];
@@ -69,7 +62,6 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
             this._activatedRoute.queryParams
         ]).subscribe({
             next: ([params, queryParams]) => {
-                this.selectedSessionType = params.type;
                 this.getSessionById(params.id);
                 this.env = queryParams.env || application.default_env;
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}`)
@@ -78,50 +70,21 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
     }
 
     ngAfterContentInit(): void {
-        /*this._activatedRoute.paramMap.subscribe((paramsList: any) => {
-            this.selectedSessionType = paramsList.params['type'];
-            this.getSessionById(paramsList.params['id']);
-        })*/
     }
 
 
 
-
-
-
-    getSessionById(id: string) {
+    getSessionById(id: number) {
 
         this.isLoading = true;
-        (this.selectedSessionType == 'main' ? this._traceService.getMainRequestById(id) : this._traceService.getIncomingRequestById(id)).subscribe({
+        this._traceService.getDbRequestById(id).subscribe({
             next: (d: any) => {
-                this.selectedSession = d;
-                if (this.selectedSession) {
-                    this.selectedSession.type = this.selectedSessionType;
-                    
-                    this.outcomingRequestList = this.selectedSession.requests;
-                    this.outcomingRequestdataSource = new MatTableDataSource(this.outcomingRequestList);
-                    setTimeout(() => { this.outcomingRequestdataSource.paginator = this.outcomingRequestPaginator });
-                    setTimeout(() => { this.outcomingRequestdataSource.sort = this.outcomingRequestSort });
-                    this.outcomingRequestdataSource.sortingDataAccessor = (row: any, columnName: string) => {
-                        if (columnName == "host") return row["host"] + ":" + row["port"] as string;
-                        if (columnName == "start") return row['start'] as string;
-                        if (columnName == "duree") return (row["end"] - row["start"]);
-                        var columnValue = row[columnName as keyof any] as string;
-                        return columnValue;
-                    }
-                    this.outcomingQueryList = this.selectedSession.queries
-                    this.outcomingQuerydataSource = new MatTableDataSource(this.outcomingQueryList);
-                    setTimeout(() => { this.outcomingQuerydataSource.paginator = this.outcomingQueryPaginator });
-                    setTimeout(() => { this.outcomingQuerydataSource.sort = this.outcomingQuerySort });
-                    this.outcomingQuerydataSource.sortingDataAccessor = (row: any, columnName: string) => {
-                        if (columnName == "duree") return (row["end"] - row["start"])
-                        var columnValue = row[columnName as keyof any] as string;
-                        return columnValue;
-                    }
-                    
-                    this.groupQueriesBySchema();
-                    this.configDbactions(this.selectedSession)
-                    
+                if(d)
+                {
+                    this.selectedQuery = d;
+
+                    //this.groupQueriesBySchema();
+                    this.configDbactions(this.selectedQuery)
                     this.visjs();
                     this.isLoading = false;
                     this.isComplete = true;
@@ -139,20 +102,20 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
 
     visjs() {
         
-        let timeline_end = +this.selectedSession.end * 1000
-        let timeline_start = +this.selectedSession.start * 1000
-        let dataArray: any = [...<OutcomingRequest[]>this.selectedSession.requests,
-        ...<OutcomingQuery[]>this.selectedSession.queries,
-        ...<RunnableStage[]>this.selectedSession.stages.map((s: any) => ({ ...s, isStage: true }))];
-        dataArray.splice(0, 0, {...this.selectedSession,isStage: true})
+        let timeline_end = +this.selectedQuery.end * 1000
+        let timeline_start = +this.selectedQuery.start * 1000
+        let dataArray: any = [...<OutcomingRequest[]>this.selectedQuery.requests,
+        ...<OutcomingQuery[]>this.selectedQuery.queries,
+        ...<RunnableStage[]>this.selectedQuery.stages.map((s: any) => ({ ...s, isStage: true }))];
+        dataArray.splice(0, 0, {...this.selectedQuery,isStage: true})
         this.sortInnerArrayByDate(dataArray);
 
 
         let data: any;
         let groups: any;
         let isWebapp = false, title = '';
-        if (this.selectedSessionType === "main" && this.selectedSession.launchMode === "WEBAPP") {
-            groups = [{ id: 0, content: this.selectedSession?.application?.re }];
+        if (this.selectedQuery === "main" && this.selectedQuery.launchMode === "WEBAPP") {
+            groups = [{ id: 0, content: this.selectedQuery?.application?.re }];
             title = 'path';
             isWebapp = true;
         } else {
@@ -185,6 +148,7 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
         if (this.timeLine) {  // destroy if exists 
             this.timeLine.destroy();
         }
+
         // Create a Timeline
         this.timeLine = new Timeline(this.timelineContainer.nativeElement, data, groups
             , {
@@ -212,8 +176,8 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
             }
         });
 
-        if (timeline_end != +this.selectedSession.end * 1000) {
-            this.timeLine.addCustomTime(+this.selectedSession.end * 1000, "async");
+        if (timeline_end != +this.selectedQuery.end * 1000) {
+            this.timeLine.addCustomTime(+this.selectedQuery.end * 1000, "async");
             this.timeLine.setCustomTimeMarker("async", "async");
         }
 
@@ -262,32 +226,16 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
     }
 
 
-    configDbactions(session: any) {
-        session.queries.forEach((query: any) => {
-            query.actions.forEach((db: any, i: number) => {
-                if (query.actions[i + 1]) {
-                    let diffElapsed = new Date(db.end * 1000).getTime() - new Date(query.actions[i + 1].start * 1000).getTime();
+    configDbactions(query: any) {
+        query.actions.forEach((db: any, i: number) => {
+            if (query.actions[i + 1]) {
+                let diffElapsed = new Date(db.end * 1000).getTime() - new Date(query.actions[i + 1].start * 1000).getTime();
 
-                    if (diffElapsed != 0) {
-                        query.actions.splice(i + 1, 0, { 'type': ' ', 'exception': { 'classname': null, 'message': null }, 'start': db.end, 'end': query.actions[i + 1].start })
-                    }
+                if (diffElapsed != 0) {
+                    query.actions.splice(i + 1, 0, { 'type': ' ', 'exception': { 'classname': null, 'message': null }, 'start': db.end, 'end': query.actions[i + 1].start })
                 }
-            });
-
+            }
         });
-    }
-
-    groupQueriesBySchema(){
-        if(this.selectedSession.queries){
-            this.queryBySchema =  this.selectedSession.queries.reduce((acc: any, item: any) => {
-                if(!acc[item['schema']]){
-                    acc[item['schema']] = []
-                }
-
-                acc[item['schema']].push(item);
-                return acc;
-            },[]);
-        }
     }
 
     getSessionUrl(selectedSession: any) {
@@ -298,20 +246,20 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
         let params: any[] = [];
         switch (targetType) {
             case "api":
-                params.push('dashboard', 'api', this.selectedSession.name);
+                params.push('dashboard', 'api', this.selectedQuery.name);
                 break;
             case "app":
-                params.push('dashboard', 'app', this.selectedSession.application.name)
+                params.push('dashboard', 'app', this.selectedQuery.application.name)
                 break;
             case "tree":
-                params.push('session/api', this.selectedSession.id, 'tree')
+                params.push('session/api', this.selectedQuery.id, 'tree')
                 break;
         }
         if(event.ctrlKey){
            this._router.open(`#/${params.join('/')}`,'_blank')
           }else {
             this._router.navigate(params, {
-                queryParams: { env: this.selectedSession?.application?.env }
+                queryParams: { env: this.selectedQuery?.application?.env }
             });
         }
     }
@@ -352,6 +300,9 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
             this.paramsSubscription.unsubscribe();
         }
     }
+
+
+   
 }
 
 @Injectable()
@@ -373,7 +324,6 @@ export class EnvRouter {
         return this.router.url;
     }
     
-
     navigate(commands: any[], extras?: NavigationExtras): Promise<boolean> {
         if (!extras?.queryParams?.env) {
             if (this._env) {

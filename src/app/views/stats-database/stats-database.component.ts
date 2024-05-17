@@ -33,7 +33,7 @@ export class StatsDatabaseComponent implements OnInit {
 
   env: any;
   dbNameDataList: any[];
-  schema: any;
+  db: any;
   dbNameListIsLoading: boolean = false
   dataIsLoading: boolean = false
   countOkKo: any[];
@@ -58,7 +58,7 @@ export class StatsDatabaseComponent implements OnInit {
     }).subscribe({
       next: (v: { params: Params, queryParams: Params }) => {
 
-        this.schema = v.params.name;
+        this.db = v.params.name;
         this.env = v.queryParams.env || application.default_env;
         let start = v.queryParams.start || (application.dashboard.database.default_period || application.dashboard.default_period || makePeriod(6)).start.toISOString();
         let end = v.queryParams.end || (application.dashboard.database.default_period || application.dashboard.default_period || makePeriod(6)).end.toISOString();
@@ -81,13 +81,13 @@ export class StatsDatabaseComponent implements OnInit {
     this.dbNameListIsLoading = true;
     this.serverFilterForm.controls.dbnameControl.reset();
     this.serverFilterForm.controls.dbnameControl.disable();
-    this._statsService.getSessionApi({ 'column.distinct': 'query.schema&query.parent=request.id&order=query.schema.asc', 'request.environement': this.env }).pipe(catchError(error => of(error)))
+    this._statsService.getSessionApi({ 'column.distinct': 'query.db&query.parent=request.id&order=query.db.asc', 'request.environement': this.env }).pipe(catchError(error => of(error)))
       .subscribe({
-        next: (res: { schema: string }[]) => {
-          this.dbNameDataList = res.map((s: any) => s.schema)
+        next: (res: { db: string }[]) => {
+          this.dbNameDataList = res.map((s: any) => s.db)
           this.serverFilterForm.controls.dbnameControl.enable();
           this.dbNameListIsLoading = false;
-          this.serverFilterForm.controls.dbnameControl.patchValue(this.schema)
+          this.serverFilterForm.controls.dbnameControl.patchValue(this.db)
         },
         error: err => {
           this.dbNameListIsLoading = false;
@@ -122,7 +122,7 @@ export class StatsDatabaseComponent implements OnInit {
     let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
     let end = new Date(this.serverFilterForm.getRawValue().dateRangePicker.end);
     end.setDate(end.getDate() + 1);
-    this.requests = this.DB_REQUEST(this.schema, this.env, start, end)
+    this.requests = this.DB_REQUEST(this.db, this.env, start, end)
     Object.keys(this.requests).forEach(k => {
       this.requests[k].data = [];
       this.requests[k].isLoading = true;
@@ -136,26 +136,26 @@ export class StatsDatabaseComponent implements OnInit {
   }
 
 
-  DB_REQUEST = (schema: string, env: string, start: Date, end: Date) => {
+  DB_REQUEST = (db: string, env: string, start: Date, end: Date) => {
     let now = new Date();
     var groupedBy = periodManagement(start, end);
     return {
-      dbInfo: { observable: this._statsService.getSessionApi({ 'column.distinct': 'query.host,query.schema,query.driver,query.db_name,query.db_version', 'query.parent': 'request.id', "request.environement": env, "query.schema": schema, 'query.start.ge': start.toISOString(), 'query.start.lt': end.toISOString(), 'request.start.ge': start.toISOString(), 'request.start.lt': end.toISOString() }) },
-      countOkKoSlowest: { observable: this._statsService.getSessionApi({ 'column': 'query.count_db_error:countErrorServer,query.count:count,query.count_slowest:countSlowest,query.start.date:date', 'query.parent': 'request.id', "request.environement": env, "query.schema": schema, 'request.start.ge': new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6).toISOString(), 'request.start.lt': now.toISOString(), 'query.start.ge': new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString(), 'query.start.lt': now.toISOString()}) },
-      countMinMaxAvg: { observable: this._statsService.getSessionApi({ 'column': `query.count_db_succes:countDbSucces,query.elapsedtime.max:max,query.elapsedtime.avg:avg,query.start.${groupedBy}:date,query.start.year:year`, 'query.parent': 'request.id', "request.environement": env, "query.schema": schema, 'request.start.ge': start.toISOString(), 'request.start.lt': end.toISOString(), 'query.start.ge': start.toISOString(), 'query.start.lt': end.toISOString(), 'order': `query.start.year.asc,query.start.${groupedBy}.asc` }).pipe(map(((r: any[]) => {
+      dbInfo: { observable: this._statsService.getSessionApi({ 'column.distinct': 'query.host,query.db,query.driver,query.db_name,query.db_version', 'query.parent': 'request.id', "request.environement": env, "query.db": db, 'query.start.ge': start.toISOString(), 'query.start.lt': end.toISOString(), 'request.start.ge': start.toISOString(), 'request.start.lt': end.toISOString() }) },
+      countOkKoSlowest: { observable: this._statsService.getSessionApi({ 'column': 'query.count_db_error:countErrorServer,query.count:count,query.count_slowest:countSlowest,query.start.date:date', 'query.parent': 'request.id', "request.environement": env, "query.db": db, 'request.start.ge': new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6).toISOString(), 'request.start.lt': now.toISOString(), 'query.start.ge': new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString(), 'query.start.lt': now.toISOString()}) },
+      countMinMaxAvg: { observable: this._statsService.getSessionApi({ 'column': `query.count_db_succes:countDbSucces,query.elapsedtime.max:max,query.elapsedtime.avg:avg,query.start.${groupedBy}:date,query.start.year:year`, 'query.parent': 'request.id', "request.environement": env, "query.db": db, 'request.start.ge': start.toISOString(), 'request.start.lt': end.toISOString(), 'query.start.ge': start.toISOString(), 'query.start.lt': end.toISOString(), 'order': `query.start.year.asc,query.start.${groupedBy}.asc` }).pipe(map(((r: any[]) => {
           formatters[groupedBy](r, this._datePipe);
           return r;
         })))
       },
       countRepartitionBySpeedBar: {
-        observable: this._statsService.getSessionApi({ 'column': `query.count_slowest:elapsedTimeSlowest,query.count_slow:elapsedTimeSlow,query.count_medium:elapsedTimeMedium,query.count_fast:elapsedTimeFast,query.count_fastest:elapsedTimeFastest,query.start.${groupedBy}:date,query.start.year:year`, 'query.parent': 'request.id', "request.environement": env, "query.schema": schema, 'request.start.ge': start.toISOString(), 'request.start.lt': end.toISOString(), 'query.start.ge': start.toISOString(), 'query.start.lt': end.toISOString(), 'order': `query.start.year.asc,query.start.${groupedBy}.asc` }).pipe(map(((r: any[]) => {
+        observable: this._statsService.getSessionApi({ 'column': `query.count_slowest:elapsedTimeSlowest,query.count_slow:elapsedTimeSlow,query.count_medium:elapsedTimeMedium,query.count_fast:elapsedTimeFast,query.count_fastest:elapsedTimeFastest,query.start.${groupedBy}:date,query.start.year:year`, 'query.parent': 'request.id', "request.environement": env, "query.db": db, 'request.start.ge': start.toISOString(), 'request.start.lt': end.toISOString(), 'query.start.ge': start.toISOString(), 'query.start.lt': end.toISOString(), 'order': `query.start.year.asc,query.start.${groupedBy}.asc` }).pipe(map(((r: any[]) => {
           formatters[groupedBy](r, this._datePipe);
           return r;
         })))
       },
-      countRepartitionBySpeedPie: { observable: this._statsService.getSessionApi({ 'column': 'query.count_slowest:elapsedTimeSlowest,query.count_slow:elapsedTimeSlow,query.count_medium:elapsedTimeMedium,query.count_fast:elapsedTimeFast,query.count_fastest:elapsedTimeFastest', 'query.parent': 'request.id', "request.environement": env, "query.schema": schema, 'request.start.ge': start.toISOString(), 'request.start.lt': end.toISOString(), 'query.start.ge': start.toISOString(), 'query.start.lt': end.toISOString()}) },
-      exceptions: { observable: this._statsService.getSessionApi({ 'column': 'count,dbaction.err_type.coalesce(null),dbaction.err_msg.coalesce(null)', 'dbaction.err_type.not': 'null', 'dbaction.err_msg.not': 'null', 'dbaction.parent': 'query.id', 'query.parent': 'request.id', 'order': 'count.desc', "request.environement": env, "query.schema": schema, 'request.start.ge': start.toISOString(), 'request.start.lt': end.toISOString(), 'query.start.ge': start.toISOString(), 'query.start.lt': end.toISOString() }).pipe(map((d: any) => d.slice(0, 5))) },
-      usersInfo: { observable: this._statsService.getSessionApi({ 'column': 'count:countRows,query.user', 'query.parent': 'request.id', "request.environement": env, "query.schema": schema, 'request.start.ge': start.toISOString(), 'request.start.lt': end.toISOString(), 'query.start.ge': start.toISOString(), 'query.start.lt': end.toISOString() }) }
+      countRepartitionBySpeedPie: { observable: this._statsService.getSessionApi({ 'column': 'query.count_slowest:elapsedTimeSlowest,query.count_slow:elapsedTimeSlow,query.count_medium:elapsedTimeMedium,query.count_fast:elapsedTimeFast,query.count_fastest:elapsedTimeFastest', 'query.parent': 'request.id', "request.environement": env, "query.db": db, 'request.start.ge': start.toISOString(), 'request.start.lt': end.toISOString(), 'query.start.ge': start.toISOString(), 'query.start.lt': end.toISOString()}) },
+      exceptions: { observable: this._statsService.getSessionApi({ 'column': 'count,dbaction.err_type.coalesce(null),dbaction.err_msg.coalesce(null)', 'dbaction.err_type.not': 'null', 'dbaction.err_msg.not': 'null', 'dbaction.parent': 'query.id', 'query.parent': 'request.id', 'order': 'count.desc', "request.environement": env, "query.db": db, 'request.start.ge': start.toISOString(), 'request.start.lt': end.toISOString(), 'query.start.ge': start.toISOString(), 'query.start.lt': end.toISOString() }).pipe(map((d: any) => d.slice(0, 5))) },
+      usersInfo: { observable: this._statsService.getSessionApi({ 'column': 'count:countRows,query.user', 'query.parent': 'request.id', "request.environement": env, "query.db": db, 'request.start.ge': start.toISOString(), 'request.start.lt': end.toISOString(), 'query.start.ge': start.toISOString(), 'query.start.lt': end.toISOString() }) }
     }
   }
 

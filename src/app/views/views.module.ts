@@ -19,6 +19,7 @@ import { StatsApiComponent } from './stats-api/stats-api.component';
 import { StatsUserComponent } from './stats-user/stats-user.component';
 import { ExceptionTableComponent } from '../shared/components/stats/exception-table/exception-table.component';
 import { ChartComponent } from '@oneteme/jquery-apexcharts';
+import { DbRequestDetailComponent } from './db-request-detail/db-request-detail.component';
 
 @NgModule({
   imports: [
@@ -44,7 +45,8 @@ import { ChartComponent } from '@oneteme/jquery-apexcharts';
     DependentsTableComponent,
     DependenciesTableComponent,
     ExceptionTableComponent,
-    SessionTableComponent
+    SessionTableComponent,
+    DbRequestDetailComponent
   ]
 })
 export class ViewsModule { }
