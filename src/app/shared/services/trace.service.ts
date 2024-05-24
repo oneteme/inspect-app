@@ -1,10 +1,11 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
+import { catchError, throwError } from "rxjs";
 import { environment } from "src/environments/environment";
 
 @Injectable({ providedIn: 'root' })
 export class TraceService { 
-    readonly INCOMING_REQUEST_URL = `${localStorage.getItem('server')}/trace/session/request`;
+    readonly INCOMING_REQUEST_URL = `${localStorage.getItem('server')}/trace/session/api`;
     readonly MAIN_REQUEST_URL = `${localStorage.getItem('server')}/trace/session/main`;
 
     constructor(private http: HttpClient) {
@@ -27,10 +28,18 @@ export class TraceService {
     }
 
     getTreeRequestById(id: string) {
-        return this.http.get(`${localStorage.getItem('server')}/trace/session/request/${id}/tree`);
+        return this.http.get(`${localStorage.getItem('server')}/trace/session/api/${id}/tree`);
     }
 
     getDbRequestById(id: number){
-        return this.http.get(`${localStorage.getItem('server')}/trace/db/request/${id}`);
+        return this.http.get(`${localStorage.getItem('server')}/trace/db/${id}`);
+    }
+
+    getSessionParentByChildId(id: string){
+        return this.http.get(`${localStorage.getItem('server')}/trace/session/api/${id}/parent`).pipe(catchError(this.handleError))
+    }
+
+    private handleError( error: HttpErrorResponse){
+        return throwError(()=>error)
     }
 }

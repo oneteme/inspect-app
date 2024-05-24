@@ -13,12 +13,12 @@ export class StatsService {
     }
 
     getSessionApi(params: any) {
-        let url = `${localStorage.getItem('server')}/stat/incoming/request`;
+        let url = `${localStorage.getItem('server')}/stat/apisession`;
         return this.http.get(url, { params: params });
     }
 
     getSessionMain(params: any) {
-        let url = `${localStorage.getItem('server')}/stat/session`;
+        let url = `${localStorage.getItem('server')}/stat/mainsession`;
         return this.http.get(url, { params: params });
     }
 }

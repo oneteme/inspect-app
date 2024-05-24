@@ -47,19 +47,6 @@ table {
     background-color: red !important;
 }
 
-.progress {
-    height: 20px;
-    display: flex;
-}
-
-.progress-bar {
-    justify-content: center;
-    overflow: hidden;
-    color: #fff;
-    text-align: center;
-    white-space: nowrap;
-}
-
 .mat-mdc-row .mat-mdc-cell {
     cursor: pointer;
 }
@@ -76,3 +63,13 @@ table {
     color: blue;
     text-decoration: solid;
 }
+
+.badge {
+    color: white;
+    padding: 0px 10px;
+    text-align: center;
+    border-radius: 12px;
+    font-size: 0.8em;
+    gap: 0.5em
+}
+  

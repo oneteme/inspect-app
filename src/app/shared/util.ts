@@ -56,18 +56,18 @@ export class Utils {
         return 'red';
     }
 
-    statusBorder(param: any): { [key: string]: string } {
-        if (typeof param == "boolean") {
-            return { 'box-shadow': '4px 0px 0px 0px ' + this.getStateColorBool(param) + ' inset' };
+    statusBorder(completed: any): { [key: string]: string } {
+        if (typeof completed == "boolean") {
+            return { 'box-shadow': '4px 0px 0px 0px ' + this.getStateColorBool(completed) + ' inset' };
         }
-        return { 'box-shadow': '4px 0px 0px 0px ' + this.getStateColor(param) + ' inset' };
+        return { 'box-shadow': '4px 0px 0px 0px ' + this.getStateColor(completed) + ' inset' };
     }
 
-    statusBorderCard(param: any): { [key: string]: string } {
-        if (typeof param == "boolean") {
-            return { 'border-left': '4px solid ' + this.getStateColorBool(param) };
+    statusBorderCard(failed: any): { [key: string]: string } {
+        if (typeof failed == "boolean") {
+            return { 'border-left': '4px solid ' + this.getStateColorBool(!failed) };
         }
-        return { 'border-left': '4px solid ' + this.getStateColor(param) };
+        return { 'border-left': '4px solid ' + this.getStateColor(failed) };
     }
 
     convertSeconds = (seconds: number): string => {
