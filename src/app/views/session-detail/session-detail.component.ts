@@ -140,13 +140,15 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
 
                 // Check if parent exist
                 this.sessionParent = null; 
-                this._traceService.getSessionParentByChildId(id).subscribe( {
-                    next : (data:  {id : string, type : sessionType}) =>{
-                    this.sessionParent = data;
-                    console.log(this.sessionParent)
-                    },
-                    error : err => console.log(err)
-                })
+                if(this.selectedSession.type == "api"){
+                    this._traceService.getSessionParentByChildId(id).subscribe( {
+                       next : (data:  {id : string, type : sessionType}) =>{
+                       this.sessionParent = data;
+                       },
+                       error : err => console.log(err)
+                   })
+                }
+              
                 this.isLoading = false;
                 this.isComplete = true;
             } else {
@@ -253,14 +255,14 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
         }
     }
 
-    selectedQuery(event: MouseEvent, query:any){ // TODO finish this 
-        if(query){
+    selectedQuery(event: MouseEvent, queryId:any){ // TODO finish this 
+        if(queryId){
             if( event.ctrlKey){
-                this._router.open(`#/session/api/${this.selectedSession.id}/db/`,'_blank',)
+                this._router.open(`#/session/${this.selectedSession.type}/${this.selectedSession.id}/db/${queryId}`,'_blank',)
               }else {
-                  this._router.navigate(['/session', 'api', this.selectedSession.id, 'db'],{
-                    
-                  });
+                  this._router.navigate([ 'db', queryId],{
+                    queryParams:{env:this.env}
+                });
               }
         }
     }
