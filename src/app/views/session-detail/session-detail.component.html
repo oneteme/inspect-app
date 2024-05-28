@@ -141,10 +141,7 @@
         <ng-container matColumnDef="host">
             <th mat-header-cell *matHeaderCellDef mat-sort-header style="padding:0"> Hôte</th>
             <td mat-cell *matCellDef="let element">
-                {{element['host']}}
-                <span *ngIf="element['port'] != 0">
-                    :{{element['port']}}
-                </span>
+                {{element['host']}}:<span *ngIf="element['port'] != 0">{{element['port']}}</span>
             </td>
         </ng-container>
 
@@ -253,7 +250,7 @@
             </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="outcomingQueryDisplayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: outcomingQueryDisplayedColumns;" (click)="selectedQuery($event, row.id)">
+        <tr mat-row *matRowDef="let row; columns: outcomingQueryDisplayedColumns;" >
         </tr>
     </table>
     <mat-paginator [hidden]="outcomingQueryList?.length<6" #OutcomingQueryPaginator [pageSize]="10"
