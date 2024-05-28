@@ -260,7 +260,8 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
             if( event.ctrlKey){
                 this._router.open(`#/session/${this.selectedSession.type}/${this.selectedSession.id}/db/${queryId}`,'_blank',)
               }else {
-                  this._router.navigate([ 'db', queryId],{
+                console.log('/session', this.selectedSession.type, this.selectedSession.id, 'db', queryId);
+                  this._router.navigate(['/session', this.selectedSession.type, this.selectedSession.id, 'db', queryId],{
                     queryParams:{env:this.env}
                 });
               }
@@ -287,7 +288,7 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
         if (session?.type == "api" || session?.type == "outcoming")
             return this.UtilInstance.statusBorderCard(session.status)
         if (session?.type == "main")
-            return this.UtilInstance.statusBorderCard(!!session.exception.message)
+            return this.UtilInstance.statusBorderCard(!!session?.exception?.message)
 
     }
 
@@ -295,7 +296,7 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
         if (session?.type == "api" || session?.type == "outcoming")
             return session?.status;
         if (session?.type == "main")
-            return !session.exception.message ? "réussi" : "échoué";
+            return !session?.exception?.message ? "réussi" : "échoué";
     }
 
 
@@ -370,7 +371,7 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
     }
 
     isQueryCompleted(query:any):boolean {
-        return  query.actions.every((a:any) => !a.exception.classname && !a.exception.message);
+        return  query.actions.every((a:any) => !a?.exception?.classname && !a?.exception?.message);
     }
 
     getCommand(commands:string[]):string{
