@@ -250,7 +250,7 @@
             </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="outcomingQueryDisplayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: outcomingQueryDisplayedColumns;" (click)="selectedQuery($event, row.id)">
+        <tr mat-row *matRowDef="let row; columns: outcomingQueryDisplayedColumns;" >
         </tr>
     </table>
     <mat-paginator [hidden]="outcomingQueryList?.length<6" #OutcomingQueryPaginator [pageSize]="10"
