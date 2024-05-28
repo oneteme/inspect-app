@@ -43,7 +43,7 @@ export class SessionApiComponent implements OnInit, OnDestroy {
 
   filterTable = new Map<string, any>();
 
-  params: Partial<{ env: string, start: any, end: any, endExclusive: any, serveurs: string[] }> = {};
+  params: Partial<{ env: string, start: Date, end: Date, serveurs: string[] }> = {};
   advancedParams: Partial<{ [key: string]: any }> ={}
   advancedParamsChip: Partial<{ [key: string]: any }> ={}
   focusFieldName: any;
@@ -62,17 +62,14 @@ export class SessionApiComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (params: Params) => {
           this.params.env = params['env'] || application.default_env;
-          this.params.start = params['start'] || (application.session.api.default_period || makePeriod(0)).start.toISOString();
-          this.params.end = params['end'] || (application.session.api.default_period || makePeriod(0)).end.toISOString();
+          this.params.start = params['start'] ? new Date(params['start']) : (application.session.api.default_period || makePeriod(0, 1)).start;
+          this.params.end = params['end'] ? new Date(params['end']) : (application.session.api.default_period || makePeriod(0, 1)).end;
           this.params.serveurs = Array.isArray(params['appname']) ? params['appname'] : [params['appname'] || ''];
           if (this.params.serveurs[0] != '') {
             this.patchServerValue(this.params.serveurs)
           }
-          this.params.endExclusive = new Date(this.params.end);
-          this.params.endExclusive.setDate(this.params.endExclusive.getDate() + 1);
-          this.params.endExclusive = this.params.endExclusive.toISOString();
 
-          this.patchDateValue(this.params.start, this.params.end);
+          this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
           this.subscriptions.push(this._statsService.getSessionApi( { 'column.distinct': 'app_name', 'order': 'app_name.asc' })
             .pipe(finalize(()=> this.serverNameIsLoading = false))
             .subscribe({
@@ -85,7 +82,7 @@ export class SessionApiComponent implements OnInit, OnDestroy {
             }));
           this.getIncomingRequest();
 
-          this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start}&end=${this.params.end}${this.params.serveurs[0] !== '' ? '&' + this.params.serveurs.map(name => `appname=${name}`).join('&') : ''}`)
+          this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${this.params.serveurs[0] !== '' ? '&' + this.params.serveurs.map(name => `appname=${name}`).join('&') : ''}`)
         }
       });
   }
@@ -105,16 +102,17 @@ export class SessionApiComponent implements OnInit, OnDestroy {
   search() {
     if (this.serverFilterForm.valid) {
       let appname = this.serverFilterForm.getRawValue().appname;
-      let start = this.serverFilterForm.getRawValue().dateRangePicker.start.toISOString();
-      let end = this.serverFilterForm.getRawValue().dateRangePicker.end.toISOString()
-      if (this.params.start != start
-        || this.params.end != end
+      let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
+      let end = this.serverFilterForm.getRawValue().dateRangePicker.end
+      let excludedEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1)
+      if (this.params.start.toISOString() != start.toISOString()
+        || this.params.end.toISOString() != excludedEnd.toISOString()
         || !this.params?.serveurs?.every((element, index) => element === appname[index])
         || appname.length != this.params?.serveurs?.length) {
         this._router.navigate([], {
           relativeTo: this._activatedRoute,
           queryParamsHandling: 'merge',
-          queryParams: { ...(appname !== undefined && { appname }), start: start, end: end }
+          queryParams: { ...(appname !== undefined && { appname }), start: start.toISOString(), end: excludedEnd }
         })
       } else {
         this.getIncomingRequest();
@@ -126,10 +124,11 @@ export class SessionApiComponent implements OnInit, OnDestroy {
     let params = {
       'env': this.params.env,
       'appname': this.params.serveurs,
-      'start': this.params.start,
-      'end': this.params.endExclusive,
+      'start': this.params.start.toISOString(),
+      'end': this.params.end.toISOString(),
       'lazy': false
     }; 
+    console.log(params)
     if(this.advancedParams){
       Object.assign(params, this.advancedParams);
     }
@@ -186,8 +185,8 @@ export class SessionApiComponent implements OnInit, OnDestroy {
   patchDateValue(start: Date, end: Date) {
     this.serverFilterForm.patchValue({
       dateRangePicker: {
-        start: new Date(start),
-        end: new Date(end)
+        start: start,
+        end: end
       }
     }, { emitEvent: false });
   }
@@ -232,7 +231,7 @@ export class SessionApiComponent implements OnInit, OnDestroy {
   }
 
   resetFilters(){
-    this.patchDateValue((application.session.api.default_period || makePeriod(0)).start,(application.session.api.default_period || makePeriod(0)).end);
+    this.patchDateValue((application.session.api.default_period || makePeriod(0)).start,(application.session.api.default_period || makePeriod(0, 1)).end);
     this.patchServerValue([]);
     this.advancedParams = {};
     this._filter.setFilterMap({})

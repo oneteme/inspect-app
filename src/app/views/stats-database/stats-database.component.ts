@@ -42,9 +42,9 @@ export class StatsDatabaseComponent implements OnInit {
   exceptions: any[];
   dbInfo: any[] = [];
   userInfo: any[];
+  start: Date;
+  end: Date;
   doresetServerFormValue: boolean = false;
-  DEFAULT_START: Date;
-  DEFAULT_END: Date;
   displayedColumns: string[] = ['name'];
   dataSource: MatTableDataSource<{ name: string }> = new MatTableDataSource([]);
 
@@ -60,12 +60,12 @@ export class StatsDatabaseComponent implements OnInit {
 
         this.db = v.params.name;
         this.env = v.queryParams.env || application.default_env;
-        let start = v.queryParams.start || (application.dashboard.database.default_period || application.dashboard.default_period || makePeriod(6)).start.toISOString();
-        let end = v.queryParams.end || (application.dashboard.database.default_period || application.dashboard.default_period || makePeriod(6)).end.toISOString();
+        this.start = v.queryParams.start ? new Date(v.queryParams.start) : (application.dashboard.database.default_period || application.dashboard.default_period || makePeriod(6)).start;
+        this.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.database.default_period || application.dashboard.default_period || makePeriod(6, 1)).end;
 
-        this.patchDateValue(start, end);
+        this.patchDateValue(this.start, new Date(this.end.getFullYear(), this.end.getMonth(), this.end.getDate() - 1));
         this.init();
-        this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&start=${start}&end=${end}`)
+        this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&start=${this.start.toISOString()}&end=${this.end.toISOString()}`)
 
       }, error: (err) => {
         console.log(err)
@@ -100,12 +100,13 @@ export class StatsDatabaseComponent implements OnInit {
   search() {
     if (this.serverFilterForm.valid) {
       let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
-      let end = new Date(this.serverFilterForm.getRawValue().dateRangePicker.end);
-      if (start.toISOString() != this._activatedRoute.snapshot?.queryParams['start'] || end.toISOString() != this._activatedRoute.snapshot?.queryParams['end']) {
+      let end = this.serverFilterForm.getRawValue().dateRangePicker.end;
+      let excludedEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1)
+      if (start.toISOString() != this.start.toISOString() || excludedEnd.toISOString() != this.end.toISOString()) {
         this._router.navigate([], {
           relativeTo: this._activatedRoute,
           queryParamsHandling: 'merge',
-          queryParams: { start: start.toISOString(), end: end.toISOString() }
+          queryParams: { start: start.toISOString(), end: excludedEnd.toISOString() }
         })
       } else {
         this.init();
@@ -120,7 +121,7 @@ export class StatsDatabaseComponent implements OnInit {
   init() {
     this.dataIsLoading = true;
     let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
-    let end = new Date(this.serverFilterForm.getRawValue().dateRangePicker.end);
+    let end = this.serverFilterForm.getRawValue().dateRangePicker.end;
     end.setDate(end.getDate() + 1);
     this.requests = this.DB_REQUEST(this.db, this.env, start, end)
     Object.keys(this.requests).forEach(k => {
@@ -162,8 +163,8 @@ export class StatsDatabaseComponent implements OnInit {
   patchDateValue(start: Date, end: Date) {
     this.serverFilterForm.patchValue({
       dateRangePicker: {
-        start: new Date(start),
-        end: new Date(end)
+        start: start,
+        end: end
       }
     }, { emitEvent: false });
   }

@@ -35,10 +35,8 @@ export class StatsApiComponent implements OnInit, OnDestroy {
 
     env: any;
     name: string;
-    start: any;
-    end: any;
-    DEFAULT_START: Date;
-    DEFAULT_END: Date;
+    start: Date;
+    end: Date;
     advancedParams: Partial<{ [key: string]: any }> = {}
     focusFieldName: any;
 
@@ -52,11 +50,11 @@ export class StatsApiComponent implements OnInit, OnDestroy {
             next: (v: { params: Params, queryParams: Params }) => {
                 this.name = v.params.name;
                 this.env = v.queryParams.env || application.default_env;
-                this.start = v.queryParams.start || (application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6)).start.toISOString();
-                this.end = v.queryParams.end || (application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6)).end.toISOString();
-                this.patchDateValue(this.start, this.end);
+                this.start = v.queryParams.start  ? new Date(v.queryParams.start) : (application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6)).start;
+                this.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6, 1)).end;
+                this.patchDateValue(this.start, new Date(this.end.getFullYear(), this.end.getMonth(), this.end.getDate() - 1));
                 this.init();
-                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&start=${this.start}&end=${this.end}`);
+                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&start=${this.start.toISOString()}&end=${this.end.toISOString()}`);
             }
         });
 
@@ -100,12 +98,13 @@ export class StatsApiComponent implements OnInit, OnDestroy {
     search() {
         if (this.serverFilterForm.valid) {
             let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
-            let end = new Date(this.serverFilterForm.getRawValue().dateRangePicker.end);
-            if (start.toISOString() != this._activatedRoute.snapshot?.queryParams['start'] || end.toISOString() != this._activatedRoute.snapshot?.queryParams['end']) {
+            let end = this.serverFilterForm.getRawValue().dateRangePicker.end;
+            let excludedEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1)
+            if (start.toISOString() != this.start.toISOString() || excludedEnd.toISOString() != this.end.toISOString()) {
                 this._router.navigate([], {
                     relativeTo: this._activatedRoute,
                     queryParamsHandling: 'merge',
-                    queryParams: { start: start.toISOString(), end: end.toISOString() }
+                    queryParams: { start: start.toISOString(), end: excludedEnd.toISOString() }
                 })
             } else {
                 this.init();
@@ -116,8 +115,8 @@ export class StatsApiComponent implements OnInit, OnDestroy {
     patchDateValue(start: Date, end: Date) {
         this.serverFilterForm.patchValue({
             dateRangePicker: {
-                start: new Date(start),
-                end: new Date(end)
+                start: start,
+                end: end
             }
         }, { emitEvent: false });
     }
@@ -175,7 +174,7 @@ export class StatsApiComponent implements OnInit, OnDestroy {
 
     resetFilters() {
         this.patchDateValue((application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6)).start,
-            (application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6)).end);
+            (application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6, 1)).end);
         this.advancedParams = {};
         this._filter.setFilterMap({})
     }

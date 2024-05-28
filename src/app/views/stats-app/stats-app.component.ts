@@ -6,7 +6,7 @@ import { ActivatedRoute, Params } from "@angular/router";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
 import { BehaviorSubject, Observable, Subscription, combineLatest, finalize, map } from "rxjs";
 import { Constants, FilterConstants, FilterMap, FilterPreset } from "../constants";
-import { mapParams,formatters, groupingBy, periodManagement } from "src/app/shared/util";
+import { mapParams, formatters, groupingBy, periodManagement } from "src/app/shared/util";
 import { application, makePeriod } from "src/environments/environment";
 import { FilterService } from "src/app/shared/services/filter.service";
 
@@ -36,11 +36,9 @@ export class StatsAppComponent implements OnInit, OnDestroy {
 
     env: any;
     name: string;
-    start: any;
-    end: any;
-    DEFAULT_START: Date;
-    DEFAULT_END: Date;
-    advancedParams: Partial<{ [key: string]: any }> ={}
+    start: Date;
+    end: Date;
+    advancedParams: Partial<{ [key: string]: any }> = {}
     focusFieldName: any;
 
     requests: { [key: string]: { observable: Observable<Object>, data?: any[], isLoading?: boolean } } = {};
@@ -54,11 +52,11 @@ export class StatsAppComponent implements OnInit, OnDestroy {
 
                 this.name = v.params.name;
                 this.env = v.queryParams.env || application.default_env;
-                this.start = v.queryParams.start || (application.dashboard.app.default_period || application.dashboard.default_period || makePeriod(6)).start.toISOString();
-                this.end = v.queryParams.end || (application.dashboard.app.default_period || application.dashboard.default_period || makePeriod(6)).end.toISOString();
-                this.patchDateValue(this.start, this.end);
+                this.start = v.queryParams.start ? new Date(v.queryParams.start) : (application.dashboard.app.default_period || application.dashboard.default_period || makePeriod(6)).start;
+                this.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.app.default_period || application.dashboard.default_period || makePeriod(6, 1)).end;
+                this.patchDateValue(this.start, new Date(this.end.getFullYear(), this.end.getMonth(), this.end.getDate() - 1));
                 this.init();
-                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&start=${this.start}&end=${this.end}`)
+                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&start=${this.start.toISOString()}&end=${this.end.toISOString()}`)
             }
         });
 
@@ -75,12 +73,12 @@ export class StatsAppComponent implements OnInit, OnDestroy {
 
     init(): void {
         let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
-        let end = new Date(this.serverFilterForm.getRawValue().dateRangePicker.end);
+        let end = this.serverFilterForm.getRawValue().dateRangePicker.end;
         end.setDate(end.getDate() + 1);
 
         let advancedParams = this.advancedParams
-        if(advancedParams){
-         advancedParams = mapParams(this.filterConstants.STATS_APP,advancedParams);
+        if (advancedParams) {
+            advancedParams = mapParams(this.filterConstants.STATS_APP, advancedParams);
         }
 
         this.requests = this.APP_REQUEST(this.name, this.env, start, end, advancedParams);
@@ -101,11 +99,12 @@ export class StatsAppComponent implements OnInit, OnDestroy {
         if (this.serverFilterForm.valid) {
             let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
             let end = new Date(this.serverFilterForm.getRawValue().dateRangePicker.end);
-            if (start.toISOString() != this._activatedRoute.snapshot?.queryParams['start'] || end.toISOString() != this._activatedRoute.snapshot?.queryParams['end']) {
+            let excludedEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1)
+            if (start.toISOString() != this.start.toISOString() || excludedEnd.toISOString() != this.end.toISOString()) {
                 this._router.navigate([], {
                     relativeTo: this._activatedRoute,
                     queryParamsHandling: 'merge',
-                    queryParams: { start: start.toISOString(), end: end.toISOString() }
+                    queryParams: { start: start.toISOString(), end: excludedEnd.toISOString() }
                 })
             } else {
                 this.init();
@@ -116,8 +115,8 @@ export class StatsAppComponent implements OnInit, OnDestroy {
     patchDateValue(start: Date, end: Date) {
         this.serverFilterForm.patchValue({
             dateRangePicker: {
-                start: new Date(start),
-                end: new Date(end)
+                start: start,
+                end: end
             }
         }, { emitEvent: false });
     }
@@ -132,7 +131,7 @@ export class StatsAppComponent implements OnInit, OnDestroy {
         }
     }
 
-    APP_REQUEST = (name: string, env: string, start: Date, end: Date, advancedParams:FilterMap) => {
+    APP_REQUEST = (name: string, env: string, start: Date, end: Date, advancedParams: FilterMap) => {
         let now = new Date();
         var groupedBy = periodManagement(start, end);
         return {
@@ -161,10 +160,10 @@ export class StatsAppComponent implements OnInit, OnDestroy {
                     }).slice(0, 5).flatMap(r => r.data);
                     return results;
                 }),
-                map((r: any[]) => {
-                    formatters[groupedBy](r, this._datePipe);
-                    return r;
-                }))
+                    map((r: any[]) => {
+                        formatters[groupedBy](r, this._datePipe);
+                        return r;
+                    }))
             },
             repartitionApiBar: { observable: this._statsService.getSessionApi({ 'column': "count_succes:countSucces,count_error_client:countErrorClient,count_error_server:countErrorServer,api_name", 'app_name': name, 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), 'environement': env, 'api_name.not': 'null', 'order': 'count.desc', ...advancedParams }).pipe(map((d: any) => d.slice(0, 5))) },
             dependentsTable: { observable: this._statsService.getSessionApi({ 'column': "count:count,count_succes:countSucces,count_error_client:countErrClient,count_error_server:countErrServer,apisession2.app_name:name", "apisession.id": "apirequest.parent", "apirequest.id": "apisession2.id", 'apisession.app_name': name, 'apisession.start.ge': start.toISOString(), 'apisession.start.lt': end.toISOString(), 'apisession2.start.ge': start.toISOString(), 'apisession2.start.lt': end.toISOString(), 'environement': env, 'apisession2.app_name.not': 'null', 'order': 'count.desc', ...advancedParams }) },
@@ -173,58 +172,58 @@ export class StatsAppComponent implements OnInit, OnDestroy {
         };
     };
 
-    resetFilters(){
+    resetFilters() {
         this.patchDateValue((application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6)).start,
-                            (application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6)).end);
+            (application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6, 1)).end);
         this.advancedParams = {};
         this._filter.setFilterMap({})
-      }
+    }
 
 
     filtersSupplier(): BehaviorSubject<FilterMap> { //change
-    return new BehaviorSubject<FilterMap>({});
+        return new BehaviorSubject<FilterMap>({});
     }
 
     handlePresetSelection(filterPreset: FilterPreset) {
 
-    const formControlNamelist = Object.keys(this.serverFilterForm.controls);
-    Object.entries(filterPreset.values).reduce((accumulator: any, [key, value]) => {
+        const formControlNamelist = Object.keys(this.serverFilterForm.controls);
+        Object.entries(filterPreset.values).reduce((accumulator: any, [key, value]) => {
 
-        if (formControlNamelist.includes(key)) {
-        this.serverFilterForm.patchValue({
-            [key]: value
-        })
-        delete filterPreset.values[key];
-        }
-    },{})
-    this.advancedParams = filterPreset.values
-    this._filter.setFilterMap(this.advancedParams);
-    this.search()
+            if (formControlNamelist.includes(key)) {
+                this.serverFilterForm.patchValue({
+                    [key]: value
+                })
+                delete filterPreset.values[key];
+            }
+        }, {})
+        this.advancedParams = filterPreset.values
+        this._filter.setFilterMap(this.advancedParams);
+        this.search()
     }
 
     handlePresetSelectionReset() {
-    this.resetFilters();
-    this.search();
+        this.resetFilters();
+        this.search();
     }
 
-    handleFilterReset(){
-    this.resetFilters();
+    handleFilterReset() {
+        this.resetFilters();
     }
 
     focusField(fieldName: string) {
-    this.focusFieldName = [fieldName];
+        this.focusFieldName = [fieldName];
     }
 
     handledialogclose(filterMap: FilterMap) {
-    this.advancedParams = filterMap;
-    this._filter.setFilterMap(this.advancedParams);
-    this.search()
+        this.advancedParams = filterMap;
+        this._filter.setFilterMap(this.advancedParams);
+        this.search()
     }
 
     handleRemovedFilter(filterName: string) {
-    if(this.advancedParams[filterName]){
-        delete this.advancedParams[filterName];
-        this._filter.setFilterMap(this.advancedParams);
-    }
+        if (this.advancedParams[filterName]) {
+            delete this.advancedParams[filterName];
+            this._filter.setFilterMap(this.advancedParams);
+        }
     }
 }
