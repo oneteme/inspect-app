@@ -278,7 +278,7 @@ export class TreeComponent implements OnDestroy {
                   break;
 
                 case 'db':
-                  modal += `<span style="color:${self.UtilInstance.getStateColorBool(!value.completed)}">●</span> <span>${value.completed ? "réussi" : "échoué"}</span><br>`
+                  modal += `<span style="color:${self.UtilInstance.getStateColorBool(value.completed)}">●</span> <span>${value.completed ? "réussi" : "échoué"}</span><br>`
                   modal += `<b>Thread :</b> ${value.threadName || 'N/A'}<br>`
                   modal += `<b>Schema :</b> ${value.schema || 'N/A'}<br>`
                   modal += `<b>Hôte   :</b> ${value.host || 'N/A'}<br>`

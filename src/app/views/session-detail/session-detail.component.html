@@ -67,7 +67,7 @@
             <span class="badge" [style.background-color]="UtilInstance.getStateColor(selectedSession?.status)">{{selectedSession?.status}}</span>     
         </mat-card-footer>
     </mat-card>
-    <mat-card style="width: 40vw;">
+    <mat-card style="width: 40vw;" *ngIf="selectedSession">
         <mat-card-title>
             <a style="display: flex; align-items: center; gap: 0.5em"
                 [routerLink]="'/dashboard/app/'+ selectedSession?.application?.name"
@@ -253,7 +253,7 @@
             </td>
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="outcomingQueryDisplayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: outcomingQueryDisplayedColumns;">
+        <tr mat-row *matRowDef="let row; columns: outcomingQueryDisplayedColumns;" (click)="selectedQuery($event, row.id)">
         </tr>
     </table>
     <mat-paginator [hidden]="outcomingQueryList?.length<6" #OutcomingQueryPaginator [pageSize]="10"
@@ -273,7 +273,7 @@
     </div>
     
 </div>
-<div #timeline id="timeline"></div>
+<div #timeline id="timeline" [hidden]="!selectedSession"></div>
 
 
 <div *ngIf="!isLoading && !isComplete" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">

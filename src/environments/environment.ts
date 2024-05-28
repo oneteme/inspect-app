@@ -10,7 +10,7 @@ export const environment = {
 };
 
 export const application: Application = {
-  default_env: 'prd',
+  default_env: 'dev',
   session: {
     api: {
       default_period: makePeriod(0)
