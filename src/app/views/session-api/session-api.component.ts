@@ -62,7 +62,7 @@ export class SessionApiComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (params: Params) => {
           this.params.env = params['env'] || application.default_env;
-          this.params.start = params['start'] ? new Date(params['start']) : (application.session.api.default_period || makePeriod(0, 1)).start;
+          this.params.start = params['start'] ? new Date(params['start']) : (application.session.api.default_period || makePeriod(0)).start;
           this.params.end = params['end'] ? new Date(params['end']) : (application.session.api.default_period || makePeriod(0, 1)).end;
           this.params.serveurs = Array.isArray(params['appname']) ? params['appname'] : [params['appname'] || ''];
           if (this.params.serveurs[0] != '') {
