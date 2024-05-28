@@ -13,14 +13,14 @@ export const application: Application = {
   default_env: 'prd',
   session: {
     api: {
-      default_period: makePeriod(0)
+      default_period: makePeriod(0, 1)
     },
     main: {
-      default_period: makePeriod(0)
+      default_period: makePeriod(0, 1)
     }
   },
   dashboard: {
-    default_period: makePeriod(6),
+    default_period: makePeriod(6, 1),
     api : {
       default_period: undefined
     },

@@ -17,7 +17,6 @@ import { FilterService } from './shared/services/filter.service';
 })
 
 export class AppComponent implements OnInit {
-  @ViewChild('drawer') drawer: MatDrawer;
   envs: any[];
   env: FormControl<string> = new FormControl();
   isLoadingEnv = false;
@@ -27,8 +26,7 @@ export class AppComponent implements OnInit {
   constructor(
     private _activatedRoute: ActivatedRoute,
     private _router: EnvRouter,
-    private _service: StatsService,
-    private _filter: FilterService ) {
+    private _service: StatsService) {
     this.isLoadingEnv = true;
     this.subscriptions.push(this._service.getSessionApi({'column.distinct': 'environement', 'order': 'environement.asc'})
       .pipe(finalize(() => this.isLoadingEnv = false))

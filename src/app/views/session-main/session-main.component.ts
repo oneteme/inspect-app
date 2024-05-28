@@ -42,7 +42,7 @@ export class SessionMainComponent implements OnInit, OnDestroy {
   focusFieldName: any
 
   filter: string = '';
-  params: Partial<{ env: string, start: any, end: any, endExclusive: any, launchMode: string }> = {};
+  params: Partial<{ env: string, start: Date, end: Date, launchMode: string }> = {};
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -60,14 +60,11 @@ export class SessionMainComponent implements OnInit, OnDestroy {
           
           this.params.launchMode = params['name'] || '';
           this.patchLaunchValue(this.params.launchMode);
-          this.params.start = params['start'] || (application.session.main.default_period || makePeriod(0)).start.toISOString();
-          this.params.end = params['end'] || (application.session.main.default_period || makePeriod(0)).end.toISOString();
-          this.params.endExclusive = new Date(this.params.end);
-          this.params.endExclusive.setDate(this.params.endExclusive.getDate() + 1);
-          this.params.endExclusive = this.params.endExclusive.toISOString();
-          this.patchDateValue(this.params.start, this.params.end);
+          this.params.start = params['start'] ? new Date(params['start']) : (application.session.main.default_period || makePeriod(0, 1)).start;
+          this.params.end = params['end'] ? new Date(params['end']) : (application.session.main.default_period || makePeriod(0, 1)).end;
+          this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
           this.getMainRequests();
-          this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start}&end=${this.params.end}${this.params.launchMode !== '' ? '&name=' + this.params.launchMode : ''}`)
+          this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${this.params.launchMode !== '' ? '&name=' + this.params.launchMode : ''}`)
         }
       });
   }
@@ -81,20 +78,12 @@ export class SessionMainComponent implements OnInit, OnDestroy {
     this.subscription.unsubscribe();
   }
 
-  configQueryParamFilter(start: Date, end: Date, name: string) {
-    this._router.navigate([], {
-      queryParamsHandling: 'merge',
-      queryParams: { name: name, start: start.toISOString(), end: end.toISOString() },
-      relativeTo: this._activatedRoute
-    });
-  }
-
   getMainRequests() {
     let params = {
       'env': this.params.env,
       'launchmode': this.params.launchMode,
-      'start': this.params.start,
-      'end': this.params.endExclusive,
+      'start': this.params.start.toISOString(),
+      'end': this.params.end.toISOString(),
       'lazy': false
     };
     if(this.advancedParams){ 
@@ -131,16 +120,16 @@ export class SessionMainComponent implements OnInit, OnDestroy {
   search() {
     if (this.serverFilterForm.valid) {
       let name = this.serverFilterForm.getRawValue().launchmode;
-      let start = this.serverFilterForm.getRawValue().dateRangePicker.start.toISOString();
-      let end = this.serverFilterForm.getRawValue().dateRangePicker.end.toISOString()
-
-      if (this.params.start != start
-        || this.params.end != end
+      let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
+      let end = this.serverFilterForm.getRawValue().dateRangePicker.end
+      let excludedEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1)
+      if (this.params.start.toISOString() != start.toISOString()
+        || this.params.end.toISOString() != excludedEnd.toISOString()
         || this.params.launchMode != name) {
         this._router.navigate([], {
           relativeTo: this._activatedRoute,
           queryParamsHandling: 'merge',
-          queryParams: { ...(name !== undefined && { name }), start: start, end: end }
+          queryParams: { ...(name !== undefined && { name }), start: start.toISOString(), end: excludedEnd.toISOString() }
         })
       } else {
         this.getMainRequests();
@@ -151,8 +140,8 @@ export class SessionMainComponent implements OnInit, OnDestroy {
   patchDateValue(start: Date, end: Date) {
     this.serverFilterForm.patchValue({
       dateRangePicker: {
-        start: new Date(start),
-        end: new Date(end)
+        start: start,
+        end: end
       }
     }, { emitEvent: false });
   }
@@ -192,7 +181,7 @@ export class SessionMainComponent implements OnInit, OnDestroy {
     }
   }
   resetFilters(){
-    this.patchDateValue((application.session.api.default_period || makePeriod(0)).start,(application.session.api.default_period || makePeriod(0)).end);
+    this.patchDateValue((application.session.api.default_period || makePeriod(0)).start,(application.session.api.default_period || makePeriod(0, 1)).end);
     this.patchLaunchValue("");
     this.advancedParams = {};
     this._filter.setFilterMap({})

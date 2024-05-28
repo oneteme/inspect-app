@@ -92,12 +92,5 @@ export class FilterService implements OnDestroy{
 
     getPresetsLocalStrorage(pageName:string):FilterPreset[] {
         return JSON.parse(localStorage.getItem(pageName) || '[]');
-    }
-    
-
-
-
-
-   
-     
+    } 
 }
