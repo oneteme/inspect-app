@@ -71,8 +71,7 @@ export class StatsApiComponent implements OnInit, OnDestroy {
 
     init(): void {
         let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
-        let end = new Date(this.serverFilterForm.getRawValue().dateRangePicker.end);
-        end.setDate(end.getDate() + 1);
+        let end = this.serverFilterForm.getRawValue().dateRangePicker.end;
         let advancedParams = this.advancedParams;
         if (advancedParams) {
             advancedParams = mapParams(this.filterConstants.STATS_API, advancedParams);

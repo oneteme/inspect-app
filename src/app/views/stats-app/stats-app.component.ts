@@ -74,13 +74,10 @@ export class StatsAppComponent implements OnInit, OnDestroy {
     init(): void {
         let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
         let end = this.serverFilterForm.getRawValue().dateRangePicker.end;
-        end.setDate(end.getDate() + 1);
-
         let advancedParams = this.advancedParams
         if (advancedParams) {
             advancedParams = mapParams(this.filterConstants.STATS_APP, advancedParams);
         }
-
         this.requests = this.APP_REQUEST(this.name, this.env, start, end, advancedParams);
         Object.keys(this.requests).forEach(k => {
             this.requests[k].data = [];
@@ -98,7 +95,7 @@ export class StatsAppComponent implements OnInit, OnDestroy {
     search() {
         if (this.serverFilterForm.valid) {
             let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
-            let end = new Date(this.serverFilterForm.getRawValue().dateRangePicker.end);
+            let end = this.serverFilterForm.getRawValue().dateRangePicker.end;
             let excludedEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1)
             if (start.toISOString() != this.start.toISOString() || excludedEnd.toISOString() != this.end.toISOString()) {
                 this._router.navigate([], {

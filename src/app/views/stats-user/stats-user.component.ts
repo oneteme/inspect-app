@@ -72,12 +72,10 @@ export class StatsUserComponent implements OnInit, OnDestroy {
     init(): void {
         let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
         let end = this.serverFilterForm.getRawValue().dateRangePicker.end;
-        end.setDate(end.getDate() + 1);
         let advancedParams = this.advancedParams;
         if (advancedParams) {
             advancedParams = mapParams(this.filterConstants.STATS_APP, advancedParams);
         }
-
         this.requests = this.USER_REQUEST(this.name, this.env, start, end, advancedParams);
         Object.keys(this.requests).forEach(k => {
             this.requests[k].data = [];
@@ -151,8 +149,6 @@ export class StatsUserComponent implements OnInit, OnDestroy {
     }
 
     handlePresetSelection(filterPreset: FilterPreset) {
-        console.log(filterPreset);
-
         const formControlNamelist = Object.keys(this.serverFilterForm.controls);
         Object.entries(filterPreset.values).reduce((accumulator: any, [key, value]) => {
 
