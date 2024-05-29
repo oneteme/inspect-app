@@ -1,8 +1,7 @@
 import { Injectable, OnDestroy, inject } from "@angular/core";
 import { NavigationStart, Router } from "@angular/router";
 import { BehaviorSubject, Observable, Subscription, catchError, combineLatest, first, map, of, throwError } from "rxjs";
-import { Filter, FilterPreset, FilterMap } from "src/app/views/constants";
-
+import { FilterPreset, FilterMap } from "src/app/views/constants";
 
 @Injectable({ providedIn: 'root' })
 export class FilterService implements OnDestroy{ 

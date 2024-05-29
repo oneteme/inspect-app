@@ -1,5 +1,3 @@
-
-
 export interface IncomingRequest {
     id: string;
     method: string;

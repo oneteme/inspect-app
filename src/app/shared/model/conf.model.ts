@@ -2,7 +2,6 @@ export interface Application {
     default_env: string;
     session: Partial<Session>;
     dashboard: Partial<Dashboard>;
-
 }
 
 interface Session {
