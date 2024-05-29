@@ -1,6 +1,7 @@
 import { Component, Input, ViewChild } from "@angular/core";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatTableDataSource } from "@angular/material/table";
+import { pipe } from "rxjs";
 
 @Component({
     selector: 'exception-table',
@@ -9,16 +10,22 @@ import { MatTableDataSource } from "@angular/material/table";
 })
 export class ExceptionTableComponent {
     displayedColumns: string[] = ['message'];
-    dataSource: MatTableDataSource<{count:number, message: string }> = new MatTableDataSource([]);
+    dataSource: MatTableDataSource<{ count: number, message: string, class: string }> = new MatTableDataSource([]);
+    addExceptionCount: number = 0;
 
-    @ViewChild(MatPaginator) paginator: MatPaginator;
-
-    @Input() set data(objects: any[]) {
-        if (objects?.length) {
-            this.dataSource = new MatTableDataSource(objects.map(r => {
-                return {count: r['COUNT'], message: r.errorMessage };
+    @Input() set data(objects: any) {
+        if (objects?.length) {  //.pipe(map((d: any) => d.slice(0, 5)))
+            this.dataSource = new MatTableDataSource(objects.slice(0, 5).map((r: any) => {
+                return { count: r['COUNT'], message: r?.errorMessage, class: r?.errorType };
             }));
-            this.dataSource.paginator = this.paginator;
+            if (objects.length > 5) {
+                this.addExceptionCount = objects.reduce((acc: number, curr: any, i: number) => {
+                    if (i >= 5 ) {
+                        acc += curr['COUNT'];
+                    }
+                    return acc;
+                }  , 0);
+            }
         } else {
             this.dataSource = new MatTableDataSource([]);
         }
