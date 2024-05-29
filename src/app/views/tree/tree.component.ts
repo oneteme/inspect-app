@@ -282,24 +282,24 @@ export class TreeComponent implements OnDestroy {
                   modal += `<b>Thread :</b> ${value.threadName || 'N/A'}<br>`
                   modal += `<b>Schema :</b> ${value.schema || 'N/A'}<br>`
                   modal += `<b>Hôte   :</b> ${value.host || 'N/A'}<br>`
-                  value.actions.forEach((action: any) => {
+                  /*value.actions.forEach((action: any) => {
                     if (action.exception) {
                       modal += `<span style="color:red">${action.exception.classname || ''} ${action.exception.message || ''}</span>`
                     }
-                  });
+                  });*/  // removed this since we dont get the actions from the back 
                   break;
 
                 case 'api':
                   modal += `<span style="color:${self.UtilInstance.getStateColor(value.remoteTrace.status)}">●</span> <span>${value.remoteTrace.status}&nbsp;&nbsp;&nbsp;&nbsp; <span style="float:right">${value.remoteTrace.path}</span></span><br>`
                   modal += `<b>Thread :</b> ${value.threadName || 'N/A'}<br>`
                   modal += `<b>Latence:</b> ${self.UtilInstance.getElapsedTime(value.remoteTrace?.start, value.start)}s<br>`;
-                  modal += `<span style="color:red">${value.remoteTrace.exception.classname || ''} ${value.remoteTrace.exception.message || ''}</span><br>`
+                  modal += `<span style="color:red">${value.remoteTrace?.exception?.classname || ''} ${value.remoteTrace?.exception?.message || ''}</span><br>`
                   //   modal += `<span style="float:right;"> ${self.UtilInstance.getElapsedTime(value.remoteTrace.end, value.remoteTrace.start)}s</span>`;
                   break;
 
                 case 'unknown':
                   modal += `<b>Thread :</b> ${value.threadName || 'N/A'}<br>`
-                  modal += `<span style="color:red">${cell.source.value.data[0].exception?.classname || ''} ${cell.source.value.data[0].exception?.message || ''}</span>`
+                  modal += `<span style="color:red">${cell.source.value.data[0]?.exception?.classname || ''} ${cell.source.value.data[0]?.exception?.message || ''}</span>`
                   break;
 
                 default:
@@ -666,12 +666,12 @@ export class TreeComponent implements OnDestroy {
   getActionsCount(actionsList: any) {
     let e = actionsList.reduce((acc: any, item: any) => {
       let key = item.type + "_succes"
-      if (item.exception.classname || item.exception.message)
+      if (item?.exception?.classname || item?.exception?.message)
         key = item.type + "_failure";
 
       if (!acc[key]) {
         acc[key] = {}
-        acc[key].failed = !!(item.exception.classname || item.exception.message)
+        acc[key].failed = !!(item?.exception?.classname || item?.exception?.message)
         acc[key].name = item.type;
         acc[key].count = 0
       }

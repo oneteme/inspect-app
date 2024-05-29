@@ -36,8 +36,8 @@
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:1%">
         </th>
-        <td [ngStyle]="statusBorder(!!(!row.exception.message && !row.exception.message))" mat-cell *matCellDef="let row"
-          [matTooltip]="!!(!row.exception.message && !row.exception.message)?'réussi':'échoué'" matTooltipPosition="before">
+        <td [ngStyle]="statusBorder(!!(!row?.exception?.message && !row?.exception?.message))" mat-cell *matCellDef="let row"
+          [matTooltip]="!!(!row?.exception?.message && !row?.exception?.message)?'réussi':'échoué'" matTooltipPosition="before">
         </td>
       </ng-container>
 
