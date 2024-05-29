@@ -128,7 +128,6 @@ export class SessionApiComponent implements OnInit, OnDestroy {
       'end': this.params.end.toISOString(),
       'lazy': false
     }; 
-    console.log(params)
     if(this.advancedParams){
       Object.assign(params, this.advancedParams);
     }
