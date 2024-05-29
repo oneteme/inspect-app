@@ -21,7 +21,6 @@ import { FilterService } from 'src/app/shared/services/filter.service';
 })
 export class SessionMainComponent implements OnInit, OnDestroy {
   filterConstants = FilterConstants;
-  currentEnv: string;
   utilInstance: Utils = new Utils();
   displayedColumns: string[] = ['status', 'app_name', 'session', 'location', 'start', 'Durée', 'user'];
   dataSource: MatTableDataSource<Mainrequest> = new MatTableDataSource();
@@ -35,9 +34,6 @@ export class SessionMainComponent implements OnInit, OnDestroy {
   });
   subscription: Subscription;
   isLoading = false;
-
-  DEFAULT_START: Date;
-  DEFAULT_END: Date;
   advancedParams: Partial<{[key:string]:any}>
   focusFieldName: any
 

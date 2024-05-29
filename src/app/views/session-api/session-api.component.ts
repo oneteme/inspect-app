@@ -29,7 +29,6 @@ export class SessionApiComponent implements OnInit, OnDestroy {
   dataSource: MatTableDataSource<IncomingRequest> = new MatTableDataSource();
   isLoading = true;
   serverNameIsLoading = true;
-  statusFilter: string[] = [];
   subscriptions: Subscription[] = [];
   serverFilterForm = new FormGroup({
     appname: new FormControl([""]),
@@ -38,8 +37,6 @@ export class SessionApiComponent implements OnInit, OnDestroy {
       end: new FormControl<Date | null>(null, [Validators.required]),
     }),
   });
-  DEFAULT_START: Date;
-  DEFAULT_END: Date;
 
   filterTable = new Map<string, any>();
 
