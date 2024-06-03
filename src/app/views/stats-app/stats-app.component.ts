@@ -72,13 +72,11 @@ export class StatsAppComponent implements OnInit, OnDestroy {
 
 
     init(): void {
-        let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
-        let end = this.serverFilterForm.getRawValue().dateRangePicker.end;
         let advancedParams = this.advancedParams
         if (advancedParams) {
             advancedParams = mapParams(this.filterConstants.STATS_APP, advancedParams);
         }
-        this.requests = this.APP_REQUEST(this.name, this.env, start, end, advancedParams);
+        this.requests = this.APP_REQUEST(this.name, this.env, this.start, this.end, advancedParams);
         Object.keys(this.requests).forEach(k => {
             this.requests[k].data = [];
             this.requests[k].isLoading = true;

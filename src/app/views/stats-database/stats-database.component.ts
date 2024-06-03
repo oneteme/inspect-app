@@ -35,7 +35,6 @@ export class StatsDatabaseComponent implements OnInit {
   dbNameDataList: any[];
   db: any;
   dbNameListIsLoading: boolean = false
-  dataIsLoading: boolean = false
   countOkKo: any[];
   countMinMaxAvg: any[];
   countRepartitionBySpeed: any[];
@@ -118,10 +117,7 @@ export class StatsDatabaseComponent implements OnInit {
   }
 
   init() {
-    this.dataIsLoading = true;
-    let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
-    let end = this.serverFilterForm.getRawValue().dateRangePicker.end;
-    this.requests = this.DB_REQUEST(this.db, this.env, start, end)
+    this.requests = this.DB_REQUEST(this.db, this.env, this.start, this.end)
     Object.keys(this.requests).forEach(k => {
       this.requests[k].data = [];
       this.requests[k].isLoading = true;
