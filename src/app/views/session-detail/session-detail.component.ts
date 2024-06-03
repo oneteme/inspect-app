@@ -1,12 +1,12 @@
-import { AfterContentInit, Component, ElementRef, Injectable, NgZone, OnDestroy, ViewChild} from '@angular/core';
+import { AfterContentInit, Component, ElementRef, Injectable, NgZone, OnDestroy, ViewChild } from '@angular/core';
 import { MatDialog } from '@angular/material/dialog';
 import { MatTableDataSource } from '@angular/material/table';
-import { ActivatedRoute, NavigationExtras, Router} from '@angular/router';
-import { Observable, Subscription, combineLatest} from "rxjs";
+import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
+import { Observable, Subscription, combineLatest } from "rxjs";
 import { Timeline } from 'vis-timeline';
-import {  ExceptionInfo, OutcomingQuery, OutcomingRequest, RunnableStage } from 'src/app/shared/model/trace.model';
+import { ExceptionInfo, OutcomingQuery, OutcomingRequest, RunnableStage } from 'src/app/shared/model/trace.model';
 import { Utils } from 'src/app/shared/util';
-import { DatePipe, Location} from '@angular/common';
+import { DatePipe, Location } from '@angular/common';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatSort } from '@angular/material/sort';
 import { TraceService } from 'src/app/shared/services/trace.service';
@@ -35,7 +35,7 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
     selectedSession: any // IncomingRequest | Mainrequest | OutcomingRequest;
     selectedSessionType: string;
     sessionDetailSubscription: Observable<object>;
-    sessionParent: {id : string, type : sessionType};
+    sessionParent: { id: string, type: sessionType };
     outcomingRequestList: any;
     outcomingQueryList: any;
     isComplete: boolean = true;
@@ -49,9 +49,10 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
     container: any;
     dataTable: any;
     timeLine: any;
-    queryBySchema :any[];
-    env:any;
-    pipe = new DatePipe('fr-FR')
+    queryBySchema: any[];
+    env: any;
+    pipe = new DatePipe('fr-FR');
+    filterTable = new Map<string, any>();
     @ViewChild('timeline') timelineContainer: ElementRef;
     @ViewChild('OutcomingRequestPaginator') outcomingRequestPaginator: MatPaginator;
     @ViewChild('OutcomingRequestSort') outcomingRequestSort: MatSort;
@@ -73,14 +74,14 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
             next: ([params, queryParams]) => {
                 this.env = queryParams.env || application.default_env;
                 this.selectedSessionType = params.type;
-                switch(this.selectedSessionType){
-                    case "main": 
+                switch (this.selectedSessionType) {
+                    case "main":
                         this.sessionDetailSubscription = this._traceService.getMainRequestById(params.id);
-                    break;
+                        break;
                     case "api":
                         this.sessionDetailSubscription = this._traceService.getIncomingRequestById(params.id);
-                    break;
-                    default :
+                        break;
+                    default:
                 }
                 this.getSessionById(params.id);
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}`)
@@ -95,82 +96,97 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
         })*/
     }
 
-
-
-
-
-
     getSessionById(id: string) {
 
         this.isLoading = true;
         this.sessionDetailSubscription.subscribe({
-        next: (d: any) => {
-            this.selectedSession = d;
-            if (this.selectedSession) {
-                this.selectedSession.type = this.selectedSessionType;
+            next: (d: any) => {
+                this.selectedSession = d;
+                if (this.selectedSession) {
+                    this.selectedSession.type = this.selectedSessionType;
 
-                // Api request list 
-                this.outcomingRequestList = this.selectedSession.requests;
-                this.outcomingRequestdataSource = new MatTableDataSource(this.outcomingRequestList);
-                setTimeout(() => { this.outcomingRequestdataSource.paginator = this.outcomingRequestPaginator });
-                setTimeout(() => { this.outcomingRequestdataSource.sort = this.outcomingRequestSort });
-                this.outcomingRequestdataSource.sortingDataAccessor = (row: any, columnName: string) => {
-                    if (columnName == "host") return row["host"] + ":" + row["port"] as string;
-                    if (columnName == "start") return row['start'] as string;
-                    if (columnName == "duree") return (row["end"] - row["start"]);
-                    var columnValue = row[columnName as keyof any] as string;
-                    return columnValue;
-                }
+                    // Api request list 
+                    this.outcomingRequestList = this.selectedSession.requests;
+                    this.outcomingRequestdataSource = new MatTableDataSource(this.outcomingRequestList);
+                    setTimeout(() => { this.outcomingRequestdataSource.paginator = this.outcomingRequestPaginator });
+                    setTimeout(() => { this.outcomingRequestdataSource.sort = this.outcomingRequestSort });
+                    this.outcomingRequestdataSource.sortingDataAccessor = (row: any, columnName: string) => {
+                        if (columnName == "host") return row["host"] + ":" + row["port"] as string;
+                        if (columnName == "start") return row['start'] as string;
+                        if (columnName == "duree") return (row["end"] - row["start"]);
+                        var columnValue = row[columnName as keyof any] as string;
+                        return columnValue;
+                    }
 
-                // DB request list 
-                this.outcomingQueryList = this.selectedSession.queries
-                this.outcomingQuerydataSource = new MatTableDataSource(this.outcomingQueryList);
-                setTimeout(() => { this.outcomingQuerydataSource.paginator = this.outcomingQueryPaginator });
-                setTimeout(() => { this.outcomingQuerydataSource.sort = this.outcomingQuerySort });
-                this.outcomingQuerydataSource.sortingDataAccessor = (row: any, columnName: string) => {
-                    if (columnName == "duree") return (row["end"] - row["start"])
-                    var columnValue = row[columnName as keyof any] as string;
-                    return columnValue;
-                }
-                
-                this.groupQueriesBySchema();
-                
-                // Timeline 
-                this.visjs();
+                    this.outcomingRequestdataSource.filterPredicate = (data: OutcomingRequest, filter: string) => {
+                        var map: Map<string, any> = new Map(JSON.parse(filter));
+                        let isMatch = true;
+                        for (let [key, value] of map.entries()) {
+                            if (key == 'filter') {
+                                isMatch = isMatch && (value == '' || 
+                                    (data.host?.toLowerCase().includes(value) || data.method?.toLowerCase().includes(value) || data.query?.toLowerCase().includes(value) ||
+                                    data.path?.toLowerCase().includes(value)));
+                            } else if (key == 'status') {
+                                const s = data.status.toString();
+                                isMatch = isMatch && (!value.length || (value.some((status: any) => {
+                                    return s.startsWith(status[0]);
+                                })));
+                            }
+                        }
+                        return isMatch;
+                    }
+                    this.outcomingRequestdataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
+                    setTimeout(() => { this.outcomingRequestdataSource.paginator.pageIndex = 0 });
 
-                // Check if parent exist
-                this.sessionParent = null; 
-                if(this.selectedSession.type == "api"){
-                    this._traceService.getSessionParentByChildId(id).subscribe( {
-                       next : (data:  {id : string, type : sessionType}) =>{
-                       this.sessionParent = data;
-                       },
-                       error : err => console.log(err)
-                   })
+                    // DB request list 
+                    this.outcomingQueryList = this.selectedSession.queries
+                    this.outcomingQuerydataSource = new MatTableDataSource(this.outcomingQueryList);
+                    setTimeout(() => { this.outcomingQuerydataSource.paginator = this.outcomingQueryPaginator });
+                    setTimeout(() => { this.outcomingQuerydataSource.sort = this.outcomingQuerySort });
+                    this.outcomingQuerydataSource.sortingDataAccessor = (row: any, columnName: string) => {
+                        if (columnName == "duree") return (row["end"] - row["start"])
+                        var columnValue = row[columnName as keyof any] as string;
+                        return columnValue;
+                    }
+
+                    this.groupQueriesBySchema();
+
+                    // Timeline 
+                    this.visjs();
+
+                    // Check if parent exist
+                    this.sessionParent = null;
+                    if (this.selectedSession.type == "api") {
+                        this._traceService.getSessionParentByChildId(id).subscribe({
+                            next: (data: { id: string, type: sessionType }) => {
+                                this.sessionParent = data;
+                            },
+                            error: err => console.log(err)
+                        })
+                    }
+
+                    this.isLoading = false;
+                    this.isComplete = true;
+                } else {
+                    this.isLoading = false;
+                    this.isComplete = false;
+                    // navigate to tab incoming
                 }
-              
+            },
+            error: err => {
                 this.isLoading = false;
-                this.isComplete = true;
-            } else {
-                this.isLoading = false;
-                this.isComplete= false;
-                // navigate to tab incoming
             }
-        },
-        error: err => {
-            this.isLoading = false;
-        }
         });
     }
 
     visjs() {
-        
+
         let timeline_end = +this.selectedSession.end * 1000
         let timeline_start = +this.selectedSession.start * 1000
         let dataArray: any = [...<OutcomingRequest[]>this.selectedSession.requests,
         ...<OutcomingQuery[]>this.selectedSession.queries,
         ...<RunnableStage[]>this.selectedSession.stages.map((s: any) => ({ ...s, isStage: true }))];
-        dataArray.splice(0, 0, {...this.selectedSession,isStage: true})
+        dataArray.splice(0, 0, { ...this.selectedSession, isStage: true })
         this.sortInnerArrayByDate(dataArray);
 
 
@@ -193,17 +209,17 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
             let o = {
                 id: c.hasOwnProperty('schema') ? -i : c.id,
                 group: isWebapp ? 0 : c.threadName,
-                content:c.hasOwnProperty('isStage') ? '' : (c.schema || c.host || 'N/A'),
+                content: c.hasOwnProperty('isStage') ? '' : (c.schema || c.host || 'N/A'),
                 start: c.start * 1000,
                 end: c.end * 1000,
                 title: `<span>${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(c.end * 1000), 'HH:mm:ss.SSS')}</span><br>
                 <h4>${c[title]}:  ${this.getElapsedTime(c.end, c.start).toFixed(3)}s</h4>`,
-                className: c.hasOwnProperty('schema') ? "bdd" : !c.hasOwnProperty('isStage')  ? "rest" : "",
-                type: c.hasOwnProperty('isStage')  ? 'background' : 'range'
+                className: c.hasOwnProperty('schema') ? "bdd" : !c.hasOwnProperty('isStage') ? "rest" : "",
+                type: c.hasOwnProperty('isStage') ? 'background' : 'range'
             }
-            if (o.end > timeline_end){
+            if (o.end > timeline_end) {
                 timeline_end = o.end
-            }      
+            }
             return o;
         })
 
@@ -245,25 +261,25 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
 
     }
 
-    selectedRequest(event:MouseEvent,row: any) {
-        if(row){
-            if( event.ctrlKey){
-                this._router.open(`#/session/api/${row}`,'_blank',)
-              }else {
-                  this._router.navigate(['/session', 'api', row],{queryParams:{env:this.env}}); // TODO remove env FIX BUG  
-              }
+    selectedRequest(event: MouseEvent, row: any) {
+        if (row) {
+            if (event.ctrlKey) {
+                this._router.open(`#/session/api/${row}`, '_blank',)
+            } else {
+                this._router.navigate(['/session', 'api', row], { queryParams: { env: this.env } }); // TODO remove env FIX BUG  
+            }
         }
     }
 
-    selectedQuery(event: MouseEvent, queryId:any){ // TODO finish this 
-        if(queryId){
-            if( event.ctrlKey){
-                this._router.open(`#/session/${this.selectedSession.type}/${this.selectedSession.id}/db/${queryId}`,'_blank',)
-              }else {
-                  this._router.navigate(['/session', this.selectedSession.type, this.selectedSession.id, 'db', queryId],{
-                    queryParams:{env:this.env}
+    selectedQuery(event: MouseEvent, queryId: any) { // TODO finish this 
+        if (queryId) {
+            if (event.ctrlKey) {
+                this._router.open(`#/session/${this.selectedSession.type}/${this.selectedSession.id}/db/${queryId}`, '_blank',)
+            } else {
+                this._router.navigate(['/session', this.selectedSession.type, this.selectedSession.id, 'db', queryId], {
+                    queryParams: { env: this.env }
                 });
-              }
+            }
         }
     }
 
@@ -314,16 +330,16 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
         });
     }
 
-    groupQueriesBySchema(){
-        if(this.selectedSession.queries){
-            this.queryBySchema =  this.selectedSession.queries.reduce((acc: any, item: any) => {
-                if(!acc[item['schema']]){
+    groupQueriesBySchema() {
+        if (this.selectedSession.queries) {
+            this.queryBySchema = this.selectedSession.queries.reduce((acc: any, item: any) => {
+                if (!acc[item['schema']]) {
                     acc[item['schema']] = []
                 }
 
                 acc[item['schema']].push(item);
                 return acc;
-            },[]);
+            }, []);
         }
     }
 
@@ -331,7 +347,7 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
         return this.UtilInstance.getSessionUrl(selectedSession);
     }
 
-    navigate(event:MouseEvent,targetType: string,extraParam?:string) {
+    navigate(event: MouseEvent, targetType: string, extraParam?: string) {
         let params: any[] = [];
         switch (targetType) {
             case "api":
@@ -344,13 +360,13 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
                 params.push('session/api', this.selectedSession.id, 'tree')
                 break;
             case "parent":
-                params.push('session',this.sessionParent.type, this.sessionParent.id)
+                params.push('session', this.sessionParent.type, this.sessionParent.id)
         }
-        if(event.ctrlKey){
-           this._router.open(`#/${params.join('/')}`,'_blank')
-          }else {
+        if (event.ctrlKey) {
+            this._router.open(`#/${params.join('/')}`, '_blank')
+        } else {
             this._router.navigate(params, {
-                  queryParams: { env: this.selectedSession?.application?.env }
+                queryParams: { env: this.selectedSession?.application?.env }
             });
         }
     }
@@ -369,15 +385,15 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
         });
     }
 
-    isQueryCompleted(query:any):boolean {
-        return  query.actions.every((a:any) => !a?.exception?.classname && !a?.exception?.message);
+    isQueryCompleted(query: any): boolean {
+        return query.actions.every((a: any) => !a?.exception?.classname && !a?.exception?.message);
     }
 
-    getCommand(commands:string[]):string{
+    getCommand(commands: string[]): string {
         let command = ""
-        if(commands?.length == 1){
+        if (commands?.length == 1) {
             command = `[${commands[0]}]`
-        }else if(commands?.length > 1) {
+        } else if (commands?.length > 1) {
             command = "[SQL]"
         }
         return command;
@@ -391,11 +407,25 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
             this.paramsSubscription.unsubscribe();
         }
     }
+
+    applyFilter(event: Event) {
+        const filterValue = (event.target as HTMLInputElement).value;
+        this.filterTable.set('filter', filterValue.trim().toLowerCase());
+        this.outcomingRequestdataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
+        if (this.outcomingRequestdataSource.paginator) {
+            this.outcomingRequestdataSource.paginator.firstPage();
+        }
+    }
+
+    toggleFilter(filter: string[]) {
+        this.filterTable.set('status', filter);
+        this.outcomingRequestdataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
+    }
 }
 
 @Injectable()
 export class EnvRouter {
-   
+
     private _env: string;
 
     constructor(private router: Router) { }
@@ -404,14 +434,14 @@ export class EnvRouter {
         this._env = env
     }
 
-    get events(): Observable<any>{
+    get events(): Observable<any> {
         return this.router.events;
     };
 
     get url(): string {
         return this.router.url;
     }
-    
+
 
     navigate(commands: any[], extras?: NavigationExtras): Promise<boolean> {
         if (!extras?.queryParams?.env) {
@@ -432,8 +462,8 @@ export class EnvRouter {
         // return Promise.resolve(true);
     }
 
-    open(url?: string | URL, target?: string, features?: string): WindowProxy | null{
-        return window.open(url,target,features);
+    open(url?: string | URL, target?: string, features?: string): WindowProxy | null {
+        return window.open(url, target, features);
     }
-    
+
 }
