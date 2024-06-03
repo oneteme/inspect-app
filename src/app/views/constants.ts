@@ -11,6 +11,11 @@ export class Constants {
             { data: { x: values('5xx'), y: field('countErrorServer') }, name: '5xx', color: '#ff0000' }
         ],
         options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
             legend: {
                 height: 225
             }
@@ -27,6 +32,11 @@ export class Constants {
             { data: { x: values('< 1'), y: field('elapsedTimeFastest') }, name: 'mapper 5', color: '#81D4FA' }
         ],
         options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
             legend: {
                 height: 225
             }
@@ -40,6 +50,11 @@ export class Constants {
             { data: { x: field('user'), y: field('count') }, name: 'Total' }
         ],
         options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
             legend: {
                 height: 225
             }
@@ -53,6 +68,11 @@ export class Constants {
         ],
         stacked: true,
         options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
             tooltip: {
                 shared: true,
                 intersect: false,
@@ -75,6 +95,11 @@ export class Constants {
         ],
         stacked: true,
         options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
             tooltip: {
                 shared: true,
                 intersect: false,
@@ -121,6 +146,11 @@ export class Constants {
         ],
         stacked: true,
         options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
             tooltip: {
                 shared: true,
                 intersect: false,
@@ -142,6 +172,11 @@ export class Constants {
         ],
         stacked: true,
         options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
             tooltip: {
                 shared: true,
                 intersect: false,
@@ -164,7 +199,10 @@ export class Constants {
         options: {
             chart: {
                 id: 'c',
-                group: 'A'
+                group: 'A',
+                toolbar: {
+                    show: false
+                }
             },
             dataLabels: {
                 enabled: false
@@ -190,7 +228,10 @@ export class Constants {
         options: {
             chart: {
                 id: 'b',
-                group: 'A'
+                group: 'A',
+                toolbar: {
+                    show: false
+                }
             },
             dataLabels: {
                 enabled: false
@@ -221,6 +262,9 @@ export class Constants {
                 group: 'sparkline',
                 sparkline: {
                     enabled: true
+                },
+                toolbar: {
+                    show: false
                 }
             },
             stroke: {
@@ -251,6 +295,9 @@ export class Constants {
                 group: 'sparkline',
                 sparkline: {
                     enabled: true
+                },
+                toolbar: {
+                    show: false
                 }
             },
             stroke: {
@@ -288,6 +335,9 @@ export class Constants {
                 group: 'sparkline',
                 sparkline: {
                     enabled: true
+                },
+                toolbar: {
+                    show: false
                 }
             },
             stroke: {
@@ -383,12 +433,9 @@ export class FilterConstants {
     ]
 
     static readonly STATS_API: Filter[] = [
-        { key: 'query', label: 'Query params', type: 'input', row: 1, col: 2, op: Operation.like },
-        { key: 'method', label: 'Method', type: 'select', width: 20, row: 1, col: 1, options: [{ method: 'GET' }, { method: 'PUT' }, { method: 'POST' }, { method: 'DELETE' }, { method: 'OPTIONS' }], op: Operation.eq  },
-        { key: 'status', label: 'Status', type: 'select', row: 3, col: 1, options: [{ status: '200' }, { status: '201' }, { status: '202' }, { status: '400' }, { status: '401' }, { status: '403' }, { status: '404' }, { status: '405' }, { status: '409' }, { status: '415' }, { status: '500' }, { status: '503' }], op: Operation.eq  },
-        { key: 'user', label: 'Utilisateur', type: 'select', row: 3, col: 2, endpoint: '/stat/apisession', query: { 'column.distinct': 'user.coalesce(null)', 'user.not': 'null', 'order': 'user.coalesce(null).asc' }, op: Operation.eq  },
-        { key: 'path', label: 'Path', type: 'input', row: 2, col: 1, op: Operation.like }
-
+        { key: 'query', label: 'Query params', type: 'input', row: 1, col: 1, op: Operation.like },
+        { key: 'status', label: 'Status', type: 'select', row: 2, col: 1, options: [{ status: '200' }, { status: '201' }, { status: '202' }, { status: '400' }, { status: '401' }, { status: '403' }, { status: '404' }, { status: '405' }, { status: '409' }, { status: '415' }, { status: '500' }, { status: '503' }], op: Operation.eq  },
+        { key: 'user', label: 'Utilisateur', type: 'select', row: 2, col: 2, endpoint: '/stat/apisession', query: { 'column.distinct': 'user.coalesce(null)', 'user.not': 'null', 'order': 'user.coalesce(null).asc' }, op: Operation.eq  },
         //new Filter("os", "OS", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
         //new Filter("re", "RE", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
         //new Filter("err_type", "Exception", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),

@@ -25,6 +25,9 @@ export class DependenciesTableComponent {
             chart: {
                 sparkline: {
                     enabled: true
+                },
+                toolbar: {
+                    show: false
                 }
             },
             plotOptions: {

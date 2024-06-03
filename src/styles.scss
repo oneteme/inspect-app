@@ -152,6 +152,10 @@ mat-form-field.loading {
   font-size: 12px;
 }
 
+.mdc-data-table__cell:has(chart) {
+  overflow: initial;
+}
+
 
 
 
