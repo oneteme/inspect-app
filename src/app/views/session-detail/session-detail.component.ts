@@ -260,7 +260,6 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
             if( event.ctrlKey){
                 this._router.open(`#/session/${this.selectedSession.type}/${this.selectedSession.id}/db/${queryId}`,'_blank',)
               }else {
-                console.log('/session', this.selectedSession.type, this.selectedSession.id, 'db', queryId);
                   this._router.navigate(['/session', this.selectedSession.type, this.selectedSession.id, 'db', queryId],{
                     queryParams:{env:this.env}
                 });
