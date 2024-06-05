@@ -6,7 +6,7 @@ import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { Location } from '@angular/common';
-import { Mainrequest } from 'src/app/shared/model/trace.model';
+import { MainRequest } from 'src/app/shared/model/trace.model';
 import { Utils } from 'src/app/shared/util';
 import { TraceService } from 'src/app/shared/services/trace.service';
 import { EnvRouter } from '../session-detail/session-detail.component';
@@ -21,10 +21,10 @@ import { FilterService } from 'src/app/shared/services/filter.service';
 })
 export class SessionMainComponent implements OnInit, OnDestroy {
   filterConstants = FilterConstants;
-  utilInstance: Utils = new Utils();
+  utils: Utils = new Utils();
   displayedColumns: string[] = ['status', 'app_name', 'session', 'location', 'start', 'Durée', 'user'];
-  dataSource: MatTableDataSource<Mainrequest> = new MatTableDataSource();
-  mainRequestList: Mainrequest[];
+  dataSource: MatTableDataSource<MainRequest> = new MatTableDataSource();
+  mainRequestList: MainRequest[];
   serverFilterForm = new FormGroup({
     launchmode: new FormControl(""),
     dateRangePicker: new FormGroup({
@@ -88,7 +88,7 @@ export class SessionMainComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
     this.dataSource.data = [];
-    this.subscription = this._traceService.getMainRequestByCriteria(params).subscribe((d: Mainrequest[]) => {
+    this.subscription = this._traceService.getMainRequestByCriteria(params).subscribe((d: MainRequest[]) => {
       if (d) {
         this.dataSource = new MatTableDataSource(d);
         this.dataSource.paginator = this.paginator;
@@ -164,7 +164,7 @@ export class SessionMainComponent implements OnInit, OnDestroy {
   }
 
   statusBorder(status: number) {
-    return this.utilInstance.statusBorder(status)
+    return Utils.statusBorder(status)
   }
 
 

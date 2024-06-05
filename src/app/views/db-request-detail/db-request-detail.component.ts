@@ -24,8 +24,7 @@ export interface UserData {
 
 })
 export class DbRequestDetailComponent implements OnDestroy {
-
-    UtilInstance: Utils = new Utils();
+    utils: Utils = new Utils;
     selectedQuery: any;
     dbQueryId: number;
     dbQueryParentId: string;
@@ -146,20 +145,20 @@ export class DbRequestDetailComponent implements OnDestroy {
     }
 
     getRe(re: string) {
-        return this.UtilInstance.getRe(re);
+        return this.utils.getRe(re);
     }
 
     statusBorder(status: any) {
-        return this.UtilInstance.statusBorder(status);
+        return Utils.statusBorder(status);
+    }
+    
+    getStateColorBool() {
+        return Utils.getStateColorBool(this.selectedQuery?.completed)
     }
 
+    getSessionDetailBorder() {
 
-    getSessionDetailBorder(session: any) {
-
-        if (session?.type == "api" || session?.type == "outcoming")
-            return this.UtilInstance.statusBorderCard(session.status)
-        if (session?.type == "main")
-            return this.UtilInstance.statusBorderCard(!!session?.exception?.message)
+        return Utils.statusBorderCard(!this.selectedQuery?.completed)
 
     }
 
@@ -181,7 +180,7 @@ export class DbRequestDetailComponent implements OnDestroy {
     }
 
     getSessionUrl(selectedSession: any) {
-        return this.UtilInstance.getSessionUrl(selectedSession);
+        return Utils.getSessionUrl(selectedSession);
     }
 
 

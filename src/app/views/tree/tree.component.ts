@@ -22,7 +22,6 @@ export class TreeComponent implements OnDestroy {
   private _zone = inject(NgZone);
   private _location = inject(Location);
 
-  UtilInstance: Utils = new Utils();
   id: string;
   groupedExchange: any;
   exchange: any;
@@ -278,7 +277,7 @@ export class TreeComponent implements OnDestroy {
                   break;
 
                 case 'db':
-                  modal += `<span style="color:${self.UtilInstance.getStateColorBool(value.completed)}">●</span> <span>${value.completed ? "réussi" : "échoué"}</span><br>`
+                  modal += `<span style="color:${Utils.getStateColorBool(value.completed)}">●</span> <span>${value.completed ? "réussi" : "échoué"}</span><br>`
                   modal += `<b>Thread :</b> ${value.threadName || 'N/A'}<br>`
                   modal += `<b>Schema :</b> ${value.schema || 'N/A'}<br>`
                   modal += `<b>Hôte   :</b> ${value.host || 'N/A'}<br>`
@@ -290,9 +289,9 @@ export class TreeComponent implements OnDestroy {
                   break;
 
                 case 'api':
-                  modal += `<span style="color:${self.UtilInstance.getStateColor(value.remoteTrace.status)}">●</span> <span>${value.remoteTrace.status}&nbsp;&nbsp;&nbsp;&nbsp; <span style="float:right">${value.remoteTrace.path}</span></span><br>`
+                  modal += `<span style="color:${Utils.getStateColor(value.remoteTrace.status)}">●</span> <span>${value.remoteTrace.status}&nbsp;&nbsp;&nbsp;&nbsp; <span style="float:right">${value.remoteTrace.path}</span></span><br>`
                   modal += `<b>Thread :</b> ${value.threadName || 'N/A'}<br>`
-                  modal += `<b>Latence:</b> ${self.UtilInstance.getElapsedTime(value.remoteTrace?.start, value.start)}s<br>`;
+                  modal += `<b>Latence:</b> ${Utils.getElapsedTime(value.remoteTrace?.start, value.start)}s<br>`;
                   modal += `<span style="color:red">${value.remoteTrace?.exception?.classname || ''} ${value.remoteTrace?.exception?.message || ''}</span><br>`
                   //   modal += `<span style="float:right;"> ${self.UtilInstance.getElapsedTime(value.remoteTrace.end, value.remoteTrace.start)}s</span>`;
                   break;
@@ -385,7 +384,7 @@ export class TreeComponent implements OnDestroy {
             vertexIcon = this.getVertexIconType(r)
             r.remoteTrace.application.name = r.remoteTrace.name;
             req = this.graph.insertVertex(this.parent, null, { data: [r] }, 0, 0, 80, 30, 'shape=image;image=assets/mxgraph/api.drawio.svg;fillColor=#81D060;')
-            edgeStyle += `strokeColor=${this.UtilInstance.getStateColor(r.status)};`;
+            edgeStyle += `strokeColor=${Utils.getStateColor(r.status)};`;
             edgeLabel = this.getElapsedTime(r.end, r.start) + "s"
             this.graph.insertEdge(this.parent, null, edgeLabel, exParent, req, edgeStyle)
           })
@@ -414,7 +413,7 @@ export class TreeComponent implements OnDestroy {
           else
             edgeLabel = `${ex?.remoteTrace.parentCallCount - ex?.remoteTrace.succesCalls} / ${ex?.remoteTrace.parentCallCount}`;
         } else {
-          edgeStyle += "strokeColor=" + this.UtilInstance.getStateColor(exchange.data[0].status)
+          edgeStyle += "strokeColor=" + Utils.getStateColor(exchange.data[0].status)
           edgeLabel = `${this.getElapsedTime(exchange.data[0].end, exchange.data[0].start)}s`
         }
 

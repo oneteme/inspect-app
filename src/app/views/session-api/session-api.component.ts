@@ -23,7 +23,6 @@ import { T } from '@angular/cdk/keycodes';
 })
 export class SessionApiComponent implements OnInit, OnDestroy {
   filterConstants = FilterConstants;
-  utilInstance: Utils = new Utils();
   nameDataList: any[];
   displayedColumns: string[] = ['status', 'app_name', 'method/path', 'query', 'start', 'Durée', 'user'];
   dataSource: MatTableDataSource<IncomingRequest> = new MatTableDataSource();
@@ -209,7 +208,7 @@ export class SessionApiComponent implements OnInit, OnDestroy {
 
   statusBorder(status: number) {
 
-    return this.utilInstance.statusBorder(status)
+    return Utils.statusBorder(status)
   }
 
   applyFilter(event: Event) {

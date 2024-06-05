@@ -10,17 +10,17 @@ export class Utils {
     dbactionIcon: any =
         {
             'CONNECTION': '#1423DC',
-            'METADATA'  : '#2134CB',
-            'STATEMENT' : '#2E45BA',
-            'EXECUTE'   : '#3B56A9',
-            'RESULTSET' : "#486798",
-            'SELECT'    : '#557887',
-            'UPDATE'    : '#628976',
-            'BATCH'     : '#6F9A65',
-            'COMMIT'    : '#7CAB54',
-            'ROLLBACK'  : '#89BC43',
-            'FETCH'     : '#96CD32',
-            ' '         : '#e9ecef'
+            'METADATA': '#2134CB',
+            'STATEMENT': '#2E45BA',
+            'EXECUTE': '#3B56A9',
+            'RESULTSET': "#486798",
+            'SELECT': '#557887',
+            'UPDATE': '#628976',
+            'BATCH': '#6F9A65',
+            'COMMIT': '#7CAB54',
+            'ROLLBACK': '#89BC43',
+            'FETCH': '#96CD32',
+            ' ': '#e9ecef'
         };
     protocol: any = {
         'http': 'fa-solid fa-lock-open',
@@ -37,7 +37,7 @@ export class Utils {
         'java': 'fa-brands fa-java fa-xl',
     }
 
-    getStateColor(status: number) { // put it in util class 
+    static getStateColor(status: number) { // put it in util class 
 
         if (status >= 200 && status < 300)
             return "green"
@@ -50,20 +50,20 @@ export class Utils {
         return "gray"
     }
 
-    getStateColorBool(completed: boolean) {
+    static getStateColorBool(completed: boolean) {
         if (completed)
             return 'green'
         return 'red';
     }
 
-    statusBorder(completed: any): { [key: string]: string } {
+    static statusBorder(completed: any): { [key: string]: string } {
         if (typeof completed == "boolean") {
             return { 'box-shadow': '4px 0px 0px 0px ' + this.getStateColorBool(completed) + ' inset' };
         }
         return { 'box-shadow': '4px 0px 0px 0px ' + this.getStateColor(completed) + ' inset' };
     }
 
-    statusBorderCard(failed: any): { [key: string]: string } {
+    static statusBorderCard(failed: any): { [key: string]: string } {
         if (typeof failed == "boolean") {
             return { 'border-left': '4px solid ' + this.getStateColorBool(!failed) };
         }
@@ -88,7 +88,7 @@ export class Utils {
         return secondString
     }
 
-    public getRe(re: string) {
+    getRe(re: string) {
 
         let result = re
         if (re) {
@@ -104,11 +104,11 @@ export class Utils {
         return result;
     }
 
-    public getSessionUrl(selectedSession: any) {
+    static getSessionUrl(selectedSession: any) {
         return `${selectedSession?.protocol ? selectedSession?.protocol + '://' : ''}${selectedSession?.host ? selectedSession?.host : ''}${selectedSession?.port > 0 ? ':' + selectedSession?.port : ''}${selectedSession?.path ? selectedSession?.path : ''}${selectedSession?.query ? '?' + selectedSession?.query : ''}`
     }
 
-    public getElapsedTime(end: number, start: number,) {
+    static getElapsedTime(end: number, start: number,) {
         return (new Date(end * 1000).getTime() - new Date(start * 1000).getTime()) / 1000
     }
 
@@ -128,13 +128,13 @@ export function groupingBy(arr: any[], field: string): any {
 export function periodManagement(start: Date, end: Date): string {
     var dayDiff = (end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000);
 
-    if(dayDiff <= 1) { // 24 heures
+    if (dayDiff <= 1) { // 24 heures
         return ChartGroup.byHour;
     }
     if (dayDiff <= 24) {
         return ChartGroup.byDay;
     }
-    if(Math.round(dayDiff / 7) <=  24) {
+    if (Math.round(dayDiff / 7) <= 24) {
         return ChartGroup.byWeek;
     }
     if (Math.round(dayDiff / 30) <= 24) {
@@ -143,7 +143,7 @@ export function periodManagement(start: Date, end: Date): string {
     return ChartGroup.byYear;
 }
 
-export const formatters : any = {
+export const formatters: any = {
 
     year: function byYear(r: any[], _datePipe: DatePipe) {
         r.forEach(e => {
@@ -181,29 +181,29 @@ export const formatters : any = {
 }
 
 
-export function mapParams(filters:Filter[],filter:FilterMap) {
-    return  Object.entries(filter).reduce((accumulator: any, [key, value]: any) => {
+export function mapParams(filters: Filter[], filter: FilterMap) {
+    return Object.entries(filter).reduce((accumulator: any, [key, value]: any) => {
 
         const f = filters.find(f => f.key.toLowerCase() == key)
 
-        const val = Array.isArray(value)? value.join(','): value
-        if(f && f.op.value != Operation.eq.value) {
+        const val = Array.isArray(value) ? value.join(',') : value
+        if (f && f.op.value != Operation.eq.value) {
             accumulator[`${key}.${f.op.value}`] = val;
-        }else {
+        } else {
             accumulator[`${key}`] = val;
         }
         return accumulator;
     }, {});
-  }
+}
 
-  export function extractInfo(filterKey: string){
+export function extractInfo(filterKey: string) {
     const r = /^(.*?)__(.*)$/;
     const match = filterKey.match(r);
-    if(match){
+    if (match) {
         return {
-            controlName : match[1],
+            controlName: match[1],
             key: match[2]
         }
     }
     return null;
-  }
+}

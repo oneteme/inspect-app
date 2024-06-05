@@ -20,6 +20,9 @@ import { StatsUserComponent } from './stats-user/stats-user.component';
 import { ExceptionTableComponent } from '../shared/components/stats/exception-table/exception-table.component';
 import { ChartComponent } from '@oneteme/jquery-apexcharts';
 import { DbRequestDetailComponent } from './db-request-detail/db-request-detail.component';
+import { RequestRestTableComponent } from './session-detail/components/request-rest-table/request-rest-table.component';
+import { RequestDatabaseTableComponent } from './session-detail/components/request-database-table/request-database-table.component';
+import { RequestTimelineComponent } from './session-detail/components/request-timeline/request-timeline.component';
 
 @NgModule({
   imports: [
@@ -36,6 +39,9 @@ import { DbRequestDetailComponent } from './db-request-detail/db-request-detail.
   declarations: [
     SessionApiComponent,
     SessionDetailComponent,
+    RequestRestTableComponent,
+    RequestDatabaseTableComponent,
+    RequestTimelineComponent,
     SessionMainComponent,
     StatsAppComponent,
     StatsApiComponent,
