@@ -317,7 +317,7 @@
     </div>
 
 </div>
-<div #timeline id="timeline" [hidden]="!selectedSession"></div>
+<div #timeline id="timeline" [hidden]="isLoading || !selectedSession"></div>
 
 
 <div *ngIf="!isLoading && !isComplete" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">
