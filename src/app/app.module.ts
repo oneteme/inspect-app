@@ -45,19 +45,19 @@ const routes: Route[] = [
         title: 'Liste des Sessions'
       },
       {
+        path: ':type/:id/db/:dbid', 
+        component: DbRequestDetailComponent,
+        title: 'Detail de la requête SQL'
+      },
+      {
         path: ':type/:id',
         component: SessionDetailComponent,
         title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          if(route.paramMap.get('type') == 'main') {
+          if (route.paramMap.get('type') == 'main') {
             return 'Detail de la Session';
-          } 
+          }
           return 'Detail de l\'API';
-        }
-      },
-      {
-        path: 'api/:id/db/:dbid',
-        component: DbRequestDetailComponent,
-        title: 'Detail de la requête SQL'
+        },
       },
       { path: '**', pathMatch: 'full', redirectTo: `/session/api` }
     ]
@@ -78,7 +78,7 @@ const routes: Route[] = [
         path: 'user/:name',
         component: StatsUserComponent,
         title: 'Statistiques Utilisateur'
-      }, 
+      },
       {
         path: 'database/:name',
         component: StatsDatabaseComponent,

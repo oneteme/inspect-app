@@ -1,77 +1,60 @@
 <div *ngIf="!isLoading" class="header-card">
-    <mat-card style="width: 60vw; min-width: 60vw;" *ngIf="selectedSession"
-        [matTooltip]="getSessionStatusTooltip(selectedSession)" matTooltipPosition="before"
-        [ngStyle]="getSessionDetailBorder(selectedSession)">
-
+    <mat-card style="width: 60vw; min-width: 60vw;" *ngIf="selectedQuery"
+        [ngStyle]="UtilInstance.statusBorderCard(!selectedQuery?.completed)">
         <mat-card-title>
-            <a style="display: flex; align-items: center; gap: 0.5em"
-                [routerLink]="'/dashboard/api/'+ selectedSession?.name"
-                [queryParams]="{'env': selectedSession?.application?.env}"
-                [style.pointer-events]="selectedSession.launchMode =='WEBAPP' ? 'none' : 'all'"
-                matTooltip="Statistique API">
+            <p style="display: flex; align-items: center; gap: 0.5em">
                 <mat-icon>settings_suggest</mat-icon>
-                {{selectedSession?.type=='api' || selectedSession?.type =='outcoming' ? (selectedSession?.name|| 'N/A') : '['
-                + selectedSession?.launchMode + '] ' + selectedSession?.name || 'N/A'}}
-            </a>
+             {{ selectedQuery?.name || 'N/A' }}
+            </p>
+
             <div class="right">
-                <button mat-icon-button (click)="navigate($event,'tree')" matTooltip="Arbre d'appels API">
-                    <mat-icon>lan</mat-icon>
+                <button mat-icon-button (click)="navigate($event,'parent')" matTooltip="Détail de l'appel parent">
+                    <mat-icon>move_up</mat-icon>
                 </button>
             </div>
-
         </mat-card-title>
+
         <mat-card-content>
-            <div *ngIf="selectedSession?.type=='api' || selectedSession?.type =='outcoming'">
+            <div>
                 <div class="ellipsis">
-                    <a class="url" [href]="getSessionUrl(selectedSession)" target="_blank">
-                        [{{selectedSession?.method}}]
-                        {{getSessionUrl(selectedSession)}}
-                    </a>
+                    <p class="url">
+                        {{selectedQuery?.location}}
+                    </p>
                 </div>
+
+                <!--<div>
+                    <mat-chip-set >
+                        <mat-chip *ngFor="let c of selectedQuery?.commands">
+                            {{c}}
+                        </mat-chip>
+                    </mat-chip-set>
+                </div>-->
 
                 <div class="ellipsis"
                     style="display: flex; gap: 0.5em; color: red; font-weight: 500; margin-top: 0.5em;"
-                    *ngIf="selectedSession?.exception?.classname || selectedSession?.exception?.message "
-                    [matTooltip]="selectedSession?.exception.classname" TooltipPosition="below">
-                    <mat-icon class="material-symbols-outlined">warning</mat-icon>{{selectedSession?.exception.message || selectedSession?.exception?.classname}} 
+                    *ngIf="!selectedQuery?.completed"
+                    [matTooltip]="selectedQuery?.exception?.classname" TooltipPosition="below">
+                    <mat-icon class="material-symbols-outlined">warning</mat-icon>{{getException(selectedQuery?.actions)?.exception?.message}} 
                 </div>
-            </div>
-
-            <div *ngIf="selectedSession?.type=='main'">
-                <span *ngIf="selectedSession.location">
-                    <a class="url" [href]="selectedSession?.location" target="_blank">
-                        {{selectedSession?.location}}
-                    </a>
-                </span>
             </div>
 
         </mat-card-content>
         <mat-card-footer>
             <mat-icon style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
             <div style="display: flex; align-items: center; gap: 0.5em">
-                <a  [style.pointer-events]="selectedSession?.user? 'auto' : 'none'"
-                    [routerLink]="'/dashboard/user/'+ selectedSession?.user"
-                    [queryParams]="{'env': env}" matTooltip="Statistique Utilisateur">
-                    {{selectedSession?.user || "N/A"}} 
-                </a>
-                le {{( selectedSession?.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
+                {{selectedQuery?.user || "N/A"}}  le {{( selectedQuery?.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
             </div>
             <div class="right">
-                {{selectedSession?.inDataSize || 0}}o
-                <mat-icon style="width: 20px; height: 20px; font-size: 20px;">swap_vert</mat-icon>
-                {{selectedSession?.outDataSize}}o en {{ getElapsedTime(selectedSession?.end, selectedSession?.start) |
-                number :'1.2-3'}}s
+                en {{ getElapsedTime(selectedQuery?.end, selectedQuery?.start) | number :'1.2-3'}}s 
             </div>
+            <span class="badge" [style.background-color]="UtilInstance.getStateColorBool(selectedQuery?.completed)">{{getSessionStatusTooltip(selectedQuery)}}</span> 
         </mat-card-footer>
     </mat-card>
-    <mat-card style="width: 40vw;">
+    <mat-card style="width: 40vw;" *ngIf="selectedQuery">
         <mat-card-title>
-            <a style="display: flex; align-items: center; gap: 0.5em"
-                [routerLink]="'/dashboard/app/'+ selectedSession?.application?.name"
-                [style.pointer-events]="selectedSession.launchMode =='WEBAPP' ? 'none' : 'all'"
-                [queryParams]="{'env': selectedSession?.application?.env}" matTooltip="Statistique Serveur">
-                <mat-icon>storage</mat-icon>
-                {{selectedSession?.application?.name}}
+            <a style="display: flex; align-items: center; gap: 0.5em">
+                <mat-icon class="material-symbols-outlined">Database</mat-icon>
+                {{selectedQuery?.database}}
             </a>
             <div style="height: 48px">
 
@@ -98,13 +81,13 @@
         </mat-card-content>
         <mat-card-footer>
             <div style="font-style: italic; font-size: 14px;">
-                {{selectedSession?.application?.address}} en {{selectedSession?.application?.env}}
+                {{selectedQuery?.host}} {{ ':'+ selectedQuery?.port || '' }}
             </div>
             <span style="margin-left: auto;">
-                {{selectedSession?.application?.os}}
+                {{selectedQuery?.databaseName}}
             </span>
             <span style="margin-left: auto;">
-                {{selectedSession?.application?.re}}
+                {{selectedQuery?.databaseVersion}}
             </span>
         </mat-card-footer>
     </mat-card>

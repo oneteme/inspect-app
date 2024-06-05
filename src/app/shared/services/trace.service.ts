@@ -31,7 +31,7 @@ export class TraceService {
     }
 
     getDbRequestById(id: number){
-        return this.http.get(`${localStorage.getItem('server')}/trace/db/${id}`);
+        return this.http.get(`${localStorage.getItem('server')}/trace/session/db/${id}`);
     }
 
     getSessionParentByChildId(id: string){

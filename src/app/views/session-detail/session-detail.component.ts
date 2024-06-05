@@ -105,7 +105,7 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
                 if (this.selectedSession) {
                     this.selectedSession.type = this.selectedSessionType;
 
-                    // Api request list 
+                    // Api request list
                     this.outcomingRequestList = this.selectedSession.requests;
                     this.outcomingRequestdataSource = new MatTableDataSource(this.outcomingRequestList);
                     setTimeout(() => { this.outcomingRequestdataSource.paginator = this.outcomingRequestPaginator });
@@ -123,7 +123,7 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
                         let isMatch = true;
                         for (let [key, value] of map.entries()) {
                             if (key == 'filter') {
-                                isMatch = isMatch && (value == '' || 
+                                isMatch = isMatch && (value == '' ||
                                     (data.host?.toLowerCase().includes(value) || data.method?.toLowerCase().includes(value) || data.query?.toLowerCase().includes(value) ||
                                     data.path?.toLowerCase().includes(value)));
                             } else if (key == 'status') {
@@ -138,7 +138,7 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
                     this.outcomingRequestdataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
                     setTimeout(() => { this.outcomingRequestdataSource.paginator.pageIndex = 0 });
 
-                    // DB request list 
+                    // DB request list
                     this.outcomingQueryList = this.selectedSession.queries
                     this.outcomingQuerydataSource = new MatTableDataSource(this.outcomingQueryList);
                     setTimeout(() => { this.outcomingQuerydataSource.paginator = this.outcomingQueryPaginator });
@@ -151,7 +151,7 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
 
                     this.groupQueriesBySchema();
 
-                    // Timeline 
+                    // Timeline
                     this.visjs();
 
                     // Check if parent exist
@@ -266,18 +266,19 @@ export class SessionDetailComponent implements AfterContentInit, OnDestroy {
             if (event.ctrlKey) {
                 this._router.open(`#/session/api/${row}`, '_blank',)
             } else {
-                this._router.navigate(['/session', 'api', row], { queryParams: { env: this.env } }); // TODO remove env FIX BUG  
+                this._router.navigate(['/session', 'api', row], { queryParams: { env: this.env } }); // TODO remove env FIX BUG
             }
         }
     }
 
-    selectedQuery(event: MouseEvent, queryId: any) { // TODO finish this 
-        if (queryId) {
-            if (event.ctrlKey) {
-                this._router.open(`#/session/${this.selectedSession.type}/${this.selectedSession.id}/db/${queryId}`, '_blank',)
-            } else {
-                this._router.navigate(['/session', this.selectedSession.type, this.selectedSession.id, 'db', queryId], {
-                    queryParams: { env: this.env }
+    selectedQuery(event: MouseEvent, queryId:any){ // TODO finish this 
+        if(queryId){
+            if( event.ctrlKey){
+                this._router.open(`#/session/${this.selectedSession.type}/${this.selectedSession.id}/db/${queryId}`,'_blank',)
+              }else {
+                console.log('/session', this.selectedSession.type, this.selectedSession.id, 'db', queryId)
+                  this._router.navigate(['/session', this.selectedSession.type, this.selectedSession.id, 'db', queryId],{
+                    queryParams:{env:this.env}
                 });
             }
         }

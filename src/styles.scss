@@ -104,14 +104,34 @@ mat-form-field.no-subscript {
   color:white;
   cursor: pointer;
 }
+
 .vis-item.bdd{
   background-color: #008080; //rgb(150, 205, 50);
   border-color: #002e2e;//rgb(150, 205, 50);
   color:white;
 }
 
+.vis-item.bdd-failed{
+  background-color: red; //rgb(150, 205, 50);
+  border-color: rgb(185, 40, 40);//rgb(150, 205, 50);
+  color:white;
+}
+
 .vis-custom-time { // makes markers not draggable 
   pointer-events: none;
+}
+
+.error{
+  color:red;
+}
+
+.badge {
+  color: white;
+  padding: 0px 10px;
+  text-align: center;
+  border-radius: 12px;
+  font-size: 0.8em;
+  gap: 0.5em
 }
 
 

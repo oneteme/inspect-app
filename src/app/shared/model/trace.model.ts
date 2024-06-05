@@ -79,6 +79,7 @@ export interface DatabaseAction{
     start:Date;
     end:Date; 
     exception:ExceptionInfo;
+    count:number;
 }
 
 export interface ExceptionInfo{
