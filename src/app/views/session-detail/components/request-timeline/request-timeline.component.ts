@@ -70,6 +70,7 @@ export class RequestTimelineComponent {
                 min: timeline_start,
                 max: timeline_end,
                 clickToUse: true,
+                selectable : false,
                 tooltip: {
                     followMouse: true
                 },

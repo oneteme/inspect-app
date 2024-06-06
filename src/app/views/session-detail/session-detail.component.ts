@@ -56,7 +56,7 @@ export class SessionDetailComponent implements OnDestroy {
                                 next: (data: { id: string, type: sessionType }) => {
                                     this.sessionParent = data;
                                 },
-                                error: err => console.log(err)
+                                error: err => {}
                             })
                         }
                     }
