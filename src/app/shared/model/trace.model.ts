@@ -11,7 +11,7 @@ export interface Request {
     stages: RunnableStage[];
 }
 
-export interface RestRequest extends Request {
+export interface RestRequest extends Request{
     method: string;
     protocol: string;
     host: string;

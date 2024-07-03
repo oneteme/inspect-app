@@ -14,7 +14,7 @@ import { EnvRouter } from '../session-detail/session-detail.component';
 import { application, makePeriod } from 'src/environments/environment';
 import { FilterConstants, FilterPreset, FilterMap } from '../constants';
 import { FilterService } from 'src/app/shared/services/filter.service';
-import { T } from '@angular/cdk/keycodes';
+import { InstanceMainSession, InstanceRestSession, RestSession } from 'src/app/shared/model/v3/trace.model';
 
 
 @Component({
@@ -24,8 +24,8 @@ import { T } from '@angular/cdk/keycodes';
 export class SessionApiComponent implements OnInit, OnDestroy {
   filterConstants = FilterConstants;
   nameDataList: any[];
-  displayedColumns: string[] = ['status', 'app_name', 'method/path', 'query', 'start', 'Durée', 'user'];
-  dataSource: MatTableDataSource<IncomingRequest> = new MatTableDataSource();
+  displayedColumns: string[] = ['status', 'app_name', 'method/path', 'query', 'start', 'durée', 'user'];
+  dataSource: MatTableDataSource<InstanceRestSession> = new MatTableDataSource();
   isLoading = true;
   serverNameIsLoading = true;
   subscriptions: Subscription[] = [];
@@ -41,7 +41,6 @@ export class SessionApiComponent implements OnInit, OnDestroy {
 
   params: Partial<{ env: string, start: Date, end: Date, serveurs: string[] }> = {};
   advancedParams: Partial<{ [key: string]: any }> ={}
-  advancedParamsChip: Partial<{ [key: string]: any }> ={}
   focusFieldName: any;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -66,7 +65,7 @@ export class SessionApiComponent implements OnInit, OnDestroy {
           }
 
           this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
-          this.subscriptions.push(this._statsService.getSessionApi( { 'column.distinct': 'app_name', 'order': 'app_name.asc' })
+          this.subscriptions.push(this._statsService.getInstance( { 'column.distinct': 'app_name', 'order': 'app_name.asc' })
             .pipe(finalize(()=> this.serverNameIsLoading = false))
             .subscribe({
               next: (appNames: { appName: string }[]) => {
@@ -121,8 +120,7 @@ export class SessionApiComponent implements OnInit, OnDestroy {
       'env': this.params.env,
       'appname': this.params.serveurs,
       'start': this.params.start.toISOString(),
-      'end': this.params.end.toISOString(),
-      'lazy': false
+      'end': this.params.end.toISOString()
     }; 
     if(this.advancedParams){
       Object.assign(params, this.advancedParams);
@@ -132,7 +130,7 @@ export class SessionApiComponent implements OnInit, OnDestroy {
     this.dataSource = new MatTableDataSource([]);
     this.subscriptions.push(this._traceService.getIncomingRequestByCriteria(params)
       .subscribe({
-        next: (d: IncomingRequest[]) => {
+        next: (d: InstanceRestSession[]) => {
           if (d) {
             this.dataSource = new MatTableDataSource(d);
             this.dataSource.paginator = this.paginator;
@@ -143,20 +141,20 @@ export class SessionApiComponent implements OnInit, OnDestroy {
               if (columnName == "name/port") return row["host"] + ":" + row["port"] as string;
               if (columnName == "method/path") return row['path'] as string;
               if (columnName == "start") return row['start'] as string;
-              if (columnName == "Durée") return (row["end"] - row["start"])
+              if (columnName == "durée") return (row["end"] - row["start"])
 
               var columnValue = row[columnName as keyof any] as string;
               return columnValue;
 
             }
-            this.dataSource.filterPredicate = (data: IncomingRequest, filter: string) => {
+            this.dataSource.filterPredicate = (data: InstanceRestSession, filter: string) => {
               var map: Map<string, any> = new Map(JSON.parse(filter));
               let isMatch = true;
               for (let [key, value] of map.entries()) {
                 if (key == 'filter') {
-                  isMatch = isMatch && (value == '' || (data.application.name?.toLowerCase().includes(value) ||
+                  isMatch = isMatch && (value == '' || (data.appName?.toLowerCase().includes(value) ||
                     data.method?.toLowerCase().includes(value) || data.query?.toLowerCase().includes(value) ||
-                    data.user?.toLowerCase().includes(value) || data.path?.toLowerCase().includes(value)));
+                    data.instanceUser?.toLowerCase().includes(value) || data.path?.toLowerCase().includes(value)));
                 } else if (key == 'status') {
                   const s = data.status.toString();
                   isMatch = isMatch && (!value.length || (value.some((status: any) => {

@@ -70,7 +70,7 @@
       <ng-container matColumnDef="app_name">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Serveur </th>
         <td mat-cell *matCellDef="let row">
-          <div [matTooltip]="row.application.re" matTooltipClass="mat-tooltip">{{row.application.name || ''}}</div>
+          {{row.appName || ''}}
         </td>
       </ng-container>
 
@@ -100,18 +100,18 @@
       </ng-container>
 
 
-      <ng-container matColumnDef="Durée">
+      <ng-container matColumnDef="durée">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Durée</th>
         <td mat-cell *matCellDef="let row">
           <div
             [matTooltip]="(row.start*1000| date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr') +' | '+ row.inDataSize +'ko ↑ \n '+ (row.end*1000 | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr')+' | '+ row?.outDataSize +'ko ↓' "
-            matTooltipClass="mat-tooltip">{{ getElapsedTime(row.end,row.start) | number :'1.2-3'}}s</div>
+            matTooltipClass="mat-tooltip">{{ getElapsedTime(row.end, row.start) | number :'1.2-3'}}s</div>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="user">
         <th mat-header-cell *matHeaderCellDef mat-sort-header> Client </th>
-        <td mat-cell *matCellDef="let row"> {{row.user || 'N/A'}} </td>
+        <td mat-cell *matCellDef="let row"> {{row.instanceUser || 'N/A'}} </td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns;sticky: true"></tr>

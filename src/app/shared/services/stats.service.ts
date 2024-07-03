@@ -21,4 +21,9 @@ export class StatsService {
         let url = `${localStorage.getItem('server')}/stat/mainsession`;
         return this.http.get(url, { params: params });
     }
+
+    getInstance(params: any) {
+        let url = `${localStorage.getItem('server')}/stat/instance`;
+        return this.http.get(url, { params: params });
+    }
 }

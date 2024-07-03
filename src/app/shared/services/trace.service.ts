@@ -1,11 +1,12 @@
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { catchError, throwError } from "rxjs";
+import { Observable, catchError, throwError } from "rxjs";
+import { RestSession } from "../model/v3/trace.model";
 
 @Injectable({ providedIn: 'root' })
 export class TraceService { 
-    readonly INCOMING_REQUEST_URL = `${localStorage.getItem('server')}/trace/session/api`;
-    readonly MAIN_REQUEST_URL = `${localStorage.getItem('server')}/trace/session/main`;
+    readonly INCOMING_REQUEST_URL = `${localStorage.getItem('server')}/v3/trace/session/api`;
+    readonly MAIN_REQUEST_URL = `${localStorage.getItem('server')}/v3/trace/session/main`;
 
     constructor(private http: HttpClient) {
     }

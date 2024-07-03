@@ -408,11 +408,11 @@ export class FilterConstants {
 
     static readonly SESSION_API: Filter[] = [
         { key: 'query', label: 'Query params', type: 'input', row: 2, col: 1, op: Operation.like },
-        { key: 'status', label: 'Status', type: 'select', row: 3, col: 1, options: [{ status: '200' }, { status: '201' }, { status: '202' }, { status: '400' }, { status: '401' }, { status: '403' }, { status: '404' }, { status: '405' }, { status: '409' }, { status: '415' }, { status: '500' }, { status: '503' }], op: Operation.like },
-        { key: 'method', label: 'Method', type: 'select', width: 20, row: 1, col: 1, options: [{ method: 'GET' }, { method: 'PUT' }, { method: 'POST' }, { method: 'DELETE' }, { method: 'OPTIONS' }], op: Operation.eq },
+        { key: 'status', label: 'Status', type: 'select', row: 3, col: 1, endpoint: "/stat/apisession", query: { 'column.distinct': 'status:status', 'order': 'status.asc' }, op: Operation.eq },
+        { key: 'method', label: 'Method', type: 'select', width: 20, row: 1, col: 1, endpoint: "/stat/apisession",  query: { 'column.distinct': 'method:method', 'order': 'method.asc' }, op: Operation.eq },
         { key: 'path', label: 'Path', type: 'input', row: 1, col: 2, op: Operation.like },
         { key: 'api_name', label: 'Nom API', type: 'select', row: 3, col: 2, endpoint: "/stat/apisession", query: { 'column.distinct': 'api_name.coalesce(null):api_name', 'api_name.not': 'null', 'order': 'api_name.coalesce(null).asc' }, op: Operation.eq  },
-        { key: 'user', label: 'Utilisateur', type: 'select', row: 3, col: 3, endpoint: "/stat/apisession", query: { 'column.distinct': 'user.coalesce(null)', 'user.not': 'null', 'order': 'user.coalesce(null).asc' }, op: Operation.eq  }
+        { key: 'user', label: 'Utilisateur', type: 'select', row: 3, col: 3, endpoint: "/stat/instance", query: { 'column.distinct': 'user.coalesce(null)', 'user.not': 'null', 'order': 'user.coalesce(null).asc' }, op: Operation.eq  }
         // new Filter("err_type", "Exception", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
         // new Filter("address", "adresse", 'input', 50),
         // new Filter("os", "OS", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),

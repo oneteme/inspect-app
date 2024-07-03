@@ -13,6 +13,7 @@ import { EnvRouter } from '../session-detail/session-detail.component';
 import { application, makePeriod } from 'src/environments/environment';
 import { FilterConstants, FilterMap, FilterPreset } from '../constants';
 import { FilterService } from 'src/app/shared/services/filter.service';
+import { InstanceMainSession } from 'src/app/shared/model/v3/trace.model';
 
 
 @Component({
@@ -22,9 +23,9 @@ import { FilterService } from 'src/app/shared/services/filter.service';
 export class SessionMainComponent implements OnInit, OnDestroy {
   filterConstants = FilterConstants;
   utils: Utils = new Utils();
-  displayedColumns: string[] = ['status', 'app_name', 'session', 'location', 'start', 'Durée', 'user'];
-  dataSource: MatTableDataSource<MainRequest> = new MatTableDataSource();
-  mainRequestList: MainRequest[];
+  displayedColumns: string[] = ['status', 'app_name', 'session', 'location', 'start', 'durée', 'user'];
+  dataSource: MatTableDataSource<InstanceMainSession> = new MatTableDataSource();
+  mainRequestList: InstanceMainSession[];
   serverFilterForm = new FormGroup({
     launchmode: new FormControl(""),
     dateRangePicker: new FormGroup({
@@ -88,7 +89,7 @@ export class SessionMainComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
     this.dataSource.data = [];
-    this.subscription = this._traceService.getMainRequestByCriteria(params).subscribe((d: MainRequest[]) => {
+    this.subscription = this._traceService.getMainRequestByCriteria(params).subscribe((d: InstanceMainSession[]) => {
       if (d) {
         this.dataSource = new MatTableDataSource(d);
         this.dataSource.paginator = this.paginator;
