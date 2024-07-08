@@ -3,6 +3,7 @@ import { Component, ElementRef, Input, OnInit, ViewChild, inject } from "@angula
 import { OutcomingQuery, OutcomingRequest, Request, RunnableStage } from "src/app/shared/model/trace.model";
 import { Timeline } from "vis-timeline";
 import { EnvRouter } from "../../session-detail.component";
+import { DatabaseRequest, LocalRequest, RestRequest } from "src/app/shared/model/v3/trace.model";
 
 @Component({
     selector: 'request-timeline-table',
@@ -21,9 +22,9 @@ export class RequestTimelineComponent {
         if (request) {
             let timeline_end = +request.end * 1000
             let timeline_start = +request.start * 1000
-            let dataArray: any = [...<OutcomingRequest[]>request.requests,
-            ...<OutcomingQuery[]>request.queries,
-            ...<RunnableStage[]>request.stages.map((s: any) => ({ ...s, isStage: true }))];
+            let dataArray: any = [...<RestRequest[]>request.requests,
+            ...<DatabaseRequest[]>request.queries,
+            ...<LocalRequest[]>request.stages.map((s: any) => ({ ...s, isStage: true }))];
             dataArray.splice(0, 0, { ...request, isStage: true })
             this.sortInnerArrayByDate(dataArray);
 
@@ -31,7 +32,7 @@ export class RequestTimelineComponent {
             let data: any;
             let groups: any;
             let isWebapp = false, title = '';
-            if (request.launchMode != null && request.launchMode === "WEBAPP") {
+            if (request.launchMode != null && request.launchMode === "VIEW") {
                 groups = [{ id: 0, content: request?.application?.re }];
                 title = 'path';
                 isWebapp = true;
@@ -88,7 +89,7 @@ export class RequestTimelineComponent {
             this.timeline.on('select', function (props: any) {
                 let id = props.items[0];
                 if (isNaN(+id)) {
-                    that._router.navigate(['/session', 'api', id]);
+                    that._router.navigate(['/session', 'rest', id]);
                 }
             });
 

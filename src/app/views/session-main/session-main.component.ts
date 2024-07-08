@@ -23,7 +23,7 @@ import { InstanceMainSession } from 'src/app/shared/model/v3/trace.model';
 export class SessionMainComponent implements OnInit, OnDestroy {
   filterConstants = FilterConstants;
   utils: Utils = new Utils();
-  displayedColumns: string[] = ['status', 'app_name', 'session', 'location', 'start', 'durée', 'user'];
+  displayedColumns: string[] = ['status', 'app_name', 'type', 'name', 'location', 'start', 'durée', 'user'];
   dataSource: MatTableDataSource<InstanceMainSession> = new MatTableDataSource();
   mainRequestList: InstanceMainSession[];
   serverFilterForm = new FormGroup({
@@ -96,7 +96,8 @@ export class SessionMainComponent implements OnInit, OnDestroy {
         this.dataSource.sort = this.sort
         this.dataSource.sortingDataAccessor = (row: any, columnName: string) => {
           if (columnName == "app_name") return row["application"]["name"] as string;
-          if (columnName == "session") return row["name"] as string;
+          if (columnName == "type") return row["type"] as string;
+          if (columnName == "name") return row["name"] as string;
           if (columnName == "location") return row['location'] as string;
           if (columnName == "start") return row['start'] as string;
           if (columnName == "Durée") return (row["end"] - row["start"])

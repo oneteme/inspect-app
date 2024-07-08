@@ -3,6 +3,7 @@ import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
 import { OutcomingRequest } from "src/app/shared/model/trace.model";
+import { RestRequest } from "src/app/shared/model/v3/trace.model";
 import { Utils } from "src/app/shared/util";
 
 @Component({
@@ -11,14 +12,14 @@ import { Utils } from "src/app/shared/util";
     styleUrls: ['./request-rest-table.component.scss']
 })
 export class RequestRestTableComponent implements OnInit {
-    displayedColumns: string[] = ['Status', 'host', 'path', 'start', 'duree'];
-    dataSource: MatTableDataSource<OutcomingRequest> = new MatTableDataSource();
+    displayedColumns: string[] = ['status', 'host', 'path', 'start', 'duree'];
+    dataSource: MatTableDataSource<RestRequest> = new MatTableDataSource();
     filterTable = new Map<string, any>();
 
     @ViewChild('paginator', {static: true}) paginator: MatPaginator;
     @ViewChild('sort', {static: true}) sort: MatSort;
 
-    @Input() set requests(requests: OutcomingRequest[]) {
+    @Input() set requests(requests: RestRequest[]) {
         if(requests) {
             this.dataSource = new MatTableDataSource(requests);
             this.dataSource.paginator = this.paginator;
@@ -67,7 +68,7 @@ const sortingDataAccessor = (row: any, columnName: string) => {
     return columnValue;
 }
 
-const filterPredicate = (data: OutcomingRequest, filter: string) => {
+const filterPredicate = (data: RestRequest, filter: string) => {
     var map: Map<string, any> = new Map(JSON.parse(filter));
     let isMatch = true;
     for (let [key, value] of map.entries()) {

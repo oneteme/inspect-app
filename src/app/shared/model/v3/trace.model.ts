@@ -16,20 +16,22 @@ export interface RestSession extends RestRequest {
     name: string;
     requests: Array<RestRequest>;
     queries: Array<DatabaseRequest>;
-    stages: Array<RunnableStage>;
+    stages: Array<LocalRequest>;
     ftpRequests: Array<FtpRequest>;
     mailRequests: Array<MailRequest>;
+    ldapRequests: Array<NamingRequest>;
     userAgent: string;
 }
 
-export interface MainSession extends RunnableStage {
+export interface MainSession extends LocalRequest {
     id: string;
     type: string;
     requests: Array<DatabaseRequest>;
     queries: Array<DatabaseRequest>;
-    stages: Array<RunnableStage>;
+    stages: Array<LocalRequest>;
     ftpRequests: Array<FtpRequest>;
     mailRequests: Array<MailRequest>;
+    ldapRequests: Array<NamingRequest>;
 }
 
 export interface RestRequest extends SessionStage {
@@ -50,18 +52,19 @@ export interface RestRequest extends SessionStage {
     outContentEncoding: string; 
 }
 
-export interface DatabaseRequest {
+export interface DatabaseRequest extends SessionStage {
     host: string;
     port: number;
-    database: string;
+    name: string;
+    schema: string;
     driverVersion: string;
-    databaseName: string;
-    databaseVersion: string;
+    productName: string;
+    productVersion: string;
     actions: Array<DatabaseRequestStage>;
     commands: Array<string>;
 }
 
-export interface FtpRequest {
+export interface FtpRequest extends SessionStage {
     protocol: string;
     host: string;
     port: number;
@@ -70,17 +73,24 @@ export interface FtpRequest {
     actions: Array<FtpRequestStage>;
 }
 
-export interface MailRequest {
+export interface MailRequest extends SessionStage {
     host: string;
     port: number;
     actions: Array<MailRequestStage>;
     mails: Array<Mail>;
 }
 
-export interface RunnableStage extends SessionStage {
+export interface LocalRequest extends SessionStage {
     name: string;
     location: string;
     exception: ExceptionInfo;
+}
+
+export interface NamingRequest extends SessionStage {
+    protocol: string;
+    host: string;
+    port: number;
+    actions: Array<NamingRequestStage>;
 }
 
 export interface DatabaseRequestStage extends RequestStage {
@@ -93,6 +103,10 @@ export interface FtpRequestStage extends RequestStage {
 
 export interface MailRequestStage extends RequestStage {
 
+}
+
+export interface NamingRequestStage extends RequestStage {
+    args: Array<string>;
 }
 
 export interface Mail {
@@ -118,7 +132,25 @@ export interface SessionStage {
     threadName: string;
 }
 
+export interface Session {
+    id: string;
+    
+}
+
 export interface ExceptionInfo {
     type: string;
     message: string;
+}
+
+export interface InstanceEnvironment {
+    name: string;
+    version: string;
+    address: string;
+    env: string;
+    os: string;
+    re: string;
+    user: string;
+    type: string;
+    instant: Date;
+    collector: string;
 }

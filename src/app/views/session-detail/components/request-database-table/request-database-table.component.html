@@ -2,7 +2,7 @@
     <table mat-table [dataSource]="dataSource" style="width:100%;" #sort="matSort" matSort
         matSortActive="date_debut" matSortDirection="desc">
 
-        <ng-container matColumnDef="Status">
+        <ng-container matColumnDef="search">
             <th mat-header-cell *matHeaderCellDef style="width:1%"></th>
             <td [ngStyle]="statusBorder(element.completed)" mat-cell *matCellDef="let element"
                 [matTooltip]="element.completed?'réussi':'échoué'" matTooltipPosition="before"

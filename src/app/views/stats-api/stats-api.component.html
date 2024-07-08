@@ -1,4 +1,4 @@
-<header-page titleIcon="dashboard" [ui-title]="name" [templateSubTitle]="subTitle">
+<header-page titleIcon="dashboard" [ui-title]="name">
     <form [formGroup]="serverFilterForm" class="header-filter md-2">
         <advanced-filter-recap [filters]="advancedParams" (filterRemoved)="handleRemovedFilter($event)" (focusField)="focusField($event)"></advanced-filter-recap> 
         <mat-form-field appearance="outline" class="no-subscript">
@@ -17,9 +17,9 @@
     </form>
 </header-page>
 
-<ng-template #subTitle>
-    <a [routerLink]="['/dashboard/app', requests.infos?.data[0]?.appName]">{{requests.infos?.data[0]?.appName}}</a>
-</ng-template>
+<!-- <ng-template #subTitle>
+    <a [routerLink]="['/dashboard/app', requests.appName?.data[0]?.appName]">{{requests.appName?.data[0]?.appName}}</a>
+</ng-template> -->
 
 <div style="display: flex; justify-content: space-between; gap: 1em; margin-bottom: 1em;">
     <chart class="mat-elevation-z5" style="width: 33%;" type="area"

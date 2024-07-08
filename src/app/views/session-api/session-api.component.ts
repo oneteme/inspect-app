@@ -192,9 +192,9 @@ export class SessionApiComponent implements OnInit, OnDestroy {
 
   selectedRequest(event: MouseEvent, row: any) {
     if (event.ctrlKey) {
-      this._router.open(`#/session/api/${row}`, '_blank')
+      this._router.open(`#/session/rest/${row}`, '_blank')
     } else {
-      this._router.navigate(['/session/api', row], {
+      this._router.navigate(['/session/rest', row], {
         queryParams: { 'env': this.params.env }
       });
     }

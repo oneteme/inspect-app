@@ -49,15 +49,23 @@
       </ng-container>
 
 
-      <ng-container matColumnDef="session">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:10%"> Session </th>
+      <ng-container matColumnDef="type">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:10%"> Type </th>
+        <td mat-cell *matCellDef="let row">
+          <div class="table-column-content">
+            {{row.type || 'N/A'}}
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="name">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:10%"> Nom </th>
         <td mat-cell *matCellDef="let row">
           <div class="table-column-content">
             {{row.name || 'N/A'}}
           </div>
         </td>
       </ng-container>
-
 
 
       <ng-container matColumnDef="location">

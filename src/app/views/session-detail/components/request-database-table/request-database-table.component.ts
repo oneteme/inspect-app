@@ -3,6 +3,7 @@ import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
 import { OutcomingQuery } from "src/app/shared/model/trace.model";
+import { DatabaseRequest } from "src/app/shared/model/v3/trace.model";
 import { Utils } from "src/app/shared/util";
 
 @Component({
@@ -11,13 +12,13 @@ import { Utils } from "src/app/shared/util";
     styleUrls: ['./request-database-table.component.scss']
 })
 export class RequestDatabaseTableComponent implements OnInit {
-    displayedColumns: string[] = ['Status', 'host', 'schema', 'start', 'duree'];
-    dataSource: MatTableDataSource<OutcomingQuery> = new MatTableDataSource();
+    displayedColumns: string[] = ['status', 'host', 'schema', 'start', 'duree'];
+    dataSource: MatTableDataSource<DatabaseRequest> = new MatTableDataSource();
 
     @ViewChild('paginator', {static: true}) paginator: MatPaginator;
     @ViewChild('sort', {static: true}) sort: MatSort;
 
-    @Input() set requests(requests: OutcomingQuery[]) {
+    @Input() set requests(requests: DatabaseRequest[]) {
         if(requests) {
             this.dataSource = new MatTableDataSource(requests);
             this.dataSource.paginator = this.paginator;

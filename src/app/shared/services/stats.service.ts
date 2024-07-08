@@ -12,18 +12,18 @@ export class StatsService {
         return this.http.get(url, { params: params });
     }
 
-    getSessionApi(params: any) {
-        let url = `${localStorage.getItem('server')}/stat/apisession`;
+    getSessionRest(params: any) {
+        let url = `${localStorage.getItem('server')}/jquery/session/rest`;
         return this.http.get(url, { params: params });
     }
 
     getSessionMain(params: any) {
-        let url = `${localStorage.getItem('server')}/stat/mainsession`;
+        let url = `${localStorage.getItem('server')}/jquery/session/main`;
         return this.http.get(url, { params: params });
     }
 
     getInstance(params: any) {
-        let url = `${localStorage.getItem('server')}/stat/instance`;
+        let url = `${localStorage.getItem('server')}/jquery/instance`;
         return this.http.get(url, { params: params });
     }
 }

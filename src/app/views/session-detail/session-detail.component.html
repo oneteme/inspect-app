@@ -5,13 +5,13 @@
             <mat-card-title>
                 <a style="display: flex; align-items: center; gap: 0.5em"
                     [routerLink]="'/dashboard/api/'+ selectedSession?.name"
-                    [queryParams]="{'env': selectedSession?.application?.env}"
-                    [style.pointer-events]="selectedSession?.launchMode =='WEBAPP' ? 'none' : 'all'"
+                    [queryParams]="{'env': instance?.env}"
+                    [style.pointer-events]="selectedSession?.type =='VIEW' ? 'none' : 'all'"
                     matTooltip="Statistique API">
                     <mat-icon>settings_suggest</mat-icon>
-                    {{selectedSessionType =='api' ? (selectedSession?.name|| 'N/A')
+                    {{selectedSessionType =='rest' ? (selectedSession?.name|| 'N/A')
                     : '['
-                    + selectedSession?.launchMode + '] ' + selectedSession?.name || 'N/A'}}
+                    + selectedSession?.type + '] ' + selectedSession?.name || 'N/A'}}
                 </a>
                 <div class="right">
                     <button mat-icon-button (click)="navigate($event,'parent')" matTooltip="Détail de l'appel parent"
@@ -25,7 +25,7 @@
 
             </mat-card-title>
             <mat-card-content>
-                <div *ngIf="selectedSessionType =='api'">
+                <div *ngIf="selectedSessionType =='rest'">
                     <div class="ellipsis">
                         <a class="url" [href]="getSessionUrl()" target="_blank">
                             [{{selectedSession?.method}}]
@@ -35,11 +35,11 @@
 
                     <div class="ellipsis"
                         style="display: flex; gap: 0.5em; color: red; font-weight: 500; margin-top: 0.5em;"
-                        *ngIf="selectedSession?.exception?.classname || selectedSession?.exception?.message "
-                        [matTooltip]="selectedSession?.exception?.classname" TooltipPosition="below">
+                        *ngIf="selectedSession?.exception?.type || selectedSession?.exception?.message "
+                        [matTooltip]="selectedSession?.exception?.type" TooltipPosition="below">
                         <mat-icon
                             class="material-symbols-outlined">warning</mat-icon>{{selectedSession?.exception?.message
-                        || selectedSession?.exception?.classname}}
+                        || selectedSession?.exception?.type}}
                     </div>
                 </div>
 
@@ -55,10 +55,10 @@
             <mat-card-footer>
                 <mat-icon style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
                 <div style="display: flex; align-items: center; gap: 0.5em">
-                    <a [style.pointer-events]="selectedSession?.user? 'auto' : 'none'"
-                        [routerLink]="'/dashboard/user/'+ selectedSession?.user" [queryParams]="{'env': env}"
+                    <a [style.pointer-events]="selectedSession?.instanceUser? 'auto' : 'none'"
+                        [routerLink]="'/dashboard/user/'+ instance?.user" [queryParams]="{'env': instance?.env}"
                         matTooltip="Statistique Utilisateur">
-                        {{selectedSession?.user || "N/A"}}
+                        {{instance?.user || "N/A"}}
                     </a>
                     le {{( selectedSession?.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
                 </div>
@@ -75,11 +75,11 @@
         <mat-card style="width: 40vw;">
             <mat-card-title>
                 <a style="display: flex; align-items: center; gap: 0.5em"
-                    [routerLink]="'/dashboard/app/'+ selectedSession?.application?.name"
-                    [style.pointer-events]="selectedSession?.launchMode =='WEBAPP' ? 'none' : 'all'"
-                    [queryParams]="{'env': selectedSession?.application?.env}" matTooltip="Statistique Serveur">
+                    [routerLink]="'/dashboard/app/'+ instance?.name"
+                    [style.pointer-events]="selectedSession?.type == 'VIEW' ? 'none' : 'all'"
+                    [queryParams]="{'env': instance?.env}" matTooltip="Statistique Serveur">
                     <mat-icon>storage</mat-icon>
-                    {{selectedSession?.application?.name}}
+                    {{instance?.name}}
                 </a>
                 <div style="height: 48px">
 
@@ -93,7 +93,7 @@
                     </div>
                     <div *ngIf="item.key != 'null'">
                         <a style="font-weight: 500; font-size: 14px;" [routerLink]="'/dashboard/database/'+ item.key"
-                            [queryParams]="{'env': selectedSession?.application?.env}"
+                            [queryParams]="{'env': instance?.env}"
                             matTooltip="Statistique Base de donnée">
                             {{ item.key }}
                         </a>
@@ -106,13 +106,13 @@
             </mat-card-content>
             <mat-card-footer>
                 <div style="font-style: italic; font-size: 14px;">
-                    {{selectedSession?.application?.address}} en {{selectedSession?.application?.env}}
+                    {{instance?.address}} en {{instance?.env}}
                 </div>
                 <span style="margin-left: auto;">
-                    {{selectedSession?.application?.os}}
+                    {{instance?.os}}
                 </span>
                 <span style="margin-left: auto;">
-                    {{selectedSession?.application?.re}}
+                    {{instance?.re}}
                 </span>
             </mat-card-footer>
         </mat-card>

@@ -1,12 +1,13 @@
 import { Component, Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
-import { Observable, combineLatest, finalize } from "rxjs";
+import { Observable, combineLatest, finalize, forkJoin, map, of, switchMap } from "rxjs";
 import { Utils } from 'src/app/shared/util';
 import { Location } from '@angular/common';
 import { TraceService } from 'src/app/shared/services/trace.service';
 import { application } from 'src/environments/environment';
+import { InstanceEnvironment, InstanceMainSession, InstanceRestSession } from 'src/app/shared/model/v3/trace.model';
 
-type sessionType = 'main' | 'api';
+type SessionType = 'main' | 'rest';
 
 @Component({
     templateUrl: './session-detail.component.html',
@@ -14,9 +15,10 @@ type sessionType = 'main' | 'api';
 
 })
 export class SessionDetailComponent implements OnDestroy {
-    selectedSession: any // IncomingRequest | Mainrequest | OutcomingRequest;
+    selectedSession: InstanceMainSession | InstanceRestSession; // IncomingRequest | Mainrequest | OutcomingRequest;
+    instance: InstanceEnvironment;
     selectedSessionType: string;
-    sessionParent: { id: string, type: sessionType };
+    sessionParent: { id: string, type: SessionType };
     isLoading: boolean = false;
     paramsSubscription: any;
     queryBySchema: any[];
@@ -42,18 +44,34 @@ export class SessionDetailComponent implements OnDestroy {
 
     getSessionById(id: string) {
         this.isLoading = true;
-        (this.selectedSessionType == "main" ? this._traceService.getMainRequestById(id) : this._traceService.getIncomingRequestById(id))
-            .pipe(finalize(() => this.isLoading = false)).subscribe({
-                next: (d: any) => {
-                    this.selectedSession = d;
+        var traceService = (this.selectedSessionType == "main" ? this._traceService.getMainRequestById(id) : this._traceService.getIncomingRequestById(id));
+        traceService
+            .pipe(
+                switchMap((s: InstanceRestSession | InstanceRestSession) => {
+                    return forkJoin({
+                        session: of(s), 
+                        instance: this._traceService.getInstance(s.instanceId),
+                        requests: this._traceService.getRestRequests(s.id),
+                        queries: this._traceService.getDatabaseRequests(s.id),
+                        stages: this._traceService.getLocalRequests(s.id)
+                    });
+                }), 
+                finalize(() => this.isLoading = false)
+            )
+            .subscribe({
+                next: (result) => {
+                    this.selectedSession = result.session;
+                    this.selectedSession.requests = result.requests;
+                    this.selectedSession.queries = result.queries;
+                    this.selectedSession.stages = result.stages;
+                    this.instance = result.instance;
                     if (this.selectedSession) {
                         this.groupQueriesBySchema();
-
                         // Check if parent exist
                         this.sessionParent = null;
-                        if (this.selectedSessionType == "api") {
+                        if (this.selectedSessionType == "rest") {
                             this._traceService.getSessionParentByChildId(id).subscribe({
-                                next: (data: { id: string, type: sessionType }) => {
+                                next: (data: { id: string, type: SessionType }) => {
                                     this.sessionParent = data;
                                 },
                                 error: err => {}
@@ -67,9 +85,9 @@ export class SessionDetailComponent implements OnDestroy {
     selectedRequest(event: { event: MouseEvent, row: any }) {
         if (event.row) {
             if (event.event.ctrlKey) {
-                this._router.open(`#/session/api/${event.row}`, '_blank',)
+                this._router.open(`#/session/rest/${event.row}`, '_blank',)
             } else {
-                this._router.navigate(['/session', 'api', event.row], { queryParams: { env: this.env } }); // TODO remove env FIX BUG
+                this._router.navigate(['/session', 'rest', event.row], { queryParams: { env: this.env } }); // TODO remove env FIX BUG
             }
         }
     }
@@ -80,14 +98,14 @@ export class SessionDetailComponent implements OnDestroy {
                 this._router.open(`#/session/${this.selectedSessionType}/${this.selectedSession.id}/db/${event.row}`, '_blank',)
             } else {
                 this._router.navigate(['/session', this.selectedSessionType, this.selectedSession.id, 'db', event.row], {
-                    queryParams: { env: this.env }
+                    queryParams: { env: this.instance.env }
                 });
             }
         }
     }
 
     getStateColor() {
-        return Utils.getStateColor(this.selectedSession?.status)
+        return Utils.getStateColor((<InstanceRestSession>this.selectedSession)?.status)
     }
     
     getElapsedTime(end: number, start: number,) {
@@ -95,29 +113,28 @@ export class SessionDetailComponent implements OnDestroy {
     }
 
     getSessionDetailBorder() {
-
-        if (this.selectedSessionType == "api")
-            return Utils.statusBorderCard(this.selectedSession.status)
+        if (this.selectedSessionType == "rest")
+            return Utils.statusBorderCard((<InstanceRestSession>this.selectedSession)?.status)
         if (this.selectedSessionType == "main")
-            return Utils.statusBorderCard(!!this.selectedSession?.exception?.message)
+            return Utils.statusBorderCard(!!(<InstanceMainSession>this.selectedSession)?.exception?.message)
 
     }
 
     groupQueriesBySchema() {
         if (this.selectedSession.queries) {
-            this.queryBySchema = this.selectedSession.queries.reduce((acc: any, item: any) => {
-                if (!acc[item['schema']]) {
-                    acc[item['schema']] = []
+            this.queryBySchema = this.selectedSession.queries.reduce((acc: any, item) => {
+                if (!acc[item.schema]) {
+                    acc[item.schema] = []
                 }
 
-                acc[item['schema']].push(item);
+                acc[item.schema].push(item);
                 return acc;
             }, []);
         }
     }
 
     getSessionUrl() {
-        return Utils.getSessionUrl(this.selectedSession);
+        return Utils.getSessionUrl(<InstanceRestSession>this.selectedSession);
     }
 
     navigate(event: MouseEvent, targetType: string, extraParam?: string) {
@@ -127,7 +144,7 @@ export class SessionDetailComponent implements OnDestroy {
                 params.push('dashboard', 'api', this.selectedSession.name);
                 break;
             case "app":
-                params.push('dashboard', 'app', this.selectedSession.application.name)
+                params.push('dashboard', 'app', this.selectedSession.appName)
                 break;
             case "tree":
                 params.push('session/api', this.selectedSession.id, 'tree')
@@ -139,7 +156,7 @@ export class SessionDetailComponent implements OnDestroy {
             this._router.open(`#/${params.join('/')}`, '_blank')
         } else {
             this._router.navigate(params, {
-                queryParams: { env: this.selectedSession?.application?.env }
+                queryParams: { env: this.instance.env }
             });
         }
     }

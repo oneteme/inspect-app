@@ -28,7 +28,7 @@ export class AppComponent implements OnInit {
     private _router: EnvRouter,
     private _service: StatsService) {
     this.isLoadingEnv = true;
-    this.subscriptions.push(this._service.getSessionApi({'column.distinct': 'environement', 'order': 'environement.asc'})
+    this.subscriptions.push(this._service.getInstance({'column.distinct': 'environement', 'order': 'environement.asc'})
       .pipe(finalize(() => this.isLoadingEnv = false))
       .subscribe({
         next: (res: {environement: string}[]) => {
