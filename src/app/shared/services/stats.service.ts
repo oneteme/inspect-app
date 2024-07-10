@@ -12,13 +12,23 @@ export class StatsService {
         return this.http.get(url, { params: params });
     }
 
-    getSessionRest(params: any) {
+    getRestSession(params: any) {
         let url = `${localStorage.getItem('server')}/jquery/session/rest`;
         return this.http.get(url, { params: params });
     }
 
-    getSessionMain(params: any) {
+    getMainSession(params: any) {
         let url = `${localStorage.getItem('server')}/jquery/session/main`;
+        return this.http.get(url, { params: params });
+    }
+
+    getDatabaseRequest(params: any) {
+        let url = `${localStorage.getItem('server')}/jquery/request/database`;
+        return this.http.get(url, { params: params });
+    }
+
+    getException(params: any) {
+        let url = `${localStorage.getItem('server')}/jquery/exception`;
         return this.http.get(url, { params: params });
     }
 

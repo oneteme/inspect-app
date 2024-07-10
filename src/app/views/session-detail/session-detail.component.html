@@ -9,7 +9,7 @@
                     [style.pointer-events]="selectedSession?.type =='VIEW' ? 'none' : 'all'"
                     matTooltip="Statistique API">
                     <mat-icon>settings_suggest</mat-icon>
-                    {{selectedSessionType =='rest' ? (selectedSession?.name|| 'N/A')
+                    {{selectedSessionType =='api' ? (selectedSession?.name|| 'N/A')
                     : '['
                     + selectedSession?.type + '] ' + selectedSession?.name || 'N/A'}}
                 </a>
@@ -25,7 +25,7 @@
 
             </mat-card-title>
             <mat-card-content>
-                <div *ngIf="selectedSessionType =='rest'">
+                <div *ngIf="selectedSessionType =='api'">
                     <div class="ellipsis">
                         <a class="url" [href]="getSessionUrl()" target="_blank">
                             [{{selectedSession?.method}}]

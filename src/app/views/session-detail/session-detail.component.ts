@@ -69,7 +69,7 @@ export class SessionDetailComponent implements OnDestroy {
                         this.groupQueriesBySchema();
                         // Check if parent exist
                         this.sessionParent = null;
-                        if (this.selectedSessionType == "rest") {
+                        if (this.selectedSessionType == "api") {
                             this._traceService.getSessionParentByChildId(id).subscribe({
                                 next: (data: { id: string, type: SessionType }) => {
                                     this.sessionParent = data;
@@ -85,9 +85,9 @@ export class SessionDetailComponent implements OnDestroy {
     selectedRequest(event: { event: MouseEvent, row: any }) {
         if (event.row) {
             if (event.event.ctrlKey) {
-                this._router.open(`#/session/rest/${event.row}`, '_blank',)
+                this._router.open(`#/session/api/${event.row}`, '_blank',)
             } else {
-                this._router.navigate(['/session', 'rest', event.row], { queryParams: { env: this.env } }); // TODO remove env FIX BUG
+                this._router.navigate(['/session', 'api', event.row], { queryParams: { env: this.env } }); // TODO remove env FIX BUG
             }
         }
     }
@@ -113,7 +113,7 @@ export class SessionDetailComponent implements OnDestroy {
     }
 
     getSessionDetailBorder() {
-        if (this.selectedSessionType == "rest")
+        if (this.selectedSessionType == "api")
             return Utils.statusBorderCard((<InstanceRestSession>this.selectedSession)?.status)
         if (this.selectedSessionType == "main")
             return Utils.statusBorderCard(!!(<InstanceMainSession>this.selectedSession)?.exception?.message)

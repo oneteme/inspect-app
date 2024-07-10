@@ -30,14 +30,14 @@ const routes: Route[] = [
   {
     path: 'session', children: [
       {
-        path: 'rest',
+        path: 'api',
         component: SessionApiComponent,
         title: 'Liste des API'
       },
       {
-        path: 'rest/:id/tree',
+        path: ':type/:id/tree',
         component: TreeComponent,
-        title: 'Arbre d\'appels API'
+        title: 'Arbre d\'appels de la Session'
       },
       {
         path: 'main',
@@ -59,7 +59,7 @@ const routes: Route[] = [
           return 'Detail de l\'API';
         },
       },
-      { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
+      { path: '**', pathMatch: 'full', redirectTo: `/session/api` }
     ]
   },
   {
