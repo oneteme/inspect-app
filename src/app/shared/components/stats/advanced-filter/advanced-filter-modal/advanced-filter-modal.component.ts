@@ -5,7 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { Filter, FilterMap, FilterPreset } from "src/app/views/constants";
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { Subscription, catchError, finalize, of } from "rxjs";
-import { StatsService } from "src/app/shared/services/stats.service";
+import { JQueryService } from "src/app/shared/services/jquery.service";
 import { MatAutocompleteSelectedEvent } from "@angular/material/autocomplete";
 import { FilterService } from "src/app/shared/services/filter.service";
 
@@ -18,7 +18,7 @@ import { FilterService } from "src/app/shared/services/filter.service";
 export class AdvancedFilterComponent implements OnInit, AfterContentChecked, OnDestroy {
 
     private _fb = inject(FormBuilder);
-    private _statsService = inject(StatsService);
+    private _statsService = inject(JQueryService);
     private _ref = inject(ChangeDetectorRef);
     private _filter = inject(FilterService);
 
@@ -122,7 +122,7 @@ export class AdvancedFilterComponent implements OnInit, AfterContentChecked, OnD
 
     getSelectData(field: Filter) {
         field.isLoading = true;
-        this.subscriptions.push(this._statsService.getSessionByEndpoint(field.endpoint, field.query) // url 
+        this.subscriptions.push(this._statsService.getJqueryData(field.endpoint, field.query) // url 
             .pipe(finalize(() => { field.isLoading = false; }))
             .pipe(
                 catchError(error => {

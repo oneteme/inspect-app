@@ -3,7 +3,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import {  Observable, Subscription, catchError, combineLatest, finalize, map, of } from 'rxjs';
 import { DatePipe, Location } from '@angular/common';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { StatsService } from 'src/app/shared/services/stats.service';
+import { JQueryService } from 'src/app/shared/services/jquery.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { Constants } from '../constants';
 import { application, makePeriod } from 'src/environments/environment';
@@ -18,7 +18,7 @@ export class StatsDatabaseComponent implements OnInit {
   private _activatedRoute = inject(ActivatedRoute);
   private _router = inject(Router);
   private _datePipe = inject(DatePipe);
-  private _statsService = inject(StatsService);
+  private _statsService = inject(JQueryService);
   private _location = inject(Location);
 
   constants = Constants;

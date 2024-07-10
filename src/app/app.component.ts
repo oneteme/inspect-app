@@ -5,7 +5,7 @@ import { Subscription, distinctUntilChanged, filter, finalize, skip } from 'rxjs
 import { application, environment } from 'src/environments/environment';
 import { EnvRouter } from './views/session-detail/session-detail.component';
 import { MatDrawer } from '@angular/material/sidenav';
-import { StatsService } from './shared/services/stats.service';
+import { JQueryService } from './shared/services/jquery.service';
 import { FilterService } from './shared/services/filter.service';
 
 
@@ -26,7 +26,7 @@ export class AppComponent implements OnInit {
   constructor(
     private _activatedRoute: ActivatedRoute,
     private _router: EnvRouter,
-    private _service: StatsService) {
+    private _service: JQueryService) {
     this.isLoadingEnv = true;
     this.subscriptions.push(this._service.getInstance({'column.distinct': 'environement', 'order': 'environement.asc'})
       .pipe(finalize(() => this.isLoadingEnv = false))

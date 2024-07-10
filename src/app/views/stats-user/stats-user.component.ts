@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, inject } from "@angular/core";
 import { EnvRouter } from "../session-detail/session-detail.component";
-import { StatsService } from "src/app/shared/services/stats.service";
+import { JQueryService } from "src/app/shared/services/jquery.service";
 import { ActivatedRoute, Params } from "@angular/router";
 import { DatePipe, Location } from '@angular/common';
 import { FormControl, FormGroup, Validators } from "@angular/forms";
@@ -19,7 +19,7 @@ export class StatsUserComponent implements OnInit, OnDestroy {
     filterConstants = FilterConstants;
 
     private _activatedRoute = inject(ActivatedRoute);
-    private _statsService = inject(StatsService);
+    private _statsService = inject(JQueryService);
     private _router = inject(EnvRouter);
     private _location = inject(Location);
     private _datePipe = inject(DatePipe);

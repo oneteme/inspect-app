@@ -8,7 +8,7 @@ import { ActivatedRoute, Params } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription, finalize } from 'rxjs';
 import { IncomingRequest } from 'src/app/shared/model/trace.model';
 import { Utils } from 'src/app/shared/util';
-import { StatsService } from 'src/app/shared/services/stats.service';
+import { JQueryService } from 'src/app/shared/services/jquery.service';
 import { TraceService } from 'src/app/shared/services/trace.service';
 import { EnvRouter } from '../session-detail/session-detail.component';
 import { application, makePeriod } from 'src/environments/environment';
@@ -47,7 +47,7 @@ export class SessionApiComponent implements OnInit, OnDestroy {
   @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   constructor(private _router: EnvRouter,
-    private _statsService: StatsService,
+    private _statsService: JQueryService,
     private _traceService: TraceService,
     private _activatedRoute: ActivatedRoute,
     private _location: Location,
