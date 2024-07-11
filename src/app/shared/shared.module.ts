@@ -7,6 +7,8 @@ import { AdvancedFilterTriggerComponent } from './components/stats/advanced-filt
 import { AdvancedFilterRecapComponent } from './components/stats/advanced-filter/advanced-filter-recap/advanced-filter-recap.component';
 import { AdvancedFilterComponent } from './components/stats/advanced-filter/advanced-filter-modal/advanced-filter-modal.component';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { DurationPipe } from './pipe/duration.pipe';
+import { SizePipe } from './pipe/size.pipe';
 
 @NgModule({
   imports: [
@@ -20,13 +22,17 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     AdvancedFilterComponent,
     AdvancedFilterRecapComponent,
     AdvancedFilterTriggerComponent,
-    FilterRowPipe
+    FilterRowPipe,
+    DurationPipe,
+    SizePipe
   ],
   exports: [
     HeaderPageComponent,
     AdvancedFilterComponent,
     AdvancedFilterRecapComponent,
     AdvancedFilterTriggerComponent,
+    DurationPipe,
+    SizePipe
   ]
 })
 export class SharedModule { }
