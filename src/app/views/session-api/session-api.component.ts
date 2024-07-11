@@ -6,7 +6,6 @@ import { MatTableDataSource } from '@angular/material/table';
 import { Location } from '@angular/common';
 import { ActivatedRoute, Params } from '@angular/router';
 import { BehaviorSubject, Observable, Subscription, finalize } from 'rxjs';
-import { IncomingRequest } from 'src/app/shared/model/trace.model';
 import { Utils } from 'src/app/shared/util';
 import { JQueryService } from 'src/app/shared/services/jquery.service';
 import { TraceService } from 'src/app/shared/services/trace.service';
@@ -128,7 +127,7 @@ export class SessionApiComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
     this.dataSource = new MatTableDataSource([]);
-    this.subscriptions.push(this._traceService.getIncomingRequestByCriteria(params)
+    this.subscriptions.push(this._traceService.getRestSessions(params)
       .subscribe({
         next: (d: InstanceRestSession[]) => {
           if (d) {

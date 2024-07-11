@@ -2,7 +2,6 @@ import { Component, EventEmitter, Input, OnInit, Output, ViewChild, inject } fro
 import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
-import { OutcomingRequest } from "src/app/shared/model/trace.model";
 import { RestRequest } from "src/app/shared/model/v3/trace.model";
 import { Utils } from "src/app/shared/util";
 

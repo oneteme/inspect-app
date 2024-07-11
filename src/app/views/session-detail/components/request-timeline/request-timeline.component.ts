@@ -1,6 +1,5 @@
 import { DatePipe } from "@angular/common";
 import { Component, ElementRef, Input, OnInit, ViewChild, inject } from "@angular/core";
-import { OutcomingQuery, OutcomingRequest, Request, RunnableStage } from "src/app/shared/model/trace.model";
 import { Timeline } from "vis-timeline";
 import { EnvRouter } from "../../session-detail.component";
 import { DatabaseRequest, LocalRequest, RestRequest } from "src/app/shared/model/v3/trace.model";

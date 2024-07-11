@@ -45,7 +45,7 @@ const routes: Route[] = [
         title: 'Liste des Sessions'
       },
       {
-        path: ':type/:id/db/:dbid', 
+        path: ':type/:id/database/:dbid', 
         component: DbRequestDetailComponent,
         title: 'Detail de la requête SQL'
       },

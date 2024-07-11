@@ -62,6 +62,9 @@ export interface DatabaseRequest extends SessionStage {
     productVersion: string;
     actions: Array<DatabaseRequestStage>;
     commands: Array<string>;
+    
+    idRequest: number;
+    completed: boolean;
 }
 
 export interface FtpRequest extends SessionStage {
@@ -94,7 +97,7 @@ export interface NamingRequest extends SessionStage {
 }
 
 export interface DatabaseRequestStage extends RequestStage {
-    count: Array<number>;
+    count?: Array<number>;
 }
 
 export interface FtpRequestStage extends RequestStage {

@@ -2,7 +2,6 @@ import { Component, EventEmitter, Input, OnInit, Output, ViewChild } from "@angu
 import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
 import { MatTableDataSource } from "@angular/material/table";
-import { OutcomingQuery } from "src/app/shared/model/trace.model";
 import { DatabaseRequest } from "src/app/shared/model/v3/trace.model";
 import { Utils } from "src/app/shared/util";
 
@@ -45,7 +44,7 @@ export class RequestDatabaseTableComponent implements OnInit {
         return command;
     }
 
-    selectedQuery(event: MouseEvent, row: any) {
+    selectedQuery(event: MouseEvent, row: number) {
         this.onClickRow.emit({event: event, row: row});
     }
 

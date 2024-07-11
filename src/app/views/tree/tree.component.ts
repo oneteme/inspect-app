@@ -53,7 +53,7 @@ export class TreeComponent implements OnDestroy {
         this.env = v.queryParams.env || application.default_env;
         this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}`)
         this.isLoading = true;
-        this._traceService.getTreeRequestById(this.id).pipe(finalize(() => this.isLoading = false)).subscribe(d => {
+        this._traceService.getTreeRequest(this.id).pipe(finalize(() => this.isLoading = false)).subscribe(d => {
 
           this.exchange = {};
           this.exchange['remoteTrace'] = d;

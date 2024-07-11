@@ -6,7 +6,6 @@ import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 import { BehaviorSubject, Subscription } from 'rxjs';
 import { Location } from '@angular/common';
-import { MainRequest } from 'src/app/shared/model/trace.model';
 import { Utils } from 'src/app/shared/util';
 import { TraceService } from 'src/app/shared/services/trace.service';
 import { EnvRouter } from '../session-detail/session-detail.component';
@@ -89,7 +88,7 @@ export class SessionMainComponent implements OnInit, OnDestroy {
 
     this.isLoading = true;
     this.dataSource.data = [];
-    this.subscription = this._traceService.getMainRequestByCriteria(params).subscribe((d: InstanceMainSession[]) => {
+    this.subscription = this._traceService.getMainSessions(params).subscribe((d: InstanceMainSession[]) => {
       if (d) {
         this.dataSource = new MatTableDataSource(d);
         this.dataSource.paginator = this.paginator;

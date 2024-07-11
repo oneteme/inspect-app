@@ -6,7 +6,7 @@
                 <a style="display: flex; align-items: center; gap: 0.5em"
                     [routerLink]="'/dashboard/api/'+ selectedSession?.name"
                     [queryParams]="{'env': instance?.env}"
-                    [style.pointer-events]="selectedSession?.type =='VIEW' ? 'none' : 'all'"
+                    [style.pointer-events]="selectedSession?.type == 'VIEW' || selectedSession?.type == 'STARTUP' ? 'none' : 'all'"
                     matTooltip="Statistique API">
                     <mat-icon>settings_suggest</mat-icon>
                     {{selectedSessionType =='api' ? (selectedSession?.name|| 'N/A')
@@ -97,8 +97,8 @@
                             matTooltip="Statistique Base de donnée">
                             {{ item.key }}
                         </a>
-                        <div style="font-style: italic; font-size: 12px;">{{ item.value[0].databaseName }} v.{{
-                            item.value[0].databaseVersion}}</div>
+                        <div style="font-style: italic; font-size: 12px;">{{ item.value[0].productName }} v.{{
+                            item.value[0].productVersion}}</div>
                     </div>
                 </div>
 

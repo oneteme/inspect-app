@@ -44,10 +44,10 @@ export class SessionDetailComponent implements OnDestroy {
 
     getSessionById(id: string) {
         this.isLoading = true;
-        var traceService = (this.selectedSessionType == "main" ? this._traceService.getMainRequestById(id) : this._traceService.getIncomingRequestById(id));
+        var traceService = (this.selectedSessionType == "main" ? this._traceService.getMainSession(id) : this._traceService.getRestSession(id));
         traceService
             .pipe(
-                switchMap((s: InstanceRestSession | InstanceRestSession) => {
+                switchMap((s: InstanceMainSession | InstanceRestSession) => {
                     return forkJoin({
                         session: of(s), 
                         instance: this._traceService.getInstance(s.instanceId),
@@ -93,11 +93,12 @@ export class SessionDetailComponent implements OnDestroy {
     }
 
     selectedQuery(event: { event: MouseEvent, row: any }) { // TODO finish this 
+        console.log(event);
         if (event.row) {
             if (event.event.ctrlKey) {
-                this._router.open(`#/session/${this.selectedSessionType}/${this.selectedSession.id}/db/${event.row}`, '_blank',)
+                this._router.open(`#/session/${this.selectedSessionType}/${this.selectedSession.id}/database/${event.row}`, '_blank',)
             } else {
-                this._router.navigate(['/session', this.selectedSessionType, this.selectedSession.id, 'db', event.row], {
+                this._router.navigate(['/session', this.selectedSessionType, this.selectedSession.id, 'database', event.row], {
                     queryParams: { env: this.instance.env }
                 });
             }
@@ -123,11 +124,11 @@ export class SessionDetailComponent implements OnDestroy {
     groupQueriesBySchema() {
         if (this.selectedSession.queries) {
             this.queryBySchema = this.selectedSession.queries.reduce((acc: any, item) => {
-                if (!acc[item.schema]) {
-                    acc[item.schema] = []
+                if (!acc[item.name]) {
+                    acc[item.name] = []
                 }
 
-                acc[item.schema].push(item);
+                acc[item.name].push(item);
                 return acc;
             }, []);
         }

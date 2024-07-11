@@ -1,7 +1,7 @@
 import { HttpClient, HttpErrorResponse } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { Observable, catchError, throwError } from "rxjs";
-import { DatabaseRequest, InstanceEnvironment, InstanceRestSession, LocalRequest, RestRequest, RestSession } from "../model/v3/trace.model";
+import { DatabaseRequest, DatabaseRequestStage, InstanceEnvironment, InstanceMainSession, InstanceRestSession, LocalRequest, RestRequest, RestSession } from "../model/v3/trace.model";
 
 @Injectable({ providedIn: 'root' })
 export class TraceService { 
@@ -11,32 +11,28 @@ export class TraceService {
     constructor(private http: HttpClient) {
     }
 
-    getIncomingRequestByCriteria(params: any) {
-        return this.http.get(this.INCOMING_REQUEST_URL, { params: params });
+    getRestSessions(params: any): Observable<Array<InstanceRestSession>> {
+        return this.http.get<Array<InstanceRestSession>>(`${localStorage.getItem('server')}/v3/trace/session/rest`, { params: params });
     }
 
-    getIncomingRequestById(id: string) {
-        return this.http.get(`${this.INCOMING_REQUEST_URL}/${id}`);
+    getRestSession(id: string) {
+        return this.http.get(`${localStorage.getItem('server')}/v3/trace/session/rest/${id}`);
     }
 
-    getMainRequestByCriteria(params: any) {
-        return this.http.get(this.MAIN_REQUEST_URL, { params: params });
+    getMainSessions(params: any): Observable<Array<InstanceMainSession>> {
+        return this.http.get<Array<InstanceMainSession>>(`${localStorage.getItem('server')}/v3/trace/session/main`, { params: params });
     }
 
-    getMainRequestById(id: string) {
-        return this.http.get(`${this.MAIN_REQUEST_URL}/${id}`);
+    getMainSession(id: string) {
+        return this.http.get(`${localStorage.getItem('server')}/v3/trace/session/main/${id}`);
     }
 
-    getTreeRequestById(id: string) {
-        return this.http.get(`${this.INCOMING_REQUEST_URL}/${id}/tree`);
+    getTreeRequest(id: string) {
+        return this.http.get(`${localStorage.getItem('server')}/v3/trace/session/rest/${id}/tree`);
     }
 
-    getTreeMainById(id: string) {
-        return this.http.get(`${this.MAIN_REQUEST_URL}/${id}/tree`);
-    }
-    
-    getDbRequestById(id: number){
-        return this.http.get(`${localStorage.getItem('server')}/trace/session/db/${id}`);
+    getTreeMain(id: string) {
+        return this.http.get(`${localStorage.getItem('server')}/v3/trace/session/main/${id}/tree`);
     }
 
     getSessionParentByChildId(id: string){
@@ -47,9 +43,17 @@ export class TraceService {
         return this.http.get<Array<RestRequest>>(`${localStorage.getItem('server')}/v3/trace/session/${id}/request/rest`);
     }
 
-    getDatabaseRequests(id: string): Observable<Array<DatabaseRequest>> {
-        return this.http.get<Array<DatabaseRequest>>(`${localStorage.getItem('server')}/v3/trace/session/${id}/request/database`);
+    getDatabaseRequests(idSession: string): Observable<Array<DatabaseRequest>>;
+    getDatabaseRequests(idSession: string, idDatabase: number): Observable<DatabaseRequest>;
+    getDatabaseRequests<T>(idSession: string, idDatabase?: number): Observable<T> {
+        if(idDatabase)         
+            return this.http.get<T>(`${localStorage.getItem('server')}/v3/trace/session/${idSession}/request/database/${idDatabase}`);
+        return this.http.get<T>(`${localStorage.getItem('server')}/v3/trace/session/${idSession}/request/database`);
     }
+
+    getDatabaseRequestStages(idSession: string, idDatabase: number): Observable<Array<DatabaseRequestStage>> {
+        return this.http.get<Array<DatabaseRequestStage>>(`${localStorage.getItem('server')}/v3/trace/session/${idSession}/request/database/${idDatabase}/stage`);
+    };
 
     getLocalRequests(id: string): Observable<Array<LocalRequest>> {
         return this.http.get<Array<LocalRequest>>(`${localStorage.getItem('server')}/v3/trace/session/${id}/request/local`);
