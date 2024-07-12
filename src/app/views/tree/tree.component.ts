@@ -116,10 +116,9 @@ export class TreeComponent implements OnDestroy {
           this.graph.getLabel = function (cell: any) {
             if (cell?.isVertex() && cell.value && typeof cell.value === 'object') {
               if (cell.value.hasOwnProperty('data')) {
-                return cell.value.data[0].remoteTrace.application.name;
+                return cell.value.data[0].remoteTrace.appName; //
               }
-
-              return cell.value.remoteTrace.application.name;
+              return cell.value.remoteTrace.appName;
             }
             return mx.mxGraph.prototype.getLabel.apply(this, arguments);
           }
@@ -162,7 +161,7 @@ export class TreeComponent implements OnDestroy {
 
 
 
-          // listners 
+          // listners
 
           this.graph.addListener(mx.mxEvent.DOUBLE_CLICK, function (sender: any, evt: any) {
 
@@ -182,24 +181,24 @@ export class TreeComponent implements OnDestroy {
                 cellCopy.data.forEach((s: any) => {
 
 
-                  if (!cell.target.value.data[0].hasOwnProperty('schema')) {
+                  if (!cell.target.value.data[0].hasOwnProperty('name')) {
 
-                    s.remoteTrace.requests = s.remoteTrace.requests.filter((r: any) => { if (r) return (r?.remoteTrace?.application?.name == cell.target.value.data[0].remoteTrace.application.name || r?.remoteTrace?.name == cell.target.value.data[0].remoteTrace.name) })
-                    s.remoteTrace.queries = []
+                    s.remoteTrace.restRequests = s.remoteTrace.restRequests.filter((r: any) => { if (r) return (r?.remoteTrace?.application?.name == cell.target.value.data[0].appName || r?.remoteTrace?.name == cell.target.value.data[0].remoteTrace.name) })
+                    s.remoteTrace.databaseRequests = []
                   } else {
                     // to be changed
-                    if (s.remoteTrace.queries.length >= 1) {
-                      s.remoteTrace.queries = cell.target.value.data
+                    if (s.remoteTrace.databaseRequests.length >= 1) {
+                      s.remoteTrace.databaseRequests = cell.target.value.data
                     } else {
-                      s.remoteTrace.queries = [];
+                      s.remoteTrace.databaseRequests = [];
                     }
-                    s.remoteTrace.requests = []
+                    s.remoteTrace.restRequests = []
                   }
 
-                  if ((s.remoteTrace.queries.length >= 1 || s.remoteTrace.requests.length >= 1)) {
-                    s.remoteTrace.application.oldName = s.remoteTrace.application.name;
-                    s.remoteTrace.application.name = s.remoteTrace.name;
-                    if (s.remoteTrace["@type"] == "api")
+                  if ((s.remoteTrace.databaseRequests.length >= 1 || s.remoteTrace.restRequests.length >= 1)) {
+                    s.remoteTrace.oldName = s.remoteTrace.appName;
+                    s.remoteTrace.appName = s.remoteTrace.name;
+                    if (s.remoteTrace["@type"] == "rest")
                       s.remoteTrace["@type"] = "endpoint"
                     self.selectedExchange = cellCopy
                     self.setnode(s, null, self.detailed)
@@ -246,7 +245,7 @@ export class TreeComponent implements OnDestroy {
                  }
                  // console.log(cellState.cell)
                }
-  
+
              } else {
                //   this.selectedExchange = undefined;
              }*/
@@ -272,6 +271,7 @@ export class TreeComponent implements OnDestroy {
               }
               else
                 value = cell.target.value
+
               switch (value.remoteTrace['@type']) {
                 case 'main':
                   break;
@@ -279,16 +279,16 @@ export class TreeComponent implements OnDestroy {
                 case 'db':
                   modal += `<span style="color:${Utils.getStateColorBool(value.completed)}">●</span> <span>${value.completed ? "réussi" : "échoué"}</span><br>`
                   modal += `<b>Thread :</b> ${value.threadName || 'N/A'}<br>`
-                  modal += `<b>Schema :</b> ${value.schema || 'N/A'}<br>`
+                  modal += `<b>name :</b> ${value.name || 'N/A'}<br>`
                   modal += `<b>Hôte   :</b> ${value.host || 'N/A'}<br>`
                   /*value.actions.forEach((action: any) => {
                     if (action.exception) {
                       modal += `<span style="color:red">${action.exception.classname || ''} ${action.exception.message || ''}</span>`
                     }
-                  });*/  // removed this since we dont get the actions from the back 
+                  });*/  // removed this since we dont get the actions from the back
                   break;
 
-                case 'api':
+                case 'rest':
                   modal += `<span style="color:${Utils.getStateColor(value.remoteTrace.status)}">●</span> <span>${value.remoteTrace.status}&nbsp;&nbsp;&nbsp;&nbsp; <span style="float:right">${value.remoteTrace.path}</span></span><br>`
                   modal += `<b>Thread :</b> ${value.threadName || 'N/A'}<br>`
                   modal += `<b>Latence:</b> ${Utils.getElapsedTime(value.remoteTrace?.start, value.start)}s<br>`;
@@ -339,10 +339,9 @@ export class TreeComponent implements OnDestroy {
 
       let edgeLabel = '', edgeStyle = '', vertexStyle = '', bdd: any, req;
       //setting querries nodes
-      if (ex.remoteTrace.queries) {
+      if (ex.remoteTrace.databaseRequests) {
         if (detailed) {
-
-          ex.remoteTrace.queries.forEach((q: any, i: any) => {
+          ex.remoteTrace.databaseRequests.forEach((q: any, i: any) => {
             vertexIcon = this.getVertexIconType(q)
             bdd = this.graph.insertVertex(this.parent, null, { data: [q] }, 0, 0, 80, 30, "shape=image;image=assets/mxgraph/" + vertexIcon + ".drawio.svg;");
             edgeStyle = this.checkQueryStatus(q.completed);
@@ -350,7 +349,8 @@ export class TreeComponent implements OnDestroy {
             this.graph.insertEdge(this.parent, null, edgeLabel, exParent, bdd, edgeStyle)
           });
         } else {
-          let groupedItems = this.groupByProperty(ex.remoteTrace.queries, 'schema');
+
+          let groupedItems = this.groupByProperty(ex.remoteTrace.databaseRequests, 'name');
           Object.keys(groupedItems).forEach((i) => {
             vertexIcon = this.getVertexIconType(groupedItems[i].data[0])
             bdd = this.graph.insertVertex(this.parent, null, groupedItems[i], 0, 0, 80, 30, "shape=image;image=assets/mxgraph/" + vertexIcon + ".drawio.svg;")
@@ -372,29 +372,29 @@ export class TreeComponent implements OnDestroy {
       }
 
       //setting child requests
-      if (ex.remoteTrace.requests) {
+      if (ex.remoteTrace.restRequests) {
         if (detailed) {
 
-          ex.remoteTrace.requests.forEach((r: any) => {
+          ex.remoteTrace.restRequests.forEach((r: any) => {
             edgeStyle = "";
             if (r.remoteTrace.unknown) {
               r.remoteTrace = this.setUnknowHost(r);
               vertexStyle = r.remoteTrace.vertexStyle;
             }
             vertexIcon = this.getVertexIconType(r)
-            r.remoteTrace.application.name = r.remoteTrace.name;
+            r.appName = r.remoteTrace.name;
             req = this.graph.insertVertex(this.parent, null, { data: [r] }, 0, 0, 80, 30, 'shape=image;image=assets/mxgraph/api.drawio.svg;fillColor=#81D060;')
             edgeStyle += `strokeColor=${Utils.getStateColor(r.status)};`;
             edgeLabel = this.getElapsedTime(r.end, r.start) + "s"
             this.graph.insertEdge(this.parent, null, edgeLabel, exParent, req, edgeStyle)
           })
         } else {
-          let groupedItems = this.groupRequestsByProperty(ex.remoteTrace.requests);
+          let groupedItems = this.groupRequestsByProperty(ex.remoteTrace.restRequests);
           if (groupedItems) {
             Object.keys(groupedItems).forEach((i) => {
               req = JSON.parse(JSON.stringify(groupedItems[i]));
               req.remoteTrace.succesCalls = groupedItems[i].succesCalls;
-              req.remoteTrace.parentCallCount = groupedItems[i].data.length; // number of calls 
+              req.remoteTrace.parentCallCount = groupedItems[i].data.length; // number of calls
               req.remoteTrace.isRequest = true;
               this.setnode(req, exParent, detailed)
             });
@@ -426,20 +426,16 @@ export class TreeComponent implements OnDestroy {
 
   groupByProperty(array: any, property: string) {
     let groupedItems = array.reduce((acc: any, item: any) => {
-
       if (!acc[item[property]]) {
         acc[item[property]] = {}
         acc[item[property]].succesCalls = 0
         acc[item[property]].data = []
-        acc[item[property]].remoteTrace = { "application": { "name": item[property], "@type": 'db' } };
 
       }
       if (item.completed) {
         acc[item[property]].succesCalls += 1
       }
-
-      item.remoteTrace = {}
-      item.remoteTrace = { "application": { "name": item[property] }, "@type": 'db' };
+      item.remoteTrace = { "@type": 'db','appName': item[property] };
       acc[item[property]].data.push(item);
 
       return acc;
@@ -451,7 +447,8 @@ export class TreeComponent implements OnDestroy {
     let groupedItems = array.reduce((acc: any, item: any) => {
       let property;
       if (item.remoteTrace) {
-        property = item.remoteTrace.application.name;
+        property = item.remoteTrace.appName;
+
       } else {
         property = item.host
         item['remoteTrace'] = this.setUnknowHost(item);
@@ -460,9 +457,9 @@ export class TreeComponent implements OnDestroy {
         acc[property] = {};
         acc[property].data = [];
         acc[property].succesCalls = 0;
-        acc[property].remoteTrace = { "application": { "name": item[property] } };
-        acc[property].remoteTrace.requests = [];
-        acc[property].remoteTrace.queries = [];
+        acc[property].remoteTrace = { "application": { "name": property } }; // maybe revert
+        acc[property].remoteTrace.restRequests = [];
+        acc[property].remoteTrace.databaseRequests = [];
       }
 
       if (item.status >= 200 && item.status < 300)
@@ -471,8 +468,12 @@ export class TreeComponent implements OnDestroy {
 
       acc[property].data.push(item)
       if (item.remoteTrace['@type'] != "unknown") {
-        acc[property].remoteTrace?.requests.push(...item.remoteTrace.requests);
-        acc[property].remoteTrace?.queries.push(...item.remoteTrace.queries);
+        if(item.remoteTrace.restRequests){
+          acc[property].remoteTrace?.restRequests.push(...item.remoteTrace.restRequests);
+        }
+        if(item.remoteTrace.databaseRequests){
+          acc[property].remoteTrace?.databaseRequests.push(...item.remoteTrace?.databaseRequests);
+        }
       }
 
       return acc;
@@ -514,7 +515,7 @@ export class TreeComponent implements OnDestroy {
     if (this.resizeSubscription) {
       this.resizeSubscription.unsubscribe();
     }
-    //destroy graph 
+    //destroy graph
   }
 
   checkRequestStatus(status: number): string {
@@ -549,7 +550,7 @@ export class TreeComponent implements OnDestroy {
   }
 
   getVertexIconType(exchange: any) {
-    if (exchange.hasOwnProperty('databaseName'))
+    if (exchange.hasOwnProperty('productName'))
       return this.vertexIcons['DATABASE'][exchange.completed];
 
     if (exchange.remoteTrace["@type"] == "main")
@@ -609,7 +610,7 @@ export class TreeComponent implements OnDestroy {
       state = this.graph.view.getState(edge);
 
       if (state) {
-        state.shape.node.getElementsByTagName('path')[0].setAttribute('stroke-width', '4'); // link it to size in size out 
+        state.shape.node.getElementsByTagName('path')[0].setAttribute('stroke-width', '4'); // link it to size in size out
         state.shape.node.getElementsByTagName('path')[0].setAttribute('stroke', 'lightGray');
         if (!edge.style.includes("strokeColor=red;") && !edge.style.includes("strokeColor=orange;")) {
           state.shape.node.getElementsByTagName('path')[0].removeAttribute('visibility');
@@ -689,7 +690,7 @@ export class TreeComponent implements OnDestroy {
         let callType = "";
         let target = cell.target.value.data[0];
         let targetId = "";
-        if (!target.hasOwnProperty('schema')) {
+        if (!target.hasOwnProperty('name')) {
           if (target.remoteTrace['@type'] == "api") {
             callType = "request";
 
@@ -714,7 +715,7 @@ export class TreeComponent implements OnDestroy {
         if (target.remoteTrace.hasOwnProperty('@type')) {
           if (target.remoteTrace['@type'] == "api") {
             menu.addItem('Statistique ', '../src/images/warning.gif', function () {
-              self._router.navigate(['/dashboard', 'api', target.remoteTrace.application.name]);
+              self._router.navigate(['/dashboard', 'api', target.appName]);
             });
           }
         }
@@ -742,7 +743,7 @@ export class TreeComponent implements OnDestroy {
        "404": "MICROSERVICE404",
        "500": "MICROSERVICE500",
      },*/
-    "api": "MICROSERVICE",
+    "rest": "MICROSERVICE",
     "endpoint": "api",
     "unknown":
     {
