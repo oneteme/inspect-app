@@ -23,6 +23,7 @@ import { DbRequestDetailComponent } from './db-request-detail/db-request-detail.
 import { RequestRestTableComponent } from './session-detail/components/request-rest-table/request-rest-table.component';
 import { RequestDatabaseTableComponent } from './session-detail/components/request-database-table/request-database-table.component';
 import { RequestTimelineComponent } from './session-detail/components/request-timeline/request-timeline.component';
+import { DashboardComponent } from './dashboard/dashboard.component';
 
 @NgModule({
   imports: [
@@ -52,7 +53,8 @@ import { RequestTimelineComponent } from './session-detail/components/request-ti
     DependenciesTableComponent,
     ExceptionTableComponent,
     SessionTableComponent,
-    DbRequestDetailComponent
+    DbRequestDetailComponent,
+    DashboardComponent
   ]
 })
 export class ViewsModule { }

@@ -30,6 +30,23 @@ export class DbRequestDetailComponent implements OnDestroy {
     pipe = new DatePipe('fr-FR')
     @ViewChild('timeline') timelineContainer: ElementRef;
 
+    jdbcActionDescription: { [key: string]: string }= 
+    {
+        'CONNECTION': 'établir une connexion avec la base de données',
+        'DISCONNECTION': '',
+        'STATEMENT': 'Création et validation de la requête SQL',
+        'EXECUTE': 'Exécution de la requête',
+        'METADATA': "",
+        'DATABASE': '',
+        'SCHEMA': '',
+        'BATCH': '',
+        'COMMIT': 'This command is used to permanently save all changes made during the current transaction. Once a transaction is committed, it cannot be undone',
+        'ROLLBACK': ' Used to undo transactions that have not yet been committed. It can revert the database to the last committed state',
+        'FETCH': 'Parcours et récupération de résultats',
+        'MORE': '',
+        'SAVEPOINT':'This command allows you to set a savepoint within a transaction'
+    };
+
 
     constructor(private _activatedRoute: ActivatedRoute,
         private _traceService: TraceService,
@@ -86,8 +103,10 @@ export class DbRequestDetailComponent implements OnDestroy {
         actions.forEach((c: DatabaseRequestStage) => {
             g.add(c.name);
         });
-        let groups = Array.from(g).map((g: string) => ({ id: g, content: g }))
 
+        
+        let groups = Array.from(g).map((g: string) => ({ id: g, content: g, title: this.jdbcActionDescription[g] }))
+      
         let dataArray = actions.map((c: DatabaseRequestStage, i: number) => {
             let e: any = {
                 group: c.name,
@@ -96,10 +115,12 @@ export class DbRequestDetailComponent implements OnDestroy {
                 end: Math.trunc(+c.end * 1000),
                 title: `<span>${this.pipe.transform(new Date(+c.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(+c.end * 1000), 'HH:mm:ss.SSS')}</span><br>
                         <h4>${c.name}${c?.count ? '(' + c?.count + ')' : ''}:  ${this.getElapsedTime(+c.end, +c.start).toFixed(3)}s </h4>`,
-                //className : 'vis-dot',  
+                //className : 'vis-dot',
             }
-
-            e.type = e.start == e.end ? 'point' : 'range'
+            if(c.name == 'FETCH' && c.count){ // changed  c.type to c.name 
+                e.content  = `Lignes Récupérées: ${c.count}`
+            }
+            e.type = e.end <= e.start ? 'point' : 'range'// TODO : change this to equals dh_dbt is set to timestamps(6), currently set to timestmap(3)
             if (c?.exception?.message || c?.exception?.type) {
                 e.className = 'bdd-failed';
                 e.title += `<h5 class="error"> ${c?.exception?.message}</h5>`; // TODO : fix css on tooltip
@@ -108,16 +129,22 @@ export class DbRequestDetailComponent implements OnDestroy {
             return e;
         })
 
-        if (this.timeLine) {  // destroy if exists 
+        if (this.timeLine) {  // destroy if exists
             this.timeLine.destroy();
         }
+
         // Create a Timeline
         this.timeLine = new Timeline(this.timelineContainer.nativeElement, dataArray, groups,
             {
-                //stack:false,
-                // min: timeline_start,
-                // max: timeline_end,
-                selectable: false,
+               //stack:false,
+               // min: timeline_start,
+               // max: timeline_end,
+               margin: {
+                item: {
+                    horizontal: -1
+                }
+            },
+                selectable : false,
                 clickToUse: true,
                 tooltip: {
                     followMouse: true
@@ -226,3 +253,4 @@ export class DbRequestDetailComponent implements OnDestroy {
 
 
 }
+
