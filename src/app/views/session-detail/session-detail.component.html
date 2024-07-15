@@ -157,7 +157,7 @@
             </div>
             <mat-divider style="margin-left: 1em; flex: 1 1 0%"></mat-divider>
         </div>
-        <request-timeline-table [request]="selectedSession"></request-timeline-table>
+        <request-timeline-table [request]="selectedSession" [instance]="instance"></request-timeline-table>
     </div>
 </div>
 <div *ngIf="!isLoading && !selectedSession" class="noDataMessage mat-elevation-z5"
