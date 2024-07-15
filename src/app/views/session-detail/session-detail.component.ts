@@ -36,6 +36,7 @@ export class SessionDetailComponent implements OnDestroy {
             next: ([params, queryParams]) => {
                 this.env = queryParams.env || application.default_env;
                 this.selectedSessionType = params.type;
+                this.selectedSession = null;
                 this.getSessionById(params.id);
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}`)
             }
@@ -48,6 +49,10 @@ export class SessionDetailComponent implements OnDestroy {
         traceService
             .pipe(
                 switchMap((s: InstanceMainSession | InstanceRestSession) => {
+                    if(!s) {
+                        return of(undefined)
+                    }
+
                     return forkJoin({
                         session: of(s), 
                         instance: this._traceService.getInstance(s.instanceId),
@@ -60,24 +65,27 @@ export class SessionDetailComponent implements OnDestroy {
             )
             .subscribe({
                 next: (result) => {
-                    this.selectedSession = result.session;
-                    this.selectedSession.requests = result.requests;
-                    this.selectedSession.queries = result.queries;
-                    this.selectedSession.stages = result.stages;
-                    this.instance = result.instance;
-                    if (this.selectedSession) {
-                        this.groupQueriesBySchema();
-                        // Check if parent exist
-                        this.sessionParent = null;
-                        if (this.selectedSessionType == "api") {
-                            this._traceService.getSessionParentByChildId(id).subscribe({
-                                next: (data: { id: string, type: SessionType }) => {
-                                    this.sessionParent = data;
-                                },
-                                error: err => {}
-                            })
+                    if(result){
+                        this.selectedSession = result.session;
+                        this.selectedSession.requests = result.requests;
+                        this.selectedSession.queries = result.queries;
+                        this.selectedSession.stages = result.stages;
+                        this.instance = result.instance;
+                        if (this.selectedSession) { // why testing here ? 
+                            this.groupQueriesBySchema();
+                            // Check if parent exist
+                            this.sessionParent = null;
+                            if (this.selectedSessionType == "api") {
+                                this._traceService.getSessionParentByChildId(id).subscribe({
+                                    next: (data: { id: string, type: SessionType }) => {
+                                        this.sessionParent = data;
+                                    },
+                                    error: err => {}
+                                })
+                            }
                         }
                     }
+                   
                 }
             });
     }
@@ -127,7 +135,6 @@ export class SessionDetailComponent implements OnDestroy {
                 if (!acc[item.name]) {
                     acc[item.name] = []
                 }
-
                 acc[item.name].push(item);
                 return acc;
             }, []);
