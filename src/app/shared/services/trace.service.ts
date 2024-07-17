@@ -36,7 +36,7 @@ export class TraceService {
     }
 
     getSessionParentByChildId(id: string){
-        return this.http.get(`${localStorage.getItem('server')}/trace/session/rest/${id}/parent`).pipe(catchError(this.handleError))
+        return this.http.get(`${localStorage.getItem('server')}/v3/trace/session/rest/${id}/parent`).pipe(catchError(this.handleError))
     }
 
     getRestRequests(id: string): Observable<Array<RestRequest>> {
