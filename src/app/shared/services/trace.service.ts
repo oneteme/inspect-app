@@ -27,12 +27,9 @@ export class TraceService {
         return this.http.get(`${localStorage.getItem('server')}/v3/trace/session/main/${id}`);
     }
 
-    getTreeRequest(id: string) {
-        return this.http.get(`${localStorage.getItem('server')}/v3/trace/session/rest/${id}/tree`);
-    }
-
-    getTreeMain(id: string) {
-        return this.http.get(`${localStorage.getItem('server')}/v3/trace/session/main/${id}/tree`);
+    getTree(id: string, type: string) {
+        return type == "api" ? this.http.get(`${localStorage.getItem('server')}/v3/trace/session/rest/${id}/tree`) :
+            this.http.get(`${localStorage.getItem('server')}/v3/trace/session/main/${id}/tree`);
     }
 
     getSessionParentByChildId(id: string): Observable<{ id: string, type: string }> {

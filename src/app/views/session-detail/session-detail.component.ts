@@ -139,7 +139,7 @@ export class SessionDetailComponent implements OnDestroy {
                 params.push('dashboard', 'app', this.selectedSession.appName)
                 break;
             case "tree":
-                params.push('session/api', this.selectedSession.id, 'tree')
+                params.push('session', this.selectedSessionType, this.selectedSession.id, 'tree')
                 break;
             case "parent":
                 params.push('session', this.sessionParent.type, this.sessionParent.id)
