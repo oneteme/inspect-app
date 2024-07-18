@@ -1,13 +1,11 @@
 export interface InstanceRestSession extends RestSession {
     instanceId: string;
-    instanceUser: string;
     appName: string;
     mask: number;
 }
 
 export interface InstanceMainSession extends MainSession {
     instanceId: string;
-    instanceUser: string;
     appName: string;
     mask: number;
 }

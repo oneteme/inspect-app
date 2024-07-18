@@ -55,10 +55,10 @@
             <mat-card-footer>
                 <mat-icon style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
                 <div style="display: flex; align-items: center; gap: 0.5em">
-                    <a [style.pointer-events]="selectedSession?.instanceUser? 'auto' : 'none'"
-                        [routerLink]="'/dashboard/user/'+ instance?.user" [queryParams]="{'env': instance?.env}"
+                    <a [style.pointer-events]="selectedSession?.user? 'auto' : 'none'"
+                        [routerLink]="'/dashboard/user/'+ selectedSession?.user" [queryParams]="{'env': instance?.env}"
                         matTooltip="Statistique Utilisateur">
-                        {{instance?.user || "N/A"}}
+                        {{selectedSession?.user || "N/A"}}
                     </a>
                     le {{( selectedSession?.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
                 </div>

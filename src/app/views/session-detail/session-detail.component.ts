@@ -1,13 +1,11 @@
 import { Component, Injectable, OnDestroy } from '@angular/core';
 import { ActivatedRoute, NavigationExtras, Router } from '@angular/router';
-import { Observable, combineLatest, finalize, forkJoin, map, of, switchMap } from "rxjs";
+import { Observable, catchError, combineLatest, finalize, forkJoin, map, of, switchMap } from "rxjs";
 import { Utils } from 'src/app/shared/util';
 import { Location } from '@angular/common';
 import { TraceService } from 'src/app/shared/services/trace.service';
 import { application } from 'src/environments/environment';
 import { InstanceEnvironment, InstanceMainSession, InstanceRestSession } from 'src/app/shared/model/v3/trace.model';
-
-type SessionType = 'main' | 'rest';
 
 @Component({
     templateUrl: './session-detail.component.html',
@@ -18,7 +16,7 @@ export class SessionDetailComponent implements OnDestroy {
     selectedSession: InstanceMainSession | InstanceRestSession; // IncomingRequest | Mainrequest | OutcomingRequest;
     instance: InstanceEnvironment;
     selectedSessionType: string;
-    sessionParent: { id: string, type: SessionType };
+    sessionParent: { id: string, type: string };
     isLoading: boolean = false;
     paramsSubscription: any;
     queryBySchema: any[];
@@ -49,13 +47,10 @@ export class SessionDetailComponent implements OnDestroy {
         traceService
             .pipe(
                 switchMap((s: InstanceMainSession | InstanceRestSession) => {
-                    if(!s) {
-                        return of(undefined)
-                    }
-
                     return forkJoin({
                         session: of(s), 
                         instance: this._traceService.getInstance(s.instanceId),
+                        parent: this._traceService.getSessionParentByChildId(id).pipe(catchError(() => of(null))),
                         requests: this._traceService.getRestRequests(s.id),
                         queries: this._traceService.getDatabaseRequests(s.id),
                         stages: this._traceService.getLocalRequests(s.id)
@@ -71,19 +66,8 @@ export class SessionDetailComponent implements OnDestroy {
                         this.selectedSession.queries = result.queries;
                         this.selectedSession.stages = result.stages;
                         this.instance = result.instance;
-                        if (this.selectedSession) { // why testing here ? 
-                            this.groupQueriesBySchema();
-                            // Check if parent exist
-                            this.sessionParent = null;
-                            if (this.selectedSessionType == "api") {
-                                this._traceService.getSessionParentByChildId(id).subscribe({
-                                    next: (data: { id: string, type: SessionType }) => {
-                                        this.sessionParent = data;
-                                    },
-                                    error: err => {}
-                                })
-                            }
-                        }
+                        this.sessionParent = result.parent;
+                        this.groupQueriesBySchema();
                     }
                    
                 }

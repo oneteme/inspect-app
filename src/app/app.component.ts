@@ -28,7 +28,7 @@ export class AppComponent implements OnInit {
     private _router: EnvRouter,
     private _service: JQueryService) {
     this.isLoadingEnv = true;
-    this.subscriptions.push(this._service.getInstance({'column.distinct': 'environement', 'order': 'environement.asc'})
+    this.subscriptions.push(this._service.getInstance({'column.distinct': 'environement', 'environement.not': 'null', 'order': 'environement.asc'})
       .pipe(finalize(() => this.isLoadingEnv = false))
       .subscribe({
         next: (res: {environement: string}[]) => {

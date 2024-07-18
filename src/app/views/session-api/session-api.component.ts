@@ -153,7 +153,7 @@ export class SessionApiComponent implements OnInit, OnDestroy {
                 if (key == 'filter') {
                   isMatch = isMatch && (value == '' || (data.appName?.toLowerCase().includes(value) ||
                     data.method?.toLowerCase().includes(value) || data.query?.toLowerCase().includes(value) ||
-                    data.instanceUser?.toLowerCase().includes(value) || data.path?.toLowerCase().includes(value)));
+                    data.user?.toLowerCase().includes(value) || data.path?.toLowerCase().includes(value)));
                 } else if (key == 'status') {
                   const s = data.status.toString();
                   isMatch = isMatch && (!value.length || (value.some((status: any) => {

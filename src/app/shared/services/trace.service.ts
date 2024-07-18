@@ -35,8 +35,8 @@ export class TraceService {
         return this.http.get(`${localStorage.getItem('server')}/v3/trace/session/main/${id}/tree`);
     }
 
-    getSessionParentByChildId(id: string){
-        return this.http.get(`${localStorage.getItem('server')}/v3/trace/session/rest/${id}/parent`).pipe(catchError(this.handleError))
+    getSessionParentByChildId(id: string): Observable<{ id: string, type: string }> {
+        return this.http.get<{ id: string, type: string }>(`${localStorage.getItem('server')}/v3/trace/session/rest/${id}/parent`)
     }
 
     getRestRequests(id: string): Observable<Array<RestRequest>> {
@@ -61,9 +61,5 @@ export class TraceService {
 
     getInstance(id: string): Observable<InstanceEnvironment> {
         return this.http.get<InstanceEnvironment>(`${localStorage.getItem('server')}/v3/trace/instance/${id}`);
-    }
-
-    private handleError( error: HttpErrorResponse){
-        return throwError(()=>error)
     }
 }
