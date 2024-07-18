@@ -16,20 +16,6 @@
 
         <mat-card-content>
             <div>
-                <div class="ellipsis">
-                    <p class="url">
-                        {{selectedQuery?.location}}
-                    </p>
-                </div>
-
-                <!--<div>
-                    <mat-chip-set >
-                        <mat-chip *ngFor="let c of selectedQuery?.commands">
-                            {{c}}
-                        </mat-chip>
-                    </mat-chip-set>
-                </div>-->
-
                 <div class="ellipsis"
                     style="display: flex; gap: 0.5em; color: red; font-weight: 500; margin-top: 0.5em;"
                     *ngIf="!selectedQuery?.completed"
@@ -54,40 +40,23 @@
         <mat-card-title>
             <a style="display: flex; align-items: center; gap: 0.5em">
                 <mat-icon class="material-symbols-outlined">Database</mat-icon>
-                {{selectedQuery?.database}}
+                {{selectedQuery?.name}}
             </a>
             <div style="height: 48px">
 
             </div>
         </mat-card-title>
         <mat-card-content>
-
-            <div style="display: flex; align-items: center;" *ngFor="let item of queryBySchema | keyvalue ">
-                <div style="display: flex; margin-right: 1em; margin-left: 1em;" *ngIf="item.key != 'null'">
-                    <mat-icon class="material-symbols-outlined">Database</mat-icon>
-                </div>
-                <div *ngIf="item.key != 'null'">
-                    <a style="font-weight: 500; font-size: 14px;" [routerLink]="'/dashboard/database/'+ item.key"
-                        [queryParams]="{'env': selectedSession?.application?.env}"
-                        matTooltip="Statistique Base de donnée">
-                        {{ item.key }}
-                    </a>
-                    <div style="font-style: italic; font-size: 12px;">{{ item.value[0].databaseName }} v.{{
-                        item.value[0].databaseVersion}}</div>
-                </div>
-            </div>
-
-
         </mat-card-content>
         <mat-card-footer>
             <div style="font-style: italic; font-size: 14px;">
                 {{selectedQuery?.host}} {{ ':'+ selectedQuery?.port || '' }}
             </div>
             <span style="margin-left: auto;">
-                {{selectedQuery?.databaseName}}
+                {{selectedQuery?.productName}}
             </span>
             <span style="margin-left: auto;">
-                {{selectedQuery?.databaseVersion}}
+                {{selectedQuery?.productVersion}}
             </span>
         </mat-card-footer>
     </mat-card>

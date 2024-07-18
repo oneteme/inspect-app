@@ -11,6 +11,7 @@ export interface InstanceMainSession extends MainSession {
 }
 
 export interface RestSession extends RestRequest {
+    type: string;
     name: string;
     requests: Array<RestRequest>;
     queries: Array<DatabaseRequest>;

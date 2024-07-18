@@ -2,7 +2,7 @@ import { DatePipe } from "@angular/common";
 import { Component, ElementRef, Input, OnChanges, OnInit, SimpleChanges, ViewChild, inject } from "@angular/core";
 import { Timeline } from "vis-timeline";
 import { EnvRouter } from "../../session-detail.component";
-import { DatabaseRequest, LocalRequest, RestRequest } from "src/app/shared/model/v3/trace.model";
+import { DatabaseRequest, InstanceEnvironment, InstanceMainSession, InstanceRestSession, LocalRequest, RestRequest } from "src/app/shared/model/v3/trace.model";
 
 @Component({
     selector: 'request-timeline-table',
@@ -17,8 +17,8 @@ export class RequestTimelineComponent implements OnChanges {
 
     @ViewChild('timeline', {static: true}) timelineElement: ElementRef;
 
-    @Input() instance:any;
-    @Input() request:any;
+    @Input() instance:InstanceEnvironment;
+    @Input() request:InstanceMainSession | InstanceRestSession;
 
     ngOnChanges(changes: SimpleChanges): void {
         if( changes.instance || changes.request){
