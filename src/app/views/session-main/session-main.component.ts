@@ -117,6 +117,7 @@ export class SessionMainComponent implements OnInit, OnDestroy {
   search() {
     if (this.serverFilterForm.valid) {
       let name = this.serverFilterForm.getRawValue().launchmode;
+      console.log(name)
       let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
       let end = this.serverFilterForm.getRawValue().dateRangePicker.end
       let excludedEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1)
