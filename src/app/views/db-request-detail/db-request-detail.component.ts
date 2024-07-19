@@ -30,6 +30,23 @@ export class DbRequestDetailComponent implements OnDestroy {
     pipe = new DatePipe('fr-FR')
     @ViewChild('timeline') timelineContainer: ElementRef;
 
+    jdbcActionDescription: { [key: string]: string }= 
+    {
+        'CONNECTION': 'établir une connexion avec la base de données',
+        'DISCONNECTION': '',
+        'STATEMENT': 'Création et validation de la requête SQL',
+        'EXECUTE': 'Exécution de la requête',
+        'METADATA': "",
+        'DATABASE': '',
+        'SCHEMA': '',
+        'BATCH': '',
+        'COMMIT': 'This command is used to permanently save all changes made during the current transaction. Once a transaction is committed, it cannot be undone',
+        'ROLLBACK': ' Used to undo transactions that have not yet been committed. It can revert the database to the last committed state',
+        'FETCH': 'Parcours et récupération de résultats',
+        'MORE': '',
+        'SAVEPOINT':'This command allows you to set a savepoint within a transaction'
+    };
+
 
     constructor(private _activatedRoute: ActivatedRoute,
         private _traceService: TraceService,
@@ -78,19 +95,16 @@ export class DbRequestDetailComponent implements OnDestroy {
     }
 
     visjs() {
-        let timeline_end = +this.selectedQuery.end * 1000;
-        let timeline_start = +this.selectedQuery.start * 1000;
+        let timeline_end = Math.round(+this.selectedQuery.end)* 1000;
+        let timeline_start = Math.trunc(+this.selectedQuery.start)* 1000 ;
         let actions = this.selectedQuery.actions;
         this.sortInnerArrayByDate(actions)
-        let g = new Set();
-        actions.forEach((c: DatabaseRequestStage) => {
-            g.add(c.name);
-        });
-        let groups = Array.from(g).map((g: string) => ({ id: g, content: g }))
 
+        let groups = actions.map((g: DatabaseRequestStage,i:number ) => ({ id: i, content: g?.name, title: this.jdbcActionDescription[g?.name] }))
+        groups
         let dataArray = actions.map((c: DatabaseRequestStage, i: number) => {
             let e: any = {
-                group: c.name,
+                group: groups[i].id,
                 // content: "c.type",
                 start: Math.trunc(+c.start * 1000),
                 end: Math.trunc(+c.end * 1000),
@@ -99,32 +113,31 @@ export class DbRequestDetailComponent implements OnDestroy {
                 //className : 'vis-dot',  
             }
 
+             if((c.name == 'FETCH' || c.name =='BATCH' ||c.name == 'EXECUTE') && c.count){ // changed  c.type to c.name 
+                e.content  = c.count.toString();
+            }
             e.type = e.start == e.end ? 'point' : 'range'
             if (c?.exception?.message || c?.exception?.type) {
                 e.className = 'bdd-failed';
                 e.title += `<h5 class="error"> ${c?.exception?.message}</h5>`; // TODO : fix css on tooltip
             }
 
+
             return e;
         })
-
         if (this.timeLine) {  // destroy if exists 
             this.timeLine.destroy();
         }
         // Create a Timeline
         this.timeLine = new Timeline(this.timelineContainer.nativeElement, dataArray, groups,
             {
-                //stack:false,
-                // min: timeline_start,
-                // max: timeline_end,
+                min: timeline_start,
+                max: timeline_end,
                 selectable: false,
                 clickToUse: true,
                 tooltip: {
                     followMouse: true
                 },
-                //order: (a, b) => {
-                //     return b.start - a.start // inverser l'ordre  
-                // }
             });
     }
 
@@ -191,11 +204,7 @@ export class DbRequestDetailComponent implements OnDestroy {
 
     sortInnerArrayByDate(innerArray: any[]): any[] {
         return innerArray.sort((a, b) => {
-            if (a.start > b.start)
-                return 1;
-
-            if (a.start < b.start)
-                return -1;
+            return a.start - b.start
         });
     }
 
