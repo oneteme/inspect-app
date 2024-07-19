@@ -24,6 +24,7 @@ import { StatsAppComponent } from './views/stats-app/stats-app.component';
 import { StatsApiComponent } from './views/stats-api/stats-api.component';
 import { StatsUserComponent } from './views/stats-user/stats-user.component';
 import { DbRequestDetailComponent } from './views/db-request-detail/db-request-detail.component';
+import { DashboardComponent } from './views/dashboard/dashboard.component';
 
 registerLocaleData(localeFr, 'fr-FR');
 const routes: Route[] = [
@@ -63,7 +64,10 @@ const routes: Route[] = [
     ]
   },
   {
-    path: 'dashboard', children: [
+    path: 'dashboard',
+    component: DashboardComponent, 
+    title: 'Dashboard',
+    children: [
       {
         path: 'app/:name',
         component: StatsAppComponent,
@@ -84,7 +88,7 @@ const routes: Route[] = [
         component: StatsDatabaseComponent,
         title: 'Statistiques Base de Donnée'
       },
-      { path: '**', pathMatch: 'full', redirectTo: `/session/api` }
+     // { path: '**', pathMatch: 'full', redirectTo: `/session/api` }
     ]
   },
   { path: '**', pathMatch: 'full', redirectTo: `/session/api` }

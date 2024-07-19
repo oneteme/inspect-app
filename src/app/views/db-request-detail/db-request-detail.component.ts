@@ -99,9 +99,14 @@ export class DbRequestDetailComponent implements OnDestroy {
         let timeline_start = Math.trunc(+this.selectedQuery.start)* 1000 ;
         let actions = this.selectedQuery.actions;
         this.sortInnerArrayByDate(actions)
+        let g = new Set();
+        actions.forEach((c: DatabaseRequestStage) => {
+            g.add(c.name);
+        });
 
-        let groups = actions.map((g: DatabaseRequestStage,i:number ) => ({ id: i, content: g?.name, title: this.jdbcActionDescription[g?.name] }))
-        groups
+        
+        let groups = Array.from(g).map((g: string) => ({ id: g, content: g, title: this.jdbcActionDescription[g] }))
+      
         let dataArray = actions.map((c: DatabaseRequestStage, i: number) => {
             let e: any = {
                 group: groups[i].id,
@@ -110,13 +115,12 @@ export class DbRequestDetailComponent implements OnDestroy {
                 end: Math.trunc(+c.end * 1000),
                 title: `<span>${this.pipe.transform(new Date(+c.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(+c.end * 1000), 'HH:mm:ss.SSS')}</span><br>
                         <h4>${c.name}${c?.count ? '(' + c?.count + ')' : ''}:  ${this.getElapsedTime(+c.end, +c.start).toFixed(3)}s </h4>`,
-                //className : 'vis-dot',  
+                //className : 'vis-dot',
             }
-
-             if((c.name == 'FETCH' || c.name =='BATCH' ||c.name == 'EXECUTE') && c.count){ // changed  c.type to c.name 
-                e.content  = c.count.toString();
+            if(c.name == 'FETCH' && c.count){ // changed  c.type to c.name 
+                e.content  = `Lignes Récupérées: ${c.count}`
             }
-            e.type = e.start == e.end ? 'point' : 'range'
+            e.type = e.end <= e.start ? 'point' : 'range'// TODO : change this to equals dh_dbt is set to timestamps(6), currently set to timestmap(3)
             if (c?.exception?.message || c?.exception?.type) {
                 e.className = 'bdd-failed';
                 e.title += `<h5 class="error"> ${c?.exception?.message}</h5>`; // TODO : fix css on tooltip
@@ -125,15 +129,23 @@ export class DbRequestDetailComponent implements OnDestroy {
 
             return e;
         })
-        if (this.timeLine) {  // destroy if exists 
+
+        if (this.timeLine) {  // destroy if exists
             this.timeLine.destroy();
         }
+
         // Create a Timeline
         this.timeLine = new Timeline(this.timelineContainer.nativeElement, dataArray, groups,
             {
-                min: timeline_start,
-                max: timeline_end,
-                selectable: false,
+               //stack:false,
+               // min: timeline_start,
+               // max: timeline_end,
+               margin: {
+                item: {
+                    horizontal: -1
+                }
+            },
+                selectable : false,
                 clickToUse: true,
                 tooltip: {
                     followMouse: true
@@ -235,3 +247,4 @@ export class DbRequestDetailComponent implements OnDestroy {
 
 
 }
+
