@@ -1,0 +1,129 @@
+<div *ngIf="!isLoading && session && instance">
+    <div class="header-card">
+        <mat-card style="width: 60vw; min-width: 60vw;"
+                  [ngStyle]="{'box-shadow: 4px 0 0 0 green inset': session.status >= 200 && session.status < 300,
+                              'box-shadow: 4px 0 0 0 orange inset':  session.status >= 300 && session.status < 500,
+                              'box-shadow: 4px 0 0 0 red inset':  session.status >= 500}">
+            <mat-card-title>
+                <a style="display: flex; align-items: center; gap: 0.5em"
+                   [routerLink]="'/statistic/rest/'+ session.name"
+                   [queryParams]="{'env': instance.env}"
+                   matTooltip="Statistiques Appel REST">
+                    <mat-icon>settings_suggest</mat-icon>
+                    {{ session.name|| 'N/A' }}
+                </a>
+                <div class="right">
+                    <button mat-icon-button (click)="navigate($event,'parent')" matTooltip="Détail de l'appel parent"
+                            [disabled]="!sessionParent">
+                        <mat-icon>move_up</mat-icon>
+                    </button>
+                    <button mat-icon-button (click)="navigate($event,'tree')" matTooltip="Arbre d'appels">
+                        <mat-icon>lan</mat-icon>
+                    </button>
+                </div>
+            </mat-card-title>
+            <mat-card-content>
+                <div class="ellipsis">
+                    <a class="url" [href]="getSessionUrl()" target="_blank">
+                        [{{ session.method }}] {{ getSessionUrl() }}
+                    </a>
+                </div>
+
+                <div class="ellipsis"
+                     style="display: flex; gap: 0.5em; color: red; font-weight: 500; margin-top: 0.5em;"
+                     *ngIf="session.exception?.type || session.exception?.message"
+                     [matTooltip]="session.exception?.type" TooltipPosition="below">
+                    <mat-icon class="material-symbols-outlined">warning</mat-icon>
+                    {{ session.exception?.message || session.exception?.type }}
+                </div>
+            </mat-card-content>
+            <mat-card-footer>
+                <mat-icon style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
+                <div style="display: flex; align-items: center; gap: 0.5em">
+                    <a [style.pointer-events]="session.user ? 'auto' : 'none'"
+                       [routerLink]="'/statistic/user/' + session.user" [queryParams]="{'env': instance.env}"
+                       matTooltip="Statistiques Utilisateur">
+                        {{ session.user || "N/A" }}
+                    </a>
+                    le {{ (session.start * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
+                </div>
+                <div class="right">
+                    {{ session.inDataSize || 0 }}o
+                    <mat-icon style="width: 20px; height: 20px; font-size: 20px;">swap_vert</mat-icon>
+                    {{ session.outDataSize }}o en {{ session.end - session.start | number :'1.2-3' }}s
+                </div>
+                <span class="badge" [ngStyle]="{'background-color: green': session.status >= 200 && session.status < 300,
+                                                'background-color: orange':  session.status >= 300 && session.status < 500,
+                                                'background-color: red':  session.status >= 500}">{{session.status}}
+                </span>
+            </mat-card-footer>
+        </mat-card>
+        <mat-card style="width: 40vw;">
+            <mat-card-title>
+                <a style="display: flex; align-items: center; gap: 0.5em"
+                   [routerLink]="'/statistic/app/'+ instance.name"
+                   [queryParams]="{'env': instance.env}" matTooltip="Statistiques Application">
+                    <mat-icon>storage</mat-icon>
+                    {{instance.name}}
+                </a>
+                <div style="height: 48px">
+
+                </div>
+            </mat-card-title>
+            <mat-card-content>
+                <div style="display: flex; align-items: center;" *ngFor="let item of queryBySchema | keyvalue ">
+                    <div style="display: flex; margin-right: 1em; margin-left: 1em;" *ngIf="item.key != 'null'">
+                        <mat-icon class="material-symbols-outlined">Database</mat-icon>
+                    </div>
+                    <div *ngIf="item.key != 'null'">
+                        <a style="font-weight: 500; font-size: 14px;"
+                           [routerLink]="'/statistic/database/'+ item.key"
+                           [queryParams]="{'env': instance.env}"
+                           matTooltip="Statistiques Base de donnée">
+                            {{ item.key }}
+                        </a>
+                        <div style="font-style: italic; font-size: 12px;">
+                            {{ item.value[0].productName }} v.{{ item.value[0].productVersion }}
+                        </div>
+                    </div>
+                </div>
+            </mat-card-content>
+            <mat-card-footer>
+                <div style="font-style: italic; font-size: 14px;">
+                    {{instance.address}} en {{instance.env}}
+                </div>
+                <span style="margin-left: auto;">
+                    {{instance.os}}
+                </span>
+                <span style="margin-left: auto;">
+                    {{instance.re}}
+                </span>
+            </mat-card-footer>
+        </mat-card>
+    </div>
+    <div *ngIf="session.requests?.length" style="margin-bottom: 2em;">
+        <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center;">
+            <mat-divider style="margin-right: 1em; flex: 1 1 0"></mat-divider>
+            <div style="display: flex; align-items: center; gap: 0.5em; margin-bottom:  0.5em; font-size: 20px; font-weight: 500;">
+                <mat-icon>west</mat-icon>
+                <div [matBadge]="session.requests?.length" matBadgeOverlap="false" matBadgeColor="primary">REST</div>
+            </div>
+            <mat-divider style="margin-left: 1em; flex: 1 1 0"></mat-divider>
+        </div>
+        <request-rest-table [requests]="session.requests"
+                            (onClickRow)="selectedRequest($event)"></request-rest-table>
+    </div>
+    <div *ngIf="session.queries?.length" style="margin-bottom: 2em;">
+        <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center;">
+            <mat-divider style="margin-right: 1em; flex: 1 1 0"></mat-divider>
+            <div style="display: flex; align-items: center; gap: 0.5em; margin-bottom:  0.5em; font-size: 20px; font-weight: 500;">
+                <mat-icon class="material-symbols-outlined">Database</mat-icon>
+                <div [matBadge]="session.queries?.length" matBadgeOverlap="false" matBadgeColor="primary">Base de donnée</div>
+            </div>
+            <mat-divider style="margin-left: 1em; flex: 1 1 0"></mat-divider>
+        </div>
+        <request-database-table [requests]="session.queries"
+                                (onClickRow)="selectedQuery($event)">
+        </request-database-table>
+    </div>
+</div>

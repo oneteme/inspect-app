@@ -1,22 +1,19 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { ActivatedRoute, NavigationEnd, NavigationStart, Router } from '@angular/router';
-import { Subscription, distinctUntilChanged, filter, finalize, skip } from 'rxjs';
-import { application, environment } from 'src/environments/environment';
-import { EnvRouter } from './views/session-detail/session-detail.component';
-import { MatDrawer } from '@angular/material/sidenav';
-import { JQueryService } from './shared/services/jquery.service';
-import { FilterService } from './shared/services/filter.service';
+import {Component, OnDestroy, OnInit} from '@angular/core';
+import {FormControl} from '@angular/forms';
+import {ActivatedRoute} from '@angular/router';
+import {distinctUntilChanged, finalize, Subscription} from 'rxjs';
+import {application, environment} from 'src/environments/environment';
+import {JQueryService} from './service/jquery.service';
+import {EnvRouter} from "./service/router.service";
 
 
 @Component({
   selector: 'app-root',
   templateUrl: 'app.component.html',
   styleUrls: ['app.component.scss']
-
 })
 
-export class AppComponent implements OnInit {
+export class AppComponent implements OnInit, OnDestroy {
   envs: any[];
   env: FormControl<string> = new FormControl();
   isLoadingEnv = false;
@@ -68,10 +65,6 @@ export class AppComponent implements OnInit {
     if (!localStorage.getItem('server')) {
       localStorage.setItem('server', environment.url);
     }
-  }
-
-  ngAfterViewInit() {
-
   }
 
   ngOnDestroy(): void {

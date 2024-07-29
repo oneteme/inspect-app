@@ -2,15 +2,22 @@
   <mat-toolbar color="primary" style="display: flex; align-items: center; height: 48px;">
     <span style="margin-right: 1em;">Trace Api</span>
 
-    <a style="color: inherit" [routerLink]="['session/api']" routerLinkActive="item-selected"
+    <a style="color: inherit" [routerLink]="['session/rest']" routerLinkActive="item-selected"
       [queryParams]="{env: env.value}">
-      <button mat-button>Liste des API</button>
+      <button mat-button>Liste des Appels REST</button>
     </a>
-    <a style="color: inherit" [routerLink]="['session/main']" routerLinkActive="item-selected"
+    <a style="color: inherit" [routerLink]="['session/main/BATCH']" routerLinkActive="item-selected"
       [queryParams]="{env: env.value}">
-      <button mat-button>Liste des Sessions</button>
+      <button mat-button>Lancement des Batch</button>
     </a>
-
+    <a style="color: inherit" [routerLink]="['session/main/STARTUP']" routerLinkActive="item-selected"
+     [queryParams]="{env: env.value}">
+      <button mat-button>Lancement des Serveurs</button>
+    </a>
+    <a style="color: inherit" [routerLink]="['session/main/VIEW']" routerLinkActive="item-selected"
+     [queryParams]="{env: env.value}">
+      <button mat-button>Lancement des Vues</button>
+    </a>
     <span style="flex-grow: 1;"></span>
     <mat-form-field appearance="fill" class="md-2 no-subscript" [class.loading]="isLoadingEnv">
       <mat-select [formControl]="env">

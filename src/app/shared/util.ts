@@ -1,7 +1,7 @@
 import { DatePipe } from "@angular/common";
-import { ChartGroup } from "./model/chart.model";
+import { ChartGroup } from "../model/chart.model";
 import { Filter, FilterMap, Operation } from "../views/constants";
-import { InstanceRestSession } from "./model/v3/trace.model";
+import { InstanceRestSession } from "../model/trace.model";
 
 export class Utils {
 

@@ -4,9 +4,9 @@ import { combineLatest, finalize, fromEvent } from 'rxjs';
 import { Location } from '@angular/common';
 import mx from '../../../mxgraph';
 import { Utils } from 'src/app/shared/util';
-import { TraceService } from 'src/app/shared/services/trace.service';
-import { EnvRouter } from '../session-detail/session-detail.component';
+import { TraceService } from 'src/app/service/trace.service';
 import { application } from 'src/environments/environment';
+import {EnvRouter} from "../../service/router.service";
 
 
 @Component({
@@ -49,11 +49,11 @@ export class TreeComponent implements OnDestroy {
       queryParams: this._activatedRoute.queryParams
     }).subscribe({
       next: (v: { paramsList: Params, queryParams: Params }) => {
-        this.id = v.paramsList.params['id'];
+        this.id = v.paramsList.params['id_session'];
         this.env = v.queryParams.env || application.default_env;
         this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}`)
         this.isLoading = true;
-        this._traceService.getTree(this.id, v.paramsList.params['type']).pipe(finalize(() => this.isLoading = false)).subscribe(d => {
+        this._traceService.getTree(this.id, v.paramsList.params['type_session']).pipe(finalize(() => this.isLoading = false)).subscribe(d => {
 
           this.exchange = {};
           this.exchange['remoteTrace'] = d;
@@ -688,23 +688,29 @@ export class TreeComponent implements OnDestroy {
 
       if (cell.isEdge() && cell.target.value.data.length == 1) {
         let callType = "";
+        let mainType = "";
         let target = cell.target.value.data[0];
         let targetId = "";
         if (!target.hasOwnProperty('name')) {
-          if (target.remoteTrace['@type'] == "api") {
-            callType = "request";
+          if (target.remoteTrace['@type'] == "rest") {
+            callType = "rest";
 
           } else if (target.remoteTrace['@type'] == 'main') {
             callType = "main";
+            mainType = target.remoteTrace.type;
           }
           targetId = target.remoteTrace.id
         } else {
-          callType = "request"
+          callType = "rest"
           targetId = cell.source.value.data[0].remoteTrace.id
         }
 
         menu.addItem('Détails de l\'appel ', 'editors/images/image.gif', function () {
-          self._router.navigate(['/session', callType, targetId]);
+          if(mainType != "") {
+            self._router.navigate(['/session', callType, mainType, targetId]);
+          } else {
+            self._router.navigate(['/session', callType, targetId]);
+          }
         });
 
 
@@ -713,9 +719,9 @@ export class TreeComponent implements OnDestroy {
       if (cell.isVertex()) {
         let target = cell.value.data[0];
         if (target.remoteTrace.hasOwnProperty('@type')) {
-          if (target.remoteTrace['@type'] == "api") {
+          if (target.remoteTrace['@type'] == "rest") {
             menu.addItem('Statistique ', '../src/images/warning.gif', function () {
-              self._router.navigate(['/dashboard', 'api', target.appName]);
+              self._router.navigate(['/statistic', 'rest', target.appName]);
             });
           }
         }

@@ -1,97 +1,114 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { NgModule, LOCALE_ID } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterModule, Route, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { AppComponent } from './app.component';
+import {BrowserModule} from '@angular/platform-browser';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {LOCALE_ID, NgModule} from '@angular/core';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {ActivatedRouteSnapshot, Route, RouterModule, RouterStateSnapshot} from '@angular/router';
+import {AppComponent} from './app.component';
 
-import { ViewsModule } from './views/views.module';
-import { SharedModule } from './shared/shared.module';
+import {ViewsModule} from './views/views.module';
+import {SharedModule} from './shared/shared.module';
 
 // main layout
-import { HttpClientModule } from '@angular/common/http';
+import {HttpClientModule} from '@angular/common/http';
 
-import { MaterialModule } from './app.material.module';
-
-import { SessionApiComponent } from './views/session-api/session-api.component';
-import { SessionDetailComponent, EnvRouter } from './views/session-detail/session-detail.component';
-import { DatePipe, DecimalPipe, registerLocaleData } from '@angular/common';
+import {DatePipe, DecimalPipe, registerLocaleData} from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
-import { SessionMainComponent } from './views/session-main/session-main.component';
-import { TreeComponent } from './views/tree/tree.component';
-import { StatsDatabaseComponent } from './views/stats-database/stats-database.component';
-import { StatsAppComponent } from './views/stats-app/stats-app.component';
-import { StatsApiComponent } from './views/stats-api/stats-api.component';
-import { StatsUserComponent } from './views/stats-user/stats-user.component';
-import { DbRequestDetailComponent } from './views/db-request-detail/db-request-detail.component';
-import { DashboardComponent } from './views/dashboard/dashboard.component';
+import {TreeComponent} from './views/tree/tree.component';
+import {ApplicationComponent as StatisticApplicationComponent} from './views/statistic/application/application.component';
+import {UserComponent as StatisticUserComponent} from './views/statistic/user/user.component';
+import {DatabaseComponent as DetailDatabaseComponent} from './views/detail/database/database.component';
+import {DatabaseComponent as StatisticDatabaseComponent} from './views/statistic/database/database.component';
+import {DashboardComponent} from './views/dashboard/dashboard.component';
+import {RestComponent as SearchRestComponent} from "./views/search/rest/rest.component";
+import {RestComponent as StatisticRestComponent} from "./views/statistic/rest/rest.component";
+import {RestComponent as DetailSessionRestComponent} from "./views/detail/session/rest/rest.component";
+import {MainComponent as SearchMainComponent} from './views/search/main/main.component';
+import {MainComponent as DetailSessionMainComponent} from "./views/detail/session/main/main.component";
+import {EnvRouter} from "./service/router.service";
 
 registerLocaleData(localeFr, 'fr-FR');
 const routes: Route[] = [
   {
     path: 'session', children: [
       {
-        path: 'api',
-        component: SessionApiComponent,
-        title: 'Liste des API'
+        path: 'rest',
+        component: SearchRestComponent,
+        title: 'Appels REST',
       },
       {
-        path: ':type/:id/tree',
-        component: TreeComponent,
-        title: 'Arbre d\'appels de la Session'
+        path: 'rest/:id_session',
+        component: DetailSessionRestComponent,
+        title: 'Detail de l\'appel REST'
       },
       {
-        path: 'main',
-        component: SessionMainComponent,
-        title: 'Liste des Sessions'
-      },
-      {
-        path: ':type/:id/database/:dbid', 
-        component: DbRequestDetailComponent,
-        title: 'Detail de la requête SQL'
-      },
-      {
-        path: ':type/:id',
-        component: SessionDetailComponent,
+        path: 'main/:type_main',
+        component: SearchMainComponent,
         title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          if (route.paramMap.get('type') == 'main') {
-            return 'Detail de la Session';
+          if (route.paramMap.get('type_main') == 'batch') {
+            return 'Liste BATCH';
+          } else if(route.paramMap.get('type_main') == 'startup') {
+            return 'Liste Lancement Serveur';
           }
-          return 'Detail de l\'API';
+          return 'Liste Interaction Web';
         },
       },
-      { path: '**', pathMatch: 'full', redirectTo: `/session/api` }
+      {
+        path: 'main/:type_main/:id_session',
+        component: DetailSessionMainComponent,
+        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+          if (route.paramMap.get('type_main') == 'batch') {
+            return 'Detail Lancement BATCH';
+          } else if (route.paramMap.get('type_main') == 'startup') {
+            return 'Detail Lancement Serveur';
+          }
+          return 'Detail Interaction Web';
+        },
+      },
+      {
+        path: ':type_session/:id_session/tree',
+        component: TreeComponent,
+        title: 'Arbre d\'appels'
+      },
+      {
+        path: ':type_session/:id_session/database/:id_database',
+        component: DetailDatabaseComponent,
+        title: 'Detail de la requête SQL'
+      },
+      { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
+    ]
+  },
+  {
+    path: 'statistic',
+    children: [
+      {
+        path: 'app/:name',
+        component: StatisticApplicationComponent,
+        title: 'Statistiques Serveur'
+      },
+      {
+        path: 'rest/:name',
+        component: StatisticRestComponent,
+        title: 'Statistiques API'
+      },
+      {
+        path: 'user/:name',
+        component: StatisticUserComponent,
+        title: 'Statistiques Utilisateur'
+      },
+      {
+        path: 'database/:name',
+        component: StatisticDatabaseComponent,
+        title: 'Statistiques Base de Donnée'
+      },
+      { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
     ]
   },
   {
     path: 'dashboard',
     component: DashboardComponent, 
-    title: 'Dashboard',
-    children: [
-      {
-        path: 'app/:name',
-        component: StatsAppComponent,
-        title: 'Statistiques Serveur'
-      },
-      {
-        path: 'api/:name',
-        component: StatsApiComponent,
-        title: 'Statistiques API'
-      },
-      {
-        path: 'user/:name',
-        component: StatsUserComponent,
-        title: 'Statistiques Utilisateur'
-      },
-      {
-        path: 'database/:name',
-        component: StatsDatabaseComponent,
-        title: 'Statistiques Base de Donnée'
-      },
-     // { path: '**', pathMatch: 'full', redirectTo: `/session/api` }
-    ]
+    title: 'Dashboard'
   },
-  { path: '**', pathMatch: 'full', redirectTo: `/session/api` }
+  { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
 ];
 
 @NgModule({
@@ -103,7 +120,6 @@ const routes: Route[] = [
     HttpClientModule,
     ReactiveFormsModule,
     SharedModule,
-    MaterialModule,
     ViewsModule
   ],
   declarations: [

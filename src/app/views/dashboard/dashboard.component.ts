@@ -1,11 +1,11 @@
 import { Component } from '@angular/core';
 import { MatTableDataSource } from '@angular/material/table';
 import { ActivatedRoute } from '@angular/router';
-import { TraceService } from 'src/app/shared/services/trace.service';
-import { EnvRouter } from '../session-detail/session-detail.component';
+import { TraceService } from 'src/app/service/trace.service';
 import { combineLatest } from 'rxjs';
 import { Location } from '@angular/common';
 import { application } from 'src/environments/environment';
+import {EnvRouter} from "../../service/router.service";
 
 @Component({
     templateUrl: './dashboard.component.html',
