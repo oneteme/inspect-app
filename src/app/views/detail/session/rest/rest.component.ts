@@ -70,6 +70,7 @@ export class RestComponent implements OnInit, OnDestroy {
     }
 
     selectedRequest(event: { event: MouseEvent, row: any }) {
+        console.log(event)
         if (event.row) {
             if (event.event.ctrlKey) {
                 this._router.open(`#/session/rest/${event.row}`, '_blank',)
@@ -117,10 +118,14 @@ export class RestComponent implements OnInit, OnDestroy {
                 params.push('statistic', 'app', this.session.appName)
                 break;
             case "tree":
-                params.push('session/rest', this.session.id, 'tree')
+                params.push('session', 'rest', this.session.id, 'tree')
                 break;
             case "parent":
-                params.push('session', this.sessionParent.type, this.sessionParent.id)
+                if(this.sessionParent.type == 'rest') {
+                    params.push('session', 'rest', this.sessionParent.id)
+                } else {
+                    params.push('session', 'main', this.sessionParent.type.toLowerCase(), this.sessionParent.id)
+                }
         }
         if (event.ctrlKey) {
             this._router.open(`#/${params.join('/')}`, '_blank')

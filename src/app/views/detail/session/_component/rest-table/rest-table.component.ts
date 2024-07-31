@@ -47,6 +47,7 @@ export class RestTableComponent implements OnInit {
     }
 
     selectedRequest(event: MouseEvent, row: any) {
+        console.log(row)
         this.onClickRow.emit({event: event, row: row});
     }
 

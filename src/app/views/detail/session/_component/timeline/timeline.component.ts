@@ -12,7 +12,7 @@ import {EnvRouter} from "../../../../../service/router.service";
 export class TimelineComponent implements OnChanges {
     private _router: EnvRouter = inject(EnvRouter);
 
-    timeline: any;
+    timeline: Timeline;
     pipe = new DatePipe('fr-FR');
 
     @ViewChild('timeline', {static: true}) timelineElement: ElementRef;
@@ -21,7 +21,7 @@ export class TimelineComponent implements OnChanges {
     @Input() request:InstanceMainSession | InstanceRestSession;
 
     ngOnChanges(changes: SimpleChanges): void {
-        if( changes.instance || changes.request){
+        if(changes.instance || changes.request){
             if(this.instance && this.request){
                 let timeline_end = +this.request.end * 1000
                 let timeline_start = +this.request.start * 1000
@@ -49,7 +49,7 @@ export class TimelineComponent implements OnChanges {
                 }
                 data = dataArray.map((c: any, i: number) => {
                     let o = {
-                        id: c.hasOwnProperty('schema') ? -i : c.id,
+                        id: c.id ?? -1,
                         group: isWebapp ? 0 : c.threadName,
                         content: c.hasOwnProperty('isStage') ? '' : (c.schema || c.host || 'N/A'),
                         start: c.start * 1000,
@@ -65,7 +65,7 @@ export class TimelineComponent implements OnChanges {
                     return o;
                 })
     
-    
+                console.log(data, dataArray)
                 if (this.timeline) {  // destroy if exists 
                     this.timeline.destroy();
                 }
@@ -73,7 +73,7 @@ export class TimelineComponent implements OnChanges {
                 this.timeline = new Timeline(this.timelineElement.nativeElement, data, groups, {
                     min: timeline_start,
                     max: timeline_end,
-                    clickToUse: true,
+                    clickToUse: false,
                     selectable : false,
                     tooltip: {
                         followMouse: true
@@ -89,16 +89,20 @@ export class TimelineComponent implements OnChanges {
                 });
     
                 let that = this;
-                this.timeline.on('select', function (props: any) {
-                    let id = props.items[0];
-                    if (isNaN(+id)) {
-                        that._router.navigate(['/session', 'rest', id]);
+                this.timeline.on('click', function (props: any) {
+                    let id = props.item;
+                    console.log('test', props)
+                    if (isNaN(id)) {
+                        that._router.navigate(['session', 'rest', id]);
+                    } else {
+                        if(id != -1)
+                            that._router.navigate(['session', 'rest', that.request.id, 'database', id]);
                     }
                 });
     
                 if (timeline_end != +this.request.end * 1000) {
                     this.timeline.addCustomTime(+this.request.end * 1000, "async");
-                    this.timeline.setCustomTimeMarker("async", "async");
+
                 }
             }
         }

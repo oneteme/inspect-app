@@ -32,8 +32,9 @@
         <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef style="width:1%">
             </th>
-            <td [ngStyle]="statusBorder(element['status'])" mat-cell *matCellDef="let element"
-                [matTooltip]="element['status']" matTooltipPosition="before">
+            <td [ngStyle]="{'border-left': element.status >= 200 && element.status < 300 ? '4px solid green' :
+                                  element.status >= 300 && element.status < 500 ? '4px solid orange' : '4px solid red'}" mat-cell *matCellDef="let element"
+                [matTooltip]="element.status" matTooltipPosition="before">
             </td>
         </ng-container>
 

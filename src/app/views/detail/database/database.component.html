@@ -73,16 +73,16 @@
         </div>
         <mat-divider style="margin-left: 1em; flex: 1 1 0%"></mat-divider>
     </div>
-    
 </div>
 <div #timeline id="timeline"></div>
+
 
 
 <div *ngIf="!isLoading && !isComplete" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">
     <h2>
         Aucun détail disponible .. <br>
-        <span *ngIf="selectedSession">Vérifiez que TraceAPI est bien configuré sur <b>{{
-                selectedSession?.host}}</b></span>
+        <span *ngIf="selectedQuery">Vérifiez que TraceAPI est bien configuré sur <b>{{
+                selectedQuery?.host}}</b></span>
     </h2>
 </div>
 <div *ngIf="isLoading" style="width: 100%; height: calc(100vh - 50px - 1em); display: flex; flex-direction: row; align-items: center; justify-content: center; font-style: italic; gap: 0.5em">

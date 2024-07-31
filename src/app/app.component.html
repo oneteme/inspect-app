@@ -6,17 +6,17 @@
       [queryParams]="{env: env.value}">
       <button mat-button>Liste des Appels REST</button>
     </a>
-    <a style="color: inherit" [routerLink]="['session/main/BATCH']" routerLinkActive="item-selected"
+    <a style="color: inherit" [routerLink]="['session/main/batch']" routerLinkActive="item-selected"
       [queryParams]="{env: env.value}">
-      <button mat-button>Lancement des Batch</button>
+      <button mat-button>Liste des BATCHs</button>
     </a>
-    <a style="color: inherit" [routerLink]="['session/main/STARTUP']" routerLinkActive="item-selected"
+    <a style="color: inherit" [routerLink]="['session/main/startup']" routerLinkActive="item-selected"
      [queryParams]="{env: env.value}">
-      <button mat-button>Lancement des Serveurs</button>
+      <button mat-button>Liste des Serveurs</button>
     </a>
-    <a style="color: inherit" [routerLink]="['session/main/VIEW']" routerLinkActive="item-selected"
+    <a style="color: inherit" [routerLink]="['session/main/view']" routerLinkActive="item-selected"
      [queryParams]="{env: env.value}">
-      <button mat-button>Lancement des Vues</button>
+      <button mat-button>Liste des Vues</button>
     </a>
     <span style="flex-grow: 1;"></span>
     <mat-form-field appearance="fill" class="md-2 no-subscript" [class.loading]="isLoadingEnv">

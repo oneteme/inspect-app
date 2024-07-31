@@ -1,4 +1,4 @@
-<header-page titleIcon="repeat" ui-title="Liste des sessions">
+<header-page titleIcon="repeat" [ui-title]="'Liste des ' + mappingType[params.type] +'s'">
   <form [formGroup]="serverFilterForm" class="header-filter md-2">
     <advanced-filter-recap [filters]="advancedParams" (filterRemoved)="handleRemovedFilter($event)" (focusField)="focusField($event)"></advanced-filter-recap> 
     <mat-form-field class="no-subscript" appearance="outline">
@@ -27,8 +27,8 @@
       <ng-container matColumnDef="status">
         <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:1%">
         </th>
-        <td [ngStyle]="statusBorder(!!(!row?.exception?.message && !row?.exception?.message))" mat-cell *matCellDef="let row"
-          [matTooltip]="!!(!row?.exception?.message && !row?.exception?.message)?'réussi':'échoué'" matTooltipPosition="before">
+        <td [ngStyle]="{'border-left': row.exception?.type || row.exception?.message ? '4px solid red' : '4px solid green'}" mat-cell *matCellDef="let row"
+          [matTooltip]="row.exception?.type || row.exception?.message ? 'échoué' : 'réussi'" matTooltipPosition="before">
         </td>
       </ng-container>
 
@@ -91,7 +91,7 @@
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns;sticky: true"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectedRequest($event,row.id)"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectedRequest($event,row)"></tr>
       <tr class="mat-row" *matNoDataRow>
         <td class="mat-cell" colspan="7">
           <div *ngIf="!isLoading"  class="empty-row" style="align-items: center;">

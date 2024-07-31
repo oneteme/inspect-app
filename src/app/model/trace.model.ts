@@ -97,6 +97,7 @@ export interface NamingRequest extends SessionStage {
 
 export interface DatabaseRequestStage extends RequestStage {
     count?: Array<number>;
+    order?: number;
 }
 
 export interface FtpRequestStage extends RequestStage {

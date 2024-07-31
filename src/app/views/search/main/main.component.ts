@@ -38,6 +38,11 @@ export class MainComponent implements OnInit, OnDestroy {
   filter: string = '';
   params: Partial<{ env: string, start: Date, end: Date, type: string }> = {};
 
+  mappingType = {
+    batch: 'BATCH',
+    startup: 'Serveur',
+    view: 'Vue'
+  }
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
@@ -76,7 +81,7 @@ export class MainComponent implements OnInit, OnDestroy {
   getMainRequests() {
     let params = {
       'env': this.params.env,
-      'launchmode': this.params.type,
+      'launchmode': this.params.type.toUpperCase(),
       'start': this.params.start.toISOString(),
       'end': this.params.end.toISOString(),
       'lazy': false
@@ -140,10 +145,11 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   selectedRequest(event: MouseEvent, row: any) {
+    console.log(row)
     if (event.ctrlKey) {
-      this._router.open(`#/session/main/${row.type}/${row}`, '_blank')
+      this._router.open(`#/session/main/${row.type.toLowerCase()}/${row.id}`, '_blank')
     } else {
-      this._router.navigate(['/session/main', row.type, row], {
+      this._router.navigate(['/session/main', row.type.toLowerCase(), row.id], {
         queryParams: { 'env': this.params.env }
       });
     }

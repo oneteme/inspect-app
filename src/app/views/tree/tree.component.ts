@@ -44,16 +44,18 @@ export class TreeComponent implements OnDestroy {
 
   constructor() {
     const self = this;
-    combineLatest({
-      paramsList: this._activatedRoute.paramMap,
-      queryParams: this._activatedRoute.queryParams
-    }).subscribe({
-      next: (v: { paramsList: Params, queryParams: Params }) => {
-        this.id = v.paramsList.params['id_session'];
-        this.env = v.queryParams.env || application.default_env;
+    combineLatest([
+      this._activatedRoute.params,
+      this._activatedRoute.data,
+      this._activatedRoute.queryParams
+    ]).subscribe({
+      next: ([params, data, queryParams]) => {
+        console.log(params, queryParams)
+        this.id = params['id_session'];
+        this.env = queryParams.env || application.default_env;
         this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}`)
         this.isLoading = true;
-        this._traceService.getTree(this.id, v.paramsList.params['type_session']).pipe(finalize(() => this.isLoading = false)).subscribe(d => {
+        this._traceService.getTree(this.id, data['type']).pipe(finalize(() => this.isLoading = false)).subscribe(d => {
 
           this.exchange = {};
           this.exchange['remoteTrace'] = d;
@@ -550,11 +552,12 @@ export class TreeComponent implements OnDestroy {
   }
 
   getVertexIconType(exchange: any) {
+    console.log(exchange);
     if (exchange.hasOwnProperty('productName'))
       return this.vertexIcons['DATABASE'][exchange.completed];
 
     if (exchange.remoteTrace["@type"] == "main")
-      return this.vertexIcons[exchange.remoteTrace.launchMode]
+      return this.vertexIcons[exchange.remoteTrace.type]
 
     if (exchange.remoteTrace['@type'] == "unknown")
       return this.vertexIcons["unknown"][exchange["status"]];

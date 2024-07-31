@@ -1,9 +1,8 @@
 <div *ngIf="!isLoading && session && instance">
     <div class="header-card">
         <mat-card style="width: 60vw; min-width: 60vw;"
-                  [ngStyle]="{'box-shadow: 4px 0 0 0 green inset': session.status >= 200 && session.status < 300,
-                              'box-shadow: 4px 0 0 0 orange inset':  session.status >= 300 && session.status < 500,
-                              'box-shadow: 4px 0 0 0 red inset':  session.status >= 500}">
+                  [ngStyle]="{'border-left': session.status >= 200 && session.status < 300 ? '4px solid green' :
+                                    session.status >= 300 && session.status < 500 ? '4px solid orange' : '4px solid red'}">
             <mat-card-title>
                 <a style="display: flex; align-items: center; gap: 0.5em"
                    [routerLink]="'/statistic/rest/'+ session.name"
@@ -52,9 +51,9 @@
                     <mat-icon style="width: 20px; height: 20px; font-size: 20px;">swap_vert</mat-icon>
                     {{ session.outDataSize }}o en {{ session.end - session.start | number :'1.2-3' }}s
                 </div>
-                <span class="badge" [ngStyle]="{'background-color: green': session.status >= 200 && session.status < 300,
-                                                'background-color: orange':  session.status >= 300 && session.status < 500,
-                                                'background-color: red':  session.status >= 500}">{{session.status}}
+                <span class="badge" [ngStyle]="{'background-color': session.status >= 200 && session.status < 300 ? 'green' :
+                                                session.status >= 300 && session.status < 500 ? 'orange' : 'red'}">
+                    {{session.status}}
                 </span>
             </mat-card-footer>
         </mat-card>
@@ -126,4 +125,25 @@
                                 (onClickRow)="selectedQuery($event)">
         </request-database-table>
     </div>
+    <div *ngIf="session.queries?.length || session.requests?.length" style="margin-bottom: 1em;">
+        <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center;">
+            <mat-divider style="margin-right: 1em; flex: 1 1 0"></mat-divider>
+            <div style="display: flex; align-items: center; gap: 0.5em; margin-bottom:  0.5em; font-size: 20px; font-weight: 500;">
+                <mat-icon class="material-symbols-outlined">view_timeline</mat-icon>
+                Chronologie
+            </div>
+            <mat-divider style="margin-left: 1em; flex: 1 1 0"></mat-divider>
+        </div>
+        <request-timeline-table [request]="session" [instance]="instance"></request-timeline-table>
+    </div>
+</div>
+
+<div *ngIf="!isLoading && !session && !instance" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">
+    <h2>
+        Aucun détail disponible .. <br>
+    </h2>
+</div>
+
+<div *ngIf="isLoading" style="width: 100%; height: calc(100vh - 50px - 1em); display: flex; flex-direction: row; align-items: center; justify-content: center; font-style: italic; gap: 0.5em">
+    <mat-progress-spinner diameter="30" mode="indeterminate"></mat-progress-spinner> Chargement en cours...
 </div>

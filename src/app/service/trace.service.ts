@@ -38,7 +38,7 @@ export class TraceService {
     }
 
     getTree(id: string, type: string) {
-        return type == "api" ? this.http.get(`${this.server}/session/rest/${id}/tree`) :
+        return type == "rest" ? this.http.get(`${this.server}/session/rest/${id}/tree`) :
             this.http.get(`${this.server}/session/main/${id}/tree`);
     }
 

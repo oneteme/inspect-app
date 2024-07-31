@@ -82,6 +82,7 @@ export class MainComponent implements OnInit, OnDestroy {
     }
 
     selectedRequest(event: { event: MouseEvent, row: any }) {
+        console.log(event)
         if (event.row) {
             if (event.event.ctrlKey) {
                 this._router.open(`#/session/rest/${event.row}`, '_blank',)
@@ -94,9 +95,9 @@ export class MainComponent implements OnInit, OnDestroy {
     selectedQuery(event: { event: MouseEvent, row: any }) { // TODO finish this
         if (event.row) {
             if (event.event.ctrlKey) {
-                this._router.open(`#/session/main/${this.session.id}/database/${event.row}`, '_blank',)
+                this._router.open(`#/session/main/${this.session.type}/${this.session.id}/database/${event.row}`, '_blank',)
             } else {
-                this._router.navigate(['/session/main', this.session.id, 'database', event.row], {
+                this._router.navigate(['/session/main', this.session.type, this.session.id, 'database', event.row], {
                     queryParams: { env: this.instance.env }
                 });
             }
@@ -113,7 +114,7 @@ export class MainComponent implements OnInit, OnDestroy {
                 params.push('statistic', 'app', this.session.appName)
                 break;
             case "tree":
-                params.push('session', 'main', this.session.id, 'tree')
+                params.push('session', 'main', this.session.type, this.session.id, 'tree')
                 break;
             case "parent":
                 params.push('session', this.sessionParent.type, this.sessionParent.id)

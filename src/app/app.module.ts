@@ -32,47 +32,85 @@ const routes: Route[] = [
     path: 'session', children: [
       {
         path: 'rest',
-        component: SearchRestComponent,
-        title: 'Appels REST',
-      },
-      {
-        path: 'rest/:id_session',
-        component: DetailSessionRestComponent,
-        title: 'Detail de l\'appel REST'
+        children: [
+          {
+            path: '',
+            component: SearchRestComponent,
+            title: 'Recherche Appels REST',
+          },
+          {
+            path: ':id_session',
+            children: [
+              {
+                path: '',
+                component: DetailSessionRestComponent,
+                title: 'Detail Appel REST'
+              },
+              {
+                path: 'database/:id_database',
+                data: { type: 'rest' },
+                component: DetailDatabaseComponent,
+                title: 'Detail Base de donnée'
+              },
+              {
+                path: 'tree',
+                data: { type: 'rest' },
+                component: TreeComponent,
+                title: 'Arbre d\'Appels'
+              },
+              { path: '**', pathMatch: 'full', redirectTo: `/session/rest/:id_session` }
+            ]
+          },
+          { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
+        ]
       },
       {
         path: 'main/:type_main',
-        component: SearchMainComponent,
-        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          if (route.paramMap.get('type_main') == 'batch') {
-            return 'Liste BATCH';
-          } else if(route.paramMap.get('type_main') == 'startup') {
-            return 'Liste Lancement Serveur';
-          }
-          return 'Liste Interaction Web';
-        },
-      },
-      {
-        path: 'main/:type_main/:id_session',
-        component: DetailSessionMainComponent,
-        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          if (route.paramMap.get('type_main') == 'batch') {
-            return 'Detail Lancement BATCH';
-          } else if (route.paramMap.get('type_main') == 'startup') {
-            return 'Detail Lancement Serveur';
-          }
-          return 'Detail Interaction Web';
-        },
-      },
-      {
-        path: ':type_session/:id_session/tree',
-        component: TreeComponent,
-        title: 'Arbre d\'appels'
-      },
-      {
-        path: ':type_session/:id_session/database/:id_database',
-        component: DetailDatabaseComponent,
-        title: 'Detail de la requête SQL'
+        children: [
+          {
+            path: '',
+            component: SearchMainComponent,
+            title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+              if (route.paramMap.get('type_main') == 'batch') {
+                return 'Recherche BATCHs';
+              } else if(route.paramMap.get('type_main') == 'startup') {
+                return 'Recherche Serveurs';
+              }
+              return 'Recherche Vues';
+            },
+          },
+          {
+            path: ':id_session',
+            children: [
+              {
+                path: '',
+                component: DetailSessionMainComponent,
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                  if (route.paramMap.get('type_main') == 'batch') {
+                    return 'Detail BATCH';
+                  } else if (route.paramMap.get('type_main') == 'startup') {
+                    return 'Detail Serveur';
+                  }
+                  return 'Detail Vue';
+                },
+              },
+              {
+                path: 'database/:id_database',
+                component: DetailDatabaseComponent,
+                data: { type: 'main' },
+                title: 'Detail Base de donnée'
+              },
+              {
+                path: 'tree',
+                data: { type: 'main' },
+                component: TreeComponent,
+                title: 'Arbre d\'appels'
+              },
+              { path: '**', pathMatch: 'full', redirectTo: `/main/:type_main/:id_session` }
+            ]
+          },
+          { path: '**', pathMatch: 'full', redirectTo: `/main/:type_main` }
+        ]
       },
       { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
     ]
