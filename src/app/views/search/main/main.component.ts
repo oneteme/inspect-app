@@ -38,11 +38,12 @@ export class MainComponent implements OnInit, OnDestroy {
   filter: string = '';
   params: Partial<{ env: string, start: Date, end: Date, type: string }> = {};
 
-  mappingType = {
+  mappingType: {[key: string]: string} = {
     batch: 'BATCH',
     startup: 'Serveur',
     view: 'Vue'
   }
+
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
 
