@@ -140,7 +140,7 @@ export class ApplicationComponent implements OnInit, OnDestroy {
             repartitionRequestByPeriodLine: { observable: this._statsService.getRestSession({ 'column': "count:count,count_error_server:countErrorServer,count_slowest:countSlowest,rest_session.start.date:date", 'rest_session.instance_env': 'instance.id', 'instance.app_name': name, 'rest_session.start.ge': new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6).toISOString(), 'rest_session.start.lt': now.toISOString(), 'instance.environement': env, 'order': 'rest_session.start.date.asc', ...advancedParams }) },
             repartitionUserPolar: { observable: this._statsService.getRestSession({ 'column': "count:count,user:user", 'instance_env': 'instance.id', 'instance.app_name': name, 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), 'instance.environement': env, 'user.not': 'null', 'order': 'count.desc', ...advancedParams }).pipe(map((r: any[]) => r.slice(0, 5))) },
             repartitionUserBar: {
-                observable: this._statsService.getRestSession({ 'column': `count:count,start.${groupedBy}:date,start.year:year,user:user`, 'instance_env': 'instance.id', 'instance.app_name': name, 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), 'instance.environement': env, 'user.not': 'null', 'order': `start.year.asc,start.${groupedBy}.asc`, ...advancedParams }).pipe(map((r: any[]) => {
+                observable: this._statsService.getRestSession({ 'column': `count:count,start.${groupedBy}:date,start.year:year,user:user`, 'instance_env': 'instance.id', 'instance.app_name': name, 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), 'instance.environement': env, 'user.not': 'null', 'order': `start.year.asc,start.${groupedBy}.asc`, ...advancedParams }).pipe(map((r: {count: number, date: number, year: number, user: string}[]) => {
                     let groupBy = groupingBy(r, 'user');
                     let results: { count: number, user: string, date: any, year: any }[] = Object.entries(groupBy).map((value: [string, any[]]) => {
                         return {
@@ -153,6 +153,7 @@ export class ApplicationComponent implements OnInit, OnDestroy {
                     }).sort((a, b) => {
                         return b.totalCount - a.totalCount
                     }).slice(0, 5).flatMap(r => r.data);
+
                     return results;
                 }),
                     map((r: any[]) => {

@@ -115,7 +115,7 @@ export class Utils {
 
 }
 
-export function groupingBy(arr: any[], field: string): any {
+export function groupingBy(arr: any[], field: string): {[key: string]: any[]} {
     return arr.reduce((acc, o) => {
         var key = o[field];
         if (!acc[key]) {

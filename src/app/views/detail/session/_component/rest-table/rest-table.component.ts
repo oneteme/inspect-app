@@ -64,8 +64,7 @@ const sortingDataAccessor = (row: any, columnName: string) => {
     if (columnName == "host") return row["host"] + ":" + row["port"] as string;
     if (columnName == "start") return row['start'] as string;
     if (columnName == "duree") return (row["end"] - row["start"]);
-    var columnValue = row[columnName as keyof any] as string;
-    return columnValue;
+    return row[columnName as keyof any] as string;
 }
 
 const filterPredicate = (data: RestRequest, filter: string) => {

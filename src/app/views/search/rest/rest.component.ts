@@ -10,7 +10,7 @@ import { Utils } from 'src/app/shared/util';
 import { JQueryService } from 'src/app/service/jquery.service';
 import { TraceService } from 'src/app/service/trace.service';
 import { application, makePeriod } from 'src/environments/environment';
-import { FilterConstants, FilterPreset, FilterMap } from '../../constants';
+import {FilterConstants, FilterPreset, FilterMap, Constants} from '../../constants';
 import { FilterService } from 'src/app/service/filter.service';
 import { InstanceMainSession, InstanceRestSession, RestSession } from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
@@ -21,6 +21,7 @@ import {EnvRouter} from "../../../service/router.service";
   styleUrls: ['./rest.component.scss'],
 })
 export class RestComponent implements OnInit, OnDestroy {
+  MAPPING_TYPE = Constants.MAPPING_TYPE;
   filterConstants = FilterConstants;
   nameDataList: any[];
   displayedColumns: string[] = ['status', 'app_name', 'method/path', 'query', 'start', 'durée', 'user'];
@@ -55,6 +56,7 @@ export class RestComponent implements OnInit, OnDestroy {
     this._activatedRoute.queryParams
       .subscribe({
         next: (params: Params) => {
+          console.log(params['start'], params['end'])
           this.params.env = params['env'] || application.default_env;
           this.params.start = params['start'] ? new Date(params['start']) : (application.session.api.default_period || makePeriod(0)).start;
           this.params.end = params['end'] ? new Date(params['end']) : (application.session.api.default_period || makePeriod(0, 1)).end;
@@ -136,7 +138,7 @@ export class RestComponent implements OnInit, OnDestroy {
             this.dataSource.sort = this.sort;
             this.dataSource.sortingDataAccessor = (row: any, columnName: string) => {
 
-              if (columnName == "app_name") return row["application"]["name"] as string;
+              if (columnName == "app_name") return row["appName"] as string;
               if (columnName == "name/port") return row["host"] + ":" + row["port"] as string;
               if (columnName == "method/path") return row['path'] as string;
               if (columnName == "start") return row['start'] as string;

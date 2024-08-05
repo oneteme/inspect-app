@@ -1,4 +1,4 @@
-<header-page titleIcon="swap_vert" ui-title="Liste des Appels REST">
+<header-page [titleIcon]="MAPPING_TYPE['rest'].icon" [ui-title]="MAPPING_TYPE['rest'].title">
   <form [formGroup]="serverFilterForm" class="header-filter md-2">
   <advanced-filter-recap [filters]="advancedParams" (filterRemoved)="handleRemovedFilter($event)" (focusField)="focusField($event)"></advanced-filter-recap> 
     <mat-form-field class="no-subscript" appearance="outline" >
@@ -105,7 +105,7 @@
         <td mat-cell *matCellDef="let row">
           <div
             [matTooltip]="(row.start*1000| date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr') +' | '+ row.inDataSize +'ko ↑ \n '+ (row.end*1000 | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr')+' | '+ row?.outDataSize +'ko ↓' "
-            matTooltipClass="mat-tooltip">{{ getElapsedTime(row.end, row.start) | number :'1.2-3'}}s</div>
+            matTooltipClass="mat-tooltip">{{ getElapsedTime(row.end, row.start) | duration}}</div>
         </td>
       </ng-container>
 

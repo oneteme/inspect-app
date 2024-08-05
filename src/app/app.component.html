@@ -1,34 +1,42 @@
 <nav>
-  <mat-toolbar color="primary" style="display: flex; align-items: center; height: 48px;">
-    <span style="margin-right: 1em;">Trace Api</span>
-
-    <a style="color: inherit" [routerLink]="['session/rest']" routerLinkActive="item-selected"
-      [queryParams]="{env: env.value}">
-      <button mat-button>Liste des Appels REST</button>
-    </a>
-    <a style="color: inherit" [routerLink]="['session/main/batch']" routerLinkActive="item-selected"
-      [queryParams]="{env: env.value}">
-      <button mat-button>Liste des BATCHs</button>
-    </a>
-    <a style="color: inherit" [routerLink]="['session/main/startup']" routerLinkActive="item-selected"
-     [queryParams]="{env: env.value}">
-      <button mat-button>Liste des Serveurs</button>
-    </a>
-    <a style="color: inherit" [routerLink]="['session/main/view']" routerLinkActive="item-selected"
-     [queryParams]="{env: env.value}">
-      <button mat-button>Liste des Vues</button>
-    </a>
-    <span style="flex-grow: 1;"></span>
-    <mat-form-field appearance="fill" class="md-2 no-subscript" [class.loading]="isLoadingEnv">
-      <mat-select [formControl]="env">
-        <mat-option *ngFor="let e of envs" [value]="e">{{e}}</mat-option>
-      </mat-select>
-      <mat-spinner *ngIf="isLoadingEnv" [diameter]="18"></mat-spinner>
-    </mat-form-field>
-  </mat-toolbar>
+    <mat-toolbar color="primary" style="display: flex; align-items: center; height: 48px;">
+        <span style="margin-right: 0.5em;">Inspect</span>
+        <button mat-icon-button [matMenuTriggerFor]="menu">
+            <mat-icon>more_vert</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+            <button mat-menu-item [routerLink]="['session/rest']" routerLinkActive="item-selected"
+                    [queryParams]="{env: env.value}">
+                <mat-icon>{{ MAPPING_TYPE['rest'].icon }}</mat-icon>
+                <span>{{ MAPPING_TYPE['rest'].title }}</span>
+            </button>
+            <button mat-menu-item [routerLink]="['session/main/batch']" routerLinkActive="item-selected"
+                    [queryParams]="{env: env.value}">
+                <mat-icon class="material-symbols-outlined">{{ MAPPING_TYPE['batch'].icon }}</mat-icon>
+                <span>{{ MAPPING_TYPE['batch'].title }}</span>
+            </button>
+            <button mat-menu-item [routerLink]="['session/main/startup']" routerLinkActive="item-selected"
+                    [queryParams]="{env: env.value}">
+                <mat-icon>{{ MAPPING_TYPE['startup'].icon }}</mat-icon>
+                <span>{{ MAPPING_TYPE['startup'].title }}</span>
+            </button>
+            <button mat-menu-item [routerLink]="['session/main/view']" routerLinkActive="item-selected"
+                    [queryParams]="{env: env.value}">
+                <mat-icon>{{ MAPPING_TYPE['view'].icon }}</mat-icon>
+                <span>{{ MAPPING_TYPE['view'].title }}</span>
+            </button>
+        </mat-menu>
+        <span style="flex-grow: 1;"></span>
+        <mat-form-field appearance="fill" class="md-2 no-subscript" [class.loading]="isLoadingEnv">
+            <mat-select [formControl]="env">
+                <mat-option *ngFor="let e of envs" [value]="e">{{ e }}</mat-option>
+            </mat-select>
+            <mat-spinner *ngIf="isLoadingEnv" [diameter]="18"></mat-spinner>
+        </mat-form-field>
+    </mat-toolbar>
 </nav>
 <mat-drawer-container>
-  <mat-drawer-content style="overflow-x: hidden; padding: 0.5em">
-    <router-outlet></router-outlet>
-  </mat-drawer-content>
+    <mat-drawer-content style="overflow-x: hidden; padding: 0.5em">
+        <router-outlet></router-outlet>
+    </mat-drawer-content>
 </mat-drawer-container>

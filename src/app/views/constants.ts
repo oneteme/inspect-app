@@ -360,6 +360,13 @@ export class Constants {
             }
         }
     };
+
+    static readonly MAPPING_TYPE: {[key: string]: {title: string, icon: string}} = {
+        rest: {title: 'Liste des Appels REST', icon: 'swap_vert'},
+        batch: {title: 'Lancement de Batch', icon: 'manufacturing'},
+        startup: {title: 'Liste des Serveurs', icon: 'restart_alt'},
+        view: {title: 'Navigation', icon: 'ads_click'}
+    }
 }
 
 export class Filter {

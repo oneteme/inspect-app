@@ -1,15 +1,17 @@
-import { Pipe, PipeTransform } from "@angular/core";
+import {inject, Pipe, PipeTransform} from "@angular/core";
+import {DecimalPipe} from "@angular/common";
 
 @Pipe({
     name:"duration"
 })
 
 export class DurationPipe implements PipeTransform {
+     _decimalPipe = inject(DecimalPipe);
 
     transform(value: any, ...args: any[]):string {
         if(!value && value !== 0) return '';
 
-        const remainingSeconds = Math.floor(value % 60);
+        const remainingSeconds = this._decimalPipe.transform(Math.round((value % 60) * 1000) / 1000);
         const minutes = Math.floor((value % 3600) / 60);
         const hours = Math.floor(value/3600);
 

@@ -9,7 +9,7 @@ import { Location } from '@angular/common';
 import { Utils } from 'src/app/shared/util';
 import { TraceService } from 'src/app/service/trace.service';
 import { application, makePeriod } from 'src/environments/environment';
-import { FilterConstants, FilterMap, FilterPreset } from '../../constants';
+import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constants';
 import { FilterService } from 'src/app/service/filter.service';
 import { InstanceMainSession } from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
@@ -20,6 +20,7 @@ import {EnvRouter} from "../../../service/router.service";
   styleUrls: ['./main.component.scss'],
 })
 export class MainComponent implements OnInit, OnDestroy {
+  MAPPING_TYPE = Constants.MAPPING_TYPE;
   filterConstants = FilterConstants;
   utils: Utils = new Utils();
   displayedColumns: string[] = ['status', 'app_name', 'name', 'location', 'start', 'durée', 'user'];
@@ -37,12 +38,6 @@ export class MainComponent implements OnInit, OnDestroy {
 
   filter: string = '';
   params: Partial<{ env: string, start: Date, end: Date, type: string }> = {};
-
-  mappingType: {[key: string]: string} = {
-    batch: 'BATCH',
-    startup: 'Serveur',
-    view: 'Vue'
-  }
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort) sort: MatSort;
@@ -99,7 +94,7 @@ export class MainComponent implements OnInit, OnDestroy {
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort
         this.dataSource.sortingDataAccessor = (row: any, columnName: string) => {
-          if (columnName == "app_name") return row["application"]["name"] as string;
+          if (columnName == "app_name") return row["appName"] as string;
           if (columnName == "name") return row["name"] as string;
           if (columnName == "location") return row['location'] as string;
           if (columnName == "start") return row['start'] as string;

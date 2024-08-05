@@ -48,14 +48,10 @@ export class DatabaseTableComponent implements OnInit {
         console.log(row)
         this.onClickRow.emit({event: event, row: row});
     }
-
-    statusBorder(status: any) {
-        return Utils.statusBorder(status);
-    }
 }
 
 const sortingDataAccessor = (row: any, columnName: string) => {
+    if (columnName == "start") return row['start'] as string;
     if (columnName == "duree") return (row["end"] - row["start"])
-    var columnValue = row[columnName as keyof any] as string;
-    return columnValue;
+    return row[columnName as keyof any] as string;
 }

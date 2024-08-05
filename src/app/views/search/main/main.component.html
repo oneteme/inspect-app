@@ -1,4 +1,4 @@
-<header-page titleIcon="repeat" [ui-title]="'Liste des ' + mappingType[params.type] +'s'">
+<header-page [titleIcon]="MAPPING_TYPE[params.type].icon" [ui-title]="MAPPING_TYPE[params.type].title">
   <form [formGroup]="serverFilterForm" class="header-filter md-2">
     <advanced-filter-recap [filters]="advancedParams" (filterRemoved)="handleRemovedFilter($event)" (focusField)="focusField($event)"></advanced-filter-recap> 
     <mat-form-field class="no-subscript" appearance="outline">
