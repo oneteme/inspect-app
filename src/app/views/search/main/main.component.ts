@@ -98,7 +98,7 @@ export class MainComponent implements OnInit, OnDestroy {
           if (columnName == "name") return row["name"] as string;
           if (columnName == "location") return row['location'] as string;
           if (columnName == "start") return row['start'] as string;
-          if (columnName == "Durée") return (row["end"] - row["start"])
+          if (columnName == "durée") return (row["end"] - row["start"])
 
           var columnValue = row[columnName as keyof any] as string;
           return columnValue;
