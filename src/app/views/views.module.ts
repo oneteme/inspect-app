@@ -24,6 +24,7 @@ import {RestTableComponent} from './detail/session/_component/rest-table/rest-ta
 import {DatabaseTableComponent} from './detail/session/_component/database-table/database-table.component';
 import {TimelineComponent} from './detail/session/_component/timeline/timeline.component';
 import {DashboardComponent} from './dashboard/dashboard.component';
+import {FtpTableComponent} from "./detail/session/_component/ftp-table/ftp-table.component";
 
 @NgModule({
   imports: [
@@ -46,6 +47,7 @@ import {DashboardComponent} from './dashboard/dashboard.component';
     DetailDatabaseComponent,
     RestTableComponent,
     DatabaseTableComponent,
+    FtpTableComponent,
     TimelineComponent,
     ApplicationComponent,
     UserComponent,
