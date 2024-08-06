@@ -9,7 +9,7 @@
                    [queryParams]="{'env': instance.env}"
                    matTooltip="Statistiques Appel REST">
                     <mat-icon>settings_suggest</mat-icon>
-                    {{ session.name|| 'N/A' }}
+                    {{ session.name || 'N/A' }}
                 </a>
                 <div class="right">
                     <button mat-icon-button (click)="navigate($event,'parent')" matTooltip="Détail de l'appel parent"
@@ -29,7 +29,7 @@
                 </div>
 
                 <div class="ellipsis"
-                     style="display: flex; gap: 0.5em; color: red; font-weight: 500; margin-top: 0.5em;"
+                     style="display: flex; align-items: center; gap: 0.5em; color: red; font-weight: 500; margin-top: 0.5em;"
                      *ngIf="session.exception?.type || session.exception?.message"
                      [matTooltip]="session.exception?.type" TooltipPosition="below">
                     <mat-icon class="material-symbols-outlined">warning</mat-icon>
@@ -63,11 +63,9 @@
                    [routerLink]="'/statistic/app/'+ instance.name"
                    [queryParams]="{'env': instance.env}" matTooltip="Statistiques Application">
                     <mat-icon>storage</mat-icon>
-                    {{instance.name}}
-                </a>
-                <div style="height: 48px">
+                    <div>{{instance.name}} <span style="font-size: 12px; font-style: italic; font-weight: normal;">{{instance.version}}</span></div>
 
-                </div>
+                </a>
             </mat-card-title>
             <mat-card-content>
                 <div style="display: flex; align-items: center;" *ngFor="let item of queryBySchema | keyvalue ">

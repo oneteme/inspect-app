@@ -11,7 +11,7 @@ import { TraceService } from 'src/app/service/trace.service';
 import { application, makePeriod } from 'src/environments/environment';
 import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constants';
 import { FilterService } from 'src/app/service/filter.service';
-import { InstanceMainSession } from 'src/app/model/trace.model';
+import {InstanceMainSession, InstanceRestSession} from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
 
 
@@ -35,7 +35,7 @@ export class MainComponent implements OnInit, OnDestroy {
   isLoading = false;
   advancedParams: Partial<{[key:string]:any}>
   focusFieldName: any
-
+  filterTable = new Map<string, any>();
   filter: string = '';
   params: Partial<{ env: string, start: Date, end: Date, type: string }> = {};
 
@@ -103,7 +103,24 @@ export class MainComponent implements OnInit, OnDestroy {
           var columnValue = row[columnName as keyof any] as string;
           return columnValue;
         }
-        this.dataSource.filter = this.filter;
+        this.dataSource.filterPredicate = (data: InstanceMainSession, filter: string) => {
+          var map: Map<string, any> = new Map(JSON.parse(filter));
+          let isMatch = true;
+          for (let [key, value] of map.entries()) {
+            if (key == 'filter') {
+              isMatch = isMatch && (value == '' || (data.appName?.toLowerCase().includes(value) ||
+                  data.name?.toLowerCase().includes(value) || data.location?.toLowerCase().includes(value) ||
+                  data.user?.toLowerCase().includes(value)));
+            } else if (key == 'status') {
+              const s = data.exception?.type || data.exception?.message ? "KO" : "OK";
+              isMatch = isMatch && (!value.length || (value.some((status: any) => {
+                return s == status;
+              })));
+            }
+          }
+          return isMatch;
+        }
+        this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
         this.dataSource.paginator.pageIndex = 0;
         this.isLoading = false;
       }
@@ -161,13 +178,19 @@ export class MainComponent implements OnInit, OnDestroy {
 
 
   applyFilter(event: Event) {
-    this.filter = (event.target as HTMLInputElement).value.trim().toLowerCase();
-    this.dataSource.filter = this.filter;
-
+    const filterValue = (event.target as HTMLInputElement).value;
+    this.filterTable.set('filter', filterValue.trim().toLowerCase());
+    this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
     if (this.dataSource.paginator) {
       this.dataSource.paginator.firstPage();
     }
   }
+
+  toggleFilter(filter: string[]) {
+    this.filterTable.set('status', filter);
+    this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
+  }
+
   resetFilters(){
     this.patchDateValue((application.session.api.default_period || makePeriod(0)).start,(application.session.api.default_period || makePeriod(0, 1)).end);
     this.advancedParams = {};

@@ -19,6 +19,14 @@
                         {{ session.location }}
                     </a>
                 </span>
+
+                <div class="ellipsis"
+                     style="display: flex; align-items: center; gap: 0.5em; color: red; font-weight: 500; margin-top: 0.5em;"
+                     *ngIf="session.exception?.type || session.exception?.message"
+                     [matTooltip]="session.exception?.type" TooltipPosition="below">
+                    <mat-icon class="material-symbols-outlined">warning</mat-icon>
+                    {{ session.exception?.message || session.exception?.type }}
+                </div>
             </mat-card-content>
             <mat-card-footer>
                 <mat-icon style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
@@ -38,7 +46,7 @@
                    [routerLink]="'/statistic/app/'+ instance.name"
                    [queryParams]="{'env': instance.env}" matTooltip="Statistiques Application">
                     <mat-icon>storage</mat-icon>
-                    {{instance.name}}
+                    <div>{{instance.name}} <span style="font-size: 12px; font-style: italic; font-weight: normal;">{{instance.version}}</span></div>
                 </a>
                 <div style="height: 48px">
 
