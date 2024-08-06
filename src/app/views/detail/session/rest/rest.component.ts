@@ -51,7 +51,8 @@ export class RestComponent implements OnInit, OnDestroy {
                         parent: this._traceService.getSessionParent(id).pipe(catchError(() => of(null))),
                         requests: this._traceService.getRestRequests(s.id),
                         queries: this._traceService.getDatabaseRequests(s.id),
-                        stages: this._traceService.getLocalRequests(s.id)
+                        stages: this._traceService.getLocalRequests(s.id),
+                        ftps: this._traceService.getFtpRequests(s.id)
                     });
                 }),
                 finalize(() => this.isLoading = false)
@@ -62,6 +63,7 @@ export class RestComponent implements OnInit, OnDestroy {
                     this.session.requests = result.requests;
                     this.session.queries = result.queries;
                     this.session.stages = result.stages;
+                    this.session.ftpRequests = result.ftps;
                     this.instance = result.instance;
                     this.sessionParent = result.parent;
                     this.groupQueriesBySchema();

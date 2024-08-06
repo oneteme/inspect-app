@@ -48,7 +48,7 @@
         <ng-container matColumnDef="path">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> API </th>
             <td mat-cell *matCellDef="let element">
-                <span [ngStyle]="{'color': element.protocol=='https' ? 'green':'gray'}">[{{element.method}}] </span>
+                <span style="font-weight: bold;" [ngStyle]="{'color': element.protocol=='https' ? 'green':'gray'}">[{{element.method}}] </span>
                 <br>
                 {{element['path']}}
             </td>
