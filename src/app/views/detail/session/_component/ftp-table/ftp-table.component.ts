@@ -6,11 +6,11 @@ import { RestRequest } from "src/app/model/trace.model";
 import { Utils } from "src/app/shared/util";
 
 @Component({
-    selector: 'rest-table',
-    templateUrl: './rest-table.component.html',
-    styleUrls: ['./rest-table.component.scss']
+    selector: 'ftp-table',
+    templateUrl: './ftp-table.component.html',
+    styleUrls: ['./ftp-table.component.scss']
 })
-export class RestTableComponent implements OnInit {
+export class FtpTableComponent implements OnInit {
     displayedColumns: string[] = ['status', 'host', 'path', 'start', 'duree'];
     dataSource: MatTableDataSource<RestRequest> = new MatTableDataSource();
     filterTable = new Map<string, any>();

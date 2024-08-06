@@ -6,7 +6,7 @@ import { DatabaseRequest } from "src/app/model/trace.model";
 import { Utils } from "src/app/shared/util";
 
 @Component({
-    selector: 'request-database-table',
+    selector: 'database-table',
     templateUrl: './database-table.component.html',
     styleUrls: ['./database-table.component.scss']
 })
@@ -35,7 +35,7 @@ export class DatabaseTableComponent implements OnInit {
     }
 
     getCommand(commands: string[]): string {
-        let command = ""
+        let command = "[--]";
         if (commands?.length == 1) {
             command = `[${commands[0]}]`
         } else if (commands?.length > 1) {

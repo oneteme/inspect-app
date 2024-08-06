@@ -15,8 +15,9 @@ export class ExceptionTableComponent {
 
     @Input() set data(objects: any) {
         if (objects?.length) {  //.pipe(map((d: any) => d.slice(0, 5)))
-            this.dataSource = new MatTableDataSource(objects.slice(0, 5).map((r: any) => {
-                return { count: r['COUNT'], message: r?.errorMessage, class: r?.errorType };
+            this.dataSource = new MatTableDataSource(objects.slice(0, 5).map((r: {COUNT: number, errorMessage: string, errorType: string}) => {
+                const index = r?.errorType.lastIndexOf('.') + 1;
+                return { count: r.COUNT, message: r?.errorMessage, class: r?.errorType?.substring(index) };
             }));
             if (objects.length > 5) {
                 this.addExceptionCount = objects.reduce((acc: number, curr: any, i: number) => {

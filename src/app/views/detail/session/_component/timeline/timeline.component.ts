@@ -5,7 +5,7 @@ import { DatabaseRequest, InstanceEnvironment, InstanceMainSession, InstanceRest
 import {EnvRouter} from "../../../../../service/router.service";
 
 @Component({
-    selector: 'request-timeline-table',
+    selector: 'timeline-table',
     templateUrl: './timeline.component.html',
     styleUrls: ['./timeline.component.scss']
 })

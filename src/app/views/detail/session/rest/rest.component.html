@@ -107,8 +107,8 @@
             </div>
             <mat-divider style="margin-left: 1em; flex: 1 1 0"></mat-divider>
         </div>
-        <request-rest-table [requests]="session.requests"
-                            (onClickRow)="selectedRequest($event)"></request-rest-table>
+        <rest-table [requests]="session.requests"
+                            (onClickRow)="selectedRequest($event)"></rest-table>
     </div>
     <div *ngIf="session.queries?.length" style="margin-bottom: 2em;">
         <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center;">
@@ -119,9 +119,9 @@
             </div>
             <mat-divider style="margin-left: 1em; flex: 1 1 0"></mat-divider>
         </div>
-        <request-database-table [requests]="session.queries"
+        <database-table [requests]="session.queries"
                                 (onClickRow)="selectedQuery($event)">
-        </request-database-table>
+        </database-table>
     </div>
     <div *ngIf="session.queries?.length || session.requests?.length" style="margin-bottom: 1em;">
         <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center;">
@@ -132,7 +132,7 @@
             </div>
             <mat-divider style="margin-left: 1em; flex: 1 1 0"></mat-divider>
         </div>
-        <request-timeline-table [request]="session" [instance]="instance"></request-timeline-table>
+        <timeline-table [request]="session" [instance]="instance"></timeline-table>
     </div>
 </div>
 
