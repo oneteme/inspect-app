@@ -2,21 +2,21 @@ import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from "@angula
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
-import {DatabaseRequest} from "src/app/model/trace.model";
+import {MailRequest} from "src/app/model/trace.model";
 
 @Component({
-    selector: 'database-table',
-    templateUrl: './database-table.component.html',
-    styleUrls: ['./database-table.component.scss']
+    selector: 'smtp-table',
+    templateUrl: './smtp-table.component.html',
+    styleUrls: ['./smtp-table.component.scss']
 })
-export class DatabaseTableComponent implements OnInit {
-    displayedColumns: string[] = ['status', 'host', 'schema', 'start', 'duree'];
-    dataSource: MatTableDataSource<DatabaseRequest> = new MatTableDataSource();
+export class SmtpTableComponent implements OnInit {
+    displayedColumns: string[] = ['status', 'host', 'start', 'duree'];
+    dataSource: MatTableDataSource<MailRequest> = new MatTableDataSource();
 
     @ViewChild('paginator', {static: true}) paginator: MatPaginator;
     @ViewChild('sort', {static: true}) sort: MatSort;
 
-    @Input() set requests(requests: DatabaseRequest[]) {
+    @Input() set requests(requests: MailRequest[]) {
         if(requests) {
             this.dataSource = new MatTableDataSource(requests);
             this.dataSource.paginator = this.paginator;
@@ -29,28 +29,19 @@ export class DatabaseTableComponent implements OnInit {
         this.dataSource.sortingDataAccessor = sortingDataAccessor;
     }
 
-    getElapsedTime(end: number, start: number,) {
-        return end - start;
-    }
-
-    getCommand(commands: string[]): string {
-        let command = "[--]";
-        if (commands?.length == 1) {
-            command = `[${commands[0]}]`
-        } else if (commands?.length > 1) {
-            command = "[SQL]"
-        }
-        return command;
-    }
-
-    selectedQuery(event: MouseEvent, row: number) {
+    selectedRequest(event: MouseEvent, row: any) {
         console.log(row)
         this.onClickRow.emit({event: event, row: row});
+    }
+
+    getElapsedTime(end: number, start: number,) {
+        return end - start;
     }
 }
 
 const sortingDataAccessor = (row: any, columnName: string) => {
+    if (columnName == "host") return row["host"] + ":" + row["port"] as string;
     if (columnName == "start") return row['start'] as string;
-    if (columnName == "duree") return (row["end"] - row["start"])
+    if (columnName == "duree") return (row["end"] - row["start"]);
     return row[columnName as keyof any] as string;
 }

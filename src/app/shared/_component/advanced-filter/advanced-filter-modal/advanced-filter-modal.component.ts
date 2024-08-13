@@ -166,10 +166,4 @@ export class AdvancedFilterComponent implements OnInit, AfterContentChecked, OnD
             return true;
         return false;
     }
-
-
-
-
-
-
 }

@@ -2,55 +2,47 @@ import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from "@angula
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
-import {DatabaseRequest} from "src/app/model/trace.model";
+import {NamingRequest} from "src/app/model/trace.model";
 
 @Component({
-    selector: 'database-table',
-    templateUrl: './database-table.component.html',
-    styleUrls: ['./database-table.component.scss']
+    selector: 'ldap-table',
+    templateUrl: './ldap-table.component.html',
+    styleUrls: ['./ldap-table.component.scss']
 })
-export class DatabaseTableComponent implements OnInit {
-    displayedColumns: string[] = ['status', 'host', 'schema', 'start', 'duree'];
-    dataSource: MatTableDataSource<DatabaseRequest> = new MatTableDataSource();
+export class LdapTableComponent implements OnInit {
+    displayedColumns: string[] = ['status', 'host', 'start', 'duree'];
+    dataSource: MatTableDataSource<NamingRequest> = new MatTableDataSource();
 
     @ViewChild('paginator', {static: true}) paginator: MatPaginator;
     @ViewChild('sort', {static: true}) sort: MatSort;
 
-    @Input() set requests(requests: DatabaseRequest[]) {
+    @Input() set requests(requests: NamingRequest[]) {
         if(requests) {
             this.dataSource = new MatTableDataSource(requests);
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
         }
     }
+
     @Output() onClickRow: EventEmitter<{event: MouseEvent, row: any}> = new EventEmitter();
 
     ngOnInit() {
         this.dataSource.sortingDataAccessor = sortingDataAccessor;
     }
 
-    getElapsedTime(end: number, start: number,) {
-        return end - start;
-    }
-
-    getCommand(commands: string[]): string {
-        let command = "[--]";
-        if (commands?.length == 1) {
-            command = `[${commands[0]}]`
-        } else if (commands?.length > 1) {
-            command = "[SQL]"
-        }
-        return command;
-    }
-
-    selectedQuery(event: MouseEvent, row: number) {
+    selectedRequest(event: MouseEvent, row: any) {
         console.log(row)
         this.onClickRow.emit({event: event, row: row});
+    }
+
+    getElapsedTime(end: number, start: number,) {
+        return end - start;
     }
 }
 
 const sortingDataAccessor = (row: any, columnName: string) => {
+    if (columnName == "host") return row["host"] + ":" + row["port"] as string;
     if (columnName == "start") return row['start'] as string;
-    if (columnName == "duree") return (row["end"] - row["start"])
+    if (columnName == "duree") return (row["end"] - row["start"]);
     return row[columnName as keyof any] as string;
 }

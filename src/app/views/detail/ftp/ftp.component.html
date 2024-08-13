@@ -1,0 +1,47 @@
+<div *ngIf="request" class="header-card">
+    <mat-card style="width: 100vw; min-width: 100vw;" [ngClass]="!exception ? 'success': 'fail'">
+        <mat-card-title>
+            <div style="display: flex; align-items: center; gap: 0.5em">
+                <mat-icon class="material-symbols-outlined">smb_share</mat-icon>
+                {{ request.host + ':' + request.port || 'N/A' }}
+            </div>
+
+            <div class="right">
+                <button mat-icon-button (click)="navigate($event,'parent')" matTooltip="Détail de l'appel parent">
+                    <mat-icon>move_up</mat-icon>
+                </button>
+            </div>
+        </mat-card-title>
+        <mat-card-content>
+            <div>
+                <div class="ellipsis"
+                     style="display: flex; gap: 0.5em; color: red; font-weight: 500; margin-top: 0.5em;"
+                     *ngIf="exception"
+                     [matTooltip]="exception.type" TooltipPosition="below">
+                    <mat-icon class="material-symbols-outlined">warning</mat-icon>{{exception.message}}
+                </div>
+            </div>
+        </mat-card-content>
+        <mat-card-footer>
+            <mat-icon style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
+            <div style="display: flex; align-items: center; gap: 0.5em">
+                {{request.user || "N/A"}}  le {{( request.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
+                en <span style="font-weight: bold">{{{ start: request.start, end: request.end } | duration}}</span>
+            </div>
+        </mat-card-footer>
+    </mat-card>
+</div>
+
+
+<div [hidden]="!request">
+    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center;">
+        <mat-divider style="margin-right: 1em; flex: 1 1 0%"></mat-divider>
+        <div style="display: flex; align-items: center; gap: 0.5em; margin-bottom:  0.5em; font-size: 20px; font-weight: 500;">
+            <mat-icon class="material-symbols-outlined">view_timeline</mat-icon>
+            Chronologie
+        </div>
+        <mat-divider style="margin-left: 1em; flex: 1 1 0%"></mat-divider>
+    </div>
+    <div #timeline id="timeline"></div>
+</div>
+

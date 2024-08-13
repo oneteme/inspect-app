@@ -73,7 +73,7 @@
                 <span
                     [matTooltip]="(element.start * 1000| date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr') +' \n '+ (element.end * 1000 | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr')  "
                     matTooltipClass="mat-tooltip">
-                    {{getElapsedTime(element.end,element.start)| number :'1.2-3' }}s
+                    {{getElapsedTime(element.end,element.start) | duration }}
                 </span>
             </td>
         </ng-container>

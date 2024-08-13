@@ -1,18 +1,18 @@
-import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
-import { MatTableDataSource } from '@angular/material/table';
-import { Location } from '@angular/common';
-import { ActivatedRoute, Params } from '@angular/router';
-import { BehaviorSubject, Observable, Subscription, finalize } from 'rxjs';
-import { Utils } from 'src/app/shared/util';
-import { JQueryService } from 'src/app/service/jquery.service';
-import { TraceService } from 'src/app/service/trace.service';
-import { application, makePeriod } from 'src/environments/environment';
-import {FilterConstants, FilterPreset, FilterMap, Constants} from '../../constants';
-import { FilterService } from 'src/app/service/filter.service';
-import { InstanceMainSession, InstanceRestSession, RestSession } from 'src/app/model/trace.model';
+import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {MatPaginator} from '@angular/material/paginator';
+import {MatSort} from '@angular/material/sort';
+import {MatTableDataSource} from '@angular/material/table';
+import {Location} from '@angular/common';
+import {ActivatedRoute, Params} from '@angular/router';
+import {BehaviorSubject, finalize, Subscription} from 'rxjs';
+import {Utils} from 'src/app/shared/util';
+import {JQueryService} from 'src/app/service/jquery.service';
+import {TraceService} from 'src/app/service/trace.service';
+import {application, makePeriod} from 'src/environments/environment';
+import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constants';
+import {FilterService} from 'src/app/service/filter.service';
+import {InstanceRestSession} from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
 
 
@@ -144,8 +144,7 @@ export class RestComponent implements OnInit, OnDestroy {
               if (columnName == "start") return row['start'] as string;
               if (columnName == "durée") return (row["end"] - row["start"])
 
-              var columnValue = row[columnName as keyof any] as string;
-              return columnValue;
+              return row[columnName as keyof any] as string;
 
             }
             this.dataSource.filterPredicate = (data: InstanceRestSession, filter: string) => {
@@ -199,10 +198,6 @@ export class RestComponent implements OnInit, OnDestroy {
         queryParams: { 'env': this.params.env }
       });
     }
-  }
-
-  getElapsedTime(end: number, start: number,) {
-    return (new Date(end * 1000).getTime() - new Date(start * 1000).getTime()) / 1000
   }
 
   statusBorder(status: number) {

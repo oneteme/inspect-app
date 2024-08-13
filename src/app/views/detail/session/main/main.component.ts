@@ -19,7 +19,6 @@ export class MainComponent implements OnInit, OnDestroy {
 
     session: InstanceMainSession;
     instance: InstanceEnvironment;
-    sessionParent: { id: string, type: string };
     isLoading: boolean = false;
     subscriptions: Array<Subscription> = [];
     queryBySchema: any[];
@@ -46,10 +45,12 @@ export class MainComponent implements OnInit, OnDestroy {
                     return forkJoin({
                         session: of(s),
                         instance: this._traceService.getInstance(s.instanceId),
-                        parent: this._traceService.getSessionParent(id).pipe(catchError(() => of(null))),
                         requests: this._traceService.getRestRequests(s.id),
                         queries: this._traceService.getDatabaseRequests(s.id),
-                        stages: this._traceService.getLocalRequests(s.id)
+                        stages: this._traceService.getLocalRequests(s.id),
+                        ftps: this._traceService.getFtpRequests(s.id),
+                        mails: this._traceService.getSmtpRequests(s.id),
+                        ldaps: this._traceService.getLdapRequests(s.id)
                     });
                 }),
                 finalize(() => this.isLoading = false)
@@ -61,8 +62,10 @@ export class MainComponent implements OnInit, OnDestroy {
                         this.session.requests = result.requests;
                         this.session.queries = result.queries;
                         this.session.stages = result.stages;
+                        this.session.ftpRequests = result.ftps;
+                        this.session.mailRequests = result.mails;
+                        this.session.ldapRequests = result.ldaps;
                         this.instance = result.instance;
-                        this.sessionParent = result.parent;
                         this.groupQueriesBySchema();
                     }
                 }
@@ -85,9 +88,45 @@ export class MainComponent implements OnInit, OnDestroy {
         console.log(event)
         if (event.row) {
             if (event.event.ctrlKey) {
-                this._router.open(`#/session/rest/${event.row}`, '_blank',)
+                this._router.open(`#/session/main/${event.row}`, '_blank',)
             } else {
-                this._router.navigate(['/session', 'rest', event.row], { queryParams: { env: this.env } }); // TODO remove env FIX BUG
+                this._router.navigate(['/session', 'main', event.row], { queryParams: { env: this.env } }); // TODO remove env FIX BUG
+            }
+        }
+    }
+
+    selectedFtp(event: { event: MouseEvent, row: any }) { // TODO finish this
+        if (event.row) {
+            if (event.event.ctrlKey) {
+                this._router.open(`#/session/main/${this.session.id}/ftp/${event.row}`, '_blank',)
+            } else {
+                this._router.navigate(['/session/main', this.session.id, 'ftp', event.row], {
+                    queryParams: { env: this.instance.env }
+                });
+            }
+        }
+    }
+
+    selectedLdap(event: { event: MouseEvent, row: any }) { // TODO finish this
+        if (event.row) {
+            if (event.event.ctrlKey) {
+                this._router.open(`#/session/main/${this.session.id}/ldap/${event.row}`, '_blank',)
+            } else {
+                this._router.navigate(['/session/main', this.session.id, 'ldap', event.row], {
+                    queryParams: { env: this.instance.env }
+                });
+            }
+        }
+    }
+
+    selectedSmtp(event: { event: MouseEvent, row: any }) { // TODO finish this
+        if (event.row) {
+            if (event.event.ctrlKey) {
+                this._router.open(`#/session/main/${this.session.id}/smtp/${event.row}`, '_blank',)
+            } else {
+                this._router.navigate(['/session/main', this.session.id, 'smtp', event.row], {
+                    queryParams: { env: this.instance.env }
+                });
             }
         }
     }
@@ -116,8 +155,6 @@ export class MainComponent implements OnInit, OnDestroy {
             case "tree":
                 params.push('session', 'main', this.session.type, this.session.id, 'tree')
                 break;
-            case "parent":
-                params.push('session', this.sessionParent.type, this.sessionParent.id)
         }
         if (event.ctrlKey) {
             this._router.open(`#/${params.join('/')}`, '_blank')

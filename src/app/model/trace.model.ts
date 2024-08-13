@@ -102,14 +102,16 @@ export interface DatabaseRequestStage extends RequestStage {
 
 export interface FtpRequestStage extends RequestStage {
     args: Array<string>;
+    order?: number;
 }
 
 export interface MailRequestStage extends RequestStage {
-
+    order?: number;
 }
 
 export interface NamingRequestStage extends RequestStage {
     args: Array<string>;
+    order?: number;
 }
 
 export interface Mail {
@@ -133,6 +135,8 @@ export interface SessionStage {
     start: number;
     end: number;
     threadName: string;
+
+    duration: number;
 }
 
 export interface ExceptionInfo {
@@ -151,4 +155,9 @@ export interface InstanceEnvironment {
     type: string;
     instant: number;
     collector: string;
+}
+
+export interface Period {
+    start: number;
+    end: number;
 }

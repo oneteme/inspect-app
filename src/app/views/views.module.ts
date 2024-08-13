@@ -25,6 +25,11 @@ import {DatabaseTableComponent} from './detail/session/_component/database-table
 import {TimelineComponent} from './detail/session/_component/timeline/timeline.component';
 import {DashboardComponent} from './dashboard/dashboard.component';
 import {FtpTableComponent} from "./detail/session/_component/ftp-table/ftp-table.component";
+import {SmtpTableComponent} from "./detail/session/_component/smtp-table/smtp-table.component";
+import {LdapTableComponent} from "./detail/session/_component/ldap-table/ldap-table.component";
+import {FtpComponent as DetailFtpComponent} from "./detail/ftp/ftp.component";
+import {LdapComponent as DetailLdapComponent} from "./detail/ldap/ldap.component";
+import {SmtpComponent as DetailSmtpComponent} from "./detail/smtp/smtp.component";
 
 @NgModule({
   imports: [
@@ -45,9 +50,14 @@ import {FtpTableComponent} from "./detail/session/_component/ftp-table/ftp-table
     DetailSessionRestComponent,
     DetailSessionMainComponent,
     DetailDatabaseComponent,
+    DetailFtpComponent,
+    DetailLdapComponent,
+    DetailSmtpComponent,
     RestTableComponent,
     DatabaseTableComponent,
     FtpTableComponent,
+    SmtpTableComponent,
+    LdapTableComponent,
     TimelineComponent,
     ApplicationComponent,
     UserComponent,

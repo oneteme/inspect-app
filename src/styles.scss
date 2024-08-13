@@ -107,14 +107,16 @@ mat-form-field.no-subscript {
 
 .vis-item.bdd{
   background-color: #008080; //rgb(150, 205, 50);
-  border-color: #002e2e;//rgb(150, 205, 50);
+  border-color: #002e2e; //rgb(150, 205, 50);
   color:white;
+  cursor: pointer;
 }
 
 .vis-item.bdd-failed{
   background-color: red; //rgb(150, 205, 50);
   border-color: rgb(185, 40, 40);//rgb(150, 205, 50);
   color:white;
+  cursor: pointer;
 }
 
 .vis-custom-time { // makes markers not draggable 

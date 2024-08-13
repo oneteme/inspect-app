@@ -1,9 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild, inject } from "@angular/core";
-import { MatPaginator } from "@angular/material/paginator";
-import { MatSort } from "@angular/material/sort";
-import { MatTableDataSource } from "@angular/material/table";
-import { RestRequest } from "src/app/model/trace.model";
-import { Utils } from "src/app/shared/util";
+import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from "@angular/core";
+import {MatPaginator} from "@angular/material/paginator";
+import {MatSort} from "@angular/material/sort";
+import {MatTableDataSource} from "@angular/material/table";
+import {RestRequest} from "src/app/model/trace.model";
 
 @Component({
     selector: 'rest-table',
@@ -53,10 +52,6 @@ export class RestTableComponent implements OnInit {
 
     getElapsedTime(end: number, start: number,) {
         return end - start;
-    }
-
-    statusBorder(status: any) {
-        return Utils.statusBorder(status);
     }
 }
 

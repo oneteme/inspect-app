@@ -52,7 +52,9 @@ export class RestComponent implements OnInit, OnDestroy {
                         requests: this._traceService.getRestRequests(s.id),
                         queries: this._traceService.getDatabaseRequests(s.id),
                         stages: this._traceService.getLocalRequests(s.id),
-                        ftps: this._traceService.getFtpRequests(s.id)
+                        ftps: this._traceService.getFtpRequests(s.id),
+                        mails: this._traceService.getSmtpRequests(s.id),
+                        ldaps: this._traceService.getLdapRequests(s.id)
                     });
                 }),
                 finalize(() => this.isLoading = false)
@@ -64,6 +66,8 @@ export class RestComponent implements OnInit, OnDestroy {
                     this.session.queries = result.queries;
                     this.session.stages = result.stages;
                     this.session.ftpRequests = result.ftps;
+                    this.session.mailRequests = result.mails;
+                    this.session.ldapRequests = result.ldaps;
                     this.instance = result.instance;
                     this.sessionParent = result.parent;
                     this.groupQueriesBySchema();
@@ -78,6 +82,43 @@ export class RestComponent implements OnInit, OnDestroy {
                 this._router.open(`#/session/rest/${event.row}`, '_blank',)
             } else {
                 this._router.navigate(['/session', 'rest', event.row], { queryParams: { env: this.env } }); // TODO remove env FIX BUG
+            }
+        }
+    }
+
+    selectedFtp(event: { event: MouseEvent, row: any }) { // TODO finish this
+        if (event.row) {
+            if (event.event.ctrlKey) {
+                this._router.open(`#/session/rest/${this.session.id}/ftp/${event.row}`, '_blank',)
+            } else {
+                this._router.navigate(['/session/rest', this.session.id, 'ftp', event.row], {
+                    queryParams: { env: this.instance.env }
+                });
+            }
+        }
+    }
+
+    selectedLdap(event: { event: MouseEvent, row: any }) { // TODO finish this
+        if (event.row) {
+            if (event.event.ctrlKey) {
+                this._router.open(`#/session/rest/${this.session.id}/ldap/${event.row}`, '_blank',)
+            } else {
+                this._router.navigate(['/session/rest', this.session.id, 'ldap', event.row], {
+                    queryParams: { env: this.instance.env }
+                });
+            }
+        }
+    }
+
+    selectedSmtp(event: { event: MouseEvent, row: any }) { // TODO finish this
+        console.log(event)
+        if (event.row) {
+            if (event.event.ctrlKey) {
+                this._router.open(`#/session/rest/${this.session.id}/smtp/${event.row}`, '_blank',)
+            } else {
+                this._router.navigate(['/session/rest', this.session.id, 'smtp', event.row], {
+                    queryParams: { env: this.instance.env }
+                });
             }
         }
     }

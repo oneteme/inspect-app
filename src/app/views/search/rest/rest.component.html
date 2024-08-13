@@ -105,7 +105,7 @@
         <td mat-cell *matCellDef="let row">
           <div
             [matTooltip]="(row.start*1000| date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr') +' | '+ row.inDataSize +'ko ↑ \n '+ (row.end*1000 | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr')+' | '+ row?.outDataSize +'ko ↓' "
-            matTooltipClass="mat-tooltip">{{ getElapsedTime(row.end, row.start) | duration}}</div>
+            matTooltipClass="mat-tooltip">{{ { start: row.start, end: row.end } | duration }}</div>
         </td>
       </ng-container>
 

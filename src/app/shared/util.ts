@@ -208,3 +208,7 @@ export function extractInfo(filterKey: string) {
     }
     return null;
 }
+
+export function getElapsedTime(end: number, start: number) {
+    return end - start;
+}

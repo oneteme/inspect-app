@@ -4,11 +4,11 @@ import { Observable, catchError, throwError } from "rxjs";
 import {
     DatabaseRequest,
     DatabaseRequestStage,
-    FtpRequest,
+    FtpRequest, FtpRequestStage,
     InstanceEnvironment,
     InstanceMainSession,
     InstanceRestSession,
-    LocalRequest, MailRequest, MailRequestStage, NamingRequest, NamingRequestStage,
+    LocalRequest, Mail, MailRequest, MailRequestStage, NamingRequest, NamingRequestStage,
     RestRequest,
     RestSession
 } from "../model/trace.model";
@@ -70,8 +70,8 @@ export class TraceService {
         return this.http.get<T>(`${this.server}/session/${idSession}/request/ftp`);
     }
 
-    getFtpRequestStages(idSession: string, idFtp: number): Observable<Array<FtpRequest>> {
-        return this.http.get<Array<FtpRequest>>(`${this.server}/session/${idSession}/request/ftp/${idFtp}/stage`);
+    getFtpRequestStages(idSession: string, idFtp: number): Observable<Array<FtpRequestStage>> {
+        return this.http.get<Array<FtpRequestStage>>(`${this.server}/session/${idSession}/request/ftp/${idFtp}/stage`);
     };
 
     getSmtpRequests(idSession: string): Observable<Array<MailRequest>>;
@@ -86,16 +86,20 @@ export class TraceService {
         return this.http.get<Array<MailRequestStage>>(`${this.server}/session/${idSession}/request/smtp/${idSmtp}/stage`);
     };
 
+    getSmtpRequestMails(idSession: string, idSmtp: number): Observable<Array<Mail>> {
+        return this.http.get<Array<Mail>>(`${this.server}/session/${idSession}/request/smtp/${idSmtp}/mail`);
+    };
+
     getLdapRequests(idSession: string): Observable<Array<NamingRequest>>;
     getLdapRequests(idSession: string, idLdap: number): Observable<NamingRequest>;
     getLdapRequests<T>(idSession: string, idLdap?: number): Observable<T> {
         if(idLdap)
-            return this.http.get<T>(`${this.server}/session/${idSession}/request/smtp/${idLdap}`);
-        return this.http.get<T>(`${this.server}/session/${idSession}/request/smtp`);
+            return this.http.get<T>(`${this.server}/session/${idSession}/request/ldap/${idLdap}`);
+        return this.http.get<T>(`${this.server}/session/${idSession}/request/ldap`);
     }
 
     getLdapRequestStages(idSession: string, idLdap: number): Observable<Array<NamingRequestStage>> {
-        return this.http.get<Array<NamingRequestStage>>(`${this.server}/session/${idSession}/request/smtp/${idLdap}/stage`);
+        return this.http.get<Array<NamingRequestStage>>(`${this.server}/session/${idSession}/request/ldap/${idLdap}/stage`);
     };
 
     getLocalRequests(id: string): Observable<Array<LocalRequest>> {

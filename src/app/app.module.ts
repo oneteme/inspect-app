@@ -25,6 +25,9 @@ import {RestComponent as DetailSessionRestComponent} from "./views/detail/sessio
 import {MainComponent as SearchMainComponent} from './views/search/main/main.component';
 import {MainComponent as DetailSessionMainComponent} from "./views/detail/session/main/main.component";
 import {EnvRouter} from "./service/router.service";
+import {FtpComponent as DetailFtpComponent} from "./views/detail/ftp/ftp.component";
+import {LdapComponent as DetailLdapComponent} from "./views/detail/ldap/ldap.component";
+import {SmtpComponent as DetailSmtpComponent} from "./views/detail/smtp/smtp.component";
 
 registerLocaleData(localeFr, 'fr-FR');
 const routes: Route[] = [
@@ -47,10 +50,28 @@ const routes: Route[] = [
                 title: 'Detail Appel REST'
               },
               {
-                path: 'database/:id_database',
+                path: 'database/:id_jdbc',
                 data: { type: 'rest' },
                 component: DetailDatabaseComponent,
                 title: 'Detail Base de donnée'
+              },
+              {
+                path: 'ftp/:id_ftp',
+                data: { type: 'rest' },
+                component: DetailFtpComponent,
+                title: 'Detail Ftp'
+              },
+              {
+                path: 'ldap/:id_ldap',
+                data: { type: 'rest' },
+                component: DetailLdapComponent,
+                title: 'Detail Ldap'
+              },
+              {
+                path: 'smtp/:id_smtp',
+                data: { type: 'rest' },
+                component: DetailSmtpComponent,
+                title: 'Detail Smtp'
               },
               {
                 path: 'tree',
@@ -95,10 +116,28 @@ const routes: Route[] = [
                 },
               },
               {
-                path: 'database/:id_database',
+                path: 'database/:id_jdbc',
                 component: DetailDatabaseComponent,
                 data: { type: 'main' },
                 title: 'Detail Base de donnée'
+              },
+              {
+                path: 'ftp/:id_ftp',
+                data: { type: 'main' },
+                component: DetailFtpComponent,
+                title: 'Detail Ftp'
+              },
+              {
+                path: 'ldap/:id_ldap',
+                data: { type: 'main' },
+                component: DetailLdapComponent,
+                title: 'Detail Ldap'
+              },
+              {
+                path: 'ldap/:id_smtp',
+                data: { type: 'main' },
+                component: DetailSmtpComponent,
+                title: 'Detail Smtp'
               },
               {
                 path: 'tree',

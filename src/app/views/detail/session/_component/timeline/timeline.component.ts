@@ -1,7 +1,14 @@
-import { DatePipe } from "@angular/common";
-import { Component, ElementRef, Input, OnChanges, OnInit, SimpleChanges, ViewChild, inject } from "@angular/core";
-import { Timeline } from "vis-timeline";
-import { DatabaseRequest, InstanceEnvironment, InstanceMainSession, InstanceRestSession, LocalRequest, RestRequest } from "src/app/model/trace.model";
+import {DatePipe} from "@angular/common";
+import {Component, ElementRef, inject, Input, OnChanges, SimpleChanges, ViewChild} from "@angular/core";
+import {Timeline} from "vis-timeline";
+import {
+    DatabaseRequest,
+    InstanceEnvironment,
+    InstanceMainSession,
+    InstanceRestSession,
+    LocalRequest,
+    RestRequest
+} from "src/app/model/trace.model";
 import {EnvRouter} from "../../../../../service/router.service";
 
 @Component({
@@ -28,10 +35,8 @@ export class TimelineComponent implements OnChanges {
                 let dataArray: any = [...<RestRequest[]>this.request.requests,
                 ...<DatabaseRequest[]>this.request.queries,
                 ...<LocalRequest[]>this.request.stages.map((s: any) => ({ ...s, isStage: true }))];
-                dataArray.splice(0, 0, { ...this.request, isStage: true })
+                dataArray.splice(0, 0, { ...this.request, isStage: true });
                 this.sortInnerArrayByDate(dataArray);
-    
-    
                 let data: any;
                 let groups: any;
                 let isWebapp = false, title = '';
@@ -49,14 +54,14 @@ export class TimelineComponent implements OnChanges {
                 }
                 data = dataArray.map((c: any, i: number) => {
                     let o = {
-                        id: c.id ?? -1,
+                        id: c.id ?? `${c.idRequest}_no_session`,
                         group: isWebapp ? 0 : c.threadName,
-                        content: c.hasOwnProperty('isStage') ? '' : (c.schema || c.host || 'N/A'),
+                        content: c.hasOwnProperty('isStage') ? '' : (c.name || c.host || 'N/A'),
                         start: c.start * 1000,
                         end: c.end * 1000,
                         title: `<span>${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(c.end * 1000), 'HH:mm:ss.SSS')}</span><br>
                     <h4>${c[title]}:  ${this.getElapsedTime(c.end, c.start).toFixed(3)}s</h4>`,
-                        className: c.hasOwnProperty('schema') ? "bdd" : !c.hasOwnProperty('isStage') ? "rest" : "",
+                        className: c.hasOwnProperty('name') ? "bdd" : !c.hasOwnProperty('isStage') ? "rest" : "",
                         type: c.hasOwnProperty('isStage') ? 'background' : 'range'
                     }
                     if (o.end > timeline_end) {
@@ -64,8 +69,6 @@ export class TimelineComponent implements OnChanges {
                     }
                     return o;
                 })
-    
-                console.log(data, dataArray)
                 if (this.timeline) {  // destroy if exists 
                     this.timeline.destroy();
                 }
@@ -89,20 +92,22 @@ export class TimelineComponent implements OnChanges {
                 });
     
                 let that = this;
-                this.timeline.on('click', function (props: any) {
+                this.timeline.on('doubleClick', function (props: any) {
                     let id = props.item;
-                    console.log('test', props)
-                    if (isNaN(id)) {
-                        that._router.navigate(['session', 'rest', id]);
-                    } else {
-                        if(id != -1)
+                    if(id) {
+                        if (isNaN(id)) {
+                            if(id.lastIndexOf('_no_session') == -1) {
+                                that._router.navigate(['session', 'rest', id]);
+                            }
+                        } else {
                             that._router.navigate(['session', 'rest', that.request.id, 'database', id]);
+                        }
                     }
+
                 });
     
                 if (timeline_end != +this.request.end * 1000) {
                     this.timeline.addCustomTime(+this.request.end * 1000, "async");
-
                 }
             }
         }

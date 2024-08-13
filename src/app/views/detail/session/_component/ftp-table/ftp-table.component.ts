@@ -1,9 +1,8 @@
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild, inject } from "@angular/core";
-import { MatPaginator } from "@angular/material/paginator";
-import { MatSort } from "@angular/material/sort";
-import { MatTableDataSource } from "@angular/material/table";
-import {FtpRequest, RestRequest} from "src/app/model/trace.model";
-import { Utils } from "src/app/shared/util";
+import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from "@angular/core";
+import {MatPaginator} from "@angular/material/paginator";
+import {MatSort} from "@angular/material/sort";
+import {MatTableDataSource} from "@angular/material/table";
+import {FtpRequest} from "src/app/model/trace.model";
 
 @Component({
     selector: 'ftp-table',
@@ -11,9 +10,8 @@ import { Utils } from "src/app/shared/util";
     styleUrls: ['./ftp-table.component.scss']
 })
 export class FtpTableComponent implements OnInit {
-    displayedColumns: string[] = ['status', 'host', 'path', 'start', 'duree'];
+    displayedColumns: string[] = ['status', 'host', 'start', 'duree'];
     dataSource: MatTableDataSource<FtpRequest> = new MatTableDataSource();
-    filterTable = new Map<string, any>();
 
     @ViewChild('paginator', {static: true}) paginator: MatPaginator;
     @ViewChild('sort', {static: true}) sort: MatSort;
@@ -30,20 +28,6 @@ export class FtpTableComponent implements OnInit {
     ngOnInit() {
         this.dataSource.sortingDataAccessor = sortingDataAccessor;
     }
-    
-    applyFilter(event: Event) {
-        const filterValue = (event.target as HTMLInputElement).value;
-        this.filterTable.set('filter', filterValue.trim().toLowerCase());
-        this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
-        if (this.dataSource.paginator) {
-            this.dataSource.paginator.firstPage();
-        }
-    }
-
-    toggleFilter(filter: string[]) {
-        this.filterTable.set('status', filter);
-        this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
-    }
 
     selectedRequest(event: MouseEvent, row: any) {
         console.log(row)
@@ -52,10 +36,6 @@ export class FtpTableComponent implements OnInit {
 
     getElapsedTime(end: number, start: number,) {
         return end - start;
-    }
-
-    statusBorder(status: any) {
-        return Utils.statusBorder(status);
     }
 }
 
