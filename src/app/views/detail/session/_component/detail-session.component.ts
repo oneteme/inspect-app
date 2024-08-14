@@ -1,5 +1,5 @@
 import {Component, inject, Input, OnInit} from "@angular/core";
-import {InstanceEnvironment, InstanceMainSession} from "../../../../model/trace.model";
+import {InstanceEnvironment, InstanceMainSession, InstanceRestSession} from "../../../../model/trace.model";
 import {EnvRouter} from "../../../../service/router.service";
 
 @Component({
@@ -10,7 +10,7 @@ import {EnvRouter} from "../../../../service/router.service";
 export class DetailSessionComponent {
     private _router: EnvRouter = inject(EnvRouter);
 
-    @Input() session: InstanceMainSession;
+    @Input() session: InstanceMainSession | InstanceRestSession;
     @Input() instance: InstanceEnvironment;
 
     selectedRequest(event: { event: MouseEvent, row: any }) {
