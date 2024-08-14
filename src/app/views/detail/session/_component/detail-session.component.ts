@@ -16,19 +16,21 @@ export class DetailSessionComponent {
     selectedRequest(event: { event: MouseEvent, row: any }) {
         if (event.row) {
             if (event.event.ctrlKey) {
-                this._router.open(`#/session/main/${event.row}`, '_blank',)
+                this._router.open(`#/session/rest/${event.row}`, '_blank',)
             } else {
-                this._router.navigate(['/session', 'main', event.row], { queryParams: { env: this.instance.env } }); // TODO remove env FIX BUG
+                this._router.navigate(['/session', 'rest', event.row], { queryParams: { env: this.instance.env } }); // TODO remove env FIX BUG
             }
         }
     }
 
     selectedFtp(event: { event: MouseEvent, row: any }) { // TODO finish this
         if (event.row) {
+            let segment = 'rest';
+            if(this.session.type) segment = `main/${this.session.type.toLowerCase()}`;
             if (event.event.ctrlKey) {
-                this._router.open(`#/session/main/${this.session.id}/ftp/${event.row}`, '_blank',)
+                this._router.open(`#/session/${segment}/${this.session.id}/ftp/${event.row}`, '_blank',)
             } else {
-                this._router.navigate(['/session/main', this.session.id, 'ftp', event.row], {
+                this._router.navigate([`/session/${segment}`, this.session.id, 'ftp', event.row], {
                     queryParams: { env: this.instance.env }
                 });
             }
@@ -37,10 +39,12 @@ export class DetailSessionComponent {
 
     selectedLdap(event: { event: MouseEvent, row: any }) { // TODO finish this
         if (event.row) {
+            let segment = 'rest';
+            if(this.session.type) segment = `main/${this.session.type.toLowerCase()}`;
             if (event.event.ctrlKey) {
-                this._router.open(`#/session/main/${this.session.id}/ldap/${event.row}`, '_blank',)
+                this._router.open(`#/session/${segment}/${this.session.id}/ldap/${event.row}`, '_blank',)
             } else {
-                this._router.navigate(['/session/main', this.session.id, 'ldap', event.row], {
+                this._router.navigate([`/session/${segment}`, this.session.id, 'ldap', event.row], {
                     queryParams: { env: this.instance.env }
                 });
             }
@@ -49,10 +53,12 @@ export class DetailSessionComponent {
 
     selectedSmtp(event: { event: MouseEvent, row: any }) { // TODO finish this
         if (event.row) {
+            let segment = 'rest';
+            if(this.session.type) segment = `main/${this.session.type.toLowerCase()}`;
             if (event.event.ctrlKey) {
-                this._router.open(`#/session/main/${this.session.id}/smtp/${event.row}`, '_blank',)
+                this._router.open(`#/session/${segment}/${this.session.id}/smtp/${event.row}`, '_blank',)
             } else {
-                this._router.navigate(['/session/main', this.session.id, 'smtp', event.row], {
+                this._router.navigate([`/session/${segment}`, this.session.id, 'smtp', event.row], {
                     queryParams: { env: this.instance.env }
                 });
             }
@@ -61,10 +67,12 @@ export class DetailSessionComponent {
 
     selectedQuery(event: { event: MouseEvent, row: any }) { // TODO finish this
         if (event.row) {
+            let segment = 'rest';
+            if(this.session.type) segment = `main/${this.session.type.toLowerCase()}`;
             if (event.event.ctrlKey) {
-                this._router.open(`#/session/main/${this.session.type}/${this.session.id}/database/${event.row}`, '_blank',)
+                this._router.open(`#/session/${segment}/${this.session.id}/database/${event.row}`, '_blank',)
             } else {
-                this._router.navigate(['/session/main', this.session.type, this.session.id, 'database', event.row], {
+                this._router.navigate([`/session/${segment}`, this.session.id, 'database', event.row], {
                     queryParams: { env: this.instance.env }
                 });
             }

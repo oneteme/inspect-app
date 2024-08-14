@@ -53,9 +53,9 @@ export class SearchMainView implements OnInit, OnDestroy {
             this._activatedRoute.queryParams
         ]).subscribe({
             next: ([params, queryParams]) => {
+                console.log(params.type_main, 'test')
                 this.params.env = queryParams['env'] || application.default_env;
-
-                this.params.type = params.type;
+                this.params.type = params.type_main;
                 this.params.start = queryParams['start'] ? new Date(queryParams['start']) : (application.session.main.default_period || makePeriod(0, 1)).start;
                 this.params.end = queryParams['end'] ? new Date(queryParams['end']) : (application.session.main.default_period || makePeriod(0, 1)).end;
                 this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
