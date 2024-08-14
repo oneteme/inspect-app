@@ -13,21 +13,23 @@ import {HttpClientModule} from '@angular/common/http';
 
 import {DatePipe, DecimalPipe, registerLocaleData} from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
-import {TreeView} from './views/tree/tree.view';
-import {DetailDatabaseView} from './views/detail/database/detail-database.view';
-import {DashboardComponent} from './views/dashboard/dashboard.component';
 import {SearchRestView} from "./views/search/rest/search-rest.view";
-import {SearchMainView} from './views/search/main/search-main.view';
-import {EnvRouter} from "./service/router.service";
+import {DetailSessionRestView} from "./views/detail/session/rest/detail-session-rest.view";
+import {DetailDatabaseView} from "./views/detail/database/detail-database.view";
 import {DetailFtpView} from "./views/detail/ftp/detail-ftp.view";
 import {DetailLdapView} from "./views/detail/ldap/detail-ldap.view";
-import {DetailSmtpView as DetailSmtpComponent} from "./views/detail/smtp/detail-smtp.view";
-import {DetailSessionRestView} from "./views/detail/session/rest/detail-session-rest.view";
+import {DetailSmtpView} from "./views/detail/smtp/detail-smtp.view";
+import {TreeView} from "./views/tree/tree.view";
+import {SearchMainView} from "./views/search/main/search-main.view";
 import {DetailSessionMainView} from "./views/detail/session/main/detail-session-main.view";
 import {StatisticApplicationView} from "./views/statistic/application/statistic-application.view";
 import {StatisticRestView} from "./views/statistic/rest/statistic-rest.view";
 import {StatisticUserView} from "./views/statistic/user/statistic-user.view";
 import {StatisticDatabaseView} from "./views/statistic/database/statistic-database.view";
+import {DashboardComponent} from "./views/dashboard/dashboard.component";
+import {EnvRouter} from "./service/router.service";
+import {DurationPipe} from "./shared/pipe/duration.pipe";
+
 
 registerLocaleData(localeFr, 'fr-FR');
 const routes: Route[] = [
@@ -70,7 +72,7 @@ const routes: Route[] = [
               {
                 path: 'smtp/:id_smtp',
                 data: { type: 'rest' },
-                component: DetailSmtpComponent,
+                component: DetailSmtpView,
                 title: 'Detail Smtp'
               },
               {
@@ -136,7 +138,7 @@ const routes: Route[] = [
               {
                 path: 'smtp/:id_smtp',
                 data: { type: 'main' },
-                component: DetailSmtpComponent,
+                component: DetailSmtpView,
                 title: 'Detail Smtp'
               },
               {
@@ -182,7 +184,7 @@ const routes: Route[] = [
   },
   {
     path: 'dashboard',
-    component: DashboardComponent, 
+    component: DashboardComponent,
     title: 'Dashboard'
   },
   { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
@@ -205,6 +207,7 @@ const routes: Route[] = [
   providers: [
     DatePipe,
     DecimalPipe,
+    DurationPipe,
     EnvRouter,
     { provide: LOCALE_ID, useValue: 'fr-FR' }
   ],
