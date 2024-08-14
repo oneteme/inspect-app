@@ -10,7 +10,7 @@ export class DurationPipe implements PipeTransform {
      _decimalPipe = inject(DecimalPipe);
 
     transform(value: Period | number, ...args: any[]):string {
-        if(value == null) return;
+        if(value == null) return 'N/A';
         let time = typeof value == "object" ? value.end - value.start : value;
 
         const remainingSeconds = this._decimalPipe.transform(Math.round((time % 60) * 1000) / 1000);

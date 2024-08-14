@@ -5,31 +5,40 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {SharedModule} from '../shared/shared.module';
-import {MainComponent as SearchMainComponent} from './search/main/main.component';
-import {MainComponent as DetailSessionMainComponent} from './detail/session/main/main.component';
-import {TreeComponent} from './tree/tree.component';
-import {DependenciesTableComponent} from './statistic/_component/dependencies-table/dependencies-table.component';
-import {DependentsTableComponent} from './statistic/_component/dependents-table/dependents-table.component';
-import {SessionTableComponent} from './statistic/user/_component/session-table/session-table.component';
-import {ApplicationComponent} from './statistic/application/application.component';
-import {RestComponent as SearchRestComponent} from './search/rest/rest.component';
-import {RestComponent as StatisticRestComponent} from './statistic/rest/rest.component';
-import {RestComponent as DetailSessionRestComponent} from './detail/session/rest/rest.component';
-import {UserComponent} from './statistic/user/user.component';
-import {ExceptionTableComponent} from './statistic/_component/exception-table/exception-table.component';
+import {SearchMainView} from './search/main/search-main.view';
+import {DetailSessionMainView} from './detail/session/main/detail-session-main.view';
+import {TreeView} from './tree/tree.view';
+import {
+  StatisticDependenciesTableComponent
+} from './statistic/_component/dependencies-table/statistic-dependencies-table.component';
+import {
+  StatisticDependentsTableComponent
+} from './statistic/_component/dependents-table/statistic-dependents-table.component';
+import {
+  StatisticUserSessionTableComponent
+} from './statistic/user/_component/session-table/statistic-user-session-table.component';
+import {StatisticApplicationView} from './statistic/application/statistic-application.view';
+import {SearchRestView} from './search/rest/search-rest.view';
+import {StatisticRestView} from './statistic/rest/statistic-rest.view';
+import {DetailSessionRestView} from './detail/session/rest/detail-session-rest.view';
+import {StatisticUserView} from './statistic/user/statistic-user.view';
+import {
+  StatisticExceptionTableComponent
+} from './statistic/_component/exception-table/statistic-exception-table.component';
 import {ChartComponent} from '@oneteme/jquery-apexcharts';
-import {DatabaseComponent as StatisticDatabaseComponent} from './statistic/database/database.component';
-import {DatabaseComponent as DetailDatabaseComponent} from './detail/database/database.component';
-import {RestTableComponent} from './detail/session/_component/rest-table/rest-table.component';
-import {DatabaseTableComponent} from './detail/session/_component/database-table/database-table.component';
-import {TimelineComponent} from './detail/session/_component/timeline/timeline.component';
+import {StatisticDatabaseView} from './statistic/database/statistic-database.view';
+import {DetailDatabaseView} from './detail/database/detail-database.view';
+import {DetailRestTableComponent} from './detail/session/_component/rest-table/detail-rest-table.component';
+import {DetailDatabaseTableComponent} from './detail/session/_component/database-table/detail-database-table.component';
+import {DetailTimelineComponent} from './detail/session/_component/timeline/detail-timeline.component';
 import {DashboardComponent} from './dashboard/dashboard.component';
-import {FtpTableComponent} from "./detail/session/_component/ftp-table/ftp-table.component";
-import {SmtpTableComponent} from "./detail/session/_component/smtp-table/smtp-table.component";
-import {LdapTableComponent} from "./detail/session/_component/ldap-table/ldap-table.component";
-import {FtpComponent as DetailFtpComponent} from "./detail/ftp/ftp.component";
-import {LdapComponent as DetailLdapComponent} from "./detail/ldap/ldap.component";
-import {SmtpComponent as DetailSmtpComponent} from "./detail/smtp/smtp.component";
+import {DetailFtpTableComponent} from "./detail/session/_component/ftp-table/detail-ftp-table.component";
+import {DetailSmtpTableComponent} from "./detail/session/_component/smtp-table/detail-smtp-table.component";
+import {DetailLdapTableComponent} from "./detail/session/_component/ldap-table/detail-ldap-table.component";
+import {DetailFtpView} from "./detail/ftp/detail-ftp.view";
+import {DetailLdapView} from "./detail/ldap/detail-ldap.view";
+import {DetailSmtpView} from "./detail/smtp/detail-smtp.view";
+import {DetailSessionComponent} from "./detail/session/_component/detail-session.component";
 
 @NgModule({
   imports: [
@@ -43,29 +52,30 @@ import {SmtpComponent as DetailSmtpComponent} from "./detail/smtp/smtp.component
     ChartComponent
   ],
   declarations: [
-    SearchRestComponent,
-    SearchMainComponent,
-    StatisticRestComponent,
-    StatisticDatabaseComponent,
-    DetailSessionRestComponent,
-    DetailSessionMainComponent,
-    DetailDatabaseComponent,
-    DetailFtpComponent,
-    DetailLdapComponent,
-    DetailSmtpComponent,
-    RestTableComponent,
-    DatabaseTableComponent,
-    FtpTableComponent,
-    SmtpTableComponent,
-    LdapTableComponent,
-    TimelineComponent,
-    ApplicationComponent,
-    UserComponent,
-    TreeComponent,
-    DependentsTableComponent,
-    DependenciesTableComponent,
-    ExceptionTableComponent,
-    SessionTableComponent,
+    SearchRestView,
+    SearchMainView,
+    StatisticRestView,
+    StatisticDatabaseView,
+    DetailSessionRestView,
+    DetailSessionMainView,
+    DetailDatabaseView,
+    DetailFtpView,
+    DetailLdapView,
+    DetailSmtpView,
+    DetailRestTableComponent,
+    DetailDatabaseTableComponent,
+    DetailFtpTableComponent,
+    DetailSmtpTableComponent,
+    DetailLdapTableComponent,
+    DetailTimelineComponent,
+    DetailSessionComponent,
+    StatisticApplicationView,
+    StatisticUserView,
+    TreeView,
+    StatisticDependentsTableComponent,
+    StatisticDependenciesTableComponent,
+    StatisticExceptionTableComponent,
+    StatisticUserSessionTableComponent,
     DashboardComponent
   ]
 })

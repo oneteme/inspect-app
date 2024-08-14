@@ -135,8 +135,6 @@ export interface SessionStage {
     start: number;
     end: number;
     threadName: string;
-
-    duration: number;
 }
 
 export interface ExceptionInfo {

@@ -13,21 +13,21 @@ import {HttpClientModule} from '@angular/common/http';
 
 import {DatePipe, DecimalPipe, registerLocaleData} from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
-import {TreeComponent} from './views/tree/tree.component';
-import {ApplicationComponent as StatisticApplicationComponent} from './views/statistic/application/application.component';
-import {UserComponent as StatisticUserComponent} from './views/statistic/user/user.component';
-import {DatabaseComponent as DetailDatabaseComponent} from './views/detail/database/database.component';
-import {DatabaseComponent as StatisticDatabaseComponent} from './views/statistic/database/database.component';
+import {TreeView} from './views/tree/tree.view';
+import {DetailDatabaseView} from './views/detail/database/detail-database.view';
 import {DashboardComponent} from './views/dashboard/dashboard.component';
-import {RestComponent as SearchRestComponent} from "./views/search/rest/rest.component";
-import {RestComponent as StatisticRestComponent} from "./views/statistic/rest/rest.component";
-import {RestComponent as DetailSessionRestComponent} from "./views/detail/session/rest/rest.component";
-import {MainComponent as SearchMainComponent} from './views/search/main/main.component';
-import {MainComponent as DetailSessionMainComponent} from "./views/detail/session/main/main.component";
+import {SearchRestView} from "./views/search/rest/search-rest.view";
+import {SearchMainView} from './views/search/main/search-main.view';
 import {EnvRouter} from "./service/router.service";
-import {FtpComponent as DetailFtpComponent} from "./views/detail/ftp/ftp.component";
-import {LdapComponent as DetailLdapComponent} from "./views/detail/ldap/ldap.component";
-import {SmtpComponent as DetailSmtpComponent} from "./views/detail/smtp/smtp.component";
+import {DetailFtpView} from "./views/detail/ftp/detail-ftp.view";
+import {DetailLdapView} from "./views/detail/ldap/detail-ldap.view";
+import {DetailSmtpView as DetailSmtpComponent} from "./views/detail/smtp/detail-smtp.view";
+import {DetailSessionRestView} from "./views/detail/session/rest/detail-session-rest.view";
+import {DetailSessionMainView} from "./views/detail/session/main/detail-session-main.view";
+import {StatisticApplicationView} from "./views/statistic/application/statistic-application.view";
+import {StatisticRestView} from "./views/statistic/rest/statistic-rest.view";
+import {StatisticUserView} from "./views/statistic/user/statistic-user.view";
+import {StatisticDatabaseView} from "./views/statistic/database/statistic-database.view";
 
 registerLocaleData(localeFr, 'fr-FR');
 const routes: Route[] = [
@@ -38,7 +38,7 @@ const routes: Route[] = [
         children: [
           {
             path: '',
-            component: SearchRestComponent,
+            component: SearchRestView,
             title: 'Recherche Appels REST',
           },
           {
@@ -46,25 +46,25 @@ const routes: Route[] = [
             children: [
               {
                 path: '',
-                component: DetailSessionRestComponent,
+                component: DetailSessionRestView,
                 title: 'Detail Appel REST'
               },
               {
                 path: 'database/:id_jdbc',
                 data: { type: 'rest' },
-                component: DetailDatabaseComponent,
+                component: DetailDatabaseView,
                 title: 'Detail Base de donnée'
               },
               {
                 path: 'ftp/:id_ftp',
                 data: { type: 'rest' },
-                component: DetailFtpComponent,
+                component: DetailFtpView,
                 title: 'Detail Ftp'
               },
               {
                 path: 'ldap/:id_ldap',
                 data: { type: 'rest' },
-                component: DetailLdapComponent,
+                component: DetailLdapView,
                 title: 'Detail Ldap'
               },
               {
@@ -76,7 +76,7 @@ const routes: Route[] = [
               {
                 path: 'tree',
                 data: { type: 'rest' },
-                component: TreeComponent,
+                component: TreeView,
                 title: 'Arbre d\'Appels'
               },
               { path: '**', pathMatch: 'full', redirectTo: `/session/rest/:id_session` }
@@ -90,7 +90,7 @@ const routes: Route[] = [
         children: [
           {
             path: '',
-            component: SearchMainComponent,
+            component: SearchMainView,
             title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
               if (route.paramMap.get('type_main') == 'batch') {
                 return 'Recherche BATCHs';
@@ -105,7 +105,7 @@ const routes: Route[] = [
             children: [
               {
                 path: '',
-                component: DetailSessionMainComponent,
+                component: DetailSessionMainView,
                 title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
                   if (route.paramMap.get('type_main') == 'batch') {
                     return 'Detail BATCH';
@@ -117,24 +117,24 @@ const routes: Route[] = [
               },
               {
                 path: 'database/:id_jdbc',
-                component: DetailDatabaseComponent,
+                component: DetailDatabaseView,
                 data: { type: 'main' },
                 title: 'Detail Base de donnée'
               },
               {
                 path: 'ftp/:id_ftp',
                 data: { type: 'main' },
-                component: DetailFtpComponent,
+                component: DetailFtpView,
                 title: 'Detail Ftp'
               },
               {
                 path: 'ldap/:id_ldap',
                 data: { type: 'main' },
-                component: DetailLdapComponent,
+                component: DetailLdapView,
                 title: 'Detail Ldap'
               },
               {
-                path: 'ldap/:id_smtp',
+                path: 'smtp/:id_smtp',
                 data: { type: 'main' },
                 component: DetailSmtpComponent,
                 title: 'Detail Smtp'
@@ -142,7 +142,7 @@ const routes: Route[] = [
               {
                 path: 'tree',
                 data: { type: 'main' },
-                component: TreeComponent,
+                component: TreeView,
                 title: 'Arbre d\'appels'
               },
               { path: '**', pathMatch: 'full', redirectTo: `/main/:type_main/:id_session` }
@@ -159,22 +159,22 @@ const routes: Route[] = [
     children: [
       {
         path: 'app/:name',
-        component: StatisticApplicationComponent,
+        component: StatisticApplicationView,
         title: 'Statistiques Serveur'
       },
       {
         path: 'rest/:name',
-        component: StatisticRestComponent,
+        component: StatisticRestView,
         title: 'Statistiques API'
       },
       {
         path: 'user/:name',
-        component: StatisticUserComponent,
+        component: StatisticUserView,
         title: 'Statistiques Utilisateur'
       },
       {
         path: 'database/:name',
-        component: StatisticDatabaseComponent,
+        component: StatisticDatabaseView,
         title: 'Statistiques Base de Donnée'
       },
       { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }

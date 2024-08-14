@@ -1,0 +1,75 @@
+<div *ngIf="session.requests?.length" style="margin-bottom: 2em;">
+    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
+        <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
+        <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
+            <mat-icon>call_made</mat-icon>
+            <div [matBadge]="session.requests?.length" matBadgeOverlap="false" matBadgeColor="primary">API</div>
+        </div>
+        <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
+    </div>
+    <rest-table [requests]="session.requests"
+                (onClickRow)="selectedRequest($event)"></rest-table>
+</div>
+<div *ngIf="session.ftpRequests?.length" style="margin-bottom: 2em;">
+    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
+        <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
+        <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
+            <mat-icon class="material-symbols-outlined">smb_share</mat-icon>
+            <div [matBadge]="session.ftpRequests?.length" matBadgeOverlap="false" matBadgeColor="primary">FTP</div>
+        </div>
+        <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
+    </div>
+    <ftp-table [requests]="session.ftpRequests"
+               (onClickRow)="selectedFtp($event)">
+    </ftp-table>
+</div>
+<div *ngIf="session.mailRequests?.length" style="margin-bottom: 2em;">
+    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
+        <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
+        <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
+            <mat-icon class="material-symbols-outlined">outgoing_mail</mat-icon>
+            <div [matBadge]="session.mailRequests?.length" matBadgeOverlap="false" matBadgeColor="primary">SMTP</div>
+        </div>
+        <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
+    </div>
+    <smtp-table [requests]="session.mailRequests"
+                (onClickRow)="selectedSmtp($event)">
+    </smtp-table>
+</div>
+<div *ngIf="session.ldapRequests?.length" style="margin-bottom: 2em;">
+    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
+        <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
+        <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
+            <mat-icon class="material-symbols-outlined">user_attributes</mat-icon>
+            <div [matBadge]="session.ldapRequests?.length" matBadgeOverlap="false" matBadgeColor="primary">LDAP</div>
+        </div>
+        <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
+    </div>
+    <ldap-table [requests]="session.ldapRequests"
+                (onClickRow)="selectedLdap($event)">
+    </ldap-table>
+</div>
+<div *ngIf="session.queries?.length" style="margin-bottom: 2em;">
+    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center;  margin-bottom:  0.5em;">
+        <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
+        <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
+            <mat-icon class="material-symbols-outlined">Database</mat-icon>
+            <div [matBadge]="session.queries?.length" matBadgeOverlap="false" matBadgeColor="primary">BDD</div>
+        </div>
+        <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
+    </div>
+    <database-table [requests]="session.queries"
+                    (onClickRow)="selectedQuery($event)">
+    </database-table>
+</div>
+<div *ngIf="session.queries?.length || session.requests?.length" style="margin-bottom: 1em;">
+    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
+        <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
+        <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
+            <mat-icon class="material-symbols-outlined">view_timeline</mat-icon>
+            Chronologie
+        </div>
+        <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
+    </div>
+    <timeline-table [request]="session" [instance]="instance"></timeline-table>
+</div>
