@@ -48,7 +48,7 @@
                 <div class="right">
                     {{ session.inDataSize || 0 }}o
                     <mat-icon style="width: 20px; height: 20px; font-size: 20px;">swap_vert</mat-icon>
-                    {{ session.outDataSize }}o en {{ session.end - session.start | number :'1.2-3' }}s
+                    {{ session.outDataSize }}o en <span style="font-weight: bold">{{{ start: session.start, end: session.end } | duration}}</span>
                 </div>
                 <span class="badge" [ngStyle]="{'background-color': session.status >= 200 && session.status < 300 ? 'green' :
                                                 session.status >= 300 && session.status < 500 ? 'orange' : 'red'}">

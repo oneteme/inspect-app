@@ -37,6 +37,9 @@
                     </a>
                     le {{ (session.start * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
                 </div>
+                <div class="right">
+                    en <span style="font-weight: bold">{{{ start: session.start, end: session.end } | duration}}</span>
+                </div>
             </mat-card-footer>
         </mat-card>
         <mat-card style="width: 40vw;">
