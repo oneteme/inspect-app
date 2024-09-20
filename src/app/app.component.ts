@@ -29,7 +29,7 @@ export class AppComponent implements OnInit, OnDestroy {
         this.isLoadingEnv = true;
         this.subscriptions.push(this._service.getInstance({
             'column.distinct': 'environement',
-            'environement.not': 'null',
+            'environement.notNull': '',
             'order': 'environement.asc'
         })
             .pipe(finalize(() => this.isLoadingEnv = false))
