@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
@@ -7,13 +7,14 @@ import {Location} from '@angular/common';
 import {ActivatedRoute, Params} from '@angular/router';
 import {BehaviorSubject, finalize, Subscription} from 'rxjs';
 import {Utils} from 'src/app/shared/util';
-import {JQueryService} from 'src/app/service/jquery.service';
+import {JQueryService} from 'src/app/service/jquery/jquery.service';
 import {TraceService} from 'src/app/service/trace.service';
 import {application, makePeriod} from 'src/environments/environment';
 import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constants';
 import {FilterService} from 'src/app/service/filter.service';
 import {InstanceRestSession} from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
+import {InstanceService} from "../../../service/jquery/instance.service";
 
 
 @Component({
@@ -21,6 +22,13 @@ import {EnvRouter} from "../../../service/router.service";
   styleUrls: ['./search-rest.view.scss'],
 })
 export class SearchRestView implements OnInit, OnDestroy {
+  private _router = inject(EnvRouter);
+  private _instanceService = inject(InstanceService);
+  private _traceService = inject(TraceService);
+  private _activatedRoute = inject(ActivatedRoute);
+  private _location = inject(Location);
+  private _filter = inject(FilterService);
+
   MAPPING_TYPE = Constants.MAPPING_TYPE;
   filterConstants = FilterConstants;
   nameDataList: any[];
@@ -46,12 +54,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
 
-  constructor(private _router: EnvRouter,
-    private _statsService: JQueryService,
-    private _traceService: TraceService,
-    private _activatedRoute: ActivatedRoute,
-    private _location: Location,
-    private _filter: FilterService) {
+  constructor() {
 
     this._activatedRoute.queryParams
       .subscribe({
@@ -65,11 +68,11 @@ export class SearchRestView implements OnInit, OnDestroy {
           }
 
           this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
-          this.subscriptions.push(this._statsService.getInstance( { 'column.distinct': 'app_name', 'order': 'app_name.asc' })
+          this.subscriptions.push(this._instanceService.getApplications()
             .pipe(finalize(()=> this.serverNameIsLoading = false))
             .subscribe({
-              next: (appNames: { appName: string }[]) => {
-                this.nameDataList = appNames.map(r => r.appName);
+              next: res => {
+                this.nameDataList = res.map(r => r.appName);
                 this.patchServerValue(this.params.serveurs);
               }, error: (e) => {
                 console.log(e)

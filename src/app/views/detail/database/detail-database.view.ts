@@ -1,22 +1,13 @@
-import {Component, ElementRef, inject, NgZone, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 
 import {ActivatedRoute} from '@angular/router';
 import {combineLatest, finalize, forkJoin, Subscription} from "rxjs";
 import {DataItem, Timeline} from 'vis-timeline';
-import {Utils} from 'src/app/shared/util';
-import {DatePipe, Location} from '@angular/common';
+import {DatePipe} from '@angular/common';
 import {TraceService} from 'src/app/service/trace.service';
 import {application} from 'src/environments/environment';
-import {
-    DatabaseRequest,
-    DatabaseRequestStage,
-    ExceptionInfo,
-    Mail,
-    MailRequest,
-    MailRequestStage
-} from 'src/app/model/trace.model';
+import {DatabaseRequest, DatabaseRequestStage, ExceptionInfo} from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
-import {MatTableDataSource} from "@angular/material/table";
 import {DurationPipe} from "../../../shared/pipe/duration.pipe";
 
 @Component({

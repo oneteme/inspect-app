@@ -3,13 +3,7 @@ import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../service/trace.service";
 import {DataItem, Timeline} from "vis-timeline";
 import {combineLatest, finalize, forkJoin, Subscription} from "rxjs";
-import {
-    ExceptionInfo, Mail,
-    MailRequest,
-    MailRequestStage,
-    NamingRequest,
-    NamingRequestStage
-} from "../../../model/trace.model";
+import {ExceptionInfo, Mail, MailRequest, MailRequestStage} from "../../../model/trace.model";
 import {DatePipe} from "@angular/common";
 import {application} from "../../../../environments/environment";
 import {EnvRouter} from "../../../service/router.service";

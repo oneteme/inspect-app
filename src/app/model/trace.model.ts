@@ -73,6 +73,8 @@ export interface FtpRequest extends SessionStage {
     serverVersion: string;
     clientVersion: string;
     actions: Array<FtpRequestStage>;
+
+    completed: boolean;
 }
 
 export interface MailRequest extends SessionStage {
@@ -80,6 +82,8 @@ export interface MailRequest extends SessionStage {
     port: number;
     actions: Array<MailRequestStage>;
     mails: Array<Mail>;
+
+    completed: boolean;
 }
 
 export interface LocalRequest extends SessionStage {
@@ -93,6 +97,8 @@ export interface NamingRequest extends SessionStage {
     host: string;
     port: number;
     actions: Array<NamingRequestStage>;
+
+    completed: boolean;
 }
 
 export interface DatabaseRequestStage extends RequestStage {

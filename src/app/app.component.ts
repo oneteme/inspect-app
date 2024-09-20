@@ -3,9 +3,9 @@ import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {distinctUntilChanged, finalize, Subscription} from 'rxjs';
 import {application, environment} from 'src/environments/environment';
-import {JQueryService} from './service/jquery.service';
 import {EnvRouter} from "./service/router.service";
 import {Constants} from "./views/constants";
+import {InstanceService} from "./service/jquery/instance.service";
 
 
 @Component({
@@ -15,7 +15,7 @@ import {Constants} from "./views/constants";
 })
 export class AppComponent implements OnInit, OnDestroy {
     private _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
-    private _service: JQueryService = inject(JQueryService);
+    private _service: InstanceService = inject(InstanceService);
     private _router: EnvRouter = inject(EnvRouter);
 
     MAPPING_TYPE = Constants.MAPPING_TYPE;
@@ -27,14 +27,10 @@ export class AppComponent implements OnInit, OnDestroy {
 
     constructor() {
         this.isLoadingEnv = true;
-        this.subscriptions.push(this._service.getInstance({
-            'column.distinct': 'environement',
-            'environement.notNull': '',
-            'order': 'environement.asc'
-        })
+        this.subscriptions.push(this._service.getEnvironments()
             .pipe(finalize(() => this.isLoadingEnv = false))
             .subscribe({
-                next: (res: { environement: string }[]) => {
+                next: res => {
                     this.envs = res.map(r => r.environement);
                 }
             }));

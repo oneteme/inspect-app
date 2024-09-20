@@ -1,28 +1,42 @@
 import { Component, OnDestroy, OnInit, inject } from "@angular/core";
-import { JQueryService } from "src/app/service/jquery.service";
+import { JQueryService } from "src/app/service/jquery/jquery.service";
 import { DatePipe, Location } from '@angular/common';
 import { ActivatedRoute, Params } from "@angular/router";
 import { FormControl, FormGroup, Validators } from "@angular/forms";
-import { BehaviorSubject, Observable, Subscription, combineLatest, filter, finalize, map } from "rxjs";
+import {
+    BehaviorSubject,
+    Observable,
+    Subscription,
+    combineLatest,
+    filter,
+    finalize,
+    map,
+    switchMap,
+    forkJoin, of
+} from "rxjs";
 import { Constants, FilterConstants, FilterMap, FilterPreset } from "../../constants";
 import { Utils, formatters, groupingBy, periodManagement, mapParams, } from "src/app/shared/util";
 import { application, makePeriod } from "src/environments/environment";
 import { FilterService } from "src/app/service/filter.service";
 import {EnvRouter} from "../../../service/router.service";
+import {InstanceService} from "../../../service/jquery/instance.service";
+import {RestSessionService} from "../../../service/jquery/rest-session.service";
 
 @Component({
     templateUrl: './statistic-rest.view.html',
     styleUrls: ['./statistic-rest.view.scss']
 })
 export class StatisticRestView implements OnInit, OnDestroy {
-    constants = Constants;
-    filterConstants = FilterConstants;
     private _activatedRoute = inject(ActivatedRoute);
-    private _statsService = inject(JQueryService);
+    private _restSessionService = inject(RestSessionService);
+    private _instanceService = inject(InstanceService);
     private _router = inject(EnvRouter);
     private _location = inject(Location);
     private _datePipe = inject(DatePipe);
     private _filter = inject(FilterService);
+
+    constants = Constants;
+    filterConstants = FilterConstants;
 
     serverFilterForm = new FormGroup({
         dateRangePicker: new FormGroup({
@@ -32,15 +46,11 @@ export class StatisticRestView implements OnInit, OnDestroy {
     });
 
     subscriptions: Subscription[] = [];
-
-    env: any;
-    name: string;
-    start: Date;
-    end: Date;
     advancedParams: Partial<{ [key: string]: any }> = {}
+    params: Partial<{serverName: string, restName: string, env: string, start: Date, end: Date}> = {};
     focusFieldName: any;
 
-    requests: { [key: string]: { observable: Observable<Object>, data?: any[], isLoading?: boolean } } = {};
+    requests: { [key: string]: { observable: Observable<Object>, data?: any, isLoading?: boolean } } = {};
 
     constructor() {
         combineLatest({
@@ -48,13 +58,14 @@ export class StatisticRestView implements OnInit, OnDestroy {
             queryParams: this._activatedRoute.queryParams
         }).subscribe({
             next: (v: { params: Params, queryParams: Params }) => {
-                this.name = v.params.name;
-                this.env = v.queryParams.env || application.default_env;
-                this.start = v.queryParams.start  ? new Date(v.queryParams.start) : (application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6)).start;
-                this.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6, 1)).end;
-                this.patchDateValue(this.start, new Date(this.end.getFullYear(), this.end.getMonth(), this.end.getDate() - 1));
+                this.params.serverName = v.params.server_name;
+                this.params.restName = v.params.rest_name;
+                this.params.env = v.queryParams.env || application.default_env;
+                this.params.start = v.queryParams.start  ? new Date(v.queryParams.start) : (application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6)).start;
+                this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6, 1)).end;
+                this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
                 this.init();
-                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&start=${this.start.toISOString()}&end=${this.end.toISOString()}`);
+                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}`);
             }
         });
 
@@ -74,18 +85,22 @@ export class StatisticRestView implements OnInit, OnDestroy {
         if (advancedParams) {
             advancedParams = mapParams(this.filterConstants.STATS_API, advancedParams);
         }
-        this.requests = this.API_REQUEST(this.name, this.env, this.start, this.end, advancedParams);
-        Object.keys(this.requests).forEach(k => {
-            this.requests[k].data = [];
-            this.requests[k].isLoading = true;
-            this.subscriptions.push(this.requests[k].observable
-                .pipe(finalize(() => this.requests[k].isLoading = false))
-                .subscribe({
-                    next: (res: any) => {
-                        this.requests[k].data = res;
-                    }
-                }));
+        this.API_REQUEST(this.params.serverName, this.params.restName, this.params.env, this.params.start, this.params.end, advancedParams).subscribe({
+            next: obs => {
+                this.requests = obs;
+                Object.keys(this.requests).forEach(k => {
+                    this.requests[k].isLoading = true;
+                    this.subscriptions.push(this.requests[k].observable
+                        .pipe(finalize(() => this.requests[k].isLoading = false))
+                        .subscribe({
+                            next: (res: any) => {
+                                this.requests[k].data = res;
+                            }
+                        }));
+                });
+            }
         });
+
     }
 
     unsubscribe() {
@@ -97,7 +112,7 @@ export class StatisticRestView implements OnInit, OnDestroy {
             let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
             let end = this.serverFilterForm.getRawValue().dateRangePicker.end;
             let excludedEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1)
-            if (start.toISOString() != this.start.toISOString() || excludedEnd.toISOString() != this.end.toISOString()) {
+            if (start.toISOString() != this.params.start.toISOString() || excludedEnd.toISOString() != this.params.end.toISOString()) {
                 this._router.navigate([], {
                     relativeTo: this._activatedRoute,
                     queryParamsHandling: 'merge',
@@ -120,54 +135,46 @@ export class StatisticRestView implements OnInit, OnDestroy {
 
     onClickRow(event: MouseEvent, row: any) {
         if (event.ctrlKey) {
-            this._router.open(`#/statistic/rest/${row.name}?env=${this.env}&start=${this.start.toISOString()}&end=${this.end.toISOString()}`, '_blank')
+            this._router.open(`#/dashboard/server/${this.params.serverName}/rest/${row.name}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}`, '_blank')
         } else {
-            this._router.navigate(['/statistic/rest', row.name], {
+            this._router.navigate(['/dashboard/server',this.params.serverName, 'rest', row.name], {
                 queryParamsHandling: 'preserve'
             });
         }
     }
 
-    API_REQUEST = (name: string, env: string, start: Date, end: Date, advancedParams: FilterMap) => {
+    API_REQUEST = (serverName: string, restName: string, env: string, start: Date, end: Date, advancedParams: FilterMap) => {
         let now = new Date();
         const groupedBy = periodManagement(start, end);
-        return {
-            infos: { observable: this._statsService.getRestSession({ 'column.distinct': 'instance.app_name:app', 'instance_env': 'instance.id', 'api_name': name, "instance.environement": env, 'start.ge': start.toISOString(), 'start.lt': end.toISOString() }) },
-            repartitionTimeAndTypeResponse: { observable: this._statsService.getRestSession({ 'column': "count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,count_succes:countSucces,count_error_server:countErrorServer,count_error_client:countErrorClient", 'rest_session.instance_env': 'instance.id', 'api_name': name, 'rest_session.start.ge': start.toISOString(), 'rest_session.start.lt': end.toISOString(), 'instance.environement': env, ...advancedParams }) },
-            repartitionTimeAndTypeResponseByPeriod: {
-                observable: this._statsService.getRestSession({ 'column': `count_succes:countSucces,count_error_client:countErrorClient,count_error_server:countErrorServer,count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max,rest_session.start.${groupedBy}:date,rest_session.start.year:year`, 'rest_session.instance_env': 'instance.id', 'api_name': name, 'rest_session.start.ge': start.toISOString(), 'rest_session.start.lt': end.toISOString(), 'instance.environement': env, 'order': `rest_session.start.year.asc,rest_session.start.${groupedBy}.asc`, ...advancedParams }).pipe(map((r: any[]) => {
-                    formatters[groupedBy](r, this._datePipe);
-                    return r;
-                }))
-            },
-            repartitionRequestByPeriodLine: { observable: this._statsService.getRestSession({ 'column': `count:count,count_error_server:countErrorServer,count_slowest:countSlowest,rest_session.start.date:date`, 'rest_session.instance_env': 'instance.id', 'api_name': name, 'rest_session.start.ge': new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6).toISOString(), 'rest_session.start.lt': now.toISOString(), 'instance.environement': env, 'order': 'rest_session.start.date.asc', ...advancedParams }) }, // 7 derniers jours
-            repartitionUserPolar: { observable: this._statsService.getRestSession({ 'column': "count:count,user:user", 'rest_session.instance_env': 'instance.id', 'api_name': name, 'rest_session.start.ge': start.toISOString(), 'rest_session.start.lt': end.toISOString(), 'instance.environement': env, 'user.not': 'null', 'order': 'count.desc', ...advancedParams }).pipe(map((r: any[]) => r.slice(0, 5))) },
-            repartitionUserBar: {
-                observable: this._statsService.getRestSession({ 'column': `count:count,start.${groupedBy}:date,start.year:year,user:user`, 'instance_env': 'instance.id', 'api_name': name, 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), 'instance.environement': env, 'user.not': 'null', 'order': `start.year.asc,start.${groupedBy}.asc`, ...advancedParams }).pipe(map((r: any[]) => {
-                    let groupBy = groupingBy(r, 'user');
-                    let results: { count: number, user: string, date: any, year: any }[] = Object.entries(groupBy).map((value: [string, any[]]) => {
-                        return {
-                            totalCount: value[1].reduce((acc: number, o) => {
-                                return acc + o['count'];
-                            }, 0),
-                            user: value[0],
-                            data: value[1]
-                        }
-                    }).sort((a, b) => {
-                        return b.totalCount - a.totalCount
-                    }).slice(0, 5).flatMap(r => r.data);
-                    return results;
-                }),
-                    map((r: any[]) => {
-                        formatters[groupedBy](r, this._datePipe);
-                        return r;
-                    }))
-            },
-            dependenciesTable: { observable: this._statsService.getRestSession({ 'column': "count:count,count_succes:countSucces,count_error_client:countErrClient,count_error_server:countErrServer,api_name:name", 'instance_env': 'instance.id', "id": "rest_request.parent", "rest_request.remote": "rest_session_join.id", 'rest_session_join.api_name': name, 'rest_session_join.start.ge': start.toISOString(), 'rest_session_join.start.lt': end.toISOString(), 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), 'instance.environement': env, 'api_name.not': 'null', 'order': 'count.desc', ...advancedParams }) },
-            dependentsTable: { observable: this._statsService.getRestSession({ 'column': "rest_session_join.count:count,rest_session_join.count_succes:countSucces,rest_session_join.count_error_client:countErrClient,rest_session_join.count_error_server:countErrServer,rest_session_join.api_name:name", 'instance_env': 'instance.id', "id": "rest_request.parent", "rest_request.remote": "rest_session_join.id", 'api_name': name, 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), 'rest_session_join.start.ge': start.toISOString(), 'rest_session_join.start.lt': end.toISOString(), 'instance.environement': env, 'rest_session_join.api_name.not': 'null', 'order': 'count.desc', ...advancedParams }) },
-            exceptionsTable: { observable: this._statsService.getRestSession({ 'column': 'count,err_type,err_msg', 'instance_env': 'instance.id', 'err.group': '', "status.ge": 500, "instance.environement": env, "api_name": name, 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), 'order': 'count.desc', ...advancedParams })}
-        };
-    }
+        return this._instanceService.getIds(env, end, serverName).pipe(map((data: {id: string}[]) => {
+                    let ids = data.map(d => `"${d.id}"`).join(',');
+                    return {
+                        repartitionTimeAndTypeResponse: { observable: this._restSessionService.getRepartitionTimeAndTypeResponse({start: start, end: end, advancedParams: advancedParams, ids: ids, apiName: restName}) },
+                        repartitionTimeAndTypeResponseByPeriod: {
+                            observable: this._restSessionService.getRepartitionTimeAndTypeResponseByPeriod({start: start, end: end, groupedBy: groupedBy, advancedParams: advancedParams, ids: ids, apiName: restName}).pipe(map(r => {
+                                formatters[groupedBy](r, this._datePipe);
+                                return r;
+                            }))
+                        },
+                        repartitionRequestByPeriodLine: { observable: this._restSessionService.getRepartitionRequestByPeriod({now: now, advancedParams: advancedParams, ids: ids, apiName: restName}) }, // 7 derniers jours
+                        repartitionUser: { observable:
+                                this._restSessionService.getRepartitionUser({start: start, end: end, advancedParams: advancedParams, ids: ids, apiName: restName})
+                                    .pipe(switchMap(res => {
+                                        return forkJoin({
+                                            polar: of(res),
+                                            bar: this._restSessionService.getRepartitionUserByPeriod({users: res.map(d => `"${d.user}"`).join(','), start: start, end: end, groupedBy: groupedBy, advancedParams: advancedParams, ids: ids, apiName: restName}).pipe(map(r => {
+                                                formatters[groupedBy](r, this._datePipe);
+                                                return r;
+                                            }))
+                                        })
+                                    }))
+                        },
+                        dependenciesTable: { observable: this._restSessionService.getDependencies({start: start, end: end, advancedParams: advancedParams, ids: ids, apiName: restName}) },
+                        dependentsTable: { observable: this._restSessionService.getDependents({start: start, end: end, advancedParams: advancedParams, ids: ids, apiName: restName}) },
+                        exceptionsTable: { observable: this._restSessionService.getExceptions({start: start, end: end, advancedParams: advancedParams, ids: ids, apiName: restName}) }
+                    }}))
+    };
+
 
     resetFilters() {
         this.patchDateValue((application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6)).start,

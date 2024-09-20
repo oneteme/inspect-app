@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
@@ -13,6 +13,7 @@ import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constan
 import {FilterService} from 'src/app/service/filter.service';
 import {InstanceMainSession} from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
+import {InstanceService} from "../../../service/jquery/instance.service";
 
 
 @Component({
@@ -20,6 +21,12 @@ import {EnvRouter} from "../../../service/router.service";
     styleUrls: ['./search-main.view.scss'],
 })
 export class SearchMainView implements OnInit, OnDestroy {
+    private _router = inject(EnvRouter);
+    private _traceService = inject(TraceService);
+    private _activatedRoute = inject(ActivatedRoute);
+    private _location = inject(Location);
+    private _filter = inject(FilterService);
+
     MAPPING_TYPE = Constants.MAPPING_TYPE;
     filterConstants = FilterConstants;
     utils: Utils = new Utils();
@@ -42,11 +49,7 @@ export class SearchMainView implements OnInit, OnDestroy {
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild(MatSort) sort: MatSort;
 
-    constructor(private _router: EnvRouter,
-                private _traceService: TraceService,
-                private _activatedRoute: ActivatedRoute,
-                private _location: Location,
-                private _filter: FilterService) {
+    constructor() {
 
         combineLatest([
             this._activatedRoute.params,

@@ -1,17 +1,22 @@
-import { HttpClient, HttpErrorResponse } from "@angular/common/http";
-import { Injectable } from "@angular/core";
-import { Observable, catchError, throwError } from "rxjs";
+import {HttpClient} from "@angular/common/http";
+import {Injectable} from "@angular/core";
+import {Observable} from "rxjs";
 import {
     DatabaseRequest,
     DatabaseRequestStage,
     ExceptionInfo,
-    FtpRequest, FtpRequestStage,
+    FtpRequest,
+    FtpRequestStage,
     InstanceEnvironment,
     InstanceMainSession,
     InstanceRestSession,
-    LocalRequest, Mail, MailRequest, MailRequestStage, NamingRequest, NamingRequestStage,
-    RestRequest,
-    RestSession
+    LocalRequest,
+    Mail,
+    MailRequest,
+    MailRequestStage,
+    NamingRequest,
+    NamingRequestStage,
+    RestRequest
 } from "../model/trace.model";
 
 @Injectable({ providedIn: 'root' })

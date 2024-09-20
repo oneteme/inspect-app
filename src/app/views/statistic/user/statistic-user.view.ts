@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, inject } from "@angular/core";
-import { JQueryService } from "src/app/service/jquery.service";
+import { JQueryService } from "src/app/service/jquery/jquery.service";
 import { ActivatedRoute, Params } from "@angular/router";
 import { DatePipe, Location } from '@angular/common';
 import { FormControl, FormGroup, Validators } from "@angular/forms";
@@ -9,21 +9,24 @@ import { application, makePeriod } from "src/environments/environment";
 import { FilterService } from "src/app/service/filter.service";
 import { mapParams, formatters, periodManagement } from "src/app/shared/util";
 import {EnvRouter} from "../../../service/router.service";
+import {RestSessionService} from "../../../service/jquery/rest-session.service";
+import {MainSessionService} from "../../../service/jquery/main-session.service";
 
 @Component({
     templateUrl: './statistic-user.view.html',
     styleUrls: ['./statistic-user.view.scss']
 })
 export class StatisticUserView implements OnInit, OnDestroy {
-    constants = Constants;
-    filterConstants = FilterConstants;
-
     private _activatedRoute = inject(ActivatedRoute);
-    private _statsService = inject(JQueryService);
+    private _restSessionService = inject(RestSessionService);
+    private _mainSessionService = inject(MainSessionService);
     private _router = inject(EnvRouter);
     private _location = inject(Location);
     private _datePipe = inject(DatePipe);
     private _filter = inject(FilterService);
+
+    constants = Constants;
+    filterConstants = FilterConstants;
 
     serverFilterForm = new FormGroup({
         dateRangePicker: new FormGroup({
@@ -49,7 +52,7 @@ export class StatisticUserView implements OnInit, OnDestroy {
             queryParams: this._activatedRoute.queryParams
         }).subscribe({
             next: (v: { params: Params, queryParams: Params }) => {
-                this.name = v.params.name;
+                this.name = v.params.user_name;
                 this.env = v.queryParams.env || application.default_env;
                 this.start = v.queryParams.start ? new Date(v.queryParams.start) : (application.dashboard.database.default_period || application.dashboard.default_period || makePeriod(6)).start;
                 this.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.database.default_period || application.dashboard.default_period || makePeriod(6, 1)).end;
@@ -58,7 +61,6 @@ export class StatisticUserView implements OnInit, OnDestroy {
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&start=${this.start.toISOString()}&end=${this.end.toISOString()}`)
             }
         });
-
     }
 
     ngOnInit() {
@@ -118,19 +120,19 @@ export class StatisticUserView implements OnInit, OnDestroy {
     // Stats en fonction du navigateur et du systeme
     USER_REQUEST = (name: string, env: string, start: Date, end: Date, advancedParams: FilterMap) => {
         let now = new Date();
-        var groupedBy = periodManagement(start, end);
+        let groupedBy = periodManagement(start, end);
         return {
-            repartitionTimeAndTypeResponse: { observable: this._statsService.getRestSession({ 'column': "count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,count_succes:countSucces,count_error_server:countErrorServer,count_error_client:countErrorClient", 'rest_session.instance_env': 'instance.id', 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), 'instance.environement': env, 'rest_session.user': name,  ...advancedParams }) },
+            repartitionTimeAndTypeResponse: { observable: this._restSessionService.getRepartitionTimeAndTypeResponse({start: start, end: end, advancedParams: advancedParams, user: name, env: env}) },
             repartitionTimeAndTypeResponseByPeriod: {
-                observable: this._statsService.getRestSession({ 'column': `count_succes:countSucces,count_error_client:countErrorClient,count_error_server:countErrorServer,count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max,start.${groupedBy}:date,start.year:year`, 'rest_session.instance_env': 'instance.id', 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), 'rest_session.user': name, 'instance.environement': env, 'order': `start.year.asc,start.${groupedBy}.asc`, ...advancedParams }).pipe(map(((r: any[]) => {
+                observable: this._restSessionService.getRepartitionTimeAndTypeResponseByPeriod({start: start, end: end, groupedBy: groupedBy, advancedParams: advancedParams, user: name, env: env}).pipe(map(r => {
                     formatters[groupedBy](r, this._datePipe);
                     return r;
-                })))
+                }))
             },
-            repartitionRequestByPeriodLine: { observable: this._statsService.getRestSession({ 'column': "count:count,count_error_server:countErrorServer,count_slowest:countSlowest,start.date:date", 'rest_session.instance_env': 'instance.id', 'start.ge': new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6).toISOString(), 'start.lt': now.toISOString(), 'instance.environement': env, 'rest_session.user': name, 'order': 'start.date.asc', ...advancedParams }) },
-            repartitionApiBar: { observable: this._statsService.getRestSession({ 'column': "count_succes:countSucces,count_error_client:countErrorClient,count_error_server:countErrorServer,api_name", 'rest_session.instance_env': 'instance.id', 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), 'instance.environement': env, 'rest_session.user': name, 'api_name.not': 'null', 'order': 'count.desc', ...advancedParams }).pipe(map((d: any) => d.slice(0, 5))) },
-            // exceptionsTable: { observable: this._statsService.getException({ 'column': 'count,err_type,err_msg', 'err.group': '', "status.ge": 500, "environement": env, 'user': name, 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), 'order': 'count.desc', ...advancedParams })},
-            sessionTable: { observable: this._statsService.getMainSession({ 'column': "name,start:date,elapsedtime,location,instance.app_name", 'main_session.instance_env': 'instance.id', 'user': name, 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), 'instance.environement': env, 'type': 'VIEW', 'order': 'start.date.desc' }) }
+            repartitionRequestByPeriodLine: { observable: this._restSessionService.getRepartitionRequestByPeriod({now: now, advancedParams: advancedParams, user: name, env: env}) },
+            repartitionApiBar: { observable: this._restSessionService.getRepartitionApi({start: start, end: end, advancedParams: advancedParams, user: name, env: env}) },
+            exceptionsTable: { observable: this._restSessionService.getExceptions({start: start, end: end, advancedParams: advancedParams, user: name, env: env})},
+            sessionTable: { observable: this._mainSessionService.getInfos({start: start, end: end, advancedParams: advancedParams, user: name, env: env}) }
         };
     }
 

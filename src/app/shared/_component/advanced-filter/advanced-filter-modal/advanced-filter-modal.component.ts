@@ -5,7 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { Filter, FilterMap, FilterPreset } from "src/app/views/constants";
 import { COMMA, ENTER } from '@angular/cdk/keycodes';
 import { Subscription, catchError, finalize, of } from "rxjs";
-import { JQueryService } from "src/app/service/jquery.service";
+import { JQueryService } from "src/app/service/jquery/jquery.service";
 import { MatAutocompleteSelectedEvent } from "@angular/material/autocomplete";
 import { FilterService } from "src/app/service/filter.service";
 

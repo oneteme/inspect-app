@@ -5,7 +5,7 @@
                                     session.status >= 300 && session.status < 500 ? '4px solid orange' : '4px solid red'}">
             <mat-card-title>
                 <a style="display: flex; align-items: center; gap: 0.5em"
-                   [routerLink]="'/statistic/rest/'+ session.name"
+                   [routerLink]="'/dashboard/server/'+instance.name+'/rest/'+ session.name"
                    [queryParams]="{'env': instance.env}"
                    matTooltip="Statistiques Appel REST">
                     <mat-icon>settings_suggest</mat-icon>
@@ -39,7 +39,7 @@
                 <mat-icon style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
                 <div style="display: flex; align-items: center; gap: 0.5em">
                     <a [style.pointer-events]="session.user ? 'auto' : 'none'"
-                       [routerLink]="'/statistic/user/' + session.user" [queryParams]="{'env': instance.env}"
+                       [routerLink]="'/dashboard/user/' + session.user" [queryParams]="{'env': instance.env}"
                        matTooltip="Statistiques Utilisateur">
                         {{ session.user || "N/A" }}
                     </a>
@@ -59,7 +59,7 @@
         <mat-card style="width: 40vw;">
             <mat-card-title>
                 <a style="display: flex; align-items: center; gap: 0.5em"
-                   [routerLink]="'/statistic/app/'+ instance.name"
+                   [routerLink]="'/dashboard/server/'+ instance.name"
                    [queryParams]="{'env': instance.env}" matTooltip="Statistiques Application">
                     <mat-icon>storage</mat-icon>
                     <div>{{instance.name}} <span style="font-size: 12px; font-style: italic; font-weight: normal;">{{instance.version}}</span></div>
@@ -76,7 +76,7 @@
                     </div>
                     <div *ngIf="item.key != 'null'">
                         <a style="font-weight: 500; font-size: 14px;"
-                           [routerLink]="'/statistic/database/'+ item.key"
+                           [routerLink]="'/dashboard/database/'+ item.key"
                            [queryParams]="{'env': instance.env}"
                            matTooltip="Statistiques Base de donnée">
                             {{ item.key }}

@@ -157,36 +157,36 @@ const routes: Route[] = [
     ]
   },
   {
-    path: 'statistic',
+    path: 'dashboard',
     children: [
       {
-        path: 'app/:name',
+        path: 'server/:server_name',
         component: StatisticApplicationView,
         title: 'Statistiques Serveur'
       },
       {
-        path: 'rest/:name',
+        path: 'server/:server_name/rest/:rest_name',
         component: StatisticRestView,
         title: 'Statistiques API'
       },
       {
-        path: 'user/:name',
+        path: 'user/:user_name',
         component: StatisticUserView,
         title: 'Statistiques Utilisateur'
       },
       {
-        path: 'database/:name',
+        path: 'database/:database_name',
         component: StatisticDatabaseView,
         title: 'Statistiques Base de Donnée'
       },
       { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
     ]
   },
-  {
+  /*{
     path: 'dashboard',
     component: DashboardComponent,
     title: 'Dashboard'
-  },
+  },*/
   { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
 ];
 

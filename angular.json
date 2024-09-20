@@ -53,6 +53,21 @@
             "namedChunks": true
           },
           "configurations": {
+            "local": {
+              "optimization": false,
+              "sourceMap": true,
+              "aot": true,
+              "extractLicenses": false,
+              "namedChunks": false,
+              "vendorChunk": false,
+              "buildOptimizer": false,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.ts"
+                }
+              ]
+            },
             "production": {
               "fileReplacements": [
                 {
@@ -82,7 +97,7 @@
               ]
             }
           },
-          "defaultConfiguration": ""
+          "defaultConfiguration": "local"
         },
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
@@ -90,6 +105,9 @@
             "browserTarget": "ng-admin-free:build"
           },
           "configurations": {
+            "local": {
+              "browserTarget": "smart-ihm:build:local"
+            },
             "production": {
               "browserTarget": "ng-admin-free:build:production"
             }

@@ -3,12 +3,14 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import {  Observable, Subscription, catchError, combineLatest, finalize, map, of } from 'rxjs';
 import { DatePipe, Location } from '@angular/common';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { JQueryService } from 'src/app/service/jquery.service';
+import { JQueryService } from 'src/app/service/jquery/jquery.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { Constants } from '../../constants';
 import { application, makePeriod } from 'src/environments/environment';
 import { formatters, periodManagement } from 'src/app/shared/util';
 import { ChartProvider, field } from '@oneteme/jquery-core';
+import {DatabaseRequestService} from "../../../service/jquery/database-request.service";
+import {ExceptionService} from "../../../service/jquery/exception.service";
 
 @Component({
   templateUrl: './statistic-database.view.html',
@@ -18,7 +20,8 @@ export class StatisticDatabaseView implements OnInit {
   private _activatedRoute = inject(ActivatedRoute);
   private _router = inject(Router);
   private _datePipe = inject(DatePipe);
-  private _statsService = inject(JQueryService);
+  private _databaseService = inject(DatabaseRequestService);
+  private _exceptionService = inject(ExceptionService);
   private _location = inject(Location);
 
   constants = Constants;
@@ -32,18 +35,9 @@ export class StatisticDatabaseView implements OnInit {
   });
 
   env: any;
-  dbNameDataList: any[];
   db: any;
-  dbNameListIsLoading: boolean = false
-  countOkKo: any[];
-  countMinMaxAvg: any[];
-  countRepartitionBySpeed: any[];
-  exceptions: any[];
-  dbInfo: any[] = [];
-  userInfo: any[];
   start: Date;
   end: Date;
-  doresetServerFormValue: boolean = false;
   displayedColumns: string[] = ['name'];
   dataSource: MatTableDataSource<{ name: string }> = new MatTableDataSource([]);
 
@@ -73,26 +67,6 @@ export class StatisticDatabaseView implements OnInit {
 
   ngOnInit(): void {
 
-  }
-
-  setServerFormValue() {
-    this.dbNameListIsLoading = true;
-    this.serverFilterForm.controls.dbnameControl.reset();
-    this.serverFilterForm.controls.dbnameControl.disable();
-    this._statsService.getRestSession({ 'column.distinct': 'dbquery.db&dbquery.parent=apisession.id&order=dbquery.db.asc', 'apisession.environement': this.env }).pipe(catchError(error => of(error)))
-      .subscribe({
-        next: (res: { db: string }[]) => {
-          this.dbNameDataList = res.map((s: any) => s.db)
-          this.serverFilterForm.controls.dbnameControl.enable();
-          this.dbNameListIsLoading = false;
-          this.serverFilterForm.controls.dbnameControl.patchValue(this.db)
-        },
-        error: err => {
-          this.dbNameListIsLoading = false;
-          this.serverFilterForm.controls.dbnameControl.enable();
-          console.log(err)
-        }
-      });
   }
 
   search() {
@@ -133,24 +107,16 @@ export class StatisticDatabaseView implements OnInit {
 
   DB_REQUEST = (db: string, env: string, start: Date, end: Date) => {
     let now = new Date();
-    var groupedBy = periodManagement(start, end);
+    let groupedBy = periodManagement(start, end);
     return {
-      dbInfo: { observable: this._statsService.getDatabaseRequest({ 'column.distinct': 'host,db,driver,db_name,db_version', 'database_request.parent': 'rest_session.id', 'rest_session.instance_env': 'instance.id', "instance.environement": env, "db": db, 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), 'rest_session.start.ge': start.toISOString(), 'rest_session.start.lt': end.toISOString() }) },
-      countOkKoSlowest: { observable: this._statsService.getDatabaseRequest({ 'column': 'count_db_error:countErrorServer,count:count,count_slowest:countSlowest,start.date:date', 'database_request.parent': 'rest_session.id', 'rest_session.instance_env': 'instance.id', "instance.environement": env, "db": db, 'rest_session.start.ge': new Date(now.getFullYear(), now.getMonth(), now.getDate() - 6).toISOString(), 'rest_session.start.lt': now.toISOString(), 'start.ge': new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7).toISOString(), 'start.lt': now.toISOString()}) },
-      countMinMaxAvg: { observable: this._statsService.getDatabaseRequest({ 'column': `count_db_succes:countDbSucces,elapsedtime.max:max,elapsedtime.avg:avg,start.${groupedBy}:date,start.year:year`, 'database_request.parent': 'rest_session.id', 'rest_session.instance_env': 'instance.id', "instance.environement": env, "db": db, 'rest_session.start.ge': start.toISOString(), 'rest_session.start.lt': end.toISOString(), 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), 'order': `start.year.asc,start.${groupedBy}.asc` }).pipe(map(((r: any[]) => {
+      repartitionRequestByPeriodLine: { observable: this._databaseService.getRepartitionRequestByPeriod({now: now, database: db, env: env}) },
+      repartitionTimeByPeriodBar: { observable: this._databaseService.getRepartitionTimeByPeriod({start: start, end: end, groupedBy: groupedBy, database: db, env: env}).pipe(map(((r: any[]) => {
           formatters[groupedBy](r, this._datePipe);
           return r;
         })))
       },
-      countRepartitionBySpeedBar: {
-        observable: this._statsService.getDatabaseRequest({ 'column': `count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,start.${groupedBy}:date,start.year:year`, 'database_request.parent': 'rest_session.id', 'rest_session.instance_env': 'instance.id', "instance.environement": env, "db": db, 'rest_session.start.ge': start.toISOString(), 'rest_session.start.lt': end.toISOString(), 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), 'order': `start.year.asc,start.${groupedBy}.asc` }).pipe(map(((r: any[]) => {
-          formatters[groupedBy](r, this._datePipe);
-          return r;
-        })))
-      },
-      countRepartitionBySpeedPie: { observable: this._statsService.getDatabaseRequest({ 'column': 'count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest', 'database_request.parent': 'rest_session.id', 'rest_session.instance_env': 'instance.id', "instance.environement": env, "db": db, 'rest_session.start.ge': start.toISOString(), 'rest_session.start.lt': end.toISOString(), 'start.ge': start.toISOString(), 'start.lt': end.toISOString()}) },
-      exceptions: { observable: this._statsService.getException({ 'column': 'count,err_type,err_msg', 'err.group': '', 'exception.parent': 'database_request.id', 'database_request.parent': 'rest_session.id', 'rest_session.instance_env': 'instance.id', "instance.environement": env, "database_request.db": db, 'rest_session.start.ge': start.toISOString(), 'rest_session.start.lt': end.toISOString(), 'database_request.start.ge': start.toISOString(), 'database_request.start.lt': end.toISOString(), 'order': 'count.desc' })}
-      // usersInfo: { observable: this._statsService.getDatabaseRequest({ 'column': 'count:countRows,dbquery.user', 'dbquery.parent': 'apisession.id', "apisession.environement": env, "dbquery.db": db, 'apisession.start.ge': start.toISOString(), 'apisession.start.lt': end.toISOString(), 'dbquery.start.ge': start.toISOString(), 'dbquery.start.lt': end.toISOString() }) }
+      repartitionTimePie: { observable: this._databaseService.getRepartitionTime({start: start, end: end, database: db, env: env}) },
+      exceptions: { observable: this._exceptionService.getDatabaseException({start: start, end: end, database: db, env: env})}
     }
   }
 
