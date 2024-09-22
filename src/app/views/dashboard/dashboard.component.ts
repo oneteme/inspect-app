@@ -7,13 +7,20 @@ import { EnvRouter } from "../../service/router.service";
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Constants } from '../constants';
 import { formatters, periodManagement } from 'src/app/shared/util';
-import { JQueryService } from 'src/app/service/jquery.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ProtocolExceptionComponent } from './components/protocol-exception-modal/protocol-exception-modal.component';
-import { cp } from 'fs';
 import { MatPaginator } from '@angular/material/paginator';
 import { MatTableDataSource } from '@angular/material/table';
 import { MatSort } from '@angular/material/sort';
+import { InstanceService } from 'src/app/service/jquery/instance.service';
+import { RestSessionService } from 'src/app/service/jquery/rest-session.service';
+import { MainSessionService } from 'src/app/service/jquery/main-session.service';
+import { restRequestService } from 'src/app/service/jquery/rest-request.service';
+import { DatabaseRequestService } from 'src/app/service/jquery/database-request.service';
+import { FtpRequestService} from 'src/app/service/jquery/ftp-request.service';
+import { LdapRequestService } from 'src/app/service/jquery/ldap-request.service';
+import { FtpMainExceptionsByPeriodAndappname, FtpSessionExceptionsByPeriodAndappname, JdbcMainExceptionsByPeriodAndappname, JdbcSessionExceptionsByPeriodAndappname, LdapMainExceptionsByPeriodAndappname, LdapSessionExceptionsByPeriodAndappname, RestMainExceptionsByPeriodAndappname, RestSessionExceptionsByPeriodAndappname, SessionExceptionsByPeriodAndAppname, SmtpMainExceptionsByPeriodAndappname, SmtpSessionExceptionsByPeriodAndappname } from 'src/app/model/jquery.model';
+import { smtpRequestService } from 'src/app/service/jquery/smtp-request.service';
 @Component({
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
@@ -23,11 +30,17 @@ export class DashboardComponent {
     constants = Constants;
     private _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
     private _router: EnvRouter = inject(EnvRouter);
+    private _instanceService = inject(InstanceService);
+    private _sessionService = inject(RestSessionService);
+    private _mainService = inject(MainSessionService);
+    private _restService = inject(restRequestService);
+    private _datebaseService = inject(DatabaseRequestService);
+    private _ftpService = inject(FtpRequestService);
+    private _smtpService = inject(smtpRequestService)
+    private _ldapService = inject(LdapRequestService);
     private _location: Location = inject(Location);
-    private _statsService: JQueryService = inject(JQueryService);
     private _datePipe = inject(DatePipe);
     private _dialog = inject(MatDialog)
-
 
     MAPPING_TYPE = Constants.MAPPING_TYPE;
     serverStartDisplayedColumns: string[] = ["appName","version", "duree"];
@@ -75,7 +88,7 @@ export class DashboardComponent {
                     this.patchServerValue(this.params.serveurs);
                 }
                 this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
-                this.subscriptions.push(this._statsService.getInstance({ 'column.distinct': 'app_name', 'order': 'app_name.asc' })
+                this.subscriptions.push(this._instanceService.getApplications()
                     .pipe(finalize(() => this.serverNameIsLoading = false))
                     .subscribe({
                         next: (appNames: { appName: string }[]) => {
@@ -187,7 +200,6 @@ export class DashboardComponent {
     removePackage(errorType: string) {
           const index = errorType.lastIndexOf('.') + 1;
           return errorType?.substring(index);
-        return ''
     }
 
     openProtocolDialog(exceptions: { observable: any, type: string }) {
@@ -264,23 +276,21 @@ export class DashboardComponent {
         return {
 
             // Server start
-            serverStartTable: { observable: this._statsService.getInstance({ 'column': `view1.appName,view1.version,view1.start`, 'view': `select(app_name,version,start,rank.over(partition(environement,app_name).order(start.desc)):rk).filter(type.eq(SERVER).and(environement.eq(${env})).and(start.ge(${start.toISOString()})).and(start.lt(${end.toISOString()}))${serverStartAppName}):view1`, 'view1.rk': '1', 'order': 'view1.start.desc' }) },
+            serverStartTable: { observable: this._instanceService.getServerStart({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})},
 
             //   Rest-Main Sessions exceptions 
             sessionExceptionsTable: {
-                observable: this._statsService.getRestSession({ "column": `start.${groupedBy}:date,err_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`, 'join': 'instance', 'instance.environement': env, 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), [app_name]: '', "order": "date.desc,count.desc" })
-                    .pipe(map(((result: any[]) => {
+                observable: this._sessionService.getSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
+                    .pipe(map(((result: SessionExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe)
-                        //                  result.map( )
-                        return result.filter(r => r.errorType != null);
+                        // result.map( )
+                        return result.filter(r => r.errorType != null); // rename errorType to errType in backend
                     })))
-
-
             },
 
             batchExceptionTable: {
-                observable: this._statsService.getMainSession({ "column": `start.${groupedBy}:date,err_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`, 'main_session.type': 'BATCH', 'join': 'instance', 'instance.environement': env, 'start.ge': start.toISOString(), [app_name]: '', 'start.lt': end.toISOString(), "order": "date.desc,count.desc" })
-                    .pipe(map(((result: any[]) => {
+                observable: this._mainService.getMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
+                    .pipe(map(((result: SessionExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe)
                         return result.filter(r => r.errorType != null);
                     })))
@@ -289,10 +299,10 @@ export class DashboardComponent {
             //------- TABLE + CHART
             restRequestExceptionsTable: {
                 observable: combineLatest({
-                    restSession: this._statsService.getRestRequest({ 'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():err_type,start.${groupedBy}:date,start.year:year`, 'instance.environement': env, 'join': 'exception,rest_request.rest_session,rest_session.instance', 'start.ge': start.toISOString(), [app_name]: '', 'start.lt': end.toISOString(), 'order': 'date.asc' }),
-                    mainSession: this._statsService.getRestRequest({ 'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():err_type,start.${groupedBy}:date,start.year:year`, 'instance.environement': env, 'join': 'exception,rest_request.main_session,main_session.instance', 'start.ge': start.toISOString(), [app_name]: '', 'start.lt': end.toISOString(), 'order': 'date.asc' })
+                    restSession: this._restService.getrestSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName}),
+                    mainSession: this._restService.getrestMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
                 })
-                    .pipe(map(((result: { restSession: any[]; mainSession: any[]; }) => {
+                    .pipe(map(((result: { restSession: RestSessionExceptionsByPeriodAndappname[]; mainSession: RestMainExceptionsByPeriodAndappname[]; }) => {
                         let r = this.setChartData([...result.restSession, ...result.mainSession], 'REST', 'restRequestExceptionsTable', 'REST_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
                         return r;
                     })))
@@ -300,40 +310,40 @@ export class DashboardComponent {
 
             databaseRequestExceptionsTable: {
                 observable: forkJoin({
-                    restSession: this._statsService.getDatabaseRequest({ 'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():err_type,start.${groupedBy}:date,start.year:year`, 'instance.environement': env, 'join': 'exception,database_request.rest_session,rest_session.instance', 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), [app_name]: '', 'order': 'date.asc' }),
-                    mainSession: this._statsService.getDatabaseRequest({ 'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():err_type,start.${groupedBy}:date,start.year:year`, 'instance.environement': env, 'join': 'exception,database_request.main_session,main_session.instance', 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), [app_name]: '', 'order': 'date.asc' })
+                    restSession: this._datebaseService.getJdbcRestSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName}),
+                    mainSession: this._datebaseService.getJdbcMainSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
                 })
-                    .pipe(map(((result: { restSession: any[]; mainSession: any[]; }) => {
+                    .pipe(map(((result: { restSession: JdbcSessionExceptionsByPeriodAndappname[]; mainSession: JdbcMainExceptionsByPeriodAndappname[]; }) => {
                         let r = this.setChartData([...result.restSession, ...result.mainSession], 'JDBC', 'databaseRequestExceptionsTable', 'DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
                         return r;
                     })))
             },
             ftpRequestExceptionsTable: {
                 observable: forkJoin({
-                    restSession: this._statsService.getFtpRequest({ 'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():err_type,start.${groupedBy}:date,start.year:year`, 'instance.environement': env, 'join': 'exception,ftp_request.rest_session,rest_session.instance', 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), [app_name]: '', 'order': 'date.asc' }),
-                    mainSession: this._statsService.getFtpRequest({ 'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():err_type,start.${groupedBy}:date,start.year:year`, 'instance.environement': env, 'join': 'exception,ftp_request.main_session,main_session.instance', 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), [app_name]: '', 'order': 'date.asc' })
+                    restSession: this._ftpService.getftpSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName}),
+                    mainSession: this._ftpService.getftpMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
                 })
-                    .pipe(map(((result: { restSession: any[]; mainSession: any[]; }) => {
+                    .pipe(map(((result: { restSession: FtpSessionExceptionsByPeriodAndappname[]; mainSession: FtpMainExceptionsByPeriodAndappname[]; }) => {
                         let r = this.setChartData([...result.restSession, ...result.mainSession], 'FTP', 'ftpRequestExceptionsTable', 'FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
                         return r;
                     })))
             },
             smtpRequestExceptionsTable: {
                 observable: forkJoin({
-                    restSession: this._statsService.getSmtpRequest({ 'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():err_type,start.${groupedBy}:date,start.year:year`, 'instance.environement': env, 'join': 'exception,smtp_request.rest_session,rest_session.instance', 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), [app_name]: '', 'order': 'date.asc' }),
-                    mainSession: this._statsService.getSmtpRequest({ 'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():err_type,start.${groupedBy}:date,start.year:year`, 'instance.environement': env, 'join': 'exception,smtp_request.main_session,main_session.instance', 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), [app_name]: '', 'order': 'date.asc' })
+                    restSession: this._smtpService.getsmtpSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName}),
+                    mainSession: this._smtpService.getsmtpMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
                 })
-                    .pipe(map(((result: { restSession: any[]; mainSession: any[]; }) => {
+                    .pipe(map(((result: { restSession: SmtpSessionExceptionsByPeriodAndappname[]; mainSession: SmtpMainExceptionsByPeriodAndappname[]; }) => {
                         let r = this.setChartData([...result.restSession, ...result.mainSession], 'SMTP', 'smtpRequestExceptionsTable', 'SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
                         return r;
                     })))
             },
             ldapRequestExceptionsTable: {
                 observable: forkJoin({
-                    restSession: this._statsService.getLdapRequest({ 'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():err_type,start.${groupedBy}:date,start.year:year`, 'instance.environement': env, 'join': 'exception,ldap_request.rest_session,rest_session.instance', 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), [app_name]: '', 'order': 'date.asc' }),
-                    mainSession: this._statsService.getLdapRequest({ 'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():err_type,start.${groupedBy}:date,start.year:year`, 'instance.environement': env, 'join': 'exception,ldap_request.main_session,main_session.instance', 'start.ge': start.toISOString(), 'start.lt': end.toISOString(), [app_name]: '', 'order': 'date.asc' })
+                    restSession: this._ldapService.getLdapSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName}),
+                    mainSession: this._ldapService.getLdapMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
                 })
-                    .pipe(map(((result: { restSession: any[]; mainSession: any[]; }) => {
+                    .pipe(map(((result: { restSession: LdapSessionExceptionsByPeriodAndappname[]; mainSession: LdapMainExceptionsByPeriodAndappname[]; }) => {
                         let r = this.setChartData([...result.restSession, ...result.mainSession], 'LDAP', 'ldapRequestExceptionsTable', 'LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
                         return r;
                     })))

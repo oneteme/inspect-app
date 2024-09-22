@@ -158,11 +158,13 @@ const routes: Route[] = [
   },
   {
     path: 'dashboard',
+    component: DashboardComponent,
+    title: 'Dashboard',
     children: [
       {
         path: 'server/:server_name',
         component: StatisticApplicationView,
-        title: 'Statistiques Serveur'
+        title: 'Statist iques Serveur'
       },
       {
         path: 'server/:server_name/rest/:rest_name',
@@ -179,14 +181,9 @@ const routes: Route[] = [
         component: StatisticDatabaseView,
         title: 'Statistiques Base de Donnée'
       },
-      { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
+     // { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
     ]
   },
-  /*{
-    path: 'dashboard',
-    component: DashboardComponent,
-    title: 'Dashboard'
-  },*/
   { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
 ];
 
