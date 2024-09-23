@@ -31,7 +31,7 @@
                 <div style="display: flex; align-items: center; gap: 0.5em; color: red; font-weight: 500; margin-top: 0.5em;"
                      *ngIf="session.exception?.type || session.exception?.message"
                      [matTooltip]="session.exception?.type" TooltipPosition="below">
-                    <mat-icon class="material-symbols-outlined" style="width: 28px; height: 28px;">warning</mat-icon>
+                    <mat-icon class="material-symbols-outlined" style="overflow: initial !important; width: 28px; height: 28px;">warning</mat-icon>
                     <div class="ellipsis" >{{ session.exception?.message || session.exception?.type }}</div>
                 </div>
             </mat-card-content>
