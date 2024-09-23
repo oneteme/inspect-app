@@ -10,6 +10,7 @@ import {FilterService} from "src/app/service/filter.service";
 import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
 import {RestSessionService} from "../../../service/jquery/rest-session.service";
+import {countByFields, groupByField} from "../rest/statistic-rest.view";
 
 @Component({
     templateUrl: './statistic-application.view.html',
@@ -137,24 +138,47 @@ export class StatisticApplicationView implements OnInit, OnDestroy {
         return this._instanceService.getIds(env, end, name).pipe(map(data => {
             let ids = data.map(d => `"${d.id}"`).join(',');
             return {
-                repartitionTimeAndTypeResponse: { observable: this._restSessionService.getRepartitionTimeAndTypeResponse({start: start, end: end, advancedParams: advancedParams, ids: ids}) },
                 repartitionTimeAndTypeResponseByPeriod: {
                     observable: this._restSessionService.getRepartitionTimeAndTypeResponseByPeriod({start: start, end: end, groupedBy: groupedBy, advancedParams: advancedParams, ids: ids}).pipe(map(r => {
                             formatters[groupedBy](r, this._datePipe);
-                            return r;
+                            let combiner = (args: any[], f: string)=> args.reduce((acc, o) => {
+                                acc += o[f];
+                                return acc;
+                            }, 0);
+                            return {
+                                pie: [countByFields(r, combiner, ['countSucces', 'countErrorClient', 'countErrorServer', 'elapsedTimeSlowest', 'elapsedTimeSlow', 'elapsedTimeMedium', 'elapsedTimeFast', 'elapsedTimeFastest'])],
+                                bar: r
+                            }
                     }))
                 },
                 repartitionRequestByPeriodLine: { observable: this._restSessionService.getRepartitionRequestByPeriod({now: now, advancedParams: advancedParams, ids: ids}) },
                 repartitionUser: { observable:
-                    this._restSessionService.getRepartitionUser({start: start, end: end, advancedParams: advancedParams, ids: ids})
-                        .pipe(switchMap(res => {
-                            return forkJoin({
-                                polar: of(res),
-                                bar: this._restSessionService.getRepartitionUserByPeriod({users: res.map(d => `"${d.user}"`).join(','), start: start, end: end, groupedBy: groupedBy, advancedParams: advancedParams, ids: ids}).pipe(map(r => {
-                                    formatters[groupedBy](r, this._datePipe);
-                                    return r;
-                                }))
-                            })
+                    this._restSessionService.getRepartitionUserByPeriod({start: start, end: end, groupedBy: groupedBy, advancedParams: advancedParams, ids: ids})
+                        .pipe(map(r => {
+                            formatters[groupedBy](r, this._datePipe);
+                            let bar = Object.values(groupByField(r, "date")).flatMap(g=> {
+                                let other = g.slice(6).reduce((acc, o)=> {
+                                    if(acc) {
+                                        acc = {count: o['count'], date: o['date'], year: o['year'], user: 'Autres'};
+                                    } else {
+                                        acc['count'] += o['count'];
+                                    }
+                                    return acc;
+                                }, {});
+                                return g.slice(6).length ? [g.slice(0,5), other].flat(): g.slice(0,5);
+                            });
+                            let groupByUser = groupByField(r, "user");
+                            let pie = Object.keys(groupByUser).map(k => {
+                                let count = groupByUser[k].reduce((acc, o) => {
+                                    acc += o['count'];
+                                    return acc;
+                                }, 0);
+                                return {user: k, count: count};
+                            }).sort((a, b) => b.count - a.count).slice(0, 5);
+                            return {
+                                bar: bar,
+                                pie: pie
+                            };
                         }))
                 },
                 repartitionApiBar: { observable: this._restSessionService.getRepartitionApi({start: start, end: end, advancedParams: advancedParams, ids: ids}) },

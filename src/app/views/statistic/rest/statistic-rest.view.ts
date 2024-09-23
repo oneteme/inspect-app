@@ -1,23 +1,23 @@
-import { Component, OnDestroy, OnInit, inject } from "@angular/core";
-import { JQueryService } from "src/app/service/jquery/jquery.service";
-import { DatePipe, Location } from '@angular/common';
-import { ActivatedRoute, Params } from "@angular/router";
-import { FormControl, FormGroup, Validators } from "@angular/forms";
+import {Component, inject, OnDestroy, OnInit} from "@angular/core";
+import {DatePipe, Location} from '@angular/common';
+import {ActivatedRoute, Params} from "@angular/router";
+import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {
     BehaviorSubject,
-    Observable,
-    Subscription,
     combineLatest,
-    filter,
     finalize,
+    forkJoin,
     map,
+    Observable,
+    of,
+    Subscription,
     switchMap,
-    forkJoin, of
+    tap
 } from "rxjs";
-import { Constants, FilterConstants, FilterMap, FilterPreset } from "../../constants";
-import { Utils, formatters, groupingBy, periodManagement, mapParams, } from "src/app/shared/util";
-import { application, makePeriod } from "src/environments/environment";
-import { FilterService } from "src/app/service/filter.service";
+import {Constants, FilterConstants, FilterMap, FilterPreset} from "../../constants";
+import {formatters, mapParams, periodManagement,} from "src/app/shared/util";
+import {application, makePeriod} from "src/environments/environment";
+import {FilterService} from "src/app/service/filter.service";
 import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
 import {RestSessionService} from "../../../service/jquery/rest-session.service";
@@ -135,9 +135,9 @@ export class StatisticRestView implements OnInit, OnDestroy {
 
     onClickRow(event: MouseEvent, row: any) {
         if (event.ctrlKey) {
-            this._router.open(`#/dashboard/server/${this.params.serverName}/rest/${row.name}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}`, '_blank')
+            this._router.open(`#/dashboard/server/${row.appName}/rest/${row.name}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}`, '_blank')
         } else {
-            this._router.navigate(['/dashboard/server',this.params.serverName, 'rest', row.name], {
+            this._router.navigate(['/dashboard/server', row.appName, 'rest', row.name], {
                 queryParamsHandling: 'preserve'
             });
         }
@@ -149,26 +149,46 @@ export class StatisticRestView implements OnInit, OnDestroy {
         return this._instanceService.getIds(env, end, serverName).pipe(map((data: {id: string}[]) => {
                     let ids = data.map(d => `"${d.id}"`).join(',');
                     return {
-                        repartitionTimeAndTypeResponse: { observable: this._restSessionService.getRepartitionTimeAndTypeResponse({start: start, end: end, advancedParams: advancedParams, ids: ids, apiName: restName}) },
                         repartitionTimeAndTypeResponseByPeriod: {
                             observable: this._restSessionService.getRepartitionTimeAndTypeResponseByPeriod({start: start, end: end, groupedBy: groupedBy, advancedParams: advancedParams, ids: ids, apiName: restName}).pipe(map(r => {
                                 formatters[groupedBy](r, this._datePipe);
-                                return r;
+                                let combiner = (args: any[], f: string)=> args.reduce((acc, o) => {
+                                    acc += o[f];
+                                    return acc;
+                                }, 0);
+                                return {
+                                    pie: [countByFields(r, combiner, ['countSucces', 'countErrorClient', 'countErrorServer', 'elapsedTimeSlowest', 'elapsedTimeSlow', 'elapsedTimeMedium', 'elapsedTimeFast', 'elapsedTimeFastest'])],
+                                    bar: r
+                                }
                             }))
                         },
                         repartitionRequestByPeriodLine: { observable: this._restSessionService.getRepartitionRequestByPeriod({now: now, advancedParams: advancedParams, ids: ids, apiName: restName}) }, // 7 derniers jours
-                        repartitionUser: { observable:
-                                this._restSessionService.getRepartitionUser({start: start, end: end, advancedParams: advancedParams, ids: ids, apiName: restName})
-                                    .pipe(switchMap(res => {
-                                        return forkJoin({
-                                            polar: of(res),
-                                            bar: this._restSessionService.getRepartitionUserByPeriod({users: res.map(d => `"${d.user}"`).join(','), start: start, end: end, groupedBy: groupedBy, advancedParams: advancedParams, ids: ids, apiName: restName}).pipe(map(r => {
-                                                formatters[groupedBy](r, this._datePipe);
-                                                return r;
-                                            }))
-                                        })
-                                    }))
-                        },
+                        repartitionUser: { observable: this._restSessionService.getRepartitionUserByPeriod({start: start, end: end, groupedBy: groupedBy, advancedParams: advancedParams, ids: ids, apiName: restName}).pipe(map(r => {
+                            formatters[groupedBy](r, this._datePipe);
+                            let bar = Object.values(groupByField(r, "date")).flatMap(g=> {
+                                let other = g.slice(6).reduce((acc, o)=> {
+                                    if(acc) {
+                                        acc = {count: o['count'], date: o['date'], year: o['year'], user: 'Autres'};
+                                    } else {
+                                        acc['count'] += o['count'];
+                                    }
+                                    return acc;
+                                }, {});
+                                return g.slice(6).length ? [g.slice(0,5), other].flat(): g.slice(0,5);
+                            });
+                            let groupByUser = groupByField(r, "user");
+                            let pie = Object.keys(groupByUser).map(k => {
+                                let count = groupByUser[k].reduce((acc, o) => {
+                                    acc += o['count'];
+                                    return acc;
+                                }, 0);
+                                return {user: k, count: count};
+                            }).sort((a, b) => b.count - a.count).slice(0, 5);
+                            return {
+                                bar: bar,
+                                pie: pie
+                            };
+                        }))},
                         dependenciesTable: { observable: this._restSessionService.getDependencies({start: start, end: end, advancedParams: advancedParams, ids: ids, apiName: restName}) },
                         dependentsTable: { observable: this._restSessionService.getDependents({start: start, end: end, advancedParams: advancedParams, ids: ids, apiName: restName}) },
                         exceptionsTable: { observable: this._restSessionService.getExceptions({start: start, end: end, advancedParams: advancedParams, ids: ids, apiName: restName}) }
@@ -230,4 +250,20 @@ export class StatisticRestView implements OnInit, OnDestroy {
             this._filter.setFilterMap(this.advancedParams);
         }
     }
+}
+export declare type DataProvider<T> = (o: any, idx: number) => T;
+
+export function groupByField(arr: any[], field: string): {[key: string]: any[]}{
+    return arr.reduce((acc: {[key: string]: any[]}, o)=> {
+        let key: string = o[field];
+        (acc[key] = acc[key] || []).push(o);
+        return acc;
+    }, {});
+}
+
+export function countByFields<T>(arr: any[], combiner: (args: any[], o: string)=> T, fields: string[]): {[key: string]: T}{
+    return fields.reduce((acc: {[key: string]: T}, o)=> {
+        acc[o] = combiner(arr, o);
+        return acc;
+    }, {});
 }

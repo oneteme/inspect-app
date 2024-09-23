@@ -41,7 +41,7 @@ const routes: Route[] = [
           {
             path: '',
             component: SearchRestView,
-            title: 'Recherche Appels REST',
+            title: 'Appel d\'API',
           },
           {
             path: ':id_session',
@@ -49,37 +49,39 @@ const routes: Route[] = [
               {
                 path: '',
                 component: DetailSessionRestView,
-                title: 'Detail Appel REST'
+                title: `Appel d'API > Détail`
               },
               {
                 path: 'database/:id_jdbc',
                 data: { type: 'rest' },
                 component: DetailDatabaseView,
-                title: 'Detail Base de donnée'
+                title: `Appel d'API > Base de donnée`
               },
               {
                 path: 'ftp/:id_ftp',
                 data: { type: 'rest' },
                 component: DetailFtpView,
-                title: 'Detail Ftp'
+                title: `Appel d'API > FTP`
               },
               {
                 path: 'ldap/:id_ldap',
                 data: { type: 'rest' },
                 component: DetailLdapView,
-                title: 'Detail Ldap'
+                title: `Appel d'API > LDAP`
               },
               {
                 path: 'smtp/:id_smtp',
                 data: { type: 'rest' },
                 component: DetailSmtpView,
-                title: 'Detail Smtp'
+                title: `Appel d'API > SMTP`
+
               },
               {
                 path: 'tree',
                 data: { type: 'rest' },
                 component: TreeView,
-                title: 'Arbre d\'Appels'
+                title: `Appel d'API > Arbre d\'Appels`
+
               },
               { path: '**', pathMatch: 'full', redirectTo: `/session/rest/:id_session` }
             ]
@@ -95,12 +97,12 @@ const routes: Route[] = [
             component: SearchMainView,
             title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
               if (route.paramMap.get('type_main') == 'batch') {
-                return 'Recherche BATCHs';
+                return 'Lancement de Batch';
               } else if(route.paramMap.get('type_main') == 'startup') {
-                return 'Recherche Serveurs';
+                return 'Lancement de Serveur';
               }
-              return 'Recherche Vues';
-            },
+              return 'Navigation';
+            }
           },
           {
             path: ':id_session',
@@ -109,43 +111,84 @@ const routes: Route[] = [
                 path: '',
                 component: DetailSessionMainView,
                 title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                  let detail = '> Detail';
                   if (route.paramMap.get('type_main') == 'batch') {
-                    return 'Detail BATCH';
+                    return `Lancement de Batch ${detail}`;
                   } else if (route.paramMap.get('type_main') == 'startup') {
-                    return 'Detail Serveur';
+                    return `Lancement de Serveur ${detail}`;
                   }
-                  return 'Detail Vue';
-                },
+                  return `Navigation ${detail}`;
+                }
               },
               {
                 path: 'database/:id_jdbc',
                 component: DetailDatabaseView,
                 data: { type: 'main' },
-                title: 'Detail Base de donnée'
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                  let detail = `> Base de Donnée`;
+                  if (route.paramMap.get('type_main') == 'batch') {
+                    return `Lancement de Batch ${detail}`;
+                  } else if (route.paramMap.get('type_main') == 'startup') {
+                    return `Lancement de Serveur ${detail}`;
+                  }
+                  return `Navigation ${detail}`;
+                }
               },
               {
                 path: 'ftp/:id_ftp',
                 data: { type: 'main' },
                 component: DetailFtpView,
-                title: 'Detail Ftp'
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                  let detail = `> FTP`;
+                  if (route.paramMap.get('type_main') == 'batch') {
+                    return `Lancement de Batch ${detail}`;
+                  } else if (route.paramMap.get('type_main') == 'startup') {
+                    return `Lancement de Serveur ${detail}`;
+                  }
+                  return `Navigation ${detail}`;
+                }
               },
               {
                 path: 'ldap/:id_ldap',
                 data: { type: 'main' },
                 component: DetailLdapView,
-                title: 'Detail Ldap'
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                  let detail = `> LDAP`;
+                  if (route.paramMap.get('type_main') == 'batch') {
+                    return `Lancement de Batch ${detail}`;
+                  } else if (route.paramMap.get('type_main') == 'startup') {
+                    return `Lancement de Serveur ${detail}`;
+                  }
+                  return `Navigation ${detail}`;
+                }
               },
               {
                 path: 'smtp/:id_smtp',
                 data: { type: 'main' },
                 component: DetailSmtpView,
-                title: 'Detail Smtp'
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                  let detail = `> SMTP`;
+                  if (route.paramMap.get('type_main') == 'batch') {
+                    return `Lancement de Batch ${detail}`;
+                  } else if (route.paramMap.get('type_main') == 'startup') {
+                    return `Lancement de Serveur ${detail}`;
+                  }
+                  return `Navigation ${detail}`;
+                }
               },
               {
                 path: 'tree',
                 data: { type: 'main' },
                 component: TreeView,
-                title: 'Arbre d\'appels'
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                  let detail = `> Arbre d'Appels`;
+                  if (route.paramMap.get('type_main') == 'batch') {
+                    return `Lancement de Batch ${detail}`;
+                  } else if (route.paramMap.get('type_main') == 'startup') {
+                    return `Lancement de Serveur ${detail}`;
+                  }
+                  return `Navigation ${detail}`;
+                }
               },
               { path: '**', pathMatch: 'full', redirectTo: `/main/:type_main/:id_session` }
             ]
@@ -162,22 +205,30 @@ const routes: Route[] = [
       {
         path: 'server/:server_name',
         component: StatisticApplicationView,
-        title: 'Statistiques Serveur'
+        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+          return `Dashboard > ${route.paramMap.get('server_name')}`;
+        }
       },
       {
         path: 'server/:server_name/rest/:rest_name',
         component: StatisticRestView,
-        title: 'Statistiques API'
+        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+          return `Dashboard > ${route.paramMap.get('server_name')} > ${route.paramMap.get('rest_name')}`;
+        }
       },
       {
         path: 'user/:user_name',
         component: StatisticUserView,
-        title: 'Statistiques Utilisateur'
+        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+          return `Dashboard > ${route.paramMap.get('user_name')}`;
+        }
       },
       {
         path: 'database/:database_name',
         component: StatisticDatabaseView,
-        title: 'Statistiques Base de Donnée'
+        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+          return `Dashboard > ${route.paramMap.get('database_name')}`;
+        }
       },
       { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
     ]

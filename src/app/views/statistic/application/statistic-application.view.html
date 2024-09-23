@@ -33,23 +33,23 @@
 
 <div class="mat-elevation-z5" style="display: flex; justify-content: space-between; margin-bottom: 1em;">
     <chart style="width: 30%;" type="pie" [config]="constants.REPARTITION_TYPE_RESPONSE_PIE"
-        [data]="requests.repartitionTimeAndTypeResponse?.data || []"
-        [isLoading]="requests.repartitionTimeAndTypeResponse?.isLoading" />
+        [data]="requests.repartitionTimeAndTypeResponseByPeriod?.data?.pie || []"
+        [isLoading]="requests.repartitionTimeAndTypeResponseByPeriod?.isLoading" />
     <mat-divider style="margin-top: 5em; margin-bottom: 5em;" [vertical]="true"></mat-divider>
     <chart style="width: 70%;" type="column" [config]="constants.REPARTITION_TYPE_RESPONSE_BAR"
-        [data]="requests.repartitionTimeAndTypeResponseByPeriod?.data || []"
+        [data]="requests.repartitionTimeAndTypeResponseByPeriod?.data?.bar || []"
         [isLoading]="requests.repartitionTimeAndTypeResponseByPeriod?.isLoading" />
 </div>
 <div class="mat-elevation-z5" style="display: flex; justify-content: space-between; margin-bottom: 1em;">
     <chart style="width: 70%;" type="column" [config]="constants.REPARTITION_SPEED_BAR"
-        [data]="requests.repartitionTimeAndTypeResponseByPeriod?.data || []" [isLoading]="requests.repartitionTimeAndTypeResponseByPeriod?.isLoading" />
+        [data]="requests.repartitionTimeAndTypeResponseByPeriod?.data?.bar || []" [isLoading]="requests.repartitionTimeAndTypeResponseByPeriod?.isLoading" />
     <mat-divider style="margin-top: 5em; margin-bottom: 5em;" [vertical]="true"></mat-divider>
     <chart style="width: 30%;" type="pie" [config]="constants.REPARTITION_SPEED_PIE"
-        [data]="requests.repartitionTimeAndTypeResponse?.data || []" [isLoading]="requests.repartitionTimeAndTypeResponse?.isLoading" />
+        [data]="requests.repartitionTimeAndTypeResponseByPeriod?.data?.pie || []" [isLoading]="requests.repartitionTimeAndTypeResponseByPeriod?.isLoading" />
 </div>
 <div class="mat-elevation-z5" style="display: flex; justify-content: space-between; margin-bottom: 1em;">
     <chart style="width: 30%;" type="pie" [config]="constants.REPARTITION_USER_POLAR"
-        [data]="requests.repartitionUser?.data?.polar || []" [isLoading]="requests.repartitionUser?.isLoading" />
+        [data]="requests.repartitionUser?.data?.pie || []" [isLoading]="requests.repartitionUser?.isLoading" />
     <mat-divider style="margin-top: 5em; margin-bottom: 5em;" [vertical]="true"></mat-divider>
     <chart style="width: 70%;" type="column" [config]="constants.REPARTITION_USER_BAR"
         [data]="requests.repartitionUser?.data?.bar || []" [isLoading]="requests.repartitionUser?.isLoading" />
@@ -61,10 +61,10 @@
 <div class="mat-elevation-z5" style="margin-bottom: 1em;">
     <chart type="line"
         [config]="constants.REPARTITION_MAX_BY_PERIOD_LINE"
-        [data]="requests.repartitionTimeAndTypeResponseByPeriod?.data || []"
+        [data]="requests.repartitionTimeAndTypeResponseByPeriod?.data?.bar || []"
         [isLoading]="requests.repartitionTimeAndTypeResponseByPeriod?.isLoading" />
     <chart type="line" [config]="constants.REPARTITION_AVG_BY_PERIOD_LINE"
-        [data]="requests.repartitionTimeAndTypeResponseByPeriod?.data || []"
+        [data]="requests.repartitionTimeAndTypeResponseByPeriod?.data.bar || []"
         [isLoading]="requests.repartitionTimeAndTypeResponseByPeriod?.isLoading" />
 </div>
 <div style="display: flex; flex-direction: row; gap: 0.5em; margin-bottom: 1em;">

@@ -5,7 +5,7 @@
             <mat-card-title>
                 <a style="display: flex; align-items: center; gap: 0.5em">
                     <mat-icon>settings_suggest</mat-icon>
-                    {{ '[' + session.type + '] ' + session.name || 'N/A' }}
+                    {{ '[' + session.type + '] ' + (session.name || 'N/A') }}
                 </a>
                 <div class="right">
                     <button mat-icon-button (click)="navigate($event,'tree')" matTooltip="Arbre d'appels">
@@ -38,7 +38,7 @@
                     le {{ (session.start * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
                 </div>
                 <div class="right">
-                    en  <span style="font-weight: bold">{{ { start: session.start, end: session.end } | duration }}</span>
+                    en <span style="font-weight: bold">{{{ start: session.start, end: session.end } | duration }}</span>
                 </div>
             </mat-card-footer>
         </mat-card>

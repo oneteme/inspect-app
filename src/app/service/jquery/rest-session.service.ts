@@ -106,7 +106,7 @@ export class RestSessionService {
             'start.lt': filters.end.toISOString(),
             'user.notNull': '',
             'order': 'count.desc',
-            'fetch': 5,
+            'limit': 5,
             ...filters.advancedParams
         }
         if (filters.apiName) {
@@ -115,23 +115,20 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getRepartitionUserByPeriod(filters: {users: string, start: Date, end: Date, groupedBy: string, advancedParams: FilterMap, ids: string}): Observable<{count: number, date: number, year: number, user: string}[]>;
-    getRepartitionUserByPeriod(filters: {users: string, start: Date, end: Date, groupedBy: string, advancedParams: FilterMap, ids: string, apiName: string}): Observable<{count: number, date: number, year: number, user: string}[]>;
-    getRepartitionUserByPeriod(filters: {users: string, start: Date, end: Date, groupedBy: string, advancedParams: FilterMap, ids: string, apiName: string}): Observable<{count: number, date: number, year: number, user: string}[]> {
+    getRepartitionUserByPeriod(filters: {start: Date, end: Date, groupedBy: string, advancedParams: FilterMap, ids: string}): Observable<{count: number, date: number, year: number, user: string}[]>;
+    getRepartitionUserByPeriod(filters: {start: Date, end: Date, groupedBy: string, advancedParams: FilterMap, ids: string, apiName: string}): Observable<{count: number, date: number, year: number, user: string}[]>;
+    getRepartitionUserByPeriod(filters: {start: Date, end: Date, groupedBy: string, advancedParams: FilterMap, ids: string, apiName: string}): Observable<{count: number, date: number, year: number, user: string}[]> {
         let args: any = {
             'column': `count:count,start.${filters.groupedBy}:date,start.year:year,user`,
             'instance_env.in': filters.ids,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'user.notNull': '',
-            'order': `year.asc,date.asc`,
+            'order': `year.asc,date.asc,count.desc`,
             ...filters.advancedParams
         }
         if(filters.apiName) {
             args['api_name'] = `"${filters.apiName}"`;
-        }
-        if(filters.users) {
-            args['user.in'] = filters.users;
         }
         return this.getRestSession(args);
     }
@@ -145,7 +142,7 @@ export class RestSessionService {
             'start.lt': filters.end.toISOString(),
             'api_name.notNull': '',
             'order': 'count.desc',
-            'fetch': 5,
+            'limit': 5,
             ...filters.advancedParams
         }
         if(filters.ids) {
@@ -161,10 +158,10 @@ export class RestSessionService {
     }
 
     getDependencies(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string}[]>;
-    getDependencies(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string, apiName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string}[]> ;
-    getDependencies(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string, apiName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string}[]> {
+    getDependencies(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string, apiName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, appName: string}[]> ;
+    getDependencies(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string, apiName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, appName: string}[]> {
         let args: any = {
-            'column': 'count:count,count_succes:countSucces,count_error_client:countErrClient,count_error_server:countErrServer,instance.app_name:name',
+            'column': `count:count,count_succes:countSucces,count_error_client:countErrClient,count_error_server:countErrServer,${filters.apiName ? 'api_name:name,instance.app_name' : 'instance.app_name:name'}`,
             'instance.id':  'instance_env',
             'id': 'rest_request.parent',
             'rest_request.remote': 'rest_session_join.id',
@@ -218,7 +215,7 @@ export class RestSessionService {
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'order': 'count.desc',
-            'fetch': 5,
+            'limit': 5,
             ...filters.advancedParams
         }
         if(filters.ids) {
