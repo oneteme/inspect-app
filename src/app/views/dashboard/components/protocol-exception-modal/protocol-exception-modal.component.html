@@ -1,0 +1,62 @@
+<h2 mat-dialog-title color="primary" style="background-color:#3f51b5;color:white;">{{exceptions.type}} Exceptions</h2>
+
+<mat-dialog-content class="mat-typography">
+  <div class="filter-container mat-elevation-z5">
+    <table  mat-table [dataSource]="exceptions.observable.data" #sort="matSort" matSort matSortActive="date"
+    matSortDirection="desc" >
+      <ng-container matColumnDef="date">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Instant</th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.date }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="errType">
+        <th mat-header-cell *matHeaderCellDef>Titre</th>
+        <td mat-cell *matCellDef="let row">
+          <div matTooltipClass="mat-tooltip">
+            <span> {{ removePackage(row.err_type) }} </span>
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="count">
+        <th mat-header-cell *matHeaderCellDef>Taux</th>
+        <td mat-cell *matCellDef="let row">
+          <div matTooltipClass="mat-tooltip">
+            <span class="error-badge">{{ row.count }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="protocolExceptionsDisplyedColumns;sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: protocolExceptionsDisplyedColumns;" [class.hidden]="row.count==0"></tr>
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" colspan="7">
+          <div *ngIf="!result.isLoading" class="empty-row" style="align-items: center;">
+            <span class="material-symbols-outlined">
+              info
+            </span>
+            <span style="font-style: italic;">Aucun résultat</span>
+          </div>
+          <div *ngIf="result.isLoading" class="loading-row">
+            <span style="display: flex; flex-direction: column; font-style: italic;">
+              Chargement en cours...
+              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            </span>
+          </div>
+
+        </td>
+      </tr>
+    </table>
+    <!--
+    <div [hidden]="exceptions.observable.data.data.length < 5">
+      <mat-paginator #paginator [length]="exceptions.observable.data.data.length" [pageSize]="5" [hidePageSize]="true"
+        [showFirstLastButtons]="true"></mat-paginator>
+    </div>
+    -->
+  </div>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close>Close</button>
+</mat-dialog-actions>
