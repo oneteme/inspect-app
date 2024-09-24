@@ -15,6 +15,7 @@ interface Main {
 
 interface Dashboard {
     default_period: Partial<DefaultPeriod>;
+    home: Partial<Home>;
     api: Partial<Api>;
     app: Partial<App>;
     database: Partial<Database>;
@@ -34,6 +35,10 @@ interface Database {
 }
 
 interface User {
+    default_period: Partial<DefaultPeriod>;
+}
+
+interface Home{
     default_period: Partial<DefaultPeriod>;
 }
 

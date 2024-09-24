@@ -4,6 +4,7 @@ import {Observable} from "rxjs";
 import {
     DatabaseRequest,
     DatabaseRequestStage,
+    ExceptionInfo,
     FtpRequest,
     FtpRequestStage,
     InstanceEnvironment,

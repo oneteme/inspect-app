@@ -233,11 +233,11 @@ const routes: Route[] = [
       { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
     ]
   },
-  /*{
-    path: 'dashboard',
+  {
+    path: 'home',
     component: DashboardComponent,
-    title: 'Dashboard'
-  },*/
+    title: 'Accueil'
+  },
   { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
 ];
 

@@ -1,4 +1,5 @@
 import { ChartProvider, field, values } from "@oneteme/jquery-core";
+import { DashboardComponent } from "./dashboard/dashboard.component";
 
 export class Constants {
 
@@ -365,8 +366,247 @@ export class Constants {
         rest: {title: 'Appel d\'API', icon: 'call_received'},
         batch: {title: 'Lancement de Batch', icon: 'manufacturing'},
         startup: {title: 'Lancement de Serveur', icon: 'restart_alt'},
-        view: {title: 'Navigation', icon: 'ads_click'}
+        view: {title: 'Navigation', icon: 'ads_click'},
+        dashboard: {title:'Dashboard', icon: 'home'}
     }
+
+    
+    static REST_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<string, number> = {
+   
+    
+        height: 150,
+        continue: true,
+        series: [
+            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions REST', color: "#ff0000" },
+        ],
+        options: {
+            title: {
+                text: 'REST: ',
+            },
+            chart: {
+                id: 'sparkline-1',
+                group: 'sparkline',
+                data : {
+                     name : "restRequestExceptionsTable",
+                     type :  "REST"
+                },
+                sparkline: {
+                   enabled: true
+                },
+                toolbar: {
+                    show: false
+                }
+                
+            },
+            stroke: {
+                curve: 'straight'
+            },
+            xaxis: {
+                labels: {
+                    datetimeUTC: false
+                },
+            },
+            yaxis: {
+                labels: {
+                    formatter: function (val: any) {
+                        return val.toFixed(2)+"%";
+                    },
+                },
+                max: 100
+            },
+            subtitle: {
+                offsetY: 20
+            }
+        }
+    };
+    
+    static  DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+      
+        height: 150,
+        continue: true,
+        series: [
+            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions JDBC', color: "#ff0000" }
+        ],
+        options: {
+            title: {
+                text: 'JDBC: ',
+            },
+            chart: {
+                id: 'sparkline-2',
+                group: 'sparkline',
+                data : {
+                    name : "databaseRequestExceptionsTable",
+                    type :  "JDBC"
+                },
+                sparkline: {
+                    enabled: true
+                },
+                toolbar: {
+                    show: false
+                }
+            },
+            stroke: {
+                curve: 'straight'
+            },
+            xaxis: {
+                labels: {
+                    datetimeUTC: false
+                },
+            },
+            yaxis: {
+                labels: {
+                    formatter: function (val: any) {
+                        return val.toFixed(2)+"%";
+                    },
+                },
+                max: 100
+            },
+            subtitle: {
+                offsetY: 20
+            }
+        }
+    };
+
+    static  FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+
+
+        height: 150,
+        continue: true,
+        series: [
+            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions FTP', color: "#ff0000"}
+        ],
+        options: {
+            title: {
+                text: 'FTP: ',
+            },
+            chart: {
+                id: 'sparkline-3',
+                group: 'sparkline',
+                data : {
+                    name : "ftpRequestExceptionsTable",
+                    type :  "FTP"
+                },
+                sparkline: {
+                    enabled: true
+                },
+                toolbar: {
+                    show: false
+                }
+            },
+            stroke: {
+                curve: 'straight'
+            },
+            xaxis: {
+                labels: {
+                    datetimeUTC: false
+                },
+            },
+            yaxis: {
+                labels: {
+                    formatter: function (val: any) {
+                        return val.toFixed(2)+"%";
+                    },
+                },
+                max: 100
+            },
+            subtitle: {
+                offsetY: 20
+            }
+        }
+    };
+
+    static  SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+        height: 150,
+        continue: true,
+        series: [
+            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions SMTP', color: "#ff0000" }
+        ],
+        options: {
+            title: {
+                text: 'SMTP: ',
+            },
+            chart: {
+                id: 'sparkline-4',
+                group: 'sparkline',
+                data : {
+                    name : "smtpRequestExceptionsTable",
+                    type :  "SMTP"
+                },
+                sparkline: {
+                    enabled: true
+                },
+                toolbar: {
+                    show: false
+                }
+            },
+            stroke: {
+                curve: 'straight'
+            },
+            xaxis: {
+                labels: {
+                    datetimeUTC: false
+                },
+            },
+            yaxis: {
+                labels: {
+                    formatter: function (val: any) {
+                        return val.toFixed(2)+"%";
+                    },
+                },
+                max: 100
+            },
+            subtitle: {
+                offsetY: 20
+            }
+        }
+    };
+
+    static  LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+        height: 150,
+        continue: true,
+        series: [
+            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions LDAP', color: "#ff0000" }
+        ],
+        options: {
+            title: {
+                text: 'LDAP: ',
+            },
+            chart: {
+                id: 'sparkline-5',
+                group: 'sparkline',
+                data : {
+                    name : "ldapRequestExceptionsTable",
+                    type :  "LDAP"
+                },
+                sparkline: {
+                    enabled: true
+                },
+                toolbar: {
+                    show: true,
+                    
+                }
+            },
+            stroke: {
+                curve: 'straight'
+            },
+            xaxis: {
+                labels: {
+                    datetimeUTC: false
+                },
+            },
+            yaxis: {
+                labels: {
+                    formatter: function (val: any) {
+                        return val.toFixed(2)+"%";
+                    },
+                },
+                max: 100
+            },
+            subtitle: {
+                offsetY: 20
+            }
+        }
+    };
 }
 
 export class Filter {

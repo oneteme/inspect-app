@@ -59,7 +59,6 @@ export class SearchRestView implements OnInit, OnDestroy {
     this._activatedRoute.queryParams
       .subscribe({
         next: (params: Params) => {
-          console.log(params['start'], params['end'])
           this.params.env = params['env'] || application.default_env;
           this.params.start = params['start'] ? new Date(params['start']) : (application.session.api.default_period || makePeriod(0)).start;
           this.params.end = params['end'] ? new Date(params['end']) : (application.session.api.default_period || makePeriod(0, 1)).end;

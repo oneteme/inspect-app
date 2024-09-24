@@ -5,7 +5,8 @@ import {FilterMap} from "../../views/constants";
 import {
     RepartitionRequestByPeriod,
     RepartitionTimeAndTypeResponse,
-    RepartitionTimeAndTypeResponseByPeriod
+    RepartitionTimeAndTypeResponseByPeriod,
+    SessionExceptionsByPeriodAndAppname
 } from "../../model/jquery.model";
 
 @Injectable({ providedIn: 'root' })
@@ -227,6 +228,19 @@ export class RestSessionService {
             if (filters.user) {
                 args['user'] = filters.user;
             }
+        }
+        return this.getRestSession(args);
+    }
+
+    getSessionExceptions(filters : {env: string, start:Date, end: Date,groupedBy:string, app_name: string }): Observable<SessionExceptionsByPeriodAndAppname[]> {
+        let args = {
+            "column": `start.${filters.groupedBy}:date,err_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`,
+             'join': 'instance',
+              'instance.environement': filters.env,
+               'start.ge': filters.start.toISOString(), 
+               'start.lt': filters.end.toISOString(),
+                [filters.app_name]: '', 
+                "order": "date.desc,count.desc" 
         }
         return this.getRestSession(args);
     }

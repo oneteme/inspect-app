@@ -21,6 +21,9 @@ export const application: Application = {
   },
   dashboard: {
     default_period: makePeriod(6, 1),
+    home: {
+      default_period : makePeriod (0, 1)
+    },
     api : {
       default_period: undefined
     },
