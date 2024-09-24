@@ -48,7 +48,11 @@ import {CdkMenuModule} from '@angular/cdk/menu';
 import {DialogModule} from '@angular/cdk/dialog';
 import {BrowserAnimationsModule} from 
     '@angular/platform-browser/animations';
+import {LabelIconComponent} from "./_component/label-icon/label-icon.component";
+import {CommonModule} from "@angular/common";
 @NgModule({
+  imports: [CommonModule, MatIconModule],
+  declarations: [LabelIconComponent],
   exports: [
     BrowserAnimationsModule,
     A11yModule,
@@ -99,6 +103,7 @@ import {BrowserAnimationsModule} from
     PortalModule,
     ScrollingModule,
     DialogModule,
+    LabelIconComponent
   ]
 })
 export class MaterialModule {}

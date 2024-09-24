@@ -11,6 +11,7 @@ import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
 import {RestSessionService} from "../../../service/jquery/rest-session.service";
 import {countByFields, groupByField} from "../rest/statistic-rest.view";
+import {MainSessionService} from "../../../service/jquery/main-session.service";
 
 @Component({
     templateUrl: './statistic-application.view.html',
@@ -19,6 +20,7 @@ import {countByFields, groupByField} from "../rest/statistic-rest.view";
 export class StatisticApplicationView implements OnInit, OnDestroy {
     private _activatedRoute = inject(ActivatedRoute);
     private _restSessionService = inject(RestSessionService);
+    private _mainSessionService = inject(MainSessionService);
     private _instanceService = inject(InstanceService);
     private _router = inject(EnvRouter);
     private _location = inject(Location);
@@ -182,7 +184,13 @@ export class StatisticApplicationView implements OnInit, OnDestroy {
                         }))
                 },
                 repartitionApiBar: { observable: this._restSessionService.getRepartitionApi({start: start, end: end, advancedParams: advancedParams, ids: ids}) },
-                dependenciesTable: { observable: this._restSessionService.getDependencies({start: start, end: end, advancedParams: advancedParams, ids: ids}) },
+                dependenciesTable: { observable: forkJoin({
+                        restSession : this._restSessionService.getDependencies({start: start, end: end, advancedParams: advancedParams, ids: ids}),
+                        mainSession : this._mainSessionService.getDependencies({start: start, end: end, advancedParams: advancedParams, ids: ids})
+                    }).pipe(map(res => {
+                        console.log("test", [res.restSession, res.mainSession.map(res => ({count: res.count, countSucces: 0, countErrClient: 0, countErrServer: 0, name: res.name}))].flat())
+                        return [res.restSession, res.mainSession].flat().sort((a, b) => b.count - a.count);
+                    })) },
                 dependentsTable: { observable: this._restSessionService.getDependents({start: start, end: end, advancedParams: advancedParams, ids: ids}) },
                 exceptionsTable: { observable: this._restSessionService.getExceptions({start: start, end: end, advancedParams: advancedParams, ids: ids})}
             }

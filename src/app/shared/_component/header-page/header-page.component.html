@@ -1,7 +1,5 @@
 <div class="title-container">
-    <div class="title-icon">
-        <mat-icon class="material-symbols-outlined" [fontIcon]="titleIcon"></mat-icon>
-    </div>
+    <label-icon [icon]="titleIcon" [iconOutlined]="true" [size]="35"></label-icon>
     <div class="title">
         <div *ngIf="title" class="main">{{title}}</div>
         <div *ngIf="subTitle || templateSubTitle" class="sub">

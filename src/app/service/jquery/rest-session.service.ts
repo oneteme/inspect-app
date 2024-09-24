@@ -161,7 +161,7 @@ export class RestSessionService {
     getDependencies(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string, apiName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, appName: string}[]> ;
     getDependencies(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string, apiName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, appName: string}[]> {
         let args: any = {
-            'column': `count:count,count_succes:countSucces,count_error_client:countErrClient,count_error_server:countErrServer,${filters.apiName ? 'api_name:name,instance.app_name' : 'instance.app_name:name'}`,
+            'column': `rest_request.count:count,rest_request.count_succes:countSucces,rest_request.count_error_client:countErrClient,rest_request.count_error_server:countErrServer,${filters.apiName ? 'api_name:name,instance.app_name' : 'instance.app_name:name'}`,
             'instance.id':  'instance_env',
             'id': 'rest_request.parent',
             'rest_request.remote': 'rest_session_join.id',
