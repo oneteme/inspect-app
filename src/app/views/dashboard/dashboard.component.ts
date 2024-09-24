@@ -15,7 +15,7 @@ import { MatSort } from '@angular/material/sort';
 import { InstanceService } from 'src/app/service/jquery/instance.service';
 import { RestSessionService } from 'src/app/service/jquery/rest-session.service';
 import { MainSessionService } from 'src/app/service/jquery/main-session.service';
-import { restRequestService } from 'src/app/service/jquery/rest-request.service';
+import { RestRequestService } from 'src/app/service/jquery/rest-request.service';
 import { DatabaseRequestService } from 'src/app/service/jquery/database-request.service';
 import { FtpRequestService} from 'src/app/service/jquery/ftp-request.service';
 import { LdapRequestService } from 'src/app/service/jquery/ldap-request.service';
@@ -33,7 +33,7 @@ export class DashboardComponent {
     private _instanceService = inject(InstanceService);
     private _sessionService = inject(RestSessionService);
     private _mainService = inject(MainSessionService);
-    private _restService = inject(restRequestService);
+    private _restService = inject(RestRequestService);
     private _datebaseService = inject(DatabaseRequestService);
     private _ftpService = inject(FtpRequestService);
     private _smtpService = inject(smtpRequestService)

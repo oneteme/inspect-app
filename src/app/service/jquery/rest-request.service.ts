@@ -5,7 +5,7 @@ import { RestMainExceptionsByPeriodAndappname, RestSessionExceptionsByPeriodAnda
 
 
 @Injectable({ providedIn: 'root' })
-export class restRequestService {
+export class RestRequestService {
     constructor(private http: HttpClient) {
 
     }
