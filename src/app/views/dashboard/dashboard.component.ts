@@ -21,6 +21,7 @@ import { FtpRequestService} from 'src/app/service/jquery/ftp-request.service';
 import { LdapRequestService } from 'src/app/service/jquery/ldap-request.service';
 import { FtpMainExceptionsByPeriodAndappname, FtpSessionExceptionsByPeriodAndappname, JdbcMainExceptionsByPeriodAndappname, JdbcSessionExceptionsByPeriodAndappname, LdapMainExceptionsByPeriodAndappname, LdapSessionExceptionsByPeriodAndappname, RestMainExceptionsByPeriodAndappname, RestSessionExceptionsByPeriodAndappname, SessionExceptionsByPeriodAndAppname, SmtpMainExceptionsByPeriodAndappname, SmtpSessionExceptionsByPeriodAndappname } from 'src/app/model/jquery.model';
 import { smtpRequestService } from 'src/app/service/jquery/smtp-request.service';
+import { ChartProvider} from "@oneteme/jquery-core";
 @Component({
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
@@ -162,13 +163,16 @@ export class DashboardComponent {
         return { app_name: '' };
     }
 
-    setChartDialogEvent() {
+    setChartDialogEvent() { // todo fix 
         let dis = this;
         [this.constants.REST_REQUEST_EXCEPTION_BY_PERIOD_LINE,
         this.constants.DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE,
         this.constants.FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE,
         this.constants.SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE,
-        this.constants.LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE].forEach(p => {
+        this.constants.LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE].forEach((p:ChartProvider<string, number> | ChartProvider<Date, number>) => {
+           // p = Object.assign({}, p);
+           // p.options.title.text = `${p.options.chart.data.type}: `;
+           // p.options.subtitle.Text = ''; 
             p.options.chart.toolbar = {
                 show: true,
                 tools: {
@@ -268,7 +272,7 @@ export class DashboardComponent {
 
             //   Rest-Main Sessions exceptions 
             sessionExceptionsTable: {
-                observable: this._sessionService.getSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
+                observable: this._sessionService.getSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: app_name})
                     .pipe(map(((result: SessionExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe)
                         // result.map( )
@@ -277,7 +281,7 @@ export class DashboardComponent {
             },
 
             batchExceptionTable: {
-                observable: this._mainService.getMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
+                observable: this._mainService.getMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: app_name})
                     .pipe(map(((result: SessionExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe)
                         return result.filter(r => r.errorType != null);
@@ -287,8 +291,8 @@ export class DashboardComponent {
             //------- TABLE + CHART
             restRequestExceptionsTable: {
                 observable: forkJoin({
-                    restSession: this._restService.getrestSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName}),
-                    mainSession: this._restService.getrestMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
+                    restSession: this._restService.getrestSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: app_name}),
+                    mainSession: this._restService.getrestMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: app_name})
                 })
                     .pipe(map(((result: { restSession: RestSessionExceptionsByPeriodAndappname[]; mainSession: RestMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
@@ -299,8 +303,8 @@ export class DashboardComponent {
 
             databaseRequestExceptionsTable: {
                 observable: forkJoin({
-                    restSession: this._datebaseService.getJdbcRestSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName}),
-                    mainSession: this._datebaseService.getJdbcMainSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
+                    restSession: this._datebaseService.getJdbcRestSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: app_name}),
+                    mainSession: this._datebaseService.getJdbcMainSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: app_name})
                 })
                     .pipe(map(((result: { restSession: JdbcSessionExceptionsByPeriodAndappname[]; mainSession: JdbcMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
@@ -310,8 +314,8 @@ export class DashboardComponent {
             },
             ftpRequestExceptionsTable: {
                 observable: forkJoin({
-                    restSession: this._ftpService.getftpSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName}),
-                    mainSession: this._ftpService.getftpMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
+                    restSession: this._ftpService.getftpSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: app_name}),
+                    mainSession: this._ftpService.getftpMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: app_name})
                 })
                     .pipe(map(((result: { restSession: FtpSessionExceptionsByPeriodAndappname[]; mainSession: FtpMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
@@ -321,8 +325,8 @@ export class DashboardComponent {
             },
             smtpRequestExceptionsTable: {
                 observable: forkJoin({
-                    restSession: this._smtpService.getsmtpSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName}),
-                    mainSession: this._smtpService.getsmtpMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
+                    restSession: this._smtpService.getsmtpSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: app_name}),
+                    mainSession: this._smtpService.getsmtpMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: app_name})
                 })
                     .pipe(map(((result: { restSession: SmtpSessionExceptionsByPeriodAndappname[]; mainSession: SmtpMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
@@ -332,8 +336,8 @@ export class DashboardComponent {
             },
             ldapRequestExceptionsTable: {
                 observable: forkJoin({
-                    restSession: this._ldapService.getLdapSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName}),
-                    mainSession: this._ldapService.getLdapMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
+                    restSession: this._ldapService.getLdapSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: app_name}),
+                    mainSession: this._ldapService.getLdapMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: app_name})
                 })
                     .pipe(map(((result: { restSession: LdapSessionExceptionsByPeriodAndappname[]; mainSession: LdapMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
