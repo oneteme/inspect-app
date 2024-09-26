@@ -162,13 +162,13 @@
           <tr mat-row *matRowDef="let row; columns: batchExceptionDisplayedColumns;"></tr>
           <tr class="mat-row" *matNoDataRow>
             <td class="mat-cell" colspan="7">
-              <div *ngIf="!requests.sessionExceptionsTable.isLoading" class="empty-row" style="align-items: center;">
+              <div *ngIf="!requests.batchExceptionTable.isLoading" class="empty-row" style="align-items: center;">
                 <span class="material-symbols-outlined">
                   info
                 </span>
                 <span style="font-style: italic;">Aucun résultat</span>
               </div>
-              <div *ngIf="requests.sessionExceptionsTable.isLoading" class="loading-row">
+              <div *ngIf="requests.batchExceptionTable.isLoading" class="loading-row">
                 <span style="display: flex; flex-direction: column; font-style: italic;">
                   Chargement en cours...
                   <mat-progress-bar mode="indeterminate"></mat-progress-bar>

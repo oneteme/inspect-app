@@ -238,8 +238,6 @@ export class DashboardComponent {
         config.options.subtitle.text = subtitle
         c[configName] = config
         this.charts[chartName] = arr;
-
-        return data;
     }
 
     groupByProperty(property: string, array: any[]) {
@@ -303,7 +301,8 @@ export class DashboardComponent {
                     mainSession: this._restService.getrestMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
                 })
                     .pipe(map(((result: { restSession: RestSessionExceptionsByPeriodAndappname[]; mainSession: RestMainExceptionsByPeriodAndappname[]; }) => {
-                        let r = this.setChartData([...result.restSession, ...result.mainSession], 'REST', 'restRequestExceptionsTable', 'REST_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
+                        let r = [...result.restSession, ...result.mainSession]
+                        this.setChartData(r , 'REST', 'restRequestExceptionsTable', 'REST_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
                         return r;
                     })))
             },
@@ -314,7 +313,8 @@ export class DashboardComponent {
                     mainSession: this._datebaseService.getJdbcMainSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
                 })
                     .pipe(map(((result: { restSession: JdbcSessionExceptionsByPeriodAndappname[]; mainSession: JdbcMainExceptionsByPeriodAndappname[]; }) => {
-                        let r = this.setChartData([...result.restSession, ...result.mainSession], 'JDBC', 'databaseRequestExceptionsTable', 'DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
+                        let r = [...result.restSession, ...result.mainSession]
+                        this.setChartData(r , 'JDBC', 'databaseRequestExceptionsTable', 'DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
                         return r;
                     })))
             },
@@ -324,7 +324,8 @@ export class DashboardComponent {
                     mainSession: this._ftpService.getftpMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
                 })
                     .pipe(map(((result: { restSession: FtpSessionExceptionsByPeriodAndappname[]; mainSession: FtpMainExceptionsByPeriodAndappname[]; }) => {
-                        let r = this.setChartData([...result.restSession, ...result.mainSession], 'FTP', 'ftpRequestExceptionsTable', 'FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
+                        let r = [...result.restSession, ...result.mainSession]
+                        this.setChartData(r , 'FTP', 'ftpRequestExceptionsTable', 'FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
                         return r;
                     })))
             },
@@ -334,7 +335,8 @@ export class DashboardComponent {
                     mainSession: this._smtpService.getsmtpMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
                 })
                     .pipe(map(((result: { restSession: SmtpSessionExceptionsByPeriodAndappname[]; mainSession: SmtpMainExceptionsByPeriodAndappname[]; }) => {
-                        let r = this.setChartData([...result.restSession, ...result.mainSession], 'SMTP', 'smtpRequestExceptionsTable', 'SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
+                        let r = [...result.restSession, ...result.mainSession]
+                        this.setChartData(r , 'SMTP', 'smtpRequestExceptionsTable', 'SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
                         return r;
                     })))
             },
@@ -344,7 +346,8 @@ export class DashboardComponent {
                     mainSession: this._ldapService.getLdapMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
                 })
                     .pipe(map(((result: { restSession: LdapSessionExceptionsByPeriodAndappname[]; mainSession: LdapMainExceptionsByPeriodAndappname[]; }) => {
-                        let r = this.setChartData([...result.restSession, ...result.mainSession], 'LDAP', 'ldapRequestExceptionsTable', 'LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
+                        let r = [...result.restSession, ...result.mainSession]
+                        this.setChartData(r , 'LDAP', 'ldapRequestExceptionsTable', 'LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
                         return r;
                     })))
             },
