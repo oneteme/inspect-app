@@ -107,7 +107,7 @@
             </td>
           </tr>
         </table>
-        <div [hidden]="requests.sessionExceptionsTable?.data?.data.length < 5">
+        <div [hidden]="requests.sessionExceptionsTable?.data?.data.length < 6">
           <mat-paginator #sessionExceptionsTablePaginator [length]="requests.sessionExceptionsTable?.data?.data.length"
             [hidePageSize]="true" [showFirstLastButtons]="true" [pageSize]="5"
             aria-label="Select page of GitHub search results"></mat-paginator>
@@ -168,7 +168,7 @@
                 </span>
                 <span style="font-style: italic;">Aucun résultat</span>
               </div>
-              <div *ngIf="requests.batchExceptionTable.isLoading" class="loading-row">
+              <div *ngIf="requests.batchExceptionTable?.isLoading" class="loading-row">
                 <span style="display: flex; flex-direction: column; font-style: italic;">
                   Chargement en cours...
                   <mat-progress-bar mode="indeterminate"></mat-progress-bar>
@@ -178,7 +178,7 @@
             </td>
           </tr>
         </table>
-        <div [hidden]="requests.batchExceptionTable?.data?.data.length < 5">
+        <div [hidden]="requests.batchExceptionTable?.data?.data.length < 6">
           <mat-paginator #batchExceptionTablePaginator [length]="requests.batchExceptionTable?.data?.data.length"
             [pageSize]="5" [hidePageSize]="true" [showFirstLastButtons]="true"></mat-paginator>
         </div>
@@ -289,7 +289,7 @@
           </td>
         </tr>
       </table>
-      <div [hidden]="requests.serverStartTable?.data?.data.length < 5">
+      <div [hidden]="requests.serverStartTable?.data?.data.length < 6">
         <mat-paginator #serverStartTablePaginator [length]="requests.serverStartTable?.data?.data.length" [pageSize]="5"
           [hidePageSize]="true" [showFirstLastButtons]="true"></mat-paginator>
       </div>

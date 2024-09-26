@@ -3,6 +3,7 @@ import { AfterContentInit, AfterViewInit, Component, Inject, OnInit, ViewChild} 
 import { MAT_DIALOG_DATA, MatDialogRef } from "@angular/material/dialog";
 import { MatPaginator } from "@angular/material/paginator";
 import { MatSort } from "@angular/material/sort";
+import { MatTableDataSource } from "@angular/material/table";
 
 
 
@@ -12,25 +13,21 @@ import { MatSort } from "@angular/material/sort";
     
 
 })
-export class ProtocolExceptionComponent implements OnInit, AfterViewInit {
+export class ProtocolExceptionComponent implements AfterViewInit {
 
     @ViewChild("paginator") paginator: MatPaginator;
     @ViewChild("sort") sort: MatSort;
-    table :any;
     protocolExceptionsDisplyedColumns: string[] = ["date","errType","count"];
     constructor(public dialogRef: MatDialogRef<ProtocolExceptionComponent>,
         @Inject(MAT_DIALOG_DATA) public exceptions: any) { }
 
     ngAfterViewInit(): void {
-
-        setTimeout(() => { // TODO: fix sort pagination 
-          // this.exceptions.observable.data.paginator = this.paginator;
-           // this.exceptions.observable.data.sort = this.sort;
-        }, 0);
+        this.dialogRef.afterOpened().subscribe(( )=> {
+            this.exceptions.observable.data.paginator = this.paginator;
+            this.exceptions.observable.data.sort = this.sort;
+        })
     }
 
-    ngOnInit(): void {
-    }
 
     removePackage(errorType: string ){
         if(errorType){

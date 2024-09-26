@@ -104,7 +104,7 @@ export class DashboardComponent {
         });
     }
 
-    init() {
+    init() { //TODO REFACTO
         let that: any = this;
         this.setChartDialogEvent()
         let serverParam = this.createServerFilter();
@@ -116,20 +116,9 @@ export class DashboardComponent {
                 .pipe(finalize(() => { this.requests[k].isLoading = false; }))
                 .subscribe({
                     next: (res: any) => {
-
-                        /*this.requests[k].data.sortingDataAccessor = (row: any, columnName: string) => {
-
-                            if (columnName == "count") return ((row['count']*100) / row['countok']).toFixed(0);
-
-                          //  return row[columnName as keyof any] as string;
-              
-                          }*/
-
-                        // if(["serverStartTable","sessionExceptionsTable","batchExceptionTable"].indexOf(k)>-1){
                         this.requests[k].data = new MatTableDataSource(res);
                         this.requests[k].data.sort = that[`${k}Sort`];
                         this.requests[k].data.paginator = that[`${k}Paginator`];
-                        // }
                     }
                 }))
         })
@@ -203,7 +192,8 @@ export class DashboardComponent {
     }
 
     openProtocolDialog(exceptions: { observable: any, type: string }) {
-        if (exceptions.observable.data.data.length > 0 && exceptions.observable.data.data.some((d: any) => d.count > 0)) {
+        exceptions.observable.data.data =  exceptions.observable.data.data.filter((d:any) => d.count > 0  );
+        if (exceptions.observable.data.data.length > 0) {
 
             const dialog = this._dialog.open(ProtocolExceptionComponent, {
                 width: "70%",
@@ -296,7 +286,7 @@ export class DashboardComponent {
 
             //------- TABLE + CHART
             restRequestExceptionsTable: {
-                observable: combineLatest({
+                observable: forkJoin({
                     restSession: this._restService.getrestSessionExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName}),
                     mainSession: this._restService.getrestMainExceptions({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})
                 })
