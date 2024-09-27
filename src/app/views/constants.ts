@@ -383,6 +383,10 @@ export class Constants {
             title: {
                 text: 'REST: ',
             },
+            subtitle: {
+                text :'',
+                offsetY: 20
+            },
             chart: {
                 id: 'sparkline-1',
                 group: 'sparkline',
@@ -413,9 +417,6 @@ export class Constants {
                     },
                 },
                 max: 100
-            },
-            subtitle: {
-                offsetY: 20
             }
         }
     };
@@ -429,7 +430,11 @@ export class Constants {
         ],
         options: {
             title: {
-                text: 'JDBC: ',
+                text: 'JDBC: '
+            },
+            subtitle: {
+                text :'',
+                offsetY: 20
             },
             chart: {
                 id: 'sparkline-2',
@@ -460,9 +465,6 @@ export class Constants {
                     },
                 },
                 max: 100
-            },
-            subtitle: {
-                offsetY: 20
             }
         }
     };
@@ -478,6 +480,10 @@ export class Constants {
         options: {
             title: {
                 text: 'FTP: ',
+            },
+            subtitle: {
+                text :'',
+                offsetY: 20
             },
             chart: {
                 id: 'sparkline-3',
@@ -508,9 +514,6 @@ export class Constants {
                     },
                 },
                 max: 100
-            },
-            subtitle: {
-                offsetY: 20
             }
         }
     };
@@ -524,6 +527,10 @@ export class Constants {
         options: {
             title: {
                 text: 'SMTP: ',
+            },
+            subtitle: {
+                text :'',
+                offsetY: 20
             },
             chart: {
                 id: 'sparkline-4',
@@ -554,9 +561,6 @@ export class Constants {
                     },
                 },
                 max: 100
-            },
-            subtitle: {
-                offsetY: 20
             }
         }
     };
@@ -570,6 +574,10 @@ export class Constants {
         options: {
             title: {
                 text: 'LDAP: ',
+            },
+            subtitle: {
+                text :'',
+                offsetY: 20
             },
             chart: {
                 id: 'sparkline-5',
@@ -601,9 +609,6 @@ export class Constants {
                     },
                 },
                 max: 100
-            },
-            subtitle: {
-                offsetY: 20
             }
         }
     };

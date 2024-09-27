@@ -432,7 +432,6 @@ export class TreeView implements OnDestroy {
         acc[item[property]] = {}
         acc[item[property]].succesCalls = 0
         acc[item[property]].data = []
-
       }
       if (item.completed) {
         acc[item[property]].succesCalls += 1

@@ -107,7 +107,7 @@
             </td>
           </tr>
         </table>
-        <div [hidden]="requests.sessionExceptionsTable?.data?.data.length < 5">
+        <div [hidden]="requests.sessionExceptionsTable?.data?.data.length < 6">
           <mat-paginator #sessionExceptionsTablePaginator [length]="requests.sessionExceptionsTable?.data?.data.length"
             [hidePageSize]="true" [showFirstLastButtons]="true" [pageSize]="5"
             aria-label="Select page of GitHub search results"></mat-paginator>
@@ -162,13 +162,13 @@
           <tr mat-row *matRowDef="let row; columns: batchExceptionDisplayedColumns;"></tr>
           <tr class="mat-row" *matNoDataRow>
             <td class="mat-cell" colspan="7">
-              <div *ngIf="!requests.sessionExceptionsTable.isLoading" class="empty-row" style="align-items: center;">
+              <div *ngIf="!requests.batchExceptionTable.isLoading" class="empty-row" style="align-items: center;">
                 <span class="material-symbols-outlined">
                   info
                 </span>
                 <span style="font-style: italic;">Aucun résultat</span>
               </div>
-              <div *ngIf="requests.sessionExceptionsTable.isLoading" class="loading-row">
+              <div *ngIf="requests.batchExceptionTable?.isLoading" class="loading-row">
                 <span style="display: flex; flex-direction: column; font-style: italic;">
                   Chargement en cours...
                   <mat-progress-bar mode="indeterminate"></mat-progress-bar>
@@ -178,7 +178,7 @@
             </td>
           </tr>
         </table>
-        <div [hidden]="requests.batchExceptionTable?.data?.data.length < 5">
+        <div [hidden]="requests.batchExceptionTable?.data?.data.length < 6">
           <mat-paginator #batchExceptionTablePaginator [length]="requests.batchExceptionTable?.data?.data.length"
             [pageSize]="5" [hidePageSize]="true" [showFirstLastButtons]="true"></mat-paginator>
         </div>
@@ -188,57 +188,8 @@
 </div>
 
 <div class="exception-card">
-  <!--<div  style="width: 70%; margin-bottom:  0.5em; gap: 1em;">
-    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
-        <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
-        <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
-            <mat-icon>call_made</mat-icon>
-            <div [matBadge]="" matBadgeOverlap="false" matBadgeColor="primary">Protocol Exceptions </div>
-        </div>
-        <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
-    </div>
-    <table  class="mat-elevation-z5"  mat-table [dataSource]="requests.restRequestExceptionsChart?.data" matSort matSortActive="start" matSortDirection="desc">
-  
-    <ng-container matColumnDef="date">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Début</th>
-      <td mat-cell *matCellDef="let row">
-        {{ row.date }}
-      </td>
-    </ng-container>
-  
-    <ng-container matColumnDef="type">
-      <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
-      <td mat-cell *matCellDef="let row">
-        <div matTooltipClass="mat-tooltip">
-             <span >{{removePackage(row.type)}} </span>
-        </div>
-      </td>
-    </ng-container>
-  
-    <tr mat-header-row *matHeaderRowDef="protocolExceptionsDisplyedColumns;sticky: true"></tr>
-    <tr mat-row *matRowDef="let row; columns: protocolExceptionsDisplyedColumns;"   ></tr>
-    <tr class="mat-row" *matNoDataRow>
-      <td class="mat-cell" colspan="7">
-        <div *ngIf="!requests.sessionExceptionsTable.isLoading"  class="empty-row" style="align-items: center;">
-          <span class="material-symbols-outlined" >
-            info
-          </span>
-          <span style="font-style: italic;">Aucun résultat</span>
-        </div>
-        <div *ngIf="requests.sessionExceptionsTable.isLoading" class="loading-row">
-            <span style="display: flex; flex-direction: column; font-style: italic;">
-              Chargement en cours...
-              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-            </span>
-        </div>
-        
-      </td>
-    </tr>
-  </table>
-  </div>-->
   <div style="width: 100%">
-    <div
-      style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
+    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
       <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
       <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
         <mat-icon>restart_alt</mat-icon>
@@ -289,7 +240,7 @@
           </td>
         </tr>
       </table>
-      <div [hidden]="requests.serverStartTable?.data?.data.length < 5">
+      <div [hidden]="requests.serverStartTable?.data?.data.length < 6">
         <mat-paginator #serverStartTablePaginator [length]="requests.serverStartTable?.data?.data.length" [pageSize]="5"
           [hidePageSize]="true" [showFirstLastButtons]="true"></mat-paginator>
       </div>
