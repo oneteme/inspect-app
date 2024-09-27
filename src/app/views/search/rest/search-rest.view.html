@@ -22,7 +22,7 @@
     <button mat-mini-fab color="primary"  (click)="search()">
       <mat-icon matSuffix>search</mat-icon>
     </button>
-    <advanced-filter-trigger [pageName]="'session-api'" [filterConfig]="filterConstants.SESSION_API" [focusField]="focusFieldName" (handleDialogclose)="handledialogclose($event)" (handlePresetSelection)="handlePresetSelection($event)" (handlePresetSelectionReset)="handlePresetSelectionReset()" (handleFilterReset)="handleFilterReset()"></advanced-filter-trigger>
+    <advanced-filter-trigger [pageName]="'session-api'" [filterConfig]="filterConstants.SEARCH['rest']" [focusField]="focusFieldName" (handleDialogclose)="handledialogclose($event)" (handlePresetSelection)="handlePresetSelection($event)" (handlePresetSelectionReset)="handlePresetSelectionReset()" (handleFilterReset)="handleFilterReset()"></advanced-filter-trigger>
   </form>
 </header-page>
 <div style="display: flex; justify-content: space-between; margin-bottom: 0.2em;">

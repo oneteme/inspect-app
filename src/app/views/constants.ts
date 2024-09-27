@@ -653,31 +653,47 @@ export const Operation = {
 }
 export class FilterConstants {
 
-    static readonly SESSION_API: Filter[] = [
-        { key: 'query', label: 'Query params', type: 'input', row: 2, col: 1, op: Operation.like },
-        { key: 'status', label: 'Status', type: 'select', row: 3, col: 1, endpoint: "session/rest", query: { 'column.distinct': 'status:status', 'order': 'status.asc' }, op: Operation.eq },
-        { key: 'method', label: 'Method', type: 'select', width: 20, row: 1, col: 1, endpoint: "session/rest",  query: { 'column.distinct': 'method:method', 'order': 'method.asc' }, op: Operation.eq },
-        { key: 'path', label: 'Path', type: 'input', row: 1, col: 2, op: Operation.like },
-        { key: 'api_name', label: 'Nom API', type: 'select', row: 3, col: 2, endpoint: "session/rest", query: { 'column.distinct': 'api_name', 'api_name.notNull': '', 'order': 'api_name.asc' }, op: Operation.eq  },
-        { key: 'user', label: 'Utilisateur', type: 'select', row: 3, col: 3, endpoint: "session/rest", query: { 'column.distinct': 'user', 'user.notNull': '', 'order': 'user.asc' }, op: Operation.eq  }
-        // new Filter("err_type", "Exception", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
-        // new Filter("address", "adresse", 'input', 50),
-        // new Filter("os", "OS", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
-        // new Filter("re", "RE", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
-        // new Filter("auth", "Authentification scheme", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'auth', 'order': 'auth.asc' }),
-        // new Filter("host", "Hôte", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'host', 'order': 'host.asc' }),
-        // new Filter("protocol", "Protocole", 'select', 50, null,null, [{ protocol: 'HTTPS' }, { protocol: 'HTTP' }]),
-    ]
-
-    static readonly SESSION_MAIN: Filter[] = [
-        { key: 'name', label: 'Serveur', type: 'select', row: 2, col: 1, endpoint: 'session/main', query: { 'column.distinct': 'name', 'name.notNull': '', 'order': 'name.asc' }, op: Operation.eq  },
-        { key: 'location', label: 'Chemin', type: 'input', row: 1, col: 1, op: Operation.like },
-        { key: 'user', label: 'Utilisateur', type: 'select', row: 2, col: 2, endpoint: 'session/main', query: { 'column.distinct': 'user', 'user.notNull': '', 'order': 'user.asc' }, op: Operation.eq  }
-
-        // new Filter("err_type", "Exception", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
-        // new Filter("os", "OS", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
-        //new Filter("re", "RE", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
-    ]
+    static readonly SEARCH: {[key: string]: Filter[]} = {
+        rest: [
+            { key: 'query', label: 'Query params', type: 'input', row: 2, col: 1, op: Operation.like },
+            { key: 'status', label: 'Status', type: 'select', row: 3, col: 1, endpoint: "session/rest", query: { 'column.distinct': 'status:status', 'order': 'status.asc' }, op: Operation.eq },
+            { key: 'method', label: 'Method', type: 'select', width: 20, row: 1, col: 1, endpoint: "session/rest",  query: { 'column.distinct': 'method:method', 'order': 'method.asc' }, op: Operation.eq },
+            { key: 'path', label: 'Path', type: 'input', row: 1, col: 2, op: Operation.like },
+            { key: 'api_name', label: 'Nom API', type: 'select', row: 3, col: 2, endpoint: "session/rest", query: { 'column.distinct': 'api_name', 'api_name.notNull': '', 'order': 'api_name.asc' }, op: Operation.eq  },
+            { key: 'user', label: 'Utilisateur', type: 'select', row: 3, col: 3, endpoint: "session/rest", query: { 'column.distinct': 'user', 'user.notNull': '', 'order': 'user.asc' }, op: Operation.eq  }
+            // new Filter("err_type", "Exception", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
+            // new Filter("address", "adresse", 'input', 50),
+            // new Filter("os", "OS", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
+            // new Filter("re", "RE", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
+            // new Filter("auth", "Authentification scheme", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'auth', 'order': 'auth.asc' }),
+            // new Filter("host", "Hôte", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'host', 'order': 'host.asc' }),
+            // new Filter("protocol", "Protocole", 'select', 50, null,null, [{ protocol: 'HTTPS' }, { protocol: 'HTTP' }]),
+        ],
+        batch: [
+            { key: 'name', label: 'Nom', type: 'select', row: 2, col: 1, endpoint: 'session/main', query: { 'column.distinct': 'name', 'name.notNull': '', 'type': 'BATCH', 'order': 'name.asc' }, op: Operation.eq  },
+            { key: 'location', label: 'Chemin', type: 'input', row: 1, col: 1, op: Operation.like },
+            { key: 'user', label: 'Utilisateur', type: 'select', row: 2, col: 2, endpoint: 'session/main', query: { 'column.distinct': 'user', 'user.notNull': '',  'type': 'BATCH', 'order': 'user.asc' }, op: Operation.eq  }
+            // new Filter("err_type", "Exception", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
+            // new Filter("os", "OS", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
+            //new Filter("re", "RE", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
+        ],
+        startup: [
+            { key: 'name', label: 'Nom', type: 'select', row: 2, col: 1, endpoint: 'session/main', query: { 'column.distinct': 'name', 'name.notNull': '', 'type': 'STARTUP', 'order': 'name.asc' }, op: Operation.eq  },
+            { key: 'location', label: 'Chemin', type: 'input', row: 1, col: 1, op: Operation.like },
+            { key: 'user', label: 'Utilisateur', type: 'select', row: 2, col: 2, endpoint: 'session/main', query: { 'column.distinct': 'user', 'user.notNull': '', 'type': 'STARTUP', 'order': 'user.asc' }, op: Operation.eq  }
+            // new Filter("err_type", "Exception", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
+            // new Filter("os", "OS", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
+            //new Filter("re", "RE", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
+        ],
+        view: [
+            { key: 'name', label: 'Nom', type: 'select', row: 2, col: 1, endpoint: 'session/main', query: { 'column.distinct': 'name', 'name.notNull': '', 'type': 'VIEW', 'order': 'name.asc' }, op: Operation.eq  },
+            { key: 'location', label: 'Chemin', type: 'input', row: 1, col: 1, op: Operation.like },
+            { key: 'user', label: 'Utilisateur', type: 'select', row: 2, col: 2, endpoint: 'session/main', query: { 'column.distinct': 'user', 'user.notNull': '', 'type': 'VIEW', 'order': 'user.asc' }, op: Operation.eq  }
+            // new Filter("err_type", "Exception", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
+            // new Filter("os", "OS", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
+            //new Filter("re", "RE", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
+        ]
+    }
 
     static readonly STATS_API: Filter[] = [
         { key: 'query', label: 'Query params', type: 'input', row: 1, col: 1, op: Operation.like },

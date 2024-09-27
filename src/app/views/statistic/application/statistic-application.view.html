@@ -73,6 +73,7 @@
     <dependents-table style="width: 50%" [data]="requests.dependentsTable?.data || []"
         [isLoading]="requests.dependentsTable?.isLoading" (onClickRow)="onClickRow($event.event, $event.row)"/>
 </div>
-<div style="margin-bottom: 1em;">
-    <exception-table [data]="requests.exceptionsTable?.data || []" [isLoading]="requests.exceptionsTable?.isLoading"></exception-table>
+<div style="display: flex; flex-direction: row; gap: 0.5em; margin-bottom: 1em;">
+    <exception-table style="width: 50%" [data]="requests.exceptionsTable?.data || []" [isLoading]="requests.exceptionsTable?.isLoading"></exception-table>
+    <server-history-table style="width: 50%"  [data]="requests.historyTable?.data" [isLoading]="requests.historyTable?.isLoading"></server-history-table>
 </div>

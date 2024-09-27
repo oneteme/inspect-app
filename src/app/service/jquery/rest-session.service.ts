@@ -211,7 +211,7 @@ export class RestSessionService {
     getExceptions(filters: {start: Date, end: Date, advancedParams: FilterMap, user: string, env: string}): Observable<{count: number, errType: string, errMsg: string}[]>;
     getExceptions(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string, apiName: string, user: string, env: string}): Observable<{count: number, errType: string, errMsg: string}[]> {
         let args: any = {
-            'column': 'count:count,err_type,err_msg',
+            'column': 'count:count,err_type',
             'status.ge': 500,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),

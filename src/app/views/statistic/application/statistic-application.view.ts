@@ -188,11 +188,11 @@ export class StatisticApplicationView implements OnInit, OnDestroy {
                         restSession : this._restSessionService.getDependencies({start: start, end: end, advancedParams: advancedParams, ids: ids}),
                         mainSession : this._mainSessionService.getDependencies({start: start, end: end, advancedParams: advancedParams, ids: ids})
                     }).pipe(map(res => {
-                        console.log("test", [res.restSession, res.mainSession.map(res => ({count: res.count, countSucces: 0, countErrClient: 0, countErrServer: 0, name: res.name}))].flat())
                         return [res.restSession, res.mainSession].flat().sort((a, b) => b.count - a.count);
                     })) },
                 dependentsTable: { observable: this._restSessionService.getDependents({start: start, end: end, advancedParams: advancedParams, ids: ids}) },
-                exceptionsTable: { observable: this._restSessionService.getExceptions({start: start, end: end, advancedParams: advancedParams, ids: ids})}
+                exceptionsTable: { observable: this._restSessionService.getExceptions({start: start, end: end, advancedParams: advancedParams, ids: ids})},
+                historyTable: { observable: this._instanceService.getServerStartHistory({start: start, end: end, env: env, appName: name})}
             }
         }));
     };

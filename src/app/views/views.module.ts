@@ -40,6 +40,7 @@ import {
 } from "./statistic/user/_component/session-table/statistic-user-session-table.component";
 import {DashboardComponent} from "./dashboard/dashboard.component";
 import { ProtocolExceptionComponent } from './dashboard/components/protocol-exception-modal/protocol-exception-modal.component';
+import {ServerHistoryTableComponent} from "./statistic/application/history-table/server-history-table.component";
 
 @NgModule({
   imports: [
@@ -78,7 +79,8 @@ import { ProtocolExceptionComponent } from './dashboard/components/protocol-exce
     StatisticExceptionTableComponent,
     StatisticUserSessionTableComponent,
     DashboardComponent,
-    ProtocolExceptionComponent
+    ProtocolExceptionComponent,
+    ServerHistoryTableComponent
   ]
 })
 export class ViewsModule { }
