@@ -4,12 +4,12 @@ import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import {ActivatedRoute} from '@angular/router';
-import {combineLatest, Subscription} from 'rxjs';
+import {combineLatest, finalize, Subscription} from 'rxjs';
 import {Location} from '@angular/common';
 import {Utils} from 'src/app/shared/util';
 import {TraceService} from 'src/app/service/trace.service';
 import {application, makePeriod} from 'src/environments/environment';
-import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constants';
+import {Constants, Filter, FilterConstants, FilterMap, FilterPreset} from '../../constants';
 import {FilterService} from 'src/app/service/filter.service';
 import {InstanceMainSession} from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
@@ -23,6 +23,7 @@ import {InstanceService} from "../../../service/jquery/instance.service";
 export class SearchMainView implements OnInit, OnDestroy {
     private _router = inject(EnvRouter);
     private _traceService = inject(TraceService);
+    private _instanceService = inject(InstanceService);
     private _activatedRoute = inject(ActivatedRoute);
     private _location = inject(Location);
     private _filter = inject(FilterService);
@@ -32,19 +33,22 @@ export class SearchMainView implements OnInit, OnDestroy {
     utils: Utils = new Utils();
     displayedColumns: string[] = ['status', 'app_name', 'name', 'location', 'start', 'durée', 'user'];
     dataSource: MatTableDataSource<InstanceMainSession> = new MatTableDataSource();
+    serverNameIsLoading = true;
     serverFilterForm = new FormGroup({
+        appname: new FormControl([""]),
         dateRangePicker: new FormGroup({
             start: new FormControl<Date | null>(null, [Validators.required]),
             end: new FormControl<Date | null>(null, [Validators.required]),
         })
     });
-    subscription: Subscription;
+    nameDataList: any[];
+    subscriptions: Subscription[] = [];
     isLoading = false;
     advancedParams: Partial<{ [key: string]: any }>
     focusFieldName: any
     filterTable = new Map<string, any>();
     filter: string = '';
-    params: Partial<{ env: string, start: Date, end: Date, type: string }> = {};
+    params: Partial<{ env: string, start: Date, end: Date, type: string, serveurs: string[] }> = {};
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild(MatSort) sort: MatSort;
@@ -61,9 +65,23 @@ export class SearchMainView implements OnInit, OnDestroy {
                 this.params.type = params.type_main;
                 this.params.start = queryParams['start'] ? new Date(queryParams['start']) : (application.session.main.default_period || makePeriod(0, 1)).start;
                 this.params.end = queryParams['end'] ? new Date(queryParams['end']) : (application.session.main.default_period || makePeriod(0, 1)).end;
+                this.params.serveurs = Array.isArray(queryParams['appname']) ? queryParams['appname'] : [queryParams['appname'] || ''];
+                if (this.params.serveurs[0] != '') {
+                    this.patchServerValue(this.params.serveurs)
+                }
                 this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
+                this.subscriptions.push(this._instanceService.getApplications(this.params.type == 'view' ? 'CLIENT' : 'SERVER' )
+                    .pipe(finalize(()=> this.serverNameIsLoading = false))
+                    .subscribe({
+                        next: res => {
+                            this.nameDataList = res.map(r => r.appName);
+                            this.patchServerValue(this.params.serveurs);
+                        }, error: (e) => {
+                            console.log(e)
+                        }
+                    }));
                 this.getMainRequests();
-                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}`)
+                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${this.params.serveurs[0] !== '' ? '&' + this.params.serveurs.map(name => `appname=${name}`).join('&') : ''}`)
             }
         });
     }
@@ -74,11 +92,12 @@ export class SearchMainView implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.subscription.unsubscribe();
+        this.subscriptions.forEach(s => s.unsubscribe());
     }
 
     getMainRequests() {
         let params = {
+            'appname': this.params.serveurs,
             'env': this.params.env,
             'launchmode': this.params.type.toUpperCase(),
             'start': this.params.start.toISOString(),
@@ -91,7 +110,7 @@ export class SearchMainView implements OnInit, OnDestroy {
 
         this.isLoading = true;
         this.dataSource.data = [];
-        this.subscription = this._traceService.getMainSessions(params).subscribe((d: InstanceMainSession[]) => {
+        this.subscriptions.push(this._traceService.getMainSessions(params).subscribe((d: InstanceMainSession[]) => {
             if (d) {
                 this.dataSource = new MatTableDataSource(d);
                 this.dataSource.paginator = this.paginator;
@@ -129,21 +148,24 @@ export class SearchMainView implements OnInit, OnDestroy {
             }
         }, error => {
             this.isLoading = false;
-        })
+        }));
     }
 
 
     search() {
         if (this.serverFilterForm.valid) {
+            let appname = this.serverFilterForm.getRawValue().appname;
             let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
             let end = this.serverFilterForm.getRawValue().dateRangePicker.end
             let excludedEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1)
             if (this.params.start.toISOString() != start.toISOString()
-                || this.params.end.toISOString() != excludedEnd.toISOString()) {
+                || this.params.end.toISOString() != excludedEnd.toISOString()
+                || !this.params?.serveurs?.every((element, index) => element === appname[index])
+                || appname.length != this.params?.serveurs?.length) {
                 this._router.navigate([], {
                     relativeTo: this._activatedRoute,
                     queryParamsHandling: 'merge',
-                    queryParams: {start: start.toISOString(), end: excludedEnd.toISOString()}
+                    queryParams: { ...(appname !== undefined && { appname }), start: start.toISOString(), end: excludedEnd }
                 })
             } else {
                 this.getMainRequests();
@@ -158,6 +180,12 @@ export class SearchMainView implements OnInit, OnDestroy {
                 end: end
             }
         }, {emitEvent: false});
+    }
+
+    patchServerValue(servers: any[]) {
+        this.serverFilterForm.patchValue({
+            appname: servers
+        },{ emitEvent: false })
     }
 
     selectedRequest(event: MouseEvent, row: any) {

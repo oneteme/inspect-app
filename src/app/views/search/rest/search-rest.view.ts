@@ -68,7 +68,7 @@ export class SearchRestView implements OnInit, OnDestroy {
           }
 
           this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
-          this.subscriptions.push(this._instanceService.getApplications()
+          this.subscriptions.push(this._instanceService.getApplications('SERVER')
             .pipe(finalize(()=> this.serverNameIsLoading = false))
             .subscribe({
               next: res => {

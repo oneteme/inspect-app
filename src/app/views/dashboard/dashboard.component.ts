@@ -89,7 +89,7 @@ export class DashboardComponent {
                     this.patchServerValue(this.params.serveurs);
                 }
                 this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
-                this.subscriptions.push(this._instanceService.getApplications()
+                this.subscriptions.push(this._instanceService.getApplications('SERVER')
                     .pipe(finalize(() => this.serverNameIsLoading = false))
                     .subscribe({
                         next: (appNames: { appName: string }[]) => {
@@ -268,7 +268,7 @@ export class DashboardComponent {
         return {
 
             // Server start
-            serverStartTable: { observable: this._instanceService.getServerStart({env: env, start: start, end: end,groupedBy: groupedBy, app_name: serverStartAppName})},
+            serverStartTable: { observable: this._instanceService.getServerStart({env: env, start: start, end: end, app_name: serverStartAppName})},
 
             //   Rest-Main Sessions exceptions 
             sessionExceptionsTable: {
