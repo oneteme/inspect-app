@@ -157,7 +157,7 @@ const routes: Route[] = [
                   if (route.paramMap.get('type_main') == 'batch') {
                     return `Lancement de Batch ${detail}`;
                   } else if (route.paramMap.get('type_main') == 'startup') {
-                    return `Lancement de Serveur ${detail}`;
+                    return `L&ancement de Serveur ${detail}`;
                   }
                   return `Navigation ${detail}`;
                 }
