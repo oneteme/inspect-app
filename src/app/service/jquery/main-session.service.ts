@@ -61,4 +61,62 @@ export class MainSessionService {
         }
         return this.getMainSession(args);
     }
+
+    getDependents(filters: {env: string, start: Date, end: Date, appName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string}[]> {
+        return this.getMainSession({
+            'column': 'rest_request.count:count,rest_request.count_succes:countSucces,rest_request.count_error_client:countErrClient,rest_request.count_error_server:countErrServer,instance_join.app_name:name',
+            'instance.id': 'instance_env',
+            'instance.app_name': `"${filters.appName}"`,
+            'instance.environement': filters.env,
+            'id': 'rest_request.parent',
+            'rest_request.remote': 'rest_session_join.id',
+            'rest_session_join.instance_env': 'instance_join.id',
+            'rest_session_join.start.ge': filters.start.toISOString(),
+            'rest_session_join.start.lt': filters.end.toISOString(),
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'view': 'rest_session:rest_session_join,instance:instance_join',
+            'order': 'count.desc'
+        });
+    }
+
+    getCountByPage(filters: { env: string, start: Date, end: Date, appName: string }): Observable<{count: number, location: string}[]> {
+        return this.getMainSession({
+            'column': `count:count,location`,
+            'join': 'instance',
+            'instance.environement': filters.env,
+            'instance.app_name': `"${filters.appName}"`,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'order': 'count.desc',
+            'limit': '5'
+        });
+    }
+
+    getCountSessionByDateAndUser(filters: { env: string, start: Date, end: Date, groupedBy: string, appName: string }): Observable<{count: number, user: string, date: number}[]> {
+        return this.getMainSession({
+            'column': `count:count,user,start.${filters.groupedBy}:date`,
+            'join': 'instance',
+            'instance.environement': filters.env,
+            'instance.app_name': `"${filters.appName}"`,
+            'instance.type': 'CLIENT',
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'type': 'VIEW',
+            'order': 'date.asc'
+        });
+    }
+
+    getCountByException(filters: { env: string, start: Date, end: Date, appName: string }): Observable<{count: number, errorMessage: string, status: number}[]> {
+        return this.getMainSession({
+            'column': `exception.count:count,exception.err_msg,rest_request.status`,
+            'join': 'instance,rest_request,rest_request.exception',
+            'instance.environement': filters.env,
+            'instance.app_name': `"${filters.appName}"`,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'rest_request.status.ge': 400,
+            'order': 'count.desc'
+        });
+    }
 }

@@ -3,10 +3,10 @@
         <mat-card style="width: 60vw; min-width: 60vw; border-left: 4px solid green"
                   [ngStyle]="{'border-left': session.exception?.type || session.exception?.message ? '4px solid red' : '4px solid green'}">
             <mat-card-title>
-                <a style="display: flex; align-items: center; gap: 0.5em">
+                <span style="display: flex; align-items: center; gap: 0.5em">
                     <mat-icon>settings_suggest</mat-icon>
                     {{ '[' + session.type + '] ' + (session.name || 'N/A') }}
-                </a>
+                </span>
                 <div class="right">
                     <button mat-icon-button (click)="navigate($event,'tree')" matTooltip="Arbre d'appels">
                         <mat-icon>lan</mat-icon>
@@ -44,9 +44,13 @@
         </mat-card>
         <mat-card style="width: 40vw;">
             <mat-card-title>
-                <a style="display: flex; align-items: center; gap: 0.5em"
-                   [routerLink]="'/dashboard/server/'+ instance.name"
-                   [queryParams]="{'env': instance.env}" matTooltip="Statistiques Application">
+                <a style="display: flex; align-items: center; gap: 0.5em" *ngIf="session.type == 'VIEW'"
+                   [routerLink]="'/dashboard/client/'+ instance.name"
+                   [queryParams]="{'env': instance.env}" matTooltip="Statistiques Client">
+                    <mat-icon>storage</mat-icon>
+                    <div>{{instance.name}} <span style="font-size: 12px; font-style: italic; font-weight: normal;">{{instance.version}}</span></div>
+                </a>
+                <a style="display: flex; align-items: center; gap: 0.5em" *ngIf="session.type != 'VIEW'">
                     <mat-icon>storage</mat-icon>
                     <div>{{instance.name}} <span style="font-size: 12px; font-style: italic; font-weight: normal;">{{instance.version}}</span></div>
                 </a>

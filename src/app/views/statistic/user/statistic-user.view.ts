@@ -3,7 +3,7 @@ import { JQueryService } from "src/app/service/jquery/jquery.service";
 import { ActivatedRoute, Params } from "@angular/router";
 import { DatePipe, Location } from '@angular/common';
 import { FormControl, FormGroup, Validators } from "@angular/forms";
-import { BehaviorSubject, Observable, Subscription, combineLatest, finalize, map } from "rxjs";
+import {BehaviorSubject, Observable, Subscription, combineLatest, finalize, map, tap} from "rxjs";
 import { Constants, FilterConstants, FilterMap, FilterPreset } from "../../constants";
 import { application, makePeriod } from "src/environments/environment";
 import { FilterService } from "src/app/service/filter.service";
@@ -119,7 +119,6 @@ export class StatisticUserView implements OnInit, OnDestroy {
 
     // Stats en fonction du navigateur et du systeme
     USER_REQUEST = (name: string, env: string, start: Date, end: Date, advancedParams: FilterMap) => {
-        let now = new Date();
         let groupedBy = periodManagement(start, end);
         return {
             repartitionTimeAndTypeResponse: { observable: this._restSessionService.getRepartitionTimeAndTypeResponse({start: start, end: end, advancedParams: advancedParams, user: name, env: env}) },
@@ -129,7 +128,11 @@ export class StatisticUserView implements OnInit, OnDestroy {
                     return r;
                 }))
             },
-            repartitionRequestByPeriodLine: { observable: this._restSessionService.getRepartitionRequestByPeriod({now: now, advancedParams: advancedParams, user: name, env: env}) },
+            repartitionRequestByPeriodLine: {
+                observable: this._restSessionService.getRepartitionRequestByPeriod({start: start, end: end, groupedBy: groupedBy, advancedParams: advancedParams, user: name, env: env}).pipe(tap(r => {
+                    formatters[groupedBy](r, this._datePipe);
+                }))
+            },
             repartitionApiBar: { observable: this._restSessionService.getRepartitionApi({start: start, end: end, advancedParams: advancedParams, user: name, env: env}) },
             exceptionsTable: { observable: this._restSessionService.getExceptions({start: start, end: end, advancedParams: advancedParams, user: name, env: env})},
             sessionTable: { observable: this._mainSessionService.getInfos({start: start, end: end, advancedParams: advancedParams, user: name, env: env}) }

@@ -29,6 +29,7 @@ import {StatisticDatabaseView} from "./views/statistic/database/statistic-databa
 import {DashboardComponent} from "./views/dashboard/dashboard.component";
 import {EnvRouter} from "./service/router.service";
 import {DurationPipe} from "./shared/pipe/duration.pipe";
+import {StatisticClientView} from "./views/statistic/view/statistic-client.view";
 
 
 registerLocaleData(localeFr, 'fr-FR');
@@ -228,6 +229,13 @@ const routes: Route[] = [
         component: StatisticDatabaseView,
         title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
           return `Dashboard > ${route.paramMap.get('database_name')}`;
+        }
+      },
+      {
+        path: 'client/:client_name',
+        component: StatisticClientView,
+        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+          return `Dashboard > ${route.paramMap.get('client_name')}`;
         }
       },
       { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }

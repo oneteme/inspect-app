@@ -10,18 +10,19 @@ import {MatSort} from "@angular/material/sort";
     styleUrls: ['./statistic-exception-table.component.scss'],
 })
 export class StatisticExceptionTableComponent {
-    displayedColumns: string[] = ['type', 'count'];
-    dataSource: MatTableDataSource<{ count: number, class: string }> = new MatTableDataSource([]);
+    displayedColumns: string[] = ['label', 'count'];
+    dataSource: MatTableDataSource<{ count: number, label: string }> = new MatTableDataSource([]);
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild(MatSort) sort: MatSort;
-
+/*.slice(0, 5).map((r: {count: number, errorType: string}) => {
+    const index = r?.errorType.lastIndexOf('.') + 1;
+    return { count: r.count, class: r?.errorType?.substring(index) };
+})*/
     @Input() set data(objects: any) {
+        console.log(objects)
         if (objects?.length) {  //.pipe(map((d: any) => d.slice(0, 5)))
-            this.dataSource = new MatTableDataSource(objects.slice(0, 5).map((r: {count: number, errorType: string}) => {
-                const index = r?.errorType.lastIndexOf('.') + 1;
-                return { count: r.count, class: r?.errorType?.substring(index) };
-            }));
+            this.dataSource = new MatTableDataSource(objects);
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
         } else {

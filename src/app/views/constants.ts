@@ -4,9 +4,10 @@ import { DashboardComponent } from "./dashboard/dashboard.component";
 export class Constants {
 
     static readonly REPARTITION_TYPE_RESPONSE_PIE: ChartProvider<string, number> = {
-        title: 'Nombre d\'appels par type de réponse',
+        title: 'Appels REST par type de réponse',
         height: 250,
         series: [
+            { data: { x: values('0'), y: field('countUnavailableServer') }, name: '0', color: '#495D63' },
             { data: { x: values('2xx'), y: field('countSucces') }, name: '2xx', color: '#33cc33' },
             { data: { x: values('4xx'), y: field('countErrorClient') }, name: '4xx', color: '#ffa31a' },
             { data: { x: values('5xx'), y: field('countErrorServer') }, name: '5xx', color: '#ff0000' }
@@ -62,6 +63,21 @@ export class Constants {
         }
     };
 
+    static readonly REPARTITION_RE_PIE: ChartProvider<string, number> = {
+        title: 'Repartition par navigateur',
+        height: 250,
+        series: [
+            { data: { x: field('re'), y: field('count') } }
+        ],
+        options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            }
+        }
+    }
+
     static readonly REPARTITION_USER_BAR: ChartProvider<string, number> = {
         height: 250,
         series: [
@@ -85,6 +101,48 @@ export class Constants {
             }
         }
     }
+
+    static readonly REPARTITION_PAGE_BAR: ChartProvider<string, number> = {
+        title: 'Consultation par page (Top 5)',
+        height: 250,
+        series: [
+            { data: { x: field('location'), y: field('count') }, name: 'Consultation par page', color: '#33cc33' }
+        ],
+        stacked: true,
+        options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
+            tooltip: {
+                shared: true,
+                intersect: false,
+                followCursor: true
+            },
+            plotOptions: {
+                bar: {
+                    dataLabels: {
+                        total: {
+                            enabled: true,
+                            offsetX: 0,
+                            style: {
+                                fontSize: '13px',
+                                fontWeight: 900
+                            }
+                        }
+                    }
+                },
+            },
+            fill: {
+                opacity: 1
+            },
+            stroke: {
+                width: 1,
+                colors: ['#fff']
+            }
+        }
+    };
 
     static readonly REPARTITION_API_BAR: ChartProvider<string, number> = {
         title: 'Nombre d\'appels par Api (Top 5)',
@@ -136,7 +194,7 @@ export class Constants {
     };
 
     static readonly REPARTITION_SPEED_BAR: ChartProvider<string, number> = {
-        title: 'Nombre d\'appels par tranche de temps (seconde)',
+        title: 'Appels REST par tranche de temps (seconde)',
         height: 250,
         series: [
             { data: { x: field('date'), y: field('elapsedTimeSlowest') }, name: '> 10', color: '#848383' },
@@ -167,6 +225,7 @@ export class Constants {
     static readonly REPARTITION_TYPE_RESPONSE_BAR: ChartProvider<string, number> = {
         height: 250,
         series: [
+            { data: { x: field('date'), y: field('countUnavailableServer') }, name: '0', color: '#495D63' },
             { data: { x: field('date'), y: field('countSucces') }, name: '2xx', color: '#33cc33' },
             { data: { x: field('date'), y: field('countErrorClient') }, name: '4xx', color: '#ffa31a' },
             { data: { x: field('date'), y: field('countErrorServer') }, name: '5xx', color: '#ff0000' }
@@ -190,6 +249,21 @@ export class Constants {
         }
     }
 
+    static readonly REPARTITION_VIEW_AREA: ChartProvider<string, number> = {
+        title: 'Nombre de pages visités',
+        height: 250,
+        series: [
+            { data: { x: field('date'), y: field('count') }, name: 'Nombre de pages visités' }
+        ],
+        options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            }
+        }
+    };
+
     static readonly REPARTITION_MAX_BY_PERIOD_LINE: ChartProvider<string, number> = {
         title: 'Temps de reponse moyen et maximum',
         ytitle: 'Temps (s)',
@@ -212,7 +286,7 @@ export class Constants {
                 width: [4]
             },
             yaxis: {
-                decimalsInFloat: 0
+                decimalsInFloat: 3
             },
             legend: {
                 showForSingleSeries: true
@@ -249,13 +323,67 @@ export class Constants {
         }
     };
 
-    static readonly REPARTITION_REQUEST_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        title: 'Nombre d\'appels',
-        subtitle: 'sur les 7 derniers jours',
+    static readonly REPARTITION_USER_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+        title: 'Utilisateurs',
         height: 150,
-        continue: true,
         series: [
-            { data: { x: o => new Date(o['date']), y: field('count') }, name: 'Nombre d\'appels', color: "#1423dc" }
+            { data: { x: field('date'), y: field('count') }, name: 'Utilisateurs', color: "#FFD400" }
+        ],
+        options: {
+            chart: {
+                id: 'sparkline-3',
+                group: 'sparkline',
+                sparkline: {
+                    enabled: true
+                },
+                toolbar: {
+                    show: false
+                }
+            },
+            xaxis: {
+                labels: {
+                    datetimeUTC: false
+                }
+            },
+            subtitle: {
+                offsetY: 20
+            }
+        }
+    };
+
+    static readonly REPARTITION_VIEW_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+        title: 'Pages visités',
+        height: 150,
+        series: [
+            { data: { x: field('date'), y: field('count') }, name: 'Pages visités', color: "#DECDF5" }
+        ],
+        options: {
+            chart: {
+                id: 'sparkline-2',
+                group: 'sparkline',
+                sparkline: {
+                    enabled: true
+                },
+                toolbar: {
+                    show: false
+                }
+            },
+            xaxis: {
+                labels: {
+                    datetimeUTC: false
+                }
+            },
+            subtitle: {
+                offsetY: 20
+            }
+        }
+    };
+
+    static readonly REPARTITION_REQUEST_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+        title: 'Appels REST',
+        height: 150,
+        series: [
+            { data: { x: field('date'), y: field('count') }, name: 'Appels REST', color: "#1423dc" }
         ],
         options: {
             chart: {
@@ -267,9 +395,6 @@ export class Constants {
                 toolbar: {
                     show: false
                 }
-            },
-            stroke: {
-                curve: 'straight'
             },
             xaxis: {
                 labels: {
@@ -283,12 +408,10 @@ export class Constants {
     };
 
     static readonly REPARTITION_REQUEST_ERROR_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        title: 'Nombre d\'appels en erreur',
-        subtitle: 'sur les 7 derniers jours',
+        title: 'Appels REST en erreur',
         height: 150,
-        continue: true,
         series: [
-            { data: { x: o => new Date(o['date']), y: field('countErrorServer') }, name: 'Nombre d\'appels en erreur', color: "#ff0000" }
+            { data: { x: field('date'), y: field('countErrorServer') }, name: 'Appels REST en erreur', color: "#ff0000" }
         ],
         options: {
             chart: {
@@ -300,9 +423,6 @@ export class Constants {
                 toolbar: {
                     show: false
                 }
-            },
-            stroke: {
-                curve: 'straight'
             },
             xaxis: {
                 labels: {
@@ -323,12 +443,10 @@ export class Constants {
     };
 
     static readonly REPARTITION_REQUEST_SLOWEST_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        title: 'Nombre d\'appels superieur à 10 secondes',
-        subtitle: 'sur les 7 derniers jours',
+        title: 'Appels REST superieur à 10 secondes',
         height: 150,
-        continue: true,
         series: [
-            { data: { x: o => new Date(o['date']), y: field('countSlowest') }, name: 'Nombre d\'appels superieur à 10 secondes', color: "#848383" }
+            { data: { x: field('date'), y: field('countSlowest') }, name: 'Appels REST superieur à 10 secondes', color: "#848383" }
         ],
         options: {
             chart: {
@@ -340,9 +458,6 @@ export class Constants {
                 toolbar: {
                     show: false
                 }
-            },
-            stroke: {
-                curve: 'straight'
             },
             xaxis: {
                 labels: {
