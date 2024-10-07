@@ -13,8 +13,8 @@ export interface InstanceMainSession extends MainSession {
 export interface RestSession extends RestRequest {
     type: string;
     name: string;
-    requests: Array<RestRequest>;
-    queries: Array<DatabaseRequest>;
+    restRequests: Array<RestRequest>;
+    databaseRequests: Array<DatabaseRequest>;
     stages: Array<LocalRequest>;
     ftpRequests: Array<FtpRequest>;
     mailRequests: Array<MailRequest>;
@@ -25,8 +25,8 @@ export interface RestSession extends RestRequest {
 export interface MainSession extends LocalRequest {
     id: string;
     type: string;
-    requests: Array<RestRequest>;
-    queries: Array<DatabaseRequest>;
+    restRequests: Array<RestRequest>;
+    databaseRequests: Array<DatabaseRequest>;
     stages: Array<LocalRequest>;
     ftpRequests: Array<FtpRequest>;
     mailRequests: Array<MailRequest>;
@@ -49,6 +49,7 @@ export interface RestRequest extends SessionStage {
     exception: ExceptionInfo;
     inContentEncoding: string;
     outContentEncoding: string; 
+    remoteTrace: ServerRestSession;
 }
 
 export interface DatabaseRequest extends SessionStage {
@@ -61,7 +62,6 @@ export interface DatabaseRequest extends SessionStage {
     productVersion: string;
     actions: Array<DatabaseRequestStage>;
     commands: Array<string>;
-    
     id: number;
     completed: boolean;
 }
@@ -164,4 +164,163 @@ export interface InstanceEnvironment {
 export interface Period {
     start: number;
     end: number;
+}
+
+export interface ServerMainSession extends MainSession {
+    instanceId: string;
+    version: string;
+    os: string;
+    re: string;
+    address: string; 
+    appName: string;
+    mask: number
+}
+
+export interface ServerRestSession extends RestSession{
+    instanceId: string;
+    version: string;
+    os: string;
+    re: string;
+    address: string;
+    appName: string;
+    mask: number
+    treeToString():string;
+}
+
+export interface Node<T> {
+    format(field: T):string;
+}
+
+export class RestServerNode implements Node<Label> {
+    
+    nodeObject: ServerRestSession;
+    
+    constructor(nodeObject: ServerRestSession){
+        this.nodeObject = nodeObject;
+    }
+
+    format(field: Label): string {
+        switch(field){
+            case Label.SERVER_IDENTITY : return  this.nodeObject.appName + " " /*+ this.nodeObject.version*/ //version
+            case Label.OS_RE: return this.nodeObject.os + " " + this.nodeObject.re;
+            case Label.IP_PORT: return this.nodeObject.address + " " + this.nodeObject.port
+            case Label.BRANCH_COMMIT: return "" // soon
+            default: return '';
+        }
+    }
+    
+}
+
+export class MainServerNode implements Node<Label> {
+    
+    nodeObject: ServerMainSession;
+    constructor(nodeObject: ServerMainSession){
+        this.nodeObject = nodeObject;
+    }
+
+    format(field: Label): string {
+        switch(field){
+            case Label.SERVER_IDENTITY : return  this.nodeObject.appName + " " /*+ this.nodeObject.version*/ //version
+            case Label.OS_RE: return this.nodeObject.os + " " + this.nodeObject.re;
+            case Label.IP_PORT: return this.nodeObject.address;
+            case Label.BRANCH_COMMIT: return "" // soon
+            default: return 'N/A';
+        }
+    }
+    
+}
+export class JdbcRequestNode implements Node<Label> {
+    nodeObject: DatabaseRequest;
+    constructor(nodeObject: DatabaseRequest){
+        this.nodeObject = nodeObject;
+    }
+
+    format(field: Label): string {
+        switch(field){
+            case Label.SERVER_IDENTITY : return  this.nodeObject.name + " " /*+ this.nodeObject.version*/ //version
+            case Label.OS_RE: return this.nodeObject.productName;
+            case Label.IP_PORT: return this.nodeObject.port.toString();
+            case Label.BRANCH_COMMIT: return "" // soon
+            default: return 'N/A';
+        }
+    }
+}
+
+export class FtpRequestNode implements Node<Label> {
+    
+    nodeObject: FtpRequest;
+    constructor(nodeObject: FtpRequest){
+        this.nodeObject = nodeObject;
+    }
+
+    format(field: Label): string {
+        switch(field){
+            case Label.SERVER_IDENTITY : return  this.nodeObject.host; //version
+            case Label.IP_PORT: return this.nodeObject.port.toString();
+            case Label.BRANCH_COMMIT: return "" // soon
+            default: return 'N/A';
+        }
+    }
+    
+}
+
+export class SmtpRequestNode implements Node<Label> {
+    
+    nodeObject: MailRequest;
+    constructor(nodeObject: MailRequest){
+        this.nodeObject = nodeObject;
+    }
+
+    format(field: Label): string {
+        switch(field){
+            case Label.SERVER_IDENTITY : return  this.nodeObject.host //version
+            case Label.IP_PORT: return this.nodeObject.port.toString();
+            case Label.BRANCH_COMMIT: return "" // soon
+            default: return 'N/A';
+        }
+    }
+    
+}
+
+export class LdapRequestNode implements Node<Label> {
+    
+    nodeObject: NamingRequest;
+    constructor(nodeObject: NamingRequest){
+        this.nodeObject = nodeObject;
+    }
+
+    format(field: Label): string {
+        switch(field){
+            case Label.SERVER_IDENTITY : return  this.nodeObject.host + " " /*+ this.nodeObject.version*/ //version
+            case Label.IP_PORT: return this.nodeObject.port.toString();
+            case Label.BRANCH_COMMIT: return "" // soon
+            default: return 'N/A';
+        }
+    }
+    
+}
+
+export class RestRequestNode implements Node<Label> {
+    
+    nodeObject: RestRequest;
+    constructor(nodeObject: RestRequest){
+        this.nodeObject = nodeObject;
+    }
+
+    format(field: Label): string {
+        switch(field){
+            case Label.SERVER_IDENTITY : return  this.nodeObject.host //version
+            case Label.IP_PORT: return this.nodeObject.port.toString();
+            case Label.BRANCH_COMMIT: return "" // soon
+            default: return 'N/A';
+        }
+    }
+    
+}
+
+export enum Label {
+    SERVER_IDENTITY = "SERVER_IDENTITY",
+    OS_RE= "OS_RE",
+    IP_PORT= "IP_PORT",
+    BRANCH_COMMIT = "BRANCH_COMMIT"
 }
