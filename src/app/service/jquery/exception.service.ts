@@ -13,7 +13,7 @@ export class ExceptionService {
         return this.http.get<T>(url, { params: params });
     }
 
-    getDatabaseException(filters: {start: Date, end: Date, database: string, env: string}): Observable<{count: number, errType: string, errMsg: string}[]> {
+    getDatabaseException(filters: {start: Date, end: Date, database: string, env: string}): Observable<{count: number, errorType: string, errorMessage: string}[]> {
         let args = {
             'column': 'count:count,err_type:errType,err_msg:errMsg',
             'parent': 'database_request.id',

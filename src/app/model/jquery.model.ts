@@ -1,6 +1,6 @@
 export type RepartitionTimeAndTypeResponse = {elapsedTimeSlowest: number, elapsedTimeSlow: number, elapsedTimeMedium: number, elapsedTimeFast: number, elapsedTimeFastest: number, countSucces: number, countErrorServer: number, countErrorClient: number}[];
-export type RepartitionTimeAndTypeResponseByPeriod = {countSucces: number, countErrorClient: number, countErrorServer: number, elapsedTimeSlowest: number, elapsedTimeSlow: number, elapsedTimeMedium: number, elapsedTimeFast: number, elapsedTimeFastest: number, avg: number, max: number, date: number, year: number}[];
-export type RepartitionRequestByPeriod = {count: number, countErrorServer: number, countSlowest: number, date: number}[];
+export type RepartitionTimeAndTypeResponseByPeriod = {countSucces: number, countErrorClient: number, countErrorServer: number, countUnavailableServer: number, elapsedTimeSlowest: number, elapsedTimeSlow: number, elapsedTimeMedium: number, elapsedTimeFast: number, elapsedTimeFastest: number, avg: number, max: number, date: number, year: number}[];
+export type RepartitionRequestByPeriod = {count: number, countErrorServer: number, countSlowest: number, date: number, year: number}[];
 export type ServerStartByPeriodAndAppname = { appName: string, version: string, start:number}[];
 export type SessionExceptionsByPeriodAndAppname = {date: string, errorType: string, count: number, countok: number, groupedBy: string,};
 export type MainExceptionsByPeriodAndAppname = {date: string, errorType: string, count: number, countok: number, groupedBy: string,};

@@ -227,11 +227,11 @@ export class DashboardComponent {
             title = `${type}:  ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%`;
             subtitle = `sur ${sumRes.countok} requête(s)`;
         }
+        this.charts[chartName] = arr;
         let config = { ...c[configName] }
         config.options.title.text = title
         config.options.subtitle.text = subtitle
         c[configName] = config
-        this.charts[chartName] = arr;
     }
 
     groupByProperty(property: string, array: any[]) {

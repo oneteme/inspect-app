@@ -10,7 +10,7 @@ export class RestRequestService {
 
     }
 
-    getrest<T>(params: any): Observable<T> {
+    getRestRequest<T>(params: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/request/rest`;
         return this.http.get<T>(url, { params: params });
     }
@@ -26,7 +26,7 @@ export class RestRequestService {
             [filters.app_name]: '',
             'order': 'date.asc'
         }
-        return this.getrest(args);
+        return this.getRestRequest(args);
     }
 
     getrestMainExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<RestMainExceptionsByPeriodAndappname[]>{
@@ -39,9 +39,23 @@ export class RestRequestService {
             [filters.app_name]: '',
             'order': 'date.asc'
         }
-        return this.getrest(args);
+        return this.getRestRequest(args);
     }
 
+    getCountByDate(filters: {env: string, start: Date, end: Date, appName: string, groupedBy: string}): Observable<{countSucces: number, countErrorClient: number, countErrorServer: number, countUnavailableServer: number, elapsedTimeSlowest: number, elapsedTimeSlow: number, elapsedTimeMedium: number, elapsedTimeFast: number, elapsedTimeFastest: number, date: number, year: number}[]> {
+        return this.getRestRequest({
+            'column': `count:count,count_succes:countSucces,count_error_client:countErrorClient,count_error_server:countErrorServer,count_unavailable_server:countUnavailableServer,count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,start.${filters.groupedBy}:date,start.year:year`,
+            'parent': 'main_session.id',
+            'main_session.instance_env': 'instance.id',
+            'main_session.start.ge': filters.start.toISOString(),
+            'main_session.start.lt': filters.end.toISOString(),
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'instance.environement': filters.env,
+            'instance.app_name': `"${filters.appName}"`,
+            'order': 'year.asc,date.asc'
+        });
+    }
 
 
 }
