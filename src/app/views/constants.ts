@@ -7,7 +7,7 @@ export class Constants {
         title: 'Appels REST par type de réponse',
         height: 250,
         series: [
-            { data: { x: values('0'), y: field('countUnavailableServer') }, name: '0', color: '#495D63' },
+            { data: { x: values('N/A'), y: field('countUnavailableServer') }, name: '0', color: '#495D63' },
             { data: { x: values('2xx'), y: field('countSucces') }, name: '2xx', color: '#33cc33' },
             { data: { x: values('4xx'), y: field('countErrorClient') }, name: '4xx', color: '#ffa31a' },
             { data: { x: values('5xx'), y: field('countErrorServer') }, name: '5xx', color: '#ff0000' }
@@ -225,7 +225,7 @@ export class Constants {
     static readonly REPARTITION_TYPE_RESPONSE_BAR: ChartProvider<string, number> = {
         height: 250,
         series: [
-            { data: { x: field('date'), y: field('countUnavailableServer') }, name: '0', color: '#495D63' },
+            { data: { x: field('date'), y: field('countUnavailableServer') }, name: 'N/A', color: '#495D63' },
             { data: { x: field('date'), y: field('countSucces') }, name: '2xx', color: '#33cc33' },
             { data: { x: field('date'), y: field('countErrorClient') }, name: '4xx', color: '#ffa31a' },
             { data: { x: field('date'), y: field('countErrorServer') }, name: '5xx', color: '#ff0000' }
@@ -352,7 +352,7 @@ export class Constants {
     };
 
     static readonly REPARTITION_VIEW_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        title: 'Pages visités',
+        title: 'Pages visitées',
         height: 150,
         series: [
             { data: { x: field('date'), y: field('count') }, name: 'Pages visités', color: "#DECDF5" }
