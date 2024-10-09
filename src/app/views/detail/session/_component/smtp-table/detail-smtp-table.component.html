@@ -7,7 +7,6 @@
             <th mat-header-cell *matHeaderCellDef style="width:1%">
             </th>
             <td [ngStyle]="{'border-left': element.completed ? '4px solid green' : '4px solid red'}"
-                [matTooltip]="element.completed ? 'réussi' : 'échoué'"
                 mat-cell *matCellDef="let element">
             </td>
         </ng-container>
@@ -59,6 +58,6 @@
         </tr>
     </table>
     <mat-paginator #paginator [pageSize]="3"
-        [pageSizeOptions]="[3, 5, 10, 20]"
+        [pageSizeOptions]="[3, 5, 10, 20]" [hidePageSize]="true"
         showFirstLastButtons></mat-paginator>
 </div>

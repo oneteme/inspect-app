@@ -53,6 +53,7 @@ export class RestRequestService {
             'start.lt': filters.end.toISOString(),
             'instance.environement': filters.env,
             'instance.app_name': `"${filters.appName}"`,
+            'instance.type': 'CLIENT',
             'order': 'year.asc,date.asc'
         });
     }

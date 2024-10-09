@@ -66,6 +66,7 @@ export class InstanceService {
             'column': `count:count,re`,
             'environement': filters.env,
             'app_name': `"${filters.appName}"`,
+            'type': 'CLIENT',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         });
