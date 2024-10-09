@@ -48,7 +48,9 @@ export interface RestRequest extends SessionStage {
     outDataSize: number;
     exception: ExceptionInfo;
     inContentEncoding: string;
-    outContentEncoding: string; 
+    outContentEncoding: string;
+
+    completed: boolean;
 }
 
 export interface DatabaseRequest extends SessionStage {
@@ -90,6 +92,8 @@ export interface LocalRequest extends SessionStage {
     name: string;
     location: string;
     exception: ExceptionInfo;
+
+    completed: boolean;
 }
 
 export interface NamingRequest extends SessionStage {
