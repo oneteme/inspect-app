@@ -42,6 +42,7 @@ import {DashboardComponent} from "./dashboard/dashboard.component";
 import { ProtocolExceptionComponent } from './dashboard/components/protocol-exception-modal/protocol-exception-modal.component';
 import {ServerHistoryTableComponent} from "./statistic/application/history-table/server-history-table.component";
 import {StatisticClientView} from "./statistic/view/statistic-client.view";
+import {ArchitectureView} from "./architecture/architecture.view";
 
 @NgModule({
   imports: [
@@ -51,7 +52,7 @@ import {StatisticClientView} from "./statistic/view/statistic-client.view";
     RouterModule,
     BrowserModule,
     BrowserAnimationsModule,
-    SharedModule, 
+    SharedModule,
     ChartComponent
   ],
   declarations: [
@@ -82,7 +83,8 @@ import {StatisticClientView} from "./statistic/view/statistic-client.view";
     StatisticClientView,
     DashboardComponent,
     ProtocolExceptionComponent,
-    ServerHistoryTableComponent
+    ServerHistoryTableComponent,
+    ArchitectureView
   ]
 })
 export class ViewsModule { }

@@ -30,6 +30,7 @@ import {DashboardComponent} from "./views/dashboard/dashboard.component";
 import {EnvRouter} from "./service/router.service";
 import {DurationPipe} from "./shared/pipe/duration.pipe";
 import {StatisticClientView} from "./views/statistic/view/statistic-client.view";
+import {ArchitectureView} from "./views/architecture/architecture.view";
 
 
 registerLocaleData(localeFr, 'fr-FR');
@@ -245,6 +246,11 @@ const routes: Route[] = [
     path: 'home',
     component: DashboardComponent,
     title: 'Accueil'
+  },
+  {
+    path: 'architecture',
+    component: ArchitectureView,
+    title: 'Architecture'
   },
   { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
 ];
