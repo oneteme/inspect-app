@@ -16,7 +16,7 @@ export class DatabaseRequestService {
 
     getRepartitionRequestByPeriod(filters: {start: Date, end: Date, groupedBy: string, database: string, env: string}): Observable<RepartitionRequestByPeriod> {
         let args: any = {
-            'column': `count:count,count_error_server:countErrorServer,count_slowest:countSlowest,start.${filters.groupedBy}:date,start.year:year`,
+            'column': `count:count,count_request_error:countErrorServer,count_slowest:countSlowest,start.${filters.groupedBy}:date,start.year:year`,
             'parent': 'rest_session.id',
             'rest_session.start.ge': filters.start,
             'rest_session.start.lt': filters.end,
