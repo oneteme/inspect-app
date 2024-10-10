@@ -49,8 +49,6 @@ export interface RestRequest extends SessionStage {
     exception: ExceptionInfo;
     inContentEncoding: string;
     outContentEncoding: string;
-
-    completed: boolean;
 }
 
 export interface DatabaseRequest extends SessionStage {
@@ -65,7 +63,7 @@ export interface DatabaseRequest extends SessionStage {
     commands: Array<string>;
     
     id: number;
-    completed: boolean;
+    status: boolean;
 }
 
 export interface FtpRequest extends SessionStage {
@@ -76,7 +74,7 @@ export interface FtpRequest extends SessionStage {
     clientVersion: string;
     actions: Array<FtpRequestStage>;
 
-    completed: boolean;
+    status: boolean;
 }
 
 export interface MailRequest extends SessionStage {
@@ -85,7 +83,7 @@ export interface MailRequest extends SessionStage {
     actions: Array<MailRequestStage>;
     mails: Array<Mail>;
 
-    completed: boolean;
+    status: boolean;
 }
 
 export interface LocalRequest extends SessionStage {
@@ -93,7 +91,7 @@ export interface LocalRequest extends SessionStage {
     location: string;
     exception: ExceptionInfo;
 
-    completed: boolean;
+    status: boolean;
 }
 
 export interface NamingRequest extends SessionStage {
@@ -102,7 +100,7 @@ export interface NamingRequest extends SessionStage {
     port: number;
     actions: Array<NamingRequestStage>;
 
-    completed: boolean;
+    status: boolean;
 }
 
 export interface DatabaseRequestStage extends RequestStage {
