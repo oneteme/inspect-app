@@ -1,3 +1,5 @@
+import { E } from "@angular/cdk/keycodes";
+
 export interface InstanceRestSession extends RestSession {
     instanceId: string;
     appName: string;
@@ -34,6 +36,7 @@ export interface MainSession extends LocalRequest {
 }
 
 export interface RestRequest extends SessionStage {
+    idRequest?:number;
     id: string;
     method: string;
     protocol: string;
@@ -62,27 +65,35 @@ export interface DatabaseRequest extends SessionStage {
     productVersion: string;
     actions: Array<DatabaseRequestStage>;
     commands: Array<string>;
+    count?:number;
+    exception?:ExceptionInfo
     id: number;
     completed: boolean;
+    status?:boolean
 }
 
 export interface FtpRequest extends SessionStage {
+    id: number;
     protocol: string;
     host: string;
     port: number;
     serverVersion: string;
     clientVersion: string;
     actions: Array<FtpRequestStage>;
-
+    commands?:string[]; //non 
+    exception?:ExceptionInfo;
     completed: boolean;
 }
 
 export interface MailRequest extends SessionStage {
+    id: number;
     host: string;
     port: number;
     actions: Array<MailRequestStage>;
     mails: Array<Mail>;
-
+    commands?:string[]; //non 
+    count:number;
+    exception?:ExceptionInfo;
     completed: boolean;
 }
 
@@ -93,11 +104,13 @@ export interface LocalRequest extends SessionStage {
 }
 
 export interface NamingRequest extends SessionStage {
+    id: number;
     protocol: string;
     host: string;
     port: number;
     actions: Array<NamingRequestStage>;
-
+    commands?:string[];
+    exception?: ExceptionInfo;
     completed: boolean;
 }
 
@@ -184,12 +197,15 @@ export interface ServerRestSession extends RestSession{
     address: string;
     appName: string;
     mask: number
-    treeToString():string;
 }
 
 export interface Node<T> {
-    format(field: T):string;
+    formatNode(field: T):string;
+    formatLink(field: T):string;
 }
+// link node
+
+
 
 export class RestServerNode implements Node<Label> {
     
@@ -199,16 +215,20 @@ export class RestServerNode implements Node<Label> {
         this.nodeObject = nodeObject;
     }
 
-    format(field: Label): string {
+    formatNode(field: Label): string {
         switch(field){
             case Label.SERVER_IDENTITY : return  this.nodeObject.appName + " " /*+ this.nodeObject.version*/ //version
-            case Label.OS_RE: return this.nodeObject.os + " " + this.nodeObject.re;
-            case Label.IP_PORT: return this.nodeObject.address + " " + this.nodeObject.port
+            case Label.OS_RE: return (this.nodeObject.os || "?") + " " + (this.nodeObject.re || '?');
+            case Label.IP_PORT: return (this.nodeObject.address|| "?") + ":" + (this.nodeObject.port || '?')
             case Label.BRANCH_COMMIT: return "" // soon
             default: return '';
         }
     }
-    
+
+    formatLink(field: Label): string {
+        return '';
+    }
+
 }
 
 export class MainServerNode implements Node<Label> {
@@ -218,12 +238,24 @@ export class MainServerNode implements Node<Label> {
         this.nodeObject = nodeObject;
     }
 
-    format(field: Label): string {
+    formatNode(field: Label): string {
         switch(field){
             case Label.SERVER_IDENTITY : return  this.nodeObject.appName + " " /*+ this.nodeObject.version*/ //version
-            case Label.OS_RE: return this.nodeObject.os + " " + this.nodeObject.re;
-            case Label.IP_PORT: return this.nodeObject.address;
-            case Label.BRANCH_COMMIT: return "" // soon
+            case Label.OS_RE: return (this.nodeObject.os || "?") + " " + (this.nodeObject.re || '?');
+            case Label.IP_PORT: return (this.nodeObject.address|| "?") 
+            case Label.BRANCH_COMMIT: return  "N/A"  // soon
+            default: return 'N/A';
+        }
+    }
+
+    formatLink(field: Label): string {
+        switch(field){
+            case Label.ELAPSED_LATENSE : return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
+            case Label.METHOD_RESOURCE: return ""
+            case Label.SIZE_COMPRESSION: return ""
+            case Label.SCHEME_PROTOCOL: return ""
+            case Label.STATUS_EXCEPTION: return ""
+            case Label.USER: return ""
             default: return 'N/A';
         }
     }
@@ -235,12 +267,24 @@ export class JdbcRequestNode implements Node<Label> {
         this.nodeObject = nodeObject;
     }
 
-    format(field: Label): string {
+    formatNode(field: Label): string {
         switch(field){
             case Label.SERVER_IDENTITY : return  this.nodeObject.name + " " /*+ this.nodeObject.version*/ //version
             case Label.OS_RE: return this.nodeObject.productName;
-            case Label.IP_PORT: return this.nodeObject.port.toString();
-            case Label.BRANCH_COMMIT: return "" // soon
+            case Label.IP_PORT: return this.nodeObject.name + ":" + this.nodeObject.port.toString();
+            case Label.BRANCH_COMMIT: return  "N/A" // soon
+            default: return 'N/A';
+        }
+    }
+
+    formatLink(field: Label): string {
+        switch(field){
+            case Label.ELAPSED_LATENSE : return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
+            case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands,'SQL '+this.nodeObject.name)// todo: with sql add schema 
+            case Label.SIZE_COMPRESSION: return this.nodeObject.count.toString() || '?';
+            case Label.SCHEME_PROTOCOL: return "JDBC/Basic"
+            case Label.STATUS_EXCEPTION: return this.nodeObject.exception&& 'FAIL:'+this.nodeObject.exception?.type || 'OK'
+            case Label.USER: return `${this.nodeObject.user}`;
             default: return 'N/A';
         }
     }
@@ -253,51 +297,84 @@ export class FtpRequestNode implements Node<Label> {
         this.nodeObject = nodeObject;
     }
 
-    format(field: Label): string {
+    formatNode(field: Label): string {
         switch(field){
             case Label.SERVER_IDENTITY : return  this.nodeObject.host; //version
             case Label.IP_PORT: return this.nodeObject.port.toString();
-            case Label.BRANCH_COMMIT: return "" // soon
+            case Label.BRANCH_COMMIT: return  "N/A"  // soon
+            default: return 'N/A';
+        }
+    }  
+    
+    formatLink(field: Label): string {
+        switch(field){
+            case Label.ELAPSED_LATENSE : return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
+            case Label.METHOD_RESOURCE:  return getCommand(this.nodeObject?.commands,"SCRIPT")
+            case Label.SIZE_COMPRESSION: return "?"
+            case Label.SCHEME_PROTOCOL: return this.nodeObject.protocol+'/Basic'
+            case Label.STATUS_EXCEPTION: return this.nodeObject.exception&& 'FAIL:'+this.nodeObject.exception?.type || 'OK'
+            case Label.USER: return  `${this.nodeObject.user}`;
             default: return 'N/A';
         }
     }
-    
 }
 
-export class SmtpRequestNode implements Node<Label> {
+export class MailRequestNode implements Node<Label> {
     
     nodeObject: MailRequest;
     constructor(nodeObject: MailRequest){
         this.nodeObject = nodeObject;
     }
 
-    format(field: Label): string {
+    formatNode(field: Label): string {
         switch(field){
             case Label.SERVER_IDENTITY : return  this.nodeObject.host //version
             case Label.IP_PORT: return this.nodeObject.port.toString();
-            case Label.BRANCH_COMMIT: return "" // soon
+            case Label.BRANCH_COMMIT: return  "N/A" // soon
             default: return 'N/A';
         }
     }
-    
+
+    formatLink(field: Label): string {
+        switch(field){
+            case Label.ELAPSED_LATENSE : return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
+            case Label.METHOD_RESOURCE: return  getCommand(this.nodeObject?.commands,"SCRIPT")
+            case Label.SIZE_COMPRESSION: return this.nodeObject.count.toString() || '?';
+            case Label.SCHEME_PROTOCOL: return "SMTP/Basic"
+            case Label.STATUS_EXCEPTION: return this.nodeObject.exception&& 'FAIL:'+this.nodeObject.exception?.type || 'OK'
+            case Label.USER: return `${this.nodeObject.user}`;
+            default: return 'N/A';
+        }
+    }
 }
 
-export class LdapRequestNode implements Node<Label> {
+export class LdapRequestNode implements Node<Label>{
     
     nodeObject: NamingRequest;
     constructor(nodeObject: NamingRequest){
         this.nodeObject = nodeObject;
     }
 
-    format(field: Label): string {
+    formatNode(field: Label): string {
         switch(field){
             case Label.SERVER_IDENTITY : return  this.nodeObject.host + " " /*+ this.nodeObject.version*/ //version
             case Label.IP_PORT: return this.nodeObject.port.toString();
-            case Label.BRANCH_COMMIT: return "" // soon
+            case Label.BRANCH_COMMIT: return  "N/A"  // soon
             default: return 'N/A';
         }
     }
-    
+
+    formatLink(field: Label): string {
+        switch(field){
+            case Label.ELAPSED_LATENSE : return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
+            case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands,"SCRIPT")
+            case Label.SIZE_COMPRESSION: return "?"
+            case Label.SCHEME_PROTOCOL: return this.nodeObject.protocol ?? "LDAP/Basic" // wait for fix backend 
+            case Label.STATUS_EXCEPTION: return this.nodeObject.exception&& 'FAIL:'+this.nodeObject.exception?.type || 'OK'
+            case Label.USER: return `${this.nodeObject.user}`;
+            default: return 'N/A';
+        }
+    }
 }
 
 export class RestRequestNode implements Node<Label> {
@@ -307,20 +384,59 @@ export class RestRequestNode implements Node<Label> {
         this.nodeObject = nodeObject;
     }
 
-    format(field: Label): string {
+    formatNode(field: Label): string {
         switch(field){
             case Label.SERVER_IDENTITY : return  this.nodeObject.host //version
             case Label.IP_PORT: return this.nodeObject.port.toString();
-            case Label.BRANCH_COMMIT: return "" // soon
+            case Label.BRANCH_COMMIT: return "N/A" // soon
             default: return 'N/A';
         }
     }
-    
+
+    formatLink(field: Label): string {
+        switch(field){
+            case Label.ELAPSED_LATENSE : {
+                var e1 = this.nodeObject.end - this.nodeObject.start;
+                let e2 = 0;
+                if(this.nodeObject.remoteTrace){
+                    e2 =  e1-(this.nodeObject.remoteTrace.end - this.nodeObject.remoteTrace.start)
+                }
+                return `${e1.toFixed(3)}s` + (e2 >= 1 ? `~${e2.toFixed(3)}s` : '');
+            }
+            case Label.METHOD_RESOURCE: return this.nodeObject.method+" "+this.nodeObject.path
+            case Label.SIZE_COMPRESSION: return this.nodeObject.inDataSize +" ↑↓ "+this.nodeObject.outDataSize
+            case Label.SCHEME_PROTOCOL: return `${this.nodeObject.protocol}/${this.nodeObject.authScheme}`
+            case Label.STATUS_EXCEPTION: return this.nodeObject.status.toString();
+            case Label.USER: return `${ this.nodeObject.remoteTrace?.user ?? "?" }` 
+            default: return 'N/A';
+        }
+    }
 }
+
+
 
 export enum Label {
     SERVER_IDENTITY = "SERVER_IDENTITY",
     OS_RE= "OS_RE",
     IP_PORT= "IP_PORT",
-    BRANCH_COMMIT = "BRANCH_COMMIT"
+    BRANCH_COMMIT = "BRANCH_COMMIT",
+    ELAPSED_LATENSE = "ELAPSED_LATENSE ",
+    METHOD_RESOURCE = "METHOD_RESOURCE",
+    SIZE_COMPRESSION = "SIZE_COMPRESSION", 
+    SCHEME_PROTOCOL = "SCHEME_PROTOCOL", 
+    STATUS_EXCEPTION = "STATUS_EXCEPTION",
+    USER = "USER"
 }
+
+
+function getCommand<T>(arr:T[], multiple:string){
+    let r = arr.reduce((acc: any, item: any) => {
+        if(!acc[item]){
+            acc[item] = 0
+        }
+        return acc;
+    }, {});
+    return Object.keys(r).length == 1 
+        ? Object.keys(r)[0]
+        : multiple;
+} 
