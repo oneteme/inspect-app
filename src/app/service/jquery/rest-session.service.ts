@@ -206,9 +206,9 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getArchitectureForHeatMap(filters: {start: Date, end: Date, env: string}): Observable<{count: number, appName: string, appNameJoin: string}[]> {
+    getArchitectureForHeatMap(filters: {start: Date, end: Date, env: string}): Observable<{count: number, origin: string, target: string}[]> {
         return this.getRestSession({
-            'column': 'rest_request.count:count,instance.app_name:appName,instance_join.app_name:appNameJoin',
+            'column': 'rest_request.count:count,instance.app_name:origin,instance_join.app_name:target',
             'instance.id': 'instance_env',
             'id': 'rest_request.parent',
             'rest_request.remote': 'rest_session_join.id',
@@ -220,9 +220,7 @@ export class RestSessionService {
             'rest_session_join.start.lt': filters.end.toISOString(),
             'instance.environement': filters.env,
             'instance_join.environement': filters.env,
-            'appName.ne': '"smart-stm"',
-            'appNameJoin.ne': '"smart-stm"',
-            'order': 'appName.asc,appNameJoin.asc'
+            'order': 'origin.asc,target.asc'
         });
     }
 

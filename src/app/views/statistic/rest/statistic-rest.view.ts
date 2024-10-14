@@ -271,6 +271,7 @@ export function groupByField(arr: any[], field: string): {[key: string]: any[]}{
     }, {});
 }
 
+
 export function countByFields<T>(arr: any[], combiner: (args: any[], o: string)=> T, fields: string[]): {[key: string]: T}{
     return fields.reduce((acc: {[key: string]: T}, o)=> {
         acc[o] = combiner(arr, o);
