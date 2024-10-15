@@ -62,8 +62,8 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
             .subscribe({
                 next: result => {
                     this.session = result.session;
-                    this.session.requests = result.requests;
-                    this.session.queries = result.queries;
+                    this.session.restRequests = result.requests;
+                    this.session.databaseRequests = result.queries;
                     this.session.stages = result.stages;
                     this.session.ftpRequests = result.ftps;
                     this.session.mailRequests = result.mails;
@@ -136,8 +136,8 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     }
 
     groupQueriesBySchema() {
-        if (this.session.queries) {
-            this.queryBySchema = this.session.queries.reduce((acc: any, item) => {
+        if (this.session.databaseRequests) {
+            this.queryBySchema = this.session.databaseRequests.reduce((acc: any, item) => {
                 if (!acc[item.name]) {
                     acc[item.name] = []
                 }

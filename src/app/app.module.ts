@@ -31,6 +31,7 @@ import {EnvRouter} from "./service/router.service";
 import {DurationPipe} from "./shared/pipe/duration.pipe";
 import {StatisticClientView} from "./views/statistic/view/statistic-client.view";
 import {ArchitectureView} from "./views/architecture/architecture.view";
+import { NewTreeView } from './views/newtree/newtree.view';
 
 
 registerLocaleData(localeFr, 'fr-FR');
@@ -82,6 +83,13 @@ const routes: Route[] = [
                 path: 'tree',
                 data: { type: 'rest' },
                 component: TreeView,
+                title: `Appel d'API > Arbre d\'Appels`
+
+              },
+              {
+                path: 'newtree',
+                data: { type: 'rest' },
+                component: NewTreeView,
                 title: `Appel d'API > Arbre d\'Appels`
 
               },

@@ -36,11 +36,11 @@ export class DetailTimelineComponent implements OnChanges {
             if(this.instance && this.request){
                 let timeline_end = this.request.end * 1000
                 let timeline_start = this.request.start * 1000
-                let dataArray: any = [...<RestRequest[]>this.request.requests.map(r => ({...r, type: 'rest'})),
+                let dataArray: any = [...<RestRequest[]>this.request.restRequests.map(r => ({...r, type: 'rest'})),
                     ...<FtpRequest[]>this.request.ftpRequests.map(r => ({...r, type: 'ftp'})),
                     ...<MailRequest[]>this.request.mailRequests.map(r => ({...r, type: 'smtp'})),
                     ...<NamingRequest[]>this.request.ldapRequests.map(r => ({...r, type: 'ldap'})),
-                    ...<DatabaseRequest[]>this.request.queries.map(r => ({...r, type: 'database'})),
+                    ...<DatabaseRequest[]>this.request.databaseRequests.map(r => ({...r, type: 'database'})),
                     ...<LocalRequest[]>this.request.stages.map(r => ({...r, type: 'stage'}))];
                 dataArray.splice(0, 0, { ...this.request, type: 'stage' });
                 this.sortInnerArrayByDate(dataArray);
