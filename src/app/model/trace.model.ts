@@ -35,9 +35,9 @@ export interface MainSession extends LocalRequest {
     ldapRequests: Array<NamingRequest>;
 }
 
-export interface RestRequest extends SessionStage {
+export interface RestRequest extends SessionStage<number> {
     idRequest?:number;
-    id: string;
+    id: string; //TODO
     method: string;
     protocol: string;
     host: string;
@@ -46,7 +46,6 @@ export interface RestRequest extends SessionStage {
     query: string;
     contentType: string;
     authScheme: string;
-    status: number;
     inDataSize: number;
     outDataSize: number;
     exception: ExceptionInfo;
@@ -55,7 +54,7 @@ export interface RestRequest extends SessionStage {
     remoteTrace: ServerRestSession;
 }
 
-export interface DatabaseRequest extends SessionStage {
+export interface DatabaseRequest extends SessionStage<boolean> {
     host: string;
     port: number;
     name: string;
@@ -66,13 +65,11 @@ export interface DatabaseRequest extends SessionStage {
     actions: Array<DatabaseRequestStage>;
     commands: Array<string>;
     count?:number;
-    exception?:ExceptionInfo
     id: number;
     completed: boolean;
-    status?:boolean
 }
 
-export interface FtpRequest extends SessionStage {
+export interface FtpRequest extends SessionStage<boolean> {
     id: number;
     protocol: string;
     host: string;
@@ -85,7 +82,7 @@ export interface FtpRequest extends SessionStage {
     completed: boolean;
 }
 
-export interface MailRequest extends SessionStage {
+export interface MailRequest extends SessionStage<boolean> {
     id: number;
     host: string;
     port: number;
@@ -97,13 +94,13 @@ export interface MailRequest extends SessionStage {
     completed: boolean;
 }
 
-export interface LocalRequest extends SessionStage {
+export interface LocalRequest extends SessionStage<boolean> {
     name: string;
     location: string;
     exception: ExceptionInfo;
 }
 
-export interface NamingRequest extends SessionStage {
+export interface NamingRequest extends SessionStage<boolean> {
     id: number;
     protocol: string;
     host: string;
@@ -149,11 +146,13 @@ export interface RequestStage {
     exception: ExceptionInfo;
 }
 
-export interface SessionStage {
+export interface SessionStage<T> {
     user: string;
     start: number;
     end: number;
     threadName: string;
+    status:T
+    exception?:ExceptionInfo
 }
 
 export interface ExceptionInfo {
@@ -240,7 +239,7 @@ export class MainServerNode implements Node<Label> {
 
     formatNode(field: Label): string {
         switch(field){
-            case Label.SERVER_IDENTITY : return  this.nodeObject.appName + " " /*+ this.nodeObject.version*/ //version
+            case Label.SERVER_IDENTITY : return  this.nodeObject.appName || '?'/*+ this.nodeObject.version*/ //version
             case Label.OS_RE: return (this.nodeObject.os || "?") + " " + (this.nodeObject.re || '?');
             case Label.IP_PORT: return (this.nodeObject.address|| "?") 
             case Label.BRANCH_COMMIT: return  "N/A"  // soon
@@ -269,9 +268,9 @@ export class JdbcRequestNode implements Node<Label> {
 
     formatNode(field: Label): string {
         switch(field){
-            case Label.SERVER_IDENTITY : return  this.nodeObject.name + " " /*+ this.nodeObject.version*/ //version
-            case Label.OS_RE: return this.nodeObject.productName;
-            case Label.IP_PORT: return this.nodeObject.name + ":" + this.nodeObject.port.toString();
+            case Label.SERVER_IDENTITY : return  this.nodeObject.name  || '?'/*+ this.nodeObject.version*/ //version
+            case Label.OS_RE: return this.nodeObject.productName || '?';
+            case Label.IP_PORT: return (this.nodeObject.name || '?') + ":" + (this.nodeObject?.port.toString() || '?');
             case Label.BRANCH_COMMIT: return  "N/A" // soon
             default: return 'N/A';
         }
@@ -280,11 +279,11 @@ export class JdbcRequestNode implements Node<Label> {
     formatLink(field: Label): string {
         switch(field){
             case Label.ELAPSED_LATENSE : return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
-            case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands,'SQL '+this.nodeObject.name)// todo: with sql add schema 
-            case Label.SIZE_COMPRESSION: return this.nodeObject.count.toString() || '?';
+            case Label.METHOD_RESOURCE:return getCommand(this.nodeObject?.commands,'SQL '+this.nodeObject.name)// todo: with sql add schema 
+            case Label.SIZE_COMPRESSION: return this.nodeObject?.count.toString() || '?';
             case Label.SCHEME_PROTOCOL: return "JDBC/Basic"
             case Label.STATUS_EXCEPTION: return this.nodeObject.exception&& 'FAIL:'+this.nodeObject.exception?.type || 'OK'
-            case Label.USER: return `${this.nodeObject.user}`;
+            case Label.USER: return `${this.nodeObject.user || '?'}`;
             default: return 'N/A';
         }
     }
@@ -299,8 +298,8 @@ export class FtpRequestNode implements Node<Label> {
 
     formatNode(field: Label): string {
         switch(field){
-            case Label.SERVER_IDENTITY : return  this.nodeObject.host; //version
-            case Label.IP_PORT: return this.nodeObject.port.toString();
+            case Label.SERVER_IDENTITY : return  this.nodeObject.host || '?'; //version
+            case Label.IP_PORT: return this.nodeObject?.port.toString();
             case Label.BRANCH_COMMIT: return  "N/A"  // soon
             default: return 'N/A';
         }
@@ -313,7 +312,7 @@ export class FtpRequestNode implements Node<Label> {
             case Label.SIZE_COMPRESSION: return "?"
             case Label.SCHEME_PROTOCOL: return this.nodeObject.protocol+'/Basic'
             case Label.STATUS_EXCEPTION: return this.nodeObject.exception&& 'FAIL:'+this.nodeObject.exception?.type || 'OK'
-            case Label.USER: return  `${this.nodeObject.user}`;
+            case Label.USER: return  `${this.nodeObject.user|| '?'}`;
             default: return 'N/A';
         }
     }
@@ -328,8 +327,8 @@ export class MailRequestNode implements Node<Label> {
 
     formatNode(field: Label): string {
         switch(field){
-            case Label.SERVER_IDENTITY : return  this.nodeObject.host //version
-            case Label.IP_PORT: return this.nodeObject.port.toString();
+            case Label.SERVER_IDENTITY : return  this.nodeObject.host || '?' //version
+            case Label.IP_PORT: return this.nodeObject?.port.toString() || '?';
             case Label.BRANCH_COMMIT: return  "N/A" // soon
             default: return 'N/A';
         }
@@ -339,10 +338,10 @@ export class MailRequestNode implements Node<Label> {
         switch(field){
             case Label.ELAPSED_LATENSE : return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
             case Label.METHOD_RESOURCE: return  getCommand(this.nodeObject?.commands,"SCRIPT")
-            case Label.SIZE_COMPRESSION: return this.nodeObject.count.toString() || '?';
+            case Label.SIZE_COMPRESSION: return this.nodeObject?.count.toString() || '?';
             case Label.SCHEME_PROTOCOL: return "SMTP/Basic"
             case Label.STATUS_EXCEPTION: return this.nodeObject.exception&& 'FAIL:'+this.nodeObject.exception?.type || 'OK'
-            case Label.USER: return `${this.nodeObject.user}`;
+            case Label.USER: return `${this.nodeObject.user|| '?'}`;
             default: return 'N/A';
         }
     }
@@ -357,8 +356,8 @@ export class LdapRequestNode implements Node<Label>{
 
     formatNode(field: Label): string {
         switch(field){
-            case Label.SERVER_IDENTITY : return  this.nodeObject.host + " " /*+ this.nodeObject.version*/ //version
-            case Label.IP_PORT: return this.nodeObject.port.toString();
+            case Label.SERVER_IDENTITY : return  this.nodeObject.host || '?'/*+ this.nodeObject.version*/ //version
+            case Label.IP_PORT: return this.nodeObject?.port.toString() || '?';
             case Label.BRANCH_COMMIT: return  "N/A"  // soon
             default: return 'N/A';
         }
@@ -367,11 +366,11 @@ export class LdapRequestNode implements Node<Label>{
     formatLink(field: Label): string {
         switch(field){
             case Label.ELAPSED_LATENSE : return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
-            case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands,"SCRIPT")
+            case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands,"SCRIPT")|| '?'
             case Label.SIZE_COMPRESSION: return "?"
             case Label.SCHEME_PROTOCOL: return this.nodeObject.protocol ?? "LDAP/Basic" // wait for fix backend 
             case Label.STATUS_EXCEPTION: return this.nodeObject.exception&& 'FAIL:'+this.nodeObject.exception?.type || 'OK'
-            case Label.USER: return `${this.nodeObject.user}`;
+            case Label.USER: return `${this.nodeObject.user|| '?'}`;
             default: return 'N/A';
         }
     }
@@ -386,8 +385,8 @@ export class RestRequestNode implements Node<Label> {
 
     formatNode(field: Label): string {
         switch(field){
-            case Label.SERVER_IDENTITY : return  this.nodeObject.host //version
-            case Label.IP_PORT: return this.nodeObject.port.toString();
+            case Label.SERVER_IDENTITY : return  this.nodeObject.host || '?' //version
+            case Label.IP_PORT: return this.nodeObject?.port.toString() || '?';
             case Label.BRANCH_COMMIT: return "N/A" // soon
             default: return 'N/A';
         }
@@ -430,13 +429,16 @@ export enum Label {
 
 
 function getCommand<T>(arr:T[], multiple:string){
-    let r = arr.reduce((acc: any, item: any) => {
-        if(!acc[item]){
-            acc[item] = 0
-        }
-        return acc;
-    }, {});
-    return Object.keys(r).length == 1 
+    if(arr){
+        let r = arr.reduce((acc: any, item: any) => {
+            if(!acc[item]){
+                acc[item] = 0
+            }
+            return acc;
+        }, {});
+        return Object.keys(r).length == 1 
         ? Object.keys(r)[0]
         : multiple;
+    }
+    return '?';
 } 
