@@ -2,6 +2,7 @@
 import { HttpClient } from "@angular/common/http";
 import {Injectable} from "@angular/core";
 import { Observable } from "rxjs";
+import {Architecture} from "../views/architecture/architecture.view";
 
 @Injectable({ providedIn: 'root' })
 export class TreeService {
@@ -51,4 +52,7 @@ export class TreeService {
         return this.http.get(`${this.server}/session/request/rest/exception`, {params: ids})
     }
 
+    getArchitecture(start: Date, end: Date, env: string): Observable<Architecture[]> {
+        return this.http.get<Architecture[]>(`${this.server}/architecture`, {params: {start: start.toISOString(), end: end.toISOString(), env: env}});
+    }
 }

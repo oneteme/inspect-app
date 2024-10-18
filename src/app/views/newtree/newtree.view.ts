@@ -10,6 +10,7 @@ import { EnvRouter } from "../../service/router.service";
 import { RestRequest, ServerMainSession, ServerRestSession, RestServerNode, Label, MainServerNode, JdbcRequestNode, FtpRequestNode, MailRequestNode, LdapRequestNode, RestRequestNode, ExceptionInfo, DatabaseRequest, MailRequest, NamingRequest, FtpRequest } from 'src/app/model/trace.model';
 import { Q, R } from '@angular/cdk/keycodes';
 import { TreeService } from 'src/app/service/tree.service';
+import {mxGraph} from "mxgraph";
 
 
 @Component({
@@ -287,8 +288,8 @@ export class NewTreeView implements OnDestroy {
           //this.groupedExchange = this.groupRequestsByProperty([this.exchange]);
           console.log(this.groupedExchange)
 
-          let a = this.graph.insertVertex(this.parent, null, 'a', 0, 0, 80, 30, 'shape=image;image=assets/mxgraph/MICROSERVICE.drawio.svg;') //Adds a new vertex into the given parent mxCell using value as the user object and the given coordinates as the mxGeometry of the new vertex.
-          let b = this.graph.insertVertex(this.parent, null, 'b', 0, 0, 80, 30, "shape=image;image=assets/mxgraph/MICROSERVICE.drawio.svg;");
+          let a = this.graph.insertVertex(this.parent, null, 'a', 0, 0, 80, 30, 'shape=image;image=assets/mxgraph/microservice.drawio.svg;') //Adds a new vertex into the given parent mxCell using value as the user object and the given coordinates as the mxGeometry of the new vertex.
+          let b = this.graph.insertVertex(this.parent, null, 'b', 0, 0, 80, 30, "shape=image;image=assets/mxgraph/microservice.drawio.svg;");
           this.graph.insertEdge(this.parent, null, 'link', a, b) //Adds a new edge into the given parent mxCell using value as the user object and the given source and target as the terminals of the new edge.
           //this.setnode(this.groupedExchange[Object.keys(this.groupedExchange)[0]], this.detailed = false, false)
         }
@@ -1010,11 +1011,11 @@ export class NewTreeView implements OnDestroy {
 
 
 
-class TreeGraph {
+export class TreeGraph {
 
 
   constructor(
-    private graph: any,
+    private graph: mxGraph,
     private parent: any,
     private layout: any) { }
 
@@ -1050,12 +1051,12 @@ class TreeGraph {
     this.graph.getModel().beginUpdate();
     try {
       fn();
-      layout.execute(this.parent);
     }
     finally {
       // Updates the display
       this.graph.getModel().endUpdate();
       this.resizeAndCenter();
+      //this.resizeAndCenter();
     }
   }
 
@@ -1080,9 +1081,14 @@ class TreeGraph {
 
   setVertexDefaultStyle() {
     let style = this.graph.getStylesheet().getDefaultVertexStyle();
-    style[mx.mxConstants.STYLE_VERTICAL_LABEL_POSITION] = "bottom"
+    /*style[mx.mxConstants.STYLE_VERTICAL_LABEL_POSITION] = "bottom"
     style[mx.mxConstants.STYLE_VERTICAL_ALIGN] = "top"
-    style[mx.mxConstants.STYLE_FONTCOLOR] = '#446299'
+    style[mx.mxConstants.STYLE_FONTCOLOR] = '#446299'*/
+
+    style = mx.mxUtils.clone(style);
+    style[mx.mxConstants.STYLE_SHAPE] = mx.mxConstants.SHAPE_SWIMLANE;
+    style[mx.mxConstants.STYLE_SWIMLANE_LINE] = 0;
+    this.graph.getStylesheet().putCellStyle("swimlane", style);
     //style[mx.mxConstants.STYLE_IMAGE_BORDER] = "black";
   }
 

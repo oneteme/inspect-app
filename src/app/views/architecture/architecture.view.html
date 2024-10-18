@@ -1,2 +1,26 @@
-<chart class="mat-elevation-z5" style="width: 33%;" type="heatmap"
-       [config]="heatMapConfig" [data]="heatMapData || []"/>
+<header-page titleIcon="dashboard" ui-title="Architecture">
+    <form [formGroup]="serverFilterForm" class="header-filter md-2">
+        <mat-form-field appearance="outline"  class="no-subscript">
+            <mat-label>Période</mat-label>
+            <mat-date-range-input [formGroup]="serverFilterForm.controls.dateRangePicker" [rangePicker]="picker">
+                <input matStartDate formControlName="start" placeholder="Start date">
+                <input matEndDate formControlName="end" placeholder="End date">
+            </mat-date-range-input>
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-date-range-picker #picker></mat-date-range-picker>
+        </mat-form-field>
+        <button mat-mini-fab color="primary" (click)="search()">
+            <mat-icon matSuffix>search</mat-icon>
+        </button>
+    </form>
+</header-page>
+<!--<div class="mat-elevation-z5">
+    <chart type="heatmap"
+           [config]="heatMapConfig" [data]="heatMapData || []"/>
+</div>-->
+<div id="container">
+    <div id="fixed-width-container">
+        <div #graphContainer id="graphContainer"></div>
+    </div>
+</div>
+
