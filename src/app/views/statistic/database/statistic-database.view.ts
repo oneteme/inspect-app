@@ -51,7 +51,7 @@ export class StatisticDatabaseView implements OnInit {
     }).subscribe({
       next: (v: { params: Params, queryParams: Params }) => {
 
-        this.db = v.params.name;
+        this.db = v.params.database_name;
         this.env = v.queryParams.env || application.default_env;
         this.start = v.queryParams.start ? new Date(v.queryParams.start) : (application.dashboard.database.default_period || application.dashboard.default_period || makePeriod(6)).start;
         this.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.database.default_period || application.dashboard.default_period || makePeriod(6, 1)).end;

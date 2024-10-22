@@ -44,9 +44,9 @@ export class MainSessionService {
         return this.getMainSession(args);
     }
 
-    getDependencies(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, appName: string}[]> {
+    getDependencies(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, appName: string, type: string}[]> {
         let args: any = {
-            'column': `rest_request.count:count,rest_request.count_succes:countSucces,rest_request.count_error_client:countErrClient,rest_request.count_error_server:countErrServer,instance.app_name:name`,
+            'column': `rest_request.count:count,rest_request.count_succes:countSucces,rest_request.count_error_client:countErrClient,rest_request.count_error_server:countErrServer,instance.app_name:name,instance.type`,
             'instance.id':  'instance_env',
             'id': 'rest_request.parent',
             'rest_request.remote': 'rest_session_join.id',

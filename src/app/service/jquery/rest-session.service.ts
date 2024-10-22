@@ -158,11 +158,11 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getDependencies(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string}[]>;
-    getDependencies(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string, apiName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, appName: string}[]> ;
-    getDependencies(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string, apiName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, appName: string}[]> {
+    getDependencies(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, type: string}[]>;
+    getDependencies(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string, apiName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, appName: string, type: string}[]> ;
+    getDependencies(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string, apiName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, appName: string, type: string}[]> {
         let args: any = {
-            'column': `rest_request.count:count,rest_request.count_succes:countSucces,rest_request.count_error_client:countErrClient,rest_request.count_error_server:countErrServer,${filters.apiName ? 'api_name:name,instance.app_name' : 'instance.app_name:name'}`,
+            'column': `rest_request.count:count,rest_request.count_succes:countSucces,rest_request.count_error_client:countErrClient,rest_request.count_error_server:countErrServer,${filters.apiName ? 'api_name:name,instance.app_name' : 'instance.app_name:name'},instance.type`,
             'instance.id':  'instance_env',
             'id': 'rest_request.parent',
             'rest_request.remote': 'rest_session_join.id',
@@ -182,11 +182,11 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getDependents(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string}[]>;
-    getDependents(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string, apiName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string}[]>;
-    getDependents(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string, apiName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string}[]> {
+    getDependents(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, type: string}[]>;
+    getDependents(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string, apiName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, appName: string, type: string}[]>;
+    getDependents(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string, apiName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, appName: string, type: string}[]> {
         let args: any = {
-            'column': 'rest_session_join.count:count,rest_session_join.count_succes:countSucces,rest_session_join.count_error_client:countErrClient,rest_session_join.count_error_server:countErrServer,instance_join.app_name:name',
+            'column': `rest_session_join.count:count,rest_session_join.count_succes:countSucces,rest_session_join.count_error_client:countErrClient,rest_session_join.count_error_server:countErrServer,${filters.apiName ? 'rest_session_join.api_name:name,instance_join.app_name' : 'instance_join.app_name:name'},instance_join.type`,
             'id': 'rest_request.parent',
             'rest_request.remote': 'rest_session_join.id',
             'rest_session_join.instance_env': 'instance_join.id',

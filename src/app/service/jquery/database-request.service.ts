@@ -18,12 +18,12 @@ export class DatabaseRequestService {
         let args: any = {
             'column': `count:count,count_request_error:countErrorServer,count_slowest:countSlowest,start.${filters.groupedBy}:date,start.year:year`,
             'parent': 'rest_session.id',
-            'rest_session.start.ge': filters.start,
-            'rest_session.start.lt': filters.end,
+            'rest_session.start.ge': filters.start.toISOString(),
+            'rest_session.start.lt': filters.end.toISOString(),
             'rest_session.instance_env': 'instance.id',
             'instance.environement': filters.env,
-            'start.ge': filters.start,
-            'start.lt': filters.end,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
             'db': filters.database,
             'order': 'year.asc,date.asc'
         }
@@ -34,8 +34,8 @@ export class DatabaseRequestService {
         let args: any = {
             'column': 'count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest',
             'parent': 'rest_session.id',
-            'rest_session.start.ge': filters.start,
-            'rest_session.start.lt': filters.end,
+            'rest_session.start.ge': filters.start.toISOString(),
+            'rest_session.start.lt': filters.end.toISOString(),
             'rest_session.instance_env': 'instance.id',
             'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),
@@ -49,8 +49,8 @@ export class DatabaseRequestService {
         let args: any = {
             'column': `count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max,start.${filters.groupedBy}:date,start.year:year`,
             'parent': 'rest_session.id',
-            'rest_session.start.ge': filters.start,
-            'rest_session.start.lt': filters.end,
+            'rest_session.start.ge': filters.start.toISOString(),
+            'rest_session.start.lt': filters.end.toISOString(),
             'rest_session.instance_env': 'instance.id',
             'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),
