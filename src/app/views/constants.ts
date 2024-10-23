@@ -797,8 +797,7 @@ export class FilterConstants {
             //new Filter("re", "RE", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
         ],
         startup: [
-            { key: 'name', label: 'Nom', type: 'select', row: 1, col: 1, width: 20, endpoint: 'session/main', query: { 'column.distinct': 'name', 'name.notNull': '', 'type': 'STARTUP', 'order': 'name.asc' }, op: Operation.eq  },
-            { key: 'location', label: 'Chemin', type: 'input', row: 1, col: 2, op: Operation.like },
+            { key: 'location', label: 'Chemin', type: 'input', row: 1, col: 1, op: Operation.like }
             // new Filter("err_type", "Exception", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
             // new Filter("os", "OS", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
             //new Filter("re", "RE", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
