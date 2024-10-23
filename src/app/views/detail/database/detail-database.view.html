@@ -4,7 +4,7 @@
         <mat-card-title>
             <p style="display: flex; align-items: center; gap: 0.5em">
                 <mat-icon class="material-symbols-outlined">Database</mat-icon>
-                {{ request.host }}{{ ':'+ request.port }} -- {{ request.name}}
+                {{ request.host ? request.host + ':' + request.port + ' -- ' + request.name : 'N/A'}}
             </p>
 
             <div class="right">
@@ -31,7 +31,7 @@
                 {{request.user || "N/A"}}  le {{( request.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }} en <span style="font-weight: bold">{{{ start: request.start, end: request.end } | duration}}</span>
             </div>
             <div class="right">
-                {{ request.productName }} v.{{ request.productVersion }}
+                {{ request.productName || "N/A"}} v.{{ request.productVersion || "N/A"}}
             </div>
         </mat-card-footer>
     </mat-card>

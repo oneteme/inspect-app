@@ -4,8 +4,8 @@
                   [ngStyle]="{'border-left': session.exception?.type || session.exception?.message ? '4px solid red' : '4px solid green'}">
             <mat-card-title>
                 <span style="display: flex; align-items: center; gap: 0.5em">
-                    <mat-icon>settings_suggest</mat-icon>
-                    {{ '[' + session.type + '] ' + (session.name || 'N/A') }}
+                    <mat-icon class="material-symbols-outlined">{{MAPPING_TYPE[type]?.icon}}</mat-icon>
+                    {{ session.name || 'N/A' }}
                 </span>
                 <div class="right">
                     <button mat-icon-button (click)="navigate($event,'tree')" matTooltip="Arbre d'appels">
@@ -50,7 +50,8 @@
                     <mat-icon>storage</mat-icon>
                     <div>{{instance.name}} <span style="font-size: 12px; font-style: italic; font-weight: normal;">{{instance.version}}</span></div>
                 </a>
-                <a style="display: flex; align-items: center; gap: 0.5em" *ngIf="session.type != 'VIEW'">
+                <a style="display: flex; align-items: center; gap: 0.5em" *ngIf="session.type != 'VIEW'" [routerLink]="'/dashboard/server/'+ instance.name"
+                   [queryParams]="{'env': instance.env}" matTooltip="Statistiques Serveur">
                     <mat-icon>storage</mat-icon>
                     <div>{{instance.name}} <span style="font-size: 12px; font-style: italic; font-weight: normal;">{{instance.version}}</span></div>
                 </a>

@@ -137,9 +137,9 @@ export class StatisticApplicationView implements OnInit, OnDestroy {
 
     onClickRow(event: MouseEvent, row: any) {
         if (event.ctrlKey) {
-            this._router.open(`#/dashboard/server/${row.name}?env=${this.env}&start=${this.start.toISOString()}&end=${this.end.toISOString()}`, '_blank')
+            this._router.open(`#/dashboard/${row.type.toLowerCase()}/${row.name}?env=${this.env}&start=${this.start.toISOString()}&end=${this.end.toISOString()}`, '_blank')
         } else {
-            this._router.navigate(['/dashboard/server', row.name], {
+            this._router.navigate(['/dashboard', row.type.toLowerCase(), row.name], {
                 queryParamsHandling: 'preserve'
             });
         }

@@ -6,6 +6,7 @@ import {EnvRouter} from "../../../../service/router.service";
 import {Location} from "@angular/common";
 import {combineLatest, finalize, forkJoin, of, Subscription, switchMap} from "rxjs";
 import {application} from "../../../../../environments/environment";
+import {Constants} from "../../../constants";
 
 @Component({
     templateUrl: './detail-session-main.view.html',
@@ -17,12 +18,14 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
     private _router: EnvRouter = inject(EnvRouter);
     private _location: Location = inject(Location);
 
+    MAPPING_TYPE = Constants.MAPPING_TYPE;
     session: InstanceMainSession;
     instance: InstanceEnvironment;
     isLoading: boolean = false;
     subscriptions: Array<Subscription> = [];
     queryBySchema: any[];
     env: string;
+    type: string;
 
     ngOnInit() {
         this.subscriptions.push(combineLatest([
@@ -31,6 +34,7 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
         ]).subscribe({
             next: ([params, queryParams]) => {
                 this.env = queryParams.env || application.default_env;
+                this.type = params.type_main;
                 this.getSession(params.id_session);
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}`)
             }
