@@ -80,13 +80,6 @@ const routes: Route[] = [
               {
                 path: 'tree',
                 data: { type: 'rest' },
-                component: TreeView,
-                title: `Appel d'API > Arbre d\'Appels`
-
-              },
-              {
-                path: 'newtree',
-                data: { type: 'rest' },
                 component: NewTreeView,
                 title: `Appel d'API > Arbre d\'Appels`
 
@@ -187,7 +180,7 @@ const routes: Route[] = [
               {
                 path: 'tree',
                 data: { type: 'main' },
-                component: TreeView,
+                component: NewTreeView,
                 title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
                   let detail = `> Arbre d'Appels`;
                   if (route.paramMap.get('type_main') == 'batch') {

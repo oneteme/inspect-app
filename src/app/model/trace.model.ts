@@ -200,7 +200,11 @@ export interface ServerRestSession extends RestSession{
 
 export interface Node<T> {
     formatNode(field: T):string;
+}
+
+export interface Link<T>{
     formatLink(field: T):string;
+    getLinkStyle():string;
 }
 // link node
 
@@ -223,11 +227,6 @@ export class RestServerNode implements Node<Label> {
             default: return '';
         }
     }
-
-    formatLink(field: Label): string {
-        return '';
-    }
-
 }
 
 export class MainServerNode implements Node<Label> {
@@ -247,20 +246,32 @@ export class MainServerNode implements Node<Label> {
         }
     }
 
+}
+
+export class LinkRequestNode implements Link<Label> {
+    nodeObject: ServerRestSession
+
+    constructor(nodeObject: ServerRestSession){
+        this.nodeObject = nodeObject;
+    }
+    getLinkStyle(): string {
+        return this.nodeObject.status ? 'SUCCES': 'FAILURE' 
+    }
+
     formatLink(field: Label): string {
         switch(field){
-            case Label.ELAPSED_LATENSE : return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
-            case Label.METHOD_RESOURCE: return ""
-            case Label.SIZE_COMPRESSION: return ""
-            case Label.SCHEME_PROTOCOL: return ""
-            case Label.STATUS_EXCEPTION: return ""
-            case Label.USER: return ""
+            case Label.ELAPSED_LATENSE : return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s` ;
+            case Label.METHOD_RESOURCE: return `${this.nodeObject.method || "?"} ${this.nodeObject.path || "?"}`
+            case Label.SIZE_COMPRESSION: return `${this.nodeObject.inDataSize || "?"} ↑↓ ${this.nodeObject.outDataSize || "?"}`
+            case Label.SCHEME_PROTOCOL: return `${this.nodeObject.protocol || "?"}/${this.nodeObject.authScheme || "?"}`
+            case Label.STATUS_EXCEPTION: return this.nodeObject.status.toString();
+            case Label.USER: return `${ this.nodeObject.user ?? "?" }` 
             default: return 'N/A';
         }
     }
-    
 }
-export class JdbcRequestNode implements Node<Label> {
+
+export class JdbcRequestNode implements Node<Label>, Link<Label> {
     nodeObject: DatabaseRequest;
     constructor(nodeObject: DatabaseRequest){
         this.nodeObject = nodeObject;
@@ -287,9 +298,13 @@ export class JdbcRequestNode implements Node<Label> {
             default: return 'N/A';
         }
     }
+
+    getLinkStyle(): string {
+        return this.nodeObject.status ? 'SUCCES': 'FAILURE' 
+    }
 }
 
-export class FtpRequestNode implements Node<Label> {
+export class FtpRequestNode implements Node<Label>, Link<Label> {
     
     nodeObject: FtpRequest;
     constructor(nodeObject: FtpRequest){
@@ -316,9 +331,13 @@ export class FtpRequestNode implements Node<Label> {
             default: return 'N/A';
         }
     }
+
+    getLinkStyle(): string {
+        return this.nodeObject.status ? 'SUCCES': 'FAILURE' 
+    }
 }
 
-export class MailRequestNode implements Node<Label> {
+export class MailRequestNode implements Node<Label>, Link<Label> {
     
     nodeObject: MailRequest;
     constructor(nodeObject: MailRequest){
@@ -345,14 +364,18 @@ export class MailRequestNode implements Node<Label> {
             default: return 'N/A';
         }
     }
+
+    getLinkStyle(): string {
+        return this.nodeObject.status ? 'SUCCES': 'FAILURE' 
+    }
 }
 
-export class LdapRequestNode implements Node<Label>{
+export class LdapRequestNode implements Node<Label>,Link<Label>{
     
     nodeObject: NamingRequest;
     constructor(nodeObject: NamingRequest){
         this.nodeObject = nodeObject;
-    }
+    }   
 
     formatNode(field: Label): string {
         switch(field){
@@ -373,6 +396,10 @@ export class LdapRequestNode implements Node<Label>{
             case Label.USER: return `${this.nodeObject.user|| '?'}`;
             default: return 'N/A';
         }
+    }
+
+    getLinkStyle(): string {
+       return this.nodeObject.status ? 'SUCCES' : 'FAILURE' 
     }
 }
 
@@ -402,13 +429,17 @@ export class RestRequestNode implements Node<Label> {
                 }
                 return `${e1.toFixed(3)}s` + (e2 >= 1 ? `~${e2.toFixed(3)}s` : '');
             }
-            case Label.METHOD_RESOURCE: return this.nodeObject.method+" "+this.nodeObject.path
-            case Label.SIZE_COMPRESSION: return this.nodeObject.inDataSize +" ↑↓ "+this.nodeObject.outDataSize
-            case Label.SCHEME_PROTOCOL: return `${this.nodeObject.protocol}/${this.nodeObject.authScheme}`
+            case Label.METHOD_RESOURCE: return `${this.nodeObject.method || "?"} ${this.nodeObject.path || "?"}`
+            case Label.SIZE_COMPRESSION: return `${this.nodeObject.inDataSize || "?"} ↑↓ ${this.nodeObject.outDataSize || "?"}`
+            case Label.SCHEME_PROTOCOL: return `${this.nodeObject.protocol || "?"}/${this.nodeObject.authScheme || "?"}`
             case Label.STATUS_EXCEPTION: return this.nodeObject.status.toString();
             case Label.USER: return `${ this.nodeObject.remoteTrace?.user ?? "?" }` 
             default: return 'N/A';
         }
+    }
+
+    getLinkStyle(): string {
+       return this.nodeObject.status > 400 || this.nodeObject.status == 0 ? 'FAILURE' : 'SUCCES'
     }
 }
 
@@ -426,6 +457,8 @@ export enum Label {
     STATUS_EXCEPTION = "STATUS_EXCEPTION",
     USER = "USER"
 }
+
+
 
 
 function getCommand<T>(arr:T[], multiple:string){
