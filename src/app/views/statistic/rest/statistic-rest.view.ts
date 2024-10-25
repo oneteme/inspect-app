@@ -144,7 +144,6 @@ export class StatisticRestView implements OnInit, OnDestroy {
     }
 
     API_REQUEST = (serverName: string, restName: string, env: string, start: Date, end: Date, advancedParams: FilterMap) => {
-        let now = new Date();
         const groupedBy = periodManagement(start, end);
         return this._instanceService.getIds(env, end, serverName).pipe(map((data: {id: string}[]) => {
                     let ids = data.map(d => `"${d.id}"`).join(',');
@@ -157,12 +156,16 @@ export class StatisticRestView implements OnInit, OnDestroy {
                                     return acc;
                                 }, 0);
                                 return {
-                                    pie: [countByFields(r, combiner, ['countSucces', 'countErrorClient', 'countErrorServer', 'elapsedTimeSlowest', 'elapsedTimeSlow', 'elapsedTimeMedium', 'elapsedTimeFast', 'elapsedTimeFastest'])],
+                                    pie: [countByFields(r, combiner, ['countSucces', 'countErrorClient', 'countErrorServer', 'countUnavailableServer', 'elapsedTimeSlowest', 'elapsedTimeSlow', 'elapsedTimeMedium', 'elapsedTimeFast', 'elapsedTimeFastest'])],
                                     bar: r
                                 }
                             }))
                         },
-                        repartitionRequestByPeriodLine: { observable: this._restSessionService.getRepartitionRequestByPeriod({now: now, advancedParams: advancedParams, ids: ids, apiName: restName}) }, // 7 derniers jours
+                        repartitionRequestByPeriodLine: {
+                            observable: this._restSessionService.getRepartitionRequestByPeriod({start: start, end: end, groupedBy: groupedBy, advancedParams: advancedParams, ids: ids, apiName: restName}).pipe(tap(r => {
+                                formatters[groupedBy](r, this._datePipe);
+                            }))
+                        },
                         repartitionUser: { observable: this._restSessionService.getRepartitionUserByPeriod({start: start, end: end, groupedBy: groupedBy, advancedParams: advancedParams, ids: ids, apiName: restName}).pipe(map(r => {
                             formatters[groupedBy](r, this._datePipe);
                             let bar = Object.values(groupByField(r, "date")).flatMap(g=> {
@@ -191,7 +194,14 @@ export class StatisticRestView implements OnInit, OnDestroy {
                         }))},
                         dependenciesTable: { observable: this._restSessionService.getDependencies({start: start, end: end, advancedParams: advancedParams, ids: ids, apiName: restName}) },
                         dependentsTable: { observable: this._restSessionService.getDependents({start: start, end: end, advancedParams: advancedParams, ids: ids, apiName: restName}) },
-                        exceptionsTable: { observable: this._restSessionService.getExceptions({start: start, end: end, advancedParams: advancedParams, ids: ids, apiName: restName}) }
+                        exceptionsTable: {
+                            observable: this._restSessionService.getExceptions({start: start, end: end, advancedParams: advancedParams, ids: ids, apiName: restName}).pipe(map(res => {
+                                return res.slice(0, 5).map((r: {count: number, errorType: string}) => {
+                                    const index = r?.errorType.lastIndexOf('.') + 1;
+                                    return { count: r.count, label: r?.errorType?.substring(index) };
+                                });
+                            }))
+                        }
                     }}))
     };
 

@@ -14,20 +14,18 @@ export class DatabaseRequestService {
         return this.http.get<T>(url, { params: params });
     }
 
-    getRepartitionRequestByPeriod(filters: {now: Date, database: string, env: string}): Observable<RepartitionRequestByPeriod> {
-        let start = new Date(filters.now.getFullYear(), filters.now.getMonth(), filters.now.getDate() - 6).toISOString();
-        let end = filters.now.toISOString();
+    getRepartitionRequestByPeriod(filters: {start: Date, end: Date, groupedBy: string, database: string, env: string}): Observable<RepartitionRequestByPeriod> {
         let args: any = {
-            'column': "count:count,count_error_server:countErrorServer,count_slowest:countSlowest,start.date:date",
+            'column': `count:count,count_request_error:countErrorServer,count_slowest:countSlowest,start.${filters.groupedBy}:date,start.year:year`,
             'parent': 'rest_session.id',
-            'rest_session.start.ge': start,
-            'rest_session.start.lt': end,
+            'rest_session.start.ge': filters.start.toISOString(),
+            'rest_session.start.lt': filters.end.toISOString(),
             'rest_session.instance_env': 'instance.id',
             'instance.environement': filters.env,
-            'start.ge': start,
-            'start.lt': end,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
             'db': filters.database,
-            'order': 'date.asc'
+            'order': 'year.asc,date.asc'
         }
         return this.getDatabaseRequest(args);
     }
@@ -36,8 +34,8 @@ export class DatabaseRequestService {
         let args: any = {
             'column': 'count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest',
             'parent': 'rest_session.id',
-            'rest_session.start.ge': filters.start,
-            'rest_session.start.lt': filters.end,
+            'rest_session.start.ge': filters.start.toISOString(),
+            'rest_session.start.lt': filters.end.toISOString(),
             'rest_session.instance_env': 'instance.id',
             'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),
@@ -51,8 +49,8 @@ export class DatabaseRequestService {
         let args: any = {
             'column': `count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max,start.${filters.groupedBy}:date,start.year:year`,
             'parent': 'rest_session.id',
-            'rest_session.start.ge': filters.start,
-            'rest_session.start.lt': filters.end,
+            'rest_session.start.ge': filters.start.toISOString(),
+            'rest_session.start.lt': filters.end.toISOString(),
             'rest_session.instance_env': 'instance.id',
             'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),

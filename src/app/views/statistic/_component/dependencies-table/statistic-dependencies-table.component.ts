@@ -11,7 +11,7 @@ import { ChartProvider, field, values } from "@oneteme/jquery-core";
 export class StatisticDependenciesTableComponent {
 
     displayedColumns: string[] = ['name', 'response'];
-    dataSource: MatTableDataSource<{ name: string, appName: string, count: number, data: any[] }> = new MatTableDataSource([]);
+    dataSource: MatTableDataSource<{ name: string, appName: string, type: string, count: number, data: any[] }> = new MatTableDataSource([]);
 
     readonly CONFIG_SPARKLINE: ChartProvider<string, number> = {
         height: 50,
@@ -65,7 +65,7 @@ export class StatisticDependenciesTableComponent {
     @Input() set data(objects: any[]) {
         if (objects?.length) {
             this.dataSource = new MatTableDataSource(objects.map(r => {
-                return { name: r.name, appName: r.appName, count: r.count, data: [r] };
+                return { name: r.name, appName: r.appName, type: r.type, count: r.count, data: [r] };
             }));
             this.dataSource.paginator = this.paginator;
         } else {

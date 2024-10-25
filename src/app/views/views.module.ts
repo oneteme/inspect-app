@@ -41,6 +41,7 @@ import {
 import {DashboardComponent} from "./dashboard/dashboard.component";
 import { ProtocolExceptionComponent } from './dashboard/components/protocol-exception-modal/protocol-exception-modal.component';
 import {ServerHistoryTableComponent} from "./statistic/application/history-table/server-history-table.component";
+import {StatisticClientView} from "./statistic/view/statistic-client.view";
 
 
 @NgModule({
@@ -79,6 +80,7 @@ import {ServerHistoryTableComponent} from "./statistic/application/history-table
     StatisticDependenciesTableComponent,
     StatisticExceptionTableComponent,
     StatisticUserSessionTableComponent,
+    StatisticClientView,
     DashboardComponent,
     ProtocolExceptionComponent,
     ServerHistoryTableComponent,

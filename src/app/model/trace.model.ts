@@ -50,7 +50,7 @@ export interface RestRequest extends SessionStage<number> {
     outDataSize: number;
     exception: ExceptionInfo;
     inContentEncoding: string;
-    outContentEncoding: string; 
+    outContentEncoding: string;
     remoteTrace: ServerRestSession;
 }
 
@@ -66,7 +66,6 @@ export interface DatabaseRequest extends SessionStage<boolean> {
     commands: Array<string>;
     count?:number;
     id: number;
-    completed: boolean;
 }
 
 export interface FtpRequest extends SessionStage<boolean> {
@@ -77,9 +76,8 @@ export interface FtpRequest extends SessionStage<boolean> {
     serverVersion: string;
     clientVersion: string;
     actions: Array<FtpRequestStage>;
-    commands?:string[]; //non 
+    commands?:string[]; //non
     exception?:ExceptionInfo;
-    completed: boolean;
 }
 
 export interface MailRequest extends SessionStage<boolean> {
@@ -88,10 +86,9 @@ export interface MailRequest extends SessionStage<boolean> {
     port: number;
     actions: Array<MailRequestStage>;
     mails: Array<Mail>;
-    commands?:string[]; //non 
+    commands?:string[]; //non
     count:number;
     exception?:ExceptionInfo;
-    completed: boolean;
 }
 
 export interface LocalRequest extends SessionStage<boolean> {
@@ -108,7 +105,6 @@ export interface NamingRequest extends SessionStage<boolean> {
     actions: Array<NamingRequestStage>;
     commands?:string[];
     exception?: ExceptionInfo;
-    completed: boolean;
 }
 
 export interface DatabaseRequestStage extends RequestStage {
@@ -183,7 +179,7 @@ export interface ServerMainSession extends MainSession {
     version: string;
     os: string;
     re: string;
-    address: string; 
+    address: string;
     appName: string;
     mask: number
 }
@@ -211,9 +207,9 @@ export interface Link<T>{
 
 
 export class RestServerNode implements Node<Label> {
-    
+
     nodeObject: ServerRestSession;
-    
+
     constructor(nodeObject: ServerRestSession){
         this.nodeObject = nodeObject;
     }
@@ -230,7 +226,7 @@ export class RestServerNode implements Node<Label> {
 }
 
 export class MainServerNode implements Node<Label> {
-    
+
     nodeObject: ServerMainSession;
     constructor(nodeObject: ServerMainSession){
         this.nodeObject = nodeObject;
@@ -240,7 +236,7 @@ export class MainServerNode implements Node<Label> {
         switch(field){
             case Label.SERVER_IDENTITY : return  this.nodeObject.appName || '?'/*+ this.nodeObject.version*/ //version
             case Label.OS_RE: return (this.nodeObject.os || "?") + " " + (this.nodeObject.re || '?');
-            case Label.IP_PORT: return (this.nodeObject.address|| "?") 
+            case Label.IP_PORT: return (this.nodeObject.address|| "?")
             case Label.BRANCH_COMMIT: return  "N/A"  // soon
             default: return 'N/A';
         }
@@ -255,7 +251,7 @@ export class LinkRequestNode implements Link<Label> {
         this.nodeObject = nodeObject;
     }
     getLinkStyle(): string {
-        return this.nodeObject.status ? 'SUCCES': 'FAILURE' 
+        return this.nodeObject.status ? 'SUCCES': 'FAILURE'
     }
 
     formatLink(field: Label): string {
@@ -265,7 +261,7 @@ export class LinkRequestNode implements Link<Label> {
             case Label.SIZE_COMPRESSION: return `${this.nodeObject.inDataSize || "?"} ↑↓ ${this.nodeObject.outDataSize || "?"}`
             case Label.SCHEME_PROTOCOL: return `${this.nodeObject.protocol || "?"}/${this.nodeObject.authScheme || "?"}`
             case Label.STATUS_EXCEPTION: return this.nodeObject.status.toString();
-            case Label.USER: return `${ this.nodeObject.user ?? "?" }` 
+            case Label.USER: return `${ this.nodeObject.user ?? "?" }`
             default: return 'N/A';
         }
     }
@@ -290,7 +286,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
     formatLink(field: Label): string {
         switch(field){
             case Label.ELAPSED_LATENSE : return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
-            case Label.METHOD_RESOURCE:return getCommand(this.nodeObject?.commands,'SQL '+this.nodeObject.name)// todo: with sql add schema 
+            case Label.METHOD_RESOURCE:return getCommand(this.nodeObject?.commands,'SQL '+this.nodeObject.name)// todo: with sql add schema
             case Label.SIZE_COMPRESSION: return this.nodeObject?.count.toString() || '?';
             case Label.SCHEME_PROTOCOL: return "JDBC/Basic"
             case Label.STATUS_EXCEPTION: return this.nodeObject.exception&& 'FAIL:'+this.nodeObject.exception?.type || 'OK'
@@ -300,12 +296,12 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
     }
 
     getLinkStyle(): string {
-        return this.nodeObject.status ? 'SUCCES': 'FAILURE' 
+        return this.nodeObject.status ? 'SUCCES': 'FAILURE'
     }
 }
 
 export class FtpRequestNode implements Node<Label>, Link<Label> {
-    
+
     nodeObject: FtpRequest;
     constructor(nodeObject: FtpRequest){
         this.nodeObject = nodeObject;
@@ -318,8 +314,8 @@ export class FtpRequestNode implements Node<Label>, Link<Label> {
             case Label.BRANCH_COMMIT: return  "N/A"  // soon
             default: return 'N/A';
         }
-    }  
-    
+    }
+
     formatLink(field: Label): string {
         switch(field){
             case Label.ELAPSED_LATENSE : return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
@@ -333,12 +329,12 @@ export class FtpRequestNode implements Node<Label>, Link<Label> {
     }
 
     getLinkStyle(): string {
-        return this.nodeObject.status ? 'SUCCES': 'FAILURE' 
+        return this.nodeObject.status ? 'SUCCES': 'FAILURE'
     }
 }
 
 export class MailRequestNode implements Node<Label>, Link<Label> {
-    
+
     nodeObject: MailRequest;
     constructor(nodeObject: MailRequest){
         this.nodeObject = nodeObject;
@@ -366,16 +362,16 @@ export class MailRequestNode implements Node<Label>, Link<Label> {
     }
 
     getLinkStyle(): string {
-        return this.nodeObject.status ? 'SUCCES': 'FAILURE' 
+        return this.nodeObject.status ? 'SUCCES': 'FAILURE'
     }
 }
 
 export class LdapRequestNode implements Node<Label>,Link<Label>{
-    
+
     nodeObject: NamingRequest;
     constructor(nodeObject: NamingRequest){
         this.nodeObject = nodeObject;
-    }   
+    }
 
     formatNode(field: Label): string {
         switch(field){
@@ -391,7 +387,7 @@ export class LdapRequestNode implements Node<Label>,Link<Label>{
             case Label.ELAPSED_LATENSE : return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
             case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands,"SCRIPT")|| '?'
             case Label.SIZE_COMPRESSION: return "?"
-            case Label.SCHEME_PROTOCOL: return this.nodeObject.protocol ?? "LDAP/Basic" // wait for fix backend 
+            case Label.SCHEME_PROTOCOL: return this.nodeObject.protocol ?? "LDAP/Basic" // wait for fix backend
             case Label.STATUS_EXCEPTION: return this.nodeObject.exception&& 'FAIL:'+this.nodeObject.exception?.type || 'OK'
             case Label.USER: return `${this.nodeObject.user|| '?'}`;
             default: return 'N/A';
@@ -399,12 +395,12 @@ export class LdapRequestNode implements Node<Label>,Link<Label>{
     }
 
     getLinkStyle(): string {
-       return this.nodeObject.status ? 'SUCCES' : 'FAILURE' 
+       return this.nodeObject.status ? 'SUCCES' : 'FAILURE'
     }
 }
 
 export class RestRequestNode implements Node<Label> {
-    
+
     nodeObject: RestRequest;
     constructor(nodeObject: RestRequest){
         this.nodeObject = nodeObject;
@@ -433,7 +429,7 @@ export class RestRequestNode implements Node<Label> {
             case Label.SIZE_COMPRESSION: return `${this.nodeObject.inDataSize || "?"} ↑↓ ${this.nodeObject.outDataSize || "?"}`
             case Label.SCHEME_PROTOCOL: return `${this.nodeObject.protocol || "?"}/${this.nodeObject.authScheme || "?"}`
             case Label.STATUS_EXCEPTION: return this.nodeObject.status.toString();
-            case Label.USER: return `${ this.nodeObject.remoteTrace?.user ?? "?" }` 
+            case Label.USER: return `${ this.nodeObject.remoteTrace?.user ?? "?" }`
             default: return 'N/A';
         }
     }
@@ -452,8 +448,8 @@ export enum Label {
     BRANCH_COMMIT = "BRANCH_COMMIT",
     ELAPSED_LATENSE = "ELAPSED_LATENSE ",
     METHOD_RESOURCE = "METHOD_RESOURCE",
-    SIZE_COMPRESSION = "SIZE_COMPRESSION", 
-    SCHEME_PROTOCOL = "SCHEME_PROTOCOL", 
+    SIZE_COMPRESSION = "SIZE_COMPRESSION",
+    SCHEME_PROTOCOL = "SCHEME_PROTOCOL",
     STATUS_EXCEPTION = "STATUS_EXCEPTION",
     USER = "USER"
 }
@@ -469,9 +465,9 @@ function getCommand<T>(arr:T[], multiple:string){
             }
             return acc;
         }, {});
-        return Object.keys(r).length == 1 
+        return Object.keys(r).length == 1
         ? Object.keys(r)[0]
         : multiple;
     }
     return '?';
-} 
+}

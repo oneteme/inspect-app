@@ -80,7 +80,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     }
 
     createTimeline() {
-        let timeline_end = Math.ceil(this.request.end * 1000) ;
+        let timeline_end = Math.ceil(this.request.end * 1000);
         let timeline_start = Math.trunc(this.request.start * 1000);
         let actions = this.request.actions.sort((a, b) => a.order - b.order);
 
@@ -93,6 +93,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
                 title: `<span>${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(c.end * 1000), 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform({start: c.start, end: c.end})})<br>
                         <h4>${c.count ? c.count : ''}</h4>`
             }
+            console.log(item);
             item.type = item.end <= item.start ? 'point' : 'range' // TODO : change this to equals dh_dbt is set to timestamps(6), currently set to timestmap(3)
             if (c.exception?.message || c.exception?.type) {
                 item.className = 'bdd-failed';

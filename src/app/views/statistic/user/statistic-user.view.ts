@@ -3,7 +3,7 @@ import { JQueryService } from "src/app/service/jquery/jquery.service";
 import { ActivatedRoute, Params } from "@angular/router";
 import { DatePipe, Location } from '@angular/common';
 import { FormControl, FormGroup, Validators } from "@angular/forms";
-import { BehaviorSubject, Observable, Subscription, combineLatest, finalize, map } from "rxjs";
+import {BehaviorSubject, Observable, Subscription, combineLatest, finalize, map, tap} from "rxjs";
 import { Constants, FilterConstants, FilterMap, FilterPreset } from "../../constants";
 import { application, makePeriod } from "src/environments/environment";
 import { FilterService } from "src/app/service/filter.service";
@@ -11,6 +11,7 @@ import { mapParams, formatters, periodManagement } from "src/app/shared/util";
 import {EnvRouter} from "../../../service/router.service";
 import {RestSessionService} from "../../../service/jquery/rest-session.service";
 import {MainSessionService} from "../../../service/jquery/main-session.service";
+import {countByFields} from "../rest/statistic-rest.view";
 
 @Component({
     templateUrl: './statistic-user.view.html',
@@ -44,7 +45,7 @@ export class StatisticUserView implements OnInit, OnDestroy {
     advancedParams: Partial<{ [key: string]: any }> = {}
     focusFieldName: any;
 
-    requests: { [key: string]: { observable: Observable<Object>, data?: any[], isLoading?: boolean } } = {};
+    requests: { [key: string]: { observable: Observable<Object>, data?: any, isLoading?: boolean } } = {};
 
     constructor() {
         combineLatest({
@@ -78,7 +79,6 @@ export class StatisticUserView implements OnInit, OnDestroy {
         }
         this.requests = this.USER_REQUEST(this.name, this.env, this.start, this.end, advancedParams);
         Object.keys(this.requests).forEach(k => {
-            this.requests[k].data = [];
             this.requests[k].isLoading = true;
             this.subscriptions.push(this.requests[k].observable
                 .pipe(finalize(() => this.requests[k].isLoading = false))
@@ -119,17 +119,26 @@ export class StatisticUserView implements OnInit, OnDestroy {
 
     // Stats en fonction du navigateur et du systeme
     USER_REQUEST = (name: string, env: string, start: Date, end: Date, advancedParams: FilterMap) => {
-        let now = new Date();
         let groupedBy = periodManagement(start, end);
         return {
-            repartitionTimeAndTypeResponse: { observable: this._restSessionService.getRepartitionTimeAndTypeResponse({start: start, end: end, advancedParams: advancedParams, user: name, env: env}) },
             repartitionTimeAndTypeResponseByPeriod: {
                 observable: this._restSessionService.getRepartitionTimeAndTypeResponseByPeriod({start: start, end: end, groupedBy: groupedBy, advancedParams: advancedParams, user: name, env: env}).pipe(map(r => {
                     formatters[groupedBy](r, this._datePipe);
-                    return r;
+                    let combiner = (args: any[], f: string)=> args.reduce((acc, o) => {
+                        acc += o[f];
+                        return acc;
+                    }, 0);
+                    return {
+                        pie: [countByFields(r, combiner, ['countSucces', 'countErrorClient', 'countErrorServer', 'countUnavailableServer', 'elapsedTimeSlowest', 'elapsedTimeSlow', 'elapsedTimeMedium', 'elapsedTimeFast', 'elapsedTimeFastest'])],
+                        bar: r
+                    }
                 }))
             },
-            repartitionRequestByPeriodLine: { observable: this._restSessionService.getRepartitionRequestByPeriod({now: now, advancedParams: advancedParams, user: name, env: env}) },
+            repartitionRequestByPeriodLine: {
+                observable: this._restSessionService.getRepartitionRequestByPeriod({start: start, end: end, groupedBy: groupedBy, advancedParams: advancedParams, user: name, env: env}).pipe(tap(r => {
+                    formatters[groupedBy](r, this._datePipe);
+                }))
+            },
             repartitionApiBar: { observable: this._restSessionService.getRepartitionApi({start: start, end: end, advancedParams: advancedParams, user: name, env: env}) },
             exceptionsTable: { observable: this._restSessionService.getExceptions({start: start, end: end, advancedParams: advancedParams, user: name, env: env})},
             sessionTable: { observable: this._mainSessionService.getInfos({start: start, end: end, advancedParams: advancedParams, user: name, env: env}) }

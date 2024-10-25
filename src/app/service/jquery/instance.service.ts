@@ -60,4 +60,22 @@ export class InstanceService {
             'order': 'start.desc'
         });
     }
+
+    getCountByRe(filters : {env: string, start: Date, end: Date, appName: string }): Observable<{count: number, re: string}[]>  {
+        return this.getInstance({
+            'column': `count:count,re`,
+            'environement': filters.env,
+            'app_name': `"${filters.appName}"`,
+            'type': 'CLIENT',
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString()
+        });
+    }
+
+    getVersionStart(filters : {env: string, start: Date, end: Date, appName: string }): Observable<{collector: string, start: number}[]> {
+        return this.getInstance({
+            'column': `view1.collector,view1.start`,
+            'view': `select(collector,start,rank.over(partition(environement,app_name).order(start.asc)):rk).filter(type.eq(CLIENT).and(environement.eq(${filters.env})).and(start.ge(${filters.start.toISOString()})).and(start.lt(${filters.end.toISOString()}))):view1`,
+            'view1.rk': '1', 'order': 'view1.start.desc' });
+    }
 }

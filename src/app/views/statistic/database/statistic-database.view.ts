@@ -1,6 +1,6 @@
 import { Component, OnInit,  inject } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import {  Observable, Subscription, catchError, combineLatest, finalize, map, of } from 'rxjs';
+import {Observable, Subscription, catchError, combineLatest, finalize, map, of, tap} from 'rxjs';
 import { DatePipe, Location } from '@angular/common';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { JQueryService } from 'src/app/service/jquery/jquery.service';
@@ -51,7 +51,7 @@ export class StatisticDatabaseView implements OnInit {
     }).subscribe({
       next: (v: { params: Params, queryParams: Params }) => {
 
-        this.db = v.params.name;
+        this.db = v.params.database_name;
         this.env = v.queryParams.env || application.default_env;
         this.start = v.queryParams.start ? new Date(v.queryParams.start) : (application.dashboard.database.default_period || application.dashboard.default_period || makePeriod(6)).start;
         this.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.database.default_period || application.dashboard.default_period || makePeriod(6, 1)).end;
@@ -106,17 +106,27 @@ export class StatisticDatabaseView implements OnInit {
 
 
   DB_REQUEST = (db: string, env: string, start: Date, end: Date) => {
-    let now = new Date();
     let groupedBy = periodManagement(start, end);
     return {
-      repartitionRequestByPeriodLine: { observable: this._databaseService.getRepartitionRequestByPeriod({now: now, database: db, env: env}) },
+      repartitionRequestByPeriodLine: {
+        observable: this._databaseService.getRepartitionRequestByPeriod({start: start, end: end, groupedBy: groupedBy, database: db, env: env}).pipe(tap(r => {
+          formatters[groupedBy](r, this._datePipe);
+        }))
+      },
       repartitionTimeByPeriodBar: { observable: this._databaseService.getRepartitionTimeByPeriod({start: start, end: end, groupedBy: groupedBy, database: db, env: env}).pipe(map(((r: any[]) => {
           formatters[groupedBy](r, this._datePipe);
           return r;
         })))
       },
       repartitionTimePie: { observable: this._databaseService.getRepartitionTime({start: start, end: end, database: db, env: env}) },
-      exceptions: { observable: this._exceptionService.getDatabaseException({start: start, end: end, database: db, env: env})}
+      exceptions: {
+        observable: this._exceptionService.getDatabaseException({start: start, end: end, database: db, env: env}).pipe(map(res => {
+          return res.slice(0, 5).map((r: {count: number, errorType: string}) => {
+            const index = r?.errorType.lastIndexOf('.') + 1;
+            return { count: r.count, label: r?.errorType?.substring(index) };
+          });
+        }))
+      }
     }
   }
 

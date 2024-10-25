@@ -4,9 +4,10 @@ import { DashboardComponent } from "./dashboard/dashboard.component";
 export class Constants {
 
     static readonly REPARTITION_TYPE_RESPONSE_PIE: ChartProvider<string, number> = {
-        title: 'Nombre d\'appels par type de réponse',
+        title: 'Appels par type de réponse',
         height: 250,
         series: [
+            { data: { x: values('N/A'), y: field('countUnavailableServer') }, name: '0', color: '#495D63' },
             { data: { x: values('2xx'), y: field('countSucces') }, name: '2xx', color: '#33cc33' },
             { data: { x: values('4xx'), y: field('countErrorClient') }, name: '4xx', color: '#ffa31a' },
             { data: { x: values('5xx'), y: field('countErrorServer') }, name: '5xx', color: '#ff0000' }
@@ -45,7 +46,7 @@ export class Constants {
     };
 
     static readonly REPARTITION_USER_POLAR: ChartProvider<string, number> = {
-        title: 'Nombre d\'appels par utilisateur (Top 5)',
+        title: 'Appels par utilisateur (Top 5)',
         height: 250,
         series: [
             { data: { x: field('user'), y: field('count') }, name: 'Total' }
@@ -61,6 +62,21 @@ export class Constants {
             }
         }
     };
+
+    static readonly REPARTITION_RE_PIE: ChartProvider<string, number> = {
+        title: 'Repartition par navigateur',
+        height: 250,
+        series: [
+            { data: { x: field('re'), y: field('count') } }
+        ],
+        options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            }
+        }
+    }
 
     static readonly REPARTITION_USER_BAR: ChartProvider<string, number> = {
         height: 250,
@@ -86,8 +102,50 @@ export class Constants {
         }
     }
 
+    static readonly REPARTITION_PAGE_BAR: ChartProvider<string, number> = {
+        title: 'Consultation par page (Top 5)',
+        height: 250,
+        series: [
+            { data: { x: field('location'), y: field('count') }, name: 'Consultation par page', color: '#33cc33' }
+        ],
+        stacked: true,
+        options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
+            tooltip: {
+                shared: true,
+                intersect: false,
+                followCursor: true
+            },
+            plotOptions: {
+                bar: {
+                    dataLabels: {
+                        total: {
+                            enabled: true,
+                            offsetX: 0,
+                            style: {
+                                fontSize: '13px',
+                                fontWeight: 900
+                            }
+                        }
+                    }
+                },
+            },
+            fill: {
+                opacity: 1
+            },
+            stroke: {
+                width: 1,
+                colors: ['#fff']
+            }
+        }
+    };
+
     static readonly REPARTITION_API_BAR: ChartProvider<string, number> = {
-        title: 'Nombre d\'appels par Api (Top 5)',
+        title: 'Appels par Api (Top 5)',
         height: 300,
         series: [
             { data: { x: field('apiName'), y: field('countSucces') }, name: '2xx', color: '#33cc33' },
@@ -136,7 +194,7 @@ export class Constants {
     };
 
     static readonly REPARTITION_SPEED_BAR: ChartProvider<string, number> = {
-        title: 'Nombre d\'appels par tranche de temps (seconde)',
+        title: 'Appels par tranche de temps (seconde)',
         height: 250,
         series: [
             { data: { x: field('date'), y: field('elapsedTimeSlowest') }, name: '> 10', color: '#848383' },
@@ -167,6 +225,7 @@ export class Constants {
     static readonly REPARTITION_TYPE_RESPONSE_BAR: ChartProvider<string, number> = {
         height: 250,
         series: [
+            { data: { x: field('date'), y: field('countUnavailableServer') }, name: 'N/A', color: '#495D63' },
             { data: { x: field('date'), y: field('countSucces') }, name: '2xx', color: '#33cc33' },
             { data: { x: field('date'), y: field('countErrorClient') }, name: '4xx', color: '#ffa31a' },
             { data: { x: field('date'), y: field('countErrorServer') }, name: '5xx', color: '#ff0000' }
@@ -190,6 +249,21 @@ export class Constants {
         }
     }
 
+    static readonly REPARTITION_VIEW_AREA: ChartProvider<string, number> = {
+        title: 'Nombre de pages visités',
+        height: 250,
+        series: [
+            { data: { x: field('date'), y: field('count') }, name: 'Nombre de pages visités' }
+        ],
+        options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            }
+        }
+    };
+
     static readonly REPARTITION_MAX_BY_PERIOD_LINE: ChartProvider<string, number> = {
         title: 'Temps de reponse moyen et maximum',
         ytitle: 'Temps (s)',
@@ -212,7 +286,7 @@ export class Constants {
                 width: [4]
             },
             yaxis: {
-                decimalsInFloat: 0
+                decimalsInFloat: 3
             },
             legend: {
                 showForSingleSeries: true
@@ -249,13 +323,67 @@ export class Constants {
         }
     };
 
-    static readonly REPARTITION_REQUEST_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        title: 'Nombre d\'appels',
-        subtitle: 'sur les 7 derniers jours',
+    static readonly REPARTITION_USER_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+        title: 'Utilisateurs',
         height: 150,
-        continue: true,
         series: [
-            { data: { x: o => new Date(o['date']), y: field('count') }, name: 'Nombre d\'appels', color: "#1423dc" }
+            { data: { x: field('date'), y: field('count') }, name: 'Utilisateurs', color: "#FFD400" }
+        ],
+        options: {
+            chart: {
+                id: 'sparkline-3',
+                group: 'sparkline',
+                sparkline: {
+                    enabled: true
+                },
+                toolbar: {
+                    show: false
+                }
+            },
+            xaxis: {
+                labels: {
+                    datetimeUTC: false
+                }
+            },
+            subtitle: {
+                offsetY: 20
+            }
+        }
+    };
+
+    static readonly REPARTITION_VIEW_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+        title: 'Pages visitées',
+        height: 150,
+        series: [
+            { data: { x: field('date'), y: field('count') }, name: 'Pages visités', color: "#DECDF5" }
+        ],
+        options: {
+            chart: {
+                id: 'sparkline-2',
+                group: 'sparkline',
+                sparkline: {
+                    enabled: true
+                },
+                toolbar: {
+                    show: false
+                }
+            },
+            xaxis: {
+                labels: {
+                    datetimeUTC: false
+                }
+            },
+            subtitle: {
+                offsetY: 20
+            }
+        }
+    };
+
+    static readonly REPARTITION_REQUEST_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+        title: 'Appels',
+        height: 150,
+        series: [
+            { data: { x: field('date'), y: field('count') }, name: 'Appels', color: "#1423dc" }
         ],
         options: {
             chart: {
@@ -267,9 +395,6 @@ export class Constants {
                 toolbar: {
                     show: false
                 }
-            },
-            stroke: {
-                curve: 'straight'
             },
             xaxis: {
                 labels: {
@@ -283,12 +408,10 @@ export class Constants {
     };
 
     static readonly REPARTITION_REQUEST_ERROR_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        title: 'Nombre d\'appels en erreur',
-        subtitle: 'sur les 7 derniers jours',
+        title: 'Appels en erreur',
         height: 150,
-        continue: true,
         series: [
-            { data: { x: o => new Date(o['date']), y: field('countErrorServer') }, name: 'Nombre d\'appels en erreur', color: "#ff0000" }
+            { data: { x: field('date'), y: field('countErrorServer') }, name: 'Appels en erreur', color: "#ff0000" }
         ],
         options: {
             chart: {
@@ -300,9 +423,6 @@ export class Constants {
                 toolbar: {
                     show: false
                 }
-            },
-            stroke: {
-                curve: 'straight'
             },
             xaxis: {
                 labels: {
@@ -323,12 +443,10 @@ export class Constants {
     };
 
     static readonly REPARTITION_REQUEST_SLOWEST_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        title: 'Nombre d\'appels superieur à 10 secondes',
-        subtitle: 'sur les 7 derniers jours',
+        title: 'Appels superieur à 10 secondes',
         height: 150,
-        continue: true,
         series: [
-            { data: { x: o => new Date(o['date']), y: field('countSlowest') }, name: 'Nombre d\'appels superieur à 10 secondes', color: "#848383" }
+            { data: { x: field('date'), y: field('countSlowest') }, name: 'Appels superieur à 10 secondes', color: "#848383" }
         ],
         options: {
             chart: {
@@ -340,9 +458,6 @@ export class Constants {
                 toolbar: {
                     show: false
                 }
-            },
-            stroke: {
-                curve: 'straight'
             },
             xaxis: {
                 labels: {
@@ -664,7 +779,7 @@ export class FilterConstants {
             { key: 'status', label: 'Status', type: 'select', row: 3, col: 1, endpoint: "session/rest", query: { 'column.distinct': 'status:status', 'order': 'status.asc' }, op: Operation.eq },
             { key: 'method', label: 'Method', type: 'select', width: 20, row: 1, col: 1, endpoint: "session/rest",  query: { 'column.distinct': 'method:method', 'order': 'method.asc' }, op: Operation.eq },
             { key: 'path', label: 'Path', type: 'input', row: 1, col: 2, op: Operation.like },
-            { key: 'api_name', label: 'Nom API', type: 'select', row: 3, col: 2, endpoint: "session/rest", query: { 'column.distinct': 'api_name', 'api_name.notNull': '', 'order': 'api_name.asc' }, op: Operation.eq  },
+            { key: 'apiName', label: 'Nom API', type: 'select', row: 3, col: 2, endpoint: "session/rest", query: { 'column.distinct': 'api_name', 'api_name.notNull': '', 'order': 'api_name.asc' }, op: Operation.eq  },
             { key: 'user', label: 'Utilisateur', type: 'select', row: 3, col: 3, endpoint: "session/rest", query: { 'column.distinct': 'user', 'user.notNull': '', 'order': 'user.asc' }, op: Operation.eq  }
             // new Filter("err_type", "Exception", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
             // new Filter("address", "adresse", 'input', 50),
@@ -675,17 +790,14 @@ export class FilterConstants {
             // new Filter("protocol", "Protocole", 'select', 50, null,null, [{ protocol: 'HTTPS' }, { protocol: 'HTTP' }]),
         ],
         batch: [
-            { key: 'name', label: 'Nom', type: 'select', row: 2, col: 1, endpoint: 'session/main', query: { 'column.distinct': 'name', 'name.notNull': '', 'type': 'BATCH', 'order': 'name.asc' }, op: Operation.eq  },
-            { key: 'location', label: 'Chemin', type: 'input', row: 1, col: 1, op: Operation.like },
-            { key: 'user', label: 'Utilisateur', type: 'select', row: 2, col: 2, endpoint: 'session/main', query: { 'column.distinct': 'user', 'user.notNull': '',  'type': 'BATCH', 'order': 'user.asc' }, op: Operation.eq  }
+            { key: 'name', label: 'Nom', type: 'select', row: 1, col: 1, width: 20, endpoint: 'session/main', query: { 'column.distinct': 'name', 'name.notNull': '', 'type': 'BATCH', 'order': 'name.asc' }, op: Operation.eq  },
+            { key: 'location', label: 'Chemin', type: 'input', row: 1, col: 2, op: Operation.like },
             // new Filter("err_type", "Exception", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
             // new Filter("os", "OS", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
             //new Filter("re", "RE", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
         ],
         startup: [
-            { key: 'name', label: 'Nom', type: 'select', row: 2, col: 1, endpoint: 'session/main', query: { 'column.distinct': 'name', 'name.notNull': '', 'type': 'STARTUP', 'order': 'name.asc' }, op: Operation.eq  },
-            { key: 'location', label: 'Chemin', type: 'input', row: 1, col: 1, op: Operation.like },
-            { key: 'user', label: 'Utilisateur', type: 'select', row: 2, col: 2, endpoint: 'session/main', query: { 'column.distinct': 'user', 'user.notNull': '', 'type': 'STARTUP', 'order': 'user.asc' }, op: Operation.eq  }
+            { key: 'location', label: 'Chemin', type: 'input', row: 1, col: 1, op: Operation.like }
             // new Filter("err_type", "Exception", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
             // new Filter("os", "OS", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
             //new Filter("re", "RE", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 're', 'order': 're.asc' }),

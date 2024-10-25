@@ -2,7 +2,18 @@ import {Component, inject, OnDestroy, OnInit} from "@angular/core";
 import {DatePipe, Location} from '@angular/common';
 import {ActivatedRoute, Params} from "@angular/router";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {BehaviorSubject, combineLatest, finalize, forkJoin, map, Observable, of, Subscription, switchMap} from "rxjs";
+import {
+    BehaviorSubject,
+    combineLatest,
+    finalize,
+    forkJoin,
+    map,
+    Observable,
+    of,
+    Subscription,
+    switchMap,
+    tap
+} from "rxjs";
 import {Constants, FilterConstants, FilterMap, FilterPreset} from "../../constants";
 import {formatters, mapParams, periodManagement} from "src/app/shared/util";
 import {application, makePeriod} from "src/environments/environment";
@@ -126,16 +137,15 @@ export class StatisticApplicationView implements OnInit, OnDestroy {
 
     onClickRow(event: MouseEvent, row: any) {
         if (event.ctrlKey) {
-            this._router.open(`#/dashboard/server/${row.name}?env=${this.env}&start=${this.start.toISOString()}&end=${this.end.toISOString()}`, '_blank')
+            this._router.open(`#/dashboard/${row.type.toLowerCase()}/${row.name}?env=${this.env}&start=${this.start.toISOString()}&end=${this.end.toISOString()}`, '_blank')
         } else {
-            this._router.navigate(['/dashboard/server', row.name], {
+            this._router.navigate(['/dashboard', row.type.toLowerCase(), row.name], {
                 queryParamsHandling: 'preserve'
             });
         }
     }
 
     APP_REQUEST = (name: string, env: string, start: Date, end: Date, advancedParams: FilterMap) => {
-        let now = new Date();
         let groupedBy = periodManagement(start, end);
         return this._instanceService.getIds(env, end, name).pipe(map(data => {
             let ids = data.map(d => `"${d.id}"`).join(',');
@@ -148,12 +158,16 @@ export class StatisticApplicationView implements OnInit, OnDestroy {
                                 return acc;
                             }, 0);
                             return {
-                                pie: [countByFields(r, combiner, ['countSucces', 'countErrorClient', 'countErrorServer', 'elapsedTimeSlowest', 'elapsedTimeSlow', 'elapsedTimeMedium', 'elapsedTimeFast', 'elapsedTimeFastest'])],
+                                pie: [countByFields(r, combiner, ['countSucces', 'countErrorClient', 'countErrorServer', 'countUnavailableServer', 'elapsedTimeSlowest', 'elapsedTimeSlow', 'elapsedTimeMedium', 'elapsedTimeFast', 'elapsedTimeFastest'])],
                                 bar: r
                             }
                     }))
                 },
-                repartitionRequestByPeriodLine: { observable: this._restSessionService.getRepartitionRequestByPeriod({now: now, advancedParams: advancedParams, ids: ids}) },
+                repartitionRequestByPeriodLine: {
+                    observable: this._restSessionService.getRepartitionRequestByPeriod({start: start, end: end, groupedBy: groupedBy, advancedParams: advancedParams, ids: ids}).pipe(tap(r => {
+                        formatters[groupedBy](r, this._datePipe);
+                    }))
+                },
                 repartitionUser: { observable:
                     this._restSessionService.getRepartitionUserByPeriod({start: start, end: end, groupedBy: groupedBy, advancedParams: advancedParams, ids: ids})
                         .pipe(map(r => {
@@ -191,7 +205,14 @@ export class StatisticApplicationView implements OnInit, OnDestroy {
                         return [res.restSession, res.mainSession].flat().sort((a, b) => b.count - a.count);
                     })) },
                 dependentsTable: { observable: this._restSessionService.getDependents({start: start, end: end, advancedParams: advancedParams, ids: ids}) },
-                exceptionsTable: { observable: this._restSessionService.getExceptions({start: start, end: end, advancedParams: advancedParams, ids: ids})},
+                exceptionsTable: {
+                    observable: this._restSessionService.getExceptions({start: start, end: end, advancedParams: advancedParams, ids: ids}).pipe(map(res => {
+                        return res.slice(0, 5).map((r: {count: number, errorType: string}) => {
+                            const index = r?.errorType.lastIndexOf('.') + 1;
+                            return { count: r.count, label: r?.errorType?.substring(index) };
+                        });
+                    }))
+                },
                 historyTable: { observable: this._instanceService.getServerStartHistory({start: start, end: end, env: env, appName: name})}
             }
         }));
