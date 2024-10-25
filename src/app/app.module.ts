@@ -19,7 +19,6 @@ import {DetailDatabaseView} from "./views/detail/database/detail-database.view";
 import {DetailFtpView} from "./views/detail/ftp/detail-ftp.view";
 import {DetailLdapView} from "./views/detail/ldap/detail-ldap.view";
 import {DetailSmtpView} from "./views/detail/smtp/detail-smtp.view";
-import {TreeView} from "./views/tree/tree.view";
 import {SearchMainView} from "./views/search/main/search-main.view";
 import {DetailSessionMainView} from "./views/detail/session/main/detail-session-main.view";
 import {StatisticApplicationView} from "./views/statistic/application/statistic-application.view";
@@ -29,7 +28,7 @@ import {StatisticDatabaseView} from "./views/statistic/database/statistic-databa
 import {DashboardComponent} from "./views/dashboard/dashboard.component";
 import {EnvRouter} from "./service/router.service";
 import {DurationPipe} from "./shared/pipe/duration.pipe";
-import { NewTreeView } from './views/newtree/newtree.view';
+import { TreeView } from './views/tree/tree.view';
 
 
 registerLocaleData(localeFr, 'fr-FR');
@@ -80,7 +79,7 @@ const routes: Route[] = [
               {
                 path: 'tree',
                 data: { type: 'rest' },
-                component: NewTreeView,
+                component: TreeView,
                 title: `Appel d'API > Arbre d\'Appels`
 
               },
@@ -180,7 +179,7 @@ const routes: Route[] = [
               {
                 path: 'tree',
                 data: { type: 'main' },
-                component: NewTreeView,
+                component: TreeView,
                 title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
                   let detail = `> Arbre d'Appels`;
                   if (route.paramMap.get('type_main') == 'batch') {

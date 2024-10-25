@@ -41,7 +41,7 @@ import {
 import {DashboardComponent} from "./dashboard/dashboard.component";
 import { ProtocolExceptionComponent } from './dashboard/components/protocol-exception-modal/protocol-exception-modal.component';
 import {ServerHistoryTableComponent} from "./statistic/application/history-table/server-history-table.component";
-import { NewTreeView } from './newtree/newtree.view';
+
 
 @NgModule({
   imports: [
@@ -82,7 +82,7 @@ import { NewTreeView } from './newtree/newtree.view';
     DashboardComponent,
     ProtocolExceptionComponent,
     ServerHistoryTableComponent,
-    NewTreeView
+    TreeView
   ]
 })
 export class ViewsModule { }
