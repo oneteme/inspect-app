@@ -54,14 +54,13 @@ export class ArchitectureView implements OnInit, OnDestroy {
                     );
                 }
             },
-            colors: ["#008FFB"],
             plotOptions: {
                 heatmap: {
-                    shadeIntensity: 0,
+                    shadeIntensity: 0.4,
+                    radius: 0,
                     useFillColorAsStroke: true,
                     colorScale: {
-                        min: 0,
-                        max: 1000
+
                     }
                 }
             }
@@ -169,16 +168,18 @@ export class ArchitectureView implements OnInit, OnDestroy {
                 return acc + ServerConfig['REST'].width;
             }
         }, 38);
-        console.log(widthServerSl);
-        let serverSwimlane = tg._graph.insertVertex(tg._parent, null, 'REST', 0, 0, widthServerSl, 100, 'swimlane;fillColor=#66B922;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=bold;fontStyle=3');
+        let serverSwimlane = tg._graph.insertVertex(tg._parent, null, 'REST', 0, 150, widthServerSl, 100, 'swimlane;fillColor=#66B922;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=bold;fontStyle=3');
         //let testServ = tg._graph.insertVertex(serverSwimlane, null, 'TestServer', 50, 25, 100, 50);
-        console.log(serverSwimlane.getGeometry().alternateBounds);
-        let databaseSwimlane = tg._graph.insertVertex(tg._parent, null, 'JDBC', 0, 100, widthServerSl, 100, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontColor=white;fontStyle=3');
+        let databaseSwimlane = tg._graph.insertVertex(tg._parent, null, 'JDBC', 0, 260, widthServerSl, 100, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontColor=white;fontStyle=3');
         //let testDb = tg._graph.insertVertex(DatabaseSwimlane, null, 'TestDb', 50, 25, 100, 50);
-        //tg._graph.insertEdge(tg._parent, null, null, testServ, testDb);
-        let ftpSwimlane = tg._graph.insertVertex(tg._parent, null, 'FTP', widthServerSl, 0, 300, 50, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontColor=white;fontStyle=3');
-        let smtpSwimlane = tg._graph.insertVertex(tg._parent, null, 'SMTP', widthServerSl, 50, 300, 50, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontColor=white;fontStyle=3');
-        let ldapSwimlane = tg._graph.insertVertex(tg._parent, null, 'LDAP', widthServerSl, 100, 300, 50, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontColor=white;fontStyle=3');
+        let ftpSwimlane = tg._graph.insertVertex(tg._parent, null, 'FTP', widthServerSl + 10, 0, 100, 150, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontColor=white;fontStyle=3');
+        let smtpSwimlane = tg._graph.insertVertex(tg._parent, null, 'SMTP', widthServerSl + 120, 0, 100, 150, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontColor=white;fontStyle=3');
+        let ldapSwimlane = tg._graph.insertVertex(tg._parent, null, 'LDAP', widthServerSl + 230, 0, 100, 150, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontColor=white;fontStyle=3');
+
+        tg._graph.insertEdge(tg._parent, null, null, serverSwimlane, databaseSwimlane);
+        tg._graph.insertEdge(tg._parent, null, null, serverSwimlane, ftpSwimlane, "");
+        tg._graph.insertEdge(tg._parent, null, null, serverSwimlane, smtpSwimlane);
+        tg._graph.insertEdge(tg._parent, null, null, serverSwimlane, ldapSwimlane);
 
         let initialX = 38;
         let initialY = 10;
@@ -193,11 +194,14 @@ export class ArchitectureView implements OnInit, OnDestroy {
 
         let servers: {[key: string]: mxCell} = {};
         let databases: {[key: string]: mxCell} = {};
+        let ftp: {[key: string]: mxCell} = {};
+        let smtp: {[key: string]: mxCell} = {};
+        let ldap: {[key: string]: mxCell} = {};
         architectures.forEach(a => {
             servers[a.name] = tg._graph.insertVertex(serverSwimlane, null, null, x, y, width, height, ServerConfig['REST'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
-            a.remoteServers.filter(r => r.type == 'JDBC').forEach(r => {
+            a.remoteServers.forEach(r => {
                 console.log(r)
-                if(!databases[r.name]) {
+                if(r.type == 'JDBC' && !databases[r.name]) {
                     databases[r.name] = tg._graph.insertVertex(databaseSwimlane, null, null, xDb, yDb, widthDb, heightDb, ServerConfig['JDBC'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
                     xDb += widthDb - 50;
                     if(yDb == initialY) {
@@ -206,8 +210,17 @@ export class ArchitectureView implements OnInit, OnDestroy {
                         yDb = initialY;
                     }
                 }
+                if(r.type == 'FTP' && !ftp[r.name]) {
+                    ftp[r.name] = tg._graph.insertVertex(ftpSwimlane, null, null, 0, 0, widthDb, heightDb, ServerConfig['FTP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
+                }
+                if(r.type == 'SMTP' && !smtp[r.name]) {
+                    smtp[r.name] = tg._graph.insertVertex(smtpSwimlane, null, null, 0, 0, widthDb, heightDb, ServerConfig['SMTP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
+                }
+                if(r.type == 'LDAP' && !ldap[r.name]) {
+                    ldap[r.name] = tg._graph.insertVertex(ldapSwimlane, null, null, 0, 0, widthDb, heightDb, ServerConfig['LDAP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
+                }
                 //tg._graph.insertEdge(serverSwimlane, null, null, servers[a.name], databases[r.name]);
-            })
+            });
             x += width - 50;
             if(y == initialY) {
                 y += 50;
@@ -215,7 +228,7 @@ export class ArchitectureView implements OnInit, OnDestroy {
                 y = initialY;
             }
         });
-        console.log(x)
+        console.log(x);
     }
 
     distinct<T, U>(arr: Array<T>, mapper: (o: T) => U): Set<U> {

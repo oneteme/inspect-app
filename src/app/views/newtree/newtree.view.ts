@@ -1015,7 +1015,7 @@ export class TreeGraph {
 
 
   constructor(
-    private graph: mxGraph,
+    private graph: any,
     private parent: any,
     private layout: any) { }
 
@@ -1056,7 +1056,6 @@ export class TreeGraph {
       // Updates the display
       this.graph.getModel().endUpdate();
       this.resizeAndCenter();
-      //this.resizeAndCenter();
     }
   }
 
@@ -1081,9 +1080,9 @@ export class TreeGraph {
 
   setVertexDefaultStyle() {
     let style = this.graph.getStylesheet().getDefaultVertexStyle();
-    /*style[mx.mxConstants.STYLE_VERTICAL_LABEL_POSITION] = "bottom"
+    style[mx.mxConstants.STYLE_VERTICAL_LABEL_POSITION] = "bottom"
     style[mx.mxConstants.STYLE_VERTICAL_ALIGN] = "top"
-    style[mx.mxConstants.STYLE_FONTCOLOR] = '#446299'*/
+    style[mx.mxConstants.STYLE_FONTCOLOR] = '#446299'
 
     style = mx.mxUtils.clone(style);
     style[mx.mxConstants.STYLE_SHAPE] = mx.mxConstants.SHAPE_SWIMLANE;
