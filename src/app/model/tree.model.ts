@@ -35,8 +35,6 @@ export class TreeGraph {
       tg.setVertexDefaultStyle()
       fn(tg);
       graph.setCellsLocked(true);
-      graph.setResizeContainer(true);
-      graph.setEnabled(false);  // Specifies if the graph should allow any interactions.
       graph.panningHandler.useLeftButtonForPanning = true; // Specifies if panning should be active for the left mouse button. 
       graph.panningHandler.ignoreCell = true; // Specifies if panning should be active even if there is a cell under the mousepointer.
       graph.container.style.cursor = 'move'

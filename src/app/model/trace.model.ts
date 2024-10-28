@@ -287,7 +287,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
         switch(field){
             case Label.ELAPSED_LATENSE : return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
             case Label.METHOD_RESOURCE:return getCommand(this.nodeObject?.commands,'SQL '+this.nodeObject.name)// todo: with sql add schema
-            case Label.SIZE_COMPRESSION: return this.nodeObject?.count.toString() || '?';
+            case Label.SIZE_COMPRESSION: return this.nodeObject?.count?.toString() || '?';
             case Label.SCHEME_PROTOCOL: return "JDBC/Basic"
             case Label.STATUS_EXCEPTION: return this.nodeObject.exception&& 'FAIL:'+this.nodeObject.exception?.type || 'OK'
             case Label.USER: return `${this.nodeObject.user || '?'}`;
@@ -353,7 +353,7 @@ export class MailRequestNode implements Node<Label>, Link<Label> {
         switch(field){
             case Label.ELAPSED_LATENSE : return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
             case Label.METHOD_RESOURCE: return  getCommand(this.nodeObject?.commands,"SCRIPT")
-            case Label.SIZE_COMPRESSION: return this.nodeObject?.count.toString() || '?';
+            case Label.SIZE_COMPRESSION: return this.nodeObject?.count?.toString() || '?';
             case Label.SCHEME_PROTOCOL: return "SMTP/Basic"
             case Label.STATUS_EXCEPTION: return this.nodeObject.exception&& 'FAIL:'+this.nodeObject.exception?.type || 'OK'
             case Label.USER: return `${this.nodeObject.user|| '?'}`;
