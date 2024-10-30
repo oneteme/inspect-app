@@ -310,7 +310,7 @@ export class ArchitectureView implements OnInit, OnDestroy {
         console.log(architectures)
         let widthServerSl = architectures.reduce((acc, cur, index) => {
             if(index != architectures.length - 1) {
-                return (acc + ServerConfig['REST'].width) - 40;
+                return (acc + ServerConfig['REST'].width) - 30;
             } else {
                 return acc + ServerConfig['REST'].width;
             }
@@ -354,7 +354,7 @@ export class ArchitectureView implements OnInit, OnDestroy {
         architectures.forEach(a => {
             if(a.type == 'REST') {
                 servers[a.name] = tg._graph.insertVertex(serverSwimlane, null, a.name, x, y, width, height, ServerConfig['REST'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
-                x += width - 40;
+                x += width - 30;
                 if(y == initialY) {
                     y += 50;
                 } else {
@@ -363,7 +363,7 @@ export class ArchitectureView implements OnInit, OnDestroy {
             } else {
 
                 mains[a.name] = tg._graph.insertVertex(launchSwimlane, null, a.name, xMain, yMain, width, height, ServerConfig[a.type].icon + "verticalLabelPosition=bottom;verticalAlign=top");
-                xMain += width - 40;
+                xMain += width - 30;
                 if(yMain == initialY) {
                     yMain += 50;
                 } else {
@@ -373,23 +373,24 @@ export class ArchitectureView implements OnInit, OnDestroy {
             if(a.remoteServers != null) {
                 a.remoteServers.forEach(r => {
                     console.log(r)
-                    if(r.type == 'JDBC' && !databases[r.name]) {
-                        databases[r.name] = tg._graph.insertVertex(databaseSwimlane, null, r.name, xDb, yDb, widthDb, heightDb, ServerConfig['JDBC'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
-                        xDb += widthDb - 40;
+                    let name = r.schema ? r.schema : r.name;
+                    if(r.type == 'JDBC' && !databases[name]) {
+                        databases[name] = tg._graph.insertVertex(databaseSwimlane, null, name, xDb, yDb, widthDb, heightDb, ServerConfig['JDBC'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
+                        xDb += widthDb - 30;
                         if(yDb == initialY) {
                             yDb += 50;
                         } else {
                             yDb = initialY;
                         }
                     }
-                    if(r.type == 'FTP' && !ftp[r.name]) {
-                        ftp[r.name] = tg._graph.insertVertex(ftpSwimlane, null, r.name, 0, 0, widthDb, heightDb, ServerConfig['FTP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
+                    if(r.type == 'FTP' && !ftp[name]) {
+                        ftp[name] = tg._graph.insertVertex(ftpSwimlane, null, name, 0, 0, widthDb, heightDb, ServerConfig['FTP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
                     }
-                    if(r.type == 'SMTP' && !smtp[r.name]) {
-                        smtp[r.name] = tg._graph.insertVertex(smtpSwimlane, null, r.name, 0, 0, widthDb, heightDb, ServerConfig['SMTP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
+                    if(r.type == 'SMTP' && !smtp[name]) {
+                        smtp[name] = tg._graph.insertVertex(smtpSwimlane, null, name, 0, 0, widthDb, heightDb, ServerConfig['SMTP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
                     }
-                    if(r.type == 'LDAP' && !ldap[r.name]) {
-                        ldap[r.name] = tg._graph.insertVertex(ldapSwimlane, null, r.name, 0, 0, widthDb, heightDb, ServerConfig['LDAP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
+                    if(r.type == 'LDAP' && !ldap[name]) {
+                        ldap[name] = tg._graph.insertVertex(ldapSwimlane, null, name, 0, 0, widthDb, heightDb, ServerConfig['LDAP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
                     }
                     //tg._graph.insertEdge(serverSwimlane, null, null, servers[a.name], databases[r.name]);
                 });

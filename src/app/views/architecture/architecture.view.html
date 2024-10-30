@@ -15,14 +15,15 @@
     </form>
 </header-page>
 <div style="display: flex; justify-content: space-between; gap: 1em; margin-bottom: 1em;">
+    <chart class="mat-elevation-z5" style="width: 50%;" type="treemap"
+           [config]="treeMapConfig"
+           [data]="treeMapData || []"
+           [isLoading]="trafficIsloading" />
     <chart class="mat-elevation-z5" style="width: 50%;" type="heatmap"
         [config]="heatMapConfig"
         [data]="heatMapData || []"
         [isLoading]="trafficIsloading" />
-    <chart class="mat-elevation-z5" style="width: 50%;" type="treemap"
-        [config]="treeMapConfig"
-        [data]="treeMapData || []"
-        [isLoading]="trafficIsloading" />
+
 </div>
 <div id="container" class="mat-elevation-z5" style="margin-bottom: 1em">
     <div id="fixed-width-container" >
