@@ -14,12 +14,12 @@
         </button>
     </form>
 </header-page>
-<div class="mat-elevation-z5">
+<div class="mat-elevation-z5" style="margin-bottom: 0.5em">
     <chart type="heatmap"
            [config]="heatMapConfig" [data]="heatMapData || []"/>
 </div>
-<div id="container">
-    <div id="fixed-width-container">
+<div id="container" class="mat-elevation-z5" style="margin-bottom: 1em">
+    <div id="fixed-width-container" >
         <div #graphContainer id="graphContainer"></div>
     </div>
 </div>

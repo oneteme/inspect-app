@@ -6,12 +6,14 @@ import {FilterConstants} from "../constants";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {EnvRouter} from "../../service/router.service";
 import {ActivatedRoute, Params} from "@angular/router";
-import {combineLatest, Subscription} from "rxjs";
+import {combineLatest, forkJoin, map, Subscription} from "rxjs";
 import {application, makePeriod} from "../../../environments/environment";
 import {Location} from "@angular/common";
 import {TreeService} from "../../service/tree.service";
 import { mxCell } from "mxgraph";
-import {ServerConfig, TreeGraph} from "../newtree/newtree.view";
+import {ArchitectureTree} from "./model/architecture.model";
+import mx from "../../../mxgraph";
+import {InstanceService} from "../../service/jquery/instance.service";
 
 @Component({
     templateUrl: './architecture.view.html',
@@ -20,6 +22,7 @@ import {ServerConfig, TreeGraph} from "../newtree/newtree.view";
 export class ArchitectureView implements OnInit, OnDestroy {
     private _restSessionService = inject(RestSessionService);
     private _treeService = inject(TreeService);
+    private _instanceService = inject(InstanceService);
     private _router = inject(EnvRouter);
     private _activatedRoute = inject(ActivatedRoute);
     private _location = inject(Location);
@@ -150,34 +153,46 @@ export class ArchitectureView implements OnInit, OnDestroy {
                 console.log(buildChart(this.heatMapData, { ...this.heatMapConfig, continue: true }, 0))
             }
         });
-        this._treeService.getArchitecture(this.params.start, this.params.end, this.params.env).subscribe({
+        forkJoin({
+            mainSession: this._instanceService.getMainSessionApplication(this.params.start, this.params.end, this.params.env),
+            restSession: this._treeService.getArchitecture(this.params.start, this.params.end, this.params.env)
+        }).pipe(map(res => {
+            res.restSession.push(...res.mainSession.map(m => ({name: m.appName, schema: null, type: m.type, remoteServers: null})));
+            return res.restSession;
+        })).subscribe({
             next: res => {
                 let self = this;
-                TreeGraph.setup(this.graphContainer.nativeElement, tg => {
+                ArchitectureTree.setup(this.graphContainer.nativeElement, tg => {
                     tg.draw(() => self.draw(tg, res))
                 });
             }
-        })
+        });
     }
 
-    draw(tg: TreeGraph, architectures: Architecture[]) {
+    draw(tg: ArchitectureTree, architectures: Architecture[]) {
+        let layout = new mx.mxHierarchicalLayout(tg._graph, mx.mxConstants.DIRECTION_WEST);
+        console.log(architectures)
         let widthServerSl = architectures.reduce((acc, cur, index) => {
             if(index != architectures.length - 1) {
-                return (acc + ServerConfig['REST'].width) - 50;
+                return (acc + ServerConfig['REST'].width) - 40;
             } else {
                 return acc + ServerConfig['REST'].width;
             }
         }, 38);
-        let serverSwimlane = tg._graph.insertVertex(tg._parent, null, 'REST', 0, 150, widthServerSl, 100, 'swimlane;fillColor=#66B922;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=bold;fontStyle=3');
-        //let testServ = tg._graph.insertVertex(serverSwimlane, null, 'TestServer', 50, 25, 100, 50);
-        let databaseSwimlane = tg._graph.insertVertex(tg._parent, null, 'JDBC', 0, 260, widthServerSl, 100, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontColor=white;fontStyle=3');
-        //let testDb = tg._graph.insertVertex(DatabaseSwimlane, null, 'TestDb', 50, 25, 100, 50);
-        let ftpSwimlane = tg._graph.insertVertex(tg._parent, null, 'FTP', widthServerSl + 10, 0, 100, 150, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontColor=white;fontStyle=3');
-        let smtpSwimlane = tg._graph.insertVertex(tg._parent, null, 'SMTP', widthServerSl + 120, 0, 100, 150, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontColor=white;fontStyle=3');
-        let ldapSwimlane = tg._graph.insertVertex(tg._parent, null, 'LDAP', widthServerSl + 230, 0, 100, 150, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontColor=white;fontStyle=3');
+        let launchSwimlane = tg._graph.insertVertex(tg._parent, null, 'Clients', 0, 0, widthServerSl, 110, 'swimlane;fillColor=#66B922;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=bold;fontStyle=3');
 
-        tg._graph.insertEdge(tg._parent, null, null, serverSwimlane, databaseSwimlane);
-        tg._graph.insertEdge(tg._parent, null, null, serverSwimlane, ftpSwimlane, "");
+        let serverSwimlane = tg._graph.insertVertex(tg._parent, 'server', 'Serveurs', 0, 190, widthServerSl, 110, 'swimlane;fillColor=#66B922;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=bold;fontStyle=3');
+        //let testServ = tg._graph.insertVertex(serverSwimlane, null, 'TestServer', 50, 25, 100, 50);
+        let databaseSwimlane = tg._graph.insertVertex(tg._parent, 'database', 'BDD', 0, 400, widthServerSl, 110, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontColor=white;fontStyle=3');
+        //let testDb = tg._graph.insertVertex(DatabaseSwimlane, null, 'TestDb', 50, 25, 100, 50);
+        let ftpSwimlane = tg._graph.insertVertex(tg._parent, null, 'FTP', widthServerSl + 100, 0, 80, 150, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontColor=white;fontStyle=3');
+        let smtpSwimlane = tg._graph.insertVertex(tg._parent, null, 'SMTP', widthServerSl + 100, 190, 80, 150, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontColor=white;fontStyle=3');
+        let ldapSwimlane = tg._graph.insertVertex(tg._parent, null, 'LDAP', widthServerSl + 100, 300, 80, 150, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontColor=white;fontStyle=3');
+
+        tg._graph.insertEdge(tg._parent, null, null, launchSwimlane, serverSwimlane); // 'perimeterSpacing=10;strokeWidth=10;endArrow=block;endSize=2;endFill=1;strokeColor=#66B922;rounded=1;'
+
+
+        tg._graph.insertEdge(tg._parent, null, null, serverSwimlane, ftpSwimlane);
         tg._graph.insertEdge(tg._parent, null, null, serverSwimlane, smtpSwimlane);
         tg._graph.insertEdge(tg._parent, null, null, serverSwimlane, ldapSwimlane);
 
@@ -191,44 +206,73 @@ export class ArchitectureView implements OnInit, OnDestroy {
         let widthDb = ServerConfig['JDBC'].width;
         let xDb = initialX;
         let yDb = initialY;
+        let xMain = initialX;
+        let yMain = initialY;
 
+        let mains: {[key: string]: mxCell} = {};
         let servers: {[key: string]: mxCell} = {};
         let databases: {[key: string]: mxCell} = {};
         let ftp: {[key: string]: mxCell} = {};
         let smtp: {[key: string]: mxCell} = {};
         let ldap: {[key: string]: mxCell} = {};
         architectures.forEach(a => {
-            servers[a.name] = tg._graph.insertVertex(serverSwimlane, null, null, x, y, width, height, ServerConfig['REST'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
-            a.remoteServers.forEach(r => {
-                console.log(r)
-                if(r.type == 'JDBC' && !databases[r.name]) {
-                    databases[r.name] = tg._graph.insertVertex(databaseSwimlane, null, null, xDb, yDb, widthDb, heightDb, ServerConfig['JDBC'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
-                    xDb += widthDb - 50;
-                    if(yDb == initialY) {
-                        yDb += 50;
-                    } else {
-                        yDb = initialY;
-                    }
+            if(a.type == 'REST') {
+                servers[a.name] = tg._graph.insertVertex(serverSwimlane, null, a.name, x, y, width, height, ServerConfig['REST'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
+                x += width - 40;
+                if(y == initialY) {
+                    y += 50;
+                } else {
+                    y = initialY;
                 }
-                if(r.type == 'FTP' && !ftp[r.name]) {
-                    ftp[r.name] = tg._graph.insertVertex(ftpSwimlane, null, null, 0, 0, widthDb, heightDb, ServerConfig['FTP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
-                }
-                if(r.type == 'SMTP' && !smtp[r.name]) {
-                    smtp[r.name] = tg._graph.insertVertex(smtpSwimlane, null, null, 0, 0, widthDb, heightDb, ServerConfig['SMTP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
-                }
-                if(r.type == 'LDAP' && !ldap[r.name]) {
-                    ldap[r.name] = tg._graph.insertVertex(ldapSwimlane, null, null, 0, 0, widthDb, heightDb, ServerConfig['LDAP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
-                }
-                //tg._graph.insertEdge(serverSwimlane, null, null, servers[a.name], databases[r.name]);
-            });
-            x += width - 50;
-            if(y == initialY) {
-                y += 50;
             } else {
-                y = initialY;
+
+                mains[a.name] = tg._graph.insertVertex(launchSwimlane, null, a.name, xMain, yMain, width, height, ServerConfig[a.type].icon + "verticalLabelPosition=bottom;verticalAlign=top");
+                xMain += width - 40;
+                if(yMain == initialY) {
+                    yMain += 50;
+                } else {
+                    yMain = initialY;
+                }
             }
+            if(a.remoteServers != null) {
+                a.remoteServers.forEach(r => {
+                    console.log(r)
+                    if(r.type == 'JDBC' && !databases[r.name]) {
+                        databases[r.name] = tg._graph.insertVertex(databaseSwimlane, null, r.name, xDb, yDb, widthDb, heightDb, ServerConfig['JDBC'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
+                        xDb += widthDb - 40;
+                        if(yDb == initialY) {
+                            yDb += 50;
+                        } else {
+                            yDb = initialY;
+                        }
+                    }
+                    if(r.type == 'FTP' && !ftp[r.name]) {
+                        ftp[r.name] = tg._graph.insertVertex(ftpSwimlane, null, r.name, 0, 0, widthDb, heightDb, ServerConfig['FTP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
+                    }
+                    if(r.type == 'SMTP' && !smtp[r.name]) {
+                        smtp[r.name] = tg._graph.insertVertex(smtpSwimlane, null, r.name, 0, 0, widthDb, heightDb, ServerConfig['SMTP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
+                    }
+                    if(r.type == 'LDAP' && !ldap[r.name]) {
+                        ldap[r.name] = tg._graph.insertVertex(ldapSwimlane, null, r.name, 0, 0, widthDb, heightDb, ServerConfig['LDAP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
+                    }
+                    //tg._graph.insertEdge(serverSwimlane, null, null, servers[a.name], databases[r.name]);
+                });
+            }
+
+
         });
+        layout.execute(tg._parent, [serverSwimlane]);
+        tg._graph.insertEdge(tg._parent, null, null, serverSwimlane, databaseSwimlane);
         console.log(x);
+    }
+
+    setFtpVertex(ftpServers: Architecture[]) {
+        let ftp: {[key: string]: mxCell} = {};
+        ftpServers.forEach(f => {
+            if(f.type == 'FTP' && !ftp[f.name]) {
+
+            }
+        })
     }
 
     distinct<T, U>(arr: Array<T>, mapper: (o: T) => U): Set<U> {
@@ -237,7 +281,6 @@ export class ArchitectureView implements OnInit, OnDestroy {
             return set;
         }, new Set<U>());
     }
-
 }
 
 export class Architecture {
@@ -245,5 +288,17 @@ export class Architecture {
     schema: string;
     type: string;
     remoteServers: Architecture[];
+}
+
+export const ServerConfig = {
+    JDBC: { icon: "shape=image;image=assets/mxgraph/database.drawio.svg;", width: 80, height: 30 },
+    REST: { icon: "shape=image;image=assets/mxgraph/microservice.drawio.svg;", width: 80, height: 30 },
+    SMTP: { icon: "shape=image;image=assets/mxgraph/smtp.drawio.svg;", width: 80, height: 30 },
+    FTP: { icon: "shape=image;image=assets/mxgraph/ftp.drawio.svg;", width: 80, height: 30 },
+    LDAP: { icon: "shape=image;image=assets/mxgraph/ldap.drawio.svg;", width: 80, height: 30 },
+    VIEW: { icon: "shape=image;image=assets/mxgraph/view.drawio.svg;", width: 80, height: 30 },
+    BATCH: { icon: "shape=image;image=assets/mxgraph/batch.drawio.svg;", width: 80, height: 30 },
+    LINK: { icon: "shape=image;image=assets/mxgraph/parent.drawio.svg;", width: 30, height: 30 },
+    GHOST: { icon: "shape=image;image=assets/mxgraph/ghost.drawio.svg;", width: 30, height: 30 }
 }
 

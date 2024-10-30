@@ -78,4 +78,18 @@ export class InstanceService {
             'view': `select(collector,start,rank.over(partition(environement,app_name).order(start.asc)):rk).filter(type.eq(CLIENT).and(environement.eq(${filters.env})).and(start.ge(${filters.start.toISOString()})).and(start.lt(${filters.end.toISOString()}))):view1`,
             'view1.rk': '1', 'order': 'view1.start.desc' });
     }
+
+    getMainSessionApplication(start: Date, end: Date, env: string): Observable<{appName: string, type: string}[]> {
+        let args = {
+            'column.distinct': 'app_name:appName,main_session.type',
+            'id': 'main_session.instance_env',
+            'main_session.start.ge': start.toISOString(),
+            'main_session.start.lt': end.toISOString(),
+            'main_session.type.ne': 'STARTUP',
+            'appName.notNull': '',
+            'environement': env,
+            'order': 'app_name.asc'
+        }
+        return this.getInstance(args);
+    }
 }
