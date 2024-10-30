@@ -32,6 +32,7 @@ import {DurationPipe} from "./shared/pipe/duration.pipe";
 import {StatisticClientView} from "./views/statistic/view/statistic-client.view";
 import {ArchitectureView} from "./views/architecture/architecture.view";
 import { NewTreeView } from './views/newtree/newtree.view';
+import { NumberFormatterPipe } from './shared/pipe/number.pipe';
 
 
 registerLocaleData(localeFr, 'fr-FR');
@@ -282,7 +283,8 @@ const routes: Route[] = [
     DecimalPipe,
     DurationPipe,
     EnvRouter,
-    { provide: LOCALE_ID, useValue: 'fr-FR' }
+    { provide: LOCALE_ID, useValue: 'fr-FR' },
+    NumberFormatterPipe
   ],
   bootstrap: [AppComponent]
 })
