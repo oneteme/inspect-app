@@ -121,4 +121,23 @@ export class MainSessionService {
             'order': 'count.desc'
         });
     }
+
+    getMainSessionArchitectureForHeatMap(filters: {start: Date, end: Date, env: string}): Observable<{count: number, origin: string, target: string}[]> {
+        return this.getMainSession({
+            'column': 'rest_request.count:count,instance.app_name:origin,instance_join.app_name:target',
+            'instance.id': 'instance_env',
+            'id': 'rest_request.parent',
+            'rest_request.remote': 'rest_session_join.id',
+            'rest_session_join.instance_env': 'instance_join.id',
+            'view': 'rest_session:rest_session_join,instance:instance_join',
+            'type': 'VIEW',
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'rest_session_join.start.ge': filters.start.toISOString(),
+            'rest_session_join.start.lt': filters.end.toISOString(),
+            'instance.environement': filters.env,
+            'instance_join.environement': filters.env,
+            'order': 'origin.asc,target.asc'
+        });
+    }
 }

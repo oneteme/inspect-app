@@ -1,6 +1,6 @@
 <header-page titleIcon="dashboard" ui-title="Architecture">
     <form [formGroup]="serverFilterForm" class="header-filter md-2">
-        <mat-form-field appearance="outline"  class="no-subscript">
+        <mat-form-field appearance="outline" class="no-subscript">
             <mat-label>Période</mat-label>
             <mat-date-range-input [formGroup]="serverFilterForm.controls.dateRangePicker" [rangePicker]="picker">
                 <input matStartDate formControlName="start" placeholder="Start date">
@@ -14,13 +14,18 @@
         </button>
     </form>
 </header-page>
-<div class="mat-elevation-z5" style="margin-bottom: 0.5em">
-    <chart type="heatmap"
-           [config]="heatMapConfig" [data]="heatMapData || []"/>
+<div style="display: flex; justify-content: space-between; gap: 1em; margin-bottom: 1em;">
+    <chart class="mat-elevation-z5" style="width: 50%;" type="heatmap"
+        [config]="heatMapConfig"
+        [data]="heatMapData || []"
+        [isLoading]="trafficIsloading" />
+    <chart class="mat-elevation-z5" style="width: 50%;" type="treemap"
+        [config]="treeMapConfig"
+        [data]="treeMapData || []"
+        [isLoading]="trafficIsloading" />
 </div>
 <div id="container" class="mat-elevation-z5" style="margin-bottom: 1em">
     <div id="fixed-width-container" >
         <div #graphContainer id="graphContainer"></div>
     </div>
 </div>
-
