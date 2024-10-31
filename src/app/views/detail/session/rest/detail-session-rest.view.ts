@@ -138,12 +138,15 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     groupQueriesBySchema() {
         if (this.session.databaseRequests) {
             this.queryBySchema = this.session.databaseRequests.reduce((acc: any, item) => {
-                if (!acc[item.name]) {
-                    acc[item.name] = []
+                if(item.name) {
+                    if (!acc[item.name]) {
+                        acc[item.name] = []
+                    }
+                    acc[item.name].push(item);
                 }
-                acc[item.name].push(item);
                 return acc;
             }, []);
+            console.log(this.queryBySchema)
         }
     }
 

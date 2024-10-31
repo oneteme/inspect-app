@@ -27,23 +27,25 @@ import {StatisticApplicationView} from "./statistic/application/statistic-applic
 import {StatisticUserView} from "./statistic/user/statistic-user.view";
 import {TreeView} from "./tree/tree.view";
 import {
-  StatisticDependentsTableComponent
+    StatisticDependentsTableComponent
 } from "./statistic/_component/dependents-table/statistic-dependents-table.component";
 import {
-  StatisticDependenciesTableComponent
+    StatisticDependenciesTableComponent
 } from "./statistic/_component/dependencies-table/statistic-dependencies-table.component";
 import {
-  StatisticExceptionTableComponent
+    StatisticExceptionTableComponent
 } from "./statistic/_component/exception-table/statistic-exception-table.component";
 import {
-  StatisticUserSessionTableComponent
+    StatisticUserSessionTableComponent
 } from "./statistic/user/_component/session-table/statistic-user-session-table.component";
 import {DashboardComponent} from "./dashboard/dashboard.component";
-import { ProtocolExceptionComponent } from './dashboard/components/protocol-exception-modal/protocol-exception-modal.component';
+import {
+    ProtocolExceptionComponent
+} from './dashboard/components/protocol-exception-modal/protocol-exception-modal.component';
 import {ServerHistoryTableComponent} from "./statistic/application/history-table/server-history-table.component";
 import {StatisticClientView} from "./statistic/view/statistic-client.view";
 import {ArchitectureView} from "./architecture/architecture.view";
-import { NewTreeView } from './newtree/newtree.view';
+
 
 @NgModule({
   imports: [
@@ -76,7 +78,6 @@ import { NewTreeView } from './newtree/newtree.view';
     DetailSessionComponent,
     StatisticApplicationView,
     StatisticUserView,
-    TreeView,
     StatisticDependentsTableComponent,
     StatisticDependenciesTableComponent,
     StatisticExceptionTableComponent,
@@ -86,7 +87,7 @@ import { NewTreeView } from './newtree/newtree.view';
     ProtocolExceptionComponent,
     ServerHistoryTableComponent,
     ArchitectureView,
-    NewTreeView
+    TreeView
   ]
 })
 export class ViewsModule { }
