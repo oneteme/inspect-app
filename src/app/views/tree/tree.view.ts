@@ -39,9 +39,9 @@ export class TreeView implements OnDestroy {
   LabelIsLoaded: { [key: string]: boolean } = { "METHOD_RESOURCE": false, "STATUS_EXCEPTION": false, "SIZE_COMPRESSION": false }
   @ViewChild('graphContainer') graphContainer: ElementRef;
   @ViewChild('outlineContainer') outlineContainer: ElementRef;
-  serverFilterForm = new FormGroup({
-    nodeView: new FormControl("SERVER_IDENTITY"),
-    linkView: new FormControl("ELAPSED_LATENSE"),
+  ViewForm = new FormGroup({
+    nodeView: new FormControl(),
+    linkView: new FormControl(),
   });
 
   ViewEvent: { [key: string]: (lbl: Label) => void } =
@@ -50,10 +50,10 @@ export class TreeView implements OnDestroy {
       "OS_RE": (lbl: Label) => this.viewByServerLbl(lbl),
       "IP_PORT": (lbl: Label) => this.viewByServerLbl(lbl),
       "ELAPSED_LATENSE": (lbl: Label) => this.viewByLinklbl(lbl),
-      "METHOD_RESOURCE": (lbl: Label) => this.viewMethodResource(),
-      "SIZE_COMPRESSION": (lbl: Label) => this.viewSizeCompression(),
+      "METHOD_RESOURCE": () => this.viewMethodResource(),
+      "SIZE_COMPRESSION": () => this.viewSizeCompression(),
       "SCHEME_PROTOCOL": (lbl: Label) => this.viewByLinklbl(lbl),
-      "STATUS_EXCEPTION": (lbl: Label) => this.viewStatusException(),
+      "STATUS_EXCEPTION": () => this.viewStatusException(),
       "USER": (lbl: Label) => this.viewByLinklbl(lbl),
     }
 
@@ -68,18 +68,29 @@ export class TreeView implements OnDestroy {
       next: ([params, data, queryParams]) => {
         this.id = params['id_session'];
         this.env = queryParams.env || application.default_env;
+        this.serverLbl = Label[queryParams.server_lbl] || Label.SERVER_IDENTITY
+        this.linkLbl = Label[queryParams.link_lbl] || Label.ELAPSED_LATENSE
+        this.patchDataView(this.serverLbl,this.linkLbl)
         this.data = data
-        this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}`)
-        this.getTree(this.data, this.serverLbl = Label.SERVER_IDENTITY, this.linkLbl = Label.ELAPSED_LATENSE);
-
-        this.serverFilterForm.controls.nodeView.valueChanges.subscribe(v => {
+        this.getTree(this.data, this.serverLbl, this.linkLbl);
+        this.ViewForm.controls.nodeView.valueChanges.subscribe(v => {
+          this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&server_lbl=${v}&link_lbl=${this.linkLbl}`);
           this.ViewEvent[v](Label[v])
         })
-        this.serverFilterForm.controls.linkView.valueChanges.subscribe(v => {
+        this.ViewForm.controls.linkView.valueChanges.subscribe(v => {
+          this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&server_lbl=${this.serverLbl}&link_lbl=${v}`);
           this.ViewEvent[v](Label[v])
         })
+        this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&server_lbl=${this.serverLbl}&link_lbl=${this.linkLbl}`);
       },
     })
+  }
+
+  patchDataView(node: Label, link: Label){
+    this.ViewForm.patchValue({
+      nodeView: node,
+      linkView: link
+    },{ emitEvent: false })
   }
 
   getTree(data: any, serverlbl: Label, linklbl: Label) {
@@ -132,12 +143,12 @@ export class TreeView implements OnDestroy {
 
     //restRequests 
     if (server.restRequests) {
-      let res = this.groupBy(server.restRequests, v => v.remoteTrace ? v.remoteTrace.appName : v.host,RestRequestNode) //instance
+      let res = this.groupBy(server.restRequests, v => v.remoteTrace ? v.remoteTrace.appName : v.host, RestRequestNode) //instance
       Object.entries(res).forEach((v: any[]) => {//[key,[req1,req2,..]]
         if (v[1].length > 1) {
           b = this.draw(treeGraph, this.mergeRestRequests(v[0], v[1]), serverlbl, linklbl);
-          label ={ linkLbl: linklbl, nodes: v[1]};
-          linkStyle = LinkConfig[this.checkSome<RestRequestNode>(v[1], v => { return v.nodeObject.status > 400 || v.nodeObject.status == 0  }) ? 'FAILURE' : 'SUCCES'] + "strokeWidth=1.5;"
+          label = { linkLbl: linklbl, nodes: v[1] };
+          linkStyle = LinkConfig[this.checkSome<RestRequestNode>(v[1], v => { return v.nodeObject.status > 400 || v.nodeObject.status == 0 }) ? 'FAILURE' : 'SUCCES'] + "strokeWidth=1.5;"
         }
         else {
           let restRequestNode = v[1][0];
@@ -157,7 +168,7 @@ export class TreeView implements OnDestroy {
         let jdbcRequestNode = v[1][0];
         b = treeGraph.insertServer(jdbcRequestNode.formatNode(serverlbl), "JDBC"); // demon server
         if (v[1].length > 1) {
-          label = { linkLbl: linklbl, nodes: v[1]};
+          label = { linkLbl: linklbl, nodes: v[1] };
           linkStyle = LinkConfig[this.checkSome<JdbcRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'FAILURE' : 'SUCCES'] + "strokeWidth=1.5;"
         } else {
           label = jdbcRequestNode.formatLink(linklbl);
@@ -174,8 +185,8 @@ export class TreeView implements OnDestroy {
         let ftpRequestNode = v[1][0];
         b = treeGraph.insertServer(ftpRequestNode.formatNode(serverlbl), "FTP"); // demon server
         if (v[1].length > 1) {
-          label = { linkLbl: linklbl, nodes: v[1]};
-          linkStyle = LinkConfig[this.checkSome<FtpRequestNode>(v[1], v => { return !v.nodeObject.status  }) ? 'FAILURE' : 'SUCCES'] + "strokeWidth=1.5;"
+          label = { linkLbl: linklbl, nodes: v[1] };
+          linkStyle = LinkConfig[this.checkSome<FtpRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'FAILURE' : 'SUCCES'] + "strokeWidth=1.5;"
         } else {
           label = ftpRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[ftpRequestNode.getLinkStyle()];
@@ -191,11 +202,11 @@ export class TreeView implements OnDestroy {
         let mailRequestNode = v[1][0];
         b = treeGraph.insertServer(mailRequestNode.formatNode(serverlbl), "SMTP"); // demon server
         if (v[1].length > 1) {
-          label = { linkLbl: linklbl, nodes: v[1]};
-          linkStyle = LinkConfig[this.checkSome<MailRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'FAILURE' : 'SUCCES' ] + "strokeWidth=1.5;"
+          label = { linkLbl: linklbl, nodes: v[1] };
+          linkStyle = LinkConfig[this.checkSome<MailRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'FAILURE' : 'SUCCES'] + "strokeWidth=1.5;"
         } else {
           label = mailRequestNode.formatLink(linklbl);
-          linkStyle =LinkConfig[mailRequestNode.getLinkStyle()];
+          linkStyle = LinkConfig[mailRequestNode.getLinkStyle()];
         }
         treeGraph.insertLink(label, a, b, linkStyle);
       })
@@ -208,7 +219,7 @@ export class TreeView implements OnDestroy {
         let ldapRequestNode = v[1][0];
         b = treeGraph.insertServer(ldapRequestNode.formatNode(serverlbl), "LDAP"); // demon server
         if (v[1].length > 1) {
-          label = { linkLbl: linklbl, nodes: v[1]};
+          label = { linkLbl: linklbl, nodes: v[1] };
           linkStyle = LinkConfig[this.checkSome<MailRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'FAILURE' : 'SUCCES'] + "strokeWidth=1.5;"
         } else {
           label = ldapRequestNode.formatLink(linklbl);
@@ -230,7 +241,7 @@ export class TreeView implements OnDestroy {
       if (!acc[id]) {
         acc[id] = [];
       }
-      type ? acc[id].push(new type(item)): acc[id].push(item);
+      type ? acc[id].push(new type(item)) : acc[id].push(item);
       return acc;
     }, {})
   }
