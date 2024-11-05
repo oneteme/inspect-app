@@ -2,27 +2,23 @@ import {mxCell, mxGraph, mxHierarchicalLayout, mxUtils, mxConstants} from "mxgra
 import mx from '../../../../mxgraph';
 
 export class ArchitectureTree {
+    _graph: mxGraph;
+    _parent: mxCell;
+    _layout: mxHierarchicalLayout;
+
     constructor(
         private graph: mxGraph,
         private parent: mxCell,
-        private layout: mxHierarchicalLayout) { }
-
-    public get _graph() {
-        return this.graph;
+        private layout: mxHierarchicalLayout) {
+        this._graph = graph;
+        this._parent = parent;
+        this._layout = layout;
     }
 
-    public get _parent() {
-        return this.parent
-    }
-
-    public get _layout() {
-        return this.layout;
-    }
-
-    static setup(elem: HTMLElement, fn: (tg: ArchitectureTree) => void) {
+    static setup(elem: HTMLElement) {
         let graph = new mx.mxGraph(elem); // create a graph inside a DOM node with an id of graph
-
-
+        graph.setCellsLocked(true);
+        graph.setCellsSelectable(false);
         graph.setTooltips(true);
         graph.getLabel = function(cell: any)
         {
@@ -38,7 +34,7 @@ export class ArchitectureTree {
                 var max = geometry.width / (fontSize * 0.625);
                 if (max < label.length)
                 {
-                    return label.substring(0, max) + '...';
+                    return label.substring(0, max / 2) + '...' + label.substring(label.length - max / 2);
                 }
             }
 
@@ -47,47 +43,63 @@ export class ArchitectureTree {
         let parent = graph.getDefaultParent(); // Returns defaultParent or mxGraphView.currentRoot or the first child child
         let layout = new mx.mxHierarchicalLayout(graph); //Constructs a new hierarchical layout algorithm.
         let tg = new ArchitectureTree(graph, parent, layout);
-        tg.setVertexDefaultStyle()
-        fn(tg);
+        tg.setVertexDefaultStyle();
+
+        return tg;
     }
 
     draw(fn: () => void) {
-        this.graph.getModel().beginUpdate();
+        this._graph.getModel().beginUpdate();
         try {
             fn();
         }
         finally {
             // Updates the display
-            this.graph.getModel().endUpdate();
+            this._graph.getModel().endUpdate();
             this.resizeAndCenter();
         }
     }
 
     setVertexDefaultStyle() {
-        let style = this.graph.getStylesheet().getDefaultVertexStyle();
+        let style = this._graph.getStylesheet().getDefaultVertexStyle();
         style = mx.mxUtils.clone(style);
         style[mx.mxConstants.STYLE_SHAPE] = mx.mxConstants.SHAPE_SWIMLANE;
         style[mx.mxConstants.STYLE_SWIMLANE_LINE] = 0;
-        this.graph.getStylesheet().putCellStyle("swimlane", style);
+        this._graph.getStylesheet().putCellStyle("swimlane", style);
     }
 
+    clearCells() {
+        const model = this._graph.getModel();
+        this._graph.getModel().beginUpdate();
+        try {
+            const cells =  this._graph.getModel().cells;
+            for (const cellId in cells) {
+                if (cells.hasOwnProperty(cellId) && cells[cellId].getGeometry() && cellId != '1') {
+                    this._graph.getModel().remove(cells[cellId])
+                }
+            }
+        }
+        finally {
+            this._graph.getModel().endUpdate()
+        }
+    }
 
     private resizeAndCenter() {
         let availableWidth = document.getElementById("fixed-width-container")?.offsetWidth;
         let availableHeight = document.getElementById("fixed-width-container")?.offsetHeight;
-        this.graph.doResizeContainer(availableWidth, availableHeight);
-        this.graph.fit()
+        this._graph.doResizeContainer(availableWidth, availableHeight);
+        this._graph.fit()
         let margin = 10;
         let max = 3;
-        let bounds = this.graph.getGraphBounds();
-        let cw = this.graph.container.clientWidth - margin;
-        let ch = this.graph.container.clientHeight - margin;
-        let w = bounds.width / this.graph.view.scale;
-        let h = bounds.height / this.graph.view.scale;
+        let bounds = this._graph.getGraphBounds();
+        let cw = this._graph.container.clientWidth - margin;
+        let ch = this._graph.container.clientHeight - margin;
+        let w = bounds.width / this._graph.view.scale;
+        let h = bounds.height / this._graph.view.scale;
         let s = Math.min(max, Math.min(cw / w, ch / h));
 
-        this.graph.view.scaleAndTranslate(s,
-            (margin + cw - w * s) / (2 * s) - bounds.x / this.graph.view.scale,
-            (margin + ch - h * s) / (2 * s) - bounds.y / this.graph.view.scale);
+        this._graph.view.scaleAndTranslate(s,
+            (margin + cw - w * s) / (2 * s) - bounds.x / this._graph.view.scale,
+            (margin + ch - h * s) / (2 * s) - bounds.y / this._graph.view.scale);
     }
 }

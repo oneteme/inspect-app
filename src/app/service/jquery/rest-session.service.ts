@@ -206,9 +206,9 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getArchitectureForHeatMap(filters: {start: Date, end: Date, env: string}): Observable<{count: number, origin: string, target: string}[]> {
+    getArchitectureForHeatMap(filters: {start: Date, end: Date, env: string}): Observable<{count: number, sum: number, origin: string, target: string}[]> {
         return this.getRestSession({
-            'column': 'rest_request.count:count,instance.app_name:origin,instance_join.app_name:target',
+            'column': 'rest_request.count:count,rest_request.size_out.sum:sum,instance.app_name:origin,instance_join.app_name:target',
             'instance.id': 'instance_env',
             'id': 'rest_request.parent',
             'rest_request.remote': 'rest_session_join.id',

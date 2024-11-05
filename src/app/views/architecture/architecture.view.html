@@ -1,4 +1,4 @@
-<header-page titleIcon="dashboard" ui-title="Architecture">
+<header-page titleIcon="lan" ui-title="Architecture">
     <form [formGroup]="serverFilterForm" class="header-filter md-2">
         <mat-form-field appearance="outline" class="no-subscript">
             <mat-label>Période</mat-label>
@@ -15,18 +15,36 @@
     </form>
 </header-page>
 <div style="display: flex; justify-content: space-between; gap: 1em; margin-bottom: 1em;">
-    <chart class="mat-elevation-z5" style="width: 50%;" type="treemap"
-           [config]="treeMapConfig"
-           [data]="treeMapData || []"
-           [isLoading]="trafficIsloading" />
-    <chart class="mat-elevation-z5" style="width: 50%;" type="heatmap"
-        [config]="heatMapConfig"
-        [data]="heatMapData || []"
-        [isLoading]="trafficIsloading" />
+    <div style="width: 50%; display: flex; flex-direction: column;" class="mat-elevation-z5">
+        <div style="display: flex; justify-content: space-between;">
+            <span class="dashboard_component_title">Trafic d'Appel Global</span>
+            <div style="margin-right: 10px">
+                Nombre d'Appel
+                <mat-slide-toggle [formControl]="treeMapControl">Volume</mat-slide-toggle>
+            </div>
+        </div>
+        <chart type="treemap"
+               [config]="treeMapConfig"
+               [data]="treeMapData || []"
+               [isLoading]="trafficIsloading" />
+    </div>
+    <div style="width: 50%; display: flex; flex-direction: column;" class="mat-elevation-z5">
+        <div style="display: flex; justify-content: space-between;">
+            <span class="dashboard_component_title">Trafic d'Appel</span>
+            <div style="margin-right: 10px">
+                Nombre d'Appel
+                <mat-slide-toggle [formControl]="heatMapControl">Volume</mat-slide-toggle>
+            </div>
+        </div>
+        <chart type="heatmap"
+            [config]="heatMapConfig"
+            [data]="heatMapData || []"
+            [isLoading]="trafficIsloading" />
+    </div>
 
 </div>
 <div id="container" class="mat-elevation-z5" style="margin-bottom: 1em">
-    <div id="fixed-width-container" >
+    <div id="fixed-width-container">
         <div #graphContainer id="graphContainer"></div>
     </div>
 </div>
