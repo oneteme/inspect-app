@@ -174,6 +174,7 @@ export class TreeGraph {
         style[mx.mxConstants.STYLE_VERTICAL_LABEL_POSITION] = "bottom"
         style[mx.mxConstants.STYLE_VERTICAL_ALIGN] = "top"
         style[mx.mxConstants.STYLE_FONTCOLOR] = '#446299'
+        style[mx.mxConstants.STYLE_FONTSIZE] = 8
         //style[mx.mxConstants.STYLE_IMAGE_BORDER] = "black";
     }
 
@@ -181,11 +182,12 @@ export class TreeGraph {
         let style = this.graph.getStylesheet().getDefaultEdgeStyle();
         style[mx.mxConstants.STYLE_LABEL_BACKGROUNDCOLOR] = 'white';
         style[mx.mxConstants.EDGE_SELECTION_STROKEWIDTH] = 10;
-        style[mx.mxConstants.STYLE_STROKEWIDTH] = 1.5;
+        style[mx.mxConstants.STYLE_STROKEWIDTH] = 0.5;
         style[mx.mxConstants.STYLE_ENDARROW] = "none";
         style[mx.mxConstants.STYLE_ENDSIZE] = 2;
         style[mx.mxConstants.STYLE_ENDFILL] = 1;
         style[mx.mxConstants.STYLE_SOURCE_PERIMETER_SPACING] = 12;
+        style[mx.mxConstants.STYLE_FONTSIZE] = 8
     }
 
     clearCells() {

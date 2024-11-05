@@ -106,16 +106,16 @@ export class TreeView implements OnDestroy {
     }
   }
 
-  mergeRestRequests(name: string, array: RestRequest[]): ServerRestSession {
-    let remote = array[0].remoteTrace ? array[0].remoteTrace : { appName: name };
+  mergeRestRequests(name: string, array: RestRequestNode[]): ServerRestSession {
+    let remote = array[0].nodeObject.remoteTrace ? array[0].nodeObject.remoteTrace : { appName: name };
     let acc: any = { ...remote, 'restRequests': [], 'databaseRequests': [], 'ftpRequests': [], 'mailRequests': [], 'ldapRequests': [] };
     array.forEach(o => {
-      if (o.remoteTrace) {
-        o.remoteTrace.restRequests && acc.restRequests.push(...o.remoteTrace.restRequests)
-        o.remoteTrace.databaseRequests && acc.databaseRequests.push(...o.remoteTrace.databaseRequests)
-        o.remoteTrace.ftpRequests && acc.ftpRequests.push(...o.remoteTrace.ftpRequests)
-        o.remoteTrace.mailRequests && acc.mailRequests.push(...o.remoteTrace.mailRequests)
-        o.remoteTrace.ldapRequests && acc.ldapRequests.push(...o.remoteTrace.ldapRequests)
+      if (o.nodeObject.remoteTrace) {
+        o.nodeObject.remoteTrace.restRequests && acc.restRequests.push(...o.nodeObject.remoteTrace.restRequests)
+        o.nodeObject.remoteTrace.databaseRequests && acc.databaseRequests.push(...o.nodeObject.remoteTrace.databaseRequests)
+        o.nodeObject.remoteTrace.ftpRequests && acc.ftpRequests.push(...o.nodeObject.remoteTrace.ftpRequests)
+        o.nodeObject.remoteTrace.mailRequests && acc.mailRequests.push(...o.nodeObject.remoteTrace.mailRequests)
+        o.nodeObject.remoteTrace.ldapRequests && acc.ldapRequests.push(...o.nodeObject.remoteTrace.ldapRequests)
       }
     })
     return <ServerRestSession>acc;
@@ -129,26 +129,24 @@ export class TreeView implements OnDestroy {
     let label: any = '';
     let linkStyle = '';
     let b;
-    let firstValue;
 
     //restRequests 
     if (server.restRequests) {
-      let res = this.groupBy(server.restRequests, v => v.remoteTrace ? v.remoteTrace.appName : v.host) //instance
+      let res = this.groupBy(server.restRequests, v => v.remoteTrace ? v.remoteTrace.appName : v.host,RestRequestNode) //instance
       Object.entries(res).forEach((v: any[]) => {//[key,[req1,req2,..]]
         if (v[1].length > 1) {
           b = this.draw(treeGraph, this.mergeRestRequests(v[0], v[1]), serverlbl, linklbl);
-          firstValue = new RestRequestNode(v[1][0]).formatLink(linklbl)
-          label = this.checkSome(v[1], v => (new RestRequestNode(<RestRequest>v)).formatLink(linklbl) != firstValue) ? `? x ${v[1].length}` : `${firstValue} x ${v[1].length}`
-          linkStyle = this.checkSome(v[1], v => { return (<RestRequest>v).status > 400 || (<RestRequest>v).status == 0  }) ? 'FAILURE' : 'SUCCES'
+          label ={ linkLbl: linklbl, nodes: v[1]};
+          linkStyle = LinkConfig[this.checkSome<RestRequestNode>(v[1], v => { return v.nodeObject.status > 400 || v.nodeObject.status == 0  }) ? 'FAILURE' : 'SUCCES'] + "strokeWidth=1.5;"
         }
         else {
-          let restRequestNode = new RestRequestNode(v[1][0]);
-          b = this.draw(treeGraph, restRequestNode.nodeObject.remoteTrace ? restRequestNode.nodeObject.remoteTrace : <ServerRestSession>{ appName: v[1][0].host }, serverlbl, linklbl)
+          let restRequestNode = v[1][0];
+          b = this.draw(treeGraph, restRequestNode.nodeObject.remoteTrace ? restRequestNode.nodeObject.remoteTrace : <ServerRestSession>{ appName: v[1][0].nodeObject.host }, serverlbl, linklbl)
           label = restRequestNode.formatLink(linklbl);
-          linkStyle = restRequestNode.getLinkStyle();
+          linkStyle = LinkConfig[restRequestNode.getLinkStyle()];
         }
 
-        treeGraph.insertLink(label, a, b, LinkConfig[linkStyle]);
+        treeGraph.insertLink(label, a, b, linkStyle);
       })
     }
 
@@ -160,7 +158,7 @@ export class TreeView implements OnDestroy {
         b = treeGraph.insertServer(jdbcRequestNode.formatNode(serverlbl), "JDBC"); // demon server
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1]};
-          linkStyle = LinkConfig[this.checkSome<JdbcRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'FAILURE' : 'SUCCES'] + "strokeWidth=3;"
+          linkStyle = LinkConfig[this.checkSome<JdbcRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'FAILURE' : 'SUCCES'] + "strokeWidth=1.5;"
         } else {
           label = jdbcRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[jdbcRequestNode.getLinkStyle()];
@@ -176,50 +174,47 @@ export class TreeView implements OnDestroy {
         let ftpRequestNode = v[1][0];
         b = treeGraph.insertServer(ftpRequestNode.formatNode(serverlbl), "FTP"); // demon server
         if (v[1].length > 1) {
-          firstValue = new FtpRequestNode(v[1][0]).formatLink(linklbl)
-          label = this.checkSome(v[1], v => (new FtpRequestNode(<FtpRequest>v)).formatLink(linklbl) != firstValue) ? `? x ${v[1].length}` : `${firstValue} x ${v[1].length}`
-          linkStyle = this.checkSome(v[1], v => { return !(<FtpRequest>v).status }) ? 'FAILURE' : 'SUCCES'
+          label = { linkLbl: linklbl, nodes: v[1]};
+          linkStyle = LinkConfig[this.checkSome<FtpRequestNode>(v[1], v => { return !v.nodeObject.status  }) ? 'FAILURE' : 'SUCCES'] + "strokeWidth=1.5;"
         } else {
           label = ftpRequestNode.formatLink(linklbl);
-          linkStyle = ftpRequestNode.getLinkStyle();
+          linkStyle = LinkConfig[ftpRequestNode.getLinkStyle()];
         }
-        treeGraph.insertLink(label, a, b, LinkConfig[linkStyle]);
+        treeGraph.insertLink(label, a, b, linkStyle);
       })
     }
 
     //mailRequests
     if (server.mailRequests) {
-      let res = this.groupBy(server.mailRequests, v => v.host, MailRequestNode)
+      let res = this.groupBy<MailRequest, MailRequestNode>(server.mailRequests, v => v.host, MailRequestNode)
       Object.entries(res).forEach((v: any[]) => {
-        let mailRequestNode = new MailRequestNode(v[1][0]);
+        let mailRequestNode = v[1][0];
         b = treeGraph.insertServer(mailRequestNode.formatNode(serverlbl), "SMTP"); // demon server
         if (v[1].length > 1) {
-          firstValue = new MailRequestNode(v[1][0]).formatLink(linklbl)
-          label = this.checkSome(v[1], v => (new MailRequestNode(<MailRequest>v)).formatLink(linklbl) != firstValue) ? `? x ${v[1].length}` : `${firstValue} x ${v[1].length}`
-          linkStyle = this.checkSome(v[1], v => { return !(<MailRequest>v).status }) ? 'FAILURE' : 'SUCCES'
+          label = { linkLbl: linklbl, nodes: v[1]};
+          linkStyle = LinkConfig[this.checkSome<MailRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'FAILURE' : 'SUCCES' ] + "strokeWidth=1.5;"
         } else {
           label = mailRequestNode.formatLink(linklbl);
-          linkStyle = mailRequestNode.getLinkStyle();
+          linkStyle =LinkConfig[mailRequestNode.getLinkStyle()];
         }
-        treeGraph.insertLink(label, a, b, LinkConfig[linkStyle]);
+        treeGraph.insertLink(label, a, b, linkStyle);
       })
     }
 
     //ldapRequests
     if (server.ldapRequests) {
-      let res = this.groupBy(server.ldapRequests, v => v.host, LdapRequestNode)
+      let res = this.groupBy<NamingRequest, LdapRequestNode>(server.ldapRequests, v => v.host, LdapRequestNode)
       Object.entries(res).forEach((v: any[]) => {
-        let ldapRequestNode = new LdapRequestNode(v[1][0]);
+        let ldapRequestNode = v[1][0];
         b = treeGraph.insertServer(ldapRequestNode.formatNode(serverlbl), "LDAP"); // demon server
         if (v[1].length > 1) {
-          firstValue = new LdapRequestNode(v[1][0]).formatLink(linklbl)
-          label = this.checkSome(v[1], v => (new LdapRequestNode(<NamingRequest>v)).formatLink(linklbl) != firstValue) ? `? x ${v[1].length}` : `${firstValue} x ${v[1].length}`
-          linkStyle = this.checkSome(v[1], v => { return !(<NamingRequest>v).status }) ? 'FAILURE' : 'SUCCES'
+          label = { linkLbl: linklbl, nodes: v[1]};
+          linkStyle = LinkConfig[this.checkSome<MailRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'FAILURE' : 'SUCCES'] + "strokeWidth=1.5;"
         } else {
           label = ldapRequestNode.formatLink(linklbl);
-          linkStyle = ldapRequestNode.getLinkStyle();
+          linkStyle = LinkConfig[ldapRequestNode.getLinkStyle()];
         }
-        treeGraph.insertLink(label, a, b, LinkConfig[linkStyle]);
+        treeGraph.insertLink(label, a, b, linkStyle);
       })
     }
     return a;
