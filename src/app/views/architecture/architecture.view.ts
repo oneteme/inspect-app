@@ -1,4 +1,4 @@
-import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from "@angular/core";
+import {AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from "@angular/core";
 import {ChartProvider, field, XaxisType, YaxisType} from "@oneteme/jquery-core";
 import {RestSessionService} from "../../service/jquery/rest-session.service";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
@@ -19,7 +19,7 @@ import { NumberFormatterPipe } from "src/app/shared/pipe/number.pipe";
     templateUrl: './architecture.view.html',
     styleUrls: ['./architecture.view.scss'],
 })
-export class ArchitectureView implements OnInit, OnDestroy {
+export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
     private _restSessionService = inject(RestSessionService);
     private _mainSessionService = inject(MainSessionService);
     private _treeService = inject(TreeService);
@@ -30,9 +30,8 @@ export class ArchitectureView implements OnInit, OnDestroy {
     private _numberFormatter = inject(NumberFormatterPipe);
 
     rangesColorConfig = [ '#E9E9E9', '#AFB3EF', '#757DF4', '#3A47FA', '#0011FF' ]
-
+    tree: ArchitectureTree;
     treeMapConfig: ChartProvider<XaxisType, YaxisType> = {
-        title: "Trafic d'appel",
         series: [
             {
                 data: { x: field('origin'), y: field('count')},
@@ -41,7 +40,7 @@ export class ArchitectureView implements OnInit, OnDestroy {
 
             }
         ],
-        height: 500,
+        height: 450,
         options: {
             chart: {
                 toolbar: {
@@ -62,7 +61,7 @@ export class ArchitectureView implements OnInit, OnDestroy {
                 markers: {
                     strokeWidth: 1,
                     offsetX: 0,
-                    offsetY: 5
+                    offsetY: 4
                 },
             },
             colors:[
@@ -77,14 +76,13 @@ export class ArchitectureView implements OnInit, OnDestroy {
     };
 
     heatMapConfig: ChartProvider<XaxisType, YaxisType> = {
-        title: "Trafic d'appel",
         series: [
             {
                 data: { x: field('target'), y: field('count') },
                 name: field('origin')
             }
         ],
-        height: 500,
+        height: 450,
         options: {
             chart: {
                 toolbar: {
@@ -108,6 +106,9 @@ export class ArchitectureView implements OnInit, OnDestroy {
                 labels: {
                     rotate: -35,
                     hideOverlappingLabels: false
+                },
+                tooltip: {
+                    enabled: false
                 }
             },
             yaxis: {
@@ -124,7 +125,7 @@ export class ArchitectureView implements OnInit, OnDestroy {
                 markers: {
                     strokeWidth: 1,
                     offsetX: 0,
-                    offsetY: 5
+                    offsetY: 4
                 }
             },
             tooltip: {
@@ -139,6 +140,10 @@ export class ArchitectureView implements OnInit, OnDestroy {
                         `
 
                     );
+                },
+
+                x: {
+                    show: false
                 }
             },
             plotOptions: {
@@ -154,6 +159,7 @@ export class ArchitectureView implements OnInit, OnDestroy {
     };
     trafficIsloading:boolean;
     heatMapData: { count: number, origin: string, target: string }[] = [];
+
     treeMapData: { count: number, origin: string, name: string, color: string }[] = [];
 
     serverFilterForm = new FormGroup({
@@ -162,6 +168,9 @@ export class ArchitectureView implements OnInit, OnDestroy {
             end: new FormControl<Date>(null, Validators.required)
         })
     });
+
+    heatMapControl: FormControl = new FormControl<boolean>(false);
+    treeMapControl: FormControl = new FormControl<boolean>(false);
 
     subscriptions: Subscription[] = [];
     params: Partial<{ env: string, start: Date, end: Date }> = {};
@@ -182,6 +191,51 @@ export class ArchitectureView implements OnInit, OnDestroy {
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}`);
             }
         });
+
+        this.treeMapControl.valueChanges.subscribe({
+            next: res => {
+                let _field = res ? 'sum': 'count';
+                let d  = this.heatMapData.reduce((acc:any,cur:any) => {
+                    let i = acc.findIndex(a => a.origin === cur.origin)
+                    if(i == -1){
+                        acc.push({origin: cur.origin, count: 0})
+                    }else {
+                        acc[i].count += cur[_field];
+                    }
+                    return acc;
+                },[]).sort((a,b)=>(a.count-b.count))
+
+                const treeRanges = this.createRanges(d, 'count');
+                this.treeMapData = d.map(t => {
+                    let r = treeRanges.find(r=> t.count >= r.from && t.count <= r.to)
+                    if(r){
+                        t.name = r.name
+                        t.color = r.color
+                    }
+                    return t
+                });
+            }
+        });
+
+        this.heatMapControl.valueChanges.subscribe({
+            next: res => {
+                let _field = res ? 'sum': 'count';
+                const ranges = this.createRanges(this.heatMapData, _field);
+                let newConfig = this.heatMapConfig;
+                newConfig.options.plotOptions.heatmap.colorScale.ranges = ranges;
+                newConfig.series = [
+                    {
+                        data: { x: field('target'), y: field(_field) },
+                        name: field('origin')
+                    }
+                ];
+                this.heatMapConfig = { ...newConfig };
+            }
+        })
+    }
+
+    ngAfterViewInit() {
+        this.tree = ArchitectureTree.setup(this.graphContainer.nativeElement);
     }
 
     ngOnDestroy(): void {
@@ -215,59 +269,20 @@ export class ArchitectureView implements OnInit, OnDestroy {
     }
 
     init() {
-       this.trafficIsloading=true;
+        this.trafficIsloading = true;
+        this.heatMapData = [];
+        this.treeMapData = [];
         forkJoin(
             {
                 rest: this._restSessionService.getArchitectureForHeatMap({ start: this.params.start, end: this.params.end, env: this.params.env }),
                 main: this._mainSessionService.getMainSessionArchitectureForHeatMap({ start: this.params.start, end: this.params.end, env: this.params.env }),
             }
-        ).pipe(finalize(()=>  this.trafficIsloading=false)).subscribe({
+        ).pipe(finalize(()=>  this.trafficIsloading = false)).subscribe({
             next: (result: {rest: any[], main: any[]})  => {
                 let res = [...result.rest, ...result.main];
-                let distinct = [...this.distinct(res, o => o.target)];
-                let map: any = {};
-                res.forEach(r => {
-                    if (!map[r.origin]) {
-                        map[r.origin] = {};
-                        distinct.forEach(v => map[r.origin][v] = 0);
-                    }
-                    map[r.origin][r.target] = r.count;
-                });
-
-                //heatmap
-                let arr: { count: number, origin: string, target: string }[] = [];
-                Object.entries(map).forEach(e1 => {
-                    Object.entries(e1[1]).forEach(e2 => {
-                        arr.push({ origin: e1[0], target: e2[0], count: e2[1] })
-                    })
-                });
-                this.heatMapData = arr;
-                const ranges = this.createRanges(this.heatMapData);
-                let newConfig = this.heatMapConfig;
-                newConfig.options.plotOptions.heatmap.colorScale.ranges = ranges;
-                this.heatMapConfig = { ...newConfig }
-
-                //treemap
-                let d  = arr.reduce((acc:any,cur:any) => {
-                    let i = acc.findIndex(a => a.origin === cur.origin)
-                    if(i == -1){
-                        acc.push({origin: cur.origin, count: 0})
-                    }else {
-                        acc[i].count += cur.count
-                    }
-                    return acc;
-                },[]).sort((a,b)=>(a.count-b.count))
-
-                const treeRanges = this.createRanges(d)
-                this.treeMapData= d.map(t => {
-                    let r = treeRanges.find(r=> t.count >= r.from && t.count <= r.to)
-                    if(r){
-
-                        t.name = r.name
-                        t.color = r.color
-                    }
-                    return t
-                })
+                this.buildHeatMapCharts(res);
+                this.treeMapControl.updateValueAndValidity();
+                this.heatMapControl.updateValueAndValidity();
             }
         });
 
@@ -279,20 +294,37 @@ export class ArchitectureView implements OnInit, OnDestroy {
             return res.restSession;
         })).subscribe({
             next: res => {
-                let self = this;
-                ArchitectureTree.setup(this.graphContainer.nativeElement, tg => {
-                    tg.draw(() => self.draw(tg, res))
-                });
+                this.tree.clearCells();
+                this.tree.draw(() => this.draw(this.tree, res));
             }
         });
     }
 
-    createRanges(arr: any[]) {
+    buildHeatMapCharts(res: {count: number, sum: number, origin: string, target: string}[]) {
+        let distinct = [...this.distinct(res, o => o.target)];
+        let map: any = {};
+        res.forEach(r => {
+            if (!map[r.origin]) {
+                map[r.origin] = {};
+                distinct.forEach(v => map[r.origin][v] = {count: 0, sum: 0});
+            }
+            map[r.origin][r.target] = {count: r.count, sum: r.sum};
+        });
+        let arr: { count: number, sum: number, origin: string, target: string }[] = [];
+        Object.entries(map).forEach(e1 => {
+            Object.entries(e1[1]).forEach(e2 => {
+                arr.push({ origin: e1[0], target: e2[0], count: e2[1].count, sum: e2[1].sum})
+            });
+        });
+        this.heatMapData = arr;
+    }
+
+    createRanges(arr: any[], field: string) {
         const ranges: any[] = [{ from: 0, to: 0, name: `0`, color: this.rangesColorConfig[0] }];
         if(arr.length){
             let max = arr.reduce((acc: any, cur: any) => {
-                return cur.count > acc ? cur.count : acc
-            }, arr[0].count);
+                return cur[field] > acc ? cur[field] : acc
+            }, arr[0][field]);
             const range = max / 4;
             const parts = range != 0 ? 4 : 1;
 
@@ -305,9 +337,9 @@ export class ArchitectureView implements OnInit, OnDestroy {
         return ranges;
     }
 
-    draw(tg: ArchitectureTree, architectures: Architecture[]) {
-        let layout = new mx.mxHierarchicalLayout(tg._graph, mx.mxConstants.DIRECTION_WEST);
-        console.log(architectures)
+    draw(tree: ArchitectureTree, architectures: Architecture[]) {
+
+        let layout = new mx.mxHierarchicalLayout(tree._graph, mx.mxConstants.DIRECTION_WEST);
         let widthServerSl = architectures.reduce((acc, cur, index) => {
             if(index != architectures.length - 1) {
                 return (acc + ServerConfig['REST'].width) - 30;
@@ -315,22 +347,22 @@ export class ArchitectureView implements OnInit, OnDestroy {
                 return acc + ServerConfig['REST'].width;
             }
         }, 38);
-        let launchSwimlane = tg._graph.insertVertex(tg._parent, null, 'Clients', 0, 0, widthServerSl, 110, 'swimlane;fillColor=#66B922;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=bold;fontStyle=3');
+        let launchSwimlane = tree._graph.insertVertex(tree._parent, null, 'Clients', 0, 0, widthServerSl, 110, 'swimlane;fillColor=#6482B9;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=3');
 
-        let serverSwimlane = tg._graph.insertVertex(tg._parent, 'server', 'Serveurs', 0, 190, widthServerSl, 110, 'swimlane;fillColor=#66B922;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=bold;fontStyle=3');
+        let serverSwimlane = tree._graph.insertVertex(tree._parent, null, 'Serveurs', 0, 190, widthServerSl, 110, 'swimlane;fillColor=#6482B9;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=3');
         //let testServ = tg._graph.insertVertex(serverSwimlane, null, 'TestServer', 50, 25, 100, 50);
-        let databaseSwimlane = tg._graph.insertVertex(tg._parent, 'database', 'BDD', 0, 400, widthServerSl, 110, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontColor=white;fontStyle=3');
+        let databaseSwimlane = tree._graph.insertVertex(tree._parent, null, 'BDD', 0, 400, widthServerSl, 110, 'swimlane;fillColor=#6482B9;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=3');
         //let testDb = tg._graph.insertVertex(DatabaseSwimlane, null, 'TestDb', 50, 25, 100, 50);
-        let ftpSwimlane = tg._graph.insertVertex(tg._parent, null, 'FTP', widthServerSl + 100, 0, 80, 150, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontColor=white;fontStyle=3');
-        let smtpSwimlane = tg._graph.insertVertex(tg._parent, null, 'SMTP', widthServerSl + 100, 190, 80, 150, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontColor=white;fontStyle=3');
-        let ldapSwimlane = tg._graph.insertVertex(tg._parent, null, 'LDAP', widthServerSl + 100, 300, 80, 150, 'swimlane;fillColor=#CF0056;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontColor=white;fontStyle=3');
+        let ftpSwimlane = tree._graph.insertVertex(tree._parent, null, 'FTP', widthServerSl + 100, 0, 80, 150, 'swimlane;fillColor=#6482B9;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontStyle=3');
+        let smtpSwimlane = tree._graph.insertVertex(tree._parent, null, 'SMTP', widthServerSl + 100, 190, 80, 150, 'swimlane;fillColor=#6482B9;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontStyle=3');
+        let ldapSwimlane = tree._graph.insertVertex(tree._parent, null, 'LDAP', widthServerSl + 100, 300, 80, 150, 'swimlane;fillColor=#6482B9;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontStyle=3');
 
-        tg._graph.insertEdge(tg._parent, null, null, launchSwimlane, serverSwimlane); // 'perimeterSpacing=10;strokeWidth=10;endArrow=block;endSize=2;endFill=1;strokeColor=#66B922;rounded=1;'
+        tree._graph.insertEdge(tree._parent, null, null, launchSwimlane, serverSwimlane); // 'perimeterSpacing=10;strokeWidth=10;endArrow=block;endSize=2;endFill=1;strokeColor=#66B922;rounded=1;'
 
 
-        tg._graph.insertEdge(tg._parent, null, null, serverSwimlane, ftpSwimlane);
-        tg._graph.insertEdge(tg._parent, null, null, serverSwimlane, smtpSwimlane);
-        tg._graph.insertEdge(tg._parent, null, null, serverSwimlane, ldapSwimlane);
+        tree._graph.insertEdge(tree._parent, null, null, serverSwimlane, ftpSwimlane);
+        tree._graph.insertEdge(tree._parent, null, null, serverSwimlane, smtpSwimlane);
+        tree._graph.insertEdge(tree._parent, null, null, serverSwimlane, ldapSwimlane);
 
         let initialX = 38;
         let initialY = 10;
@@ -353,7 +385,7 @@ export class ArchitectureView implements OnInit, OnDestroy {
         let ldap: {[key: string]: mxCell} = {};
         architectures.forEach(a => {
             if(a.type == 'REST') {
-                servers[a.name] = tg._graph.insertVertex(serverSwimlane, null, a.name, x, y, width, height, ServerConfig['REST'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
+                servers[a.name] = tree._graph.insertVertex(serverSwimlane, null, a.name, x, y, width, height, ServerConfig['REST'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
                 x += width - 30;
                 if(y == initialY) {
                     y += 50;
@@ -362,7 +394,7 @@ export class ArchitectureView implements OnInit, OnDestroy {
                 }
             } else {
 
-                mains[a.name] = tg._graph.insertVertex(launchSwimlane, null, a.name, xMain, yMain, width, height, ServerConfig[a.type].icon + "verticalLabelPosition=bottom;verticalAlign=top");
+                mains[a.name] = tree._graph.insertVertex(launchSwimlane, null, a.name, xMain, yMain, width, height, ServerConfig[a.type].icon + "verticalLabelPosition=bottom;verticalAlign=top");
                 xMain += width - 30;
                 if(yMain == initialY) {
                     yMain += 50;
@@ -372,10 +404,9 @@ export class ArchitectureView implements OnInit, OnDestroy {
             }
             if(a.remoteServers != null) {
                 a.remoteServers.forEach(r => {
-                    console.log(r)
                     let name = r.schema ? r.schema : r.name;
                     if(r.type == 'JDBC' && !databases[name]) {
-                        databases[name] = tg._graph.insertVertex(databaseSwimlane, null, name, xDb, yDb, widthDb, heightDb, ServerConfig['JDBC'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
+                        databases[name] = tree._graph.insertVertex(databaseSwimlane, null, name, xDb, yDb, widthDb, heightDb, ServerConfig['JDBC'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
                         xDb += widthDb - 30;
                         if(yDb == initialY) {
                             yDb += 50;
@@ -384,13 +415,13 @@ export class ArchitectureView implements OnInit, OnDestroy {
                         }
                     }
                     if(r.type == 'FTP' && !ftp[name]) {
-                        ftp[name] = tg._graph.insertVertex(ftpSwimlane, null, name, 0, 0, widthDb, heightDb, ServerConfig['FTP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
+                        ftp[name] = tree._graph.insertVertex(ftpSwimlane, null, name, 0, 0, widthDb, heightDb, ServerConfig['FTP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
                     }
                     if(r.type == 'SMTP' && !smtp[name]) {
-                        smtp[name] = tg._graph.insertVertex(smtpSwimlane, null, name, 0, 0, widthDb, heightDb, ServerConfig['SMTP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
+                        smtp[name] = tree._graph.insertVertex(smtpSwimlane, null, name, 0, 0, widthDb, heightDb, ServerConfig['SMTP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
                     }
                     if(r.type == 'LDAP' && !ldap[name]) {
-                        ldap[name] = tg._graph.insertVertex(ldapSwimlane, null, name, 0, 0, widthDb, heightDb, ServerConfig['LDAP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
+                        ldap[name] = tree._graph.insertVertex(ldapSwimlane, null, name, 0, 0, widthDb, heightDb, ServerConfig['LDAP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
                     }
                     //tg._graph.insertEdge(serverSwimlane, null, null, servers[a.name], databases[r.name]);
                 });
@@ -398,9 +429,8 @@ export class ArchitectureView implements OnInit, OnDestroy {
 
 
         });
-        layout.execute(tg._parent, [serverSwimlane]);
-        tg._graph.insertEdge(tg._parent, null, null, serverSwimlane, databaseSwimlane);
-        console.log(x);
+        layout.execute(tree._parent, [serverSwimlane]);
+        tree._graph.insertEdge(tree._parent, null, null, serverSwimlane, databaseSwimlane);
     }
 
     distinct<T, U>(arr: Array<T>, mapper: (o: T) => U): Set<U> {

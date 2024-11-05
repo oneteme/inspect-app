@@ -85,9 +85,9 @@ export class InstanceService {
             'id': 'main_session.instance_env',
             'main_session.start.ge': start.toISOString(),
             'main_session.start.lt': end.toISOString(),
-            'main_session.type.ne': 'STARTUP',
             'appName.notNull': '',
             'environement': env,
+            'main_session.type': 'VIEW',
             'order': 'app_name.asc'
         }
         return this.getInstance(args);
