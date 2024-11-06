@@ -347,15 +347,15 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
                 return acc + ServerConfig['REST'].width;
             }
         }, 38);
-        let launchSwimlane = tree._graph.insertVertex(tree._parent, null, 'Clients', 0, 0, widthServerSl, 110, 'swimlane;fillColor=#6482B9;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=3');
+        let launchSwimlane = tree._graph.insertVertex(tree._parent, null, 'Clients', 0, 0, widthServerSl, 110, 'swimlane;fillColor=#ECB390;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=3');
 
-        let serverSwimlane = tree._graph.insertVertex(tree._parent, null, 'Serveurs', 0, 190, widthServerSl, 110, 'swimlane;fillColor=#6482B9;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=3');
+        let serverSwimlane = tree._graph.insertVertex(tree._parent, null, 'Serveurs', 0, 190, widthServerSl, 110, 'swimlane;fillColor=#7FC7D9;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=3');
         //let testServ = tg._graph.insertVertex(serverSwimlane, null, 'TestServer', 50, 25, 100, 50);
-        let databaseSwimlane = tree._graph.insertVertex(tree._parent, null, 'BDD', 0, 400, widthServerSl, 110, 'swimlane;fillColor=#6482B9;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=3');
+        let databaseSwimlane = tree._graph.insertVertex(tree._parent, null, 'BDD', 0, 400, widthServerSl, 110, 'swimlane;fillColor=#FFB200;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=3');
         //let testDb = tg._graph.insertVertex(DatabaseSwimlane, null, 'TestDb', 50, 25, 100, 50);
-        let ftpSwimlane = tree._graph.insertVertex(tree._parent, null, 'FTP', widthServerSl + 100, 0, 80, 150, 'swimlane;fillColor=#6482B9;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontStyle=3');
-        let smtpSwimlane = tree._graph.insertVertex(tree._parent, null, 'SMTP', widthServerSl + 100, 190, 80, 150, 'swimlane;fillColor=#6482B9;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontStyle=3');
-        let ldapSwimlane = tree._graph.insertVertex(tree._parent, null, 'LDAP', widthServerSl + 100, 300, 80, 150, 'swimlane;fillColor=#6482B9;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontStyle=3');
+        let ftpSwimlane = tree._graph.insertVertex(tree._parent, null, 'FTP', widthServerSl + 100, 0, 80, 150, 'swimlane;fillColor=#BFEA7C;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontStyle=3');
+        let smtpSwimlane = tree._graph.insertVertex(tree._parent, null, 'SMTP', widthServerSl + 100, 190, 80, 150, 'swimlane;fillColor=#BFEA7C;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontStyle=3');
+        let ldapSwimlane = tree._graph.insertVertex(tree._parent, null, 'LDAP', widthServerSl + 100, 300, 80, 150, 'swimlane;fillColor=#BFEA7C;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontStyle=3');
 
         tree._graph.insertEdge(tree._parent, null, null, launchSwimlane, serverSwimlane); // 'perimeterSpacing=10;strokeWidth=10;endArrow=block;endSize=2;endFill=1;strokeColor=#66B922;rounded=1;'
 

@@ -14,10 +14,16 @@
         </button>
     </form>
 </header-page>
+<div id="container" class="mat-elevation-z5" style="margin-bottom: 1em">
+    <span class="dashboard_component_title">Vue globale</span>
+    <div id="fixed-width-container">
+        <div #graphContainer id="graphContainer"></div>
+    </div>
+</div>
 <div style="display: flex; justify-content: space-between; gap: 1em; margin-bottom: 1em;">
     <div style="width: 50%; display: flex; flex-direction: column;" class="mat-elevation-z5">
         <div style="display: flex; justify-content: space-between;">
-            <span class="dashboard_component_title">Trafic d'Appel Global</span>
+            <span class="dashboard_component_title">Trafic global</span>
             <div style="margin-right: 10px">
                 Nombre d'Appel
                 <mat-slide-toggle [formControl]="treeMapControl">Volume</mat-slide-toggle>
@@ -30,7 +36,7 @@
     </div>
     <div style="width: 50%; display: flex; flex-direction: column;" class="mat-elevation-z5">
         <div style="display: flex; justify-content: space-between;">
-            <span class="dashboard_component_title">Trafic d'Appel</span>
+            <span class="dashboard_component_title">Trafic</span>
             <div style="margin-right: 10px">
                 Nombre d'Appel
                 <mat-slide-toggle [formControl]="heatMapControl">Volume</mat-slide-toggle>
@@ -42,9 +48,4 @@
             [isLoading]="trafficIsloading" />
     </div>
 
-</div>
-<div id="container" class="mat-elevation-z5" style="margin-bottom: 1em">
-    <div id="fixed-width-container">
-        <div #graphContainer id="graphContainer"></div>
-    </div>
 </div>
