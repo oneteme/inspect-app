@@ -1,4 +1,10 @@
 <header-page [titleIcon]="MAPPING_TYPE['dashboard'].icon" [ui-title]="MAPPING_TYPE['dashboard'].title">
+  {{chartRequests.databaseRequestExceptionsTable?.isLoading}}
+  {{chartRequests.ldapRequestExceptionsTable?.isLoading}}
+  {{chartRequests.ldapRequestExceptionsTable?.isLoading}}
+  {{chartRequests.ldapRequestExceptionsTable?.isLoading}}
+  {{chartRequests.ldapRequestExceptionsTable?.isLoading}}
+  
   <form [formGroup]="serverFilterForm" class="header-filter md-2">
     <mat-form-field class="no-subscript" appearance="outline">
       <mat-label>Période</mat-label>
@@ -30,19 +36,19 @@
 <div style="display: flex; justify-content: space-between; gap: 1em; margin-bottom: 1em;">
   <chart class="mat-elevation-z5" style="width: 25%;" type="area"
     [config]="constants.REST_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="charts?.restRequestExceptionsTable"
-    [isLoading]="requests?.databaseRequestExceptionsTable?.isLoading" />
+    [isLoading]="chartRequests?.restRequestExceptionsTable?.isLoading" />
   <chart class="mat-elevation-z5" style="width: 25%;" type="area"
     [config]="constants.DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="charts?.databaseRequestExceptionsTable"
-    [isLoading]="requests.databaseRequestExceptionsTable?.isLoading" />
+    [isLoading]="chartRequests?.databaseRequestExceptionsTable?.isLoading" />
   <chart class="mat-elevation-z5" style="width: 25%;" type="area"
     [config]="constants.FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="charts?.ftpRequestExceptionsTable"
-    [isLoading]="requests.ftpRequestExceptionsTable?.isLoading" />
+    [isLoading]="chartRequests?.ftpRequestExceptionsTable?.isLoading" />
   <chart class="mat-elevation-z5" style="width: 25%;" type="area"
     [config]="constants.SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="charts?.smtpRequestExceptionsTable"
-    [isLoading]="requests.smtpRequestExceptionsTable?.isLoading" />
+    [isLoading]="chartRequests?.smtpRequestExceptionsTable?.isLoading" />
   <chart class="mat-elevation-z5" style="width: 25%;" type="area"
     [config]="constants.LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="charts?.ldapRequestExceptionsTable"
-    [isLoading]="requests.ldapRequestExceptionsTable?.isLoading" />
+    [isLoading]="chartRequests?.ldapRequestExceptionsTable?.isLoading" />
 </div>
 
 <div class="exception-card">
@@ -58,7 +64,7 @@
         <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
       </div>
       <div class="mat-elevation-z5">
-        <table mat-table [dataSource]="requests.sessionExceptionsTable.data" #sessionExceptionsTableSort="matSort"
+        <table mat-table [dataSource]="tabRequests.sessionExceptionsTable.data" #sessionExceptionsTableSort="matSort"
           matSort matSortActive="date" matSortDirection="desc" matSortDisableClear="true">
 
           <ng-container matColumnDef="date">
@@ -91,13 +97,13 @@
           <tr mat-row *matRowDef="let row; columns: sessionExceptionsDisplayedColumns;"></tr>
           <tr class="mat-row" *matNoDataRow>
             <td class="mat-cell" colspan="7">
-              <div *ngIf="!requests.sessionExceptionsTable.isLoading" class="empty-row" style="align-items: center;">
+              <div *ngIf="!tabRequests.sessionExceptionsTable.isLoading" class="empty-row" style="align-items: center;">
                 <span class="material-symbols-outlined">
                   info
                 </span>
                 <span style="font-style: italic;">Aucun résultat</span>
               </div>
-              <div *ngIf="requests.sessionExceptionsTable.isLoading" class="loading-row">
+              <div *ngIf="tabRequests.sessionExceptionsTable.isLoading" class="loading-row">
                 <span style="display: flex; flex-direction: column; font-style: italic;">
                   Chargement en cours...
                   <mat-progress-bar mode="indeterminate"></mat-progress-bar>
@@ -107,8 +113,8 @@
             </td>
           </tr>
         </table>
-        <div [hidden]="requests.sessionExceptionsTable?.data?.data.length < 6">
-          <mat-paginator #sessionExceptionsTablePaginator [length]="requests.sessionExceptionsTable?.data?.data.length"
+        <div [hidden]="tabRequests.sessionExceptionsTable?.data?.data.length < 6">
+          <mat-paginator #sessionExceptionsTablePaginator [length]="tabRequests.sessionExceptionsTable?.data?.data.length"
             [hidePageSize]="true" [showFirstLastButtons]="true" [pageSize]="5"
             aria-label="Select page of GitHub search results"></mat-paginator>
         </div>
@@ -129,7 +135,7 @@
         <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
       </div>
       <div class="mat-elevation-z5">
-        <table mat-table [dataSource]="requests.batchExceptionTable.data" #batchExceptionTableSort="matSort" matSort
+        <table mat-table [dataSource]="tabRequests.batchExceptionTable.data" #batchExceptionTableSort="matSort" matSort
           matSortActive="date" matSortDirection="desc">
 
           <ng-container matColumnDef="date">
@@ -162,13 +168,13 @@
           <tr mat-row *matRowDef="let row; columns: batchExceptionDisplayedColumns;"></tr>
           <tr class="mat-row" *matNoDataRow>
             <td class="mat-cell" colspan="7">
-              <div *ngIf="!requests.batchExceptionTable.isLoading" class="empty-row" style="align-items: center;">
+              <div *ngIf="!tabRequests.batchExceptionTable.isLoading" class="empty-row" style="align-items: center;">
                 <span class="material-symbols-outlined">
                   info
                 </span>
                 <span style="font-style: italic;">Aucun résultat</span>
               </div>
-              <div *ngIf="requests.batchExceptionTable?.isLoading" class="loading-row">
+              <div *ngIf="tabRequests.batchExceptionTable?.isLoading" class="loading-row">
                 <span style="display: flex; flex-direction: column; font-style: italic;">
                   Chargement en cours...
                   <mat-progress-bar mode="indeterminate"></mat-progress-bar>
@@ -178,8 +184,8 @@
             </td>
           </tr>
         </table>
-        <div [hidden]="requests.batchExceptionTable?.data?.data.length < 6">
-          <mat-paginator #batchExceptionTablePaginator [length]="requests.batchExceptionTable?.data?.data.length"
+        <div [hidden]="tabRequests.batchExceptionTable?.data?.data.length < 6">
+          <mat-paginator #batchExceptionTablePaginator [length]="tabRequests.batchExceptionTable?.data?.data.length"
             [pageSize]="5" [hidePageSize]="true" [showFirstLastButtons]="true"></mat-paginator>
         </div>
       </div>
@@ -198,7 +204,7 @@
       <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
     </div>
     <div class="mat-elevation-z5">
-      <table mat-table [dataSource]="requests.serverStartTable.data" #serverStartTableSort="matSort" matSort>
+      <table mat-table [dataSource]="tabRequests.serverStartTable.data" #serverStartTableSort="matSort" matSort>
 
         <ng-container matColumnDef="appName">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Serveur </th>
@@ -224,13 +230,13 @@
         <tr mat-row *matRowDef="let row; columns: serverStartDisplayedColumns;"></tr>
         <tr class="mat-row" *matNoDataRow>
           <td class="mat-cell" colspan="7">
-            <div *ngIf="!requests.serverStartTable.isLoading" class="empty-row" style="align-items: center;">
+            <div *ngIf="!tabRequests.serverStartTable.isLoading" class="empty-row" style="align-items: center;">
               <span class="material-symbols-outlined">
                 info
               </span>
               <span style="font-style: italic;">Aucun résultat</span>
             </div>
-            <div *ngIf="requests.serverStartTable.isLoading" class="loading-row">
+            <div *ngIf="tabRequests.serverStartTable.isLoading" class="loading-row">
               <span style="display: flex; flex-direction: column; font-style: italic;">
                 Chargement en cours...
                 <mat-progress-bar mode="indeterminate"></mat-progress-bar>
@@ -240,8 +246,8 @@
           </td>
         </tr>
       </table>
-      <div [hidden]="requests.serverStartTable?.data?.data.length < 6">
-        <mat-paginator #serverStartTablePaginator [length]="requests.serverStartTable?.data?.data.length" [pageSize]="5"
+      <div [hidden]="tabRequests.serverStartTable?.data?.data.length < 6">
+        <mat-paginator #serverStartTablePaginator [length]="tabRequests.serverStartTable?.data?.data.length" [pageSize]="5"
           [hidePageSize]="true" [showFirstLastButtons]="true"></mat-paginator>
       </div>
     </div>
