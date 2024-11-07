@@ -51,7 +51,7 @@ export class DashboardComponent implements AfterViewInit  {
     today: Date = new Date();
     subscriptions: Subscription[] = [];
     tabRequests: { [key: string]: { observable?: Observable<Object>, data?: MatTableDataSource<any[]>, isLoading?: boolean, key?: string } } = {};
-    chartRequests: { [key: string]: { observable?: Observable<Object>, data?: any[], isLoading?: boolean, key?: string } } = {};
+    chartRequests: { [key: string]: { observable?: Observable<Object>, chartData?: any[], tableData?: MatTableDataSource<any[]>, isLoading?: boolean, key?: string } } = {};
     charts: any = {}
     serverFilterForm = new FormGroup({
         appname: new FormControl([""]),
@@ -102,26 +102,28 @@ export class DashboardComponent implements AfterViewInit  {
                     }));
                 this.initTab();
                 this.initCharts();
+
+
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${this.params.serveurs.length > 0 ? '&' + this.params.serveurs.map(name => `appname=${name}`).join('&') : ''}`)
             }
         });
     }
     ngAfterViewInit(): void {
-        this.initTab();
+        //this.initTab();
     }
 
     initCharts() { //TODO REFACTO
         this.setChartDialogEvent()
         let serverParam = this.createServerFilter();
-        this.chartRequests = this.REQUESTS(this.params.env, this.params.start, this.params.end, serverParam.app_name);
+        this.chartRequests = {...this.REQUESTS(this.params.env, this.params.start, this.params.end, serverParam.app_name)};
         Object.keys(this.chartRequests).forEach(k => {
-            this.charts[k] = [];
             this.chartRequests[k].isLoading = true;
             this.chartRequests[k].observable
                 .pipe(finalize(() => {   this.chartRequests[k].isLoading = false;  }))
                 .subscribe({
                     next: (res: any) => {
-                        this.chartRequests[k].data = res;
+                        this.chartRequests[k].chartData = [...res.chart];
+                        console.log(this.chartRequests[k])
                     }
                 })
         })
@@ -167,8 +169,9 @@ export class DashboardComponent implements AfterViewInit  {
                     queryParams: { ...(appname !== undefined && { appname }), start: start.toISOString(), end: excludedEnd }
                 })
             } else {
-                this.initTab();
                 this.initCharts();
+                this.initTab();
+
             }
         }
     }
@@ -248,17 +251,17 @@ export class DashboardComponent implements AfterViewInit  {
         let subtitle = ''
         formatters[groupedBy](data, this._datePipe)
 
-        let arr = this.groupByProperty("date", data).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } });
+        let arr: any[] = this.groupByProperty("date", data).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } });
         if (arr.length) {
             let sumRes = this.sumcounts(arr);
             title = `${type}:  ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%`;
             subtitle = `sur ${sumRes.countok} requête(s)`;
         }
-        this.charts[chartName] = arr;
         let config = { ...c[configName] }
         config.options.title.text = title
         config.options.subtitle.text = subtitle
         c[configName] = config
+        return {chart: arr, table: data};
     }
 
     groupByProperty(property: string, array: any[]) {
@@ -327,8 +330,7 @@ export class DashboardComponent implements AfterViewInit  {
                 })
                     .pipe(map(((result: { restSession: RestSessionExceptionsByPeriodAndappname[]; mainSession: RestMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
-                        this.setChartData([...r], 'REST', 'restRequestExceptionsTable', 'REST_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
-                        return r;
+                        return this.setChartData(r, 'REST', 'restRequestExceptionsTable', 'REST_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
                     })))
             },
 
@@ -339,8 +341,7 @@ export class DashboardComponent implements AfterViewInit  {
                 })
                     .pipe(map(((result: { restSession: JdbcSessionExceptionsByPeriodAndappname[]; mainSession: JdbcMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
-                        this.setChartData(r, 'JDBC', 'databaseRequestExceptionsTable', 'DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
-                        return r;
+                        return this.setChartData(r, 'JDBC', 'databaseRequestExceptionsTable', 'DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
                     })))
             },
             ftpRequestExceptionsTable: {
@@ -350,8 +351,7 @@ export class DashboardComponent implements AfterViewInit  {
                 })
                     .pipe(map(((result: { restSession: FtpSessionExceptionsByPeriodAndappname[]; mainSession: FtpMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
-                        this.setChartData(r, 'FTP', 'ftpRequestExceptionsTable', 'FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
-                        return r;
+                        return this.setChartData(r, 'FTP', 'ftpRequestExceptionsTable', 'FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
                     })))
             },
             smtpRequestExceptionsTable: {
@@ -361,8 +361,7 @@ export class DashboardComponent implements AfterViewInit  {
                 })
                     .pipe(map(((result: { restSession: SmtpSessionExceptionsByPeriodAndappname[]; mainSession: SmtpMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
-                        this.setChartData(r, 'SMTP', 'smtpRequestExceptionsTable', 'SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
-                        return r;
+                        return this.setChartData(r, 'SMTP', 'smtpRequestExceptionsTable', 'SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
                     })))
             },
             ldapRequestExceptionsTable: {
@@ -372,8 +371,7 @@ export class DashboardComponent implements AfterViewInit  {
                 })
                     .pipe(map(((result: { restSession: LdapSessionExceptionsByPeriodAndappname[]; mainSession: LdapMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
-                        this.setChartData(r, 'LDAP', 'ldapRequestExceptionsTable', 'LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
-                        return r;
+                        return this.setChartData(r, 'LDAP', 'ldapRequestExceptionsTable', 'LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
                     })))
             },
         }

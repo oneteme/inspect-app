@@ -35,22 +35,21 @@
 
 <div style="display: flex; justify-content: space-between; gap: 1em; margin-bottom: 1em;">
   <chart class="mat-elevation-z5" style="width: 25%;" type="area"
-    [config]="constants.REST_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="charts?.restRequestExceptionsTable"
+    [config]="constants.REST_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.restRequestExceptionsTable?.chartData || []"
     [isLoading]="chartRequests?.restRequestExceptionsTable?.isLoading" />
   <chart class="mat-elevation-z5" style="width: 25%;" type="area"
-    [config]="constants.DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="charts?.databaseRequestExceptionsTable"
+    [config]="constants.DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.databaseRequestExceptionsTable?.chartData  || []"
     [isLoading]="chartRequests?.databaseRequestExceptionsTable?.isLoading" />
   <chart class="mat-elevation-z5" style="width: 25%;" type="area"
-    [config]="constants.FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="charts?.ftpRequestExceptionsTable"
+    [config]="constants.FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.ftpRequestExceptionsTable?.chartData  || []"
     [isLoading]="chartRequests?.ftpRequestExceptionsTable?.isLoading" />
   <chart class="mat-elevation-z5" style="width: 25%;" type="area"
-    [config]="constants.SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="charts?.smtpRequestExceptionsTable"
+    [config]="constants.SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.smtpRequestExceptionsTable?.chartData  || []"
     [isLoading]="chartRequests?.smtpRequestExceptionsTable?.isLoading" />
   <chart class="mat-elevation-z5" style="width: 25%;" type="area"
-    [config]="constants.LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="charts?.ldapRequestExceptionsTable"
+    [config]="constants.LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.ldapRequestExceptionsTable?.chartData  || []"
     [isLoading]="chartRequests?.ldapRequestExceptionsTable?.isLoading" />
 </div>
-
 <div class="exception-card">
   <div style="width: 50vw;">
     <div style="height: calc(100% - 31px);">
