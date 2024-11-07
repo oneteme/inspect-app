@@ -84,7 +84,7 @@ export class ArchitectureTree {
         }
     }
 
-    private resizeAndCenter() {
+    resizeAndCenter() {
         let availableWidth = document.getElementById("fixed-width-container")?.offsetWidth;
         let availableHeight = document.getElementById("fixed-width-container")?.offsetHeight;
         this._graph.doResizeContainer(availableWidth, availableHeight);

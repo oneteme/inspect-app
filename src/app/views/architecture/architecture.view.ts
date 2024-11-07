@@ -1,10 +1,10 @@
-import {AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from "@angular/core";
+import {AfterViewInit, Component, ElementRef, inject, NgZone, OnDestroy, OnInit, ViewChild} from "@angular/core";
 import {ChartProvider, field, XaxisType, YaxisType} from "@oneteme/jquery-core";
 import {RestSessionService} from "../../service/jquery/rest-session.service";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {EnvRouter} from "../../service/router.service";
 import {ActivatedRoute, Params} from "@angular/router";
-import {combineLatest, finalize, forkJoin, map, Subscription} from "rxjs";
+import {combineLatest, finalize, forkJoin, fromEvent, map, Subscription} from "rxjs";
 import {application, makePeriod} from "../../../environments/environment";
 import {Location} from "@angular/common";
 import {TreeService} from "../../service/tree.service";
@@ -28,9 +28,11 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
     private _activatedRoute = inject(ActivatedRoute);
     private _location = inject(Location);
     private _numberFormatter = inject(NumberFormatterPipe);
+    private _zone = inject(NgZone);
 
     rangesColorConfig = [ '#E9E9E9', '#AFB3EF', '#757DF4', '#3A47FA', '#0011FF' ]
     tree: ArchitectureTree;
+    resizeSubscription: any;
     treeMapConfig: ChartProvider<XaxisType, YaxisType> = {
         series: [
             {
@@ -236,10 +238,25 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
 
     ngAfterViewInit() {
         this.tree = ArchitectureTree.setup(this.graphContainer.nativeElement);
+
+        this._zone.runOutsideAngular(() => {
+            this.resizeSubscription = fromEvent(window, 'resize').subscribe(() => {
+                this._zone.run(() => {
+                    if (this.tree) {
+                        this.tree.resizeAndCenter()
+                    }
+                })
+
+            });
+        });
+
     }
 
     ngOnDestroy(): void {
         this.subscriptions.forEach(s => s.unsubscribe());
+        if (this.resizeSubscription) {
+            this.resizeSubscription.unsubscribe();
+        }
     }
 
     patchDateValue(start: Date, end: Date) {

@@ -246,14 +246,14 @@ const routes: Route[] = [
   {
     path: 'home',
     component: DashboardComponent,
-    title: 'Accueil'
+    title: 'Page d\'accueil'
   },
   {
     path: 'architecture',
     component: ArchitectureView,
     title: 'Architecture'
   },
-  { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
+  { path: '**', pathMatch: 'full', redirectTo: `/home` }
 ];
 
 @NgModule({

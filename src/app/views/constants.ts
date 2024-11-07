@@ -482,7 +482,7 @@ export class Constants {
         batch: {title: 'Lancement de Batch', icon: 'manufacturing'},
         startup: {title: 'Lancement de Serveur', icon: 'restart_alt'},
         view: {title: 'Navigation', icon: 'ads_click'},
-        dashboard: {title:'Dashboard', icon: 'home'}
+        dashboard: {title:'Page d\'Accueil', icon: 'home'}
     }
 
     
