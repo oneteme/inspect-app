@@ -52,7 +52,7 @@ export class TreeView implements OnDestroy {
       "ELAPSED_LATENSE": (lbl: Label) => this.viewByLinklbl(lbl),
       "METHOD_RESOURCE": () => this.viewMethodResource(),
       "SIZE_COMPRESSION": () => this.viewSizeCompression(),
-      "SCHEME_PROTOCOL": (lbl: Label) => this.viewByLinklbl(lbl),
+      "PROTOCOL_SCHEME": (lbl: Label) => this.viewByLinklbl(lbl),
       "STATUS_EXCEPTION": () => this.viewStatusException(),
       "USER": (lbl: Label) => this.viewByLinklbl(lbl),
     }
@@ -99,9 +99,10 @@ export class TreeView implements OnDestroy {
       this.TreeObj = d;
       let self = this;
       this.tree = TreeGraph.setup(this.graphContainer.nativeElement, tg => {
-        tg.draw(() => self.dr(tg, self.TreeObj, serverlbl, linklbl))
+        tg.draw(() => {})//self.dr(tg, self.TreeObj, serverlbl, linklbl))
         return tg;
       });
+      this.ViewEvent[linklbl](Label[linklbl])
       this.tree.setOutline(this.outlineContainer.nativeElement)
     })
   }
@@ -111,7 +112,7 @@ export class TreeView implements OnDestroy {
     let a = this.draw(tg, data, serverlbl, linklbl);
     if (this.data.type != 'main') {
       let linkRequestNode = new LinkRequestNode(data);
-      let p = tg.insertServer("parent", 'LINK')
+      let p = tg.insertServer("Client", 'LINK')
       let label = linkRequestNode.formatLink(linklbl)
       tg.insertLink(label, p, a, LinkConfig[linkRequestNode.getLinkStyle()]);
     }

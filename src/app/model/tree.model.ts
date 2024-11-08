@@ -29,7 +29,7 @@ export class TreeGraph {
         graph.getLabel = function (cell: any) {
             if (cell?.isEdge() && cell.value && typeof cell.value === 'object') {
                 let compare = cell.value.nodes[0].formatLink(cell.value.linkLbl)
-                return tg.checkSome(cell.value.nodes, x => x.formatLink(cell.value.linkLbl) != compare) ? `...x${cell.value.nodes.length}` : `${compare}x${cell.value.nodes.length}`
+                return tg.checkSome(cell.value.nodes, x => x.formatLink(cell.value.linkLbl) != compare) ? `... ×${cell.value.nodes.length}` : `${compare} ×${cell.value.nodes.length}`
             }
             return mx.mxGraph.prototype.getLabel.apply(this, arguments);
         }
@@ -64,7 +64,7 @@ export class TreeGraph {
                     }
 
                     for (let i = 0; i < max; i++) {
-                        modal += `<b>${entries[i][0]}</b>${entries[i][1].length>1 ?'x'+entries[i][1].length: ''}<br>`
+                        modal += `<b>${entries[i][0]}</b>${entries[i][1].length>1 ?'×'+entries[i][1].length: ''}<br>`
                     }
                     modal += extendMessage;
                 }
