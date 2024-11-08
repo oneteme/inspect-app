@@ -132,7 +132,7 @@ export class DashboardComponent implements AfterViewInit  {
                         }
                     })
             }
-           
+
         })
     }
 
@@ -143,7 +143,7 @@ export class DashboardComponent implements AfterViewInit  {
     initTab() {
         let that: any = this;
         let serverParam = this.createServerFilter();
-        
+
         Object.keys(this.tabRequests).forEach(i => {
             if(this.tabRequests[i].isLoading!= true){
             this.tabRequests[i].isLoading = true;
@@ -178,7 +178,7 @@ export class DashboardComponent implements AfterViewInit  {
                 })
             } else {
                 this.initTab();
-                this.initCharts(); 
+                this.initCharts();
             }
         }
     }
@@ -337,7 +337,7 @@ export class DashboardComponent implements AfterViewInit  {
                     .pipe(map(((result: { restSession: RestSessionExceptionsByPeriodAndappname[]; mainSession: RestMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
                         return this.setChartData([...r], 'REST', 'restRequestExceptionsTable', 'REST_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
-                        
+
                     })))
             },
 
@@ -349,7 +349,7 @@ export class DashboardComponent implements AfterViewInit  {
                     .pipe(map(((result: { restSession: JdbcSessionExceptionsByPeriodAndappname[]; mainSession: JdbcMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
                         return this.setChartData(r, 'JDBC', 'databaseRequestExceptionsTable', 'DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
-                    
+
                     })))
             },
             ftpRequestExceptionsTable: {
@@ -360,7 +360,7 @@ export class DashboardComponent implements AfterViewInit  {
                     .pipe(map(((result: { restSession: FtpSessionExceptionsByPeriodAndappname[]; mainSession: FtpMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
                         return this.setChartData(r, 'FTP', 'ftpRequestExceptionsTable', 'FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
-                   
+
                     })))
             },
             smtpRequestExceptionsTable: {
@@ -371,7 +371,7 @@ export class DashboardComponent implements AfterViewInit  {
                     .pipe(map(((result: { restSession: SmtpSessionExceptionsByPeriodAndappname[]; mainSession: SmtpMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
                         return this.setChartData(r, 'SMTP', 'smtpRequestExceptionsTable', 'SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
-                     
+
                     })))
             },
             ldapRequestExceptionsTable: {
@@ -382,7 +382,7 @@ export class DashboardComponent implements AfterViewInit  {
                     .pipe(map(((result: { restSession: LdapSessionExceptionsByPeriodAndappname[]; mainSession: LdapMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
                        return  this.setChartData(r, 'LDAP', 'ldapRequestExceptionsTable', 'LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
-                  
+
                     })))
             },
         }

@@ -1,4 +1,9 @@
 <header-page [titleIcon]="MAPPING_TYPE['dashboard'].icon" [ui-title]="MAPPING_TYPE['dashboard'].title">
+  {{chartRequests.databaseRequestExceptionsTable?.isLoading}}
+  {{chartRequests.ldapRequestExceptionsTable?.isLoading}}
+  {{chartRequests.ldapRequestExceptionsTable?.isLoading}}
+  {{chartRequests.ldapRequestExceptionsTable?.isLoading}}
+  {{chartRequests.ldapRequestExceptionsTable?.isLoading}}
   
   <form [formGroup]="serverFilterForm" class="header-filter md-2">
     <mat-form-field class="no-subscript" appearance="outline">
@@ -211,7 +216,7 @@
           <td mat-cell *matCellDef="let row"> {{row.version || 'N/A'}} </td>
         </ng-container>
 
-        <ng-container matColumnDef="duree" >
+        <ng-container matColumnDef="duree">
           <th mat-header-cell *matHeaderCellDef>Depuis</th>
           <td mat-cell *matCellDef="let row">
             <div matTooltipClass="mat-tooltip">
