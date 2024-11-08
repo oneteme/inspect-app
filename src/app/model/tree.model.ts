@@ -64,7 +64,7 @@ export class TreeGraph {
                     }
 
                     for (let i = 0; i < max; i++) {
-                        modal += `<b>${entries[i][0]}</b>${entries[i][1].length>1 ?'×'+entries[i][1].length: ''}<br>`
+                        modal += `<b>${entries[i][0]}</b>${entries[i][1].length>1 ?' ×'+entries[i][1].length: ''}<br>`
                     }
                     modal += extendMessage;
                 }

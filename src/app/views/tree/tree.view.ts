@@ -99,10 +99,10 @@ export class TreeView implements OnDestroy {
       this.TreeObj = d;
       let self = this;
       this.tree = TreeGraph.setup(this.graphContainer.nativeElement, tg => {
-        tg.draw(() => {})//self.dr(tg, self.TreeObj, serverlbl, linklbl))
+        tg.draw(() => {})//self.dr(tg, self.TreeObj, serverlbl, linklbl)) // refacto
         return tg;
       });
-      this.ViewEvent[linklbl](Label[linklbl])
+      this.ViewEvent[linklbl](Label[linklbl])// draw
       this.tree.setOutline(this.outlineContainer.nativeElement)
     })
   }
