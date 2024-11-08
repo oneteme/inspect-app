@@ -60,7 +60,6 @@ export class DetailTimelineComponent implements OnChanges {
                     groups = Array.from(groups).map((g: string) => ({ id: g, content: g }))
                 }
                 data = dataArray.map((c: any, i: number) => {
-                    console.log(c);
                     let o = {
                         id: c.id ? `${c.id}_${c.type}` : `${c.idRequest}_no_session`,
                         group: isWebapp ? 0 : c.threadName,
@@ -77,7 +76,6 @@ export class DetailTimelineComponent implements OnChanges {
                     }
                     return o;
                 })
-                console.log(data)
                 if (this.timeline) {  // destroy if exists 
                     this.timeline.destroy();
                 }

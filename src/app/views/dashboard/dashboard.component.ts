@@ -1,6 +1,6 @@
 import { AfterViewInit, Component, inject, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
-import { combineLatest, finalize, forkJoin, map, Observable, Subscription } from 'rxjs';
+import { combineLatest, finalize, forkJoin, map, Observable, Subscription, take } from 'rxjs';
 import { DatePipe, Location } from '@angular/common';
 import { application, makePeriod } from 'src/environments/environment';
 import { EnvRouter } from "../../service/router.service";
@@ -22,6 +22,7 @@ import { LdapRequestService } from 'src/app/service/jquery/ldap-request.service'
 import { FtpMainExceptionsByPeriodAndappname, FtpSessionExceptionsByPeriodAndappname, JdbcMainExceptionsByPeriodAndappname, JdbcSessionExceptionsByPeriodAndappname, LdapMainExceptionsByPeriodAndappname, LdapSessionExceptionsByPeriodAndappname, RestMainExceptionsByPeriodAndappname, RestSessionExceptionsByPeriodAndappname, SessionExceptionsByPeriodAndAppname, SmtpMainExceptionsByPeriodAndappname, SmtpSessionExceptionsByPeriodAndappname } from 'src/app/model/jquery.model';
 import { smtpRequestService } from 'src/app/service/jquery/smtp-request.service';
 import { ChartProvider } from "@oneteme/jquery-core";
+import { NumberFormatterPipe } from 'src/app/shared/pipe/number.pipe';
 @Component({
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
@@ -41,7 +42,9 @@ export class DashboardComponent implements AfterViewInit  {
     private _ldapService = inject(LdapRequestService);
     private _location: Location = inject(Location);
     private _datePipe = inject(DatePipe);
-    private _dialog = inject(MatDialog)
+    private _dialog = inject(MatDialog);
+    private _numberFormatter = inject(NumberFormatterPipe);
+
 
     MAPPING_TYPE = Constants.MAPPING_TYPE;
     serverStartDisplayedColumns: string[] = ["appName", "version", "duree"];
@@ -51,7 +54,7 @@ export class DashboardComponent implements AfterViewInit  {
     today: Date = new Date();
     subscriptions: Subscription[] = [];
     tabRequests: { [key: string]: { observable?: Observable<Object>, data?: MatTableDataSource<any[]>, isLoading?: boolean, key?: string } } = {};
-    chartRequests: { [key: string]: { observable?: Observable<Object>, data?: any[], isLoading?: boolean, key?: string } } = {};
+    chartRequests: { [key: string]: { observable?: Observable<Object>, data?: MatTableDataSource<any[]>,chart?:any[], isLoading?: boolean, key?: string } } = {};
     charts: any = {}
     serverFilterForm = new FormGroup({
         appname: new FormControl([""]),
@@ -100,6 +103,9 @@ export class DashboardComponent implements AfterViewInit  {
                             console.log(e)
                         }
                     }));
+                let serverParam = this.createServerFilter();
+                this.chartRequests = this.REQUESTS(this.params.env, this.params.start, this.params.end, serverParam.app_name);
+                this.tabRequests   = this.TAB_REQUESTS(this.params.env, this.params.start, this.params.end, serverParam.app_name);
                 this.initTab();
                 this.initCharts();
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${this.params.serveurs.length > 0 ? '&' + this.params.serveurs.map(name => `appname=${name}`).join('&') : ''}`)
@@ -112,18 +118,21 @@ export class DashboardComponent implements AfterViewInit  {
 
     initCharts() { //TODO REFACTO
         this.setChartDialogEvent()
-        let serverParam = this.createServerFilter();
-        this.chartRequests = this.REQUESTS(this.params.env, this.params.start, this.params.end, serverParam.app_name);
+
         Object.keys(this.chartRequests).forEach(k => {
-            this.charts[k] = [];
-            this.chartRequests[k].isLoading = true;
-            this.chartRequests[k].observable
-                .pipe(finalize(() => {   this.chartRequests[k].isLoading = false;  }))
-                .subscribe({
-                    next: (res: any) => {
-                        this.chartRequests[k].data = res;
-                    }
-                })
+            if(this.chartRequests[k].isLoading!= true){
+                this.charts[k] = [];
+                this.chartRequests[k].isLoading = true;
+                this.chartRequests[k].observable
+                    .pipe(finalize(() => {   this.chartRequests[k].isLoading = false;  })).pipe(take(1))
+                    .subscribe({
+                        next: (res: any) => {
+                            this.chartRequests[k].data = res.data;
+                            this.chartRequests[k].chart =res.chart
+                        }
+                    })
+            }
+           
         })
     }
 
@@ -134,19 +143,20 @@ export class DashboardComponent implements AfterViewInit  {
     initTab() {
         let that: any = this;
         let serverParam = this.createServerFilter();
-        this.tabRequests = this.TAB_REQUESTS(this.params.env, this.params.start, this.params.end, serverParam.app_name);
-        Object.keys(this.tabRequests).forEach(k => {
-      
-            this.tabRequests[k].isLoading = true;
-            this.tabRequests[k].observable
-                .pipe(finalize(() => { this.tabRequests[k].isLoading = false;   }))
+        
+        Object.keys(this.tabRequests).forEach(i => {
+            if(this.tabRequests[i].isLoading!= true){
+            this.tabRequests[i].isLoading = true;
+            this.tabRequests[i].observable
+                .pipe(finalize(() => {   this.tabRequests[i].isLoading = false;  })).pipe(take(1))
                 .subscribe({
                     next: (res: any[]) => {
-                        this.tabRequests[k].data = new MatTableDataSource(res);
-                        this.tabRequests[k].data.sort = that[`${k}Sort`];
-                        this.tabRequests[k].data.paginator = that[`${k}Paginator`];
+                        this.tabRequests[i].data = new MatTableDataSource(res);
+                        this.tabRequests[i].data.sort = that[`${i}Sort`];
+                        this.tabRequests[i].data.paginator = that[`${i}Paginator`];
                     }
                 })
+            }
 
         })
     }
@@ -168,7 +178,7 @@ export class DashboardComponent implements AfterViewInit  {
                 })
             } else {
                 this.initTab();
-                this.initCharts();
+                this.initCharts(); 
             }
         }
     }
@@ -213,7 +223,6 @@ export class DashboardComponent implements AfterViewInit  {
                     }],
                 }
             }
-            return p
         })
     }
 
@@ -223,14 +232,11 @@ export class DashboardComponent implements AfterViewInit  {
     }
 
     openProtocolDialog(exceptions: { observable: any, type: string }) {
-        exceptions.observable.data.data = exceptions.observable.data.data.filter((d: any) => d.count > 0);
-        if (exceptions.observable.data.data.length > 0) {
-
+        if (exceptions.observable.data.length > 0) {
             const dialog = this._dialog.open(ProtocolExceptionComponent, {
                 width: "70%",
                 data: exceptions
             })
-
             dialog.afterClosed().subscribe(result => {
             })
         }
@@ -254,11 +260,14 @@ export class DashboardComponent implements AfterViewInit  {
             title = `${type}:  ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%`;
             subtitle = `sur ${sumRes.countok} requête(s)`;
         }
-        this.charts[chartName] = arr;
-        let config = { ...c[configName] }
+        //this.charts[chartName] = arr;
+       let config = { ...c[configName] }
         config.options.title.text = title
         config.options.subtitle.text = subtitle
         c[configName] = config
+
+        data = data.filter((a:any)=> a.count>0)
+        return {chart : arr, data :data}
     }
 
     groupByProperty(property: string, array: any[]) {
@@ -327,8 +336,8 @@ export class DashboardComponent implements AfterViewInit  {
                 })
                     .pipe(map(((result: { restSession: RestSessionExceptionsByPeriodAndappname[]; mainSession: RestMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
-                        this.setChartData([...r], 'REST', 'restRequestExceptionsTable', 'REST_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
-                        return r;
+                        return this.setChartData([...r], 'REST', 'restRequestExceptionsTable', 'REST_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
+                        
                     })))
             },
 
@@ -339,8 +348,8 @@ export class DashboardComponent implements AfterViewInit  {
                 })
                     .pipe(map(((result: { restSession: JdbcSessionExceptionsByPeriodAndappname[]; mainSession: JdbcMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
-                        this.setChartData(r, 'JDBC', 'databaseRequestExceptionsTable', 'DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
-                        return r;
+                        return this.setChartData(r, 'JDBC', 'databaseRequestExceptionsTable', 'DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
+                    
                     })))
             },
             ftpRequestExceptionsTable: {
@@ -350,8 +359,8 @@ export class DashboardComponent implements AfterViewInit  {
                 })
                     .pipe(map(((result: { restSession: FtpSessionExceptionsByPeriodAndappname[]; mainSession: FtpMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
-                        this.setChartData(r, 'FTP', 'ftpRequestExceptionsTable', 'FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
-                        return r;
+                        return this.setChartData(r, 'FTP', 'ftpRequestExceptionsTable', 'FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
+                   
                     })))
             },
             smtpRequestExceptionsTable: {
@@ -361,8 +370,8 @@ export class DashboardComponent implements AfterViewInit  {
                 })
                     .pipe(map(((result: { restSession: SmtpSessionExceptionsByPeriodAndappname[]; mainSession: SmtpMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
-                        this.setChartData(r, 'SMTP', 'smtpRequestExceptionsTable', 'SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
-                        return r;
+                        return this.setChartData(r, 'SMTP', 'smtpRequestExceptionsTable', 'SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
+                     
                     })))
             },
             ldapRequestExceptionsTable: {
@@ -372,8 +381,8 @@ export class DashboardComponent implements AfterViewInit  {
                 })
                     .pipe(map(((result: { restSession: LdapSessionExceptionsByPeriodAndappname[]; mainSession: LdapMainExceptionsByPeriodAndappname[]; }) => {
                         let r = [...result.restSession, ...result.mainSession]
-                        this.setChartData(r, 'LDAP', 'ldapRequestExceptionsTable', 'LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
-                        return r;
+                       return  this.setChartData(r, 'LDAP', 'ldapRequestExceptionsTable', 'LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE', groupedBy)
+                  
                     })))
             },
         }
