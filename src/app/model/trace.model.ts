@@ -273,7 +273,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
 
     formatNode(field: Label): string {
         switch (field) {
-            case Label.SERVER_IDENTITY: return this.nodeObject.name || '?'/*+ this.nodeObject.version*/ //version
+            case Label.SERVER_IDENTITY: return this.nodeObject.schema || this.nodeObject.name || '?'/*+ this.nodeObject.version*/ //version
             case Label.OS_RE: return this.nodeObject.productName || '?';
             case Label.IP_PORT: return (this.nodeObject.name || '?') + (!!this.nodeObject?.port ?   ":"+ this.nodeObject?.port.toString() : '') 
             case Label.BRANCH_COMMIT: return "N/A" // soon
