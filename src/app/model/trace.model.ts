@@ -256,7 +256,7 @@ export class LinkRequestNode implements Link<Label> {
         switch (field) {
             case Label.ELAPSED_LATENSE: return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`;
             case Label.METHOD_RESOURCE: return `${this.nodeObject.method || "?"} ${this.nodeObject.path || "?"}`
-            case Label.SIZE_COMPRESSION: return `${this.nodeObject.inDataSize < 0 ? 0 : this.nodeObject.inDataSize } ↓↑ ${this.nodeObject.outDataSize < 0 ? 0 : this.nodeObject.outDataSize }`
+            case Label.SIZE_COMPRESSION: return `${this.nodeObject.inDataSize < 0 ? 0 : sizeFormatter(this.nodeObject.inDataSize) } ↓↑ ${this.nodeObject.outDataSize < 0 ? 0 : sizeFormatter(this.nodeObject.outDataSize) }`
             case Label.PROTOCOL_SCHEME: return `${this.nodeObject.protocol || "?"}/${this.nodeObject.authScheme || "?"}`
             case Label.STATUS_EXCEPTION: return this.nodeObject.status.toString();
             case Label.USER: return `${this.nodeObject.user ?? "?"}`
@@ -424,7 +424,7 @@ export class RestRequestNode implements Node<Label> {
                 return `${e1.toFixed(3)}s` + (e2 >= 1 ? `~${e2.toFixed(3)}s` : '');
             }
             case Label.METHOD_RESOURCE: return `${this.nodeObject.method || "?"} ${this.nodeObject.path || "?"}`
-            case Label.SIZE_COMPRESSION: return `${this.nodeObject.inDataSize < 0 ? 0 : this.nodeObject.inDataSize } ↓↑ ${this.nodeObject.outDataSize < 0 ? 0 : this.nodeObject.outDataSize }`
+            case Label.SIZE_COMPRESSION: return `${this.nodeObject.inDataSize < 0 ? 0 : sizeFormatter(this.nodeObject.inDataSize) } ↓↑ ${this.nodeObject.outDataSize < 0 ? 0 :sizeFormatter(this.nodeObject.outDataSize) }`
             case Label.PROTOCOL_SCHEME: return `${this.nodeObject.protocol || "?"}/${this.nodeObject.authScheme || "?"}`
             case Label.STATUS_EXCEPTION: return this.nodeObject.status.toString();
             case Label.USER: return `${this.nodeObject.remoteTrace?.user ?? "?"}`
@@ -468,4 +468,21 @@ function getCommand<T>(arr: T[], multiple: string) {
             : multiple;
     }
     return '?';
+}
+
+function sizeFormatter(value:any){
+    if(!value && value!= 0) return '';
+    if(value < 1024){
+        return `${value}o`;
+    }
+    const units= ['ko','Mo' ];
+    let size = value / 1024;
+    let ui = 0;
+
+    while( size>= 1024 && ui < units.length -1){
+        size /= 1024;
+        ui++;
+    }
+
+    return `${size.toFixed(2)} ${units[ui]}`;
 }
