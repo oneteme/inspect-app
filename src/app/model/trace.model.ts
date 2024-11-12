@@ -249,7 +249,7 @@ export class LinkRequestNode implements Link<Label> {
         this.nodeObject = nodeObject;
     }
     getLinkStyle(): string {
-        return this.nodeObject.status ? 'SUCCES' : 'FAILURE'
+        return this.nodeObject.status > 400 || this.nodeObject.status == 0 ? 'FAILURE' : 'SUCCES'
     }
 
     formatLink(field: Label): string {
