@@ -4,20 +4,20 @@
       <mat-form-field class="no-subscript" appearance="outline">
         <mat-label>Node</mat-label>
         <mat-select [formControl]="ViewForm.controls.nodeView" >
-          <mat-option value="SERVER_IDENTITY">SERVER_IDENTITY</mat-option>
-          <mat-option value="OS_RE">OS_RE</mat-option>
-          <mat-option value="IP_PORT">IP_PORT</mat-option>
+          <mat-option value="SERVER_IDENTITY">ID</mat-option>
+          <mat-option value="OS_RE">Environement</mat-option>
+          <mat-option value="IP_PORT">Addresse</mat-option>
         </mat-select>
       </mat-form-field>
 
       <mat-form-field class="no-subscript" appearance="outline">
         <mat-label>Link</mat-label>
         <mat-select [formControl]="ViewForm.controls.linkView">
-          <mat-option value="ELAPSED_LATENSE">ELAPSED_LATENSE</mat-option>
-          <mat-option value="METHOD_RESOURCE">METHOD_RESOURCE</mat-option>
-          <mat-option value="SIZE_COMPRESSION">SIZE_COMPRESSION</mat-option>
-          <mat-option value="SCHEME_PROTOCOL">SCHEME_PROTOCOL</mat-option>
-          <mat-option value="STATUS_EXCEPTION">STATUS_EXCEPTION</mat-option>
+          <mat-option value="ELAPSED_LATENSE">Temps de réponse</mat-option>
+          <mat-option value="METHOD_RESOURCE">Ressource</mat-option>
+          <mat-option value="SIZE_COMPRESSION">Traffic</mat-option>
+          <mat-option value="PROTOCOL_SCHEME">Protocole</mat-option>
+          <mat-option value="STATUS_EXCEPTION">Statut</mat-option>
         </mat-select>
       </mat-form-field>
     </form>
