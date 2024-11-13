@@ -44,9 +44,9 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
 
             }
         ],
-        height: 450,
         options: {
             chart: {
+                height: '100%',
                 toolbar: {
                     show: false
                 },
@@ -85,9 +85,9 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
                 name: field('origin')
             }
         ],
-        height: 450,
         options: {
             chart: {
+                height: '100%',
                 toolbar: {
                     show: false
                 },
