@@ -14,6 +14,7 @@ import mx from "../../../mxgraph";
 import {InstanceService} from "../../service/jquery/instance.service";
 import {MainSessionService} from "../../service/jquery/main-session.service";
 import { NumberFormatterPipe } from "src/app/shared/pipe/number.pipe";
+import {SizePipe} from "../../shared/pipe/size.pipe";
 
 @Component({
     templateUrl: './architecture.view.html',
@@ -28,6 +29,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
     private _activatedRoute = inject(ActivatedRoute);
     private _location = inject(Location);
     private _numberFormatter = inject(NumberFormatterPipe);
+    private _sizeFormatter = inject(SizePipe);
     private _zone = inject(NgZone);
 
     rangesColorConfig = [ '#E9E9E9', '#AFB3EF', '#757DF4', '#3A47FA', '#0011FF' ]
@@ -76,7 +78,6 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
               }
         }
     };
-
     heatMapConfig: ChartProvider<XaxisType, YaxisType> = {
         series: [
             {
@@ -160,6 +161,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
         }
     };
     trafficIsloading:boolean;
+    syntheseIsLoading: boolean;
     heatMapData: { count: number, origin: string, target: string }[] = [];
 
     treeMapData: { count: number, origin: string, name: string, color: string }[] = [];
@@ -207,7 +209,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
                     return acc;
                 },[]).sort((a,b)=>(a.count-b.count))
 
-                const treeRanges = this.createRanges(d, 'count');
+                const treeRanges = this.createRanges(d, 'count', res);
                 this.treeMapData = d.map(t => {
                     let r = treeRanges.find(r=> t.count >= r.from && t.count <= r.to)
                     if(r){
@@ -222,7 +224,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
         this.heatMapControl.valueChanges.subscribe({
             next: res => {
                 let _field = res ? 'sum': 'count';
-                const ranges = this.createRanges(this.heatMapData, _field);
+                const ranges = this.createRanges(this.heatMapData, _field, res);
                 let newConfig = this.heatMapConfig;
                 newConfig.options.plotOptions.heatmap.colorScale.ranges = ranges;
                 newConfig.series = [
@@ -287,6 +289,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
 
     init() {
         this.trafficIsloading = true;
+        this.syntheseIsLoading = true;
         this.heatMapData = [];
         this.treeMapData = [];
         forkJoin(
@@ -309,7 +312,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
         }).pipe(map(res => {
             res.restSession.push(...res.mainSession.map(m => ({name: m.appName, schema: null, type: m.type, remoteServers: null})));
             return res.restSession;
-        })).subscribe({
+        }), finalize(() => this.syntheseIsLoading = false)).subscribe({
             next: res => {
                 this.tree.clearCells();
                 this.tree.draw(() => this.draw(this.tree, res));
@@ -318,25 +321,33 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
     }
 
     buildHeatMapCharts(res: {count: number, sum: number, origin: string, target: string}[]) {
-        let distinct = [...this.distinct(res, o => o.target)];
+        let orders  = res.reduce((acc, cur) => {
+            if(!acc[cur.target]) {
+                acc[cur.target] = 0;
+            }
+            acc[cur.target] += 1;
+            return acc;
+        }, {});
+        let distinct = Object.entries(orders).map((e1: [string, number]) => ({name: e1[0], count: e1[1]})).sort((a1, a2) => a2.count - a1.count);
         let map: any = {};
         res.forEach(r => {
             if (!map[r.origin]) {
                 map[r.origin] = {};
-                distinct.forEach(v => map[r.origin][v] = {count: 0, sum: 0});
+                distinct.forEach(v => map[r.origin][v.name] = {count: 0, sum: 0});
             }
             map[r.origin][r.target] = {count: r.count, sum: r.sum};
         });
-        let arr: { count: number, sum: number, origin: string, target: string }[] = [];
+        let arr: { count: number, sum: number, origin: string, target: string, targetSum: number }[] = [];
         Object.entries(map).forEach(e1 => {
+            let sum = Object.values(e1[1]).filter(v => v.count > 0).length;
             Object.entries(e1[1]).forEach(e2 => {
-                arr.push({ origin: e1[0], target: e2[0], count: e2[1].count, sum: e2[1].sum})
+                arr.push({ origin: e1[0], target: e2[0], count: e2[1].count, sum: e2[1].sum < 0 ? 0 : e2[1].sum, targetSum: sum})
             });
         });
-        this.heatMapData = arr;
+        this.heatMapData = arr.sort((a1, a2) => a2.targetSum - a1.targetSum);
     }
 
-    createRanges(arr: any[], field: string) {
+    createRanges(arr: any[], field: string, isSize: boolean) {
         const ranges: any[] = [{ from: 0, to: 0, name: `0`, color: this.rangesColorConfig[0] }];
         if(arr.length){
             let max = arr.reduce((acc: any, cur: any) => {
@@ -348,11 +359,13 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
             for (let i = 0; i < parts; i++) {
                 const start = i * range != 0 ? Math.floor(i * range+1) : 1;
                 const end = Math.floor((i + 1) * range);
-                ranges.push({ from: start, to: end, name: `${this._numberFormatter.transform(start)} - ${this._numberFormatter.transform(end)}`, color: this.rangesColorConfig[i + 1] })
+                let name = `${this._numberFormatter.transform(start)} - ${this._numberFormatter.transform(end)} ${isSize ? '(o)' : ''}`;
+                ranges.push({ from: start, to: end, name: name, color: this.rangesColorConfig[i + 1] })
             }
         }
         return ranges;
     }
+
 
     draw(tree: ArchitectureTree, architectures: Architecture[]) {
 

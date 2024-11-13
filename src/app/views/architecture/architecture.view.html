@@ -15,10 +15,12 @@
     </form>
 </header-page>
 <div id="container" class="mat-elevation-z5" style="margin-bottom: 1em">
-    <span class="dashboard_component_title">Vue globale</span>
+    <span class="dashboard_component_title">Synthése</span>
     <div id="fixed-width-container">
+        <div [hidden]="!syntheseIsLoading" style="height: 100%"><div class="loading">Loading...</div></div>
         <div #graphContainer id="graphContainer"></div>
     </div>
+
 </div>
 <div style="display: flex; justify-content: space-between; gap: 1em; margin-bottom: 1em;">
     <div style="width: 50%; display: flex; flex-direction: column;" class="mat-elevation-z5">

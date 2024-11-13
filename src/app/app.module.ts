@@ -32,6 +32,7 @@ import {StatisticClientView} from "./views/statistic/view/statistic-client.view"
 import {ArchitectureView} from "./views/architecture/architecture.view";
 import { NumberFormatterPipe } from './shared/pipe/number.pipe';
 import { TreeView } from './views/tree/tree.view';
+import {SizePipe} from "./shared/pipe/size.pipe";
 
 
 registerLocaleData(localeFr, 'fr-FR');
@@ -271,6 +272,7 @@ const routes: Route[] = [
     AppComponent
   ],
   providers: [
+      SizePipe,
     DatePipe,
     DecimalPipe,
     DurationPipe,

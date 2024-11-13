@@ -9,7 +9,7 @@ export class SizePipe implements PipeTransform {
     transform(value: any, ...args: any[]):string {
         if(!value) return '';
         if(value < 1024){
-            return `${value}octets`;
+            return `${value} o`;
         }
         const units= ['ko','Mo' ];
         let size = value / 1024;
