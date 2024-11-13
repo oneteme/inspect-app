@@ -43,7 +43,6 @@ export class TreeView implements OnDestroy {
     nodeView: new FormControl(),
     linkView: new FormControl(),
   });
-
   ViewEvent: { [key: string]: (lbl: Label) => void } =
     {
       "SERVER_IDENTITY": (lbl: Label) => this.viewByServerLbl(lbl),
