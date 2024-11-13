@@ -62,7 +62,7 @@
                     (onClickRow)="selectedQuery($event)">
     </database-table>
 </div>
-<div *ngIf="session.databaseRequests?.length || session.restRequests?.length" style="margin-bottom: 1em;">
+<div *ngIf="(session.databaseRequests?.length || session.restRequests?.length) && (session.databaseRequests?.length+session.restRequests?.length <500) " style="margin-bottom: 1em;">
     <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
