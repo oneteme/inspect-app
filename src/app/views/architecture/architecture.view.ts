@@ -359,7 +359,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
             for (let i = 0; i < parts; i++) {
                 const start = i * range != 0 ? Math.floor(i * range+1) : 1;
                 const end = Math.floor((i + 1) * range);
-                let name = `${this._numberFormatter.transform(start)} - ${this._numberFormatter.transform(end)} ${isSize ? '(o)' : ''}`;
+                let name = isSize ?`${this._sizeFormatter.transform(start)} - ${this._sizeFormatter.transform(end)}`: `${this._numberFormatter.transform(start)} - ${this._numberFormatter.transform(end)}`;
                 ranges.push({ from: start, to: end, name: name, color: this.rangesColorConfig[i + 1] })
             }
         }
