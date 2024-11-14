@@ -45,7 +45,7 @@
     <div #timeline id="timeline"></div>
 </div>
 
-<div *ngIf="!isLoading && request" style="margin-bottom: 2em;">
+<div *ngIf="!isLoading && request && request.mails?.length" style="margin-bottom: 2em;">
     <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
