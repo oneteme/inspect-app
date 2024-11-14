@@ -258,7 +258,7 @@ export class LinkRequestNode implements Link<Label> {
             case Label.METHOD_RESOURCE: return `${this.nodeObject.method || "?"} ${this.nodeObject.path || "?"}`
             case Label.SIZE_COMPRESSION: return `${this.nodeObject.inDataSize < 0 ? 0 : sizeFormatter(this.nodeObject.inDataSize) } ↓↑ ${this.nodeObject.outDataSize < 0 ? 0 : sizeFormatter(this.nodeObject.outDataSize) }`
             case Label.PROTOCOL_SCHEME: return `${this.nodeObject.protocol || "?"}/${this.nodeObject.authScheme || "?"}`
-            case Label.STATUS_EXCEPTION: return this.nodeObject.status.toString() +(this.nodeObject.exception && ': ' + this.nodeObject.exception?.type);
+            case Label.STATUS_EXCEPTION: return this.nodeObject.status.toString() +(this.nodeObject.exception && ': ' + this.nodeObject.exception?.type || '');
             case Label.USER: return `${this.nodeObject.user ?? "?"}`
             default: return '?';
         }
@@ -284,7 +284,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
     formatLink(field: Label): string {
         switch (field) {
             case Label.ELAPSED_LATENSE: return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
-            case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands, 'SQL ' + this.nodeObject.name)// todo: with sql add schema
+            case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands, 'SQL ')// todo: with sql add schema
             case Label.SIZE_COMPRESSION: return this.nodeObject?.count < 0 ? '0': this.nodeObject?.count!= undefined? this.nodeObject?.count.toString() : '?'; // remove undefined condition 
             case Label.PROTOCOL_SCHEME: return "JDBC/Basic"
             case Label.STATUS_EXCEPTION: return this.nodeObject.exception && 'FAIL:' + this.nodeObject.exception?.type || 'OK'
