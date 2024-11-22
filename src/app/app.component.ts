@@ -6,6 +6,8 @@ import {application, environment} from 'src/environments/environment';
 import {EnvRouter} from "./service/router.service";
 import {Constants} from "./views/constants";
 import {InstanceService} from "./service/jquery/instance.service";
+import {MatIconRegistry} from "@angular/material/icon";
+import {DomSanitizer} from "@angular/platform-browser";
 
 
 @Component({
@@ -26,6 +28,12 @@ export class AppComponent implements OnInit, OnDestroy {
 
 
     constructor() {
+        const iconRegistry = inject(MatIconRegistry);
+        const sanitizer = inject(DomSanitizer);
+
+        // Note that we provide the icon here as a string literal here due to a limitation in
+        // Stackblitz. If you want to provide the icon from a URL, you can use:
+        iconRegistry.addSvgIcon('github', sanitizer.bypassSecurityTrustResourceUrl('./assets/github.svg'));
         this.isLoadingEnv = true;
         this.subscriptions.push(this._service.getEnvironments()
             .pipe(finalize(() => this.isLoadingEnv = false))

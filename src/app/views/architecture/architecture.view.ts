@@ -370,6 +370,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
     draw(tree: ArchitectureTree, architectures: Architecture[]) {
 
         let layout = new mx.mxHierarchicalLayout(tree._graph, mx.mxConstants.DIRECTION_WEST);
+
         let widthServerSl = architectures.reduce((acc, cur, index) => {
             if(index != architectures.length - 1) {
                 return (acc + ServerConfig['REST'].width) - 30;
