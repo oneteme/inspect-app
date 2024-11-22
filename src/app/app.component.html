@@ -5,9 +5,9 @@
         <button mat-icon-button [matMenuTriggerFor]="menu">
             <mat-icon>more_vert</mat-icon>
         </button>
-        <button mat-icon-button [routerLink]="['architecture']">
+        <!--<button mat-icon-button [routerLink]="['architecture']">
             <mat-icon class="material-symbols-outlined">lan</mat-icon>
-        </button>
+        </button>-->
         <mat-menu #menu="matMenu">
             <button mat-menu-item [routerLink]="['session/rest']" routerLinkActive="item-selected"
                     [queryParams]="{env: env.value}">
