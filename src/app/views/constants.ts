@@ -1,16 +1,23 @@
 import { ChartProvider, field, values } from "@oneteme/jquery-core";
+import { DashboardComponent } from "./dashboard/dashboard.component";
 
 export class Constants {
 
     static readonly REPARTITION_TYPE_RESPONSE_PIE: ChartProvider<string, number> = {
-        title: 'Nombre d\'appels par type de réponse',
+        title: 'Appels par type de réponse',
         height: 250,
         series: [
+            { data: { x: values('N/A'), y: field('countUnavailableServer') }, name: '0', color: '#495D63' },
             { data: { x: values('2xx'), y: field('countSucces') }, name: '2xx', color: '#33cc33' },
             { data: { x: values('4xx'), y: field('countErrorClient') }, name: '4xx', color: '#ffa31a' },
             { data: { x: values('5xx'), y: field('countErrorServer') }, name: '5xx', color: '#ff0000' }
         ],
         options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
             legend: {
                 height: 225
             }
@@ -27,6 +34,11 @@ export class Constants {
             { data: { x: values('< 1'), y: field('elapsedTimeFastest') }, name: 'mapper 5', color: '#81D4FA' }
         ],
         options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
             legend: {
                 height: 225
             }
@@ -34,17 +46,37 @@ export class Constants {
     };
 
     static readonly REPARTITION_USER_POLAR: ChartProvider<string, number> = {
-        title: 'Nombre d\'appels par utilisateur (Top 5)',
+        title: 'Appels par utilisateur (Top 5)',
         height: 250,
         series: [
             { data: { x: field('user'), y: field('count') }, name: 'Total' }
         ],
         options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
             legend: {
                 height: 225
             }
         }
     };
+
+    static readonly REPARTITION_RE_PIE: ChartProvider<string, number> = {
+        title: 'Repartition par navigateur',
+        height: 250,
+        series: [
+            { data: { x: field('re'), y: field('count') } }
+        ],
+        options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            }
+        }
+    }
 
     static readonly REPARTITION_USER_BAR: ChartProvider<string, number> = {
         height: 250,
@@ -53,6 +85,11 @@ export class Constants {
         ],
         stacked: true,
         options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
             tooltip: {
                 shared: true,
                 intersect: false,
@@ -65,8 +102,50 @@ export class Constants {
         }
     }
 
+    static readonly REPARTITION_PAGE_BAR: ChartProvider<string, number> = {
+        title: 'Consultation par page (Top 5)',
+        height: 250,
+        series: [
+            { data: { x: field('location'), y: field('count') }, name: 'Consultation par page', color: '#33cc33' }
+        ],
+        stacked: true,
+        options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
+            tooltip: {
+                shared: true,
+                intersect: false,
+                followCursor: true
+            },
+            plotOptions: {
+                bar: {
+                    dataLabels: {
+                        total: {
+                            enabled: true,
+                            offsetX: 0,
+                            style: {
+                                fontSize: '13px',
+                                fontWeight: 900
+                            }
+                        }
+                    }
+                },
+            },
+            fill: {
+                opacity: 1
+            },
+            stroke: {
+                width: 1,
+                colors: ['#fff']
+            }
+        }
+    };
+
     static readonly REPARTITION_API_BAR: ChartProvider<string, number> = {
-        title: 'Nombre d\'appels par Api (Top 5)',
+        title: 'Appels par Api (Top 5)',
         height: 300,
         series: [
             { data: { x: field('apiName'), y: field('countSucces') }, name: '2xx', color: '#33cc33' },
@@ -75,6 +154,11 @@ export class Constants {
         ],
         stacked: true,
         options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
             tooltip: {
                 shared: true,
                 intersect: false,
@@ -110,7 +194,7 @@ export class Constants {
     };
 
     static readonly REPARTITION_SPEED_BAR: ChartProvider<string, number> = {
-        title: 'Nombre d\'appels par tranche de temps (seconde)',
+        title: 'Appels par tranche de temps (seconde)',
         height: 250,
         series: [
             { data: { x: field('date'), y: field('elapsedTimeSlowest') }, name: '> 10', color: '#848383' },
@@ -121,6 +205,11 @@ export class Constants {
         ],
         stacked: true,
         options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
             tooltip: {
                 shared: true,
                 intersect: false,
@@ -136,12 +225,18 @@ export class Constants {
     static readonly REPARTITION_TYPE_RESPONSE_BAR: ChartProvider<string, number> = {
         height: 250,
         series: [
+            { data: { x: field('date'), y: field('countUnavailableServer') }, name: 'N/A', color: '#495D63' },
             { data: { x: field('date'), y: field('countSucces') }, name: '2xx', color: '#33cc33' },
             { data: { x: field('date'), y: field('countErrorClient') }, name: '4xx', color: '#ffa31a' },
             { data: { x: field('date'), y: field('countErrorServer') }, name: '5xx', color: '#ff0000' }
         ],
         stacked: true,
         options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
             tooltip: {
                 shared: true,
                 intersect: false,
@@ -154,6 +249,21 @@ export class Constants {
         }
     }
 
+    static readonly REPARTITION_VIEW_AREA: ChartProvider<string, number> = {
+        title: 'Nombre de pages visités',
+        height: 250,
+        series: [
+            { data: { x: field('date'), y: field('count') }, name: 'Nombre de pages visités' }
+        ],
+        options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            }
+        }
+    };
+
     static readonly REPARTITION_MAX_BY_PERIOD_LINE: ChartProvider<string, number> = {
         title: 'Temps de reponse moyen et maximum',
         ytitle: 'Temps (s)',
@@ -164,33 +274,10 @@ export class Constants {
         options: {
             chart: {
                 id: 'c',
-                group: 'A'
-            },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                width: [4]
-            },
-            yaxis: {
-                decimalsInFloat: 0
-            },
-            legend: {
-                showForSingleSeries: true
-            }
-        }
-    };
-
-    static readonly REPARTITION_AVG_BY_PERIOD_LINE: ChartProvider<string, number> = {
-        ytitle: 'Temps (s)',
-        height: 200,
-        series: [
-            { data: { x: field('date'), y: field('avg') }, name: 'Temps moyen', color: '#FF9B00' }
-        ],
-        options: {
-            chart: {
-                id: 'b',
-                group: 'A'
+                group: 'A',
+                toolbar: {
+                    show: false
+                }
             },
             dataLabels: {
                 enabled: false
@@ -207,13 +294,96 @@ export class Constants {
         }
     };
 
-    static readonly REPARTITION_REQUEST_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        title: 'Nombre d\'appels',
-        subtitle: 'sur les 7 derniers jours',
-        height: 150,
-        continue: true,
+    static readonly REPARTITION_AVG_BY_PERIOD_LINE: ChartProvider<string, number> = {
+        ytitle: 'Temps (s)',
+        height: 200,
         series: [
-            { data: { x: o => new Date(o['date']), y: field('count') }, name: 'Nombre d\'appels', color: "#1423dc" }
+            { data: { x: field('date'), y: field('avg') }, name: 'Temps moyen', color: '#FF9B00' }
+        ],
+        options: {
+            chart: {
+                id: 'b',
+                group: 'A',
+                toolbar: {
+                    show: false
+                }
+            },
+            dataLabels: {
+                enabled: false
+            },
+            stroke: {
+                width: [4]
+            },
+            yaxis: {
+                decimalsInFloat: 3
+            },
+            legend: {
+                showForSingleSeries: true
+            }
+        }
+    };
+
+    static readonly REPARTITION_USER_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+        title: 'Utilisateurs',
+        height: 150,
+        series: [
+            { data: { x: field('date'), y: field('count') }, name: 'Utilisateurs', color: "#FFD400" }
+        ],
+        options: {
+            chart: {
+                id: 'sparkline-3',
+                group: 'sparkline',
+                sparkline: {
+                    enabled: true
+                },
+                toolbar: {
+                    show: false
+                }
+            },
+            xaxis: {
+                labels: {
+                    datetimeUTC: false
+                }
+            },
+            subtitle: {
+                offsetY: 20
+            }
+        }
+    };
+
+    static readonly REPARTITION_VIEW_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+        title: 'Pages visitées',
+        height: 150,
+        series: [
+            { data: { x: field('date'), y: field('count') }, name: 'Pages visités', color: "#DECDF5" }
+        ],
+        options: {
+            chart: {
+                id: 'sparkline-2',
+                group: 'sparkline',
+                sparkline: {
+                    enabled: true
+                },
+                toolbar: {
+                    show: false
+                }
+            },
+            xaxis: {
+                labels: {
+                    datetimeUTC: false
+                }
+            },
+            subtitle: {
+                offsetY: 20
+            }
+        }
+    };
+
+    static readonly REPARTITION_REQUEST_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+        title: 'Appels',
+        height: 150,
+        series: [
+            { data: { x: field('date'), y: field('count') }, name: 'Appels', color: "#1423dc" }
         ],
         options: {
             chart: {
@@ -221,10 +391,10 @@ export class Constants {
                 group: 'sparkline',
                 sparkline: {
                     enabled: true
+                },
+                toolbar: {
+                    show: false
                 }
-            },
-            stroke: {
-                curve: 'straight'
             },
             xaxis: {
                 labels: {
@@ -238,12 +408,10 @@ export class Constants {
     };
 
     static readonly REPARTITION_REQUEST_ERROR_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        title: 'Nombre d\'appels en erreur',
-        subtitle: 'sur les 7 derniers jours',
+        title: 'Appels en erreur',
         height: 150,
-        continue: true,
         series: [
-            { data: { x: o => new Date(o['date']), y: field('countErrorServer') }, name: 'Nombre d\'appels en erreur', color: "#ff0000" }
+            { data: { x: field('date'), y: field('countErrorServer') }, name: 'Appels en erreur', color: "#ff0000" }
         ],
         options: {
             chart: {
@@ -251,10 +419,10 @@ export class Constants {
                 group: 'sparkline',
                 sparkline: {
                     enabled: true
+                },
+                toolbar: {
+                    show: false
                 }
-            },
-            stroke: {
-                curve: 'straight'
             },
             xaxis: {
                 labels: {
@@ -275,12 +443,10 @@ export class Constants {
     };
 
     static readonly REPARTITION_REQUEST_SLOWEST_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        title: 'Nombre d\'appels superieur à 10 secondes',
-        subtitle: 'sur les 7 derniers jours',
+        title: 'Appels superieur à 10 secondes',
         height: 150,
-        continue: true,
         series: [
-            { data: { x: o => new Date(o['date']), y: field('countSlowest') }, name: 'Nombre d\'appels superieur à 10 secondes', color: "#848383" }
+            { data: { x: field('date'), y: field('countSlowest') }, name: 'Appels superieur à 10 secondes', color: "#848383" }
         ],
         options: {
             chart: {
@@ -288,10 +454,10 @@ export class Constants {
                 group: 'sparkline',
                 sparkline: {
                     enabled: true
+                },
+                toolbar: {
+                    show: false
                 }
-            },
-            stroke: {
-                curve: 'straight'
             },
             xaxis: {
                 labels: {
@@ -307,6 +473,257 @@ export class Constants {
             },
             subtitle: {
                 offsetY: 20
+            }
+        }
+    };
+
+    static readonly MAPPING_TYPE: {[key: string]: {title: string, icon: string}} = {
+        rest: {title: 'Appel d\'API', icon: 'call_received'},
+        batch: {title: 'Lancement de Batch', icon: 'manufacturing'},
+        startup: {title: 'Lancement de Serveur', icon: 'restart_alt'},
+        view: {title: 'Navigation', icon: 'ads_click'},
+        dashboard: {title:'Page d\'Accueil', icon: 'home'}
+    }
+
+    
+    static REST_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<string, number> = {
+   
+    
+        height: 150,
+        continue: true,
+        series: [
+            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions REST', color: "#ff0000" },
+        ],
+        options: {
+            title: {
+                text: 'REST: ',
+            },
+            subtitle: {
+                text :'',
+                offsetY: 20
+            },
+            chart: {
+                id: 'sparkline-1',
+                group: 'sparkline',
+                data : {
+                     name : "restRequestExceptionsTable",
+                     type :  "REST"
+                },
+                sparkline: {
+                   enabled: true
+                },
+                toolbar: {
+                    show: false
+                }
+                
+            },
+            stroke: {
+                curve: 'straight'
+            },
+            xaxis: {
+                labels: {
+                    datetimeUTC: false
+                },
+            },
+            yaxis: {
+                labels: {
+                    formatter: function (val: any) {
+                        return val.toFixed(2)+"%";
+                    },
+                },
+                max: 100
+            }
+        }
+    };
+    
+    static  DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+      
+        height: 150,
+        continue: true,
+        series: [
+            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions JDBC', color: "#ff0000" }
+        ],
+        options: {
+            title: {
+                text: 'JDBC: '
+            },
+            subtitle: {
+                text :'',
+                offsetY: 20
+            },
+            chart: {
+                id: 'sparkline-2',
+                group: 'sparkline',
+                data : {
+                    name : "databaseRequestExceptionsTable",
+                    type :  "JDBC"
+                },
+                sparkline: {
+                    enabled: true
+                },
+                toolbar: {
+                    show: false
+                }
+            },
+            stroke: {
+                curve: 'straight'
+            },
+            xaxis: {
+                labels: {
+                    datetimeUTC: false
+                },
+            },
+            yaxis: {
+                labels: {
+                    formatter: function (val: any) {
+                        return val.toFixed(2)+"%";
+                    },
+                },
+                max: 100
+            }
+        }
+    };
+
+    static  FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+
+
+        height: 150,
+        continue: true,
+        series: [
+            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions FTP', color: "#ff0000"}
+        ],
+        options: {
+            title: {
+                text: 'FTP: ',
+            },
+            subtitle: {
+                text :'',
+                offsetY: 20
+            },
+            chart: {
+                id: 'sparkline-3',
+                group: 'sparkline',
+                data : {
+                    name : "ftpRequestExceptionsTable",
+                    type :  "FTP"
+                },
+                sparkline: {
+                    enabled: true
+                },
+                toolbar: {
+                    show: false
+                }
+            },
+            stroke: {
+                curve: 'straight'
+            },
+            xaxis: {
+                labels: {
+                    datetimeUTC: false
+                },
+            },
+            yaxis: {
+                labels: {
+                    formatter: function (val: any) {
+                        return val.toFixed(2)+"%";
+                    },
+                },
+                max: 100
+            }
+        }
+    };
+
+    static  SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+        height: 150,
+        continue: true,
+        series: [
+            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions SMTP', color: "#ff0000" }
+        ],
+        options: {
+            title: {
+                text: 'SMTP: ',
+            },
+            subtitle: {
+                text :'',
+                offsetY: 20
+            },
+            chart: {
+                id: 'sparkline-4',
+                group: 'sparkline',
+                data : {
+                    name : "smtpRequestExceptionsTable",
+                    type :  "SMTP"
+                },
+                sparkline: {
+                    enabled: true
+                },
+                toolbar: {
+                    show: false
+                }
+            },
+            stroke: {
+                curve: 'straight'
+            },
+            xaxis: {
+                labels: {
+                    datetimeUTC: false
+                },
+            },
+            yaxis: {
+                labels: {
+                    formatter: function (val: any) {
+                        return val.toFixed(2)+"%";
+                    },
+                },
+                max: 100
+            }
+        }
+    };
+
+    static  LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+        height: 150,
+        continue: true,
+        series: [
+            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions LDAP', color: "#ff0000" }
+        ],
+        options: {
+            title: {
+                text: 'LDAP: ',
+            },
+            subtitle: {
+                text :'',
+                offsetY: 20
+            },
+            chart: {
+                id: 'sparkline-5',
+                group: 'sparkline',
+                data : {
+                    name : "ldapRequestExceptionsTable",
+                    type :  "LDAP"
+                },
+                sparkline: {
+                    enabled: true
+                },
+                toolbar: {
+                    show: true,
+                    
+                }
+            },
+            stroke: {
+                curve: 'straight'
+            },
+            xaxis: {
+                labels: {
+                    datetimeUTC: false
+                },
+            },
+            yaxis: {
+                labels: {
+                    formatter: function (val: any) {
+                        return val.toFixed(2)+"%";
+                    },
+                },
+                max: 100
             }
         }
     };
@@ -356,42 +773,52 @@ export const Operation = {
 }
 export class FilterConstants {
 
-    static readonly SESSION_API: Filter[] = [
-        { key: 'query', label: 'Query params', type: 'input', row: 2, col: 1, op: Operation.like },
-        { key: 'status', label: 'Status', type: 'select', row: 3, col: 1, options: [{ status: '200' }, { status: '201' }, { status: '202' }, { status: '400' }, { status: '401' }, { status: '403' }, { status: '404' }, { status: '405' }, { status: '409' }, { status: '415' }, { status: '500' }, { status: '503' }], op: Operation.like },
-        { key: 'method', label: 'Method', type: 'select', width: 20, row: 1, col: 1, options: [{ method: 'GET' }, { method: 'PUT' }, { method: 'POST' }, { method: 'DELETE' }, { method: 'OPTIONS' }], op: Operation.eq },
-        { key: 'path', label: 'Path', type: 'input', row: 1, col: 2, op: Operation.like },
-        { key: 'api_name', label: 'Nom API', type: 'select', row: 3, col: 2, endpoint: "/stat/incoming/request", query: { 'column.distinct': 'api_name.coalesce(null):api_name', 'api_name.not': 'null', 'order': 'api_name.coalesce(null).asc' }, op: Operation.eq  },
-        { key: 'user', label: 'Utilisateur', type: 'select', row: 3, col: 3, endpoint: "/stat/incoming/request", query: { 'column.distinct': 'user.coalesce(null)', 'user.not': 'null', 'order': 'user.coalesce(null).asc' }, op: Operation.eq  }
-        // new Filter("err_type", "Exception", 'select', 50, "/stat/incoming/request", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
-        // new Filter("address", "adresse", 'input', 50),
-        // new Filter("os", "OS", 'select', 50, "/stat/incoming/request", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
-        // new Filter("re", "RE", 'select', 50, "/stat/incoming/request", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
-        // new Filter("auth", "Authentification scheme", 'select', 50, "/stat/incoming/request", null, null, { 'column.distinct': 'auth', 'order': 'auth.asc' }),
-        // new Filter("host", "Hôte", 'select', 50, "/stat/incoming/request", null, null, { 'column.distinct': 'host', 'order': 'host.asc' }),
-        // new Filter("protocol", "Protocole", 'select', 50, null,null, [{ protocol: 'HTTPS' }, { protocol: 'HTTP' }]),
-    ]
-
-    static readonly SESSION_MAIN: Filter[] = [
-        { key: 'name', label: 'Serveur', type: 'select', row: 2, col: 1, endpoint: '/stat/session', query: { 'column.distinct': 'session.name.coalesce(null)', 'session.name.not': 'null', 'order': 'session.name.coalesce(null).asc' }, op: Operation.eq  },
-        { key: 'location', label: 'Chemin', type: 'input', row: 1, col: 1, op: Operation.like },
-        { key: 'user', label: 'Utilisateur', type: 'select', row: 2, col: 2, endpoint: '/stat/session', query: { 'column.distinct': 'user.coalesce(null)', 'user.not': 'null', 'order': 'user.coalesce(null).asc' }, op: Operation.eq  }
-
-        // new Filter("err_type", "Exception", 'select', 50, "/stat/session", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
-        // new Filter("os", "OS", 'select', 50, "/stat/session", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
-        //new Filter("re", "RE", 'select', 50, "/stat/session", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
-    ]
+    static readonly SEARCH: {[key: string]: Filter[]} = {
+        rest: [
+            { key: 'query', label: 'Query params', type: 'input', row: 2, col: 1, op: Operation.like },
+            { key: 'status', label: 'Status', type: 'select', row: 3, col: 1, endpoint: "session/rest", query: { 'column.distinct': 'status:status', 'order': 'status.asc' }, op: Operation.eq },
+            { key: 'method', label: 'Method', type: 'select', width: 20, row: 1, col: 1, endpoint: "session/rest",  query: { 'column.distinct': 'method:method', 'order': 'method.asc' }, op: Operation.eq },
+            { key: 'path', label: 'Path', type: 'input', row: 1, col: 2, op: Operation.like },
+            { key: 'apiName', label: 'Nom API', type: 'select', row: 3, col: 2, endpoint: "session/rest", query: { 'column.distinct': 'api_name', 'api_name.notNull': '', 'order': 'api_name.asc' }, op: Operation.eq  },
+            { key: 'user', label: 'Utilisateur', type: 'select', row: 3, col: 3, endpoint: "session/rest", query: { 'column.distinct': 'user', 'user.notNull': '', 'order': 'user.asc' }, op: Operation.eq  }
+            // new Filter("err_type", "Exception", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
+            // new Filter("address", "adresse", 'input', 50),
+            // new Filter("os", "OS", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
+            // new Filter("re", "RE", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
+            // new Filter("auth", "Authentification scheme", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'auth', 'order': 'auth.asc' }),
+            // new Filter("host", "Hôte", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'host', 'order': 'host.asc' }),
+            // new Filter("protocol", "Protocole", 'select', 50, null,null, [{ protocol: 'HTTPS' }, { protocol: 'HTTP' }]),
+        ],
+        batch: [
+            { key: 'name', label: 'Nom', type: 'select', row: 1, col: 1, width: 20, endpoint: 'session/main', query: { 'column.distinct': 'name', 'name.notNull': '', 'type': 'BATCH', 'order': 'name.asc' }, op: Operation.eq  },
+            { key: 'location', label: 'Chemin', type: 'input', row: 1, col: 2, op: Operation.like },
+            // new Filter("err_type", "Exception", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
+            // new Filter("os", "OS", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
+            //new Filter("re", "RE", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
+        ],
+        startup: [
+            { key: 'location', label: 'Chemin', type: 'input', row: 1, col: 1, op: Operation.like }
+            // new Filter("err_type", "Exception", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
+            // new Filter("os", "OS", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
+            //new Filter("re", "RE", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
+        ],
+        view: [
+            { key: 'name', label: 'Nom', type: 'select', row: 2, col: 1, endpoint: 'session/main', query: { 'column.distinct': 'name', 'name.notNull': '', 'type': 'VIEW', 'order': 'name.asc' }, op: Operation.eq  },
+            { key: 'location', label: 'Chemin', type: 'input', row: 1, col: 1, op: Operation.like },
+            { key: 'user', label: 'Utilisateur', type: 'select', row: 2, col: 2, endpoint: 'session/main', query: { 'column.distinct': 'user', 'user.notNull': '', 'type': 'VIEW', 'order': 'user.asc' }, op: Operation.eq  }
+            // new Filter("err_type", "Exception", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
+            // new Filter("os", "OS", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
+            //new Filter("re", "RE", 'select', 50, "/stat/mainsession", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
+        ]
+    }
 
     static readonly STATS_API: Filter[] = [
-        { key: 'query', label: 'Query params', type: 'input', row: 1, col: 2, op: Operation.like },
-        { key: 'method', label: 'Method', type: 'select', width: 20, row: 1, col: 1, options: [{ method: 'GET' }, { method: 'PUT' }, { method: 'POST' }, { method: 'DELETE' }, { method: 'OPTIONS' }], op: Operation.eq  },
-        { key: 'status', label: 'Status', type: 'select', row: 3, col: 1, options: [{ status: '200' }, { status: '201' }, { status: '202' }, { status: '400' }, { status: '401' }, { status: '403' }, { status: '404' }, { status: '405' }, { status: '409' }, { status: '415' }, { status: '500' }, { status: '503' }], op: Operation.eq  },
-        { key: 'user', label: 'Utilisateur', type: 'select', row: 3, col: 2, endpoint: '/stat/incoming/request', query: { 'column.distinct': 'user.coalesce(null)', 'user.not': 'null', 'order': 'user.coalesce(null).asc' }, op: Operation.eq  },
-        { key: 'path', label: 'Path', type: 'input', row: 2, col: 1, op: Operation.like }
-
-        //new Filter("os", "OS", 'select', 50, "/stat/incoming/request", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
-        //new Filter("re", "RE", 'select', 50, "/stat/incoming/request", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
-        //new Filter("err_type", "Exception", 'select', 50, "/stat/incoming/request", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
+        { key: 'query', label: 'Query params', type: 'input', row: 1, col: 1, op: Operation.like },
+        { key: 'status', label: 'Status', type: 'select', row: 2, col: 1, options: [{ status: '200' }, { status: '201' }, { status: '202' }, { status: '400' }, { status: '401' }, { status: '403' }, { status: '404' }, { status: '405' }, { status: '409' }, { status: '415' }, { status: '500' }, { status: '503' }], op: Operation.eq  },
+        { key: 'user', label: 'Utilisateur', type: 'select', row: 2, col: 2, endpoint: 'session/rest', query: { 'column.distinct': 'user', 'user.notNull': '', 'order': 'user.asc' }, op: Operation.eq  },
+        //new Filter("os", "OS", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
+        //new Filter("re", "RE", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
+        //new Filter("err_type", "Exception", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
 
     ]
 
@@ -399,12 +826,12 @@ export class FilterConstants {
         { key: 'query', label: 'Query params', type: 'input', row: 1, col: 2, op: Operation.like },
         { key: 'method', label: 'Method', type: 'select', width: 20, row: 1, col: 1, options: [{ method: 'GET' }, { method: 'PUT' }, { method: 'POST' }, { method: 'DELETE' }, { method: 'OPTIONS' }], op: Operation.eq  },
         { key: 'status', label: 'Status', type: 'select', row: 3, col: 1, options: [{ status: '200' }, { status: '201' }, { status: '202' }, { status: '400' }, { status: '401' }, { status: '403' }, { status: '404' }, { status: '405' }, { status: '409' }, { status: '415' }, { status: '500' }, { status: '503' }], op: Operation.eq  },
-        { key: 'user', label: 'Utilisateur', type: 'select', row: 3, col: 2, endpoint: '/stat/incoming/request', query: { 'column.distinct': 'user.coalesce(null)', 'user.not': 'null', 'order': 'user.coalesce(null).asc' }, op: Operation.eq  },
+        { key: 'user', label: 'Utilisateur', type: 'select', row: 3, col: 2, endpoint: 'session/rest', query: { 'column.distinct': 'user', 'user.notNull': '', 'order': 'user.asc' }, op: Operation.eq  },
         { key: 'path', label: 'Path', type: 'input', row: 2, col: 1, op: Operation.like }
 
-        //new Filter("os", "OS", 'select', 50, "/stat/incoming/request", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
-        //new Filter("re", "RE", 'select', 50, "/stat/incoming/request", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
-        //new Filter("err_type", "Exception", 'select', 50, "/stat/incoming/request", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
+        //new Filter("os", "OS", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
+        //new Filter("re", "RE", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
+        //new Filter("err_type", "Exception", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
 
     ]
 
@@ -420,16 +847,16 @@ export class FilterConstants {
         // new Filter("path", "Path", 'input', 100, null, null, null, null, null, Operation.like),
 
 
-        //new Filter("os", "OS", 'select', 50, "/stat/incoming/request", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
-        //new Filter("re", "RE", 'select', 50, "/stat/incoming/request", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
-        //new Filter("err_type", "Exception", 'select', 50, "/stat/incoming/request", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
+        //new Filter("os", "OS", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'os', 'order': 'os.asc' }),
+        //new Filter("re", "RE", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 're', 'order': 're.asc' }),
+        //new Filter("err_type", "Exception", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
 
     ]
 
     static readonly STATS_DB: Filter[] = [
-        // new Filter("schema", "Base de donnée", 'select', 50, "/stat/incoming/request", null, null, { 'column.distinct': 'query.schema', 'query.parent': 'request.id',  'order': 'query.schema.asc' }),
-        // new Filter("user", "Utilisateur", 'select', 50, "/stat/incoming/request",'query.', null,  { 'column.distinct': 'query.user', 'query.parent': 'request.id', 'order': 'query.user.asc' }),
-        // new Filter("err_type", "Exception", 'select', 50, "/stat/incoming/request", null, null, { 'column.distinct': 'dbaction.err_type:err_type','dbaction.parent': 'query.id', 'query.parent': 'request.id', 'order': 'dbaction.err_type.asc' }),
-        // new Filter("db_name", "SGBD", 'select', 50, "/stat/incoming/request", "query.", null, { 'column.distinct': 'query.db_name:db_name', 'query.parent': 'request.id', 'order': 'query.db_name.asc' }),
+        // new Filter("schema", "Base de donnée", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'dbquery.schema', 'dbquery.parent': 'apisession.id',  'order': 'dbquery.schema.asc' }),
+        // new Filter("user", "Utilisateur", 'select', 50, "/stat/apisession",'dbquery.', null,  { 'column.distinct': 'dbquery.user', 'dbquery.parent': 'apisession.id', 'order': 'dbquery.user.asc' }),
+        // new Filter("err_type", "Exception", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'dbaction.err_type:err_type','dbaction.parent': 'dbquery.id', 'dbquery.parent': 'apisession.id', 'order': 'dbaction.err_type.asc' }),
+        // new Filter("db_name", "SGBD", 'select', 50, "/stat/apisession", "dbquery.", null, { 'column.distinct': 'dbquery.db_name:db_name', 'dbquery.parent': 'apisession.id', 'order': 'dbquery.db_name.asc' }),
     ]
 }

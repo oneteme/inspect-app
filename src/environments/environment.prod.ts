@@ -1,5 +1,5 @@
 
-import { Application } from "src/app/shared/model/conf.model";
+import { Application } from "src/app/model/conf.model";
 
 export const environment = {
   production: false,

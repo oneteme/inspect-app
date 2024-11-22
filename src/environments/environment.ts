@@ -2,7 +2,7 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-import { Application } from "src/app/shared/model/conf.model";
+import { Application } from "src/app/model/conf.model";
 
 export const environment = {
   production: false,
@@ -10,17 +10,20 @@ export const environment = {
 };
 
 export const application: Application = {
-  default_env: 'prd',
+  default_env: 'dev',
   session: {
     api: {
-      default_period: makePeriod(0)
+      default_period: makePeriod(0, 1)
     },
     main: {
-      default_period: makePeriod(0)
+      default_period: makePeriod(0, 1)
     }
   },
   dashboard: {
-    default_period: makePeriod(6),
+    default_period: makePeriod(0, 1),
+    home: {
+      default_period : makePeriod (0, 1)
+    },
     api : {
       default_period: undefined
     },

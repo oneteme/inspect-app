@@ -1,0 +1,38 @@
+<header-page style="height: 56px;" titleIcon="lan" [ui-title]="'Arbre d\'Appels'">
+  <div class="header-filter"></div>
+  <form [formGroup]="ViewForm" class="header-filter md-2">
+      <mat-form-field class="no-subscript" appearance="outline">
+        <mat-label>Infos Serveurs</mat-label>
+        <mat-select [formControl]="ViewForm.controls.nodeView" >
+          <mat-option value="SERVER_IDENTITY">ID</mat-option>
+          <mat-option value="OS_RE">Environnement</mat-option>
+          <mat-option value="IP_PORT">Adresse</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field class="no-subscript" appearance="outline">
+        <mat-label>Infos Appels</mat-label>
+        <mat-select [formControl]="ViewForm.controls.linkView">
+          <mat-option value="ELAPSED_LATENSE">Temps de réponse</mat-option>
+          <mat-option value="METHOD_RESOURCE">Ressource</mat-option>
+          <mat-option value="SIZE_COMPRESSION">Traffic</mat-option>
+          <mat-option value="PROTOCOL_SCHEME">Protocole</mat-option>
+          <mat-option value="STATUS_EXCEPTION">Statut</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </form>
+</header-page>
+
+
+<div id="container" >
+  <div id="fixed-width-container">
+    <div [hidden]="!isLoading" style="height: 100%"><div class="loading">Loading...</div></div>
+    <button class="zoom" (click)="tree.graph.zoomIn();">+</button>
+    <button class="zoom" (click)="tree.graph.zoomOut();" style="left:30px">-</button>
+    <button class="zoom" (click)="tree.resizeAndCenter()" style="left:60px">reset</button>
+    <div #outlineContainer id="outlineContainer"
+      style="z-index: 1; position: absolute; overflow: hidden; top: 0px; right: 0px; width: 160px; height: 120px;border-style: solid; border-color: lightgray; touch-action: none;">
+    </div>
+    <div #graphContainer id="graphContainer" style="background: url(assets/mxgraph/grid.gif);"></div>
+  </div>
+</div>

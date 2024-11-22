@@ -1,0 +1,41 @@
+<div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center;">
+    <mat-divider style="margin-right: 1em; flex: 1 1 0%"></mat-divider>
+    <div
+        style="display: flex; align-items: center; gap: 0.5em; margin-bottom:  0.5em; font-size: 18px; font-weight: 500;">
+        <mat-icon class="material-symbols-outlined">west</mat-icon>
+        <div>Serveur Appelé</div>
+    </div>
+    <mat-divider style="margin-left: 1em; flex: 1 1 0%"></mat-divider>
+</div>
+
+<div class="mat-elevation-z5"> 
+
+    <div [hidden]="!dataSource.data.length">
+        <div style="min-height: 156px;">
+            <table mat-table [dataSource]="dataSource" >
+
+                <!-- Name Column -->
+                <ng-container matColumnDef="name">
+                    <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+                </ng-container>
+            
+                <!-- Symbol Column -->
+                <ng-container matColumnDef="response">
+                    <td mat-cell *matCellDef="let element">
+                        <chart type="donut" [config]="CONFIG_SPARKLINE" [data]="element.data" />
+                    </td>
+                </ng-container>
+            
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="onClick($event, row)"></tr>
+            </table>
+        </div>
+        
+        <mat-paginator [pageSizeOptions]="[3, 5, 10]" [hidePageSize]="true" showFirstLastButtons></mat-paginator>
+    </div>
+    <div [hidden]="dataSource?.data?.length" >
+        <div class="loading">
+            {{isLoading ? 'Loading...' : 'Aucune donnée'}}
+
+        </div>
+    </div>
+</div>

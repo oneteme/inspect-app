@@ -1,0 +1,21 @@
+
+
+
+.title{
+    width: max-content;
+    margin-right: 10px;
+}
+
+.dialog-header{
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.dialog-actions{
+    margin-left: auto;
+}
+
+.hidden {
+    display: none;
+}

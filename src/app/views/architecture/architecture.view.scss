@@ -1,0 +1,33 @@
+.header-filter {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5em;
+  margin-top: 0.5em;
+}
+
+#container {
+  height: calc(100vh - 56px - 48px - 1em);
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#fixed-width-container {
+  width: 100%;
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+}
+
+.loading {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #6c6c6c;
+}
+
+
+

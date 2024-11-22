@@ -1,0 +1,53 @@
+<header-page titleIcon="lan" ui-title="Architecture">
+    <form [formGroup]="serverFilterForm" class="header-filter md-2">
+        <mat-form-field appearance="outline" class="no-subscript">
+            <mat-label>Période</mat-label>
+            <mat-date-range-input [formGroup]="serverFilterForm.controls.dateRangePicker" [rangePicker]="picker">
+                <input matStartDate formControlName="start" placeholder="Start date">
+                <input matEndDate formControlName="end" placeholder="End date">
+            </mat-date-range-input>
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-date-range-picker #picker></mat-date-range-picker>
+        </mat-form-field>
+        <button mat-mini-fab color="primary" (click)="search()">
+            <mat-icon matSuffix>search</mat-icon>
+        </button>
+    </form>
+</header-page>
+<div id="container" class="mat-elevation-z5" style="margin-bottom: 1em">
+    <span class="dashboard_component_title">Synthése</span>
+    <div id="fixed-width-container">
+        <div [hidden]="!syntheseIsLoading" style="height: 100%"><div class="loading">Loading...</div></div>
+        <div #graphContainer id="graphContainer"></div>
+    </div>
+
+</div>
+<div style="height: 80vh; display: flex; justify-content: space-between; gap: 1em; margin-bottom: 1em;">
+    <div style="width: 50%; height: 100%; display: flex; flex-direction: column;" class="mat-elevation-z5">
+        <div style="display: flex; justify-content: space-between;">
+            <span class="dashboard_component_title">Trafic global</span>
+            <div style="margin-right: 10px">
+                Nombre d'Appel
+                <mat-slide-toggle [formControl]="treeMapControl">Volume</mat-slide-toggle>
+            </div>
+        </div>
+        <chart class="chart-test" type="treemap" style="height: 100%"
+               [config]="treeMapConfig"
+               [data]="treeMapData || []"
+               [isLoading]="trafficIsloading" />
+    </div>
+    <div style="width: 50%; height: 100%; display: flex; flex-direction: column;" class="mat-elevation-z5">
+        <div style="display: flex; justify-content: space-between;">
+            <span class="dashboard_component_title">Trafic</span>
+            <div style="margin-right: 10px">
+                Nombre d'Appel
+                <mat-slide-toggle [formControl]="heatMapControl">Volume</mat-slide-toggle>
+            </div>
+        </div>
+        <chart  class="chart-test" type="heatmap" style="height: 100%"
+            [config]="heatMapConfig"
+            [data]="heatMapData || []"
+            [isLoading]="trafficIsloading" />
+    </div>
+
+</div>

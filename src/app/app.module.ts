@@ -1,87 +1,260 @@
-import { BrowserModule } from '@angular/platform-browser';
-import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
-import { NgModule, LOCALE_ID } from '@angular/core';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { RouterModule, Route, ActivatedRouteSnapshot, RouterStateSnapshot } from '@angular/router';
-import { AppComponent } from './app.component';
+import {BrowserModule} from '@angular/platform-browser';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
+import {LOCALE_ID, NgModule} from '@angular/core';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {ActivatedRouteSnapshot, Route, RouterModule, RouterStateSnapshot} from '@angular/router';
+import {AppComponent} from './app.component';
 
-import { ViewsModule } from './views/views.module';
-import { SharedModule } from './shared/shared.module';
+import {ViewsModule} from './views/views.module';
+import {SharedModule} from './shared/shared.module';
 
 // main layout
-import { HttpClientModule } from '@angular/common/http';
+import {HttpClientModule} from '@angular/common/http';
 
-import { MaterialModule } from './app.material.module';
-
-import { SessionApiComponent } from './views/session-api/session-api.component';
-import { SessionDetailComponent, EnvRouter } from './views/session-detail/session-detail.component';
-import { DatePipe, DecimalPipe, registerLocaleData } from '@angular/common';
+import {DatePipe, DecimalPipe, registerLocaleData} from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
-import { SessionMainComponent } from './views/session-main/session-main.component';
-import { TreeComponent } from './views/tree/tree.component';
-import { StatsDatabaseComponent } from './views/stats-database/stats-database.component';
-import { StatsAppComponent } from './views/stats-app/stats-app.component';
-import { StatsApiComponent } from './views/stats-api/stats-api.component';
-import { StatsUserComponent } from './views/stats-user/stats-user.component';
+import {SearchRestView} from "./views/search/rest/search-rest.view";
+import {DetailSessionRestView} from "./views/detail/session/rest/detail-session-rest.view";
+import {DetailDatabaseView} from "./views/detail/database/detail-database.view";
+import {DetailFtpView} from "./views/detail/ftp/detail-ftp.view";
+import {DetailLdapView} from "./views/detail/ldap/detail-ldap.view";
+import {DetailSmtpView} from "./views/detail/smtp/detail-smtp.view";
+import {SearchMainView} from "./views/search/main/search-main.view";
+import {DetailSessionMainView} from "./views/detail/session/main/detail-session-main.view";
+import {StatisticApplicationView} from "./views/statistic/application/statistic-application.view";
+import {StatisticRestView} from "./views/statistic/rest/statistic-rest.view";
+import {StatisticUserView} from "./views/statistic/user/statistic-user.view";
+import {StatisticDatabaseView} from "./views/statistic/database/statistic-database.view";
+import {DashboardComponent} from "./views/dashboard/dashboard.component";
+import {EnvRouter} from "./service/router.service";
+import {DurationPipe} from "./shared/pipe/duration.pipe";
+import {StatisticClientView} from "./views/statistic/view/statistic-client.view";
+import {ArchitectureView} from "./views/architecture/architecture.view";
+import { NumberFormatterPipe } from './shared/pipe/number.pipe';
+import { TreeView } from './views/tree/tree.view';
+import {SizePipe} from "./shared/pipe/size.pipe";
+
 
 registerLocaleData(localeFr, 'fr-FR');
 const routes: Route[] = [
   {
     path: 'session', children: [
       {
-        path: 'api',
-        component: SessionApiComponent,
-        title: 'Liste des API'
+        path: 'rest',
+        children: [
+          {
+            path: '',
+            component: SearchRestView,
+            title: 'Appel d\'API',
+          },
+          {
+            path: ':id_session',
+            children: [
+              {
+                path: '',
+                component: DetailSessionRestView,
+                title: `Appel d'API > Détail`
+              },
+              {
+                path: 'database/:id_jdbc',
+                data: { type: 'rest' },
+                component: DetailDatabaseView,
+                title: `Appel d'API > Base de donnée`
+              },
+              {
+                path: 'ftp/:id_ftp',
+                data: { type: 'rest' },
+                component: DetailFtpView,
+                title: `Appel d'API > FTP`
+              },
+              {
+                path: 'ldap/:id_ldap',
+                data: { type: 'rest' },
+                component: DetailLdapView,
+                title: `Appel d'API > LDAP`
+              },
+              {
+                path: 'smtp/:id_smtp',
+                data: { type: 'rest' },
+                component: DetailSmtpView,
+                title: `Appel d'API > SMTP`
+
+              },
+              {
+                path: 'tree',
+                data: { type: 'rest' },
+                component: TreeView,
+                title: `Appel d'API > Arbre d\'Appels`
+
+              },
+              { path: '**', pathMatch: 'full', redirectTo: `/session/rest/:id_session` }
+            ]
+          },
+          { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
+        ]
       },
       {
-        path: 'api/:id/tree',
-        component: TreeComponent,
-        title: 'Arbre d\'appels API'
+        path: 'main/:type_main',
+        children: [
+          {
+            path: '',
+            component: SearchMainView,
+            title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+              if (route.paramMap.get('type_main') == 'batch') {
+                return 'Lancement de Batch';
+              } else if(route.paramMap.get('type_main') == 'startup') {
+                return 'Lancement de Serveur';
+              }
+              return 'Navigation';
+            }
+          },
+          {
+            path: ':id_session',
+            children: [
+              {
+                path: '',
+                component: DetailSessionMainView,
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                  let detail = '> Detail';
+                  if (route.paramMap.get('type_main') == 'batch') {
+                    return `Lancement de Batch ${detail}`;
+                  } else if (route.paramMap.get('type_main') == 'startup') {
+                    return `Lancement de Serveur ${detail}`;
+                  }
+                  return `Navigation ${detail}`;
+                }
+              },
+              {
+                path: 'database/:id_jdbc',
+                component: DetailDatabaseView,
+                data: { type: 'main' },
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                  let detail = `> Base de Donnée`;
+                  if (route.paramMap.get('type_main') == 'batch') {
+                    return `Lancement de Batch ${detail}`;
+                  } else if (route.paramMap.get('type_main') == 'startup') {
+                    return `Lancement de Serveur ${detail}`;
+                  }
+                  return `Navigation ${detail}`;
+                }
+              },
+              {
+                path: 'ftp/:id_ftp',
+                data: { type: 'main' },
+                component: DetailFtpView,
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                  let detail = `> FTP`;
+                  if (route.paramMap.get('type_main') == 'batch') {
+                    return `Lancement de Batch ${detail}`;
+                  } else if (route.paramMap.get('type_main') == 'startup') {
+                    return `Lancement de Serveur ${detail}`;
+                  }
+                  return `Navigation ${detail}`;
+                }
+              },
+              {
+                path: 'ldap/:id_ldap',
+                data: { type: 'main' },
+                component: DetailLdapView,
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                  let detail = `> LDAP`;
+                  if (route.paramMap.get('type_main') == 'batch') {
+                    return `Lancement de Batch ${detail}`;
+                  } else if (route.paramMap.get('type_main') == 'startup') {
+                    return `L&ancement de Serveur ${detail}`;
+                  }
+                  return `Navigation ${detail}`;
+                }
+              },
+              {
+                path: 'smtp/:id_smtp',
+                data: { type: 'main' },
+                component: DetailSmtpView,
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                  let detail = `> SMTP`;
+                  if (route.paramMap.get('type_main') == 'batch') {
+                    return `Lancement de Batch ${detail}`;
+                  } else if (route.paramMap.get('type_main') == 'startup') {
+                    return `Lancement de Serveur ${detail}`;
+                  }
+                  return `Navigation ${detail}`;
+                }
+              },
+              {
+                path: 'tree',
+                data: { type: 'main' },
+                component: TreeView,
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                  let detail = `> Arbre d'Appels`;
+                  if (route.paramMap.get('type_main') == 'batch') {
+                    return `Lancement de Batch ${detail}`;
+                  } else if (route.paramMap.get('type_main') == 'startup') {
+                    return `Lancement de Serveur ${detail}`;
+                  }
+                  return `Navigation ${detail}`;
+                }
+              },
+              { path: '**', pathMatch: 'full', redirectTo: `/main/:type_main/:id_session` }
+            ]
+          },
+          { path: '**', pathMatch: 'full', redirectTo: `/main/:type_main` }
+        ]
       },
-      {
-        path: 'main',
-        component: SessionMainComponent,
-        title: 'Liste des Sessions'
-      },
-      {
-        path: ':type/:id',
-        component: SessionDetailComponent,
-        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          if(route.paramMap.get('type') == 'main') {
-            return 'Detail de la Session';
-          } 
-          return 'Detail de l\'API';
-        }
-      },
-      { path: '**', pathMatch: 'full', redirectTo: `/session/api` }
+      { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
     ]
   },
   {
-    path: 'dashboard', children: [
+    path: 'dashboard',
+    children: [
       {
-        path: 'app/:name',
-        component: StatsAppComponent,
-        title: 'Statistiques Serveur'
+        path: 'server/:server_name',
+        component: StatisticApplicationView,
+        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+          return `Dashboard > ${route.paramMap.get('server_name')}`;
+        }
       },
       {
-        path: 'api/:name',
-        component: StatsApiComponent,
-        title: 'Statistiques API'
+        path: 'server/:server_name/rest/:rest_name',
+        component: StatisticRestView,
+        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+          return `Dashboard > ${route.paramMap.get('server_name')} > ${route.paramMap.get('rest_name')}`;
+        }
       },
       {
-        path: 'user/:name',
-        component: StatsUserComponent,
-        title: 'Statistiques Utilisateur'
-      }, 
-      {
-        path: 'database/:name',
-        component: StatsDatabaseComponent,
-        title: 'Statistiques Base de Donnée'
+        path: 'user/:user_name',
+        component: StatisticUserView,
+        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+          return `Dashboard > ${route.paramMap.get('user_name')}`;
+        }
       },
-      { path: '**', pathMatch: 'full', redirectTo: `/session/api` }
+      {
+        path: 'database/:database_name',
+        component: StatisticDatabaseView,
+        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+          return `Dashboard > ${route.paramMap.get('database_name')}`;
+        }
+      },
+      {
+        path: 'client/:client_name',
+        component: StatisticClientView,
+        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+          return `Dashboard > ${route.paramMap.get('client_name')}`;
+        }
+      },
+      { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
     ]
   },
-  { path: '**', pathMatch: 'full', redirectTo: `/session/api` }
+  {
+    path: 'home',
+    component: DashboardComponent,
+    title: 'Page d\'accueil'
+  },
+  {
+    path: 'architecture',
+    component: ArchitectureView,
+    title: 'Architecture'
+  },
+  { path: '**', pathMatch: 'full', redirectTo: `/home` }
 ];
 
 @NgModule({
@@ -93,17 +266,19 @@ const routes: Route[] = [
     HttpClientModule,
     ReactiveFormsModule,
     SharedModule,
-    MaterialModule,
     ViewsModule
   ],
   declarations: [
     AppComponent
   ],
   providers: [
+      SizePipe,
     DatePipe,
     DecimalPipe,
+    DurationPipe,
     EnvRouter,
-    { provide: LOCALE_ID, useValue: 'fr-FR' }
+    { provide: LOCALE_ID, useValue: 'fr-FR' },
+    NumberFormatterPipe
   ],
   bootstrap: [AppComponent]
 })
