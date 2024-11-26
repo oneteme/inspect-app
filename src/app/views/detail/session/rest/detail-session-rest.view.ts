@@ -3,7 +3,7 @@ import {InstanceEnvironment, InstanceRestSession} from "../../../../model/trace.
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {Location} from "@angular/common";
-import {catchError, combineLatest, finalize, forkJoin, of, Subscription, switchMap} from "rxjs";
+import {catchError, combineLatest, finalize, forkJoin, Observable, of, Subscription, switchMap, EMPTY} from "rxjs";
 import {application} from "../../../../../environments/environment";
 import {Utils} from "../../../../shared/util";
 import {EnvRouter} from "../../../../service/router.service";
@@ -49,12 +49,12 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
                         session: of(s),
                         instance: this._traceService.getInstance(s.instanceId),
                         parent: this._traceService.getSessionParent(id).pipe(catchError(() => of(null))),
-                        requests: this._traceService.getRestRequests(s.id),
-                        queries: this._traceService.getDatabaseRequests(s.id),
-                        stages: this._traceService.getLocalRequests(s.id),
-                        ftps: this._traceService.getFtpRequests(s.id),
-                        mails: this._traceService.getSmtpRequests(s.id),
-                        ldaps: this._traceService.getLdapRequests(s.id)
+                        requests: (s.mask & 4) > 0 ? this._traceService.getRestRequests(s.id) : of([]),
+                        queries: (s.mask & 2) > 0 ? this._traceService.getDatabaseRequests(s.id) : of([]),
+                        stages: (s.mask & 1) > 0 ? this._traceService.getLocalRequests(s.id) : of([]),
+                        ftps: (s.mask & 8) > 0 ? this._traceService.getFtpRequests(s.id) : of([]),
+                        mails: (s.mask & 16) > 0 ? this._traceService.getSmtpRequests(s.id) : of([]),
+                        ldaps: (s.mask & 32) > 0 ? this._traceService.getLdapRequests(s.id) : of([])
                     });
                 }),
                 finalize(() => this.isLoading = false)

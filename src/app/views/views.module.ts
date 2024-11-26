@@ -45,6 +45,7 @@ import {
 import {ServerHistoryTableComponent} from "./statistic/application/history-table/server-history-table.component";
 import {StatisticClientView} from "./statistic/view/statistic-client.view";
 import {ArchitectureView} from "./architecture/architecture.view";
+import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
 
 
 @NgModule({
@@ -74,6 +75,7 @@ import {ArchitectureView} from "./architecture/architecture.view";
     DetailFtpTableComponent,
     DetailSmtpTableComponent,
     DetailLdapTableComponent,
+    DetailLocalTableComponent,
     DetailTimelineComponent,
     DetailSessionComponent,
     StatisticApplicationView,
