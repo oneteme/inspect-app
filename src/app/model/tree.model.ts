@@ -54,19 +54,24 @@ export class TreeGraph {
                 if (cell.value.nodes) {
                     let res = tg.groupBy(cell.value.nodes, (v: any) => v.formatLink(cell.value.linkLbl))
                     let entries = Object.entries(res)
-                    let extendMessage = '';
-                    let max;
+
+                    let max; 
+                    let count = 0;
                     if (entries.length > 5) {
                         max = 5;
-                        extendMessage = `...<b>${cell.value.nodes.length - 5} Autres</b>`
+                        
                     } else {
                         max = entries.length;
                     }
 
                     for (let i = 0; i < max; i++) {
                         modal += `<b>${entries[i][0]}</b>${entries[i][1].length>1 ?' ×'+entries[i][1].length: ''}<br>`
+                        count +=entries[i][1].length;
                     }
-                    modal += extendMessage;
+                    if(entries.length> 5){
+                        modal += `...<b>${cell.value.nodes.length - count} Autres</b>`
+                    }
+                   
                 }
                 else {
                     modal += `<b>${cell.value}</b>`
@@ -241,6 +246,8 @@ export const ServerConfig = {
 }
 export const LinkConfig = {
     SUCCES: "strokeColor=green;",
-    FAILURE: "strokeColor=red;"
+    CLIENT_ERROR: "strokeColor=yellow;",
+    SERVER_ERROR: "strokeColor=red;",
+    UNREACHABLE: "strokeColor=red;"
 }
 
