@@ -249,7 +249,12 @@ export class LinkRequestNode implements Link<Label> {
         this.nodeObject = nodeObject;
     }
     getLinkStyle(): string {
-        return this.nodeObject.status > 400 || this.nodeObject.status == 0 ? 'FAILURE' : 'SUCCES'
+        switch(true){
+            case (this.nodeObject.status >= 200 && this.nodeObject.status < 300): return "SUCCES";
+            case (this.nodeObject.status >= 400 && this.nodeObject.status < 500):  return "CLIENT_ERROR"
+            case (this.nodeObject.status >=500):  return "SERVER_ERROR";
+            case (this.nodeObject.status == 0):   return "UNREACHABLE"
+        }   
     }
 
     formatLink(field: Label): string {
@@ -433,7 +438,12 @@ export class RestRequestNode implements Node<Label> {
     }
 
     getLinkStyle(): string {
-        return this.nodeObject.status > 400 || this.nodeObject.status == 0 ? 'FAILURE' : 'SUCCES'
+        switch(true){
+            case (this.nodeObject.status >= 200 && this.nodeObject.status < 300): return "SUCCES";
+            case (this.nodeObject.status > 400 && this.nodeObject.status < 500):  return "CLIENT_ERROR"
+            case (this.nodeObject.status >=500):  return "SERVER_ERROR";
+            case (this.nodeObject.status == 0):   return "UNREACHABLE"
+        }   
     }
 }
 

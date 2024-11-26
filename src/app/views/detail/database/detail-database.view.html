@@ -4,7 +4,7 @@
         <mat-card-title>
             <p style="display: flex; align-items: center; gap: 0.5em">
                 <mat-icon class="material-symbols-outlined">Database</mat-icon>
-                {{ request.host ? request.host + ':' + request.port + ' -- ' + request.name : 'N/A'}}
+                {{ request.host ? request.host + ':' + (request.port || '') + ' -- ' + request.name : 'N/A'}}
             </p>
 
             <div class="right">
