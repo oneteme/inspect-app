@@ -3,7 +3,7 @@
         <mat-card-title>
             <div style="display: flex; align-items: center; gap: 0.5em">
                 <mat-icon class="material-symbols-outlined">user_attributes</mat-icon>
-                {{ request.host + ':' + request.port || 'N/A' }}
+                {{ request.protocol + '://' + (request.host ? request.host : 'N/A') + (request.port == -1 ? '' : ':' + request.port)}}
             </div>
 
             <div class="right">
