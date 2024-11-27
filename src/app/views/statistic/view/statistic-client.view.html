@@ -54,7 +54,7 @@
            [data]="requests.countRestRequestByDate?.data?.pie || []" [isLoading]="requests.countByDate?.isLoading" />
 </div>
 <div style="display: flex; flex-direction: row; gap: 0.5em; margin-bottom: 1em;">
-   <dependents-table style="width: 50%" [data]="requests.dependents?.data || []"
-                      [isLoading]="requests.dependents?.isLoading"/>
+    <dependents-table style="width: 50%" [data]="requests.dependents?.data || []"
+                      [isLoading]="requests.dependents?.isLoading" (onClickRow)="onClickRow($event.event, $event.row)"/>
     <exception-table style="width: 50%" [data]="requests.exceptions?.data || []" [isLoading]="requests.exceptions?.isLoading"></exception-table>
 </div>

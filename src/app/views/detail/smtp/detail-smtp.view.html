@@ -3,7 +3,7 @@
         <mat-card-title>
             <div style="display: flex; align-items: center; gap: 0.5em">
                 <mat-icon style="height: 20px;" class="material-symbols-outlined">outgoing_mail</mat-icon>
-                {{ request.host + ':' + request.port || 'N/A' }}
+                {{ 'smtp://' + (request.host ? request.host : 'N/A') + (request.port == -1 ? '' : ':' + request.port)}}
             </div>
 
             <div class="right">

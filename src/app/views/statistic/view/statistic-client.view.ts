@@ -98,6 +98,16 @@ export class StatisticClientView implements OnInit, OnDestroy {
         }, { emitEvent: false });
     }
 
+    onClickRow(event: MouseEvent, row: any) {
+        if (event.ctrlKey) {
+            this._router.open(`#/dashboard/server/${row.name}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}`, '_blank')
+        } else {
+            this._router.navigate(['/dashboard/server', row.name], {
+                queryParamsHandling: 'preserve'
+            });
+        }
+    }
+
     REQUEST = (name: string, env: string, start: Date, end: Date) => {
         let now = new Date();
         let groupedBy = periodManagement(start, end);
