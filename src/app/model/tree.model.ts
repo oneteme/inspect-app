@@ -246,7 +246,7 @@ export const ServerConfig = {
 }
 export const LinkConfig = {
     SUCCES: "strokeColor=green;",
-    CLIENT_ERROR: "strokeColor=yellow;",
+    CLIENT_ERROR: "strokeColor=#f9ad4e;",
     SERVER_ERROR: "strokeColor=red;",
     UNREACHABLE: "strokeColor=red;"
 }
