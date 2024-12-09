@@ -23,28 +23,28 @@
 </header-page>
 
 <div style="display: flex; justify-content: space-between; gap: 1em; margin-bottom: 1em;">
-  <chart type="area" [config]="constants.REPARTITION_REQUEST_BY_PERIOD_LINE" [data]="requests?.repartitionRequestByPeriodLine?.data"
+  <chart type="area" [config]="constants.REPARTITION_REQUEST_BY_PERIOD_LINE" [data]="requests?.repartitionRequestByPeriodLine?.data || []"
     [isLoading]="requests.repartitionRequestByPeriodLine?.isLoading" style="width:33%" class="mat-elevation-z5" />
-  <chart type="area" [config]="constants.REPARTITION_REQUEST_ERROR_BY_PERIOD_LINE" [data]="requests?.repartitionRequestByPeriodLine?.data"
+  <chart type="area" [config]="constants.REPARTITION_REQUEST_ERROR_BY_PERIOD_LINE" [data]="requests?.repartitionRequestByPeriodLine?.data || []"
     [isLoading]="requests.repartitionRequestByPeriodLine?.isLoading" style="width:33%" class="mat-elevation-z5" />
-  <chart type="area" [config]="constants.REPARTITION_REQUEST_SLOWEST_BY_PERIOD_LINE" [data]="requests?.repartitionRequestByPeriodLine?.data"
+  <chart type="area" [config]="constants.REPARTITION_REQUEST_SLOWEST_BY_PERIOD_LINE" [data]="requests?.repartitionRequestByPeriodLine?.data || []"
     [isLoading]="requests.repartitionRequestByPeriodLine?.isLoading" style="width:33%" class="mat-elevation-z5" />
 </div>
 
 <div style="display: flex; justify-content: space-between; gap: 1em; margin-bottom: 1em;" class="mat-elevation-z5">
   <chart style="width: 70%;" type="column" [config]="constants.REPARTITION_SPEED_BAR"
-    [data]="requests.repartitionTimeByPeriodBar?.data" [isLoading]="requests.repartitionTimeByPeriodBar?.isLoading" />
+    [data]="requests.repartitionTimeByPeriodBar?.data || []" [isLoading]="requests.repartitionTimeByPeriodBar?.isLoading" />
   <mat-divider style="margin-top: 5em; margin-bottom: 5em;" [vertical]="true"></mat-divider>
   <chart style="width: 30%;" type="pie" [config]="constants.REPARTITION_SPEED_PIE"
-    [data]="requests.repartitionTimePie?.data" [isLoading]="requests.repartitionTimePie?.isLoading" />
+    [data]="requests.repartitionTimePie?.data || []" [isLoading]="requests.repartitionTimePie?.isLoading" />
 </div>
 
 <div style="display: flex; justify-content: space-between; gap: 1em; margin-bottom: 1em;" class="mat-elevation-z5">
   <div style="width:100%">
     <!-- <div line-chart [config]="countOKLineChartConfig"   [data]="countMinMaxAvg"   ></div> -->
-    <chart type="line" [config]="constants.REPARTITION_MAX_BY_PERIOD_LINE" [data]="requests.repartitionTimeByPeriodBar?.data"
+    <chart type="line" [config]="constants.REPARTITION_MAX_BY_PERIOD_LINE" [data]="requests.repartitionTimeByPeriodBar?.data || []"
       [isLoading]="requests.repartitionTimeByPeriodBar?.isLoading" />
-    <chart type="line" [config]="constants.REPARTITION_AVG_BY_PERIOD_LINE" [data]="requests.repartitionTimeByPeriodBar?.data"
+    <chart type="line" [config]="constants.REPARTITION_AVG_BY_PERIOD_LINE" [data]="requests.repartitionTimeByPeriodBar?.data || []"
       [isLoading]="requests.repartitionTimeByPeriodBar?.isLoading" />
   </div>
 </div>
@@ -54,7 +54,7 @@
     [isLoading]="requests.usersInfo?.isLoading" />
 </div> -->
 <div style="margin-bottom: 1em;">
-  <exception-table [data]="requests.exceptions?.data" [isLoading]="requests.exceptions?.isLoading"></exception-table>
+  <exception-table [data]="requests.exceptions?.data || []" [isLoading]="requests.exceptions?.isLoading"></exception-table>
 </div>
 
 <!-- <div style="display: flex; justify-content: space-between; gap: 1em; margin-bottom: 1em;">

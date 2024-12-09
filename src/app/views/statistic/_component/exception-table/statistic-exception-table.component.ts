@@ -15,13 +15,9 @@ export class StatisticExceptionTableComponent {
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild(MatSort) sort: MatSort;
-/*.slice(0, 5).map((r: {count: number, errorType: string}) => {
-    const index = r?.errorType.lastIndexOf('.') + 1;
-    return { count: r.count, class: r?.errorType?.substring(index) };
-})*/
+
     @Input() set data(objects: any) {
-        console.log(objects)
-        if (objects?.length) {  //.pipe(map((d: any) => d.slice(0, 5)))
+        if (objects?.length) {
             this.dataSource = new MatTableDataSource(objects);
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
