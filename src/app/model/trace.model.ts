@@ -252,7 +252,7 @@ export class LinkRequestNode implements Link<Label> {
         switch(true){
             case (this.nodeObject.status >= 200 && this.nodeObject.status < 300): return "SUCCES";
             case (this.nodeObject.status >= 400 && this.nodeObject.status < 500):  return "CLIENT_ERROR"
-            case (this.nodeObject.status >=500):  return "SERVER_ERROR";
+            case (this.nodeObject.status >=500):  return "ERROR";
             case (this.nodeObject.status == 0):   return "UNREACHABLE"
         }   
     }
@@ -299,7 +299,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
     }
 
     getLinkStyle(): string {
-        return this.nodeObject.status ? 'SUCCES' : 'FAILURE'
+        return this.nodeObject.status ? 'SUCCES' : 'ERROR'
     }
 }
 
@@ -332,7 +332,7 @@ export class FtpRequestNode implements Node<Label>, Link<Label> {
     }
 
     getLinkStyle(): string {
-        return this.nodeObject.status ? 'SUCCES' : 'FAILURE'
+        return this.nodeObject.status ? 'SUCCES' : 'ERROR'
     }
 }
 
@@ -365,7 +365,7 @@ export class MailRequestNode implements Node<Label>, Link<Label> {
     }
 
     getLinkStyle(): string {
-        return this.nodeObject.status ? 'SUCCES' : 'FAILURE'
+        return this.nodeObject.status ? 'SUCCES' : 'ERROR'
     }
 }
 
@@ -398,7 +398,7 @@ export class LdapRequestNode implements Node<Label>, Link<Label> {
     }
 
     getLinkStyle(): string {
-        return this.nodeObject.status ? 'SUCCES' : 'FAILURE'
+        return this.nodeObject.status ? 'SUCCES' : 'ERROR'
     }
 }
 
@@ -441,7 +441,7 @@ export class RestRequestNode implements Node<Label> {
         switch(true){
             case (this.nodeObject.status >= 200 && this.nodeObject.status < 300): return "SUCCES";
             case (this.nodeObject.status > 400 && this.nodeObject.status < 500):  return "CLIENT_ERROR"
-            case (this.nodeObject.status >=500):  return "SERVER_ERROR";
+            case (this.nodeObject.status >=500):  return "ERROR";
             case (this.nodeObject.status == 0):   return "UNREACHABLE"
         }   
     }

@@ -148,7 +148,8 @@ export class TreeView implements OnDestroy {
         if (v[1].length > 1) {
           b = this.draw(treeGraph, this.mergeRestRequests(v[0], v[1]), serverlbl, linklbl);
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<RestRequestNode>(v[1], v => { return v.nodeObject.status > 400 || v.nodeObject.status == 0 }) ? 'SERVER_ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.checkSome<RestRequestNode>(v[1], v => { return v.nodeObject.status >= 500 || v.nodeObject.status == 0 }) ? 'ERROR' : 
+                                 this.checkSome<RestRequestNode>(v[1], v => { return v.nodeObject.status >= 400 && v.nodeObject.status < 500 }) ? 'CLIENT_ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
         }
         else {
           let restRequestNode = v[1][0];
@@ -169,7 +170,7 @@ export class TreeView implements OnDestroy {
         b = treeGraph.insertServer(jdbcRequestNode.formatNode(serverlbl), "JDBC"); // demon server
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<JdbcRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'SERVER_ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.checkSome<JdbcRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
         } else {
           label = jdbcRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[jdbcRequestNode.getLinkStyle()];
@@ -186,7 +187,7 @@ export class TreeView implements OnDestroy {
         b = treeGraph.insertServer(ftpRequestNode.formatNode(serverlbl), "FTP"); // demon server
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<FtpRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'SERVER_ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.checkSome<FtpRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
         } else {
           label = ftpRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[ftpRequestNode.getLinkStyle()];
@@ -203,7 +204,7 @@ export class TreeView implements OnDestroy {
         b = treeGraph.insertServer(mailRequestNode.formatNode(serverlbl), "SMTP"); // demon server
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<MailRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'SERVER_ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.checkSome<MailRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
         } else {
           label = mailRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[mailRequestNode.getLinkStyle()];
@@ -220,7 +221,7 @@ export class TreeView implements OnDestroy {
         b = treeGraph.insertServer(ldapRequestNode.formatNode(serverlbl), "LDAP"); // demon server
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<MailRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'SERVER_ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.checkSome<MailRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
         } else {
           label = ldapRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[ldapRequestNode.getLinkStyle()];
@@ -249,6 +250,8 @@ export class TreeView implements OnDestroy {
   checkSome<T>(arr: T[], fn: (o: T) => any) {
     return arr.some(r => fn(r));
   }
+  
+  check
 
   getIcon(obj: ServerRestSession | ServerMainSession) {
     if ("type" in obj) {
