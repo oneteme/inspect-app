@@ -54,6 +54,9 @@ export class TreeGraph {
                 if (cell.value.nodes) {
                     let res = tg.groupBy(cell.value.nodes, (v: any) => v.formatLink(cell.value.linkLbl))
                     let entries = Object.entries(res)
+                    if(cell.value.linkLbl =="ELAPSED_LATENSE"){
+                        entries = entries.sort((a,b) => (+b[0].substring(0,b[0].length -1) - +a[0].substring(0,a[0].length -1) ))
+                    }
 
                     let max; 
                     let count = 0;
