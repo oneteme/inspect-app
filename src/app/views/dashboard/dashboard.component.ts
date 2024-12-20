@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, inject, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, inject, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { combineLatest, finalize, forkJoin, map, Observable, Subscription, take } from 'rxjs';
 import { DatePipe, Location } from '@angular/common';
@@ -120,7 +120,7 @@ export class DashboardComponent implements AfterViewInit  {
         this.setChartDialogEvent()
 
         Object.keys(this.chartRequests).forEach(k => {
-            if(this.chartRequests[k].isLoading!= true){
+            if(!this.chartRequests[k].isLoading){
                 this.charts[k] = [];
                 this.chartRequests[k].isLoading = true;
                 this.chartRequests[k].observable
@@ -136,16 +136,13 @@ export class DashboardComponent implements AfterViewInit  {
         })
     }
 
-    init() {
-
-    }
 
     initTab() {
         let that: any = this;
         let serverParam = this.createServerFilter();
 
         Object.keys(this.tabRequests).forEach(i => {
-            if(this.tabRequests[i].isLoading!= true){
+            if(!this.tabRequests[i].isLoading){
             this.tabRequests[i].isLoading = true;
             this.tabRequests[i].observable
                 .pipe(finalize(() => {   this.tabRequests[i].isLoading = false;  })).pipe(take(1))
@@ -207,9 +204,6 @@ export class DashboardComponent implements AfterViewInit  {
         this.constants.FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE,
         this.constants.SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE,
         this.constants.LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE].forEach((p: ChartProvider<string, number> | ChartProvider<Date, number>) => {
-            // p = Object.assign({}, p);
-            // p.options.title.text = `${p.options.chart.data.type}: `;
-            // p.options.subtitle.Text = ''; 
             p.options.chart.toolbar = {
                 show: true,
                 tools: {
@@ -254,7 +248,7 @@ export class DashboardComponent implements AfterViewInit  {
         let subtitle = ''
         formatters[groupedBy](data, this._datePipe)
 
-        let arr = this.groupByProperty("date", data).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } });
+        let arr = this.groupByProperty("date", data).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } }).sort((a,b)=> a.date.localeCompare(b.date));
         if (arr.length) {
             let sumRes = this.sumcounts(arr);
             title = `${type}:  ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%`;
