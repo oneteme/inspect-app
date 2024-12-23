@@ -289,9 +289,9 @@ export class TreeView implements OnDestroy {
   viewMethodResource() {
     let reqOb: any = {}
     if (!this.LabelIsLoaded['METHOD_RESOURCE']) {
-      let ftpParam = this.getRequestsIds(this.TreeObj, (s) => s.ftpRequests?.map(o => o.id));
-      let mailParam = this.getRequestsIds(this.TreeObj, (s) => s.mailRequests?.map(o => o.id));
-      let ldapParam = this.getRequestsIds(this.TreeObj, (s) => s.ldapRequests?.map(o => o.id));
+      let ftpParam = this.getRequestsIds(this.TreeObj, (s) => s.ftpRequests?.map(o => o.idRequest));
+      let mailParam = this.getRequestsIds(this.TreeObj, (s) => s.mailRequests?.map(o => o.idRequest));
+      let ldapParam = this.getRequestsIds(this.TreeObj, (s) => s.ldapRequests?.map(o => o.idRequest));
       ftpParam.ids?.length && (reqOb.ftp = this._treeService.getFtpRequestStage(ftpParam));
       mailParam.ids?.length && (reqOb.mail = this._treeService.getMailRequestStage(mailParam));
       ldapParam.ids?.length && (reqOb.ldap = this._treeService.getLdapRequestStage(ldapParam));
@@ -303,17 +303,17 @@ export class TreeView implements OnDestroy {
       this.LabelIsLoaded['METHOD_RESOURCE'] = true;
       this.tree.draw(() => this.dr(this.tree, this.TreeObj, this.serverLbl, this.linkLbl = Label.METHOD_RESOURCE))
     })).subscribe((res: { ftp: {}, mail: {}, ldap: {} }) => {
-      this.setRequestProperties(this.TreeObj, res.ftp, (s, actionMap) => s.ftpRequests?.length && s.ftpRequests.forEach(r => r["commands"] = actionMap[r['id']]))
-      this.setRequestProperties(this.TreeObj, res.mail, (s, actionMap) => s.mailRequests?.length && s.mailRequests.forEach(r => r["commands"] = actionMap[r['id']]))
-      this.setRequestProperties(this.TreeObj, res.ldap, (s, actionMap) => s.ldapRequests?.length && s.ldapRequests.forEach(r => r["commands"] = actionMap[r['id']]))
+      this.setRequestProperties(this.TreeObj, res.ftp, (s, actionMap) => s.ftpRequests?.length && s.ftpRequests.forEach(r => r["commands"] = actionMap[r['idRequest']]))
+      this.setRequestProperties(this.TreeObj, res.mail, (s, actionMap) => s.mailRequests?.length && s.mailRequests.forEach(r => r["commands"] = actionMap[r['idRequest']]))
+      this.setRequestProperties(this.TreeObj, res.ldap, (s, actionMap) => s.ldapRequests?.length && s.ldapRequests.forEach(r => r["commands"] = actionMap[r['idRequest']]))
     })
   }
 
   viewSizeCompression() {
     let reqOb: any = {}
     if (!this.LabelIsLoaded['SIZE_COMPRESSION']) {
-      let jdbcParam = this.getRequestsIds(this.TreeObj, (s) => s.databaseRequests?.map(o => o.id));
-      let mailParam = this.getRequestsIds(this.TreeObj, (s) => s.mailRequests?.map(o => o.id));
+      let jdbcParam = this.getRequestsIds(this.TreeObj, (s) => s.databaseRequests?.map(o => o.idRequest));
+      let mailParam = this.getRequestsIds(this.TreeObj, (s) => s.mailRequests?.map(o => o.idRequest));
       jdbcParam.ids?.length && (reqOb.jdbc = this._treeService.getJdbcRequestCount(jdbcParam));
       mailParam.ids?.length && (reqOb.smtp = this._treeService.getSmtpRequestCount(mailParam));
 
@@ -325,19 +325,19 @@ export class TreeView implements OnDestroy {
       this.LabelIsLoaded['SIZE_COMPRESSION'] = true;
       this.tree.draw(() => this.dr(this.tree, this.TreeObj, this.serverLbl, this.linkLbl = Label.SIZE_COMPRESSION))
     })).subscribe((res: { jdbc: {}, smtp: {} }) => {
-      this.setRequestProperties(this.TreeObj, res.jdbc, (s, actionMap) => s.databaseRequests?.length && s.databaseRequests.forEach(r => r["count"] = actionMap[r['id']]))
-      this.setRequestProperties(this.TreeObj, res.smtp, (s, actionMap) => s.mailRequests?.length && s.mailRequests.forEach(r => r["count"] = actionMap[r['id']]))
+      this.setRequestProperties(this.TreeObj, res.jdbc, (s, actionMap) => s.databaseRequests?.length && s.databaseRequests.forEach(r => r["count"] = actionMap[r['idRequest']]))
+      this.setRequestProperties(this.TreeObj, res.smtp, (s, actionMap) => s.mailRequests?.length && s.mailRequests.forEach(r => r["count"] = actionMap[r['idRequest']]))
     })
   }
 
   viewStatusException() {
     let reqOb: any = {};
     if (!this.LabelIsLoaded['STATUS_EXCEPTION']) {
-      let jdbcParam = this.getRequestsIds(this.TreeObj, (s) => s.databaseRequests?.filter(o => !o.status).map(o => o.id));
+      let jdbcParam = this.getRequestsIds(this.TreeObj, (s) => s.databaseRequests?.filter(o => !o.status).map(o => o.idRequest));
       //let restParam = this.getRequestsIds(this.TreeObj, (s)=> s.restRequests?.filter(o=> o.status >=400).map(o=> o.idRequest));
-      let ftpParam = this.getRequestsIds(this.TreeObj, (s) => s.ftpRequests?.filter(o => !o.status).map(o => o.id));
-      let smtpParam = this.getRequestsIds(this.TreeObj, (s) => s.mailRequests?.filter(o => !o.status).map(o => o.id));
-      let ldapParam = this.getRequestsIds(this.TreeObj, (s) => s.ldapRequests?.filter(o => !o.status).map(o => o.id));
+      let ftpParam = this.getRequestsIds(this.TreeObj, (s) => s.ftpRequests?.filter(o => !o.status).map(o => o.idRequest));
+      let smtpParam = this.getRequestsIds(this.TreeObj, (s) => s.mailRequests?.filter(o => !o.status).map(o => o.idRequest));
+      let ldapParam = this.getRequestsIds(this.TreeObj, (s) => s.ldapRequests?.filter(o => !o.status).map(o => o.idRequest));
       jdbcParam.ids?.length && (reqOb.jdbc = this._treeService.getJdbcExceptions(jdbcParam));
       ftpParam.ids?.length && (reqOb.ftp = this._treeService.getFtpExceptions(ftpParam));
       smtpParam.ids?.length && (reqOb.smtp = this._treeService.getSmtpExceptions(smtpParam));
@@ -351,11 +351,11 @@ export class TreeView implements OnDestroy {
       this.tree.draw(() => this.dr(this.tree, this.TreeObj, this.serverLbl, this.linkLbl = Label.STATUS_EXCEPTION))
     })).subscribe((res: { jdbc: any, rest: any, ftp: any, smtp: any, ldap: any }) => {
 
-      this.setRequestProperties(this.TreeObj, res.jdbc, (s, actionMap) => s.databaseRequests?.length && s.databaseRequests.forEach(r => r["exception"] = actionMap[r['id']]))
+      this.setRequestProperties(this.TreeObj, res.jdbc, (s, actionMap) => s.databaseRequests?.length && s.databaseRequests.forEach(r => r["exception"] = actionMap[r['idRequest']]))
       //this.setRequestProperties(this.TreeObj, res.rest, "restRequests", "exception", "idRequest" )
-      this.setRequestProperties(this.TreeObj, res.ftp, (s, actionMap) => s.ftpRequests?.length && s.ftpRequests.forEach(r => r["exception"] = actionMap[r['id']]))
-      this.setRequestProperties(this.TreeObj, res.smtp, (s, actionMap) => s.mailRequests?.length && s.mailRequests.forEach(r => r["exception"] = actionMap[r['id']]))
-      this.setRequestProperties(this.TreeObj, res.ldap, (s, actionMap) => s.ldapRequests?.length && s.ldapRequests.forEach(r => r["exception"] = actionMap[r['id']]))
+      this.setRequestProperties(this.TreeObj, res.ftp, (s, actionMap) => s.ftpRequests?.length && s.ftpRequests.forEach(r => r["exception"] = actionMap[r['idRequest']]))
+      this.setRequestProperties(this.TreeObj, res.smtp, (s, actionMap) => s.mailRequests?.length && s.mailRequests.forEach(r => r["exception"] = actionMap[r['idRequest']]))
+      this.setRequestProperties(this.TreeObj, res.ldap, (s, actionMap) => s.ldapRequests?.length && s.ldapRequests.forEach(r => r["exception"] = actionMap[r['idRequest']]))
     })
   }
 
