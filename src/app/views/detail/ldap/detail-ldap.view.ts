@@ -67,18 +67,16 @@ export class DetailLdapView implements OnInit, OnDestroy {
     createTimeline() {
         let timeline_start = Math.trunc(this.request.start * 1000);
         let timeline_end = Math.ceil(this.request.end * 1000);
-        let actions = this.request.actions.sort((a, b) => a.order - b.order);
 
-        let items = actions.map(a => {
+        let items = this.request.actions.map(a => {
             let item: DataItem = {
-                group: a.order,
+                group: a.start,
                 start: Math.trunc(a.start * 1000),
                 end: Math.trunc(a.end * 1000),
                 content: '',
                 title: `<span>${this.pipe.transform(a.start * 1000, 'HH:mm:ss.SSS')} - ${this.pipe.transform(a.end * 1000, 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform({start: a.start, end: a.end})})<br>
                         <h4>${a?.args ? a.args.join('</br>') : ''}</h4>`
             }
-            console.log(item)
             item.type = item.end <= item.start ? 'point' : 'range';
             if (a.exception?.message || a.exception?.type) {
                 item.className = 'bdd-failed';
@@ -86,7 +84,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
             return item;
         });
 
-        this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, actions.map(a => ({ id: a.order, content: a?.name })), {
+        this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, this.request.actions.map(a => ({ id: a.start, content: a?.name })), {
             min: timeline_start,
             max: timeline_end
         });

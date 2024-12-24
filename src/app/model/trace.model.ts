@@ -34,7 +34,6 @@ export interface MainSession extends LocalRequest {
 }
 
 export interface RestRequest extends SessionStage<number> {
-    idRequest?: number;
     id: string; //TODO
     method: string;
     protocol: string;
@@ -63,11 +62,9 @@ export interface DatabaseRequest extends SessionStage<boolean> {
     actions: Array<DatabaseRequestStage>;
     commands: Array<string>;
     count?: number;
-    id: number;
 }
 
 export interface FtpRequest extends SessionStage<boolean> {
-    id: number;
     protocol: string;
     host: string;
     port: number;
@@ -79,7 +76,6 @@ export interface FtpRequest extends SessionStage<boolean> {
 }
 
 export interface MailRequest extends SessionStage<boolean> {
-    id: number;
     host: string;
     port: number;
     actions: Array<MailRequestStage>;
@@ -96,7 +92,6 @@ export interface LocalRequest extends SessionStage<boolean> {
 }
 
 export interface NamingRequest extends SessionStage<boolean> {
-    id: number;
     protocol: string;
     host: string;
     port: number;
@@ -147,6 +142,8 @@ export interface SessionStage<T> {
     threadName: string;
     status: T
     exception?: ExceptionInfo
+
+    idRequest?: number;
 }
 
 export interface ExceptionInfo {
