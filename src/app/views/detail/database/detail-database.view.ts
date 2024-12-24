@@ -82,11 +82,10 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     createTimeline() {
         let timeline_end = Math.ceil(this.request.end * 1000);
         let timeline_start = Math.trunc(this.request.start * 1000);
-        let actions = this.request.actions.sort((a, b) => a.order - b.order);
 
-        let items = actions.map((c: DatabaseRequestStage, i: number) => {
+        let items = this.request.actions.map((c: DatabaseRequestStage, i: number) => {
             let item: DataItem = {
-                group: c.order,
+                group: `${c.start}`,
                 start: Math.trunc(c.start * 1000),
                 end: Math.trunc(c.end * 1000),
                 content: '',
@@ -100,7 +99,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
             return item;
         })
 
-        this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, actions.map((g: DatabaseRequestStage,i:number ) => ({ id: g.order, content: g?.name, title: this.jdbcActionDescription[g?.name] })),
+        this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, this.request.actions.map((g: DatabaseRequestStage,i:number ) => ({ id: `${g.start}`, content: g?.name, title: this.jdbcActionDescription[g?.name] })),
             {
                min: timeline_start,
                max: timeline_end,
