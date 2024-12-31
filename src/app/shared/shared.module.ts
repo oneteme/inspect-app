@@ -9,6 +9,7 @@ import { AdvancedFilterComponent } from './_component/advanced-filter/advanced-f
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DurationPipe } from './pipe/duration.pipe';
 import { SizePipe } from './pipe/size.pipe';
+import {TitleCasePipe} from "./pipe/title-case.pipe";
 
 @NgModule({
   imports: [
@@ -24,7 +25,8 @@ import { SizePipe } from './pipe/size.pipe';
     AdvancedFilterTriggerComponent,
     FilterRowPipe,
     DurationPipe,
-    SizePipe
+    SizePipe,
+    TitleCasePipe
   ],
   exports: [
     MaterialModule,
@@ -33,7 +35,8 @@ import { SizePipe } from './pipe/size.pipe';
     AdvancedFilterRecapComponent,
     AdvancedFilterTriggerComponent,
     DurationPipe,
-    SizePipe
+    SizePipe,
+    TitleCasePipe
   ]
 })
 export class SharedModule { }

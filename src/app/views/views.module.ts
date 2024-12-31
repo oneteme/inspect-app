@@ -46,6 +46,8 @@ import {ServerHistoryTableComponent} from "./statistic/application/history-table
 import {StatisticClientView} from "./statistic/view/statistic-client.view";
 import {ArchitectureView} from "./architecture/architecture.view";
 import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
+import {DumpView} from "./dump/dump.view";
+import {DumpTimelineComponent} from "./dump/timeline/dump-timeline.component";
 
 
 @NgModule({
@@ -89,7 +91,9 @@ import {DetailLocalTableComponent} from "./detail/session/_component/local-table
     ProtocolExceptionComponent,
     ServerHistoryTableComponent,
     ArchitectureView,
-    TreeView
+    TreeView,
+    DumpView,
+    DumpTimelineComponent
   ]
 })
 export class ViewsModule { }

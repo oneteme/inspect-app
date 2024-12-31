@@ -112,6 +112,23 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
         }
     }
 
+    onClickDump(event: MouseEvent) {
+        let params: {fragments: string[], queryParams: any} = {
+            fragments: ['session', this.instance.name, 'dump'],
+            queryParams:  { env: this.instance.env, date: new Date(this.session.start * 1000).toISOString() }
+        };
+        if (event.ctrlKey) {
+            let url = this._router.createUrlTree(params.fragments, {
+                queryParams: params.queryParams }
+            ).toString();
+            this._router.open(`#/${url}`, '_blank');
+        } else {
+            this._router.navigate(params.fragments, {
+                queryParams: params.queryParams
+            });
+        }
+    }
+
     ngOnDestroy() {
         this.subscriptions.forEach(s => s.unsubscribe());
     }

@@ -33,12 +33,17 @@ import {ArchitectureView} from "./views/architecture/architecture.view";
 import { NumberFormatterPipe } from './shared/pipe/number.pipe';
 import { TreeView } from './views/tree/tree.view';
 import {SizePipe} from "./shared/pipe/size.pipe";
+import {DumpView} from "./views/dump/dump.view";
 
 
 registerLocaleData(localeFr, 'fr-FR');
 const routes: Route[] = [
   {
     path: 'session', children: [
+      {
+        path: ':app_name/dump',
+        component: DumpView
+      },
       {
         path: 'rest',
         children: [

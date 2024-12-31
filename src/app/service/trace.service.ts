@@ -31,12 +31,30 @@ export class TraceService {
         return this.http.get<Array<InstanceRestSession>>(`${this.server}/session/rest`, { params: params });
     }
 
+    getRestSessionsForDump(env: string, appName: string, start: Date, end: Date): Observable<Array<InstanceRestSession>> {
+        let params: any = {
+            'env': env,
+            'start': start.toISOString(),
+            'end': end.toISOString()
+        }
+        return this.http.get<Array<InstanceRestSession>>(`${this.server}/session/rest/${appName}/dump`, { params: params });
+    }
+
     getRestSession(id: string): Observable<InstanceRestSession> {
         return this.http.get<InstanceRestSession>(`${this.server}/session/rest/${id}`);
     }
 
     getMainSessions(params: any): Observable<Array<InstanceMainSession>> {
         return this.http.get<Array<InstanceMainSession>>(`${this.server}/session/main`, { params: params });
+    }
+
+    getMainSessionsForDump(env: string, appName: string, start: Date, end: Date): Observable<Array<InstanceMainSession>> {
+        let params: any = {
+            'env': env,
+            'start': start.toISOString(),
+            'end': end.toISOString()
+        }
+        return this.http.get<Array<InstanceMainSession>>(`${this.server}/session/main/${appName}/dump`, { params: params });
     }
 
     getMainSession(id: string): Observable<InstanceMainSession> {

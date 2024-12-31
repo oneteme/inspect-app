@@ -65,8 +65,10 @@
                     <div>{{instance.name}} <span style="font-size: 12px; font-style: italic; font-weight: normal;">{{instance.version}}</span></div>
 
                 </a>
-                <div style="height: 48px">
-
+                <div class="right">
+                    <button mat-icon-button (click)="onClickDump($event)" matTooltip="Processus">
+                        <mat-icon>developer_board</mat-icon>
+                    </button>
                 </div>
             </mat-card-title>
             <mat-card-content>
