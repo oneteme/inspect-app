@@ -76,9 +76,9 @@ export class DetailSmtpView implements OnInit, OnDestroy {
         let timeline_end = Math.ceil(this.request.end * 1000);
         let actions = this.request.actions.sort((a, b) => a.order - b.order);
 
-        let items = actions.map(a => {
+        let items = this.request.actions.map(a => {
             let item: DataItem = {
-                group: a.order,
+                group: a.start,
                 start: Math.trunc(a.start * 1000),
                 end: Math.trunc(a.end * 1000),
                 content: '',
@@ -91,7 +91,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
             return item;
         });
 
-        this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, actions.map(a => ({ id: a.order, content: a?.name })), {
+        this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, this.request.actions.map(a => ({ id: a.start, content: a?.name })), {
             min: timeline_start,
             max: timeline_end
         });
