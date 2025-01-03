@@ -1,0 +1,17 @@
+.timeline {
+  height: calc(100vh - 56px - 48px - 1.5em);
+  display: flex;
+  flex-direction: column;
+}
+
+.loading {
+  height: 100%;
+  width: 15%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  align-self: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #6c6c6c;
+}

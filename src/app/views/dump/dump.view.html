@@ -1,0 +1,24 @@
+<header-page style="height: 56px;" titleIcon="developer_board" [ui-title]="params.app | titleCase">
+</header-page>
+
+<div class="timeline">
+    <div style="display: flex; justify-content: flex-end;">
+        <button mat-icon-button  matTooltip="Recule" [disabled]="loading()" (click)="previous()">
+            <mat-icon>keyboard_double_arrow_left</mat-icon>
+        </button>
+        <button mat-icon-button matTooltip="Dezoom" [disabled]="loading()" (click)="zoomOut()">
+            <mat-icon>zoom_out</mat-icon>
+        </button>
+        <button mat-icon-button matTooltip="Zoom" [disabled]="loading() || !zoomableIn()" (click)="zoomIn()">
+            <mat-icon>zoom_in</mat-icon>
+        </button>
+        <button mat-icon-button matTooltip="Avance" [disabled]="loading()" (click)="next()">
+            <mat-icon>keyboard_double_arrow_right</mat-icon>
+        </button>
+    </div>
+    <dump-timeline *ngIf="!loading()" [groups]="groups" [items]="items"></dump-timeline>
+    <div *ngIf="loading()" class="loading">
+        <span>Loading...</span>
+        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+    </div>
+</div>

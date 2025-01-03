@@ -1,5 +1,5 @@
 import {Injectable} from "@angular/core";
-import {NavigationExtras, Router} from "@angular/router";
+import {NavigationExtras, Router, UrlTree} from "@angular/router";
 import {Observable} from "rxjs";
 
 @Injectable()
@@ -39,6 +39,24 @@ export class EnvRouter {
         }
         return this.router.navigate(commands, extras);
         // return Promise.resolve(true);
+    }
+
+    createUrlTree(commands: any[], extras?: NavigationExtras): UrlTree {
+        if (!extras?.queryParams?.env) {
+            if (this._env) {
+                if (!extras) {
+                    extras = {}
+                }
+                if (!extras.queryParams) {
+                    extras.queryParams = {}
+                }
+                extras.queryParams.env = this._env;
+            }
+        }
+        else {
+            this.env = extras.queryParams.env;
+        }
+        return this.router.createUrlTree(commands, extras);
     }
 
     open(url?: string | URL, target?: string, features?: string): WindowProxy | null {

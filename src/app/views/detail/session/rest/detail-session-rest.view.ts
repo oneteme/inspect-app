@@ -160,8 +160,8 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
             case "rest":
                 params.push('statistic', 'rest', this.session.name);
                 break;
-            case "app":
-                params.push('statistic', 'app', this.session.appName)
+            case "dump":
+                params.push('session', this.instance.name, 'dump')
                 break;
             case "tree":
                 params.push('session', 'rest', this.session.id, 'tree')
@@ -178,6 +178,23 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
         } else {
             this._router.navigate(params, {
                 queryParams: { env: this.instance.env }
+            });
+        }
+    }
+
+    onClickDump(event: MouseEvent) {
+        let params: {fragments: string[], queryParams: any} = {
+            fragments: ['session', this.instance.name, 'dump'],
+            queryParams:  { env: this.instance.env, date: new Date(this.session.start * 1000).toISOString() }
+        };
+        if (event.ctrlKey) {
+            let url = this._router.createUrlTree(params.fragments, {
+                queryParams: params.queryParams }
+            ).toString();
+            this._router.open(`#/${url}`, '_blank');
+        } else {
+            this._router.navigate(params.fragments, {
+                queryParams: params.queryParams
             });
         }
     }

@@ -44,19 +44,21 @@
         </mat-card>
         <mat-card style="width: 40vw;">
             <mat-card-title>
-                <a style="display: flex; align-items: center; gap: 0.5em" *ngIf="session.type == 'VIEW'"
+                <a style="display: flex; align-items: center; gap: 0.5em; height: inherit;" *ngIf="session.type == 'VIEW'"
                    [routerLink]="'/dashboard/client/'+ instance.name"
                    [queryParams]="{'env': instance.env}" matTooltip="Statistiques Client">
                     <mat-icon>storage</mat-icon>
                     <div>{{instance.name}} <span style="font-size: 12px; font-style: italic; font-weight: normal;">{{instance.version}}</span></div>
                 </a>
-                <a style="display: flex; align-items: center; gap: 0.5em" *ngIf="session.type != 'VIEW'" [routerLink]="'/dashboard/server/'+ instance.name"
+                <a style="display: flex; align-items: center; gap: 0.5em; height: inherit;" *ngIf="session.type != 'VIEW'" [routerLink]="'/dashboard/server/'+ instance.name"
                    [queryParams]="{'env': instance.env}" matTooltip="Statistiques Serveur">
                     <mat-icon>storage</mat-icon>
                     <div>{{instance.name}} <span style="font-size: 12px; font-style: italic; font-weight: normal;">{{instance.version}}</span></div>
                 </a>
-                <div style="height: 48px">
-
+                <div class="right">
+                    <button [hidden]="session.type == 'VIEW'" mat-icon-button (click)="onClickDump($event)" matTooltip="Processus">
+                        <mat-icon>developer_board</mat-icon>
+                    </button>
                 </div>
             </mat-card-title>
             <mat-card-content>
