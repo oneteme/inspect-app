@@ -10,6 +10,23 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DurationPipe } from './pipe/duration.pipe';
 import { SizePipe } from './pipe/size.pipe';
 
+export const MY_DATE_FORMATS = {
+  parse: {
+    dateInput: 'MM/YYYY',
+  },
+  display: {
+    dateInput: {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      timeZone: 'utc'
+    }
+  }
+};
+
 @NgModule({
   imports: [
     CommonModule,

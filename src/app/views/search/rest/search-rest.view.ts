@@ -15,11 +15,13 @@ import {FilterService} from 'src/app/service/filter.service';
 import {InstanceRestSession} from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
+import {MAT_DATE_FORMATS, MatNativeDateModule} from "@angular/material/core";
+
 
 
 @Component({
   templateUrl: './search-rest.view.html',
-  styleUrls: ['./search-rest.view.scss'],
+  styleUrls: ['./search-rest.view.scss']
 })
 export class SearchRestView implements OnInit, OnDestroy {
   private _router = inject(EnvRouter);
@@ -42,7 +44,9 @@ export class SearchRestView implements OnInit, OnDestroy {
     dateRangePicker: new FormGroup({
       start: new FormControl<Date | null>(null, [Validators.required]),
       end: new FormControl<Date | null>(null, [Validators.required]),
+
     }),
+    time: new FormControl(null, [Validators.required])
   });
 
   filterTable = new Map<string, any>();
@@ -78,7 +82,7 @@ export class SearchRestView implements OnInit, OnDestroy {
                 console.log(e)
               }
             }));
-          this.getIncomingRequest();
+          //this.getIncomingRequest();
 
           this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${this.params.serveurs[0] !== '' ? '&' + this.params.serveurs.map(name => `appname=${name}`).join('&') : ''}`)
         }
@@ -178,6 +182,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   }
 
   patchDateValue(start: Date, end: Date) {
+    console.log(start, end)
     this.serverFilterForm.patchValue({
       dateRangePicker: {
         start: start,

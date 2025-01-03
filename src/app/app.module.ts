@@ -6,7 +6,7 @@ import {ActivatedRouteSnapshot, Route, RouterModule, RouterStateSnapshot} from '
 import {AppComponent} from './app.component';
 
 import {ViewsModule} from './views/views.module';
-import {SharedModule} from './shared/shared.module';
+import {MY_DATE_FORMATS, SharedModule} from './shared/shared.module';
 
 // main layout
 import {HttpClientModule} from '@angular/common/http';
@@ -33,9 +33,10 @@ import {ArchitectureView} from "./views/architecture/architecture.view";
 import { NumberFormatterPipe } from './shared/pipe/number.pipe';
 import { TreeView } from './views/tree/tree.view';
 import {SizePipe} from "./shared/pipe/size.pipe";
+import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MAT_NATIVE_DATE_FORMATS} from "@angular/material/core";
+import {CustomDateAdapter} from "./shared/material/custom-date-adapter";
 
 
-registerLocaleData(localeFr, 'fr-FR');
 const routes: Route[] = [
   {
     path: 'session', children: [
@@ -272,12 +273,14 @@ const routes: Route[] = [
     AppComponent
   ],
   providers: [
-      SizePipe,
+    SizePipe,
     DatePipe,
     DecimalPipe,
     DurationPipe,
     EnvRouter,
-    { provide: LOCALE_ID, useValue: 'fr-FR' },
+    { provide: MAT_DATE_LOCALE, useValue: 'fr-FR' },
+    { provide: DateAdapter, useClass: CustomDateAdapter },
+    { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
     NumberFormatterPipe
   ],
   bootstrap: [AppComponent]
