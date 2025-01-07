@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, inject, LOCALE_ID, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
@@ -9,19 +9,27 @@ import {BehaviorSubject, finalize, Subscription} from 'rxjs';
 import {Utils} from 'src/app/shared/util';
 import {JQueryService} from 'src/app/service/jquery/jquery.service';
 import {TraceService} from 'src/app/service/trace.service';
-import {application, makePeriod} from 'src/environments/environment';
+import {application, makeDatePeriod} from 'src/environments/environment';
 import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constants';
 import {FilterService} from 'src/app/service/filter.service';
 import {InstanceRestSession} from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
-import {MAT_DATE_FORMATS, MatNativeDateModule} from "@angular/material/core";
-
-
+import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule} from "@angular/material/core";
+import {CustomDateAdapter} from "../../../shared/material/custom-date-adapter";
+import {MY_DATE_FORMATS} from "../../../shared/shared.module";
 
 @Component({
   templateUrl: './search-rest.view.html',
-  styleUrls: ['./search-rest.view.scss']
+  styleUrls: ['./search-rest.view.scss'],
+  providers: [
+    {
+      provide: DateAdapter, useClass: CustomDateAdapter
+    },
+    {
+      provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS
+    }
+  ]
 })
 export class SearchRestView implements OnInit, OnDestroy {
   private _router = inject(EnvRouter);
@@ -43,10 +51,8 @@ export class SearchRestView implements OnInit, OnDestroy {
     appname: new FormControl([""]),
     dateRangePicker: new FormGroup({
       start: new FormControl<Date | null>(null, [Validators.required]),
-      end: new FormControl<Date | null>(null, [Validators.required]),
-
-    }),
-    time: new FormControl(null, [Validators.required])
+      end: new FormControl<Date | null>(null, [Validators.required])
+    })
   });
 
   filterTable = new Map<string, any>();
@@ -58,20 +64,27 @@ export class SearchRestView implements OnInit, OnDestroy {
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
 
-  constructor() {
+  onChangeStart(event) {
+    this.serverFilterForm.controls.dateRangePicker.controls.end.updateValueAndValidity({onlySelf: true})
+  }
 
+  onChangeEnd(event) {
+    this.serverFilterForm.controls.dateRangePicker.controls.start.updateValueAndValidity({onlySelf: true})
+  }
+
+  constructor() {
     this._activatedRoute.queryParams
       .subscribe({
         next: (params: Params) => {
           this.params.env = params['env'] || application.default_env;
-          this.params.start = params['start'] ? new Date(params['start']) : (application.session.api.default_period || makePeriod(0)).start;
-          this.params.end = params['end'] ? new Date(params['end']) : (application.session.api.default_period || makePeriod(0, 1)).end;
+          this.params.start = params['start'] ? new Date(params['start']) : (application.session.api.default_period || makeDatePeriod(0)).start;
+          this.params.end = params['end'] ? new Date(params['end']) : (application.session.api.default_period || makeDatePeriod(0, 1)).end;
           this.params.serveurs = Array.isArray(params['appname']) ? params['appname'] : [params['appname'] || ''];
           if (this.params.serveurs[0] != '') {
             this.patchServerValue(this.params.serveurs)
           }
 
-          this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
+          this.patchDateValue(this.params.start, this.params.end);
           this.subscriptions.push(this._instanceService.getApplications('SERVER')
             .pipe(finalize(()=> this.serverNameIsLoading = false))
             .subscribe({
@@ -82,7 +95,7 @@ export class SearchRestView implements OnInit, OnDestroy {
                 console.log(e)
               }
             }));
-          //this.getIncomingRequest();
+          this.getIncomingRequest();
 
           this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${this.params.serveurs[0] !== '' ? '&' + this.params.serveurs.map(name => `appname=${name}`).join('&') : ''}`)
         }
@@ -106,15 +119,14 @@ export class SearchRestView implements OnInit, OnDestroy {
       let appname = this.serverFilterForm.getRawValue().appname;
       let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
       let end = this.serverFilterForm.getRawValue().dateRangePicker.end
-      let excludedEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1)
       if (this.params.start.toISOString() != start.toISOString()
-        || this.params.end.toISOString() != excludedEnd.toISOString()
+        || this.params.end.toISOString() != end.toISOString()
         || !this.params?.serveurs?.every((element, index) => element === appname[index])
         || appname.length != this.params?.serveurs?.length) {
         this._router.navigate([], {
           relativeTo: this._activatedRoute,
           queryParamsHandling: 'merge',
-          queryParams: { ...(appname !== undefined && { appname }), start: start.toISOString(), end: excludedEnd }
+          queryParams: { ...(appname !== undefined && { appname }), start: start.toISOString(), end: end }
         })
       } else {
         this.getIncomingRequest();
@@ -227,7 +239,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   }
 
   resetFilters(){
-    this.patchDateValue((application.session.api.default_period || makePeriod(0)).start,(application.session.api.default_period || makePeriod(0, 1)).end);
+    this.patchDateValue((application.session.api.default_period || makeDatePeriod(0)).start,(application.session.api.default_period || makeDatePeriod(0, 1)).end);
     this.patchServerValue([]);
     this.advancedParams = {};
     this._filter.setFilterMap({})

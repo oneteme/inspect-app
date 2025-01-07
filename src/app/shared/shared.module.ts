@@ -21,8 +21,7 @@ export const MY_DATE_FORMATS = {
       day: "numeric",
       hour: "numeric",
       minute: "numeric",
-      second: "numeric",
-      timeZone: 'utc'
+      second: "numeric"
     }
   }
 };

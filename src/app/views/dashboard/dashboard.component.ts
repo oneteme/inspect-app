@@ -2,7 +2,7 @@ import { AfterViewInit, Component, inject, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { combineLatest, finalize, forkJoin, map, Observable, Subscription, take } from 'rxjs';
 import { DatePipe, Location } from '@angular/common';
-import { application, makePeriod } from 'src/environments/environment';
+import { application, makeDatePeriod } from 'src/environments/environment';
 import { EnvRouter } from "../../service/router.service";
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Constants } from '../constants';
@@ -86,8 +86,8 @@ export class DashboardComponent implements AfterViewInit  {
         }).subscribe({
             next: (v: { params: Params, queryParams: Params }) => {
                 this.params.env = v.queryParams.env || application.default_env;
-                this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : (application.dashboard.home.default_period || makePeriod(0, 1)).start;
-                this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.home.default_period || makePeriod(0, 1)).end;
+                this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : (application.dashboard.home.default_period || makeDatePeriod(0, 1)).start;
+                this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.home.default_period || makeDatePeriod(0, 1)).end;
                 this.params.serveurs = Array.isArray(v.queryParams['appname']) ? v.queryParams['appname'] : v.queryParams['appname'] ? [v.queryParams['appname']] : []
                 if (this.params.serveurs.length > 0) {
                     this.patchServerValue(this.params.serveurs);

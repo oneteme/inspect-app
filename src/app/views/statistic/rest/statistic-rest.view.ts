@@ -16,7 +16,7 @@ import {
 } from "rxjs";
 import {Constants, FilterConstants, FilterMap, FilterPreset} from "../../constants";
 import {formatters, mapParams, periodManagement,} from "src/app/shared/util";
-import {application, makePeriod} from "src/environments/environment";
+import {application, makeDatePeriod} from "src/environments/environment";
 import {FilterService} from "src/app/service/filter.service";
 import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
@@ -61,8 +61,8 @@ export class StatisticRestView implements OnInit, OnDestroy {
                 this.params.serverName = v.params.server_name;
                 this.params.restName = v.params.rest_name;
                 this.params.env = v.queryParams.env || application.default_env;
-                this.params.start = v.queryParams.start  ? new Date(v.queryParams.start) : (application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6)).start;
-                this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6, 1)).end;
+                this.params.start = v.queryParams.start  ? new Date(v.queryParams.start) : (application.dashboard.api.default_period || application.dashboard.default_period || makeDatePeriod(6)).start;
+                this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.api.default_period || application.dashboard.default_period || makeDatePeriod(6, 1)).end;
                 this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
                 this.init();
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}`);
@@ -207,8 +207,8 @@ export class StatisticRestView implements OnInit, OnDestroy {
 
 
     resetFilters() {
-        this.patchDateValue((application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6)).start,
-            (application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6, 1)).end);
+        this.patchDateValue((application.dashboard.api.default_period || application.dashboard.default_period || makeDatePeriod(6)).start,
+            (application.dashboard.api.default_period || application.dashboard.default_period || makeDatePeriod(6, 1)).end);
         this.advancedParams = {};
         this._filter.setFilterMap({})
     }

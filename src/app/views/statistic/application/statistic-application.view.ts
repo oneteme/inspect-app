@@ -16,7 +16,7 @@ import {
 } from "rxjs";
 import {Constants, FilterConstants, FilterMap, FilterPreset} from "../../constants";
 import {formatters, mapParams, periodManagement} from "src/app/shared/util";
-import {application, makePeriod} from "src/environments/environment";
+import {application, makeDatePeriod} from "src/environments/environment";
 import {FilterService} from "src/app/service/filter.service";
 import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
@@ -67,8 +67,8 @@ export class StatisticApplicationView implements OnInit, OnDestroy {
             next: (v: { params: Params, queryParams: Params }) => {
                 this.name = v.params.server_name;
                 this.env = v.queryParams.env || application.default_env;
-                this.start = v.queryParams.start ? new Date(v.queryParams.start) : (application.dashboard.app.default_period || application.dashboard.default_period || makePeriod(6)).start;
-                this.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.app.default_period || application.dashboard.default_period || makePeriod(6, 1)).end;
+                this.start = v.queryParams.start ? new Date(v.queryParams.start) : (application.dashboard.app.default_period || application.dashboard.default_period || makeDatePeriod(6)).start;
+                this.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.app.default_period || application.dashboard.default_period || makeDatePeriod(6, 1)).end;
                 this.patchDateValue(this.start, new Date(this.end.getFullYear(), this.end.getMonth(), this.end.getDate() - 1));
                 this.init();
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&start=${this.start.toISOString()}&end=${this.end.toISOString()}`)
@@ -219,8 +219,8 @@ export class StatisticApplicationView implements OnInit, OnDestroy {
     };
 
     resetFilters() {
-        this.patchDateValue((application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6)).start,
-            (application.dashboard.api.default_period || application.dashboard.default_period || makePeriod(6, 1)).end);
+        this.patchDateValue((application.dashboard.api.default_period || application.dashboard.default_period || makeDatePeriod(6)).start,
+            (application.dashboard.api.default_period || application.dashboard.default_period || makeDatePeriod(6, 1)).end);
         this.advancedParams = {};
         this._filter.setFilterMap({})
     }

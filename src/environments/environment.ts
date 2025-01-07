@@ -13,16 +13,16 @@ export const application: Application = {
   default_env: 'dev',
   session: {
     api: {
-      default_period: makePeriod(0, 1)
+      default_period: makeDateTimePeriod(1)
     },
     main: {
-      default_period: makePeriod(0, 1)
+      default_period: makeDatePeriod(0, 1)
     }
   },
   dashboard: {
-    default_period: makePeriod(0, 1),
+    default_period: makeDatePeriod(0, 1),
     home: {
-      default_period : makePeriod (0, 1)
+      default_period : makeDatePeriod (0, 1)
     },
     api : {
       default_period: undefined
@@ -39,11 +39,15 @@ export const application: Application = {
   }
 }
 
-export function makePeriod(dayBetween: number, shiftEnd: number = 0): { start: Date, end: Date } {
+export function makeDateTimePeriod(hourBetween: number): { start: Date, end: Date } {
   var s = new Date();
-  return {start: new Date(s.getFullYear(), s.getMonth(), s.getDate() - dayBetween), end:  new Date(s.getFullYear(), s.getMonth(), s.getDate() + shiftEnd)}; 
+  return {start: new Date(s.getFullYear(), s.getMonth(), s.getDate(), s.getHours() - hourBetween, s.getMinutes(), s.getSeconds()), end:  s};
 }
 
+export function makeDatePeriod(dayBetween: number, shiftEnd: number = 0): { start: Date, end: Date } {
+  var s = new Date();
+  return {start: new Date(s.getFullYear(), s.getMonth(), s.getDate() - dayBetween), end:  new Date(s.getFullYear(), s.getMonth(), s.getDate() + shiftEnd)};
+}
 /*
  * For easier debugging in development mode, you can import the following file
  * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.

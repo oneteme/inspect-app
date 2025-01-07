@@ -8,7 +8,7 @@ import {combineLatest, finalize, Subscription} from 'rxjs';
 import {Location} from '@angular/common';
 import {Utils} from 'src/app/shared/util';
 import {TraceService} from 'src/app/service/trace.service';
-import {application, makePeriod} from 'src/environments/environment';
+import {application, makeDatePeriod} from 'src/environments/environment';
 import {Constants, Filter, FilterConstants, FilterMap, FilterPreset} from '../../constants';
 import {FilterService} from 'src/app/service/filter.service';
 import {InstanceMainSession} from 'src/app/model/trace.model';
@@ -63,8 +63,8 @@ export class SearchMainView implements OnInit, OnDestroy {
                 console.log(params.type_main, 'test')
                 this.params.env = queryParams['env'] || application.default_env;
                 this.params.type = params.type_main;
-                this.params.start = queryParams['start'] ? new Date(queryParams['start']) : (application.session.main.default_period || makePeriod(0, 1)).start;
-                this.params.end = queryParams['end'] ? new Date(queryParams['end']) : (application.session.main.default_period || makePeriod(0, 1)).end;
+                this.params.start = queryParams['start'] ? new Date(queryParams['start']) : (application.session.main.default_period || makeDatePeriod(0, 1)).start;
+                this.params.end = queryParams['end'] ? new Date(queryParams['end']) : (application.session.main.default_period || makeDatePeriod(0, 1)).end;
                 this.params.serveurs = Array.isArray(queryParams['appname']) ? queryParams['appname'] : [queryParams['appname'] || ''];
                 if (this.params.serveurs[0] != '') {
                     this.patchServerValue(this.params.serveurs)
@@ -214,7 +214,7 @@ export class SearchMainView implements OnInit, OnDestroy {
     }
 
     resetFilters() {
-        this.patchDateValue((application.session.api.default_period || makePeriod(0)).start, (application.session.api.default_period || makePeriod(0, 1)).end);
+        this.patchDateValue((application.session.api.default_period || makeDatePeriod(0)).start, (application.session.api.default_period || makeDatePeriod(0, 1)).end);
         this.advancedParams = {};
         this._filter.setFilterMap({})
     }
