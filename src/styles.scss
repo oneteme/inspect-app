@@ -218,5 +218,7 @@ mat-form-field.loading {
       height: 100%;
 }
 
-
+.mat-tooltip {
+  white-space: pre-line; // Allow line break
+}
 
