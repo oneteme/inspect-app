@@ -76,7 +76,6 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     }
 
     selectedRequest(event: { event: MouseEvent, row: any }) {
-        console.log(event)
         if (event.row) {
             if (event.event.ctrlKey) {
                 this._router.open(`#/session/rest/${event.row}`, '_blank',)
@@ -111,7 +110,6 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     }
 
     selectedSmtp(event: { event: MouseEvent, row: any }) { // TODO finish this
-        console.log(event)
         if (event.row) {
             if (event.event.ctrlKey) {
                 this._router.open(`#/session/rest/${this.session.id}/smtp/${event.row}`, '_blank',)
@@ -146,7 +144,6 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
                 }
                 return acc;
             }, []);
-            console.log(this.queryBySchema)
         }
     }
 
