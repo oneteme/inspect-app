@@ -8,17 +8,33 @@ import {combineLatest, finalize, Subscription} from 'rxjs';
 import {Location} from '@angular/common';
 import {Utils} from 'src/app/shared/util';
 import {TraceService} from 'src/app/service/trace.service';
-import {application, makeDatePeriod} from 'src/environments/environment';
+import {application, makeDatePeriod, makeDateTimePeriod} from 'src/environments/environment';
 import {Constants, Filter, FilterConstants, FilterMap, FilterPreset} from '../../constants';
 import {FilterService} from 'src/app/service/filter.service';
 import {InstanceMainSession} from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
+import {DateAdapter, MAT_DATE_FORMATS} from "@angular/material/core";
+import {CustomDateAdapter} from "../../../shared/material/custom-date-adapter";
+import {MY_DATE_FORMATS} from "../../../shared/shared.module";
+import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
+import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-date-range-selection-strategy";
 
 
 @Component({
     templateUrl: './search-main.view.html',
     styleUrls: ['./search-main.view.scss'],
+    providers: [
+        {
+            provide: DateAdapter, useClass: CustomDateAdapter
+        },
+        {
+            provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS
+        },
+        {
+            provide: MAT_DATE_RANGE_SELECTION_STRATEGY, useClass: CustomDateRangeSelectionStrategy
+        }
+    ]
 })
 export class SearchMainView implements OnInit, OnDestroy {
     private _router = inject(EnvRouter);
@@ -50,6 +66,9 @@ export class SearchMainView implements OnInit, OnDestroy {
     filter: string = '';
     params: Partial<{ env: string, start: Date, end: Date, type: string, serveurs: string[] }> = {};
 
+    subscriptionServer: Subscription;
+    subscriptionSession: Subscription;
+
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild(MatSort) sort: MatSort;
 
@@ -60,17 +79,16 @@ export class SearchMainView implements OnInit, OnDestroy {
             this._activatedRoute.queryParams
         ]).subscribe({
             next: ([params, queryParams]) => {
-                console.log(params.type_main, 'test')
                 this.params.env = queryParams['env'] || application.default_env;
                 this.params.type = params.type_main;
-                this.params.start = queryParams['start'] ? new Date(queryParams['start']) : (application.session.main.default_period || makeDatePeriod(0, 1)).start;
-                this.params.end = queryParams['end'] ? new Date(queryParams['end']) : (application.session.main.default_period || makeDatePeriod(0, 1)).end;
+                this.params.start = queryParams['start'] ? new Date(queryParams['start']) : (application.session.main.default_period || makeDateTimePeriod(1)).start;
+                this.params.end = queryParams['end'] ? new Date(queryParams['end']) : (application.session.main.default_period || makeDateTimePeriod(1)).end;
                 this.params.serveurs = Array.isArray(queryParams['appname']) ? queryParams['appname'] : [queryParams['appname'] || ''];
                 if (this.params.serveurs[0] != '') {
                     this.patchServerValue(this.params.serveurs)
                 }
-                this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
-                this.subscriptions.push(this._instanceService.getApplications(this.params.type == 'view' ? 'CLIENT' : 'SERVER' )
+                this.patchDateValue(this.params.start, this.params.end);
+                this.subscriptionServer = this._instanceService.getApplications(this.params.type == 'view' ? 'CLIENT' : 'SERVER' )
                     .pipe(finalize(()=> this.serverNameIsLoading = false))
                     .subscribe({
                         next: res => {
@@ -79,20 +97,28 @@ export class SearchMainView implements OnInit, OnDestroy {
                         }, error: (e) => {
                             console.log(e)
                         }
-                    }));
+                    });
                 this.getMainRequests();
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${this.params.serveurs[0] !== '' ? '&' + this.params.serveurs.map(name => `appname=${name}`).join('&') : ''}`)
             }
         });
     }
 
+    onChangeStart(event) {
+        this.serverFilterForm.controls.dateRangePicker.controls.end.updateValueAndValidity({onlySelf: true})
+    }
+
+    onChangeEnd(event) {
+        this.serverFilterForm.controls.dateRangePicker.controls.start.updateValueAndValidity({onlySelf: true})
+    }
 
     ngOnInit(): void {
 
     }
 
     ngOnDestroy(): void {
-        this.subscriptions.forEach(s => s.unsubscribe());
+        if(this.subscriptionSession) this.subscriptionSession.unsubscribe();
+        if(this.subscriptionServer) this.subscriptionServer.unsubscribe();
     }
 
     getMainRequests() {
@@ -110,7 +136,7 @@ export class SearchMainView implements OnInit, OnDestroy {
 
         this.isLoading = true;
         this.dataSource.data = [];
-        this.subscriptions.push(this._traceService.getMainSessions(params).subscribe((d: InstanceMainSession[]) => {
+        this.subscriptionSession = this._traceService.getMainSessions(params).subscribe((d: InstanceMainSession[]) => {
             if (d) {
                 this.dataSource = new MatTableDataSource(d);
                 this.dataSource.paginator = this.paginator;
@@ -148,24 +174,25 @@ export class SearchMainView implements OnInit, OnDestroy {
             }
         }, error => {
             this.isLoading = false;
-        }));
+        });
     }
 
 
     search() {
         if (this.serverFilterForm.valid) {
+            if(this.subscriptionSession) this.subscriptionSession.unsubscribe();
             let appname = this.serverFilterForm.getRawValue().appname;
             let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
-            let end = this.serverFilterForm.getRawValue().dateRangePicker.end
-            let excludedEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1)
+            let end = this.serverFilterForm.getRawValue().dateRangePicker.end;
+            let _end = new Date(end.getFullYear(), end.getMonth(), end.getDate(), end.getHours(), end.getMinutes(), 59, 999);
             if (this.params.start.toISOString() != start.toISOString()
-                || this.params.end.toISOString() != excludedEnd.toISOString()
+                || this.params.end.toISOString() != end.toISOString()
                 || !this.params?.serveurs?.every((element, index) => element === appname[index])
                 || appname.length != this.params?.serveurs?.length) {
                 this._router.navigate([], {
                     relativeTo: this._activatedRoute,
                     queryParamsHandling: 'merge',
-                    queryParams: { ...(appname !== undefined && { appname }), start: start.toISOString(), end: excludedEnd }
+                    queryParams: { ...(appname !== undefined && { appname }), start: start.toISOString(), end: _end.toISOString() }
                 })
             } else {
                 this.getMainRequests();

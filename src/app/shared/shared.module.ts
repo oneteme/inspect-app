@@ -20,8 +20,7 @@ export const MY_DATE_FORMATS = {
       month: "numeric",
       day: "numeric",
       hour: "numeric",
-      minute: "numeric",
-      second: "numeric"
+      minute: "numeric"
     }
   }
 };

@@ -2,11 +2,11 @@
     <form [formGroup]="serverFilterForm" class="header-filter md-2">
         <advanced-filter-recap [filters]="advancedParams" (filterRemoved)="handleRemovedFilter($event)"
                                (focusField)="focusField($event)"></advanced-filter-recap>
-        <mat-form-field class="no-subscript" appearance="outline">
+        <mat-form-field style="width: 360px" class="no-subscript" appearance="outline">
             <mat-label>Période</mat-label>
             <mat-date-range-input [formGroup]="serverFilterForm.controls.dateRangePicker" [rangePicker]="picker">
-                <input matStartDate formControlName="start" placeholder="Start date">
-                <input matEndDate formControlName="end" placeholder="End date">
+                <input matStartDate formControlName="start" placeholder="Start date" (dateChange)="onChangeStart($event)">
+                <input matEndDate formControlName="end" placeholder="End date" (dateChange)="onChangeEnd($event)">
             </mat-date-range-input>
             <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-date-range-picker #picker></mat-date-range-picker>

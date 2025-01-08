@@ -16,7 +16,7 @@ export const application: Application = {
       default_period: makeDateTimePeriod(1)
     },
     main: {
-      default_period: makeDatePeriod(0, 1)
+      default_period: makeDateTimePeriod(1)
     }
   },
   dashboard: {
@@ -41,7 +41,7 @@ export const application: Application = {
 
 export function makeDateTimePeriod(hourBetween: number): { start: Date, end: Date } {
   var s = new Date();
-  return {start: new Date(s.getFullYear(), s.getMonth(), s.getDate(), s.getHours() - hourBetween, s.getMinutes(), s.getSeconds()), end:  s};
+  return {start: new Date(s.getFullYear(), s.getMonth(), s.getDate(), s.getHours() - hourBetween, s.getMinutes()), end:  new Date(s.getFullYear(), s.getMonth(), s.getDate(), s.getHours(), s.getMinutes())};
 }
 
 export function makeDatePeriod(dayBetween: number, shiftEnd: number = 0): { start: Date, end: Date } {

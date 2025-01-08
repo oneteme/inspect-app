@@ -96,6 +96,11 @@ mat-form-field.no-subscript {
   color: #333!important;
 }
 
+.mat-date-range-input-inner {
+  letter-spacing: var(--mat-form-field-container-text-tracking);
+}
+
+
 
 
 .vis-item.rest{
