@@ -21,11 +21,6 @@ export class CustomDateAdapter extends NativeDateAdapter {
         return null;
     }
 
-    format(date: Date, displayFormat: Object): string {
-        console.log("format", `"${super.format(date, displayFormat)}"`)
-        return super.format(date, displayFormat).trim();
-    }
-
     compareDate(first: Date, second: Date): number {
         return (
             this.getYear(first) - this.getYear(second) ||
