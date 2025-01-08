@@ -46,10 +46,10 @@ import {MatTreeModule} from '@angular/material/tree';
 import {OverlayModule} from '@angular/cdk/overlay';
 import {CdkMenuModule} from '@angular/cdk/menu';
 import {DialogModule} from '@angular/cdk/dialog';
-import {BrowserAnimationsModule} from 
-    '@angular/platform-browser/animations';
+import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {LabelIconComponent} from "./_component/label-icon/label-icon.component";
 import {CommonModule} from "@angular/common";
+
 @NgModule({
   imports: [CommonModule, MatIconModule],
   declarations: [LabelIconComponent],

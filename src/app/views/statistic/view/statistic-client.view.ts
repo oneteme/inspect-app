@@ -3,7 +3,7 @@ import {MainSessionService} from "../../../service/jquery/main-session.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
 import {combineLatest, finalize, map, Observable, of, Subscription, tap} from "rxjs";
 import {ActivatedRoute, Params} from "@angular/router";
-import {application, makePeriod} from "../../../../environments/environment";
+import {application, makeDatePeriod} from "../../../../environments/environment";
 import {formatters, periodManagement} from "../../../shared/util";
 import {AbstractControl, FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
 import {EnvRouter} from "../../../service/router.service";
@@ -45,8 +45,8 @@ export class StatisticClientView implements OnInit, OnDestroy {
         }).subscribe({
             next: (v: { params: Params, queryParams: Params }) => {
                 this.params = {name: v.params.client_name, env: v.queryParams.env || application.default_env};
-                this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : (application.dashboard.database.default_period || application.dashboard.default_period || makePeriod(6)).start;
-                this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.database.default_period || application.dashboard.default_period || makePeriod(6, 1)).end;
+                this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : (application.dashboard.database.default_period || application.dashboard.default_period || makeDatePeriod(6)).start;
+                this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.database.default_period || application.dashboard.default_period || makeDatePeriod(6, 1)).end;
                 this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
                 this.init();
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}`)

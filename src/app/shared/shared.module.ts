@@ -11,6 +11,21 @@ import { DurationPipe } from './pipe/duration.pipe';
 import { SizePipe } from './pipe/size.pipe';
 import {TitleCasePipe} from "./pipe/title-case.pipe";
 
+export const MY_DATE_FORMATS = {
+  parse: {
+    dateInput: 'MM/YYYY',
+  },
+  display: {
+    dateInput: {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric"
+    }
+  }
+};
+
 @NgModule({
   imports: [
     CommonModule,
