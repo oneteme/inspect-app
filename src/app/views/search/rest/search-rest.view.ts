@@ -91,7 +91,7 @@ export class SearchRestView implements OnInit, OnDestroy {
             this.patchServerValue(this.params.serveurs)
           }
 
-          this.patchDateValue(this.params.start, this.params.end);
+          this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate(), this.params.end.getHours(), this.params.end.getMinutes(), this.params.end.getSeconds(), this.params.end.getMilliseconds() - 1));
           this.subscriptionServer = this._instanceService.getApplications('SERVER')
             .pipe(finalize(()=> this.serverNameIsLoading = false))
             .subscribe({
@@ -128,7 +128,7 @@ export class SearchRestView implements OnInit, OnDestroy {
       let appname = this.serverFilterForm.getRawValue().appname;
       let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
       let end = this.serverFilterForm.getRawValue().dateRangePicker.end;
-      let _end = new Date(end.getFullYear(), end.getMonth(), end.getDate(), end.getHours(), end.getMinutes(), 59, 999);
+      let _end = new Date(end.getFullYear(), end.getMonth(), end.getDate(), end.getHours(), end.getMinutes(), 59, 1000);
       if (this.params.start.toISOString() != start.toISOString()
         || this.params.end.toISOString() != end.toISOString()
         || !this.params?.serveurs?.every((element, index) => element === appname[index])
