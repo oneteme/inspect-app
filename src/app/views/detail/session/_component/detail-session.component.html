@@ -1,4 +1,4 @@
-<div *ngIf="session.restRequests?.length" style="margin-bottom: 2em;">
+<div *ngIf="session?.restRequests?.length" style="margin-bottom: 2em;">
     <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
@@ -10,7 +10,7 @@
     <rest-table [requests]="session.restRequests"
                 (onClickRow)="selectedRequest($event)"></rest-table>
 </div>
-<div *ngIf="session.stages?.length" style="margin-bottom: 2em;">
+<div *ngIf="session?.stages?.length" style="margin-bottom: 2em;">
     <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
@@ -21,7 +21,7 @@
     </div>
     <local-table [requests]="session.stages"></local-table>
 </div>
-<div *ngIf="session.ftpRequests?.length" style="margin-bottom: 2em;">
+<div *ngIf="session?.ftpRequests?.length" style="margin-bottom: 2em;">
     <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
@@ -34,7 +34,7 @@
                (onClickRow)="selectedFtp($event)">
     </ftp-table>
 </div>
-<div *ngIf="session.mailRequests?.length" style="margin-bottom: 2em;">
+<div *ngIf="session?.mailRequests?.length" style="margin-bottom: 2em;">
     <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
@@ -47,7 +47,7 @@
                 (onClickRow)="selectedSmtp($event)">
     </smtp-table>
 </div>
-<div *ngIf="session.ldapRequests?.length" style="margin-bottom: 2em;">
+<div *ngIf="session?.ldapRequests?.length" style="margin-bottom: 2em;">
     <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
@@ -60,7 +60,7 @@
                 (onClickRow)="selectedLdap($event)">
     </ldap-table>
 </div>
-<div *ngIf="session.databaseRequests?.length" style="margin-bottom: 2em;">
+<div *ngIf="session?.databaseRequests?.length" style="margin-bottom: 2em;">
     <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center;  margin-bottom:  0.5em;">
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
@@ -73,7 +73,7 @@
                     (onClickRow)="selectedQuery($event)">
     </database-table>
 </div>
-<div *ngIf="(session.databaseRequests?.length || session.restRequests?.length || session.stages?.length || session.ldapRequests?.length || session.ftpRequests?.length || session.mailRequests?.length) && (session.databaseRequests?.length+session.restRequests?.length+session.stages?.length+session.ldapRequests?.length+session.ftpRequests?.length+session.mailRequests?.length < 500) " style="margin-bottom: 1em;">
+<div *ngIf="(completedSession?.databaseRequests?.length || completedSession?.restRequests?.length || completedSession?.stages?.length || completedSession?.ldapRequests?.length || completedSession?.ftpRequests?.length || completedSession?.mailRequests?.length) && (completedSession?.databaseRequests?.length+completedSession?.restRequests?.length+completedSession?.stages?.length+completedSession?.ldapRequests?.length+completedSession?.ftpRequests?.length+completedSession?.mailRequests?.length < 500) " style="margin-bottom: 1em;">
     <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
@@ -82,5 +82,5 @@
         </div>
         <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
     </div>
-    <timeline-table [request]="session" [instance]="instance"></timeline-table>
+    <timeline-table [request]="completedSession" [instance]="instance"></timeline-table>
 </div>
