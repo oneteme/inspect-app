@@ -8,9 +8,10 @@ import {EnvRouter} from "../../../../service/router.service";
     styleUrls: ['./detail-session.component.scss']
 })
 export class DetailSessionComponent {
-    private _router: EnvRouter = inject(EnvRouter);
+    private readonly _router: EnvRouter = inject(EnvRouter);
 
     @Input() session: InstanceMainSession | InstanceRestSession;
+    @Input() completedSession: InstanceMainSession | InstanceRestSession;
     @Input() instance: InstanceEnvironment;
 
     selectedRequest(event: { event: MouseEvent, row: any }) {

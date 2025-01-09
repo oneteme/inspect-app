@@ -42,8 +42,8 @@
             <th mat-header-cell *matHeaderCellDef mat-sort-header class="center-text"> Durée </th>
             <td mat-cell *matCellDef="let element" class="center-text">
                 <span
-                        [matTooltip]="(element.start * 1000| date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr') +' \n '+ (element.end * 1000 | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr')  "
-                        matTooltipClass="mat-tooltip">
+                    matTooltipClass="mat-tooltip"
+                    [matTooltip]="((element.start * 1000| date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr') || '?') +' \n '+ ((element.end * 1000 | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr')|| '?') ">
                     {{{start: element.start, end: element.end} | duration }}
                 </span>
             </td>

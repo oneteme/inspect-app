@@ -256,7 +256,7 @@ export class LinkRequestNode implements Link<Label> {
 
     formatLink(field: Label): string {
         switch (field) {
-            case Label.ELAPSED_LATENSE: return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`;
+            case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
             case Label.METHOD_RESOURCE: return `${this.nodeObject.method || "?"} ${this.nodeObject.path || "?"}`
             case Label.SIZE_COMPRESSION: return `${this.nodeObject.inDataSize < 0 ? 0 : sizeFormatter(this.nodeObject.inDataSize) } ↓↑ ${this.nodeObject.outDataSize < 0 ? 0 : sizeFormatter(this.nodeObject.outDataSize) }`
             case Label.PROTOCOL_SCHEME: return `${this.nodeObject.protocol || "?"}/${this.nodeObject.authScheme || "?"}`
@@ -285,7 +285,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
 
     formatLink(field: Label): string {
         switch (field) {
-            case Label.ELAPSED_LATENSE: return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
+            case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
             case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands, 'SQL ')// todo: with sql add schema
             case Label.SIZE_COMPRESSION: return this.nodeObject?.count < 0 ? '0': this.nodeObject?.count!= undefined? this.nodeObject?.count.toString() : '?'; // remove undefined condition 
             case Label.PROTOCOL_SCHEME: return "JDBC/Basic"
@@ -318,7 +318,7 @@ export class FtpRequestNode implements Node<Label>, Link<Label> {
 
     formatLink(field: Label): string {
         switch (field) {
-            case Label.ELAPSED_LATENSE: return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
+            case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
             case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands, "SCRIPT")
             case Label.SIZE_COMPRESSION: return "?"
             case Label.PROTOCOL_SCHEME: return this.nodeObject.protocol + '/Basic'
@@ -351,7 +351,7 @@ export class MailRequestNode implements Node<Label>, Link<Label> {
 
     formatLink(field: Label): string {
         switch (field) {
-            case Label.ELAPSED_LATENSE: return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
+            case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
             case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands, "SCRIPT")
             case Label.SIZE_COMPRESSION: return this.nodeObject?.count < 0 ? '0': this.nodeObject?.count!= undefined? this.nodeObject?.count.toString() : '?';
             case Label.PROTOCOL_SCHEME: return "SMTP/Basic"
@@ -384,7 +384,7 @@ export class LdapRequestNode implements Node<Label>, Link<Label> {
 
     formatLink(field: Label): string {
         switch (field) {
-            case Label.ELAPSED_LATENSE: return `${(this.nodeObject.end - this.nodeObject.start).toFixed(3)}s`
+            case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
             case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands, "SCRIPT") || '?'
             case Label.SIZE_COMPRESSION: return "?"
             case Label.PROTOCOL_SCHEME: return this.nodeObject.protocol ?? "LDAP/Basic" // wait for fix backend
@@ -418,10 +418,16 @@ export class RestRequestNode implements Node<Label> {
     formatLink(field: Label): string {
         switch (field) {
             case Label.ELAPSED_LATENSE: {
-                var e1 = this.nodeObject.end - this.nodeObject.start;
+                let e1 = this.nodeObject.end - this.nodeObject.start;
+                if(!e1){
+                    return "?";
+                }
                 let e2 = 0;
                 if (this.nodeObject.remoteTrace) {
-                    e2 = e1 - (this.nodeObject.remoteTrace.end - this.nodeObject.remoteTrace.start)
+                    let e3 = this.nodeObject.remoteTrace.end - this.nodeObject.remoteTrace.start;
+                    if(e3){
+                        e2 = e1 - e3;
+                    }
                 }
                 return `${e1.toFixed(3)}s` + (e2 >= 1 ? `~${e2.toFixed(3)}s` : '');
             }
