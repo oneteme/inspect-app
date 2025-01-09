@@ -63,7 +63,8 @@
         <th mat-header-cell *matHeaderCellDef mat-sort-header style="width: 1%">
         </th>
         <td [ngStyle]="statusBorder(row['status'])" mat-cell *matCellDef="let row" [matTooltip]="row['status']"
-          matTooltipPosition="before">
+          matTooltipPosition="before" class="status">
+            Test
         </td>
       </ng-container>
 

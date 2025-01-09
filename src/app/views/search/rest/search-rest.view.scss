@@ -29,3 +29,7 @@ table {
     max-height: calc(100vh - 96px - 56px - 48px - 1.5em);
     overflow: auto;
 }
+
+.status:hover ~ th.status {
+    width: auto;
+}
