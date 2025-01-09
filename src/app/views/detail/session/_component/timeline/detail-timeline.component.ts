@@ -13,6 +13,7 @@ import {EnvRouter} from "../../../../../service/router.service";
 import {DurationPipe} from "../../../../../shared/pipe/duration.pipe";
 import {ActivatedRoute} from "@angular/router";
 
+const INFINIT = new Date(9999,12,31).getTime();
 @Component({
     selector: 'timeline-table',
     templateUrl: './detail-timeline.component.html',
@@ -21,7 +22,6 @@ import {ActivatedRoute} from "@angular/router";
 export class DetailTimelineComponent implements OnChanges {
     private _router: EnvRouter = inject(EnvRouter);
     private _activatedRoute = inject(ActivatedRoute);
-
     timeline: Timeline;
     pipe = new DatePipe('fr-FR');
     private durationPipe = new DurationPipe();
@@ -60,18 +60,19 @@ export class DetailTimelineComponent implements OnChanges {
                     groups = Array.from(groups).map((g: string) => ({ id: g, content: g }))
                 }
                 data = dataArray.map((c: any, i: number) => {
+                    let end = c.end? c.end * 1000 : INFINIT;
                     let o = {
                         id: c.id ? `${c.id}_${c.type}` : `${c.idRequest}_no_session`,
                         group: isWebapp ? 0 : c.threadName,
                         content: c.type == 'stage' ? '' : (c.name || c.host || 'N/A'),
                         start: c.start * 1000,
-                        end: c.end * 1000,
-                        title: `<span>${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(c.end * 1000), 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform({start: c.start, end: c.end})})<br>
+                        end: end,
+                        title: `<span>${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${c.end? this.pipe.transform(new Date(end), 'HH:mm:ss.SSS'):"?"}</span> ${c.end ? `(${this.durationPipe.transform({start: c.start, end: end/ 1000})})`:""}<br>
                     <h4>${c[title]}</h4>`,
                         className: c.type == 'database' ? "bdd" : c.type != 'stage' ? "rest" : "",
                         type: c.type == 'stage' ? 'background' : 'range'
                     }
-                    if (o.end > timeline_end) {
+                    if (o.end > timeline_end && o.end != INFINIT) {
                         timeline_end = o.end
                     }
                     return o;
