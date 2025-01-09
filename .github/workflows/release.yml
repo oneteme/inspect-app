@@ -24,3 +24,5 @@ jobs:
     - uses: oneteme/automation-scripts/.github/actions/create-release-notes@main
       with:
         version: ${{ needs.build.outputs.version }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
