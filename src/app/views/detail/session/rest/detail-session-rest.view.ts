@@ -3,7 +3,7 @@ import {InstanceEnvironment, InstanceRestSession} from "../../../../model/trace.
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {Location} from "@angular/common";
-import {catchError, combineLatest, finalize, forkJoin, Observable, of, Subscription, switchMap, EMPTY} from "rxjs";
+import {catchError, combineLatest, finalize, of, Subscription, switchMap, merge, map} from "rxjs";
 import {application} from "../../../../../environments/environment";
 import {Utils} from "../../../../shared/util";
 import {EnvRouter} from "../../../../service/router.service";
@@ -13,13 +13,14 @@ import {EnvRouter} from "../../../../service/router.service";
     styleUrls: ['./detail-session-rest.view.scss'],
 })
 export class DetailSessionRestView implements OnInit, OnDestroy {
-    private _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
-    private _traceService: TraceService = inject(TraceService);
-    private _router: EnvRouter = inject(EnvRouter);
-    private _location: Location = inject(Location);
+    private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+    private readonly _traceService: TraceService = inject(TraceService);
+    private readonly _router: EnvRouter = inject(EnvRouter);
+    private readonly _location: Location = inject(Location);
 
     session: InstanceRestSession;
     instance: InstanceEnvironment;
+    completedSession: InstanceRestSession
     sessionParent: { id: string, type: string };
     isLoading: boolean = false;
     subscriptions: Array<Subscription> = [];
@@ -42,37 +43,27 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     getSession(id: string) {
         this.isLoading = true;
         this.session = null;
+        this.completedSession =null;
+        this.queryBySchema = null;
+        this.sessionParent=null;
+        this._traceService.getSessionParent(id).pipe(catchError(() => of(null))).subscribe(d=>this.sessionParent=d) 
         this._traceService.getRestSession(id)
             .pipe(
                 switchMap(s => {
-                    return forkJoin({
-                        session: of(s),
-                        instance: this._traceService.getInstance(s.instanceId),
-                        parent: this._traceService.getSessionParent(id).pipe(catchError(() => of(null))),
-                        requests: (s.mask & 4) > 0 ? this._traceService.getRestRequests(s.id) : of([]),
-                        queries: (s.mask & 2) > 0 ? this._traceService.getDatabaseRequests(s.id) : of([]),
-                        stages: (s.mask & 1) > 0 ? this._traceService.getLocalRequests(s.id) : of([]),
-                        ftps: (s.mask & 8) > 0 ? this._traceService.getFtpRequests(s.id) : of([]),
-                        mails: (s.mask & 16) > 0 ? this._traceService.getSmtpRequests(s.id) : of([]),
-                        ldaps: (s.mask & 32) > 0 ? this._traceService.getLdapRequests(s.id) : of([])
-                    });
+                    return merge(
+                        of(s).pipe(map(s=>{this.session = {...s, restRequests:[],databaseRequests:[],stages:[],ftpRequests:[],mailRequests:[],ldapRequests:[]};})),
+                        this._traceService.getInstance(s.instanceId).pipe(map(d=>(this.instance=d))),
+                        (s.mask & 4) > 0 ? this._traceService.getRestRequests(s.id).pipe(map(d=>(this.session.restRequests.push(...d)))): of(),
+                        (s.mask & 2) > 0 ? this._traceService.getDatabaseRequests(s.id).pipe(map(d=>{this.session.databaseRequests.push(...d);this.groupQueriesBySchema();})) : of(),
+                        (s.mask & 1) > 0 ? this._traceService.getLocalRequests(s.id).pipe(map(d=>(this.session.stages.push(...d)))) : of(),
+                        (s.mask & 8) > 0 ? this._traceService.getFtpRequests(s.id).pipe(map(d=>(this.session.ftpRequests.push(...d)))) : of(),
+                        (s.mask & 16) > 0 ? this._traceService.getSmtpRequests(s.id).pipe(map(d=>(this.session.mailRequests.push(...d)))) : of(),
+                        (s.mask & 32) > 0 ? this._traceService.getLdapRequests(s.id).pipe(map(d=>(this.session.ldapRequests.push(...d)))) : of()
+                    )
                 }),
-                finalize(() => this.isLoading = false)
+                finalize(() =>{ this.completedSession = this.session; this.isLoading = false;})
             )
-            .subscribe({
-                next: result => {
-                    this.session = result.session;
-                    this.session.restRequests = result.requests;
-                    this.session.databaseRequests = result.queries;
-                    this.session.stages = result.stages;
-                    this.session.ftpRequests = result.ftps;
-                    this.session.mailRequests = result.mails;
-                    this.session.ldapRequests = result.ldaps;
-                    this.instance = result.instance;
-                    this.sessionParent = result.parent;
-                    this.groupQueriesBySchema();
-                }
-            });
+            .subscribe();
     }
 
     selectedRequest(event: { event: MouseEvent, row: any }) {
