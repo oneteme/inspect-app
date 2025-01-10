@@ -4,7 +4,7 @@ import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {EnvRouter} from "../../../../service/router.service";
 import {Location} from "@angular/common";
-import {combineLatest, finalize, forkJoin, of, Subscription, switchMap} from "rxjs";
+import {combineLatest, finalize, forkJoin, map, merge, of, Subscription, switchMap} from "rxjs";
 import {application} from "../../../../../environments/environment";
 import {Constants} from "../../../constants";
 
@@ -21,6 +21,7 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
     MAPPING_TYPE = Constants.MAPPING_TYPE;
     session: InstanceMainSession;
     instance: InstanceEnvironment;
+    completedSession: InstanceMainSession;
     isLoading: boolean = false;
     subscriptions: Array<Subscription> = [];
     queryBySchema: any[];
@@ -44,36 +45,24 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
     getSession(id: string) {
         this.isLoading = true;
         this.session = null;
+        this.completedSession =null;
+        this.queryBySchema = null;
         this._traceService.getMainSession(id).pipe(
                 switchMap(s => {
-                    return forkJoin({
-                        session: of(s),
-                        instance: this._traceService.getInstance(s.instanceId),
-                        requests: (s.mask & 4) > 0 ? this._traceService.getRestRequests(s.id) : of([]),
-                        queries: (s.mask & 2) > 0 ? this._traceService.getDatabaseRequests(s.id) : of([]),
-                        stages: (s.mask & 1) > 0 ? this._traceService.getLocalRequests(s.id) : of([]),
-                        ftps: (s.mask & 8) > 0 ? this._traceService.getFtpRequests(s.id) : of([]),
-                        mails: (s.mask & 16) > 0 ? this._traceService.getSmtpRequests(s.id) : of([]),
-                        ldaps: (s.mask & 32) > 0 ? this._traceService.getLdapRequests(s.id) : of([])
-                    });
+                    return merge(
+                        of(s).pipe(map(s=>{this.session = {...s, restRequests:[],databaseRequests:[],stages:[],ftpRequests:[],mailRequests:[],ldapRequests:[]};})),
+                        this._traceService.getInstance(s.instanceId).pipe(map(d=>(this.instance=d))),
+                        (s.mask & 4) > 0 ? this._traceService.getRestRequests(s.id).pipe(map(d=>(this.session.restRequests.push(...d)))): of(),
+                        (s.mask & 2) > 0 ? this._traceService.getDatabaseRequests(s.id).pipe(map(d=>{this.session.databaseRequests.push(...d);this.groupQueriesBySchema();})) : of(),
+                        (s.mask & 1) > 0 ? this._traceService.getLocalRequests(s.id).pipe(map(d=>(this.session.stages.push(...d)))) : of(),
+                        (s.mask & 8) > 0 ? this._traceService.getFtpRequests(s.id).pipe(map(d=>(this.session.ftpRequests.push(...d)))) : of(),
+                        (s.mask & 16) > 0 ? this._traceService.getSmtpRequests(s.id).pipe(map(d=>(this.session.mailRequests.push(...d)))) : of(),
+                        (s.mask & 32) > 0 ? this._traceService.getLdapRequests(s.id).pipe(map(d=>(this.session.ldapRequests.push(...d)))) : of()
+                    );
                 }),
-                finalize(() => this.isLoading = false)
+                finalize(() => {this.completedSession = this.session; this.isLoading = false;})
             )
-            .subscribe({
-                next: (result) => {
-                    if(result){
-                        this.session = result.session;
-                        this.session.restRequests = result.requests;
-                        this.session.databaseRequests = result.queries;
-                        this.session.stages = result.stages;
-                        this.session.ftpRequests = result.ftps;
-                        this.session.mailRequests = result.mails;
-                        this.session.ldapRequests = result.ldaps;
-                        this.instance = result.instance;
-                        this.groupQueriesBySchema();
-                    }
-                }
-            });
+            .subscribe();
     }
 
     groupQueriesBySchema() {
