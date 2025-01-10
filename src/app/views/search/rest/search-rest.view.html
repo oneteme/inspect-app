@@ -60,10 +60,10 @@
     <table class="fullwidth" mat-table [dataSource]="dataSource" matSort matSortActive="start" matSortDirection="desc">
 
       <ng-container matColumnDef="status">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width: 1%">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header [ngStyle]="{'width' : expandStatus ? '10%' : '1%'}">
         </th>
         <td [ngStyle]="statusBorder(row['status'])" mat-cell *matCellDef="let row" [matTooltip]="row['status']"
-          matTooltipPosition="before" class="status">
+          matTooltipPosition="before" class="status" (mouseenter)="onMouseEnter($event)" (mouseleave)="onMouseLeave($event)">
             Test
         </td>
       </ng-container>

@@ -64,6 +64,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   params: Partial<{ env: string, start: Date, end: Date, serveurs: string[] }> = {};
   advancedParams: Partial<{ [key: string]: any }> ={}
   focusFieldName: any;
+  expandStatus: boolean;
 
   subscriptionServer: Subscription;
   subscriptionSession: Subscription;
@@ -79,7 +80,18 @@ export class SearchRestView implements OnInit, OnDestroy {
     this.serverFilterForm.controls.dateRangePicker.controls.start.updateValueAndValidity({onlySelf: true})
   }
 
+  onMouseEnter(element){
+    console.log("onMouseEnter", element);
+    this.expandStatus = true;
+  }
+
+  onMouseLeave(element){
+    console.log("onMouseLeave", element);
+    this.expandStatus = false;
+  }
+
   constructor() {
+
     this._activatedRoute.queryParams
       .subscribe({
         next: (params: Params) => {
@@ -194,6 +206,8 @@ export class SearchRestView implements OnInit, OnDestroy {
             }
             this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
             this.dataSource.paginator.pageIndex = 0;
+            var element = document.getElementsByClassName("status");
+            console.log(element);
           }
           this.isLoading = false;
         },
