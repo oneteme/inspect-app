@@ -12,7 +12,8 @@
                     {{ session.name || 'N/A' }}
                 </a>
                 <div class="right">
-                    <mat-progress-spinner *ngIf="!sessionParent" style="display:inline-flex !important;" diameter="30" mode="indeterminate"></mat-progress-spinner> 
+                    <mat-progress-spinner *ngIf="!sessionParent" style="display:inline-flex !important;" diameter="24" mode="indeterminate"
+                                          matTooltip="Chargement de l'appel parent" TooltipPosition="below"></mat-progress-spinner> 
                     <button mat-icon-button (click)="navigate($event,'parent')" matTooltip="Détail de l'appel parent"
                             [hidden]="!sessionParent">
                         <mat-icon>move_up</mat-icon>
@@ -71,7 +72,7 @@
                 </div>
             </mat-card-title>
             <mat-card-content>
-                <div *ngIf="!queryBySchema" style="display: flex; flex-direction: row; align-items: center; justify-content: center; font-style: italic; gap: 0.5em">
+                <div *ngIf="isLoading && session" style="display: flex; flex-direction: row; align-items: center; justify-content: center; font-style: italic; gap: 0.5em">
                     <mat-progress-spinner  diameter="30" mode="indeterminate"></mat-progress-spinner> Chargement en cours...
                 </div>
                 <div style="display: flex; align-items: center;" *ngFor="let item of queryBySchema | keyvalue ">
