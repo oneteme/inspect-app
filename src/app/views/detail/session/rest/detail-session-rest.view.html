@@ -11,8 +11,8 @@
                     <mat-icon>call_received</mat-icon>
                     {{ session.name || 'N/A' }}
                 </a>
-                <div class="right">
-                    <mat-progress-spinner *ngIf="!sessionParent" style="display:inline-flex !important;" diameter="24" mode="indeterminate"
+                <div class="right">        
+                    <mat-progress-spinner *ngIf="parentLoading && !sessionParent" style="display:inline-flex !important;" diameter="24" mode="indeterminate"
                                           matTooltip="Chargement de l'appel parent" TooltipPosition="below"></mat-progress-spinner> 
                     <button mat-icon-button (click)="navigate($event,'parent')" matTooltip="Détail de l'appel parent"
                             [hidden]="!sessionParent">
