@@ -1,4 +1,4 @@
-<div *ngIf="!isLoading && session && instance">
+<div *ngIf="session && instance">
     <div class="header-card">
         <mat-card style="width: 60vw; min-width: 60vw; border-left: 4px solid green"
                   [ngStyle]="{'border-left': session.exception?.type || session.exception?.message ? '4px solid red' : '4px solid green'}">
@@ -62,6 +62,9 @@
                 </div>
             </mat-card-title>
             <mat-card-content>
+                <div *ngIf="isLoading && session" style="display: flex; flex-direction: row; align-items: center; justify-content: center; font-style: italic; gap: 0.5em">
+                    <mat-progress-spinner  diameter="30" mode="indeterminate"></mat-progress-spinner> Chargement en cours...
+                </div>
                 <div style="display: flex; align-items: center;" *ngFor="let item of queryBySchema | keyvalue ">
                     <div style="display: flex; margin-right: 1em; margin-left: 1em;" *ngIf="item.key != 'null'">
                         <mat-icon class="material-symbols-outlined">Database</mat-icon>
@@ -92,7 +95,7 @@
             </mat-card-footer>
         </mat-card>
     </div>
-    <detail-session [session]="session" [instance]="instance"></detail-session>
+    <detail-session [session]="session" [completedSession]="completedSession" [instance]="instance"></detail-session>
 </div>
 
 <div *ngIf="!isLoading && !session && !instance" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">
@@ -101,6 +104,6 @@
     </h2>
 </div>
 
-<div *ngIf="isLoading" style="width: 100%; height: calc(100vh - 50px - 1em); display: flex; flex-direction: row; align-items: center; justify-content: center; font-style: italic; gap: 0.5em">
+<div *ngIf="isLoading && !session && !instance" style="width: 100%; height: calc(100vh - 50px - 1em); display: flex; flex-direction: row; align-items: center; justify-content: center; font-style: italic; gap: 0.5em">
     <mat-progress-spinner diameter="30" mode="indeterminate"></mat-progress-spinner> Chargement en cours...
 </div>
