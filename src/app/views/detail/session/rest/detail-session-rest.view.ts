@@ -23,6 +23,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     completedSession: InstanceRestSession
     sessionParent: { id: string, type: string };
     isLoading: boolean = false;
+    parentLoading: boolean =false;
     subscriptions: Array<Subscription> = [];
     queryBySchema: any[];
     env: string;
@@ -42,11 +43,12 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
 
     getSession(id: string) {
         this.isLoading = true;
+        this.parentLoading = true;
         this.session = null;
         this.completedSession =null;
         this.queryBySchema = null;
         this.sessionParent=null;
-        this._traceService.getSessionParent(id).pipe(catchError(() => of(null))).subscribe(d=>this.sessionParent=d) 
+        this._traceService.getSessionParent(id).pipe(catchError(() => of(null)),finalize(()=>(this.parentLoading = false))).subscribe(d=>this.sessionParent=d) 
         this._traceService.getRestSession(id)
             .pipe(
                 switchMap(s => {
