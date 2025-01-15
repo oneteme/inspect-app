@@ -12,9 +12,9 @@
     </mat-form-field>
     <mat-form-field class="no-subscript" [class.loading]="serverNameIsLoading" appearance="outline">
       <mat-label>Serveur</mat-label>
-      <mat-select [formControl]="serverFilterForm.controls.appname" multiple>
+      <mat-select [formControl]="serverFilterForm.controls.appname" multiple (selectionChange)="onChangeServer($event)">
         
-        <span *ngIf="serverNameIsLoading && params.serveurs[0]!=''"><mat-option *ngFor="let s of params.serveurs" [value]="s">{{s}}</mat-option></span>
+        <span *ngIf="serverNameIsLoading && queryParams.servers && queryParams.servers[0]!=''"><mat-option *ngFor="let s of queryParams.servers" [value]="s">{{s}}</mat-option></span>
         <mat-option *ngFor="let d of nameDataList" [value]="d">{{d}}</mat-option>
       </mat-select>
       <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>

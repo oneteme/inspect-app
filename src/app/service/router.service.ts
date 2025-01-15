@@ -37,6 +37,7 @@ export class EnvRouter {
         else {
             this.env = extras.queryParams.env;
         }
+        console.log(extras)
         return this.router.navigate(commands, extras);
         // return Promise.resolve(true);
     }
