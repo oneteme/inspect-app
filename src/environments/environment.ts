@@ -2,7 +2,9 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-import { Application } from "src/app/model/conf.model";
+import {Application, IStep, Period} from "src/app/model/conf.model";
+
+export const DEFAULT_ENV = "dev";
 
 export const environment = {
   production: false,
@@ -10,13 +12,13 @@ export const environment = {
 };
 
 export const application: Application = {
-  default_env: 'dev',
+  default_env: DEFAULT_ENV,
   session: {
     api: {
-      default_period: makeDateTimePeriod(1)
+      default_period: makeDateTimePeriod(60)
     },
     main: {
-      default_period: makeDateTimePeriod(1)
+      default_period: makeDateTimePeriod(60)
     }
   },
   dashboard: {
@@ -39,9 +41,8 @@ export const application: Application = {
   }
 }
 
-export function makeDateTimePeriod(hourBetween: number): { start: Date, end: Date } {
-  var s = new Date();
-  return {start: new Date(s.getFullYear(), s.getMonth(), s.getDate(), s.getHours() - hourBetween, s.getMinutes()), end:  new Date(s.getFullYear(), s.getMonth(), s.getDate(), s.getHours(), s.getMinutes())};
+export function makeDateTimePeriod(step: number): Period {
+  return new IStep(step);
 }
 
 export function makeDatePeriod(dayBetween: number, shiftEnd: number = 0): { start: Date, end: Date } {

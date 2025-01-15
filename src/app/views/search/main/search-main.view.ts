@@ -11,7 +11,7 @@ import {TraceService} from 'src/app/service/trace.service';
 import {application, makeDatePeriod, makeDateTimePeriod} from 'src/environments/environment';
 import {Constants, Filter, FilterConstants, FilterMap, FilterPreset} from '../../constants';
 import {FilterService} from 'src/app/service/filter.service';
-import {InstanceMainSession} from 'src/app/model/trace.model';
+import {InstanceMainSession, InstanceRestSession} from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
 import {DateAdapter, MAT_DATE_FORMATS} from "@angular/material/core";
@@ -19,6 +19,8 @@ import {CustomDateAdapter} from "../../../shared/material/custom-date-adapter";
 import {MY_DATE_FORMATS} from "../../../shared/shared.module";
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
 import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-date-range-selection-strategy";
+import {IPeriod, IStep, QueryParams} from "../../../model/conf.model";
+import {shallowEqual} from "../rest/search-rest.view";
 
 
 @Component({
@@ -64,8 +66,9 @@ export class SearchMainView implements OnInit, OnDestroy {
     focusFieldName: any
     filterTable = new Map<string, any>();
     filter: string = '';
-    params: Partial<{ env: string, start: Date, end: Date, type: string, serveurs: string[] }> = {};
 
+    queryParams: Partial<QueryParams> = {};
+    type: string = '';
     subscriptionServer: Subscription;
     subscriptionSession: Subscription;
 
@@ -79,37 +82,46 @@ export class SearchMainView implements OnInit, OnDestroy {
             this._activatedRoute.queryParams
         ]).subscribe({
             next: ([params, queryParams]) => {
-                this.params.env = queryParams['env'] || application.default_env;
-                this.params.type = params.type_main;
-                this.params.start = queryParams['start'] ? new Date(queryParams['start']) : (application.session.main.default_period || makeDateTimePeriod(1)).start;
-                this.params.end = queryParams['end'] ? new Date(queryParams['end']) : (application.session.main.default_period || makeDateTimePeriod(1)).end;
-                this.params.serveurs = Array.isArray(queryParams['appname']) ? queryParams['appname'] : [queryParams['appname'] || ''];
-                if (this.params.serveurs[0] != '') {
-                    this.patchServerValue(this.params.serveurs)
+                this.type = params.type_main;
+                if(queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env || application.default_env, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server])
+                if(!queryParams.start && !queryParams.end)  {
+                    this.queryParams =  new QueryParams(queryParams.step ? new IStep(queryParams.step) : application.session.main.default_period, queryParams.env || application.default_env, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server]);
                 }
-                this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate(), this.params.end.getHours(), this.params.end.getMinutes(), this.params.end.getSeconds(), this.params.end.getMilliseconds() - 1));
-                this.subscriptionServer = this._instanceService.getApplications(this.params.type == 'view' ? 'CLIENT' : 'SERVER' )
+                this.patchServerValue(this.queryParams.servers);
+                this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
+
+                this.subscriptionServer = this._instanceService.getApplications(this.type == 'view' ? 'CLIENT' : 'SERVER' )
                     .pipe(finalize(()=> this.serverNameIsLoading = false))
                     .subscribe({
                         next: res => {
                             this.nameDataList = res.map(r => r.appName);
-                            this.patchServerValue(this.params.serveurs);
+                            this.patchServerValue(this.queryParams.servers);
                         }, error: (e) => {
                             console.log(e)
                         }
                     });
                 this.getMainRequests();
-                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${this.params.serveurs[0] !== '' ? '&' + this.params.serveurs.map(name => `appname=${name}`).join('&') : ''}`)
+                this._location.replaceState(`${this._router.url.split('?')[0]}?${this.queryParams.buildPath()}`);
             }
         });
     }
 
     onChangeStart(event) {
         this.serverFilterForm.controls.dateRangePicker.controls.end.updateValueAndValidity({onlySelf: true})
+        let start = this.serverFilterForm.controls.dateRangePicker.controls.start.value;
+        let end = this.serverFilterForm.controls.dateRangePicker.controls.end.value || null;
+        this.queryParams.period = new IPeriod(start, end);
     }
 
     onChangeEnd(event) {
         this.serverFilterForm.controls.dateRangePicker.controls.start.updateValueAndValidity({onlySelf: true})
+        let start = this.serverFilterForm.controls.dateRangePicker.controls.start.value || null;
+        let end = this.serverFilterForm.controls.dateRangePicker.controls.end.value;
+        this.queryParams.period = new IPeriod(start, end ? new Date(end.getFullYear(), end.getMonth(), end.getDate(), end.getHours(), end.getMinutes() + 1) : null);
+    }
+
+    onChangeServer($event){
+        this.queryParams.servers = this.serverFilterForm.controls.appname.value;
     }
 
     ngOnInit(): void {
@@ -123,11 +135,11 @@ export class SearchMainView implements OnInit, OnDestroy {
 
     getMainRequests() {
         let params = {
-            'appname': this.params.serveurs,
-            'env': this.params.env,
-            'launchmode': this.params.type.toUpperCase(),
-            'start': this.params.start.toISOString(),
-            'end': this.params.end.toISOString(),
+            'appname': this.queryParams.servers,
+            'env': this.queryParams.env,
+            'launchmode': this.type.toUpperCase(),
+            'start': this.queryParams.period.start.toISOString(),
+            'end': this.queryParams.period.end.toISOString(),
             'lazy': false
         };
         if (this.advancedParams) {
@@ -136,38 +148,15 @@ export class SearchMainView implements OnInit, OnDestroy {
 
         this.isLoading = true;
         this.dataSource.data = [];
+        this.dataSource.paginator = this.paginator;
+        this.dataSource.sort = this.sort
         this.subscriptionSession = this._traceService.getMainSessions(params).subscribe((d: InstanceMainSession[]) => {
             if (d) {
                 this.dataSource = new MatTableDataSource(d);
                 this.dataSource.paginator = this.paginator;
                 this.dataSource.sort = this.sort
-                this.dataSource.sortingDataAccessor = (row: any, columnName: string) => {
-                    if (columnName == "app_name") return row["appName"] as string;
-                    if (columnName == "name") return row["name"] as string;
-                    if (columnName == "location") return row['location'] as string;
-                    if (columnName == "start") return row['start'] as string;
-                    if (columnName == "durée") return (row["end"] - row["start"])
-
-                    var columnValue = row[columnName as keyof any] as string;
-                    return columnValue;
-                }
-                this.dataSource.filterPredicate = (data: InstanceMainSession, filter: string) => {
-                    var map: Map<string, any> = new Map(JSON.parse(filter));
-                    let isMatch = true;
-                    for (let [key, value] of map.entries()) {
-                        if (key == 'filter') {
-                            isMatch = isMatch && (value == '' || (data.appName?.toLowerCase().includes(value) ||
-                                data.name?.toLowerCase().includes(value) || data.location?.toLowerCase().includes(value) ||
-                                data.user?.toLowerCase().includes(value)));
-                        } else if (key == 'status') {
-                            const s = data.exception?.type || data.exception?.message ? "KO" : "OK";
-                            isMatch = isMatch && (!value.length || (value.some((status: any) => {
-                                return s == status;
-                            })));
-                        }
-                    }
-                    return isMatch;
-                }
+                this.dataSource.sortingDataAccessor = sortingDataAccessor;
+                this.dataSource.filterPredicate = filterPredicate;
                 this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
                 this.dataSource.paginator.pageIndex = 0;
                 this.isLoading = false;
@@ -181,20 +170,15 @@ export class SearchMainView implements OnInit, OnDestroy {
     search() {
         if (this.serverFilterForm.valid) {
             if(this.subscriptionSession) this.subscriptionSession.unsubscribe();
-            let appname = this.serverFilterForm.getRawValue().appname;
-            let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
-            let end = this.serverFilterForm.getRawValue().dateRangePicker.end;
-            let _end = new Date(end.getFullYear(), end.getMonth(), end.getDate(), end.getHours(), end.getMinutes(), 59, 1000);
-            if (this.params.start.toISOString() != start.toISOString()
-                || this.params.end.toISOString() != end.toISOString()
-                || !this.params?.serveurs?.every((element, index) => element === appname[index])
-                || appname.length != this.params?.serveurs?.length) {
+            if(!shallowEqual(this._activatedRoute.snapshot.queryParams, this.queryParams.buildParams())) {
                 this._router.navigate([], {
                     relativeTo: this._activatedRoute,
-                    queryParamsHandling: 'merge',
-                    queryParams: { ...(appname !== undefined && { appname }), start: start.toISOString(), end: _end.toISOString() }
-                })
+                    queryParams: this.queryParams.buildParams()
+                });
             } else {
+                if(this.queryParams.period instanceof IStep) {
+                    this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
+                }
                 this.getMainRequests();
             }
         }
@@ -216,12 +200,11 @@ export class SearchMainView implements OnInit, OnDestroy {
     }
 
     selectedRequest(event: MouseEvent, row: any) {
-        console.log(row)
         if (event.ctrlKey) {
             this._router.open(`#/session/main/${row.type.toLowerCase()}/${row.id}`, '_blank')
         } else {
             this._router.navigate(['/session/main', row.type.toLowerCase(), row.id], {
-                queryParams: {'env': this.params.env}
+                queryParams: {'env': this.queryParams.env}
             });
         }
     }
@@ -289,5 +272,34 @@ export class SearchMainView implements OnInit, OnDestroy {
     }
 
 }
+
+const sortingDataAccessor = (row: any, columnName: string) => {
+    if (columnName == "app_name") return row["appName"] as string;
+    if (columnName == "name") return row["name"] as string;
+    if (columnName == "location") return row['location'] as string;
+    if (columnName == "start") return row['start'] as string;
+    if (columnName == "durée") return (row["end"] - row["start"])
+
+    var columnValue = row[columnName as keyof any] as string;
+    return columnValue;
+};
+
+const filterPredicate = (data: InstanceMainSession, filter: string) => {
+    var map: Map<string, any> = new Map(JSON.parse(filter));
+    let isMatch = true;
+    for (let [key, value] of map.entries()) {
+        if (key == 'filter') {
+            isMatch = isMatch && (value == '' || (data.appName?.toLowerCase().includes(value) ||
+                data.name?.toLowerCase().includes(value) || data.location?.toLowerCase().includes(value) ||
+                data.user?.toLowerCase().includes(value)));
+        } else if (key == 'status') {
+            const s = data.exception?.type || data.exception?.message ? "KO" : "OK";
+            isMatch = isMatch && (!value.length || (value.some((status: any) => {
+                return s == status;
+            })));
+        }
+    }
+    return isMatch;
+};
 
 

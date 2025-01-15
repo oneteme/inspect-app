@@ -1,5 +1,5 @@
 
-import { Application } from "src/app/model/conf.model";
+import {Application, IStep, Period} from "src/app/model/conf.model";
 
 export const environment = {
   production: false,
@@ -10,10 +10,10 @@ export const application: Application = {
   default_env: 'prd',
   session: {
     api: {
-      default_period: makePeriod(0)
+      default_period: makeDateTimePeriod(60)
     },
     main: {
-      default_period: makePeriod(0)
+      default_period: makeDateTimePeriod(60)
     }
   },
   dashboard: {
@@ -31,6 +31,10 @@ export const application: Application = {
       default_period: undefined
     }
   }
+}
+
+export function makeDateTimePeriod(step: number): Period {
+  return new IStep(step);
 }
 
 export function makePeriod(dayBetween: number, shiftEnd: number = 0): { start: Date, end: Date } {
