@@ -20,6 +20,8 @@ import {CustomDateAdapter} from "../../../shared/material/custom-date-adapter";
 import {MY_DATE_FORMATS} from "../../../shared/shared.module";
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
 import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-date-range-selection-strategy";
+import {IPeriod, IStep, Period, QueryParams} from "../../../model/conf.model";
+import {environment} from "../../../../environments/environment.prod";
 
 @Component({
   templateUrl: './search-rest.view.html',
@@ -52,7 +54,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   isLoading = true;
   serverNameIsLoading = true;
   serverFilterForm = new FormGroup({
-    appname: new FormControl([""]),
+    appname: new FormControl([]),
     dateRangePicker: new FormGroup({
       start: new FormControl<Date | null>(null, [Validators.required]),
       end: new FormControl<Date | null>(null, [Validators.required])
@@ -61,8 +63,8 @@ export class SearchRestView implements OnInit, OnDestroy {
 
   filterTable = new Map<string, any>();
 
-  params: Partial<{ env: string, start: Date, end: Date, serveurs: string[] }> = {};
   advancedParams: Partial<{ [key: string]: any }> ={}
+  queryParams: Partial<QueryParams> = {};
   focusFieldName: any;
 
   subscriptionServer: Subscription;
@@ -73,38 +75,45 @@ export class SearchRestView implements OnInit, OnDestroy {
 
   onChangeStart(event) {
     this.serverFilterForm.controls.dateRangePicker.controls.end.updateValueAndValidity({onlySelf: true})
+    let start = this.serverFilterForm.controls.dateRangePicker.controls.start.value;
+    let end = this.serverFilterForm.controls.dateRangePicker.controls.end.value || null;
+    this.queryParams.period = new IPeriod(start, end);
   }
 
   onChangeEnd(event) {
     this.serverFilterForm.controls.dateRangePicker.controls.start.updateValueAndValidity({onlySelf: true})
+    let start = this.serverFilterForm.controls.dateRangePicker.controls.start.value || null;
+    let end = this.serverFilterForm.controls.dateRangePicker.controls.end.value;
+    this.queryParams.period = new IPeriod(start, end ? new Date(end.getFullYear(), end.getMonth(), end.getDate(), end.getHours(), end.getMinutes() + 1) : null);
+  }
+
+  onChangeServer($event){
+    this.queryParams.servers = this.serverFilterForm.controls.appname.value;
   }
 
   constructor() {
     this._activatedRoute.queryParams
       .subscribe({
         next: (params: Params) => {
-          this.params.env = params['env'] || application.default_env;
-          this.params.start = params['start'] ? new Date(params['start']) : (application.session.api.default_period || makeDateTimePeriod(1)).start;
-          this.params.end = params['end'] ? new Date(params['end']) : (application.session.api.default_period || makeDateTimePeriod(1)).end;
-          this.params.serveurs = Array.isArray(params['appname']) ? params['appname'] : [params['appname'] || ''];
-          if (this.params.serveurs[0] != '') {
-            this.patchServerValue(this.params.serveurs)
+           if(params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.env || application.default_env, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server])
+          if(!params.start && !params.end)  {
+            this.queryParams =  new QueryParams(params.step ? new IStep(params.step) : application.session.api.default_period, params.env || application.default_env, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server]);
           }
+          this.patchServerValue(this.queryParams.servers);
+          this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
-          this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate(), this.params.end.getHours(), this.params.end.getMinutes(), this.params.end.getSeconds(), this.params.end.getMilliseconds() - 1));
           this.subscriptionServer = this._instanceService.getApplications('SERVER')
             .pipe(finalize(()=> this.serverNameIsLoading = false))
             .subscribe({
               next: res => {
                 this.nameDataList = res.map(r => r.appName);
-                this.patchServerValue(this.params.serveurs);
+                this.patchServerValue(this.queryParams.servers);
               }, error: (e) => {
                 console.log(e)
               }
             });
           this.getIncomingRequest();
-
-          this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${this.params.serveurs[0] !== '' ? '&' + this.params.serveurs.map(name => `appname=${name}`).join('&') : ''}`)
+          this._location.replaceState(`${this._router.url.split('?')[0]}?${this.queryParams.buildPath()}`);
         }
       });
   }
@@ -124,32 +133,27 @@ export class SearchRestView implements OnInit, OnDestroy {
 
   search() {
     if (this.serverFilterForm.valid) {
-      if(this.subscriptionSession) this.subscriptionSession.unsubscribe();
-      let appname = this.serverFilterForm.getRawValue().appname;
-      let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
-      let end = this.serverFilterForm.getRawValue().dateRangePicker.end;
-      let _end = new Date(end.getFullYear(), end.getMonth(), end.getDate(), end.getHours(), end.getMinutes(), 59, 1000);
-      if (this.params.start.toISOString() != start.toISOString()
-        || this.params.end.toISOString() != end.toISOString()
-        || !this.params?.serveurs?.every((element, index) => element === appname[index])
-        || appname.length != this.params?.serveurs?.length) {
+      if(!shallowEqual(this._activatedRoute.snapshot.queryParams, this.queryParams.buildParams())) {
         this._router.navigate([], {
           relativeTo: this._activatedRoute,
-          queryParamsHandling: 'merge',
-          queryParams: { ...(appname !== undefined && { appname }), start: start.toISOString(), end: _end.toISOString() }
-        })
+          queryParams: this.queryParams.buildParams()
+        });
       } else {
+        if(this.queryParams.period instanceof IStep) {
+          this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
+        }
         this.getIncomingRequest();
       }
     }
   }
 
   getIncomingRequest() {
+    if(this.subscriptionSession) this.subscriptionSession.unsubscribe();
     let params = {
-      'env': this.params.env,
-      'appname': this.params.serveurs,
-      'start': this.params.start.toISOString(),
-      'end': this.params.end.toISOString()
+      'env': this.queryParams.env,
+      'appname': this.queryParams.servers,
+      'start': this.queryParams.period.start.toISOString(),
+      'end': this.queryParams.period.end.toISOString()
     }; 
     if(this.advancedParams){
       Object.assign(params, this.advancedParams);
@@ -157,6 +161,8 @@ export class SearchRestView implements OnInit, OnDestroy {
 
     this.isLoading = true;
     this.dataSource = new MatTableDataSource([]);
+    this.dataSource.paginator = this.paginator;
+    this.dataSource.sort = this.sort;
     this.subscriptionSession = this._traceService.getRestSessions(params)
       .subscribe({
         next: (d: InstanceRestSession[]) => {
@@ -164,34 +170,8 @@ export class SearchRestView implements OnInit, OnDestroy {
             this.dataSource = new MatTableDataSource(d);
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
-            this.dataSource.sortingDataAccessor = (row: any, columnName: string) => {
-
-              if (columnName == "app_name") return row["appName"] as string;
-              if (columnName == "name/port") return row["host"] + ":" + row["port"] as string;
-              if (columnName == "method/path") return row['path'] as string;
-              if (columnName == "start") return row['start'] as string;
-              if (columnName == "durée") return (row["end"] - row["start"])
-
-              return row[columnName as keyof any] as string;
-
-            }
-            this.dataSource.filterPredicate = (data: InstanceRestSession, filter: string) => {
-              var map: Map<string, any> = new Map(JSON.parse(filter));
-              let isMatch = true;
-              for (let [key, value] of map.entries()) {
-                if (key == 'filter') {
-                  isMatch = isMatch && (value == '' || (data.appName?.toLowerCase().includes(value) ||
-                    data.method?.toLowerCase().includes(value) || data.query?.toLowerCase().includes(value) ||
-                    data.user?.toLowerCase().includes(value) || data.path?.toLowerCase().includes(value)));
-                } else if (key == 'status') {
-                  const s = data.status.toString();
-                  isMatch = isMatch && (!value.length || (value.some((status: any) => {
-                    return s.startsWith(status[0]);
-                  })));
-                }
-              }
-              return isMatch;
-            }
+            this.dataSource.sortingDataAccessor = sortingDataAccessor;
+            this.dataSource.filterPredicate = filterPredicate;
             this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
             this.dataSource.paginator.pageIndex = 0;
           }
@@ -204,7 +184,6 @@ export class SearchRestView implements OnInit, OnDestroy {
   }
 
   patchDateValue(start: Date, end: Date) {
-    console.log(start, end)
     this.serverFilterForm.patchValue({
       dateRangePicker: {
         start: start,
@@ -224,7 +203,7 @@ export class SearchRestView implements OnInit, OnDestroy {
       this._router.open(`#/session/rest/${row}`, '_blank')
     } else {
       this._router.navigate(['/session/rest', row], {
-        queryParams: { 'env': this.params.env }
+        queryParams: { 'env': this.queryParams.env }
       });
     }
   }
@@ -301,6 +280,76 @@ export class SearchRestView implements OnInit, OnDestroy {
     }
   }
 
+}
+
+const sortingDataAccessor = (row: any, columnName: string) => {
+  if (columnName == "app_name") return row["appName"] as string;
+  if (columnName == "name/port") return row["host"] + ":" + row["port"] as string;
+  if (columnName == "method/path") return row['path'] as string;
+  if (columnName == "start") return row['start'] as string;
+  if (columnName == "durée") return (row["end"] - row["start"])
+
+  return row[columnName as keyof any] as string;
+};
+
+const filterPredicate = (data: InstanceRestSession, filter: string) => {
+  var map: Map<string, any> = new Map(JSON.parse(filter));
+  let isMatch = true;
+  for (let [key, value] of map.entries()) {
+    if (key == 'filter') {
+      isMatch = isMatch && (value == '' || (data.appName?.toLowerCase().includes(value) ||
+          data.method?.toLowerCase().includes(value) || data.query?.toLowerCase().includes(value) ||
+          data.user?.toLowerCase().includes(value) || data.path?.toLowerCase().includes(value)));
+    } else if (key == 'status') {
+      const s = data.status.toString();
+      isMatch = isMatch && (!value.length || (value.some((status: any) => {
+        return s.startsWith(status[0]);
+      })));
+    }
+  }
+  return isMatch;
+};
+
+export function shallowEqual(
+    a: {[key: string | symbol]: any},
+    b: {[key: string | symbol]: any},
+): boolean {
+  // While `undefined` should never be possible, it would sometimes be the case in IE 11
+  // and pre-chromium Edge. The check below accounts for this edge case.
+  const k1 = a ? getDataKeys(a) : undefined;
+  const k2 = b ? getDataKeys(b) : undefined;
+  if (!k1 || !k2 || k1.length != k2.length) {
+    return false;
+  }
+  let key: string | symbol;
+  for (let i = 0; i < k1.length; i++) {
+    key = k1[i];
+    if (!equalArraysOrString(a[key], b[key])) {
+      return false;
+    }
+  }
+  return true;
+}
+
+/**
+ * Gets the keys of an object, including `symbol` keys.
+ */
+export function getDataKeys(obj: Object): Array<string | symbol> {
+  return [...Object.keys(obj), ...Object.getOwnPropertySymbols(obj)];
+}
+
+/**
+ * Test equality for arrays of strings or a string.
+ */
+export function equalArraysOrString(a: string | string[], b: string | string[]) {
+  if (Array.isArray(a) && Array.isArray(b)) {
+    if (a.length !== b.length) return false;
+    const aSorted = [...a].sort();
+    const bSorted = [...b].sort();
+    return aSorted.every((val, index) => bSorted[index] === val);
+  } else {
+    return a === b;
+  }
 }
 
 

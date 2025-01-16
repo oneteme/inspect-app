@@ -6,16 +6,19 @@ export class CustomDateAdapter extends NativeDateAdapter {
     parse(value: any, parseFormat?: any): Date | null {
         if (typeof value === 'string') {
             // Custom parsing logic to handle both date and time.
-            const dateTimeRegex = /^([0-9][1-9])\/(0[1-9]|1[0-2])\/(\d{4}) ([0-1][0-9]|2[0-3]):([0-5]\d)$/;
+            const dateTimeRegex = /^(0[1-9]|[1-2][0-9]|3[0-1])\/(0[1-9]|1[0-2])\/(\d{4}) ([0-1][0-9]|2[0-3]):([0-5]\d)$/;
             const match = value.match(dateTimeRegex);
             if (match) {
-                return new Date(
-                    parseInt(match[3], 10),
-                    parseInt(match[2], 10) - 1,  // Month is 0-based
-                    parseInt(match[1], 10),
-                    parseInt(match[4], 10),
-                    parseInt(match[5], 10)
-                );
+                let dayNumberOfMonth =  new Date(parseInt(match[3], 10),  parseInt(match[2], 10), 0).getDate();
+                if(dayNumberOfMonth >= parseInt(match[1], 10)) {
+                    return new Date(
+                        parseInt(match[3], 10),
+                        parseInt(match[2], 10) - 1,  // Month is 0-based
+                        parseInt(match[1], 10),
+                        parseInt(match[4], 10),
+                        parseInt(match[5], 10)
+                    );
+                }
             }
         }
         return null;
