@@ -1,5 +1,5 @@
 {
-  "name": "traceapi-server",
+  "name": "inspect-app",
   "version": "15.0.0",
   "scripts": {
     "ng": "ng",
