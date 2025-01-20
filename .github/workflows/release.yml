@@ -28,6 +28,7 @@ jobs:
     - run: npm install
     - run: npm run build
     - run: |
+        ls dist/
         version=${{ needs.build.outputs.version }}
         echo "minVer=${version%*.*}" >> $GITHUB_OUTPUT #major.minor
       id: extract
