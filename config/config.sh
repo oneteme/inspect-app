@@ -3,9 +3,10 @@
 OUT=${1:-"environment.remote.json"}
 
 ENTRIES=""
-for ENTRY in INSPECT_SERVER_URL:host; do #separate var with space
-  VALUE=$(printenv "${ENTRY%:*}")
-  KEY=${ENTRY#*:}
+MAP=$(< config/config-env.map)`
+for ENTRY in $MAP; do #separate var with space
+  VALUE=$(printenv "${ENTRY#:*}")
+  KEY=${ENTRY%*:}
   if [ -n "$VALUE" ]; then
     ENTRIES="$ENTRIES\"$KEY\":\"$VALUE\","
     echo "$KEY=$VALUE"
