@@ -3,7 +3,7 @@
 OUT=${1:-"environment.remote.json"}
 
 ENTRIES=""
-for ENTRY in INSPECT_SERVER_URL:host; do
+for ENTRY in INSPECT_SERVER_URL:host; do #separate var with space
   VALUE=$(printenv "${ENTRY%:*}")
   KEY=${ENTRY#*:}
   if [ -n "$VALUE" ]; then
