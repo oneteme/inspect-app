@@ -2,12 +2,8 @@
 
 OUT=${1:-"environment.remote.json"}
 
-ENV_VARS=( "INSPECT_SERVER_URL:host"
-        # var.
-        )
-
 ENTRIES=""
-for ENTRY in "${ENV_VARS[@]}"; do
+for ENTRY in INSPECT_SERVER_URL:host JAVA_HOME:java; do
   KEY=${ENTRY%:*}
   VALUE=$(printenv "$KEY")
   if [ -n "$VALUE" ]; then
