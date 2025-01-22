@@ -1,5 +1,5 @@
 import {DatePipe} from "@angular/common";
-import {Component, ElementRef, inject, Input, OnChanges, SimpleChanges, ViewChild} from "@angular/core";
+import {Component, ElementRef, Input, OnChanges, SimpleChanges, ViewChild} from "@angular/core";
 import {Timeline} from "vis-timeline";
 import {
     DatabaseRequest, FtpRequest,
@@ -9,9 +9,8 @@ import {
     LocalRequest, MailRequest, NamingRequest,
     RestRequest
 } from "src/app/model/trace.model";
-import {EnvRouter} from "../../../../../service/router.service";
+
 import {DurationPipe} from "../../../../../shared/pipe/duration.pipe";
-import {ActivatedRoute} from "@angular/router";
 import { DataSet } from "vis-data";
 
 const INFINIT = new Date(9999,12,31).getTime();
@@ -38,7 +37,7 @@ let options: any = {
 })
 export class DetailTimelineComponent implements OnChanges {
 
-    private durationPipe = new DurationPipe();
+    private readonly durationPipe = new DurationPipe();
     timeline: Timeline;
     timeline_end;
     timeline_start;
@@ -80,33 +79,35 @@ export class DetailTimelineComponent implements OnChanges {
                     groups = Array.from(groups).map((g: string) => ({ id: g, content: g }))
                 }
 
+                if (this.timeline) {  // destroy if exists 
+                    this.timeline.destroy();
+                }
+                this.timeline = new Timeline(this.timelineElement.nativeElement, [], [], options);
                 if(dataArray.length >50 ){
                     this.timeline_end = dataArray[51].start;
                     this.timeline_end_limited = dataArray[51].start *1000
                     data = new DataSet(this.dataSetup(this.getDataforRange(dataArray,this.timeline_start, this.timeline_end),isWebapp,title));
+                    this.timeline.on('rangechanged', (props)=>{
+                            this.timeline.setItems(new DataSet(this.dataSetup(this.getDataforRange(dataArray,props.start.getTime()/1000, props.end.getTime()/1000),isWebapp,title)));
+                    })
                 }else {
                     this.timeline_end = this.request.end
                     data = new DataSet(this.dataSetup(dataArray,isWebapp,title));
                 }
-             
-   
-                if (this.timeline) {  // destroy if exists 
-                    this.timeline.destroy();
-                }
-                options.start = this.timeline_start *1000
-                options.end =  this.timeline_end_limited ? this.timeline_end_limited : (this.timeline_end);   
+                        
+                this.timeline.setOptions({
+                    start: this.timeline_start *1000,
+                    end: this.timeline_end_limited ? this.timeline_end_limited : (this.timeline_end)
+                });
 
-                this.timeline = new Timeline(this.timelineElement.nativeElement, data, groups, options);
+                this.timeline.setData({
+                    groups: groups,
+                    items: data
+                })
 
                 if (this.timeline_end != this.request.end * 1000) {
                     this.timeline.addCustomTime(this.request.end * 1000, "async");
-                }
-
-               this.timeline.on('rangechanged', (props)=>{
-                    if(dataArray.length >50 ){
-                        this.timeline.setItems(new DataSet(this.dataSetup(this.getDataforRange(dataArray,props.start.getTime()/1000, props.end.getTime()/1000),isWebapp,title)));
-                    }
-                })
+                }              
             }
         }
     }
