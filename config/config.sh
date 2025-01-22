@@ -3,7 +3,7 @@
 OUT=${1:-"environment.remote.json"}
 
 ENTRIES=""
-MAP=$(< config/config-env.map)
+MAP=$(< config-env.map)
 for ENTRY in $MAP; do #separate var with space
   VALUE=$(printenv "${ENTRY#:*}")
   KEY=${ENTRY%*:}
