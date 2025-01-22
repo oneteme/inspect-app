@@ -101,27 +101,72 @@ mat-form-field.no-subscript {
 }
 
 
-
+.vis-item {
+  border-color: #040730 !important;
+  color:white !important;
+  cursor: pointer !important;
+}
 
 .vis-item.rest{
-  background-color: rgb(20, 35, 220);
-  border-color: #040730;
-  color:white;
-  cursor: pointer;
+  background-color: #3F51B5;
+  
 }
 
-.vis-item.bdd{
-  background-color: #008080; //rgb(150, 205, 50);
-  border-color: #002e2e; //rgb(150, 205, 50);
-  color:white;
-  cursor: pointer;
+.vis-item.ftp{
+  background-color: #2196F3;
+
+}
+.vis-item.smtp{
+  background-color: #9C27B0;
+
+}
+.vis-item.ldap{
+  background-color: #00BCD4;
+
+}
+.vis-item.database{
+  background-color: #4CAF50;
+
+}
+.vis-item.local{
+  background-color: #3b3b38;
+
 }
 
-.vis-item.bdd-failed{
-  background-color: red; //rgb(150, 205, 50);
-  border-color: rgb(185, 40, 40);//rgb(150, 205, 50);
+
+.vis-item.client-error{
+  border-top: 4px #f9ad4e solid !important;
+}
+.vis-item.error{
+  border-top: 4px #bb2124 solid !important;
+}
+
+.dot {
+  height: 15px;
+  width: 15px;
+  border-radius: 50%;
+  display: inline-block;
   color:white;
-  cursor: pointer;
+}
+
+.spinner{
+  margin: auto;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.transparent {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  color: black;
+  font-weight: bold;
+  text-align: center;
+  padding: 20px;
+  background: rgb(165 157 157 / 50%);
 }
 
 .vis-custom-time { // makes markers not draggable 
