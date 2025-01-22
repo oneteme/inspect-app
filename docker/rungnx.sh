@@ -4,7 +4,6 @@ echo environment configuration ...
 OUT=${1:-"environment.remote.json"}
 DIR=$(dirname "$0")
 MAP=$(cat "$DIR/config-env.map")
-echo "map=$MAP"
 
 ENTRIES=""
 for ENTRY in $MAP; do #separate var with space

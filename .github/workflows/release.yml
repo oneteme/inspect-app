@@ -10,9 +10,9 @@ jobs:
     - uses: actions/setup-node@v4
       with:
         node-version: 18
-    # - uses: oneteme/automation-scripts/.github/actions/sonar-npm-scan@main
-    #   env:
-    #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    - uses: oneteme/automation-scripts/.github/actions/sonar-npm-scan@main
+      env:
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
     - uses: oneteme/automation-scripts/.github/actions/npm-project-version@main
       id: prj_ver
     outputs:
@@ -42,14 +42,14 @@ jobs:
         context: .
         tags: "oneteme/${{ github.event.repository.name }}:${{ steps.extract.outputs.minVer }}"
         push: true
-  # release:
-  #   needs: 
-  #     - build
-  #     - deploy
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #   - uses: oneteme/automation-scripts/.github/actions/create-release-notes@main
-  #     with:
-  #       version: ${{ needs.build.outputs.version }}
-  #     env:
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  release:
+    needs: 
+      - build
+      - deploy
+    runs-on: ubuntu-latest
+    steps:
+    - uses: oneteme/automation-scripts/.github/actions/create-release-notes@main
+      with:
+        version: ${{ needs.build.outputs.version }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
