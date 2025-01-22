@@ -5,4 +5,4 @@ COPY docker/rungnx.sh /usr/local/bin/rungnx.sh
 COPY docker/config-env.map /usr/local/bin/config-env.map
 RUN chmod +x /usr/local/bin/rungnx.sh
 EXPOSE 80
-ENTRYPOINT ["rungnx.sh"]
+ENTRYPOINT ["rungnx.sh", "/usr/share/nginx/html/environment.remote.json"]

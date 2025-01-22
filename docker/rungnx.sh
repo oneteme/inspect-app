@@ -3,7 +3,11 @@ echo environment configuration ...
 OUT=${1:-"environment.remote.json"}
 
 DIR=$(dirname "$0")
+echo "map : $DIR"
+
 MAP=$(< "$DIR/config-env.map")
+echo "map : $MAP"
+
 ENTRIES=""
 for ENTRY in $MAP; do #separate var with space
   VALUE=$(printenv "${ENTRY#*:}")
