@@ -1,8 +1,8 @@
 FROM nginx:latest
 COPY dist/inspect-app/ /usr/share/nginx/html
-COPY config/nginx.conf /etc/nginx/nginx.conf
-COPY config/config.sh /usr/local/bin/config.sh
-COPY config/config-env.map /usr/local/bin/config-env.map
-RUN chmod +x /usr/local/bin/config.sh
+COPY docker/nginx.conf /etc/nginx/nginx.conf
+COPY docker/rungnx.sh /usr/local/bin/rungnx.sh
+COPY docker/config-env.map /usr/local/bin/config-env.map
+RUN chmod +x /usr/local/bin/rungnx.sh
 EXPOSE 80
-ENTRYPOINT ["/bin/sh", "-c", "/usr/local/bin/config.sh /usr/share/nginx/html/environment.remote.json && nginx"]
+ENTRYPOINT ["rungnx.sh"]

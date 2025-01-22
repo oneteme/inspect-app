@@ -1,5 +1,5 @@
 #!/bin/sh
-
+echo environment configuration ... 
 OUT=${1:-"environment.remote.json"}
 
 DIR=$(dirname "$0")
@@ -23,3 +23,5 @@ fi
 JSON="{$ENTRIES}"
 
 echo "$JSON" > "$OUT"
+
+nginx
