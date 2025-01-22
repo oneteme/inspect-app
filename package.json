@@ -1,6 +1,6 @@
 {
-  "name": "traceapi-server",
-  "version": "15.0.0",
+  "name": "inspect-app",
+  "version": "15.14.0",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",

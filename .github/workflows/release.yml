@@ -17,8 +17,35 @@ jobs:
       id: prj_ver
     outputs:
       version: ${{ steps.prj_ver.outputs.version }}
-  release:
+  deploy:
     needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 18
+    - run: npm install
+    - run: npm run build
+    - run: |
+        version=${{ needs.build.outputs.version }}
+        echo "minVer=${version%*.*}" >> $GITHUB_OUTPUT #major.minor
+      id: extract
+    - uses: docker/login-action@v3.3.0
+      with:
+        username: ${{ secrets.DOCKERHUB_USER }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    #- uses: docker/setup-qemu-action@v3.2.0 #multiple architectures ARM, x86_64, etc.
+    #- uses: docker/setup-buildx-action@v3.8.0
+    - uses: docker/build-push-action@v6.10.0
+      with:
+        context: .
+        tags: "oneteme/${{ github.event.repository.name }}:${{ steps.extract.outputs.minVer }}"
+        push: true
+  release:
+    needs: 
+      - build
+      - deploy
     runs-on: ubuntu-latest
     steps:
     - uses: oneteme/automation-scripts/.github/actions/create-release-notes@main
