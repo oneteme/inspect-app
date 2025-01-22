@@ -6,7 +6,7 @@ DIR=$(dirname "$0")
 MAP=$(< "$DIR/config-env.map")
 ENTRIES=""
 for ENTRY in $MAP; do #separate var with space
-  VALUE=$(printenv "${ENTRY#:*}")
+  VALUE=$(printenv "${ENTRY#*:}")
   KEY=${ENTRY%:*}
   if [ -n "$VALUE" ]; then
     ENTRIES="$ENTRIES\"$KEY\":\"$VALUE\","
