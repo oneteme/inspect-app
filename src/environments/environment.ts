@@ -2,15 +2,20 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-import {Application, IStep, Period} from "src/app/model/conf.model";
+import {Application, ApplicationNew, IStep, IStepFrom, Period} from "src/app/model/conf.model";
 
 export const DEFAULT_ENV = "dev";
 
+
+
 export const environment = {
   production: false,
-  url: "http://localhost:9006"
+  url: "http://localhost:9006",
 };
 
+/**
+ * @deprecated use the new configuration ApplicationNew
+ */
 export const application: Application = {
   default_env: DEFAULT_ENV,
   session: {
@@ -41,8 +46,20 @@ export const application: Application = {
   }
 }
 
+export const app: ApplicationNew = {
+  host : "http://localhost:9006",
+  defaultEnv : "dev",
+  gridViewPeriod:  "LAST_60_60",
+  kpiViewPeriod: "LAST_60"
+}
+
+
 export function makeDateTimePeriod(step: number): Period {
   return new IStep(step);
+}
+
+export function makeDateTimePeriodFrom(step: number, from:number): Period{
+  return new IStepFrom(step, from);
 }
 
 export function makeDatePeriod(dayBetween: number, shiftEnd: number = 0): { start: Date, end: Date } {

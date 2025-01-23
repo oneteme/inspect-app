@@ -2,6 +2,7 @@ import { DatePipe } from "@angular/common";
 import { ChartGroup } from "../model/chart.model";
 import { Filter, FilterMap, Operation } from "../views/constants";
 import { InstanceRestSession } from "../model/trace.model";
+import { makeDateTimePeriod, makeDateTimePeriodFrom } from "src/environments/environment";
 
 export class Utils {
 
@@ -211,4 +212,17 @@ export function extractInfo(filterKey: string) {
 
 export function getElapsedTime(end: number, start: number) {
     return end - start;
+}
+
+export function extractPeriod(regPeriod: string, name: string){
+    const pattern  = /LAST_(\d+)(_\d+)?/;
+    const match = pattern.exec(regPeriod);
+    if(!match[1]){
+        throw new Error(`bad value ${name}=${regPeriod}, pattern=${pattern}`)
+    }
+    if(match[2]){
+        match[2] = match[2].substring(1);
+        return makeDateTimePeriodFrom(+match[1],+match[2])
+    }
+    return makeDateTimePeriod(+match[1]);
 }

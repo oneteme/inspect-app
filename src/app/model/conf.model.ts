@@ -4,6 +4,13 @@ export interface Application {
     dashboard: Partial<Dashboard>;
 }
 
+export interface ApplicationNew{
+    host: string; 
+    defaultEnv: string;
+    gridViewPeriod: string; 
+    kpiViewPeriod: string;
+}
+
 interface Session {
     api: Partial<Api>;
     main: Partial<Main>;
@@ -139,6 +146,35 @@ export class IStep implements Period {
 
     buildParams(): { step: number } {
         return { step: this._step };
+    }
+}
+
+export class IStepFrom  implements Period {
+
+    constructor(public _step:number, public _from: number){
+
+    }
+
+    set start(start: Date) {
+        console.warn("not implemented");
+    }
+
+    get start(): Date {
+        let now = this.end;
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes() - this._step);
+    }
+
+    set end(end: Date) {
+        console.warn("not implemented");
+    }
+
+    get end(): Date {
+        let now = new Date();
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes() - this._from, 0, 0);
+    }
+
+    buildParams(): { step: number, from: number  } {
+        return { step: this._step, from: this._from};
     }
 }
 
