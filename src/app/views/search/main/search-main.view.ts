@@ -6,12 +6,12 @@ import {MatTableDataSource} from '@angular/material/table';
 import {ActivatedRoute} from '@angular/router';
 import {combineLatest, finalize, Subscription} from 'rxjs';
 import {Location} from '@angular/common';
-import {Utils} from 'src/app/shared/util';
+import {extractPeriod, Utils} from 'src/app/shared/util';
 import {TraceService} from 'src/app/service/trace.service';
-import {application, makeDatePeriod, makeDateTimePeriod} from 'src/environments/environment';
+import {app, makeDatePeriod } from 'src/environments/environment';
 import {Constants, Filter, FilterConstants, FilterMap, FilterPreset} from '../../constants';
 import {FilterService} from 'src/app/service/filter.service';
-import {InstanceMainSession, InstanceRestSession} from 'src/app/model/trace.model';
+import {InstanceMainSession, } from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
 import {DateAdapter, MAT_DATE_FORMATS} from "@angular/material/core";
@@ -19,7 +19,7 @@ import {CustomDateAdapter} from "../../../shared/material/custom-date-adapter";
 import {MY_DATE_FORMATS} from "../../../shared/shared.module";
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
 import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-date-range-selection-strategy";
-import {IPeriod, IStep, QueryParams} from "../../../model/conf.model";
+import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../model/conf.model";
 import {shallowEqual} from "../rest/search-rest.view";
 
 
@@ -83,9 +83,15 @@ export class SearchMainView implements OnInit, OnDestroy {
         ]).subscribe({
             next: ([params, queryParams]) => {
                 this.type = params.type_main;
-                if(queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env || application.default_env, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server])
+                if(queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env || app.defaultEnv, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server])
                 if(!queryParams.start && !queryParams.end)  {
-                    this.queryParams =  new QueryParams(queryParams.step ? new IStep(queryParams.step) : application.session.main.default_period, queryParams.env || application.default_env, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server]);
+                    let period;
+                    if(queryParams.step && queryParams.from){
+                        period = new IStepFrom(queryParams.step, queryParams.from);
+                    } else if(queryParams.step){
+                        period = new IStep(queryParams.step);
+                    }
+                    this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), params.env || app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server]); 
                 }
                 this.patchServerValue(this.queryParams.servers);
                 this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
@@ -224,7 +230,7 @@ export class SearchMainView implements OnInit, OnDestroy {
     }
 
     resetFilters() {
-        this.patchDateValue((application.session.api.default_period || makeDatePeriod(0)).start, (application.session.api.default_period || makeDatePeriod(0, 1)).end);
+        this.patchDateValue((extractPeriod(app.gridViewPeriod, "gridViewPeriod") || makeDatePeriod(0)).start, (extractPeriod(app.gridViewPeriod, "gridViewPeriod") || makeDatePeriod(0, 1)).end);
         this.advancedParams = {};
         this._filter.setFilterMap({})
     }
