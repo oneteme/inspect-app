@@ -245,7 +245,7 @@ export const ServerConfig = {
     LINK: { icon: "shape=image;image=assets/mxgraph/parent.drawio.svg;", width: 30, height: 30 },
     GHOST: { icon: "shape=image;image=assets/mxgraph/ghost.drawio.svg;", width: 30, height: 30 },
     VIEW: { icon: "shape=image;image=assets/mxgraph/view.drawio.svg;", width: 30, height: 30 },
-    BATCH: { icon: "shape=image;image=assets/mxgraph/microservice.drawio.svg;", width: 30, height: 30 },
+    BATCH: { icon: "shape=image;image=assets/mxgraph/batch.drawio.svg;", width: 30, height: 30 },
 }
 export const LinkConfig = {
     SUCCES: "strokeColor=green;",
