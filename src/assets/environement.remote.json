@@ -1,6 +1,0 @@
-{
-    "host":"INSPECT_SERVER_URL",
-    "defaultEnv":"DEFAULT_ENV",
-    "gridViewPeriod":"DEFAULT_GRID_VIEW_PERIOD",
-    "kpiViewPeriod":"DEFAULT_KPI_VIEW_PERIOD"
-}
