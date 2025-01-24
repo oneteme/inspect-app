@@ -1,4 +1,4 @@
-import {Component, inject, LOCALE_ID, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
@@ -6,22 +6,22 @@ import {MatTableDataSource} from '@angular/material/table';
 import {Location} from '@angular/common';
 import {ActivatedRoute, Params} from '@angular/router';
 import {BehaviorSubject, finalize, Subscription} from 'rxjs';
-import {Utils} from 'src/app/shared/util';
+import {extractPeriod, Utils} from 'src/app/shared/util';
 import {JQueryService} from 'src/app/service/jquery/jquery.service';
 import {TraceService} from 'src/app/service/trace.service';
-import {application, makeDatePeriod, makeDateTimePeriod} from 'src/environments/environment';
+import {app, application, makeDatePeriod, } from 'src/environments/environment';
 import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constants';
 import {FilterService} from 'src/app/service/filter.service';
 import {InstanceRestSession} from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
-import {DateAdapter, MAT_DATE_FORMATS, MAT_DATE_LOCALE, MatNativeDateModule} from "@angular/material/core";
+import {DateAdapter, MAT_DATE_FORMATS,} from "@angular/material/core";
 import {CustomDateAdapter} from "../../../shared/material/custom-date-adapter";
 import {MY_DATE_FORMATS} from "../../../shared/shared.module";
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
 import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-date-range-selection-strategy";
-import {IPeriod, IStep, Period, QueryParams} from "../../../model/conf.model";
-import {environment} from "../../../../environments/environment.prod";
+import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../model/conf.model";
+
 
 @Component({
   templateUrl: './search-rest.view.html',
@@ -95,9 +95,15 @@ export class SearchRestView implements OnInit, OnDestroy {
     this._activatedRoute.queryParams
       .subscribe({
         next: (params: Params) => {
-           if(params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.env || application.default_env, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server])
-          if(!params.start && !params.end)  {
-            this.queryParams =  new QueryParams(params.step ? new IStep(params.step) : application.session.api.default_period, params.env || application.default_env, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server]);
+           if(params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.env ||  app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server])
+           if(!params.start && !params.end)  {
+            let period;
+            if(params.step && params.from){
+                period = new IStepFrom(params.step, params.from);
+            } else if(params.step){
+                period = new IStep(params.step);
+            }
+            this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), params.env || app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server]); 
           }
           this.patchServerValue(this.queryParams.servers);
           this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
@@ -228,7 +234,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   }
 
   resetFilters(){
-    this.patchDateValue((application.session.api.default_period || makeDatePeriod(0)).start,(application.session.api.default_period || makeDatePeriod(0, 1)).end);
+    this.patchDateValue((extractPeriod(app.gridViewPeriod, "gridViewPeriod")|| makeDatePeriod(0)).start,(extractPeriod(app.gridViewPeriod, "gridViewPeriod") || makeDatePeriod(0, 1)).end);
     this.patchServerValue([]);
     this.advancedParams = {};
     this._filter.setFilterMap({})
