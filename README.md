@@ -5,11 +5,11 @@
 ```SH
 docker run --pull=always -d --name inspect-app -e INSPECT_SERVER_URL="{{URL}}" -p 80:80 oneteme/inspect-app:{{version}}
 ```
-## Référence API
+## API Reference
 
-| Request | Description   | obligatoire | 
-|------|------------|-------------|
-| host | **string** | x           | 
-| defaultEnv | **string** | dev         | 
-| gridViewPeriod | **string** | LAST_30     |
-| kpiViewPeriod  | **string** | LAST_30           | 
+| Request | Description   | Required | 
+|------|------------|----------|
+| INSPECT_SERVER_URL | **string** | x        | 
+| DEFAULT_ENV | **string** | dev      | 
+| DEFAULT_GRID_VIEW_PERIOD | **string** | LAST_30  |
+| DEFAULT_KPI_VIEW_PERIOD  | **string** | LAST_30  | 
