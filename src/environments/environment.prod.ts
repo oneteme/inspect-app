@@ -43,7 +43,7 @@ export const application: Application = {
 
 export const app: ApplicationNew = {
   host : "http://localhost:9006",
-  defaultEnv : "dev",
+  defaultEnv : "prd",
   gridViewPeriod:  "LAST_60",
   kpiViewPeriod: "LAST_60"
 }
