@@ -7,7 +7,7 @@ docker run --pull=always -d --name inspect-app -e INSPECT_SERVER_URL="{{URL}}" -
 ```
 ## API Reference
 
-| Request | Description   | Required | 
+| VARIABLE | TYPE   | REQUIRED  | 
 |------|------------|----------|
 | INSPECT_SERVER_URL | **string** | x        | 
 | DEFAULT_ENV | **string** | dev      | 
