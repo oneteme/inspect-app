@@ -24,7 +24,6 @@ function loadConfig(){
               })
             .catch((err)=> {
               console.warn(`Error while loading config, Default config will be used: ${JSON.stringify(app)}`);
-              throw err;
             })
   
 }
