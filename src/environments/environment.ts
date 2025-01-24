@@ -58,7 +58,7 @@ export function makeDateTimePeriod(step: number): Period {
   return new IStep(step);
 }
 
-export function makeDateTimePeriodFrom(step: number, from:number): Period{
+export function makeDateTimePeriodFrom(step: number, from: number): Period{
   return new IStepFrom(step, from);
 }
 

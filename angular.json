@@ -102,21 +102,21 @@
         "serve": {
           "builder": "@angular-devkit/build-angular:dev-server",
           "options": {
-            "browserTarget": "ng-admin-free:build"
+            "browserTarget": "inspect-app:build"
           },
           "configurations": {
             "local": {
-              "browserTarget": "smart-ihm:build:local"
+              "browserTarget": "inspect-app:build:local"
             },
             "production": {
-              "browserTarget": "ng-admin-free:build:production"
+              "browserTarget": "inspect-app:build:production"
             }
           }
         },
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "ng-admin-free:build"
+            "browserTarget": "inspect-app:build"
           }
         },
         "test": {
