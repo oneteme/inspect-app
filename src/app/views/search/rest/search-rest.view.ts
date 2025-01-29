@@ -66,6 +66,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   advancedParams: Partial<{ [key: string]: any }> ={}
   queryParams: Partial<QueryParams> = {};
   focusFieldName: any;
+  expandStatus: boolean;
 
   subscriptionServer: Subscription;
   subscriptionSession: Subscription;
@@ -92,6 +93,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   }
 
   constructor() {
+
     this._activatedRoute.queryParams
       .subscribe({
         next: (params: Params) => {

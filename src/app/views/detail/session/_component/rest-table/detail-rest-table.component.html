@@ -8,7 +8,7 @@
             </th>
             <td [ngStyle]="{'border-left': element.status >= 200 && element.status < 300 ? '4px solid green' :
                                   element.status >= 300 && element.status < 500 ? '4px solid orange' : '4px solid red'}" mat-cell *matCellDef="let element"
-                [matTooltip]="element.status" matTooltipPosition="before">
+                [matTooltip]="(element.exception?.type | exceptionType) + ' ' + (element.exception?.message | truncString: 100)" matTooltipPosition="after">
             </td>
         </ng-container>
 

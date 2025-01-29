@@ -10,6 +10,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { DurationPipe } from './pipe/duration.pipe';
 import { SizePipe } from './pipe/size.pipe';
 import {TitleCasePipe} from "./pipe/title-case.pipe";
+import {ExceptionTypePipe} from "./pipe/exception-type.pipe";
+import {TruncStringPipe} from "./pipe/trunc-string.pipe";
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -41,7 +43,9 @@ export const MY_DATE_FORMATS = {
     FilterRowPipe,
     DurationPipe,
     SizePipe,
-    TitleCasePipe
+    TitleCasePipe,
+    ExceptionTypePipe,
+    TruncStringPipe
   ],
   exports: [
     MaterialModule,
@@ -51,7 +55,9 @@ export const MY_DATE_FORMATS = {
     AdvancedFilterTriggerComponent,
     DurationPipe,
     SizePipe,
-    TitleCasePipe
+    TitleCasePipe,
+    ExceptionTypePipe,
+    TruncStringPipe
   ]
 })
 export class SharedModule { }

@@ -61,8 +61,8 @@
                 </th>
                 <td [ngStyle]="{'border-left': row.exception?.type || row.exception?.message ? '4px solid red' : '4px solid green'}"
                     mat-cell *matCellDef="let row"
-                    [matTooltip]="row.exception?.type || row.exception?.message ? 'échoué' : 'réussi'"
-                    matTooltipPosition="before">
+                    [matTooltip]="(row.exception?.type | exceptionType) + ' ' + (row.exception?.message | truncString: 100)"
+                    matTooltipPosition="after">
                 </td>
             </ng-container>
 
