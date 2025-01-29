@@ -216,7 +216,6 @@ export class SearchMainView implements OnInit, OnDestroy {
     }
 
     selectedRequest(event: MouseEvent, row: any) {
-        console.log(row)
         if (event.ctrlKey) {
             this._router.open(`#/session/main/${row.type.toLowerCase()}/${row.id}`, '_blank')
         } else {
