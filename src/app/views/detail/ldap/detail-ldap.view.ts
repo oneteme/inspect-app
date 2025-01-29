@@ -68,25 +68,31 @@ export class DetailLdapView implements OnInit, OnDestroy {
         let timeline_start = Math.trunc(this.request.start * 1000);
         let timeline_end = Math.ceil(this.request.end * 1000);
 
-        let items = this.request.actions.map(a => {
+        let items = this.request.actions.map((a: NamingRequestStage, i: number) => {
             let item: DataItem = {
-                group: a.start,
+                group: `${i}`,
                 start: Math.trunc(a.start * 1000),
                 end: Math.trunc(a.end * 1000),
                 content: '',
+                className: "ldap",
                 title: `<span>${this.pipe.transform(a.start * 1000, 'HH:mm:ss.SSS')} - ${this.pipe.transform(a.end * 1000, 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform({start: a.start, end: a.end})})<br>
                         <h4>${a?.args ? a.args.join('</br>') : ''}</h4>`
             }
             item.type = item.end <= item.start ? 'point' : 'range';
             if (a.exception?.message || a.exception?.type) {
-                item.className = 'bdd-failed';
+                item.className += ' bdd-failed';
             }
             return item;
         });
 
-        this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, this.request.actions.map(a => ({ id: a.start, content: a?.name })), {
-            min: timeline_start,
-            max: timeline_end
+        this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, this.request.actions.map((a:NamingRequestStage, i:number) => ({ id: i, content: a?.name })), {
+            start: timeline_start,
+            end: timeline_end,
+            selectable : false,
+            clickToUse: true,
+            tooltip: {
+                followMouse: true
+            }
         });
     }
 

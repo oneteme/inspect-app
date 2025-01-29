@@ -85,35 +85,47 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
 
         let items = this.request.actions.map((c: DatabaseRequestStage, i: number) => {
             let item: DataItem = {
-                group: `${c.start}`,
+                group: `${i}`,
                 start: Math.trunc(c.start * 1000),
                 end: Math.trunc(c.end * 1000),
-                content: '',
+                content: c.commands? `${this.getCommmand(c.commands)}` : "",
+                className: "database overflow",
                 title: `<span>${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(c.end * 1000), 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform({start: c.start, end: c.end})})<br>
-                        <h4>${c.count ? c.count : ''}</h4>`
+                        <span>${c.count ?'count: ' + c.count : ''}</span>`
             }
             item.type = item.end <= item.start ? 'point' : 'range' // TODO : change this to equals dh_dbt is set to timestamps(6), currently set to timestmap(3)
             if (c.exception?.message || c.exception?.type) {
-                item.className = 'bdd-failed';
+                item.className += ' bdd-failed';
             }
             return item;
         })
-
-        this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, this.request.actions.map((g: DatabaseRequestStage,i:number ) => ({ id: `${g.start}`, content: g?.name, title: this.jdbcActionDescription[g?.name] })),
-            {
-               min: timeline_start,
-               max: timeline_end,
-               margin: {
-                    item: {
-                        horizontal: -1
-                    }
-                },
-                selectable : false,
-                clickToUse: true,
-                tooltip: {
-                    followMouse: true
+        let groups= this.request.actions.map((g: DatabaseRequestStage,i:number ) => ({ id: `${i}`, content: g?.name, title: this.jdbcActionDescription[g?.name], count: g.count }));
+        let options=  {
+            start: timeline_start,
+            end: timeline_end,
+            selectable : false,
+            clickToUse: true,
+            tooltip: {
+                followMouse: true
+            },
+            groupTemplate: function(group){
+                let container = document.createElement('div');
+                let label = document.createElement('span');
+                label.innerHTML = group.content+ " ";
+                container.insertAdjacentElement('afterbegin',label);
+                container.insertAdjacentElement('beforeend', document.createElement('br'));
+                if(group.count){
+                    let count= document.createElement('span');
+                    count.style.fontSize = 'smaller';
+                    count.innerHTML = `count: ${group.count }`;
+                    container.insertAdjacentElement('beforeend', count);
                 }
-            });
+                return container;
+            }
+        }
+        this.timeLine = new Timeline(this.timelineContainer.nativeElement,items);
+        this.timeLine.setOptions(options);
+        this.timeLine.setGroups(groups);
     }
 
     navigate(event: MouseEvent, targetType: string, extraParam?: string) {
@@ -135,6 +147,18 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.subscription.forEach(s => s.unsubscribe());
         this.timeLine.destroy();
+    }
+
+    getCommmand(commands?: string[]): string{
+        let command ="";
+        if(commands){
+            let distinct = new Set();
+            commands.forEach(c => {
+                distinct.add(c);
+            })
+            command = Array.from(distinct).join(", ");
+        }
+        return command;
     }
 }
 

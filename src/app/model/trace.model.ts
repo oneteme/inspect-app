@@ -101,6 +101,7 @@ export interface NamingRequest extends SessionStage<boolean> {
 }
 
 export interface DatabaseRequestStage extends RequestStage {
+    commands?: Array<string>;
     count?: Array<number>;
     order?: number;
 }
@@ -286,7 +287,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
     formatLink(field: Label): string {
         switch (field) {
             case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
-            case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands, 'SQL ')// todo: with sql add schema
+            case Label.METHOD_RESOURCE: return `${this.nodeObject?.commands || '?'}`;
             case Label.SIZE_COMPRESSION: return this.nodeObject?.count < 0 ? '0': this.nodeObject?.count!= undefined? this.nodeObject?.count.toString() : '?'; // remove undefined condition 
             case Label.PROTOCOL_SCHEME: return "JDBC/Basic"
             case Label.STATUS_EXCEPTION: return this.nodeObject.exception && 'FAIL:' + this.nodeObject.exception?.type || 'OK'
