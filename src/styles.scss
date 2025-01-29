@@ -1,8 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 /* You can add global styles to this file, and also import other style files */
 @use '@angular/material' as mat;
-@import '~@angular/material/prebuilt-themes/indigo-pink.css';
-
+@import '@angular/material/prebuilt-themes/indigo-pink.css';
 
 body {
   margin: 0;
@@ -134,7 +133,7 @@ mat-form-field.no-subscript {
 
 .badge {
   color: white;
-  padding: 0px 10px;
+  padding: 5px 10px;
   text-align: center;
   border-radius: 12px;
   font-size: 0.8em;
