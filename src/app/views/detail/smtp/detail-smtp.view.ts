@@ -43,6 +43,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
             next: ([params, data, queryParams]) => {
                 this.params = {idSession: params.id_session, idSmtp: params.id_smtp,
                     typeSession: data.type, typeMain: params.type_main, env: queryParams.env || application.default_env};
+                this.request = null;
                 this.getRequest();
             }
         }));
@@ -83,7 +84,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
                 end: Math.trunc(a.end * 1000),
                 content: '',
                 className: "smtp",
-                title: `<span>${this.pipe.transform(new Date(a.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(a.end * 1000), 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform({start: a.start, end: a.end})})<br>`
+                title: `<span>${this.pipe.transform(new Date(a.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(a.end * 1000), 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform({start: a.start, end: a.end})})`
             }
             item.type = item.end <= item.start ? 'point' : 'range';
             if (a?.exception?.message || a?.exception?.type) {
@@ -92,6 +93,9 @@ export class DetailSmtpView implements OnInit, OnDestroy {
             return item;
         });
 
+        if (this.timeLine) {  // destroy if exists 
+            this.timeLine.destroy();
+        }
         this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, this.request.actions.map((a:MailRequestStage, i:number) => ({ id: i, content: a?.name })), {
             selectable : false,
             clickToUse: true,

@@ -110,7 +110,8 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
             },
             groupTemplate: function(group){
                 let container = document.createElement('div');
-                let label = document.createElement('span');
+                if(group){
+                    let label = document.createElement('span');
                 label.innerHTML = group.content+ " ";
                 container.insertAdjacentElement('afterbegin',label);
                 container.insertAdjacentElement('beforeend', document.createElement('br'));
@@ -118,14 +119,17 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
                     let count= document.createElement('span');
                     count.style.fontSize = 'smaller';
                     count.innerHTML = `count: ${group.count }`;
-                    container.insertAdjacentElement('beforeend', count);
+                    container.insertAdjacentElement('beforeend', count,);
+                } 
                 }
                 return container;
             }
         }
-        this.timeLine = new Timeline(this.timelineContainer.nativeElement,items);
-        this.timeLine.setOptions(options);
-        this.timeLine.setGroups(groups);
+        if (this.timeLine) {  // destroy if exists 
+            this.timeLine.destroy();
+        }
+        this.timeLine = new Timeline(this.timelineContainer.nativeElement,items,groups,options);
+
     }
 
     navigate(event: MouseEvent, targetType: string, extraParam?: string) {

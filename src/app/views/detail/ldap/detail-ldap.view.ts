@@ -39,7 +39,8 @@ export class DetailLdapView implements OnInit, OnDestroy {
             next: ([params, data, queryParams]) => {
                 this.params = {idSession: params.id_session, idLdap: params.id_ldap,
                     typeSession: data.type, typeMain: params.type_main, env: queryParams.env || application.default_env};
-                this.getRequest();
+                    this.request = null;
+                    this.getRequest();
             }
         }));
     }
@@ -76,7 +77,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
                 content: '',
                 className: "ldap",
                 title: `<span>${this.pipe.transform(a.start * 1000, 'HH:mm:ss.SSS')} - ${this.pipe.transform(a.end * 1000, 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform({start: a.start, end: a.end})})<br>
-                        <h4>${a?.args ? a.args.join('</br>') : ''}</h4>`
+                        <span>${a?.args ? a.args.join('</br>') : ''}</span>`
             }
             item.type = item.end <= item.start ? 'point' : 'range';
             if (a.exception?.message || a.exception?.type) {
@@ -85,6 +86,9 @@ export class DetailLdapView implements OnInit, OnDestroy {
             return item;
         });
 
+        if (this.timeLine) {  // destroy if exists 
+            this.timeLine.destroy();
+        }
         this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, this.request.actions.map((a:NamingRequestStage, i:number) => ({ id: i, content: a?.name })), {
             start: timeline_start,
             end: timeline_end,
