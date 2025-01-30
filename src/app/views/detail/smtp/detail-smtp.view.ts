@@ -43,6 +43,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
             next: ([params, data, queryParams]) => {
                 this.params = {idSession: params.id_session, idSmtp: params.id_smtp,
                     typeSession: data.type, typeMain: params.type_main, env: queryParams.env || application.default_env};
+                this.request = null;
                 this.getRequest();
             }
         }));
@@ -76,24 +77,31 @@ export class DetailSmtpView implements OnInit, OnDestroy {
         let timeline_end = Math.ceil(this.request.end * 1000);
         let actions = this.request.actions.sort((a, b) => a.order - b.order);
 
-        let items = this.request.actions.map(a => {
+        let items = this.request.actions.map((a:MailRequestStage, i:number) => {
             let item: DataItem = {
-                group: a.start,
+                group: `${i}`,
                 start: Math.trunc(a.start * 1000),
                 end: Math.trunc(a.end * 1000),
                 content: '',
-                title: `<span>${this.pipe.transform(new Date(a.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(a.end * 1000), 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform({start: a.start, end: a.end})})<br>`
+                className: "smtp",
+                title: `<span>${this.pipe.transform(new Date(a.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(a.end * 1000), 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform({start: a.start, end: a.end})})`
             }
             item.type = item.end <= item.start ? 'point' : 'range';
             if (a?.exception?.message || a?.exception?.type) {
-                item.className = 'bdd-failed';
+                item.className += ' bdd-failed';
             }
             return item;
         });
 
-        this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, this.request.actions.map(a => ({ id: a.start, content: a?.name })), {
-            min: timeline_start,
-            max: timeline_end
+        if (this.timeLine) {  // destroy if exists 
+            this.timeLine.destroy();
+        }
+        this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, this.request.actions.map((a:MailRequestStage, i:number) => ({ id: i, content: a?.name })), {
+            selectable : false,
+            clickToUse: true,
+            tooltip: {
+                followMouse: true
+            }
         });
     }
 

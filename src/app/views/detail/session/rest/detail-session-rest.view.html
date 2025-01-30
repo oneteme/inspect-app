@@ -12,10 +12,11 @@
                     {{ session.name || 'N/A' }}
                 </a>
                 <div class="right">        
-                    <mat-progress-spinner *ngIf="parentLoading && !sessionParent" style="display:inline-flex !important;" diameter="24" mode="indeterminate"
+                    <mat-progress-spinner [hidden]="sessionParent" *ngIf="parentLoading && !sessionParent" style="display:inline-flex !important;" diameter="24" mode="indeterminate"
                                           matTooltip="Chargement de l'appel parent" TooltipPosition="below"></mat-progress-spinner> 
                     <button mat-icon-button (click)="navigate($event,'parent')" matTooltip="Détail de l'appel parent"
-                            [hidden]="!sessionParent">
+                            [disabled]="!sessionParent"
+                            [hidden]="parentLoading">
                         <mat-icon>move_up</mat-icon>
                     </button>
                     <button mat-icon-button (click)="navigate($event,'tree')" matTooltip="Arbre d'appels">
@@ -110,7 +111,7 @@
     <detail-session [session]="session" [completedSession]="completedSession" [instance]="instance"></detail-session>
 </div>
 
-<div *ngIf="!isLoading && !session && !instance" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">
+<div *ngIf="!isLoading && !session" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">
     <h2>
         Aucun détail disponible .. <br>
     </h2>

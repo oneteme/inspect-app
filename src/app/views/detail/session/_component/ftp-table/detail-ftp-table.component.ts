@@ -30,7 +30,6 @@ export class DetailFtpTableComponent implements OnInit {
     }
 
     selectedRequest(event: MouseEvent, row: any) {
-        console.log(row)
         this.onClickRow.emit({event: event, row: row});
     }
 }

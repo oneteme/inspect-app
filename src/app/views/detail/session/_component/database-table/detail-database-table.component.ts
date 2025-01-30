@@ -29,14 +29,12 @@ export class DetailDatabaseTableComponent implements OnInit {
         this.dataSource.sortingDataAccessor = sortingDataAccessor;
     }
 
-    getCommand(commands: string[]): string {
-        let command = "[--]";
-        if (commands?.length == 1) {
-            command = `[${commands[0]}]`
-        } else if (commands?.length > 1) {
-            command = "[SQL]"
+    getCommand(commands: string): string {
+        let command = "--";
+        if (commands) {
+            command = commands;
         }
-        return command;
+        return `[${command}]`;
     }
 
     selectedQuery(event: MouseEvent, row: number) {
