@@ -47,17 +47,17 @@
                 <a style="display: flex; align-items: center; gap: 0.5em; height: inherit;" *ngIf="session.type == 'VIEW'"
                    [routerLink]="'/dashboard/client/'+ instance.name"
                    [queryParams]="{'env': instance.env}" matTooltip="Statistiques Client">
-                    <mat-icon>storage</mat-icon>
+                    <mat-icon>devices</mat-icon>
                     <div>{{instance.name}} <span style="font-size: 12px; font-style: italic; font-weight: normal;">{{instance.version}}</span></div>
                 </a>
                 <a style="display: flex; align-items: center; gap: 0.5em; height: inherit;" *ngIf="session.type != 'VIEW'" [routerLink]="'/dashboard/server/'+ instance.name"
                    [queryParams]="{'env': instance.env}" matTooltip="Statistiques Serveur">
-                    <mat-icon>storage</mat-icon>
+                    <mat-icon>widgets</mat-icon>
                     <div>{{instance.name}} <span style="font-size: 12px; font-style: italic; font-weight: normal;">{{instance.version}}</span></div>
                 </a>
                 <div class="right">
                     <button [hidden]="session.type == 'VIEW'" mat-icon-button (click)="onClickDump($event)" matTooltip="Processus">
-                        <mat-icon>developer_board</mat-icon>
+                        <mat-icon>view_timeline</mat-icon>
                     </button>
                 </div>
             </mat-card-title>
@@ -65,32 +65,43 @@
                 <div *ngIf="isLoading && session" style="display: flex; flex-direction: row; align-items: center; justify-content: center; font-style: italic; gap: 0.5em">
                     <mat-progress-spinner  diameter="30" mode="indeterminate"></mat-progress-spinner> Chargement en cours...
                 </div>
-                <div style="display: flex; align-items: center;" *ngFor="let item of queryBySchema | keyvalue ">
-                    <div style="display: flex; margin-right: 1em; margin-left: 1em;" *ngIf="item.key != 'null'">
+                <div style="display: flex; align-items: center;">
+                    <div style="display: flex; margin-right: 1em; margin-left: 1em;">
                         <mat-icon class="material-symbols-outlined">Database</mat-icon>
                     </div>
-                    <div *ngIf="item.key != 'null'">
+                    <div>
                         <a style="font-weight: 500; font-size: 14px;"
-                           [routerLink]="'/dashboard/database/'+ item.key"
-                           [queryParams]="{'env': instance.env}"
                            matTooltip="Statistiques Base de donnée">
-                            {{ item.key }}
+                           {{instance.os}}
                         </a>
                         <div style="font-style: italic; font-size: 12px;">
-                            {{ item.value[0].productName }} v.{{ item.value[0].productVersion }}
+                            {{instance.re}}
+                        </div>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center;">
+                    <div style="display: flex; margin-right: 1em; margin-left: 1em;">
+                        <mat-icon class="material-symbols-outlined">account_tree</mat-icon>
+                    </div>
+                    <div>
+                        <a style="font-weight: 500; font-size: 14px;"
+                           matTooltip="Statistiques Base de donnée">
+                           {{instance.branch || 'N/A'}}
+                        </a>
+                        <div style="font-style: italic; font-size: 12px;">
+                            {{instance.hash || 'N/A'}}
                         </div>
                     </div>
                 </div>
             </mat-card-content>
             <mat-card-footer>
                 <div style="font-style: italic; font-size: 14px;">
-                    {{instance.address}} en {{instance.env}}
+                    <mat-icon style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
+                    {{instance.user || "N/A"}}
+                     le {{ (instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
                 </div>
                 <span style="margin-left: auto;">
-                    {{instance.os}}
-                </span>
-                <span style="margin-left: auto;">
-                    {{instance.re}}
+                    {{instance.collector}}
                 </span>
             </mat-card-footer>
         </mat-card>
