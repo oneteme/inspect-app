@@ -62,7 +62,8 @@
         <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:1%">
             </th>
-            <td [ngStyle]="{'border-left': row.exception?.type || row.exception?.message ? '4px solid red' : '4px solid green'}"
+            <td [ngStyle]="{'border-left': row.status >= 200 && row.status < 300 ? '4px solid green' :
+                                    row.status >= 300 && row.status < 500 ? '4px solid orange' : '4px solid red'}"
                 mat-cell *matCellDef="let row"
                 [matTooltip]="(row.exception?.type | exceptionType) + ' ' + (row.exception?.message | truncString: 100)" matTooltipPosition="after">
             </td>
