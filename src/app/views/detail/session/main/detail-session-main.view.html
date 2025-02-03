@@ -47,7 +47,7 @@
                 <a style="display: flex; align-items: center; gap: 0.5em; height: inherit;" *ngIf="session.type == 'VIEW'"
                    [routerLink]="'/dashboard/client/'+ instance.name"
                    [queryParams]="{'env': instance.env}" matTooltip="Statistiques Client">
-                    <mat-icon>devices</mat-icon>
+                    <mat-icon>widgets</mat-icon>
                     <div>{{instance.name}} <span style="font-size: 12px; font-style: italic; font-weight: normal;">{{instance.version}}</span></div>
                 </a>
                 <a style="display: flex; align-items: center; gap: 0.5em; height: inherit;" *ngIf="session.type != 'VIEW'" [routerLink]="'/dashboard/server/'+ instance.name"
@@ -65,13 +65,18 @@
                 <div *ngIf="isLoading && session" style="display: flex; flex-direction: row; align-items: center; justify-content: center; font-style: italic; gap: 0.5em">
                     <mat-progress-spinner  diameter="30" mode="indeterminate"></mat-progress-spinner> Chargement en cours...
                 </div>
-                <div style="margin-left: 3em;">
-                    <a style="font-weight: 500; font-size: 14px;">
-                         {{instance.os}}
-                    </a>
-                    <div style="font-style: italic; font-size: 12px;">
-                        {{instance.re}}
+                <div  style="display: flex; align-items: center;">
+                    <div style="margin-right: 1em; margin-left: 1em;">
+                        <mat-icon class="material-symbols-outlined">{{instance.type==="CLIENT"?"devices":"storage"}}</mat-icon>
                     </div>
+                    <div>
+                        <a style="font-weight: 500; font-size: 14px;">
+                            {{instance.os}}
+                       </a>
+                       <div style="font-style: italic; font-size: 12px;">
+                           {{instance.re}}
+                       </div>
+                    </div>     
                 </div>
             </mat-card-content>
             <mat-card-footer>
