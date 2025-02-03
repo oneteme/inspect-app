@@ -99,7 +99,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
             }
             return item;
         })
-        let groups= this.request.actions.map((g: DatabaseRequestStage,i:number ) => ({ id: `${i}`, content: g?.name, title: this.jdbcActionDescription[g?.name], count: g.count }));
+        let groups= this.request.actions.map((g: DatabaseRequestStage,i:number ) => ({ id: `${i}`, content: g?.name + (g.count? ` (${g.count})`:''), title: this.jdbcActionDescription[g?.name] }));
         let options=  {
             start: timeline_start,
             end: timeline_end,
@@ -107,22 +107,6 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
             clickToUse: true,
             tooltip: {
                 followMouse: true
-            },
-            groupTemplate: function(group){
-                let container = document.createElement('div');
-                if(group){
-                    let label = document.createElement('span');
-                label.innerHTML = group.content+ " ";
-                container.insertAdjacentElement('afterbegin',label);
-                container.insertAdjacentElement('beforeend', document.createElement('br'));
-                if(group.count){
-                    let count= document.createElement('span');
-                    count.style.fontSize = 'smaller';
-                    count.innerHTML = `count: ${group.count }`;
-                    container.insertAdjacentElement('beforeend', count,);
-                } 
-                }
-                return container;
             }
         }
         if (this.timeLine) {  // destroy if exists 

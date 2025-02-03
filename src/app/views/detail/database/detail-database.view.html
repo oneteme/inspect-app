@@ -2,10 +2,13 @@
     <mat-card style="width: 100vw; min-width: 100vw;"
               [ngClass]="!exception ? 'success': 'fail'">
         <mat-card-title>
-            <p style="display: flex; align-items: center; gap: 0.5em">
+            <a style="display: flex; align-items: center; gap: 0.5em"
+            [routerLink]="'/dashboard/database/'+ request.name"
+            [queryParams]="{'env': params.env}"
+            matTooltip="Statistiques Base de donnée">
                 <mat-icon class="material-symbols-outlined">Database</mat-icon>
                 {{ 'jdbc:' + (request.productName ? request.productName.toLowerCase() : 'N/A') + '://' + (request.host ? request.host : 'N/A') + (request.port == -1 ? '' : ':' + request.port) + '/' + (request.name ? request.name : 'N/A')}}
-            </p>
+            </a>
 
             <div class="right">
                 <button mat-icon-button (click)="navigate($event,'parent')" matTooltip="Détail de l'appel parent">
