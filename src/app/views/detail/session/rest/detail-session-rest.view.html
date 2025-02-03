@@ -78,40 +78,24 @@
                 <div *ngIf="isLoading && session" style="display: flex; flex-direction: row; align-items: center; justify-content: center; font-style: italic; gap: 0.5em">
                     <mat-progress-spinner  diameter="30" mode="indeterminate"></mat-progress-spinner> Chargement en cours...
                 </div>
-                <div style="display: flex; align-items: center;">
-                    <div style="display: flex; margin-right: 1em; margin-left: 1em;">
-                        <mat-icon class="material-symbols-outlined">Database</mat-icon>
-                    </div>
-                    <div>
-                        <a style="font-weight: 500; font-size: 14px;"
-                           matTooltip="Statistiques Base de donnée">
-                           {{instance.os}}
-                        </a>
-                        <div style="font-style: italic; font-size: 12px;">
-                            {{instance.re}}
-                        </div>
-                    </div>
-                </div>
-                <div style="display: flex; align-items: center;">
-                    <div style="display: flex; margin-right: 1em; margin-left: 1em;">
-                        <mat-icon class="material-symbols-outlined">account_tree</mat-icon>
-                    </div>
-                    <div>
-                        <a style="font-weight: 500; font-size: 14px;"
-                           matTooltip="Statistiques Base de donnée">
-                           {{instance.branch || 'N/A'}}
-                        </a>
-                        <div style="font-style: italic; font-size: 12px;">
-                            {{instance.hash || 'N/A'}}
-                        </div>
+                <div style="margin-left: 3em;">
+                    <a style="font-weight: 500; font-size: 14px;">
+                         {{instance.os}}
+                    </a>
+                    <div style="font-style: italic; font-size: 12px;">
+                        {{instance.re}}
                     </div>
                 </div>
             </mat-card-content>
             <mat-card-footer>
-                <div style="font-style: italic; font-size: 14px;">
+                <div style="display: flex; align-items: center; gap: 0.5em;font-style: italic; font-size: 14px;">
                     <mat-icon style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
-                    {{instance.user}} le {{ (instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
+                    {{instance.user || "N/A"}}
+                     le {{ (instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
                 </div>
+                <span style="margin-left: auto;" [matTooltip]="instance.hash">
+                    {{instance.branch}}
+                </span>
                 <span style="margin-left: auto;">
                     {{instance.collector}}
                 </span>
