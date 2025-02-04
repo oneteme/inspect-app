@@ -5,7 +5,6 @@ export const DEFAULT_ENV = "prd";
 
 export const environment = {
   production: false,
-  url: "http://localhost:9006",
 };
 
 /**
