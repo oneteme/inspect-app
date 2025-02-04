@@ -18,7 +18,7 @@
             <td mat-cell *matCellDef="let element">
                 <span style="font-weight: bold;">{{getCommand(element.commands)}}</span>
                 <br>
-                {{element["name"] || 'N/A'}}
+                {{element["schema"] || element["name"] || 'N/A'}}
             </td>
         </ng-container>
 
