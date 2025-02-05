@@ -151,7 +151,7 @@ export class DetailTimelineComponent implements OnChanges {
             let o = {
                 id: c.id ? `${c.id}_${c.type}` : `${c.idRequest}_no_session`,
                 group: isWebapp ? 0 : c.threadName,
-                content: c.type == 'stage' ? '' : (c.name || c.host || 'N/A'),
+                content: c.type == 'stage' ? '' : (c.schema || c.name || c.host || 'N/A'),
                 start: c.start * 1000,
                 end: end,
                 title: `
