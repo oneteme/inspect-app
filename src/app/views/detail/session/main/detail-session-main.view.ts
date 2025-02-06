@@ -4,7 +4,7 @@ import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {EnvRouter} from "../../../../service/router.service";
 import {Location} from "@angular/common";
-import {combineLatest, finalize, map, merge, of, Subscription, switchMap} from "rxjs";
+import {combineLatest, defer, finalize, map, merge, of, Subscription, switchMap} from "rxjs";
 import {application} from "../../../../../environments/environment";
 import {Constants} from "../../../constants";
 
@@ -24,7 +24,6 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
     completedSession: InstanceMainSession;
     isLoading: boolean = false;
     subscriptions: Array<Subscription> = [];
-    queryBySchema: any[];
     env: string;
     type: string;
 
@@ -46,42 +45,27 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
         this.isLoading = true;
         this.session = null;
         this.completedSession =null;
-        this.queryBySchema = null;
         this._traceService.getMainSession(id).pipe(
                 switchMap(s => {
                     return of(s).pipe(
                         map(s=>{
-                            this.session = {...s, restRequests:[],databaseRequests:[],stages:[],ftpRequests:[],mailRequests:[],ldapRequests:[]};
+                            this.session = s;
                         }),
                         switchMap((v)=> {
                             return merge( 
                                 this._traceService.getInstance(this.session.instanceId).pipe(map(d=>(this.instance=d))),
-                                (this.session.mask & 4) > 0 ? this._traceService.getRestRequests(this.session.id).pipe(map(d=>(this.session.restRequests = d))): of(),
-                                (this.session.mask & 2) > 0 ? this._traceService.getDatabaseRequests(this.session.id).pipe(map(d=>{this.session.databaseRequests=d;this.groupQueriesBySchema();})) : of(),
-                                (this.session.mask & 1) > 0 ? this._traceService.getLocalRequests(this.session.id).pipe(map(d=>(this.session.stages=d))) : of(),
-                                (this.session.mask & 8) > 0 ? this._traceService.getFtpRequests(this.session.id).pipe(map(d=>(this.session.ftpRequests=d))) : of(),
-                                (this.session.mask & 16) > 0 ? this._traceService.getSmtpRequests(this.session.id).pipe(map(d=>(this.session.mailRequests=d))) : of(),
-                                (this.session.mask & 32) > 0 ? this._traceService.getLdapRequests(this.session.id).pipe(map(d=>(this.session.ldapRequests=d))) : of()
+                                (this.session.mask & 4) > 0 ? defer(()=> {this.session.restRequests = []; return this._traceService.getRestRequests(this.session.id).pipe(map(d=>(this.session.restRequests = d)))}) : of(),
+                                (this.session.mask & 2) > 0 ? defer(()=> {this.session.databaseRequests = []; return this._traceService.getDatabaseRequests(this.session.id).pipe(map(d=>{this.session.databaseRequests=d;}))}) : of(),
+                                (this.session.mask & 1) > 0 ? defer(()=> {this.session.stages = []; return this._traceService.getLocalRequests(this.session.id).pipe(map(d=>(this.session.stages=d)))}) : of(),
+                                (this.session.mask & 8) > 0 ? defer(()=> {this.session.ftpRequests = []; return this._traceService.getFtpRequests(this.session.id).pipe(map(d=>(this.session.ftpRequests=d)))}) : of(),
+                                (this.session.mask & 16) > 0 ? defer(()=> {this.session.mailRequests = []; return this._traceService.getSmtpRequests(this.session.id).pipe(map(d=>(this.session.mailRequests=d)))}) : of(),
+                                (this.session.mask & 32) > 0 ? defer(()=> {this.session.ldapRequests = []; return this._traceService.getLdapRequests(this.session.id).pipe(map(d=>(this.session.ldapRequests=d)))}) : of()
                             )
                         }))
                 }),
                 finalize(() => {this.completedSession = this.session; this.isLoading = false;})
             )
             .subscribe();
-    }
-
-    groupQueriesBySchema() {
-        if (this.session.databaseRequests) {
-            this.queryBySchema = this.session.databaseRequests.reduce((acc: any, item) => {
-                if(item.name) {
-                    if (!acc[item.name]) {
-                        acc[item.name] = []
-                    }
-                    acc[item.name].push(item);
-                }
-                return acc;
-            }, []);
-        }
     }
 
     navigate(event: MouseEvent, targetType: string, extraParam?: string) {
