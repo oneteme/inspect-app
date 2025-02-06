@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from "@angular/core";
+import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
@@ -9,7 +9,7 @@ import {DatabaseRequest} from "src/app/model/trace.model";
     templateUrl: './detail-database-table.component.html',
     styleUrls: ['./detail-database-table.component.scss']
 })
-export class DetailDatabaseTableComponent implements OnInit {
+export class DetailDatabaseTableComponent {
     displayedColumns: string[] = ['status', 'host', 'schema', 'start', 'duree'];
     dataSource: MatTableDataSource<DatabaseRequest> = new MatTableDataSource();
 
@@ -21,13 +21,10 @@ export class DetailDatabaseTableComponent implements OnInit {
             this.dataSource = new MatTableDataSource(requests);
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
+            this.dataSource.sortingDataAccessor = sortingDataAccessor;
         }
     }
     @Output() onClickRow: EventEmitter<{event: MouseEvent, row: any}> = new EventEmitter();
-
-    ngOnInit() {
-        this.dataSource.sortingDataAccessor = sortingDataAccessor;
-    }
 
     getCommand(commands: string): string {
         let command = "--";

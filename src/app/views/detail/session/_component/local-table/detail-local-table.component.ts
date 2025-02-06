@@ -1,6 +1,6 @@
-import {Component, Input, OnInit, ViewChild} from "@angular/core";
+import {Component, Input, ViewChild} from "@angular/core";
 import {MatTableDataSource} from "@angular/material/table";
-import {LocalRequest, NamingRequest} from "../../../../../model/trace.model";
+import {LocalRequest,} from "../../../../../model/trace.model";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 
@@ -9,7 +9,7 @@ import {MatSort} from "@angular/material/sort";
     templateUrl: './detail-local-table.component.html',
     styleUrls: ['./detail-local-table.component.scss']
 })
-export class DetailLocalTableComponent implements OnInit {
+export class DetailLocalTableComponent{
     displayedColumns: string[] = ['status', 'name', 'location',  'start', 'duration'];
     dataSource: MatTableDataSource<LocalRequest> = new MatTableDataSource();
 
@@ -21,11 +21,8 @@ export class DetailLocalTableComponent implements OnInit {
             this.dataSource = new MatTableDataSource(requests);
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
+            this.dataSource.sortingDataAccessor = sortingDataAccessor;
         }
-    }
-
-    ngOnInit() {
-        this.dataSource.sortingDataAccessor = sortingDataAccessor;
     }
 }
 

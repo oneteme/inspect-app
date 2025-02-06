@@ -9,7 +9,7 @@ import {RestRequest} from "src/app/model/trace.model";
     templateUrl: './detail-rest-table.component.html',
     styleUrls: ['./detail-rest-table.component.scss']
 })
-export class DetailRestTableComponent implements OnInit {
+export class DetailRestTableComponent {
     displayedColumns: string[] = ['status', 'host', 'path', 'start', 'duree'];
     dataSource: MatTableDataSource<RestRequest> = new MatTableDataSource();
 
@@ -21,13 +21,12 @@ export class DetailRestTableComponent implements OnInit {
             this.dataSource = new MatTableDataSource(requests);
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
+            this.dataSource.sortingDataAccessor = sortingDataAccessor;
         }
     }
     @Output() onClickRow: EventEmitter<{event: MouseEvent, row: any}> = new EventEmitter();
 
-    ngOnInit() {
-        this.dataSource.sortingDataAccessor = sortingDataAccessor;
-    }
+    
 
     selectedRequest(event: MouseEvent, row: any) {
         this.onClickRow.emit({event: event, row: row});

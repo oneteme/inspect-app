@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from "@angular/core";
+import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
@@ -9,7 +9,7 @@ import {FtpRequest} from "src/app/model/trace.model";
     templateUrl: './detail-ftp-table.component.html',
     styleUrls: ['./detail-ftp-table.component.scss']
 })
-export class DetailFtpTableComponent implements OnInit {
+export class DetailFtpTableComponent {
     displayedColumns: string[] = ['status', 'host', 'start', 'duree'];
     dataSource: MatTableDataSource<FtpRequest> = new MatTableDataSource();
 
@@ -21,13 +21,10 @@ export class DetailFtpTableComponent implements OnInit {
             this.dataSource = new MatTableDataSource(requests);
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
+            this.dataSource.sortingDataAccessor = sortingDataAccessor;
         }
     }
     @Output() onClickRow: EventEmitter<{event: MouseEvent, row: any}> = new EventEmitter();
-
-    ngOnInit() {
-        this.dataSource.sortingDataAccessor = sortingDataAccessor;
-    }
 
     selectedRequest(event: MouseEvent, row: any) {
         this.onClickRow.emit({event: event, row: row});
