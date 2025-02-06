@@ -24,7 +24,6 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
     completedSession: InstanceMainSession;
     isLoading: boolean = false;
     subscriptions: Array<Subscription> = [];
-    queryBySchema: any[];
     env: string;
     type: string;
 
@@ -46,7 +45,6 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
         this.isLoading = true;
         this.session = null;
         this.completedSession =null;
-        this.queryBySchema = null;
         this._traceService.getMainSession(id).pipe(
                 switchMap(s => {
                     return of(s).pipe(
@@ -57,7 +55,7 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
                             return merge( 
                                 this._traceService.getInstance(this.session.instanceId).pipe(map(d=>(this.instance=d))),
                                 (this.session.mask & 4) > 0 ? defer(()=> {this.session.restRequests = []; return this._traceService.getRestRequests(this.session.id).pipe(map(d=>(this.session.restRequests = d)))}) : of(),
-                                (this.session.mask & 2) > 0 ? defer(()=> {this.session.databaseRequests = []; return this._traceService.getDatabaseRequests(this.session.id).pipe(map(d=>{this.session.databaseRequests=d;this.groupQueriesBySchema();}))}) : of(),
+                                (this.session.mask & 2) > 0 ? defer(()=> {this.session.databaseRequests = []; return this._traceService.getDatabaseRequests(this.session.id).pipe(map(d=>{this.session.databaseRequests=d;}))}) : of(),
                                 (this.session.mask & 1) > 0 ? defer(()=> {this.session.stages = []; return this._traceService.getLocalRequests(this.session.id).pipe(map(d=>(this.session.stages=d)))}) : of(),
                                 (this.session.mask & 8) > 0 ? defer(()=> {this.session.ftpRequests = []; return this._traceService.getFtpRequests(this.session.id).pipe(map(d=>(this.session.ftpRequests=d)))}) : of(),
                                 (this.session.mask & 16) > 0 ? defer(()=> {this.session.mailRequests = []; return this._traceService.getSmtpRequests(this.session.id).pipe(map(d=>(this.session.mailRequests=d)))}) : of(),
@@ -68,20 +66,6 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
                 finalize(() => {this.completedSession = this.session; this.isLoading = false;})
             )
             .subscribe();
-    }
-
-    groupQueriesBySchema() {
-        if (this.session.databaseRequests) {
-            this.queryBySchema = this.session.databaseRequests.reduce((acc: any, item) => {
-                if(item.name) {
-                    if (!acc[item.name]) {
-                        acc[item.name] = []
-                    }
-                    acc[item.name].push(item);
-                }
-                return acc;
-            }, []);
-        }
     }
 
     navigate(event: MouseEvent, targetType: string, extraParam?: string) {

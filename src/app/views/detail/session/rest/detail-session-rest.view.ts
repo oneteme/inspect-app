@@ -25,7 +25,6 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     isLoading: boolean = false;
     parentLoading: boolean =false;
     subscriptions: Array<Subscription> = [];
-    queryBySchema: any[];
     env: string;
 
     ngOnInit() {
@@ -46,7 +45,6 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
         this.parentLoading = true;
         this.session = null;
         this.completedSession =null;
-        this.queryBySchema = null;
         this.sessionParent=null;
         this._traceService.getSessionParent(id).pipe(catchError(() => of(null)),finalize(()=>(this.parentLoading = false))).subscribe(d=>this.sessionParent=d) 
         this._traceService.getRestSession(id)
@@ -131,19 +129,6 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
         }
     }
 
-    groupQueriesBySchema() {
-        if (this.session.databaseRequests) {
-            this.queryBySchema = this.session.databaseRequests.reduce((acc: any, item) => {
-                if(item.name) {
-                    if (!acc[item.name]) {
-                        acc[item.name] = []
-                    }
-                    acc[item.name].push(item);
-                }
-                return acc;
-            }, []);
-        }
-    }
 
     getSessionUrl() {
         return Utils.getSessionUrl(this.session);
