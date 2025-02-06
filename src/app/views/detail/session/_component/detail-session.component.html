@@ -1,58 +1,59 @@
-<div *ngIf="session?.restRequests?.length" style="margin-bottom: 2em;">
+<div [hidden]="!session.restRequests" style="margin-bottom: 2em;">
     <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
             <mat-icon>call_made</mat-icon>
-            <div [matBadge]="session.restRequests?.length" matBadgeOverlap="false" matBadgeColor="primary">API</div>
+            <div  [matBadgeHidden]="session.restRequests?.length==0" [matBadge]="session.restRequests?.length" matBadgeOverlap="false" matBadgeColor="primary">API</div>
         </div>
         <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
     </div>
-    <rest-table [requests]="session.restRequests"
+    <rest-table  [requests]="session.restRequests"
                 (onClickRow)="selectedRequest($event)"></rest-table>
 </div>
-<div *ngIf="session?.stages?.length" style="margin-bottom: 2em;">
+<div [hidden]="!session.stages"  style="margin-bottom: 2em;">
     <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
             <mat-icon>memory</mat-icon>
-            <div [matBadge]="session.stages?.length" matBadgeOverlap="false" matBadgeColor="primary">LOCAL</div>
+            <div [matBadgeHidden]="session.stages?.length==0" [matBadge]="session.stages?.length" matBadgeOverlap="false" matBadgeColor="primary">LOCAL</div>
         </div>
         <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
     </div>
-    <local-table [requests]="session.stages"></local-table>
+    <local-table [requests]="session.stages" ></local-table>
 </div>
-<div *ngIf="session?.ftpRequests?.length" style="margin-bottom: 2em;">
+<div [hidden]="!session.ftpRequests"  style="margin-bottom: 2em;">
     <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
             <mat-icon class="material-symbols-outlined">smb_share</mat-icon>
-            <div [matBadge]="session.ftpRequests?.length" matBadgeOverlap="false" matBadgeColor="primary">FTP</div>
+            <div [matBadgeHidden]="session.ftpRequests?.length==0" [matBadge]="session.ftpRequests?.length" matBadgeOverlap="false" matBadgeColor="primary">FTP</div>
         </div>
         <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
     </div>
-    <ftp-table [requests]="session.ftpRequests"
+    <ftp-table [requests]="session.ftpRequests" 
                (onClickRow)="selectedFtp($event)">
     </ftp-table>
 </div>
-<div *ngIf="session?.mailRequests?.length" style="margin-bottom: 2em;">
+<div [hidden]="!session.mailRequests"  style="margin-bottom: 2em;">
     <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
             <mat-icon class="material-symbols-outlined">outgoing_mail</mat-icon>
-            <div [matBadge]="session.mailRequests?.length" matBadgeOverlap="false" matBadgeColor="primary">SMTP</div>
+            <div [matBadgeHidden]="session.mailRequests?.length==0" [matBadge]="session.mailRequests?.length" matBadgeOverlap="false" matBadgeColor="primary">SMTP</div>
         </div>
         <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
     </div>
-    <smtp-table [requests]="session.mailRequests"
+    <smtp-table [requests]="session.mailRequests" 
                 (onClickRow)="selectedSmtp($event)">
     </smtp-table>
 </div>
-<div *ngIf="session?.ldapRequests?.length" style="margin-bottom: 2em;">
+
+<div [hidden]="!session.ldapRequests" style="margin-bottom: 2em;">
     <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
             <mat-icon class="material-symbols-outlined">user_attributes</mat-icon>
-            <div [matBadge]="session.ldapRequests?.length" matBadgeOverlap="false" matBadgeColor="primary">LDAP</div>
+            <div [matBadgeHidden]="session.ldapRequests?.length==0" [matBadge]="session.ldapRequests?.length" matBadgeOverlap="false" matBadgeColor="primary">LDAP</div>
         </div>
         <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
     </div>
@@ -60,21 +61,20 @@
                 (onClickRow)="selectedLdap($event)">
     </ldap-table>
 </div>
-<div *ngIf="session?.databaseRequests?.length" style="margin-bottom: 2em;">
+<div [hidden]="!session.databaseRequests" style="margin-bottom: 2em;">
     <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center;  margin-bottom:  0.5em;">
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
             <mat-icon class="material-symbols-outlined">Database</mat-icon>
-            <div [matBadge]="session.databaseRequests?.length" matBadgeOverlap="false" matBadgeColor="primary">BDD</div>
+            <div [matBadgeHidden]="session.databaseRequests?.length==0" [matBadge]="session.databaseRequests?.length" matBadgeOverlap="false" matBadgeColor="primary">BDD</div>
         </div>
         <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
     </div>
-    <database-table [requests]="session.databaseRequests"
+    <database-table [requests]="session.databaseRequests" 
                     (onClickRow)="selectedQuery($event)">
     </database-table>
 </div>
-<div *ngIf="(completedSession?.databaseRequests?.length || completedSession?.restRequests?.length || completedSession?.stages?.length || completedSession?.ldapRequests?.length || completedSession?.ftpRequests?.length || completedSession?.mailRequests?.length)
- " style="margin-bottom: 1em;">
+<div *ngIf="(!completedSession)||(completedSession?.databaseRequests?.length || completedSession?.restRequests?.length || completedSession?.stages?.length || completedSession?.ldapRequests?.length || completedSession?.ftpRequests?.length || completedSession?.mailRequests?.length)" style="margin-bottom: 1em;"  >
     <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">

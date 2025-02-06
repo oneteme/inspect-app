@@ -243,6 +243,18 @@ mat-form-field.loading {
   align-items: center;
   justify-content: center;
 }
+.detail-table-loading{
+  display: flex;
+  gap: .5em;
+  height: 80px;
+  color: #707070;
+  font-weight: 500;
+  width: 100%;
+  font-size: 12px;
+  align-items: center;
+  justify-content: center;
+  background: white;
+}
 
 .mdc-data-table__cell:has(chart) {
   overflow: initial;

@@ -51,7 +51,16 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns;"></tr>
-        <tr mat-row *matRowDef="let row;columns: displayedColumns;">
+        <tr mat-row *matRowDef="let row;columns: displayedColumns;"></tr>
+        <tr class="mat-row" *matNoDataRow>
+            <td class="mat-cell" colspan="7">
+              <div *ngIf="!requests" class="detail-table-loading">
+                  <span style="display: flex; flex-direction: column; font-style: italic;">
+                    Chargement en cours...
+                    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                  </span>
+              </div>
+            </td>
         </tr>
     </table>
     <mat-paginator #paginator [pageSize]="3" [hidePageSize]="true"

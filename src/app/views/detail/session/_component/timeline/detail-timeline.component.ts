@@ -55,12 +55,14 @@ export class DetailTimelineComponent implements OnChanges {
         if(changes.instance || changes.request){
             if(this.instance && this.request){
                 this.timeline_start = this.request.start
-                let dataArray: any = [...<RestRequest[]>this.request.restRequests.map(r => ({...r, type: 'rest'})),
-                    ...<FtpRequest[]>this.request.ftpRequests.map(r => ({...r, type: 'ftp'})),
-                    ...<MailRequest[]>this.request.mailRequests.map(r => ({...r, type: 'smtp'})),
-                    ...<NamingRequest[]>this.request.ldapRequests.map(r => ({...r, type: 'ldap'})),
-                    ...<DatabaseRequest[]>this.request.databaseRequests.map(r => ({...r, type: 'database'})),
-                    ...<LocalRequest[]>this.request.stages.map(r => ({...r, type: 'local'}))];
+                let dataArray: any = [].concat(
+                    (this.request.restRequests  ?? []).map(r => ({...r, type: 'rest'})),
+                    (this.request.ftpRequests?? []).map(r => ({...r, type: 'ftp'})),
+                    (this.request.mailRequests?? []).map(r => ({...r, type: 'smtp'})),
+                    (this.request.ldapRequests?? []).map(r => ({...r, type: 'ldap'})),
+                    (this.request.databaseRequests?? []).map(r => ({...r, type: 'database'})),
+                    (this.request.stages?? []).map(r => ({...r, type: 'local'})))
+
                 dataArray.splice(0, 0, { ...this.request, type: 'stage' });
                 this.sortInnerArrayByDate(dataArray);
                 let data: any;
