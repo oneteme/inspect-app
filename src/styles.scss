@@ -305,3 +305,19 @@ mat-form-field.loading {
 .mat-badge-content{
   border-radius: 7px;
 }
+
+
+div.label {
+  display:inline-block;
+  padding:.2em .7em;
+  font-size:1;
+  background-color:#696969;
+  color:#fff;
+  border-radius:6px;
+  position:relative
+}
+.hash{
+  font-size:.7em;
+  margin:0 0 0 2px;
+  opacity:.75
+}
