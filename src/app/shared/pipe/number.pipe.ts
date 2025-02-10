@@ -3,15 +3,20 @@ import { Filter } from "src/app/views/constants";
 import { groupingBy } from "../util";
 
 @Pipe({
-    name: 'groupByRow'
+    name: 'numberFormat'
 })
 export class NumberFormatterPipe implements PipeTransform {
-    transform(value: number): string{
-        if(value >= 1_000_000){
-            return (value / 1_000_000).toFixed(1) + 'M'; 
-        }else if(value >= 1_000){
-            return (value / 1_000).toFixed(1) + 'K'
+    transform(value: number, pointer?: number, suffix?: string): string{
+        let p = pointer ?? 1;
+        let s = suffix ?? '';
+        if(value){
+            if(value >= 1_000_000){
+                return `${s}${(value / 1_000_000).toFixed(p)}M`; 
+            }else if(value >= 1_000){
+                return `${s}${(value / 1_000).toFixed(p)}K`;
+            }
+            return value.toString();
         }
-        return value.toString();
+        return "";
     }
 }
