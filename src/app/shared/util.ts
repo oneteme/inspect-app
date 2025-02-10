@@ -226,3 +226,10 @@ export function extractPeriod(regPeriod: string, name: string){
     }
     return makeDateTimePeriod(+match[1]);
 }
+
+export function getErrorClassName(o:any): string{
+    if (o.exception?.message || o.exception?.type) {
+        return "error"
+    }
+    return '';
+}

@@ -9,6 +9,8 @@ import {application} from "../../../../environments/environment";
 import {DurationPipe} from "../../../shared/pipe/duration.pipe";
 import {EnvRouter} from "../../../service/router.service";
 
+const INFINIT = new Date(9999,12,31).getTime();
+
 @Component({
     templateUrl: './detail-ldap.view.html',
     styleUrls: ['./detail-ldap.view.scss'],
@@ -67,37 +69,51 @@ export class DetailLdapView implements OnInit, OnDestroy {
 
     createTimeline() {
         let timeline_start = Math.trunc(this.request.start * 1000);
-        let timeline_end = Math.ceil(this.request.end * 1000);
+        let timeline_end =Math.trunc(this.request.start * 1000);
 
         let items = this.request.actions.map((a: NamingRequestStage, i: number) => {
-            let item: DataItem = {
+            let end = a.end? Math.trunc(a.end * 1000) :INFINIT;
+            let item: any = {
                 group: `${i}`,
                 start: Math.trunc(a.start * 1000),
-                end: Math.trunc(a.end * 1000),
+                end: end,
                 content: '',
                 className: "ldap",
-                title: `<span>${this.pipe.transform(a.start * 1000, 'HH:mm:ss.SSS')} - ${this.pipe.transform(a.end * 1000, 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform({start: a.start, end: a.end})})<br>
+                title: `<span>${this.pipe.transform(a.start * 1000, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end , 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform({start: a.start, end: a.end/1000})})<br>
                         <span>${a?.args ? a.args.join('</br>') : ''}</span>`
             }
             item.type = item.end <= item.start ? 'point' : 'range';
-            if (a.exception?.message || a.exception?.type) {
-                item.className += ' bdd-failed';
+            if (item.end > timeline_end && item.end != INFINIT) {
+                timeline_end = item.end
             }
             return item;
         });
-
-        if (this.timeLine) {  // destroy if exists 
-            this.timeLine.destroy();
-        }
-        this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, this.request.actions.map((a:NamingRequestStage, i:number) => ({ id: i, content: a?.name })), {
+        items.splice(0,0,{
+            group:'parent',
             start: timeline_start,
-            end: timeline_end,
+            end: (this.request.end *1000) ||INFINIT,
+            content: (this.request.host || 'N/A'),
+            className: "overflow",
+            type:"background"
+           })
+
+        let groups:any[] = this.request.actions.map((a:NamingRequestStage, i:number) => ({ id: i, content: a?.name,treeLevel: 2}));
+        groups.splice(0,0,{id:'parent', content: this.request.threadName,treeLevel: 1, nestedGroups:groups.map(g=>(g.id))})
+        
+        let options = {
+            start: timeline_start - (Math.ceil((timeline_end - timeline_start)*0.01)),
+            end: timeline_end + (Math.ceil((timeline_end - timeline_start)*0.01)),
             selectable : false,
             clickToUse: true,
             tooltip: {
                 followMouse: true
             }
-        });
+        }
+
+        if (this.timeLine) {
+            this.timeLine.destroy();
+        }
+        this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, groups,options);
     }
 
     navigate(event: MouseEvent, targetType: string, extraParam?: string) {

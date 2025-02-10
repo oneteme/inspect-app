@@ -2,13 +2,17 @@ import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from '@angu
 
 import {ActivatedRoute} from '@angular/router';
 import {combineLatest, finalize, forkJoin, Subscription} from "rxjs";
-import {DataItem, Timeline} from 'vis-timeline';
+import {Timeline} from 'vis-timeline';
 import {DatePipe} from '@angular/common';
 import {TraceService} from 'src/app/service/trace.service';
 import {application} from 'src/environments/environment';
 import {DatabaseRequest, DatabaseRequestStage, ExceptionInfo} from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
 import {DurationPipe} from "../../../shared/pipe/duration.pipe";
+import { getErrorClassName } from 'src/app/shared/util';
+
+
+const INFINIT = new Date(9999,12,31).getTime();
 
 @Component({
     templateUrl: './detail-database.view.html',
@@ -59,6 +63,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
             next: ([params, data, queryParams]) => {
                 this.params = {idSession: params.id_session, idJdbc: params.id_jdbc,
                     typeSession: data.type, typeMain: params.type_main, env: queryParams.env || application.default_env};
+                this.request = null;
                 this.getRequest();
             }
         }))
@@ -80,36 +85,46 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     }
 
     createTimeline() {
-        let timeline_end = Math.ceil(this.request.end * 1000);
+        let timeline_end = Math.trunc(this.request.start * 1000);
         let timeline_start = Math.trunc(this.request.start * 1000);
-
         let items = this.request.actions.map((c: DatabaseRequestStage, i: number) => {
-            let item: DataItem = {
+            let end = c.end? Math.trunc(c.end * 1000) :INFINIT; 
+            let item:any  = {
                 group: `${i}`,
                 start: Math.trunc(c.start * 1000),
-                end: Math.trunc(c.end * 1000),
+                end: end,
                 content: c.commands? `${this.getCommmand(c.commands)}` : "",
-                className: "database overflow",
-                title: `<span>${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(c.end * 1000), 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform({start: c.start, end: c.end})})<br>
+                className: `database overflow ${getErrorClassName(c)}` ,
+                title: `<span>${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(end), 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform({start: c.start, end: end / 1000})})<br>
                         <span>${c.count ?'count: ' + c.count : ''}</span>`
             }
             item.type = item.end <= item.start ? 'point' : 'range' // TODO : change this to equals dh_dbt is set to timestamps(6), currently set to timestmap(3)
-            if (c.exception?.message || c.exception?.type) {
-                item.className += ' bdd-failed';
+            if (item.end > timeline_end && item.end != INFINIT) {
+                  timeline_end = item.end
             }
             return item;
         })
-        let groups= this.request.actions.map((g: DatabaseRequestStage,i:number ) => ({ id: `${i}`, content: g?.name + (g.count? ` (${g.count})`:''), title: this.jdbcActionDescription[g?.name] }));
-        let options=  {
+        items.splice(0,0,{
+            group:'parent',
             start: timeline_start,
-            end: timeline_end,
+            end: (this.request.end *1000) ||INFINIT,
+            content: (this.request.schema || this.request.name || 'N/A'),
+            className: "overflow",
+            type:"background"
+           })
+
+        let groups:any[]= this.request.actions.map((g: DatabaseRequestStage,i:number ) => ({ id: `${i}`, content: g?.name + (g.count? ` (${g.count})`:''), title: this.jdbcActionDescription[g?.name], treeLevel: 2, }));
+        groups.splice(0,0,{id:'parent', content: this.request.threadName,treeLevel: 1, nestedGroups:groups.map(g=>(g.id))})
+        let options=  {
+            start: timeline_start - (Math.ceil((timeline_end - timeline_start)*0.01)),
+            end: timeline_end + (Math.ceil((timeline_end - timeline_start)*0.01)),
             selectable : false,
             clickToUse: true,
             tooltip: {
                 followMouse: true
             }
         }
-        if (this.timeLine) {  // destroy if exists 
+        if (this.timeLine) {
             this.timeLine.destroy();
         }
         this.timeLine = new Timeline(this.timelineContainer.nativeElement,items,groups,options);
