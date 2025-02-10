@@ -1,7 +1,6 @@
 import { Component, inject, ViewChild } from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
 import { combineLatest, finalize} from 'rxjs';
-
 import { app} from 'src/environments/environment';
 import { Constants } from '../constants';
 import { MatPaginator } from '@angular/material/paginator';
@@ -9,6 +8,7 @@ import { MatSort } from '@angular/material/sort';
 import { InstanceService } from 'src/app/service/jquery/instance.service';
 import { LastServerStart } from 'src/app/model/jquery.model';
 import { MatTableDataSource } from '@angular/material/table';
+
 @Component({
     templateUrl: './deploiment.component.html',
     styleUrls: ['./deploiment.component.scss'],
@@ -16,19 +16,17 @@ import { MatTableDataSource } from '@angular/material/table';
 })
 export class DeploimentComponent   {
     constants = Constants;
-    private _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
-    private _instanceService= inject(InstanceService);
+    private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+    private readonly _instanceService= inject(InstanceService);
 
     today: Date = new Date();
     MAPPING_TYPE = Constants.MAPPING_TYPE;
     serverStartDisplayedColumns: string[] = ["appName", "version", "duree","branch","collector"];
-    isLoading: boolean= false;
     lastServerStart: {data?:MatTableDataSource<LastServerStart[]>, isLoading?:boolean} = {};
     versionColor: any;
     collectorColor: any;
-    // serverStartTable: { observable: }) }
-    params: Partial<{ env: string, start: Date, end: Date, serveurs: string[] }> = {};
-
+    branchColor:any;
+    params: Partial<{ env: string }> = {};
 
     @ViewChild('lastServerStartTablePaginator')lastServerStartTablePaginator: MatPaginator;
     @ViewChild('lastServerStartTableSort') lastServerStartTableSort: MatSort;
@@ -45,19 +43,18 @@ export class DeploimentComponent   {
                 this.getLastServerStart();
             }
         });
-
-
     }
 
     getLastServerStart(){
         this.lastServerStart.isLoading =true;
+
         this._instanceService.getlastServerStart({ env: this.params.env})
         .pipe(finalize(()=>(this.lastServerStart.isLoading =false)))
         .subscribe({
             next: ((d:any)=> {
                 this.versionColor  = this.groupBy(d,(v:any)=> v.version)
                 this.collectorColor = this.groupBy(d,(v:any)=> v.collector)
-                console.log(this.collectorColor)
+                this.branchColor = this.groupBy(d,(v:any)=> v.branch)
                 this.lastServerStart.data = new MatTableDataSource(d);
                 this.lastServerStart.data.paginator = this.lastServerStartTablePaginator;
                 this.lastServerStart.data.sort = this.lastServerStartTableSort;
@@ -68,14 +65,11 @@ export class DeploimentComponent   {
 
     groupBy<T>(array: T[], fn: (o: T) => any): { [name: string]: T[] } { // todo : refacto
         return array.reduce((acc: any, item: any) => {
-            var id = fn(item);
-            if(!id)
-                id= "N/A"
-            if(!acc){
-                acc={}
-            }
-            if (!acc[id]) {
-                acc[id] = this.getRandomColor();
+            let id = fn(item);
+            if(id){
+                if (!acc[id]) {
+                    acc[id] = this.getRandomColor();
+                }
             }
             return acc;
         }, {})
