@@ -34,6 +34,7 @@ import { NumberFormatterPipe } from './shared/pipe/number.pipe';
 import { TreeView } from './views/tree/tree.view';
 import {SizePipe} from "./shared/pipe/size.pipe";
 import {DumpView} from "./views/dump/dump.view";
+import { DeploimentComponent } from './views/deploiment/deploiment.component';
 
 
 registerLocaleData(localeFr, 'fr-FR');
@@ -253,6 +254,11 @@ const routes: Route[] = [
     path: 'home',
     component: DashboardComponent,
     title: 'Page d\'accueil'
+  },
+  {
+    path: 'deploiment',
+    component: DeploimentComponent,
+    title: 'Déploiement'
   },
   {
     path: 'architecture',

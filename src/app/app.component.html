@@ -29,6 +29,11 @@
                 <mat-icon>{{ MAPPING_TYPE['view'].icon }}</mat-icon>
                 <span>{{ MAPPING_TYPE['view'].title }}</span>
             </button>
+            <button mat-menu-item [routerLink]="['deploiment']" routerLinkActive="item-selected"
+                    [queryParams]="{env: env.value}">
+                <mat-icon>{{ MAPPING_TYPE['deploiment'].icon }}</mat-icon>
+                <span>{{ MAPPING_TYPE['deploiment'].title }}</span>
+            </button>
         </mat-menu>
         <span style="flex-grow: 1;"></span>
         <mat-form-field appearance="fill" class="md-2 no-subscript" [class.loading]="isLoadingEnv">
