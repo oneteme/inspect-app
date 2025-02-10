@@ -48,6 +48,7 @@ import {ArchitectureView} from "./architecture/architecture.view";
 import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
 import {DumpView} from "./dump/dump.view";
 import {DumpTimelineComponent} from "./dump/timeline/dump-timeline.component";
+import { NumberFormatterPipe } from '../shared/pipe/number.pipe';
 
 
 @NgModule({
@@ -93,7 +94,9 @@ import {DumpTimelineComponent} from "./dump/timeline/dump-timeline.component";
     ArchitectureView,
     TreeView,
     DumpView,
-    DumpTimelineComponent
-  ]
+    DumpTimelineComponent,
+    NumberFormatterPipe
+  ],
+  providers: [NumberFormatterPipe]
 })
 export class ViewsModule { }

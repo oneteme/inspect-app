@@ -294,3 +294,14 @@ mat-form-field.loading {
   white-space: pre-line; // Allow line break
 }
 
+
+.stretch-badge > .mat-badge-content {
+  width: auto;
+  right: unset !important;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+.mat-badge-content{
+  border-radius: 7px;
+}
