@@ -1,0 +1,81 @@
+<header-page [titleIcon]="MAPPING_TYPE['deploiment'].icon" [ui-title]="MAPPING_TYPE['deploiment'].title">
+
+</header-page>
+
+
+<div style="width: 100%">
+  <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
+  </div>
+  <div class="mat-elevation-z5">
+    <table mat-table [dataSource]="lastServerStart.data ||[]" #lastServerStartTableSort="matSort" matSort>
+
+      <ng-container matColumnDef="appName">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Serveur </th>
+        <td mat-cell *matCellDef="let row"> {{row.appName || 'N/A'}} </td>
+      </ng-container>
+
+      <ng-container matColumnDef="version">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Version </th>
+        <td mat-cell *matCellDef="let row" > 
+          <div *ngIf="row.version" class="label" [style.background-color]="versionColor[row.version]">
+                <span>{{row.version}} </span>
+          </div>  
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="duree">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Depuis</th>
+        <td mat-cell *matCellDef="let row">
+          <div matTooltipClass="mat-tooltip">
+            <span [matTooltip]="row.start | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr'" TooltipPosition="below">{{
+              (today?.getTime() - row.start) / 1000 | duration }}</span>
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="branch">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Branch/hash </th>
+        <td mat-cell *matCellDef="let row">
+           <div *ngIf="row.branch" class="label" [style.background-color]="branchColor[row.branch]">
+              <span> {{row.branch}}</span>
+              <span class="hash"> {{row.hash}}</span>
+           </div>
+        </td>
+      </ng-container>
+
+
+      <ng-container matColumnDef="collector" >
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Collector </th>
+        <td mat-cell *matCellDef="let row"> 
+          <div *ngIf="row.collector" class="label" [style.background-color]="collectorColor[row.collector]">
+            <span>{{row.collector}}</span>
+          </div>
+          </td>
+      </ng-container>
+
+
+      <tr mat-header-row *matHeaderRowDef="serverStartDisplayedColumns;"></tr>
+      <tr mat-row *matRowDef="let row; columns: serverStartDisplayedColumns;"></tr>
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" colspan="7">
+          <div *ngIf="!lastServerStart.isLoading" class="empty-row" style="align-items: center;">
+            <span class="material-symbols-outlined">
+              info
+            </span>
+            <span style="font-style: italic;">Aucun résultat</span>
+          </div>
+          <div *ngIf="lastServerStart.isLoading && !lastServerStart.data" class="detail-table-loading">
+            <span style="display: flex; flex-direction: column; font-style: italic;">
+              Chargement en cours...
+              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            </span>
+          </div>
+        </td>
+      </tr>
+    </table>
+    <div >
+      <mat-paginator #lastServerStartTablePaginator  [pageSize]="10"
+        [hidePageSize]="true" [showFirstLastButtons]="true"></mat-paginator>
+    </div>
+  </div>
+</div>

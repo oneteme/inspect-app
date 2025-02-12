@@ -49,6 +49,7 @@ import {DetailLocalTableComponent} from "./detail/session/_component/local-table
 import {DumpView} from "./dump/dump.view";
 import {DumpTimelineComponent} from "./dump/timeline/dump-timeline.component";
 import { NumberFormatterPipe } from '../shared/pipe/number.pipe';
+import { DeploimentComponent } from './deploiment/deploiment.component';
 
 
 @NgModule({
@@ -95,7 +96,8 @@ import { NumberFormatterPipe } from '../shared/pipe/number.pipe';
     TreeView,
     DumpView,
     DumpTimelineComponent,
-    NumberFormatterPipe
+    NumberFormatterPipe,
+    DeploimentComponent
   ],
   providers: [NumberFormatterPipe]
 })
