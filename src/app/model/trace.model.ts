@@ -162,6 +162,7 @@ export interface InstanceEnvironment {
     user: string;
     type: string;
     instant: number;
+    end: number;
     collector: string;
 }
 
@@ -435,7 +436,7 @@ export class RestRequestNode implements Node<Label> {
             case Label.METHOD_RESOURCE: return `${this.nodeObject.method || "?"} ${this.nodeObject.path || "?"}`
             case Label.SIZE_COMPRESSION: return `${this.nodeObject.inDataSize < 0 ? 0 : sizeFormatter(this.nodeObject.inDataSize) } ↓↑ ${this.nodeObject.outDataSize < 0 ? 0 :sizeFormatter(this.nodeObject.outDataSize) }`
             case Label.PROTOCOL_SCHEME: return `${this.nodeObject.protocol || "?"}/${this.nodeObject.authScheme || "?"}`
-            case Label.STATUS_EXCEPTION: return this.nodeObject.status.toString()+ (this.nodeObject?.remoteTrace?.exception && ': ' + this.nodeObject?.remoteTrace?.exception?.type || '');
+            case Label.STATUS_EXCEPTION: return this.nodeObject.status.toString()+ (this.nodeObject?.exception && ': ' + this.nodeObject?.exception?.type || '');
             case Label.USER: return `${this.nodeObject.remoteTrace?.user ?? "?"}`
             default: return '?';
         }
