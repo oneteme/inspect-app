@@ -27,9 +27,11 @@ export class TreeGraph {
     static setup(elem: HTMLElement, fn: (tg: TreeGraph) => void) {
         let graph = new mx.mxGraph(elem); // create a graph inside a DOM node with an id of graph
         graph.getLabel = function (cell: any) {
-            if (cell?.isEdge() && cell.value && typeof cell.value === 'object') {
+            if (cell?.isEdge() && cell.value && typeof cell.value === 'object' && cell.value.hasOwnProperty('linkLbl')) {
                 let compare = cell.value.nodes[0].formatLink(cell.value.linkLbl)
                 return tg.checkSome(cell.value.nodes, x => x.formatLink(cell.value.linkLbl) != compare) ? `... ×${cell.value.nodes.length}` : `${compare} ×${cell.value.nodes.length}`
+            }else if(cell?.isVertex() && cell.value && typeof cell.value === 'object'){
+                return cell.value.node.formatNode(cell.value.serverlbl)
             }
             return mx.mxGraph.prototype.getLabel.apply(this, arguments);
         }
@@ -49,51 +51,73 @@ export class TreeGraph {
         graph.setPanning(true);
         new mx.mxTooltipHandler(graph, 1);
         mx.mxGraph.prototype.getTooltipForCell = function (cell: any) { //tooltip 
-            let modal = ""
+          
             if (cell.isEdge()) {
+                let modal;
                 if (cell.value.nodes) {
                     let res = tg.groupBy(cell.value.nodes, (v: any) => v.formatLink(cell.value.linkLbl))
                     let entries = Object.entries(res)
                     if(cell.value.linkLbl =="ELAPSED_LATENSE"){
                         entries = entries.sort((a,b) => (+b[0].substring(0,b[0].length -1) - +a[0].substring(0,a[0].length -1) ))
                     }
-
-                    let max; 
-                    let count = 0;
-                    if (entries.length > 5) {
-                        max = 5;
-                        
-                    } else {
-                        max = entries.length;
-                    }
-
-                    for (let i = 0; i < max; i++) {
-                        modal += `<b>${entries[i][0]}</b>${entries[i][1].length>1 ?' ×'+entries[i][1].length: ''}<br>`
-                        count +=entries[i][1].length;
-                    }
-                    if(entries.length> 5){
-                        modal += `...<b>${cell.value.nodes.length - count} Autres</b>`
-                    }
-                   
+                    modal = tg.getModal(entries, cell.value.nodes.length);
                 }
                 else {
-                    modal += `<b>${cell.value}</b>`
+                    modal = `<b>${cell.value}</b>`
                 }
                 return modal;
+            }
+            if(cell.isVertex()){
+                if(cell.value.node){
+                    if(cell.value.node.nodeObject ){
+                        if(cell.value.node.nodeObject.remoteList){
+                            let res = tg.groupBy(cell.value.node.nodeObject.remoteList, (v: any) => v.formatLink(cell.value.linkLbl))
+                            if(res){
+                                let entries = Object.entries(res);
+                                return tg.getModal(entries, cell.value.node.nodeObject.remoteList.length);  
+                            }
+                        }
+                         return  cell.value.node.formatLink(cell.value.linkLbl) && `<b>${cell.value.node.formatLink(cell.value.linkLbl)}</b>` 
+                    }
+                }
             }
             return '';
         }
         return tg
     }
 
+    getModal(entries: any[], nodesLength: number){
+        let modal = "";
+        let max; 
+        let count = 0;
+        if (entries.length > 5) {
+            max = 5;
+            
+        } else {
+            max = entries.length;
+        }
+
+        for (let i = 0; i < max; i++) {
+            modal += `<b>${entries[i][0]}</b>${entries[i][1].length>1 ?' ×'+entries[i][1].length: ''}<br>`
+            count +=entries[i][1].length;
+        }
+        if(entries.length> 5){
+            modal += `...<b>${nodesLength - count} Autres</b>`
+        }
+        return modal;
+    }
+
     groupBy<T>(array: T[], fn: (o: T) => any): { [name: string]: T[] } {
         return array.reduce((acc: any, item: any) => {
             var id = fn(item);
-            if (!acc[id]) {
-                acc[id] = [];
+            if(id){
+                if (!acc[id]) {
+                    acc[id] = [];
+                }
+                acc[id].push(item);
+                return acc;
             }
-            acc[id].push(item);
-            return acc;
+           
         }, {})
     }
 

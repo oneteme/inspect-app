@@ -57,7 +57,6 @@ export class AdvancedFilterTriggerComponent implements OnInit {
                 pageName: this.pageName,
             }
         })
-        console.log(this.filterConfig)
         dialog.afterClosed().subscribe(result => {
             if (result) {
                 this.handleDialogclose.emit(result);
