@@ -51,7 +51,7 @@ export class TreeGraph {
         graph.setPanning(true);
         new mx.mxTooltipHandler(graph, 1);
         mx.mxGraph.prototype.getTooltipForCell = function (cell: any) { //tooltip 
-          
+
             if (cell.isEdge()) {
                 let modal;
                 if (cell.value.nodes) {
@@ -74,10 +74,10 @@ export class TreeGraph {
                             let res = tg.groupBy(cell.value.node.nodeObject.remoteList, (v: any) => v.formatLink(cell.value.linkLbl))
                             if(res){
                                 let entries = Object.entries(res);
-                                return tg.getModal(entries, cell.value.node.nodeObject.remoteList.length);  
+                                return tg.getModal(entries, cell.value.node.nodeObject.remoteList.length);
                             }
                         }
-                         return  cell.value.node.formatLink(cell.value.linkLbl) && `<b>${cell.value.node.formatLink(cell.value.linkLbl)}</b>` 
+                         return  cell.value.node.formatLink(cell.value.linkLbl) && `<b>${cell.value.node.formatLink(cell.value.linkLbl)}</b>`
                     }
                 }
             }
@@ -88,11 +88,11 @@ export class TreeGraph {
 
     getModal(entries: any[], nodesLength: number){
         let modal = "";
-        let max; 
+        let max;
         let count = 0;
         if (entries.length > 5) {
             max = 5;
-            
+
         } else {
             max = entries.length;
         }

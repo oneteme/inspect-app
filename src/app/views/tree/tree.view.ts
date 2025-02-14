@@ -119,7 +119,7 @@ export class TreeView implements OnDestroy {
 
   mergeRestRequests(name: string, array: RestRequestNode[]): ServerRestSession {
     let remote = array[0].nodeObject.remoteTrace ? array[0].nodeObject.remoteTrace : { appName: name };
-    let acc: any = { ...remote, 'restRequests': [], 'databaseRequests': [], 'ftpRequests': [], 'mailRequests': [], 'ldapRequests': [] };
+    let acc: any = { ...remote, 'restRequests': [], 'databaseRequests': [], 'ftpRequests': [], 'mailRequests': [], 'ldapRequests': [], 'remoteList': [] };
     array.forEach(o => {
       if (o.nodeObject.remoteTrace) {
         o.nodeObject.remoteTrace.restRequests && acc.restRequests.push(...o.nodeObject.remoteTrace.restRequests)
@@ -127,6 +127,7 @@ export class TreeView implements OnDestroy {
         o.nodeObject.remoteTrace.ftpRequests && acc.ftpRequests.push(...o.nodeObject.remoteTrace.ftpRequests)
         o.nodeObject.remoteTrace.mailRequests && acc.mailRequests.push(...o.nodeObject.remoteTrace.mailRequests)
         o.nodeObject.remoteTrace.ldapRequests && acc.ldapRequests.push(...o.nodeObject.remoteTrace.ldapRequests)
+        o.nodeObject.remoteTrace && acc.remoteList.push(('protocol' in o.nodeObject.remoteTrace ? new RestServerNode(o.nodeObject.remoteTrace) : new MainServerNode(o.nodeObject.remoteTrace)))
       }
     })
     return <ServerRestSession>acc;
@@ -136,8 +137,12 @@ export class TreeView implements OnDestroy {
 
     let serverNode = ('protocol' in server ? new RestServerNode(server) : new MainServerNode(server)); // todo test if has remote returns icons style 
     let icon: ServerType = this.getIcon(serverNode.nodeObject);
-    let a = treeGraph.insertServer(serverNode.formatNode(serverlbl), icon)
-    let label: any = '';
+    let label :any = {
+      serverlbl: serverlbl,
+      linkLbl: linklbl,
+      node: serverNode
+    }
+    let a = treeGraph.insertServer(label, icon)
     let linkStyle = '';
     let b;
 
