@@ -20,7 +20,7 @@ jobs:
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
   deploy:
-    if: github.ref_name == 'main'
+    if: github.ref_name == 'main'  #!PR
     needs: build
     runs-on: ubuntu-latest
     steps:
@@ -29,6 +29,8 @@ jobs:
       with:
         node-version: 20
     - uses: oneteme/automation-scripts/.github/actions/npm-build-project@main
+    - uses: oneteme/automation-scripts/.github/actions/npm-project-version@main
+      id: prj_ver
     - uses: docker/login-action@v3.3.0
       with:
         username: ${{ secrets.DOCKERHUB_USER }}
@@ -40,12 +42,10 @@ jobs:
         context: .
         tags: "oneteme/${{ github.event.repository.name }}:latest"
         push: true
-    - uses: oneteme/automation-scripts/.github/actions/npm-project-version@main
-      id: prj_ver
     outputs:
       version: ${{ steps.prj_ver.outputs.version }}
-  release: #!PR
-    needs: build
+  release:
+    needs: deploy
     runs-on: ubuntu-latest
     steps:
     - uses: oneteme/automation-scripts/.github/actions/github-release-notes@main
