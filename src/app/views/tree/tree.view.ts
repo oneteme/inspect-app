@@ -1,6 +1,6 @@
 import { Component, ElementRef, NgZone, OnDestroy, ViewChild, inject } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
-import { combineLatest, finalize, forkJoin, fromEvent, Observable } from 'rxjs';
+import {combineLatest, finalize, forkJoin, fromEvent, Observable, Subscription} from 'rxjs';
 import { Location } from '@angular/common';
 
 import { TraceService } from 'src/app/service/trace.service';
@@ -25,7 +25,7 @@ export class TreeView implements OnDestroy {
   private _zone = inject(NgZone);
   private _location = inject(Location);
   private _treeService = inject(TreeService);
-
+  subscriptions: Subscription[] = [];
   id: string;
   tree: any
   resizeSubscription: any;
@@ -59,7 +59,7 @@ export class TreeView implements OnDestroy {
 
   constructor() {
     const self = this;
-    combineLatest([
+    this.subscriptions.push(combineLatest([
       this._activatedRoute.params,
       this._activatedRoute.data,
       this._activatedRoute.queryParams
@@ -72,17 +72,17 @@ export class TreeView implements OnDestroy {
         this.patchDataView(this.serverLbl,this.linkLbl)
         this.data = data
         this.getTree(this.data, this.serverLbl, this.linkLbl);
-        this.ViewForm.controls.nodeView.valueChanges.subscribe(v => {
+        this.subscriptions.push(this.ViewForm.controls.nodeView.valueChanges.subscribe(v => {
           this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&server_lbl=${v}&link_lbl=${this.linkLbl}`);
           this.ViewEvent[v](Label[v])
-        })
-        this.ViewForm.controls.linkView.valueChanges.subscribe(v => {
+        }))
+        this.subscriptions.push(this.ViewForm.controls.linkView.valueChanges.subscribe(v => {
           this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&server_lbl=${this.serverLbl}&link_lbl=${v}`);
           this.ViewEvent[v](Label[v])
-        })
+        }))
         this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&server_lbl=${this.serverLbl}&link_lbl=${this.linkLbl}`);
       },
-    })
+    }))
   }
 
   patchDataView(node: Label, link: Label){
@@ -94,7 +94,7 @@ export class TreeView implements OnDestroy {
 
   getTree(data: any, serverlbl: Label, linklbl: Label) {
     this.isLoading = true;
-    this._traceService.getTree(this.id, data['type']).pipe(finalize(() => this.isLoading = false)).subscribe((d: ServerRestSession /*| ServerMainSession*/) => {
+    this.subscriptions.push(this._traceService.getTree(this.id, data['type']).pipe(finalize(() => this.isLoading = false)).subscribe((d: ServerRestSession /*| ServerMainSession*/) => {
       this.TreeObj = d;
       let self = this;
       this.tree = TreeGraph.setup(this.graphContainer.nativeElement, tg => {
@@ -103,7 +103,7 @@ export class TreeView implements OnDestroy {
       });
       this.ViewEvent[linklbl](Label[linklbl])// draw
       this.tree.setOutline(this.outlineContainer.nativeElement)
-    })
+    }))
   }
 
   dr(tg: TreeGraph, data: any, serverlbl: Label, linklbl: Label) {
@@ -282,7 +282,7 @@ export class TreeView implements OnDestroy {
     if (this.resizeSubscription) {
       this.resizeSubscription.unsubscribe();
     }
-    //destroy graph
+    this.subscriptions.forEach(s => s.unsubscribe());
   }
 
 
@@ -304,7 +304,7 @@ export class TreeView implements OnDestroy {
       mailParam.ids?.length && (reqOb.mail = this._treeService.getMailRequestStage(mailParam));
       ldapParam.ids?.length && (reqOb.ldap = this._treeService.getLdapRequestStage(ldapParam));
     }
-    forkJoin(
+    this.subscriptions.push(forkJoin(
       reqOb
     ).pipe(finalize(() => {
       this.tree.clearCells();
@@ -314,7 +314,7 @@ export class TreeView implements OnDestroy {
       this.setRequestProperties(this.TreeObj, res.ftp, (s, actionMap) => s.ftpRequests?.length && s.ftpRequests.forEach(r => r["commands"] = actionMap[r['idRequest']]))
       this.setRequestProperties(this.TreeObj, res.mail, (s, actionMap) => s.mailRequests?.length && s.mailRequests.forEach(r => r["commands"] = actionMap[r['idRequest']]))
       this.setRequestProperties(this.TreeObj, res.ldap, (s, actionMap) => s.ldapRequests?.length && s.ldapRequests.forEach(r => r["commands"] = actionMap[r['idRequest']]))
-    })
+    }))
   }
 
   viewSizeCompression() {
@@ -326,7 +326,7 @@ export class TreeView implements OnDestroy {
       mailParam.ids?.length && (reqOb.smtp = this._treeService.getSmtpRequestCount(mailParam));
 
     }
-    forkJoin(
+    this.subscriptions.push(forkJoin(
       reqOb
     ).pipe(finalize(() => {
       this.tree.clearCells();
@@ -335,7 +335,7 @@ export class TreeView implements OnDestroy {
     })).subscribe((res: { jdbc: {}, smtp: {} }) => {
       this.setRequestProperties(this.TreeObj, res.jdbc, (s, actionMap) => s.databaseRequests?.length && s.databaseRequests.forEach(r => r["count"] = actionMap[r['idRequest']]))
       this.setRequestProperties(this.TreeObj, res.smtp, (s, actionMap) => s.mailRequests?.length && s.mailRequests.forEach(r => r["count"] = actionMap[r['idRequest']]))
-    })
+    }))
   }
 
   viewStatusException() {
@@ -351,7 +351,7 @@ export class TreeView implements OnDestroy {
       smtpParam.ids?.length && (reqOb.smtp = this._treeService.getSmtpExceptions(smtpParam));
       ldapParam.ids?.length && (reqOb.ldap = this._treeService.getLdapExceptions(ldapParam));
     }
-    forkJoin(
+    this.subscriptions.push(forkJoin(
       reqOb
     ).pipe(finalize(() => {
       this.tree.clearCells();
@@ -364,7 +364,7 @@ export class TreeView implements OnDestroy {
       this.setRequestProperties(this.TreeObj, res.ftp, (s, actionMap) => s.ftpRequests?.length && s.ftpRequests.forEach(r => r["exception"] = actionMap[r['idRequest']]))
       this.setRequestProperties(this.TreeObj, res.smtp, (s, actionMap) => s.mailRequests?.length && s.mailRequests.forEach(r => r["exception"] = actionMap[r['idRequest']]))
       this.setRequestProperties(this.TreeObj, res.ldap, (s, actionMap) => s.ldapRequests?.length && s.ldapRequests.forEach(r => r["exception"] = actionMap[r['idRequest']]))
-    })
+    }))
   }
 
   getRequestsIds(treeObj: ServerRestSession | ServerMainSession, f?: (s: ServerRestSession | ServerMainSession) => number[]) {

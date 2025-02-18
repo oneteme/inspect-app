@@ -39,7 +39,7 @@ export class StatisticClientView implements OnInit, OnDestroy {
     subscriptions: Subscription[] = [];
 
     ngOnInit() {
-        combineLatest({
+        this.subscriptions.push(combineLatest({
             params: this._activatedRoute.params,
             queryParams: this._activatedRoute.queryParams
         }).subscribe({
@@ -51,7 +51,7 @@ export class StatisticClientView implements OnInit, OnDestroy {
                 this.init();
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}`)
             }
-        });
+        }));
     }
 
     ngOnDestroy() {

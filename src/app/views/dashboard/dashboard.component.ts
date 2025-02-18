@@ -1,6 +1,6 @@
-import { AfterViewInit, Component, inject, ViewChild } from '@angular/core';
+import {AfterViewInit, Component, inject, OnDestroy, ViewChild} from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
-import { combineLatest, finalize, forkJoin, map, Observable, Subscription, take } from 'rxjs';
+import {combineLatest, config, finalize, forkJoin, map, Observable, Subscription, take} from 'rxjs';
 import { DatePipe, Location } from '@angular/common';
 import { application, makeDatePeriod } from 'src/environments/environment';
 import { EnvRouter } from "../../service/router.service";
@@ -28,7 +28,7 @@ import { NumberFormatterPipe } from 'src/app/shared/pipe/number.pipe';
     styleUrls: ['./dashboard.component.scss'],
 
 })
-export class DashboardComponent implements AfterViewInit  {
+export class DashboardComponent implements AfterViewInit, OnDestroy  {
     constants = Constants;
     private _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
     private _router: EnvRouter = inject(EnvRouter);
@@ -50,7 +50,6 @@ export class DashboardComponent implements AfterViewInit  {
     serverStartDisplayedColumns: string[] = ["appName", "version", "duree"];
     sessionExceptionsDisplayedColumns: string[] = ["date", "errorType", "count"];
     batchExceptionDisplayedColumns: string[] = ["date", "error", "count"];
-    paramsSubscription: any;
     today: Date = new Date();
     subscriptions: Subscription[] = [];
     tabRequests: { [key: string]: { observable?: Observable<Object>, data?: MatTableDataSource<any[]>, isLoading?: boolean, key?: string } } = {};
@@ -80,7 +79,7 @@ export class DashboardComponent implements AfterViewInit  {
 
 
     constructor() {
-        this.paramsSubscription = combineLatest({
+        this.subscriptions.push(combineLatest({
             params: this._activatedRoute.params,
             queryParams: this._activatedRoute.queryParams
         }).subscribe({
@@ -110,7 +109,7 @@ export class DashboardComponent implements AfterViewInit  {
                 this.initCharts();
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${this.params.serveurs.length > 0 ? '&' + this.params.serveurs.map(name => `appname=${name}`).join('&') : ''}`)
             }
-        });
+        }));
     }
     ngAfterViewInit(): void {
         this.initTab();
@@ -123,14 +122,14 @@ export class DashboardComponent implements AfterViewInit  {
             if(!this.chartRequests[k].isLoading){
                 this.charts[k] = [];
                 this.chartRequests[k].isLoading = true;
-                this.chartRequests[k].observable
+                this.subscriptions.push(this.chartRequests[k].observable
                     .pipe(finalize(() => {   this.chartRequests[k].isLoading = false;  })).pipe(take(1))
                     .subscribe({
                         next: (res: any) => {
                             this.chartRequests[k].data = res.data;
                             this.chartRequests[k].chart =res.chart
                         }
-                    })
+                    }))
             }
 
         })
@@ -144,7 +143,7 @@ export class DashboardComponent implements AfterViewInit  {
         Object.keys(this.tabRequests).forEach(i => {
             if(!this.tabRequests[i].isLoading){
             this.tabRequests[i].isLoading = true;
-            this.tabRequests[i].observable
+            this.subscriptions.push(this.tabRequests[i].observable
                 .pipe(finalize(() => {   this.tabRequests[i].isLoading = false;  })).pipe(take(1))
                 .subscribe({
                     next: (res: any[]) => {
@@ -152,7 +151,7 @@ export class DashboardComponent implements AfterViewInit  {
                         this.tabRequests[i].data.sort = that[`${i}Sort`];
                         this.tabRequests[i].data.paginator = that[`${i}Paginator`];
                     }
-                })
+                }))
             }
 
         })
@@ -231,8 +230,7 @@ export class DashboardComponent implements AfterViewInit  {
                 width: "70%",
                 data: exceptions
             })
-            dialog.afterClosed().subscribe(result => {
-            })
+            this.subscriptions.push(dialog.afterClosed().subscribe());
         }
     }
 
@@ -380,6 +378,10 @@ export class DashboardComponent implements AfterViewInit  {
                     })))
             },
         }
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(s => s.unsubscribe());
     }
 }
 

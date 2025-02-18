@@ -48,7 +48,7 @@ export class StatisticUserView implements OnInit, OnDestroy {
     requests: { [key: string]: { observable: Observable<Object>, data?: any, isLoading?: boolean } } = {};
 
     constructor() {
-        combineLatest({
+        this.subscriptions.push(combineLatest({
             params: this._activatedRoute.params,
             queryParams: this._activatedRoute.queryParams
         }).subscribe({
@@ -61,7 +61,7 @@ export class StatisticUserView implements OnInit, OnDestroy {
                 this.init();
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&start=${this.start.toISOString()}&end=${this.end.toISOString()}`)
             }
-        });
+        }));
     }
 
     ngOnInit() {

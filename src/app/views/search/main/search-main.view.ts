@@ -69,15 +69,13 @@ export class SearchMainView implements OnInit, OnDestroy {
 
     queryParams: Partial<QueryParams> = {};
     type: string = '';
-    subscriptionServer: Subscription;
-    subscriptionSession: Subscription;
 
     @ViewChild(MatPaginator) paginator: MatPaginator;
     @ViewChild(MatSort) sort: MatSort;
 
     constructor() {
 
-        combineLatest([
+        this.subscriptions.push(combineLatest([
             this._activatedRoute.params,
             this._activatedRoute.queryParams
         ]).subscribe({
@@ -96,7 +94,7 @@ export class SearchMainView implements OnInit, OnDestroy {
                 this.patchServerValue(this.queryParams.servers);
                 this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
-                this.subscriptionServer = this._instanceService.getApplications(this.type == 'view' ? 'CLIENT' : 'SERVER' )
+                this.subscriptions.push(this._instanceService.getApplications(this.type == 'view' ? 'CLIENT' : 'SERVER' )
                     .pipe(finalize(()=> this.serverNameIsLoading = false))
                     .subscribe({
                         next: res => {
@@ -105,11 +103,11 @@ export class SearchMainView implements OnInit, OnDestroy {
                         }, error: (e) => {
                             console.log(e)
                         }
-                    });
+                    }));
                 this.getMainRequests();
                 this._location.replaceState(`${this._router.url.split('?')[0]}?${this.queryParams.buildPath()}`);
             }
-        });
+        }));
     }
 
     onChangeStart(event) {
@@ -135,8 +133,7 @@ export class SearchMainView implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        if(this.subscriptionSession) this.subscriptionSession.unsubscribe();
-        if(this.subscriptionServer) this.subscriptionServer.unsubscribe();
+        this.subscriptions.forEach(s => s.unsubscribe());
     }
 
     getMainRequests() {
@@ -156,7 +153,7 @@ export class SearchMainView implements OnInit, OnDestroy {
         this.dataSource.data = [];
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort
-        this.subscriptionSession = this._traceService.getMainSessions(params).subscribe((d: InstanceMainSession[]) => {
+        this.subscriptions.push(this._traceService.getMainSessions(params).subscribe((d: InstanceMainSession[]) => {
             if (d) {
                 this.dataSource = new MatTableDataSource(d);
                 this.dataSource.paginator = this.paginator;
@@ -169,13 +166,12 @@ export class SearchMainView implements OnInit, OnDestroy {
             }
         }, error => {
             this.isLoading = false;
-        });
+        }));
     }
 
 
     search() {
         if (this.serverFilterForm.valid) {
-            if(this.subscriptionSession) this.subscriptionSession.unsubscribe();
             if(!shallowEqual(this._activatedRoute.snapshot.queryParams, this.queryParams.buildParams())) {
                 this._router.navigate([], {
                     relativeTo: this._activatedRoute,
