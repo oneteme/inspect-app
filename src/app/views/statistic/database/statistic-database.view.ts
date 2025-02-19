@@ -45,7 +45,7 @@ export class StatisticDatabaseView implements OnInit {
   subscriptions: Subscription[] = [];
 
   constructor() {
-    combineLatest({
+    this.subscriptions.push(combineLatest({
       params: this._activatedRoute.params,
       queryParams: this._activatedRoute.queryParams
     }).subscribe({
@@ -62,7 +62,7 @@ export class StatisticDatabaseView implements OnInit {
       }, error: (err) => {
         console.log(err)
       }
-    })
+    }))
   }
 
   ngOnInit(): void {

@@ -53,7 +53,7 @@ export class StatisticRestView implements OnInit, OnDestroy {
     requests: { [key: string]: { observable: Observable<Object>, data?: any, isLoading?: boolean } } = {};
 
     constructor() {
-        combineLatest({
+        this.subscriptions.push(combineLatest({
             params: this._activatedRoute.params,
             queryParams: this._activatedRoute.queryParams
         }).subscribe({
@@ -67,7 +67,7 @@ export class StatisticRestView implements OnInit, OnDestroy {
                 this.init();
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}`);
             }
-        });
+        }));
 
     }
 
@@ -76,7 +76,7 @@ export class StatisticRestView implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.unsubscribe();
+        this.subscriptions.forEach(s => s.unsubscribe());
     }
 
 
@@ -85,7 +85,7 @@ export class StatisticRestView implements OnInit, OnDestroy {
         if (advancedParams) {
             advancedParams = mapParams(this.filterConstants.STATS_API, advancedParams);
         }
-        this.API_REQUEST(this.params.serverName, this.params.restName, this.params.env, this.params.start, this.params.end, advancedParams).subscribe({
+        this.subscriptions.push(this.API_REQUEST(this.params.serverName, this.params.restName, this.params.env, this.params.start, this.params.end, advancedParams).subscribe({
             next: obs => {
                 this.requests = obs;
                 Object.keys(this.requests).forEach(k => {
@@ -99,13 +99,10 @@ export class StatisticRestView implements OnInit, OnDestroy {
                         }));
                 });
             }
-        });
+        }));
 
     }
 
-    unsubscribe() {
-        this.subscriptions.forEach(s => s.unsubscribe());
-    }
 
     search() {
         if (this.serverFilterForm.valid) {

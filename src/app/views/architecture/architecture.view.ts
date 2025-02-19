@@ -182,7 +182,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('graphContainer') graphContainer: ElementRef;
 
     ngOnInit() {
-        combineLatest({
+        this.subscriptions.push(combineLatest({
             params: this._activatedRoute.params,
             queryParams: this._activatedRoute.queryParams
         }).subscribe({
@@ -194,9 +194,9 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
                 this.init();
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}`);
             }
-        });
+        }));
 
-        this.treeMapControl.valueChanges.subscribe({
+        this.subscriptions.push(this.treeMapControl.valueChanges.subscribe({
             next: res => {
                 let _field = res ? 'sum': 'count';
                 let d  = this.heatMapData.reduce((acc:any,cur:any) => {
@@ -219,9 +219,9 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
                     return t
                 });
             }
-        });
+        }));
 
-        this.heatMapControl.valueChanges.subscribe({
+        this.subscriptions.push(this.heatMapControl.valueChanges.subscribe({
             next: res => {
                 let _field = res ? 'sum': 'count';
                 const ranges = this.createRanges(this.heatMapData, _field, res);
@@ -235,7 +235,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
                 ];
                 this.heatMapConfig = { ...newConfig };
             }
-        })
+        }));
     }
 
     ngAfterViewInit() {
@@ -292,7 +292,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
         this.syntheseIsLoading = true;
         this.heatMapData = [];
         this.treeMapData = [];
-        forkJoin(
+        this.subscriptions.push(forkJoin(
             {
                 rest: this._restSessionService.getArchitectureForHeatMap({ start: this.params.start, end: this.params.end, env: this.params.env }),
                 main: this._mainSessionService.getMainSessionArchitectureForHeatMap({ start: this.params.start, end: this.params.end, env: this.params.env }),
@@ -304,9 +304,9 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
                 this.treeMapControl.updateValueAndValidity();
                 this.heatMapControl.updateValueAndValidity();
             }
-        });
+        }));
 
-        forkJoin({
+        this.subscriptions.push(forkJoin({
             mainSession: this._instanceService.getMainSessionApplication(this.params.start, this.params.end, this.params.env),
             restSession: this._treeService.getArchitecture(this.params.start, this.params.end, this.params.env)
         }).pipe(map(res => {
@@ -317,7 +317,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
                 this.tree.clearCells();
                 this.tree.draw(() => this.draw(this.tree, res));
             }
-        });
+        }));
     }
 
     buildHeatMapCharts(res: {count: number, sum: number, origin: string, target: string}[]) {

@@ -46,8 +46,8 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
         this.session = null;
         this.completedSession =null;
         this.sessionParent=null;
-        this._traceService.getSessionParent(id).pipe(catchError(() => of(null)),finalize(()=>(this.parentLoading = false))).subscribe(d=>this.sessionParent=d) 
-        this._traceService.getRestSession(id)
+        this.subscriptions.push(this._traceService.getSessionParent(id).pipe(catchError(() => of(null)),finalize(()=>(this.parentLoading = false))).subscribe(d=>this.sessionParent=d))
+        this.subscriptions.push(this._traceService.getRestSession(id)
             .pipe(
                 switchMap(s => {
                     return of(s).pipe(
@@ -68,7 +68,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
                 }),
                 finalize(() =>{ this.completedSession = this.session; this.isLoading = false;})
             )
-            .subscribe();
+            .subscribe());
     }
 
     selectedRequest(event: { event: MouseEvent, row: any }) {

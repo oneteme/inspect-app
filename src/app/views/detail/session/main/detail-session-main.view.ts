@@ -45,7 +45,7 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
         this.isLoading = true;
         this.session = null;
         this.completedSession =null;
-        this._traceService.getMainSession(id).pipe(
+        this.subscriptions.push(this._traceService.getMainSession(id).pipe(
                 switchMap(s => {
                     return of(s).pipe(
                         map(s=>{
@@ -65,7 +65,7 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
                 }),
                 finalize(() => {this.completedSession = this.session; this.isLoading = false;})
             )
-            .subscribe();
+            .subscribe());
     }
 
     navigate(event: MouseEvent, targetType: string, extraParam?: string) {

@@ -60,7 +60,7 @@ export class StatisticApplicationView implements OnInit, OnDestroy {
     requests: { [key: string]: { observable: Observable<Object>, data?: any, isLoading?: boolean } } = {};
 
     constructor() {
-        combineLatest({
+        this.subscriptions.push(combineLatest({
             params: this._activatedRoute.params,
             queryParams: this._activatedRoute.queryParams
         }).subscribe({
@@ -73,7 +73,7 @@ export class StatisticApplicationView implements OnInit, OnDestroy {
                 this.init();
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&start=${this.start.toISOString()}&end=${this.end.toISOString()}`)
             }
-        });
+        }));
 
     }
 
@@ -91,7 +91,7 @@ export class StatisticApplicationView implements OnInit, OnDestroy {
         if (advancedParams) {
             advancedParams = mapParams(this.filterConstants.STATS_APP, advancedParams);
         }
-        this.APP_REQUEST(this.name, this.env, this.start, this.end, advancedParams).subscribe({
+        this.subscriptions.push(this.APP_REQUEST(this.name, this.env, this.start, this.end, advancedParams).subscribe({
             next: obs => {
                 this.requests = obs;
                 Object.keys(this.requests).forEach(k => {
@@ -105,7 +105,7 @@ export class StatisticApplicationView implements OnInit, OnDestroy {
                         }));
                 });
             }
-        });
+        }));
 
     }
 

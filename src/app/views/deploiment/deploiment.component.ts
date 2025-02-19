@@ -1,6 +1,6 @@
-import { Component, inject, ViewChild } from '@angular/core';
+import {Component, inject, OnDestroy, ViewChild} from '@angular/core';
 import { ActivatedRoute, Params } from '@angular/router';
-import { combineLatest, finalize} from 'rxjs';
+import {combineLatest, finalize, Subscription} from 'rxjs';
 import { app} from 'src/environments/environment';
 import { Constants } from '../constants';
 import { MatPaginator } from '@angular/material/paginator';
@@ -14,7 +14,7 @@ import { MatTableDataSource } from '@angular/material/table';
     styleUrls: ['./deploiment.component.scss'],
 
 })
-export class DeploimentComponent   {
+export class DeploimentComponent implements OnDestroy  {
     constants = Constants;
     private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
     private readonly _instanceService= inject(InstanceService);
@@ -27,28 +27,28 @@ export class DeploimentComponent   {
     collectorColor: any;
     branchColor:any;
     params: Partial<{ env: string }> = {};
+    subscriptions: Subscription[] = [];
 
     @ViewChild('lastServerStartTablePaginator')lastServerStartTablePaginator: MatPaginator;
     @ViewChild('lastServerStartTableSort') lastServerStartTableSort: MatSort;
 
     constructor() {
-        combineLatest({
+        this.subscriptions.push(combineLatest({
             params: this._activatedRoute.params,
             queryParams: this._activatedRoute.queryParams
         })
-  
         .subscribe({
             next: (v: { params: Params, queryParams: Params }) => {
                 this.params.env = v.queryParams.env || app.defaultEnv;
                 this.getLastServerStart();
             }
-        });
+        }));
     }
 
     getLastServerStart(){
         this.lastServerStart.isLoading =true;
 
-        this._instanceService.getlastServerStart({ env: this.params.env})
+        this.subscriptions.push(this._instanceService.getlastServerStart({ env: this.params.env})
         .pipe(finalize(()=>(this.lastServerStart.isLoading =false)))
         .subscribe({
             next: ((d:any)=> {
@@ -60,7 +60,7 @@ export class DeploimentComponent   {
                 this.lastServerStart.data.sort = this.lastServerStartTableSort;
                 this.lastServerStart.data.sortingDataAccessor = sortingDataAccessor;
             })
-        });
+        }));
     }    
 
     groupBy<T>(array: T[], fn: (o: T) => any): { [name: string]: T[] } { // todo : refacto
@@ -82,6 +82,10 @@ export class DeploimentComponent   {
             color+= letters[Math.floor(Math.random()* 16)];
         }
         return color;
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(s => s.unsubscribe());
     }
 }
 
