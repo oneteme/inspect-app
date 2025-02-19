@@ -9,7 +9,7 @@ import {ViewsModule} from './views/views.module';
 import {SharedModule} from './shared/shared.module';
 
 // main layout
-import {HttpClientModule} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 
 import {DatePipe, DecimalPipe, registerLocaleData} from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
@@ -35,6 +35,7 @@ import { TreeView } from './views/tree/tree.view';
 import {SizePipe} from "./shared/pipe/size.pipe";
 import {DumpView} from "./views/dump/dump.view";
 import { DeploimentComponent } from './views/deploiment/deploiment.component';
+import {Interceptor} from "./shared/interceptor/interceptor";
 
 
 registerLocaleData(localeFr, 'fr-FR');
@@ -90,7 +91,7 @@ const routes: Route[] = [
                 path: 'tree',
                 data: { type: 'rest' },
                 component: TreeView,
-                title: `Appel d'API > Arbre d\'Appels`
+                title: `Appel d'API > Arbre d'Appels`
 
               },
               { path: '**', pathMatch: 'full', redirectTo: `/session/rest/:id_session` }
@@ -289,7 +290,8 @@ const routes: Route[] = [
     DurationPipe,
     EnvRouter,
     { provide: LOCALE_ID, useValue: 'fr-FR' },
-    NumberFormatterPipe
+    NumberFormatterPipe,
+    {provide: HTTP_INTERCEPTORS, useClass: Interceptor, multi:true}
   ],
   bootstrap: [AppComponent]
 })
