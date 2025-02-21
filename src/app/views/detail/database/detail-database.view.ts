@@ -5,7 +5,7 @@ import {combineLatest, finalize, forkJoin, Subscription} from "rxjs";
 import {Timeline} from 'vis-timeline';
 import {DatePipe} from '@angular/common';
 import {TraceService} from 'src/app/service/trace.service';
-import {application} from 'src/environments/environment';
+import {app, application} from 'src/environments/environment';
 import {DatabaseRequest, DatabaseRequestStage, ExceptionInfo} from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
 import {DurationPipe} from "../../../shared/pipe/duration.pipe";
@@ -62,7 +62,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
         ]).subscribe({
             next: ([params, data, queryParams]) => {
                 this.params = {idSession: params.id_session, idJdbc: params.id_jdbc,
-                    typeSession: data.type, typeMain: params.type_main, env: queryParams.env || application.default_env};
+                    typeSession: data.type, typeMain: params.type_main, env: queryParams.env || app.defaultEnv};
                 this.request = null;
                 this.getRequest();
             }

@@ -5,7 +5,7 @@ import {TraceService} from "../../../../service/trace.service";
 import {EnvRouter} from "../../../../service/router.service";
 import {Location} from "@angular/common";
 import {combineLatest, defer, finalize, map, merge, of, Subscription, switchMap} from "rxjs";
-import {application} from "../../../../../environments/environment";
+import {app} from "../../../../../environments/environment";
 import {Constants} from "../../../constants";
 
 @Component({
@@ -33,7 +33,7 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
             this._activatedRoute.queryParams
         ]).subscribe({
             next: ([params, queryParams]) => {
-                this.env = queryParams.env || application.default_env;
+                this.env = queryParams.env || app.defaultEnv;
                 this.type = params.type_main;
                 this.getSession(params.id_session);
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}`)

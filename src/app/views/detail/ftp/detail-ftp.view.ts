@@ -1,10 +1,10 @@
 import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from "@angular/core";
-import {DataItem, Timeline} from "vis-timeline";
+import {Timeline} from "vis-timeline";
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../service/trace.service";
 import {DatePipe} from "@angular/common";
 import {combineLatest, finalize, forkJoin, map, Subscription} from "rxjs";
-import {application} from "../../../../environments/environment";
+import {app} from "../../../../environments/environment";
 import {ExceptionInfo, FtpRequest, FtpRequestStage} from "../../../model/trace.model";
 import {EnvRouter} from "../../../service/router.service";
 import {getErrorClassName, Utils} from "../../../shared/util";
@@ -40,7 +40,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
         ]).subscribe({
             next: ([params, data, queryParams]) => {
                 this.params = {idSession: params.id_session, idFtp: params.id_ftp,
-                    typeSession: data.type, typeMain: params.type_main, env: queryParams.env || application.default_env};
+                    typeSession: data.type, typeMain: params.type_main, env: queryParams.env || app.defaultEnv};
                 this.request = null;
                 this.getRequest();
             }

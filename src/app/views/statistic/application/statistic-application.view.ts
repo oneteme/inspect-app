@@ -16,7 +16,7 @@ import {
 } from "rxjs";
 import {Constants, FilterConstants, FilterMap, FilterPreset} from "../../constants";
 import {formatters, mapParams, periodManagement} from "src/app/shared/util";
-import {application, makeDatePeriod} from "src/environments/environment";
+import {app, application, makeDatePeriod} from "src/environments/environment";
 import {FilterService} from "src/app/service/filter.service";
 import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
@@ -66,7 +66,7 @@ export class StatisticApplicationView implements OnInit, OnDestroy {
         }).subscribe({
             next: (v: { params: Params, queryParams: Params }) => {
                 this.name = v.params.server_name;
-                this.env = v.queryParams.env || application.default_env;
+                this.env = v.queryParams.env || app.defaultEnv;
                 this.start = v.queryParams.start ? new Date(v.queryParams.start) : (application.dashboard.app.default_period || application.dashboard.default_period || makeDatePeriod(6)).start;
                 this.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.app.default_period || application.dashboard.default_period || makeDatePeriod(6, 1)).end;
                 this.patchDateValue(this.start, new Date(this.end.getFullYear(), this.end.getMonth(), this.end.getDate() - 1));
