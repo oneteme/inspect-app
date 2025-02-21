@@ -14,7 +14,7 @@ const PERIOD_PATTERN = /LAST_(\d+)(_\d+)?/;
 const ENV_PATTERN = /[\w-]/;
 
 function loadConfig(){
-  return fetch('assets/environement.remote.json')
+  return fetch('assets/environment.remote.json')
   .then(res => res.json())
   .then((resp: ApplicationNew) =>{
       matchRegex(resp.host, "host", HOST_PATTERN,) || delete resp.host;
