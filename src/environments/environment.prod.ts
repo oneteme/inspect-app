@@ -41,7 +41,7 @@ export const application: Application = {
 }
 
 export const app: ApplicationNew = {
-  host : "http://localhost:9006",
+  host : "http://localhost:9000",
   defaultEnv : "prd",
   gridViewPeriod:  "LAST_60",
   kpiViewPeriod: "LAST_60"
@@ -57,14 +57,6 @@ export function makeDateTimePeriodFrom(step: number, from: number): Period{
 }
 
 export function makeDatePeriod(dayBetween: number, shiftEnd: number = 0): { start: Date, end: Date } {
-  var s = new Date();
+  let s = new Date();
   return {start: new Date(s.getFullYear(), s.getMonth(), s.getDate() - dayBetween), end:  new Date(s.getFullYear(), s.getMonth(), s.getDate() + shiftEnd)};
 }
-/*
- * For easier debugging in development mode, you can import the following file
- * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.
- *
- * This import should be commented out in production mode because it will have a negative impact
- * on performance if an error is thrown.
- */
-// import 'zone.js/plugins/zone-error';  // Included with Angular CLI.

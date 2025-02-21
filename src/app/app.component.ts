@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {Component, inject, OnDestroy} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {distinctUntilChanged, finalize, Subscription} from 'rxjs';
@@ -15,10 +15,10 @@ import {DomSanitizer} from "@angular/platform-browser";
     templateUrl: 'app.component.html',
     styleUrls: ['app.component.scss']
 })
-export class AppComponent implements OnInit, OnDestroy {
-    private _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
-    private _service: InstanceService = inject(InstanceService);
-    private _router: EnvRouter = inject(EnvRouter);
+export class AppComponent implements OnDestroy {
+    private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+    private readonly _service: InstanceService = inject(InstanceService);
+    private readonly _router: EnvRouter = inject(EnvRouter);
 
     MAPPING_TYPE = Constants.MAPPING_TYPE;
     envs: any[];
@@ -34,6 +34,10 @@ export class AppComponent implements OnInit, OnDestroy {
         // Note that we provide the icon here as a string literal here due to a limitation in
         // Stackblitz. If you want to provide the icon from a URL, you can use:
         iconRegistry.addSvgIcon('github', sanitizer.bypassSecurityTrustResourceUrl('./assets/github.svg'));
+        this.envs = [app.defaultEnv];
+        if (!localStorage.getItem('server')) {
+            localStorage.setItem('server', app.host);
+        }
         this.isLoadingEnv = true;
         this.subscriptions.push(this._service.getEnvironments()
             .pipe(finalize(() => this.isLoadingEnv = false))
@@ -58,7 +62,7 @@ export class AppComponent implements OnInit, OnDestroy {
 
         this.subscriptions.push(this._activatedRoute.queryParams
             .subscribe({
-                next: res => { // TODO  res.env always undefined
+                next: res => {
                     let r = this._activatedRoute.snapshot.queryParams['env'];
                     if (!r) {
                         r = app.defaultEnv;
@@ -68,13 +72,6 @@ export class AppComponent implements OnInit, OnDestroy {
                     }
                 }
             }));
-    }
-
-    ngOnInit(): void {
-        this.envs = [app.defaultEnv];
-        if (!localStorage.getItem('server')) {
-            localStorage.setItem('server', app.host);
-        }
     }
 
     ngOnDestroy(): void {
