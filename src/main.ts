@@ -21,11 +21,10 @@ function loadConfig(){
       matchRegex(resp.defaultEnv, "defaultEnv",ENV_PATTERN) || delete resp.defaultEnv;
       matchRegex(resp.gridViewPeriod, "gridViewPeriod", PERIOD_PATTERN) || delete resp.gridViewPeriod;
       matchRegex(resp.kpiViewPeriod, "kpiViewPeriod", PERIOD_PATTERN) || delete resp.kpiViewPeriod;
-      console.info(`Loaded remote config: ${JSON.stringify(app)}`)
       return resp;
     })
   .catch((err)=> {
-    console.warn(`Error while loading config, Default config will be used: ${JSON.stringify(app)}`);
+    console.warn(`Error while loading config`);
     return {};
   })
   
@@ -45,6 +44,7 @@ function loadConfig(){
 
   loadConfig()
   .then((resp)=>{ 
-    Object.assign(app,resp);  
+    Object.assign(app,resp);
+    console.info(`Loaded config: ${JSON.stringify(app)}`)
     platformBrowserDynamic().bootstrapModule(AppModule).catch(err => console.error(err)) 
   });

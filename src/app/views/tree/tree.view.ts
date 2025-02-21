@@ -4,7 +4,7 @@ import {combineLatest, finalize, forkJoin, fromEvent, Observable, Subscription} 
 import { Location } from '@angular/common';
 
 import { TraceService } from 'src/app/service/trace.service';
-import { application } from 'src/environments/environment';
+import {app, application} from 'src/environments/environment';
 import { EnvRouter } from "../../service/router.service";
 import { RestRequest, ServerMainSession, ServerRestSession, RestServerNode, Label, MainServerNode, JdbcRequestNode, FtpRequestNode, MailRequestNode, LdapRequestNode, RestRequestNode, ExceptionInfo, DatabaseRequest, MailRequest, NamingRequest, FtpRequest, SessionStage, LinkRequestNode } from 'src/app/model/trace.model';
 import { TreeService } from 'src/app/service/tree.service';
@@ -66,7 +66,7 @@ export class TreeView implements OnDestroy {
     ]).subscribe({
       next: ([params, data, queryParams]) => {
         this.id = params['id_session'];
-        this.env = queryParams.env || application.default_env;
+        this.env = queryParams.env || app.defaultEnv;
         this.serverLbl = Label[queryParams.server_lbl] || Label.SERVER_IDENTITY
         this.linkLbl = Label[queryParams.link_lbl] || Label.ELAPSED_LATENSE
         this.patchDataView(this.serverLbl,this.linkLbl)

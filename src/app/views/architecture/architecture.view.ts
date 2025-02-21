@@ -5,7 +5,7 @@ import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {EnvRouter} from "../../service/router.service";
 import {ActivatedRoute, Params} from "@angular/router";
 import {combineLatest, finalize, forkJoin, fromEvent, map, Subscription} from "rxjs";
-import {application, makeDatePeriod} from "../../../environments/environment";
+import {app, application, makeDatePeriod} from "../../../environments/environment";
 import {Location} from "@angular/common";
 import {TreeService} from "../../service/tree.service";
 import {mxCell} from "mxgraph";
@@ -187,7 +187,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
             queryParams: this._activatedRoute.queryParams
         }).subscribe({
             next: (v: { params: Params, queryParams: Params }) => {
-                this.params.env = v.queryParams.env || application.default_env;
+                this.params.env = v.queryParams.env || app.defaultEnv;
                 this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : (application.dashboard.api.default_period || application.dashboard.default_period || makeDatePeriod(6)).start;
                 this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.api.default_period || application.dashboard.default_period || makeDatePeriod(6, 1)).end;
                 this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));

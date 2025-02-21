@@ -6,7 +6,7 @@ import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { JQueryService } from 'src/app/service/jquery/jquery.service';
 import { MatTableDataSource } from '@angular/material/table';
 import { Constants } from '../../constants';
-import { application, makeDatePeriod } from 'src/environments/environment';
+import {app, application, makeDatePeriod} from 'src/environments/environment';
 import { formatters, periodManagement } from 'src/app/shared/util';
 import { ChartProvider, field } from '@oneteme/jquery-core';
 import {DatabaseRequestService} from "../../../service/jquery/database-request.service";
@@ -52,7 +52,7 @@ export class StatisticDatabaseView implements OnInit {
       next: (v: { params: Params, queryParams: Params }) => {
 
         this.db = v.params.database_name;
-        this.env = v.queryParams.env || application.default_env;
+        this.env = v.queryParams.env || app.defaultEnv;
         this.start = v.queryParams.start ? new Date(v.queryParams.start) : (application.dashboard.database.default_period || application.dashboard.default_period || makeDatePeriod(6)).start;
         this.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.database.default_period || application.dashboard.default_period || makeDatePeriod(6, 1)).end;
         this.patchDateValue(this.start, new Date(this.end.getFullYear(), this.end.getMonth(), this.end.getDate() - 1));

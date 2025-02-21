@@ -5,7 +5,7 @@ import {DataItem, Timeline} from "vis-timeline";
 import {combineLatest, finalize, forkJoin, Subscription} from "rxjs";
 import {ExceptionInfo, Mail, MailRequest, MailRequestStage} from "../../../model/trace.model";
 import {DatePipe} from "@angular/common";
-import {application} from "../../../../environments/environment";
+import {app, application} from "../../../../environments/environment";
 import {EnvRouter} from "../../../service/router.service";
 import {DurationPipe} from "../../../shared/pipe/duration.pipe";
 import {MatTableDataSource} from "@angular/material/table";
@@ -44,7 +44,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
         ]).subscribe({
             next: ([params, data, queryParams]) => {
                 this.params = {idSession: params.id_session, idSmtp: params.id_smtp,
-                    typeSession: data.type, typeMain: params.type_main, env: queryParams.env || application.default_env};
+                    typeSession: data.type, typeMain: params.type_main, env: queryParams.env || app.defaultEnv};
                 this.request = null;
                 this.getRequest();
             }
