@@ -2,7 +2,7 @@ import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {distinctUntilChanged, finalize, Subscription} from 'rxjs';
-import {app, application, environment} from 'src/environments/environment';
+import {app} from 'src/environments/environment';
 import {EnvRouter} from "./service/router.service";
 import {Constants} from "./views/constants";
 import {InstanceService} from "./service/jquery/instance.service";
@@ -61,7 +61,7 @@ export class AppComponent implements OnInit, OnDestroy {
                 next: res => { // TODO  res.env always undefined
                     let r = this._activatedRoute.snapshot.queryParams['env'];
                     if (!r) {
-                        r = application.default_env;
+                        r = app.defaultEnv;
                     }
                     if (this.env.value != r) {
                         this.env.setValue(r, {emitEvent: false});
@@ -71,7 +71,7 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit(): void {
-        this.envs = [application.default_env];
+        this.envs = [app.defaultEnv];
         if (!localStorage.getItem('server')) {
             localStorage.setItem('server', app.host);
         }

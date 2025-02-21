@@ -1,11 +1,11 @@
 import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../service/trace.service";
-import {DataItem, Timeline} from "vis-timeline";
+import {Timeline} from "vis-timeline";
 import {combineLatest, finalize, forkJoin, Subscription} from "rxjs";
 import {ExceptionInfo, NamingRequest, NamingRequestStage} from "../../../model/trace.model";
 import {DatePipe} from "@angular/common";
-import {application} from "../../../../environments/environment";
+import {app} from "../../../../environments/environment";
 import {DurationPipe} from "../../../shared/pipe/duration.pipe";
 import {EnvRouter} from "../../../service/router.service";
 
@@ -40,7 +40,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
         ]).subscribe({
             next: ([params, data, queryParams]) => {
                 this.params = {idSession: params.id_session, idLdap: params.id_ldap,
-                    typeSession: data.type, typeMain: params.type_main, env: queryParams.env || application.default_env};
+                    typeSession: data.type, typeMain: params.type_main, env: queryParams.env || app.defaultEnv};
                     this.request = null;
                     this.getRequest();
             }
