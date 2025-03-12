@@ -21,11 +21,10 @@ export class DeploimentComponent implements OnDestroy  {
 
     today: Date = new Date();
     MAPPING_TYPE = Constants.MAPPING_TYPE;
-    serverStartDisplayedColumns: string[] = ["appName", "version", "duree","branch","collector"];
+    couleur = ["#22577a","#38a3a5","#57cc99","#80ed99","#c7f9cc"]
+    serverStartDisplayedColumns: string[] = ["appName", "version", "duree","branch"];
     lastServerStart: {data?:MatTableDataSource<LastServerStart[]>, isLoading?:boolean} = {};
     versionColor: any;
-    collectorColor: any;
-    branchColor:any;
     params: Partial<{ env: string }> = {};
     subscriptions: Subscription[] = [];
 
@@ -53,8 +52,6 @@ export class DeploimentComponent implements OnDestroy  {
         .subscribe({
             next: ((d:any)=> {
                 this.versionColor  = this.groupBy(d,(v:any)=> v.version)
-                this.collectorColor = this.groupBy(d,(v:any)=> v.collector)
-                this.branchColor = this.groupBy(d,(v:any)=> v.branch)
                 this.lastServerStart.data = new MatTableDataSource(d);
                 this.lastServerStart.data.paginator = this.lastServerStartTablePaginator;
                 this.lastServerStart.data.sort = this.lastServerStartTableSort;
@@ -64,24 +61,20 @@ export class DeploimentComponent implements OnDestroy  {
     }    
 
     groupBy<T>(array: T[], fn: (o: T) => any): { [name: string]: T[] } { // todo : refacto
+        let i = 0;
         return array.reduce((acc: any, item: any) => {
             let id = fn(item);
             if(id){
                 if (!acc[id]) {
-                    acc[id] = this.getRandomColor();
+                    if(i==4){
+                        i=0;
+                    }
+                    acc[id] = this.couleur[i];
+                    i++;
                 }
             }
             return acc;
         }, {})
-    }
-
-    getRandomColor(): string{
-        const letters = '0123456789ABCDEF';
-        let color ='#';
-        for(let i = 0; i < 6; i++){
-            color+= letters[Math.floor(Math.random()* 16)];
-        }
-        return color;
     }
 
     ngOnDestroy(): void {
