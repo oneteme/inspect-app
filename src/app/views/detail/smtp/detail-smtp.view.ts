@@ -76,39 +76,38 @@ export class DetailSmtpView implements OnInit, OnDestroy {
 
     createTimeline() {
         let timeline_start = Math.trunc(this.request.start * 1000);
-        let timeline_end = Math.trunc(this.request.start * 1000);
+        let timeline_end = this.request.end ? Math.trunc(this.request.end * 1000) : INFINIT;
 
         let items = this.request.actions.map((a:MailRequestStage, i:number) => {
-            let end = a.end? Math.trunc(a.end * 1000) :INFINIT; 
-            let item: any = {
+            let start = Math.trunc(a.start * 1000);
+            let end = a.end? Math.trunc(a.end * 1000) :INFINIT;
+            return  {
                 group: `${i}`,
-                start: Math.trunc(a.start * 1000),
+                start: start,
                 end: end,
+                type: end <= start ? 'point' : 'range',
                 content: '',
                 className: "smtp",
-                title: `<span>${this.pipe.transform(new Date(a.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(end), 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform({start: a.start, end: a.end/1000})})`
+                title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end, 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform((end/1000) - (start/1000))})`
             }
-            item.type = item.end <= item.start ? 'point' : 'range';
-            if (item.end > timeline_end && item.end != INFINIT) {
-                timeline_end = item.end
-            }
-            return item;
         });
 
         items.splice(0,0,{
+            title: '',
             group:'parent',
             start: timeline_start,
-            end: (this.request.end *1000) ||INFINIT,
+            end: timeline_end,
             content: (this.request.host || 'N/A'),
             className: "overflow",
             type:"background"
            })
 
-        let groups:any[]=this.request.actions.map((a:MailRequestStage, i:number) => ({ id: i, content: a?.name,treeLevel: 2, }))
+        let groups:any[]=this.request.actions.map((a:MailRequestStage, i:number) => ({ id: i, content: a?.name,treeLevel: 2}))
         groups.splice(0,0,{id:'parent', content: this.request.threadName,treeLevel: 1, nestedGroups:groups.map(g=>(g.id))})
+        let padding = (Math.ceil((timeline_end - timeline_start)*0.01));
         let options = {
-            start: timeline_start - (Math.ceil((timeline_end - timeline_start)*0.01)),
-            end: timeline_end + (Math.ceil((timeline_end - timeline_start)*0.01)),
+            start: timeline_start - padding,
+            end: timeline_end + padding,
             selectable : false,
             clickToUse: true,
             tooltip: {

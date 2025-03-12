@@ -483,7 +483,7 @@ export class Constants {
         startup: {title: 'Lancement de Serveur', icon: 'restart_alt'},
         view: {title: 'Navigation', icon: 'ads_click'},
         dashboard: {title:'Page d\'Accueil', icon: 'home'},
-        deploiment: {title:'Déploiement', icon:'cloud'}
+        deploiment: {title:'Version déployés', icon:'deployed_code_history'}
     }
 
     
