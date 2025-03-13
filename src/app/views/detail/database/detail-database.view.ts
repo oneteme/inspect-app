@@ -85,39 +85,38 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     }
 
     createTimeline() {
-        let timeline_end = Math.trunc(this.request.start * 1000);
+        let timeline_end = this.request.end ? Math.trunc(this.request.end * 1000) : INFINIT;
         let timeline_start = Math.trunc(this.request.start * 1000);
         let items = this.request.actions.map((c: DatabaseRequestStage, i: number) => {
+            let start = Math.trunc(c.start * 1000);
             let end = c.end? Math.trunc(c.end * 1000) :INFINIT; 
-            let item:any  = {
+            return {
                 group: `${i}`,
-                start: Math.trunc(c.start * 1000),
+                start: start,
                 end: end,
+                type: end <= start ? 'point' : 'range',
                 content: c.commands? `${this.getCommmand(c.commands)}` : "",
                 className: `database overflow ${getErrorClassName(c)}` ,
-                title: `<span>${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(end), 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform({start: c.start, end: end / 1000})})<br>
+                title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end, 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform((end/1000) - (start/1000))})<br>
                         <span>${c.count ?'count: ' + c.count : ''}</span>`
             }
-            item.type = item.end <= item.start ? 'point' : 'range' // TODO : change this to equals dh_dbt is set to timestamps(6), currently set to timestmap(3)
-            if (item.end > timeline_end && item.end != INFINIT) {
-                  timeline_end = item.end
-            }
-            return item;
         })
         items.splice(0,0,{
+            title: '',
             group:'parent',
             start: timeline_start,
-            end: (this.request.end *1000) ||INFINIT,
+            end: timeline_end,
             content: (this.request.schema || this.request.name || 'N/A'),
             className: "overflow",
             type:"background"
            })
 
-        let groups:any[]= this.request.actions.map((g: DatabaseRequestStage,i:number ) => ({ id: `${i}`, content: g?.name + (g.count? ` (${g.count})`:''), title: this.jdbcActionDescription[g?.name], treeLevel: 2, }));
+        let groups:any[]= this.request.actions.map((g: DatabaseRequestStage,i:number ) => ({ id: `${i}`, content: g?.name + (g.count? ` (${g.count})`:''), title: this.jdbcActionDescription[g?.name], treeLevel: 2 }));
         groups.splice(0,0,{id:'parent', content: this.request.threadName,treeLevel: 1, nestedGroups:groups.map(g=>(g.id))})
+        let padding = (Math.ceil((timeline_end - timeline_start)*0.01))
         let options=  {
-            start: timeline_start - (Math.ceil((timeline_end - timeline_start)*0.01)),
-            end: timeline_end + (Math.ceil((timeline_end - timeline_start)*0.01)),
+            start: timeline_start - padding,
+            end: timeline_end + padding,
             selectable : false,
             clickToUse: true,
             tooltip: {

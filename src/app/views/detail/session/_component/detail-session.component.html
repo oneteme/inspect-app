@@ -16,7 +16,7 @@
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
             <mat-icon>memory</mat-icon>
-            <div [matBadgeHidden]="session.stages?.length==0" [matBadge]="session.stages?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.restRequests?.length | numberFormat).length > 2">LOCAL</div>
+            <div [matBadgeHidden]="session.stages?.length==0" [matBadge]="session.stages?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.stages?.length | numberFormat).length > 2">LOCAL</div>
         </div>
         <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
     </div>
@@ -27,7 +27,7 @@
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
             <mat-icon class="material-symbols-outlined">smb_share</mat-icon>
-            <div [matBadgeHidden]="session.ftpRequests?.length==0" [matBadge]="session.ftpRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.restRequests?.length | numberFormat).length > 2">FTP</div>
+            <div [matBadgeHidden]="session.ftpRequests?.length==0" [matBadge]="session.ftpRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.ftpRequests?.length | numberFormat).length > 2">FTP</div>
         </div>
         <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
     </div>
@@ -40,7 +40,7 @@
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
             <mat-icon class="material-symbols-outlined">outgoing_mail</mat-icon>
-            <div [matBadgeHidden]="session.mailRequests?.length==0" [matBadge]="session.mailRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.restRequests?.length | numberFormat).length > 2">SMTP</div>
+            <div [matBadgeHidden]="session.mailRequests?.length==0" [matBadge]="session.mailRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.mailRequests?.length | numberFormat).length > 2">SMTP</div>
         </div>
         <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
     </div>
@@ -54,7 +54,7 @@
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
             <mat-icon class="material-symbols-outlined">user_attributes</mat-icon>
-            <div [matBadgeHidden]="session.ldapRequests?.length==0" [matBadge]="session.ldapRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.restRequests?.length | numberFormat).length > 2">LDAP</div>
+            <div [matBadgeHidden]="session.ldapRequests?.length==0" [matBadge]="session.ldapRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.ldapRequests?.length | numberFormat).length > 2">LDAP</div>
         </div>
         <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
     </div>
@@ -67,7 +67,7 @@
         <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
             <mat-icon class="material-symbols-outlined">Database</mat-icon>
-            <div [matBadgeHidden]="session.databaseRequests?.length==0" [matBadge]="session.databaseRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.restRequests?.length | numberFormat).length > 2">BDD</div>
+            <div [matBadgeHidden]="session.databaseRequests?.length==0" [matBadge]="(session.databaseRequests?.length | numberFormat:0:'≈')" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.databaseRequests?.length | numberFormat).length > 2">BDD</div>
         </div>
         <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
     </div>
