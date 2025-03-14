@@ -52,8 +52,8 @@ export class InstanceService {
 
     getlastServerStart(filters : {env: string}): Observable<LastServerStart>{
         return this.getInstance({
-            'column': `view1.appName,view1.version,view1.start,view1.collector`,
-            'view': `select(app_name,version,start,collector,rank.over(partition(environement,app_name).order(start.desc)):rk).filter(type.eq(SERVER).and(environement.eq(${filters.env}))):view1`,
+            'column': `view1.appName,view1.version,view1.branch,view1.hash,view1.start,view1.collector`,
+            'view': `select(app_name,version,branch,hash,start,collector,rank.over(partition(environement,app_name).order(start.desc)):rk).filter(type.eq(SERVER).and(environement.eq(${filters.env}))):view1`,
             'view1.rk': '1', 'order': 'view1.start.desc' });
     }
 
