@@ -95,10 +95,7 @@
                     {{instance.user || "N/A"}}
                      le {{ (instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss': 'fr' }}
                 </div>
-                <span style="margin-left: auto;" [matTooltip]="instance.hash">
-                    {{instance.branch}}
-                </span>
-                <mat-icon *ngIf="instance.collector" [matTooltip]="instance.collector"  matTooltipClass="mat-tooltip">
+                <mat-icon *ngIf="instance.collector" [matTooltip]="instance.collector"  style="margin-left: auto;" matTooltipClass="mat-tooltip">
                     code
                 </mat-icon>
                 <span *ngIf="instance.end" class="badge" [ngStyle]="{'background-color': 'gray'}" [matTooltip]="((instance.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss': 'fr')" TooltipPosition="below">
