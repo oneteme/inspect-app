@@ -1,4 +1,4 @@
-<div *ngIf="!isLoading && request" class="header-card">
+<div *ngIf="request" class="header-card">
     <mat-card style="width: 100vw; min-width: 100vw;" [ngClass]="!exception ? 'success': 'fail'">
         <mat-card-title>
             <div style="display: flex; align-items: center; gap: 0.5em">
@@ -33,7 +33,7 @@
 </div>
 
 
-<div [hidden]="isLoading && !request" style="margin-bottom: 2em;">
+<div [hidden]="!request" style="margin-bottom: 2em;">
     <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center;">
         <mat-divider style="margin-right: 1em; flex: 1 1 0%"></mat-divider>
         <div style="display: flex; align-items: center; gap: 0.5em; margin-bottom:  0.5em; font-size: 20px; font-weight: 500;">
@@ -108,6 +108,12 @@
 </div>
 
 
+
+<div *ngIf="!isLoading && !request" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">
+    <h2>
+        Aucun détail disponible ..
+    </h2>
+</div>
 <div *ngIf="isLoading" style="width: 100%; height: calc(100vh - 50px - 1em); display: flex; flex-direction: row; align-items: center; justify-content: center; font-style: italic; gap: 0.5em">
     <mat-progress-spinner diameter="30" mode="indeterminate"></mat-progress-spinner> Chargement en cours...
 </div>

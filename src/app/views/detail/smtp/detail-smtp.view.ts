@@ -1,14 +1,16 @@
 import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../service/trace.service";
-import {DataItem, Timeline} from "vis-timeline";
+import {Timeline} from "vis-timeline";
 import {combineLatest, finalize, forkJoin, Subscription} from "rxjs";
 import {ExceptionInfo, Mail, MailRequest, MailRequestStage} from "../../../model/trace.model";
 import {DatePipe} from "@angular/common";
-import {application} from "../../../../environments/environment";
+import {app} from "../../../../environments/environment";
 import {EnvRouter} from "../../../service/router.service";
 import {DurationPipe} from "../../../shared/pipe/duration.pipe";
 import {MatTableDataSource} from "@angular/material/table";
+
+const INFINIT = new Date(9999,12,31).getTime();
 
 @Component({
     templateUrl: './detail-smtp.view.html',
@@ -42,7 +44,8 @@ export class DetailSmtpView implements OnInit, OnDestroy {
         ]).subscribe({
             next: ([params, data, queryParams]) => {
                 this.params = {idSession: params.id_session, idSmtp: params.id_smtp,
-                    typeSession: data.type, typeMain: params.type_main, env: queryParams.env || application.default_env};
+                    typeSession: data.type, typeMain: params.type_main, env: queryParams.env || app.defaultEnv};
+                this.request = null;
                 this.getRequest();
             }
         }));
@@ -73,28 +76,48 @@ export class DetailSmtpView implements OnInit, OnDestroy {
 
     createTimeline() {
         let timeline_start = Math.trunc(this.request.start * 1000);
-        let timeline_end = Math.ceil(this.request.end * 1000);
-        let actions = this.request.actions.sort((a, b) => a.order - b.order);
+        let timeline_end = this.request.end ? Math.trunc(this.request.end * 1000) : INFINIT;
 
-        let items = this.request.actions.map(a => {
-            let item: DataItem = {
-                group: a.start,
-                start: Math.trunc(a.start * 1000),
-                end: Math.trunc(a.end * 1000),
+        let items = this.request.actions.map((a:MailRequestStage, i:number) => {
+            let start = Math.trunc(a.start * 1000);
+            let end = a.end? Math.trunc(a.end * 1000) :INFINIT;
+            return  {
+                group: `${i}`,
+                start: start,
+                end: end,
+                type: end <= start ? 'point' : 'range',
                 content: '',
-                title: `<span>${this.pipe.transform(new Date(a.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(a.end * 1000), 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform({start: a.start, end: a.end})})<br>`
+                className: "smtp",
+                title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end, 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform((end/1000) - (start/1000))})`
             }
-            item.type = item.end <= item.start ? 'point' : 'range';
-            if (a?.exception?.message || a?.exception?.type) {
-                item.className = 'bdd-failed';
-            }
-            return item;
         });
 
-        this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, this.request.actions.map(a => ({ id: a.start, content: a?.name })), {
-            min: timeline_start,
-            max: timeline_end
-        });
+        items.splice(0,0,{
+            title: '',
+            group:'parent',
+            start: timeline_start,
+            end: timeline_end,
+            content: (this.request.host || 'N/A'),
+            className: "overflow",
+            type:"background"
+           })
+
+        let groups:any[]=this.request.actions.map((a:MailRequestStage, i:number) => ({ id: i, content: a?.name,treeLevel: 2}))
+        groups.splice(0,0,{id:'parent', content: this.request.threadName,treeLevel: 1, nestedGroups:groups.map(g=>(g.id))})
+        let padding = (Math.ceil((timeline_end - timeline_start)*0.01));
+        let options = {
+            start: timeline_start - padding,
+            end: timeline_end + padding,
+            selectable : false,
+            clickToUse: true,
+            tooltip: {
+                followMouse: true
+            }
+        }
+        if (this.timeLine) {  // destroy if exists 
+            this.timeLine.destroy();
+        }
+        this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, groups, options);
     }
 
     navigate(event: MouseEvent, targetType: string, extraParam?: string) {

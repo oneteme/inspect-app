@@ -11,7 +11,7 @@ export class DurationPipe implements PipeTransform {
 
     transform(value: Period | number, ...args: any[]):string {
         let time = typeof value == "object" ? value.end - value.start : value;
-        if(!time){
+        if(!time && time !=0){
             return "?";
         }
         const remainingSeconds = this._decimalPipe.transform(Math.round((time % 60) * 1000) / 1000);

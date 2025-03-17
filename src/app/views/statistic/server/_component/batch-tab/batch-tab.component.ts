@@ -1,9 +1,8 @@
-import {Component, inject, Input} from "@angular/core";
+import {Component, inject, Input, OnDestroy} from "@angular/core";
 import {DatePipe} from "@angular/common";
 import {MainSessionService} from "../../../../../service/jquery/main-session.service";
-import {formatters, periodManagement} from "../../../../../shared/util";
+import {formatters, groupByField, periodManagement} from "../../../../../shared/util";
 import {finalize, map, Subscription} from "rxjs";
-import {groupByField} from "../../../rest/statistic-rest.view";
 import {HttpParams} from "../rest-tab/rest-tab.component";
 
 @Component({
@@ -11,7 +10,7 @@ import {HttpParams} from "../rest-tab/rest-tab.component";
     templateUrl: './batch-tab.component.html',
     styleUrls: ['./batch-tab.component.scss']
 })
-export class BatchTabComponent {
+export class BatchTabComponent implements OnDestroy {
     private _mainSessionService = inject(MainSessionService);
     private _datePipe = inject(DatePipe);
     private subscriptions: Subscription[] = [];
@@ -22,23 +21,23 @@ export class BatchTabComponent {
     $exceptionsResponse: { table: any[], loading: boolean } = {table: [], loading: true};
 
     @Input() set httpParams(httpParams: HttpParams) {
-        console.log("httpParams", httpParams);
-        if(httpParams && httpParams.params?.optional?.tab == '1') {
-            let groupedBy = periodManagement(httpParams.params.period.start, httpParams.params.period.end);
-            let advancedParams = {};
-            Object.entries(httpParams.params.optional).forEach(([key, value]) => {
-                if(value && Array.isArray(value)) advancedParams[`${key}`] = (<Array<string>>value).map(v => `"${v}"`).join(',');
-            });
-            this.subscriptions.forEach(s => s.unsubscribe());
-            this.subscriptions.push(this.getTimeAndTypeResponse(httpParams, groupedBy, advancedParams));
-            this.subscriptions.push(this.getUsersByPeriod(httpParams, groupedBy, advancedParams));
-            this.subscriptions.push(this.getDependents(httpParams, advancedParams));
-            this.subscriptions.push(this.getExceptions(httpParams, advancedParams, groupedBy));
-        }
+      this.initData();
+      if(httpParams && httpParams.params?.optional?.tab == '1') {
+        let groupedBy = periodManagement(httpParams.params.period.start, httpParams.params.period.end);
+        let advancedParams = {};
+        Object.entries(httpParams.params.optional).forEach(([key, value]) => {
+            if(value && Array.isArray(value)) advancedParams[`${key}`] = (<Array<string>>value).map(v => `"${v}"`).join(',');
+        });
+        this.subscriptions.forEach(s => s.unsubscribe());
+        this.subscriptions.push(this.getTimeAndTypeResponse(httpParams, groupedBy, advancedParams));
+        this.subscriptions.push(this.getUsersByPeriod(httpParams, groupedBy, advancedParams));
+        this.subscriptions.push(this.getDependents(httpParams, advancedParams));
+        this.subscriptions.push(this.getExceptions(httpParams, advancedParams, groupedBy));
+      }
     }
 
     getTimeAndTypeResponse(httpParams: HttpParams, groupedBy: string, advancedParams) {
-        this.$timeAndTypeResponse.bar = [];
+
         this.$timeAndTypeResponse.loading = true;
         return this._mainSessionService.getRepartitionTimeAndTypeResponseByPeriodNew({
             start: httpParams.params.period.start,
@@ -62,7 +61,7 @@ export class BatchTabComponent {
     }
 
     getUsersByPeriod(httpParams: HttpParams, groupedBy: string, advancedParams) {
-        this.$evolUserResponse.line = [];
+
         this.$evolUserResponse.loading = true;
         return this._mainSessionService.getUsersByPeriod({
             start: httpParams.params.period.start,
@@ -90,7 +89,7 @@ export class BatchTabComponent {
     }
 
     getDependents(httpParams: HttpParams, advancedParams) {
-        this.$dependentsResponse.table = [];
+
         this.$dependentsResponse.loading = true;
 
         return this._mainSessionService.getDependentsNew({
@@ -111,7 +110,7 @@ export class BatchTabComponent {
     }
 
     getExceptions(httpParams: HttpParams, advancedParams, groupedBy: string) {
-        this.$exceptionsResponse.table = [];
+
         this.$exceptionsResponse.loading = true;
 
         return this._mainSessionService.getSessionExceptions({
@@ -132,4 +131,15 @@ export class BatchTabComponent {
               }
           })
     }
+
+  ngOnDestroy() {
+    this.subscriptions.forEach(s => s.unsubscribe());
+  }
+
+  initData() {
+    this.$timeAndTypeResponse.bar = [];
+    this.$evolUserResponse.line = [];
+    this.$dependentsResponse.table = [];
+    this.$exceptionsResponse.table = [];
+  }
 }

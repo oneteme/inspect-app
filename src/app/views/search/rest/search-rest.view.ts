@@ -7,9 +7,8 @@ import {Location} from '@angular/common';
 import {ActivatedRoute, Params} from '@angular/router';
 import {BehaviorSubject, finalize, Subscription} from 'rxjs';
 import {extractPeriod, Utils} from 'src/app/shared/util';
-import {JQueryService} from 'src/app/service/jquery/jquery.service';
 import {TraceService} from 'src/app/service/trace.service';
-import {app, application, makeDatePeriod, } from 'src/environments/environment';
+import {app, makeDatePeriod,} from 'src/environments/environment';
 import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constants';
 import {FilterService} from 'src/app/service/filter.service';
 import {InstanceRestSession} from 'src/app/model/trace.model';
@@ -67,9 +66,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   queryParams: Partial<QueryParams> = {};
   focusFieldName: any;
   expandStatus: boolean;
-
-  subscriptionServer: Subscription;
-  subscriptionSession: Subscription;
+  subscriptions: Subscription[] = [];
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -95,7 +92,7 @@ export class SearchRestView implements OnInit, OnDestroy {
 
   constructor() {
 
-    this._activatedRoute.queryParams
+    this.subscriptions.push(this._activatedRoute.queryParams
       .subscribe({
         next: (params: Params) => {
            if(params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.env ||  app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server])
@@ -111,7 +108,7 @@ export class SearchRestView implements OnInit, OnDestroy {
           this.patchServerValue(this.queryParams.servers);
           this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
-          this.subscriptionServer = this._instanceService.getApplications('SERVER')
+          this.subscriptions.push(this._instanceService.getApplications('SERVER')
             .pipe(finalize(()=> this.serverNameIsLoading = false))
             .subscribe({
               next: res => {
@@ -120,11 +117,11 @@ export class SearchRestView implements OnInit, OnDestroy {
               }, error: (e) => {
                 console.log(e)
               }
-            });
+            }));
           this.getIncomingRequest();
           this._location.replaceState(`${this._router.url.split('?')[0]}?${this.queryParams.buildPath()}`);
         }
-      });
+      }));
   }
 
   ngOnInit(): void {
@@ -132,12 +129,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.unsubscribe();
-  }
-
-  unsubscribe() {
-    if(this.subscriptionSession) this.subscriptionSession.unsubscribe();
-    if(this.subscriptionServer) this.subscriptionServer.unsubscribe();
+    this.subscriptions.forEach(s => s.unsubscribe());
   }
 
   search() {
@@ -157,7 +149,6 @@ export class SearchRestView implements OnInit, OnDestroy {
   }
 
   getIncomingRequest() {
-    if(this.subscriptionSession) this.subscriptionSession.unsubscribe();
     let params = {
       'env': this.queryParams.env,
       'appname': this.queryParams.servers,
@@ -172,7 +163,7 @@ export class SearchRestView implements OnInit, OnDestroy {
     this.dataSource = new MatTableDataSource([]);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    this.subscriptionSession = this._traceService.getRestSessions(params)
+    this.subscriptions.push(this._traceService.getRestSessions(params)
       .subscribe({
         next: (d: InstanceRestSession[]) => {
           if (d) {
@@ -189,7 +180,7 @@ export class SearchRestView implements OnInit, OnDestroy {
         error: err => {
           this.isLoading = false;
         }
-      });
+      }));
   }
 
   patchDateValue(start: Date, end: Date) {

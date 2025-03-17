@@ -1,52 +1,8 @@
 export interface Application {
-    default_env: string;
-    session: Partial<Session>;
-    dashboard: Partial<Dashboard>;
-}
-
-export interface ApplicationNew{
     host: string; 
     defaultEnv: string;
     gridViewPeriod: string; 
     kpiViewPeriod: string;
-}
-
-interface Session {
-    api: Partial<Api>;
-    main: Partial<Main>;
-}
-
-interface Main {
-    default_period: Period;
-}
-
-interface Dashboard {
-    default_period: Partial<Period>;
-    home: Partial<Home>;
-    api: Partial<Api>;
-    app: Partial<App>;
-    database: Partial<Database>;
-    user: Partial<User>;
-}
-
-interface Api {
-    default_period: Period;
-}
-
-interface App {
-    default_period: Partial<Period>;
-}
-
-interface Database {
-    default_period: Partial<Period>;
-}
-
-interface User {
-    default_period: Partial<Period>;
-}
-
-interface Home{
-    default_period: Partial<Period>;
 }
 
 export class QueryParams {

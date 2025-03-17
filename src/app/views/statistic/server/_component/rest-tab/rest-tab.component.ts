@@ -1,8 +1,7 @@
 import {Component, inject, Input, OnDestroy} from "@angular/core";
 import {finalize, map, Subscription} from "rxjs";
 import {RestSessionService} from "../../../../../service/jquery/rest-session.service";
-import {formatters, periodManagement} from "../../../../../shared/util";
-import {groupByField} from "../../../rest/statistic-rest.view";
+import {formatters, groupByField, periodManagement} from "../../../../../shared/util";
 import {DatePipe} from "@angular/common";
 import {QueryParams} from "../../../../../model/conf.model";
 
@@ -27,10 +26,8 @@ export class RestTabComponent implements OnDestroy {
   $dependentsResponse: { table: any[], loading: boolean } = {table: [], loading: true};
   $exceptionsResponse: { table: any[], loading: boolean } = {table: [], loading: true};
 
-
-
   @Input() set httpParams(httpParams: HttpParams) {
-    console.log("httpParams", httpParams);
+    this.initData();
     if(httpParams && httpParams.params?.optional?.tab == '0') {
       let groupedBy = periodManagement(httpParams.params.period.start, httpParams.params.period.end);
       let advancedParams = {};
@@ -47,7 +44,6 @@ export class RestTabComponent implements OnDestroy {
   }
 
   getTimeAndTypeResponse(httpParams: HttpParams, groupedBy: string, advancedParams) {
-    this.$timeAndTypeResponse.bar = [];
     this.$timeAndTypeResponse.loading = true;
     return this._restSessionService.getRepartitionTimeAndTypeResponseByPeriodNew({
       start: httpParams.params.period.start,
@@ -71,7 +67,6 @@ export class RestTabComponent implements OnDestroy {
   }
 
   getUsersByPeriod(httpParams: HttpParams, groupedBy: string, advancedParams) {
-    this.$evolUserResponse.line = [];
     this.$evolUserResponse.loading = true;
     return this._restSessionService.getUsersByPeriod({
       start: httpParams.params.period.start,
@@ -99,7 +94,6 @@ export class RestTabComponent implements OnDestroy {
   }
 
   getDependencies(httpParams: HttpParams, advancedParams) {
-    this.$dependenciesResponse.table = [];
     this.$dependenciesResponse.loading = true;
     return this._restSessionService.getDependenciesNew({
         start: httpParams.params.period.start,
@@ -119,7 +113,6 @@ export class RestTabComponent implements OnDestroy {
   }
 
   getDependents(httpParams: HttpParams, advancedParams) {
-    this.$dependentsResponse.table = [];
     this.$dependentsResponse.loading = true;
     return this._restSessionService.getDependentsNew({
         start: httpParams.params.period.start,
@@ -139,7 +132,6 @@ export class RestTabComponent implements OnDestroy {
   }
 
   getExceptions(httpParams: HttpParams, advancedParams, groupedBy: string) {
-    this.$exceptionsResponse.table = [];
     this.$exceptionsResponse.loading = true;
     return this._restSessionService.getSessionExceptions({
       env: httpParams.params.env,
@@ -161,6 +153,14 @@ export class RestTabComponent implements OnDestroy {
   }
 
   ngOnDestroy() {
-    console.log("on destroy")
+    this.subscriptions.forEach(s => s.unsubscribe());
+  }
+
+  initData() {
+    this.$timeAndTypeResponse.bar = [];
+    this.$evolUserResponse.line = [];
+    this.$dependenciesResponse.table = [];
+    this.$dependentsResponse.table = [];
+    this.$exceptionsResponse.table = [];
   }
 }

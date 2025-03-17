@@ -5,7 +5,7 @@ import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {EnvRouter} from "../../service/router.service";
 import {ActivatedRoute, Params} from "@angular/router";
 import {combineLatest, finalize, forkJoin, fromEvent, map, Subscription} from "rxjs";
-import {application, makeDatePeriod} from "../../../environments/environment";
+import {app, makeDatePeriod} from "../../../environments/environment";
 import {Location} from "@angular/common";
 import {TreeService} from "../../service/tree.service";
 import {mxCell} from "mxgraph";
@@ -13,7 +13,7 @@ import {ArchitectureTree} from "./model/architecture.model";
 import mx from "../../../mxgraph";
 import {InstanceService} from "../../service/jquery/instance.service";
 import {MainSessionService} from "../../service/jquery/main-session.service";
-import { NumberFormatterPipe } from "src/app/shared/pipe/number.pipe";
+import {NumberFormatterPipe} from "src/app/shared/pipe/number.pipe";
 import {SizePipe} from "../../shared/pipe/size.pipe";
 
 @Component({
@@ -182,21 +182,21 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('graphContainer') graphContainer: ElementRef;
 
     ngOnInit() {
-        combineLatest({
+        this.subscriptions.push(combineLatest({
             params: this._activatedRoute.params,
             queryParams: this._activatedRoute.queryParams
         }).subscribe({
             next: (v: { params: Params, queryParams: Params }) => {
-                this.params.env = v.queryParams.env || application.default_env;
-                this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : (application.dashboard.api.default_period || application.dashboard.default_period || makeDatePeriod(6)).start;
-                this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.api.default_period || application.dashboard.default_period || makeDatePeriod(6, 1)).end;
+                this.params.env = v.queryParams.env || app.defaultEnv;
+                this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(6).start;
+                this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(6, 1).end;
                 this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
                 this.init();
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}`);
             }
-        });
+        }));
 
-        this.treeMapControl.valueChanges.subscribe({
+        this.subscriptions.push(this.treeMapControl.valueChanges.subscribe({
             next: res => {
                 let _field = res ? 'sum': 'count';
                 let d  = this.heatMapData.reduce((acc:any,cur:any) => {
@@ -219,9 +219,9 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
                     return t
                 });
             }
-        });
+        }));
 
-        this.heatMapControl.valueChanges.subscribe({
+        this.subscriptions.push(this.heatMapControl.valueChanges.subscribe({
             next: res => {
                 let _field = res ? 'sum': 'count';
                 const ranges = this.createRanges(this.heatMapData, _field, res);
@@ -235,7 +235,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
                 ];
                 this.heatMapConfig = { ...newConfig };
             }
-        })
+        }));
     }
 
     ngAfterViewInit() {
@@ -292,7 +292,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
         this.syntheseIsLoading = true;
         this.heatMapData = [];
         this.treeMapData = [];
-        forkJoin(
+        this.subscriptions.push(forkJoin(
             {
                 rest: this._restSessionService.getArchitectureForHeatMap({ start: this.params.start, end: this.params.end, env: this.params.env }),
                 main: this._mainSessionService.getMainSessionArchitectureForHeatMap({ start: this.params.start, end: this.params.end, env: this.params.env }),
@@ -304,9 +304,9 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
                 this.treeMapControl.updateValueAndValidity();
                 this.heatMapControl.updateValueAndValidity();
             }
-        });
+        }));
 
-        forkJoin({
+        this.subscriptions.push(forkJoin({
             mainSession: this._instanceService.getMainSessionApplication(this.params.start, this.params.end, this.params.env),
             restSession: this._treeService.getArchitecture(this.params.start, this.params.end, this.params.env)
         }).pipe(map(res => {
@@ -317,7 +317,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
                 this.tree.clearCells();
                 this.tree.draw(() => this.draw(this.tree, res));
             }
-        });
+        }));
     }
 
     buildHeatMapCharts(res: {count: number, sum: number, origin: string, target: string}[]) {

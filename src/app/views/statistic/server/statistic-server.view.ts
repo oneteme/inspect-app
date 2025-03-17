@@ -87,6 +87,7 @@ export class StatisticServerView implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
+        this.subscriptions.forEach(s => s.unsubscribe());
     }
 
     onChangeEnd(event) {

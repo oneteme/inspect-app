@@ -1,7 +1,7 @@
-import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import {filter, map, Observable} from "rxjs";
-import { ServerStartByPeriodAndAppname } from "src/app/model/jquery.model";
+import {Injectable} from "@angular/core";
+import {HttpClient} from "@angular/common/http";
+import {map, Observable} from "rxjs";
+import {LastServerStart, ServerStartByPeriodAndAppname} from "src/app/model/jquery.model";
 
 @Injectable({ providedIn: 'root' })
 export class InstanceService {
@@ -50,6 +50,14 @@ export class InstanceService {
             'view': `select(app_name,version,start,rank.over(partition(environement,app_name).order(start.desc)):rk).filter(type.eq(SERVER).and(environement.eq(${filters.env})).and(start.ge(${filters.start.toISOString()})).and(start.lt(${filters.end.toISOString()}))${filters.app_name}):view1`,
             'view1.rk': '1', 'order': 'view1.start.desc' });
     }
+
+    getlastServerStart(filters : {env: string}): Observable<LastServerStart>{
+        return this.getInstance({
+            'column': `view1.appName,view1.version,view1.branch,view1.hash,view1.start,view1.collector`,
+            'view': `select(app_name,version,branch,hash,start,collector,rank.over(partition(environement,app_name).order(start.desc)):rk).filter(type.eq(SERVER).and(environement.eq(${filters.env}))):view1`,
+            'view1.rk': '1', 'order': 'view1.start.desc' });
+    }
+
 
     getServerStartHistory(filters : {env: string, start: Date, end: Date, appName: string }): Observable<{version: string, start: number}[]> {
         return this.getInstance({

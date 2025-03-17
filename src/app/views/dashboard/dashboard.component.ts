@@ -1,17 +1,14 @@
-import {AfterViewInit, Component, inject, ViewChild} from '@angular/core';
+import {AfterViewInit, Component, inject, OnDestroy} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
 import {combineLatest, finalize, forkJoin, map, Observable, Subscription, take} from 'rxjs';
 import {DatePipe, DecimalPipe, Location} from '@angular/common';
-import {application, makeDatePeriod} from 'src/environments/environment';
+import {app, makeDatePeriod} from 'src/environments/environment';
 import {EnvRouter} from "../../service/router.service";
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {Constants} from '../constants';
 import {formatters, periodManagement} from 'src/app/shared/util';
 import {MatDialog} from '@angular/material/dialog';
 import {ProtocolExceptionComponent} from './components/protocol-exception-modal/protocol-exception-modal.component';
-import {MatPaginator} from '@angular/material/paginator';
-import {MatTableDataSource} from '@angular/material/table';
-import {MatSort} from '@angular/material/sort';
 import {InstanceService} from 'src/app/service/jquery/instance.service';
 import {RestSessionService} from 'src/app/service/jquery/rest-session.service';
 import {MainSessionService} from 'src/app/service/jquery/main-session.service';
@@ -40,7 +37,7 @@ import {NumberFormatterPipe} from 'src/app/shared/pipe/number.pipe';
     styleUrls: ['./dashboard.component.scss'],
 
 })
-export class DashboardComponent implements AfterViewInit  {
+export class DashboardComponent implements AfterViewInit, OnDestroy  {
     constants = Constants;
     private _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
     private _router: EnvRouter = inject(EnvRouter);
@@ -73,7 +70,6 @@ export class DashboardComponent implements AfterViewInit  {
     }
 
     MAPPING_TYPE = Constants.MAPPING_TYPE;
-    paramsSubscription: any;
     subscriptions: Subscription[] = [];
     tabRequests: { [key: string]: { observable?: Observable<Object>, data?: any[], isLoading?: boolean, key?: string } } = {};
     chartRequests: { [key: string]: { observable?: Observable<Object>, data?: any[], chart?:any[], isLoading?: boolean, key?: string, title?: string, subtitle?: string } } = {};
@@ -89,14 +85,14 @@ export class DashboardComponent implements AfterViewInit  {
     nameDataList: any[];
 
     constructor() {
-        this.paramsSubscription = combineLatest({
+        this.subscriptions.push(combineLatest({
             params: this._activatedRoute.params,
             queryParams: this._activatedRoute.queryParams
         }).subscribe({
             next: (v: { params: Params, queryParams: Params }) => {
-                this.params.env = v.queryParams.env || application.default_env;
-                this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : (application.dashboard.home.default_period || makeDatePeriod(0, 1)).start;
-                this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.home.default_period || makeDatePeriod(0, 1)).end;
+                this.params.env = v.queryParams.env || app.defaultEnv;
+                this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(0, 1).start;
+                this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(0, 1).end;
                 this.params.serveurs = Array.isArray(v.queryParams['appname']) ? v.queryParams['appname'] : v.queryParams['appname'] ? [v.queryParams['appname']] : []
                 if (this.params.serveurs.length > 0) {
                     this.patchServerValue(this.params.serveurs);
@@ -119,7 +115,7 @@ export class DashboardComponent implements AfterViewInit  {
                 this.initCharts();
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${this.params.serveurs.length > 0 ? '&' + this.params.serveurs.map(name => `appname=${name}`).join('&') : ''}`)
             }
-        });
+        }));
     }
     ngAfterViewInit(): void {
         this.initTab();
@@ -129,15 +125,14 @@ export class DashboardComponent implements AfterViewInit  {
         Object.keys(this.chartRequests).forEach(k => {
             this.chartRequests[k].chart = [];
             this.chartRequests[k].isLoading = true;
-            this.chartRequests[k].observable
+            this.subscriptions.push(this.chartRequests[k].observable
                 .pipe(finalize(() => {   this.chartRequests[k].isLoading = false;  })).pipe(take(1))
                 .subscribe({
                     next: (res: any) => {
                         this.chartRequests[k].data = res.data;
                         this.chartRequests[k].chart = res.chart
-                        console.log(this.chartRequests[k].chart)
                     }
-                })
+                }));
 
 
         })
@@ -148,13 +143,13 @@ export class DashboardComponent implements AfterViewInit  {
         Object.keys(this.tabRequests).forEach(i => {
             this.tabRequests[i].data = [];
             this.tabRequests[i].isLoading = true;
-            this.tabRequests[i].observable
+            this.subscriptions.push(this.tabRequests[i].observable
                 .pipe(finalize(() => {   this.tabRequests[i].isLoading = false;  })).pipe(take(1))
                 .subscribe({
                     next: (res: any[]) => {
                         this.tabRequests[i].data = res;
                     }
-                })
+                }));
         })
     }
 
@@ -355,6 +350,10 @@ export class DashboardComponent implements AfterViewInit  {
             },
         }
     }
+
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(s => s.unsubscribe());
+  }
 }
 
 

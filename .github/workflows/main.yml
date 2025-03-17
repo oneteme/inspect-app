@@ -14,7 +14,44 @@ jobs:
         fetch-depth: 0  # Shallow clones should be disabled for a better relevancy of analysis
     - uses: actions/setup-node@v4
       with:
-        node-version: 18
-    - uses: oneteme/automation-scripts/.github/actions/sonar-npm-scan@main
+        node-version: 20
+    - uses: oneteme/automation-scripts/.github/actions/npm-build-project@main
+    - uses: oneteme/automation-scripts/.github/actions/npm-scan-project@main #see package.json: scripts.build
       env:
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+  deploy:
+    if: github.ref_name == 'main'  #!PR
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    - uses: actions/setup-node@v4
+      with:
+        node-version: 20
+    - uses: oneteme/automation-scripts/.github/actions/npm-build-project@main
+    - uses: oneteme/automation-scripts/.github/actions/npm-project-version@main
+      id: prj_ver
+    - uses: docker/login-action@v3.3.0
+      with:
+        username: ${{ secrets.DOCKERHUB_USER }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+    #- uses: docker/setup-qemu-action@v3.2.0 #multiple architectures ARM, x86_64, etc.
+    #- uses: docker/setup-buildx-action@v3.8.0
+    - uses: docker/build-push-action@v6.10.0
+      with:
+        context: .
+        tags: "oneteme/${{ github.event.repository.name }}:latest"
+        push: true
+    outputs:
+      version: ${{ steps.prj_ver.outputs.version }}
+  release:
+    needs: deploy
+    runs-on: ubuntu-latest
+    steps:
+    - uses: oneteme/automation-scripts/.github/actions/github-release-notes@main
+      with:
+        version: ${{ needs.deploy.outputs.version }}
+        draft: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+# page:

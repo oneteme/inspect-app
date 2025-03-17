@@ -2,13 +2,17 @@ import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from '@angu
 
 import {ActivatedRoute} from '@angular/router';
 import {combineLatest, finalize, forkJoin, Subscription} from "rxjs";
-import {DataItem, Timeline} from 'vis-timeline';
+import {Timeline} from 'vis-timeline';
 import {DatePipe} from '@angular/common';
 import {TraceService} from 'src/app/service/trace.service';
-import {application} from 'src/environments/environment';
+import {app} from 'src/environments/environment';
 import {DatabaseRequest, DatabaseRequestStage, ExceptionInfo} from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
 import {DurationPipe} from "../../../shared/pipe/duration.pipe";
+import {getErrorClassName} from 'src/app/shared/util';
+
+
+const INFINIT = new Date(9999,12,31).getTime();
 
 @Component({
     templateUrl: './detail-database.view.html',
@@ -58,7 +62,8 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
         ]).subscribe({
             next: ([params, data, queryParams]) => {
                 this.params = {idSession: params.id_session, idJdbc: params.id_jdbc,
-                    typeSession: data.type, typeMain: params.type_main, env: queryParams.env || application.default_env};
+                    typeSession: data.type, typeMain: params.type_main, env: queryParams.env || app.defaultEnv};
+                this.request = null;
                 this.getRequest();
             }
         }))
@@ -80,40 +85,49 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     }
 
     createTimeline() {
-        let timeline_end = Math.ceil(this.request.end * 1000);
+        let timeline_end = this.request.end ? Math.trunc(this.request.end * 1000) : INFINIT;
         let timeline_start = Math.trunc(this.request.start * 1000);
-
         let items = this.request.actions.map((c: DatabaseRequestStage, i: number) => {
-            let item: DataItem = {
-                group: `${c.start}`,
-                start: Math.trunc(c.start * 1000),
-                end: Math.trunc(c.end * 1000),
-                content: '',
-                title: `<span>${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(c.end * 1000), 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform({start: c.start, end: c.end})})<br>
-                        <h4>${c.count ? c.count : ''}</h4>`
+            let start = Math.trunc(c.start * 1000);
+            let end = c.end? Math.trunc(c.end * 1000) :INFINIT; 
+            return {
+                group: `${i}`,
+                start: start,
+                end: end,
+                type: end <= start ? 'point' : 'range',
+                content: c.commands? `${this.getCommmand(c.commands)}` : "",
+                className: `database overflow ${getErrorClassName(c)}` ,
+                title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end, 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform((end/1000) - (start/1000))})<br>
+                        <span>${c.count ?'count: ' + c.count : ''}</span>`
             }
-            item.type = item.end <= item.start ? 'point' : 'range' // TODO : change this to equals dh_dbt is set to timestamps(6), currently set to timestmap(3)
-            if (c.exception?.message || c.exception?.type) {
-                item.className = 'bdd-failed';
-            }
-            return item;
         })
+        items.splice(0,0,{
+            title: '',
+            group:'parent',
+            start: timeline_start,
+            end: timeline_end,
+            content: (this.request.schema || this.request.name || 'N/A'),
+            className: "overflow",
+            type:"background"
+           })
 
-        this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, this.request.actions.map((g: DatabaseRequestStage,i:number ) => ({ id: `${g.start}`, content: g?.name, title: this.jdbcActionDescription[g?.name] })),
-            {
-               min: timeline_start,
-               max: timeline_end,
-               margin: {
-                    item: {
-                        horizontal: -1
-                    }
-                },
-                selectable : false,
-                clickToUse: true,
-                tooltip: {
-                    followMouse: true
-                }
-            });
+        let groups:any[]= this.request.actions.map((g: DatabaseRequestStage,i:number ) => ({ id: `${i}`, content: g?.name + (g.count? ` (${g.count})`:''), title: this.jdbcActionDescription[g?.name], treeLevel: 2 }));
+        groups.splice(0,0,{id:'parent', content: this.request.threadName,treeLevel: 1, nestedGroups:groups.map(g=>(g.id))})
+        let padding = (Math.ceil((timeline_end - timeline_start)*0.01))
+        let options=  {
+            start: timeline_start - padding,
+            end: timeline_end + padding,
+            selectable : false,
+            clickToUse: true,
+            tooltip: {
+                followMouse: true
+            }
+        }
+        if (this.timeLine) {
+            this.timeLine.destroy();
+        }
+        this.timeLine = new Timeline(this.timelineContainer.nativeElement,items,groups,options);
+
     }
 
     navigate(event: MouseEvent, targetType: string, extraParam?: string) {
@@ -135,6 +149,18 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.subscription.forEach(s => s.unsubscribe());
         this.timeLine.destroy();
+    }
+
+    getCommmand(commands?: string[]): string{
+        let command ="";
+        if(commands){
+            let distinct = new Set();
+            commands.forEach(c => {
+                distinct.add(c);
+            })
+            command = Array.from(distinct).join(", ");
+        }
+        return command;
     }
 }
 

@@ -480,9 +480,10 @@ export class Constants {
     static readonly MAPPING_TYPE: {[key: string]: {title: string, icon: string}} = {
         rest: {title: 'Appel d\'API', icon: 'call_received'},
         batch: {title: 'Lancement de Batch', icon: 'manufacturing'},
-        startup: {title: 'Lancement de Serveur', icon: 'restart_alt'},
+        startup: {title: 'Lancement de Serveur', icon: 'deployed_code_history'},
         view: {title: 'Navigation', icon: 'ads_click'},
-        dashboard: {title:'Page d\'Accueil', icon: 'home'}
+        dashboard: {title:'Page d\'Accueil', icon: 'home'},
+        deploiment: {title:'Version déployés', icon:'deployed_code'}
     }
 
     

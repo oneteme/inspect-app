@@ -1,48 +1,7 @@
+import {Application, IStep, IStepFrom, Period} from "src/app/model/conf.model";
 
-import {Application, ApplicationNew, IStep, IStepFrom, Period} from "src/app/model/conf.model";
-
-export const DEFAULT_ENV = "prd";
-
-export const environment = {
-  production: false,
-  url: "http://localhost:9006",
-};
-
-/**
- * @deprecated use the new configuration ApplicationNew
- */
-export const application: Application = {
-  default_env: DEFAULT_ENV,
-  session: {
-    api: {
-      default_period: makeDateTimePeriod(60)
-    },
-    main: {
-      default_period: makeDateTimePeriod(60)
-    }
-  },
-  dashboard: {
-    default_period: makeDatePeriod(0, 1),
-    home: {
-      default_period : makeDatePeriod (0, 1)
-    },
-    api : {
-      default_period: undefined
-    },
-    app: {
-      default_period: undefined
-    },
-    database: {
-      default_period: undefined
-    },
-    user: {
-      default_period: undefined
-    }
-  }
-}
-
-export const app: ApplicationNew = {
-  host : "http://localhost:9006",
+export const app: Application = {
+  host : "http://localhost:9000",
   defaultEnv : "prd",
   gridViewPeriod:  "LAST_60",
   kpiViewPeriod: "LAST_60"
@@ -58,14 +17,6 @@ export function makeDateTimePeriodFrom(step: number, from: number): Period{
 }
 
 export function makeDatePeriod(dayBetween: number, shiftEnd: number = 0): { start: Date, end: Date } {
-  var s = new Date();
+  let s = new Date();
   return {start: new Date(s.getFullYear(), s.getMonth(), s.getDate() - dayBetween), end:  new Date(s.getFullYear(), s.getMonth(), s.getDate() + shiftEnd)};
 }
-/*
- * For easier debugging in development mode, you can import the following file
- * to ignore zone related error stack frames such as `zone.run`, `zoneDelegate.invokeTask`.
- *
- * This import should be commented out in production mode because it will have a negative impact
- * on performance if an error is thrown.
- */
-// import 'zone.js/plugins/zone-error';  // Included with Angular CLI.

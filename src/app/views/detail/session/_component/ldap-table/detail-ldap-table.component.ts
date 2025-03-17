@@ -1,4 +1,4 @@
-import {Component, EventEmitter, Input, OnInit, Output, ViewChild} from "@angular/core";
+import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
@@ -9,7 +9,7 @@ import {NamingRequest} from "src/app/model/trace.model";
     templateUrl: './detail-ldap-table.component.html',
     styleUrls: ['./detail-ldap-table.component.scss']
 })
-export class DetailLdapTableComponent implements OnInit {
+export class DetailLdapTableComponent {
     displayedColumns: string[] = ['status', 'host', 'start', 'duree'];
     dataSource: MatTableDataSource<NamingRequest> = new MatTableDataSource();
 
@@ -21,17 +21,14 @@ export class DetailLdapTableComponent implements OnInit {
             this.dataSource = new MatTableDataSource(requests);
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
+            this.dataSource.sortingDataAccessor = sortingDataAccessor;
         }
     }
 
     @Output() onClickRow: EventEmitter<{event: MouseEvent, row: any}> = new EventEmitter();
 
-    ngOnInit() {
-        this.dataSource.sortingDataAccessor = sortingDataAccessor;
-    }
 
     selectedRequest(event: MouseEvent, row: any) {
-        console.log(row)
         this.onClickRow.emit({event: event, row: row});
     }
 }

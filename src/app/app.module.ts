@@ -9,7 +9,7 @@ import {ViewsModule} from './views/views.module';
 import {SharedModule} from './shared/shared.module';
 
 // main layout
-import {HttpClientModule} from '@angular/common/http';
+import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 
 import {DatePipe, DecimalPipe, I18nPluralPipe, registerLocaleData} from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
@@ -21,8 +21,6 @@ import {DetailLdapView} from "./views/detail/ldap/detail-ldap.view";
 import {DetailSmtpView} from "./views/detail/smtp/detail-smtp.view";
 import {SearchMainView} from "./views/search/main/search-main.view";
 import {DetailSessionMainView} from "./views/detail/session/main/detail-session-main.view";
-import {StatisticApplicationView} from "./views/statistic/application/statistic-application.view";
-import {StatisticRestView} from "./views/statistic/rest/statistic-rest.view";
 import {StatisticUserView} from "./views/statistic/user/statistic-user.view";
 import {StatisticDatabaseView} from "./views/statistic/database/statistic-database.view";
 import {DashboardComponent} from "./views/dashboard/dashboard.component";
@@ -30,11 +28,13 @@ import {EnvRouter} from "./service/router.service";
 import {DurationPipe} from "./shared/pipe/duration.pipe";
 import {StatisticClientView} from "./views/statistic/view/statistic-client.view";
 import {ArchitectureView} from "./views/architecture/architecture.view";
-import { NumberFormatterPipe } from './shared/pipe/number.pipe';
-import { TreeView } from './views/tree/tree.view';
+import {NumberFormatterPipe} from './shared/pipe/number.pipe';
+import {TreeView} from './views/tree/tree.view';
 import {SizePipe} from "./shared/pipe/size.pipe";
 import {DumpView} from "./views/dump/dump.view";
 import {StatisticServerView} from "./views/statistic/server/statistic-server.view";
+import {DeploimentComponent} from './views/deploiment/deploiment.component';
+import {Interceptor} from "./shared/interceptor/interceptor";
 
 
 registerLocaleData(localeFr, 'fr-FR');
@@ -90,7 +90,7 @@ const routes: Route[] = [
                 path: 'tree',
                 data: { type: 'rest' },
                 component: TreeView,
-                title: `Appel d'API > Arbre d\'Appels`
+                title: `Appel d'API > Arbre d'Appels`
 
               },
               { path: '**', pathMatch: 'full', redirectTo: `/session/rest/:id_session` }
@@ -249,6 +249,11 @@ const routes: Route[] = [
     title: 'Page d\'accueil'
   },
   {
+    path: 'deploiment',
+    component: DeploimentComponent,
+    title: 'Déploiement'
+  },
+  {
     path: 'architecture',
     component: ArchitectureView,
     title: 'Architecture'
@@ -278,7 +283,8 @@ const routes: Route[] = [
     I18nPluralPipe,
     EnvRouter,
     { provide: LOCALE_ID, useValue: 'fr-FR' },
-    NumberFormatterPipe
+    NumberFormatterPipe,
+    {provide: HTTP_INTERCEPTORS, useClass: Interceptor, multi:true}
   ],
   bootstrap: [AppComponent]
 })

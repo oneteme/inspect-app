@@ -1,4 +1,4 @@
-import { Component, EventEmitter, Input, OnInit, Output, ViewChild, inject } from "@angular/core";
+import {Component, EventEmitter, Input, OnInit, Output, ViewChild, inject, OnDestroy} from "@angular/core";
 import { Filter, FilterConstants, FilterPreset, FilterMap } from "src/app/views/constants";
 import { AdvancedFilterComponent } from "../advanced-filter-modal/advanced-filter-modal.component";
 import { MatDialog } from "@angular/material/dialog";
@@ -15,12 +15,12 @@ import { error } from "console";
     
 
 })
-export class AdvancedFilterTriggerComponent implements OnInit {
+export class AdvancedFilterTriggerComponent implements OnInit, OnDestroy {
 
     private _dialog = inject(MatDialog)
     private _filter = inject(FilterService);
     private filters: () => FilterMap;
-
+    subscriptions: Subscription[] = [];
     currentPreset: string;
     presetsFilter: FilterPreset[];
     selectedPreset: FilterPreset;
@@ -57,20 +57,19 @@ export class AdvancedFilterTriggerComponent implements OnInit {
                 pageName: this.pageName,
             }
         })
-        console.log(this.filterConfig)
-        dialog.afterClosed().subscribe(result => {
+        this.subscriptions.push(dialog.afterClosed().subscribe(result => {
             if (result) {
                 this.handleDialogclose.emit(result);
             }
-        })
+        }))
     }
 
      savePreset() {
-         this._filter.savePreset(this.currentPreset, this.pageName).subscribe(val => {
+         this.subscriptions.push(this._filter.savePreset(this.currentPreset, this.pageName).subscribe(val => {
                 this.presetsFilter = this._filter.getPresetsLocalStrorage(this.pageName);
                 this.selectedPreset = val;
                 this.currentPreset= this.selectedPreset.name;
-        })
+        }))
     }
 
     onPresetSelected(name: string) {
@@ -104,6 +103,10 @@ export class AdvancedFilterTriggerComponent implements OnInit {
         this.currentPreset = "";
         this.selectedPreset = null;
         this.handleFilterReset.emit();
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(s => s.unsubscribe());
     }
 
 

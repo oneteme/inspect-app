@@ -8,7 +8,6 @@ import {SharedModule} from '../shared/shared.module';
 import {ChartComponent} from "@oneteme/jquery-apexcharts";
 import {SearchRestView} from "./search/rest/search-rest.view";
 import {SearchMainView} from "./search/main/search-main.view";
-import {StatisticRestView} from "./statistic/rest/statistic-rest.view";
 import {StatisticDatabaseView} from "./statistic/database/statistic-database.view";
 import {DetailSessionRestView} from "./detail/session/rest/detail-session-rest.view";
 import {DetailSessionMainView} from "./detail/session/main/detail-session-main.view";
@@ -23,7 +22,6 @@ import {DetailSmtpTableComponent} from "./detail/session/_component/smtp-table/d
 import {DetailLdapTableComponent} from "./detail/session/_component/ldap-table/detail-ldap-table.component";
 import {DetailTimelineComponent} from "./detail/session/_component/timeline/detail-timeline.component";
 import {DetailSessionComponent} from "./detail/session/_component/detail-session.component";
-import {StatisticApplicationView} from "./statistic/application/statistic-application.view";
 import {StatisticUserView} from "./statistic/user/statistic-user.view";
 import {TreeView} from "./tree/tree.view";
 import {
@@ -42,29 +40,28 @@ import {DashboardComponent} from "./dashboard/dashboard.component";
 import {
     ProtocolExceptionComponent
 } from './dashboard/components/protocol-exception-modal/protocol-exception-modal.component';
-import {ServerHistoryTableComponent} from "./statistic/application/history-table/server-history-table.component";
 import {StatisticClientView} from "./statistic/view/statistic-client.view";
 import {ArchitectureView} from "./architecture/architecture.view";
 import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
 import {DumpView} from "./dump/dump.view";
 import {DumpTimelineComponent} from "./dump/timeline/dump-timeline.component";
+import { NumberFormatterPipe } from '../shared/pipe/number.pipe';
+import { DeploimentComponent } from './deploiment/deploiment.component';
 import {StatisticServerView} from "./statistic/server/statistic-server.view";
 import {RestTabComponent} from "./statistic/server/_component/rest-tab/rest-tab.component";
 import {BatchTabComponent} from "./statistic/server/_component/batch-tab/batch-tab.component";
-import {
-  DependencyTableComponent
-} from "./statistic/server/_component/dependency-table/dependency-table.component";
+import {DependencyTableComponent} from "./statistic/server/_component/dependency-table/dependency-table.component";
 import {ExceptionsTableComponent} from "./statistic/server/_component/exceptions-table/exceptions-table.component";
+import {EvolUserCardComponent} from "./statistic/server/_component/evol-user-card/evol-user-card.component";
+import {PerformanceCardComponent} from "./statistic/server/_component/performance-card/performance-card.component";
+import {DependencyCardComponent} from "./statistic/server/_component/dependency-card/dependency-card.component";
+import {ServerStartTableComponent} from "./dashboard/components/server-start-table/server-start-table.component";
 import {
   RepartitionTypeCardComponent as RestRepartitionTypeCardComponent
 } from "./statistic/server/_component/rest-tab/_component/repartition-type-card/repartition-type-card.component";
 import {
   RepartitionTypeCardComponent as BatchRepartitionTypeCardComponent
 } from "./statistic/server/_component/batch-tab/_component/repartition-type-card/repartition-type-card.component";
-import {EvolUserCardComponent} from "./statistic/server/_component/evol-user-card/evol-user-card.component";
-import {PerformanceCardComponent} from "./statistic/server/_component/performance-card/performance-card.component";
-import {DependencyCardComponent} from "./statistic/server/_component/dependency-card/dependency-card.component";
-import {ServerStartTableComponent} from "./dashboard/components/server-start-table/server-start-table.component";
 
 
 @NgModule({
@@ -81,7 +78,6 @@ import {ServerStartTableComponent} from "./dashboard/components/server-start-tab
   declarations: [
     SearchRestView,
     SearchMainView,
-    StatisticRestView,
     StatisticDatabaseView,
     DetailSessionRestView,
     DetailSessionMainView,
@@ -97,7 +93,6 @@ import {ServerStartTableComponent} from "./dashboard/components/server-start-tab
     DetailLocalTableComponent,
     DetailTimelineComponent,
     DetailSessionComponent,
-    StatisticApplicationView,
     StatisticUserView,
     StatisticDependentsTableComponent,
     StatisticDependenciesTableComponent,
@@ -106,7 +101,6 @@ import {ServerStartTableComponent} from "./dashboard/components/server-start-tab
     StatisticClientView,
     DashboardComponent,
     ProtocolExceptionComponent,
-    ServerHistoryTableComponent,
     ArchitectureView,
     TreeView,
     DumpView,
@@ -122,7 +116,9 @@ import {ServerStartTableComponent} from "./dashboard/components/server-start-tab
     EvolUserCardComponent,
     PerformanceCardComponent,
     DependencyCardComponent,
-    ServerStartTableComponent
+    ServerStartTableComponent,
+    NumberFormatterPipe,
+    DeploimentComponent
   ]
 })
 export class ViewsModule { }

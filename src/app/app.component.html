@@ -21,7 +21,7 @@
             </button>
             <button mat-menu-item [routerLink]="['session/main/startup']" routerLinkActive="item-selected"
                     [queryParams]="{env: env.value}">
-                <mat-icon>{{ MAPPING_TYPE['startup'].icon }}</mat-icon>
+                <span class="material-symbols-outlined" style="margin-right: 16px;">{{ MAPPING_TYPE['startup'].icon }}</span>
                 <span>{{ MAPPING_TYPE['startup'].title }}</span>
             </button>
             <button mat-menu-item [routerLink]="['session/main/view']" routerLinkActive="item-selected"
@@ -31,6 +31,11 @@
             </button>
         </mat-menu>
         <span style="flex-grow: 1;"></span>
+        <a [routerLink]="['deploiment']"
+           [queryParams]="{env: env.value}"
+           [matTooltip]="MAPPING_TYPE['deploiment'].title" style="margin-right: 0.5em" mat-icon-button>
+            <span class="material-symbols-outlined">{{MAPPING_TYPE['deploiment'].icon}}</span>
+        </a>
         <mat-form-field appearance="fill" class="md-2 no-subscript" [class.loading]="isLoadingEnv">
             <mat-select [formControl]="env">
                 <mat-option *ngFor="let e of envs" [value]="e">{{ e }}</mat-option>

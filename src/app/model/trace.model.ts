@@ -101,6 +101,7 @@ export interface NamingRequest extends SessionStage<boolean> {
 }
 
 export interface DatabaseRequestStage extends RequestStage {
+    commands?: Array<string>;
     count?: Array<number>;
     order?: number;
 }
@@ -161,6 +162,7 @@ export interface InstanceEnvironment {
     user: string;
     type: string;
     instant: number;
+    end: number;
     collector: string;
 }
 
@@ -215,9 +217,16 @@ export class RestServerNode implements Node<Label> {
             case Label.OS_RE: return (this.nodeObject.os || "?") + " " + (this.nodeObject.re || '?');
             case Label.IP_PORT: return (this.nodeObject.address || "?") +  (this.nodeObject?.port < 0 ? '' : ":"+ this.nodeObject?.port.toString())
             case Label.BRANCH_COMMIT: return "" // soon
-            default: return '';
+            default: return '?';
         }
     }
+
+    formatLink(field: Label): string {
+        switch (field) {
+            case Label.STATUS_EXCEPTION: return (this.nodeObject.status!= null ? this.nodeObject.status.toString():"?")+ (this.nodeObject?.exception ? ': ' + (this.nodeObject?.exception?.type || this.nodeObject?.exception?.message ):'');
+            default: return '';
+        }
+    } 
 }
 
 export class MainServerNode implements Node<Label> {
@@ -234,6 +243,13 @@ export class MainServerNode implements Node<Label> {
             case Label.IP_PORT: return (this.nodeObject.address || "?")
             case Label.BRANCH_COMMIT: return "?"  // soon
             default: return '?';
+        }
+    }
+
+    formatLink(field: Label): string {
+        switch (field) {
+            case Label.STATUS_EXCEPTION: return(this.nodeObject.status!= null ? this.nodeObject.status.toString():"?")+ (this.nodeObject?.exception ? ': ' + (this.nodeObject?.exception?.type || this.nodeObject?.exception?.message ):'');
+            default: return '';
         }
     }
 
@@ -286,7 +302,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
     formatLink(field: Label): string {
         switch (field) {
             case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
-            case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands, 'SQL ')// todo: with sql add schema
+            case Label.METHOD_RESOURCE: return `${this.nodeObject?.commands || '?'}`;
             case Label.SIZE_COMPRESSION: return this.nodeObject?.count < 0 ? '0': this.nodeObject?.count!= undefined? this.nodeObject?.count.toString() : '?'; // remove undefined condition 
             case Label.PROTOCOL_SCHEME: return "JDBC/Basic"
             case Label.STATUS_EXCEPTION: return this.nodeObject.exception && 'FAIL:' + this.nodeObject.exception?.type || 'OK'
@@ -434,7 +450,7 @@ export class RestRequestNode implements Node<Label> {
             case Label.METHOD_RESOURCE: return `${this.nodeObject.method || "?"} ${this.nodeObject.path || "?"}`
             case Label.SIZE_COMPRESSION: return `${this.nodeObject.inDataSize < 0 ? 0 : sizeFormatter(this.nodeObject.inDataSize) } ↓↑ ${this.nodeObject.outDataSize < 0 ? 0 :sizeFormatter(this.nodeObject.outDataSize) }`
             case Label.PROTOCOL_SCHEME: return `${this.nodeObject.protocol || "?"}/${this.nodeObject.authScheme || "?"}`
-            case Label.STATUS_EXCEPTION: return this.nodeObject.status.toString()+ (this.nodeObject?.remoteTrace?.exception && ': ' + this.nodeObject?.remoteTrace?.exception?.type || '');
+            case Label.STATUS_EXCEPTION: return (this.nodeObject.status!= null ? this.nodeObject.status.toString():"?")+ (this.nodeObject?.exception ? ': ' + (this.nodeObject?.exception?.type || this.nodeObject?.exception?.message ):'');
             case Label.USER: return `${this.nodeObject.remoteTrace?.user ?? "?"}`
             default: return '?';
         }

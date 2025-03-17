@@ -58,16 +58,18 @@
         </tr>
         <tr class="mat-row" *matNoDataRow>
             <td class="mat-cell" colspan="7">
-                <div class="empty-row" style="align-items: center;">
-                    <span class="material-symbols-outlined">
-                        info
-                    </span>
-                    <span style="font-style: italic;">Aucun résultat</span>
-                </div>
+              <div *ngIf="!requests" class="detail-table-loading">
+                  <span style="display: flex; flex-direction: column; font-style: italic;">
+                    Chargement en cours...
+                    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                  </span>
+              </div>
             </td>
         </tr>
     </table>
     <mat-paginator #paginator [pageSize]="3"
         [pageSizeOptions]="[3, 5, 10, 20]" [hidePageSize]="true"
-        showFirstLastButtons></mat-paginator>
+        showFirstLastButtons>
+    </mat-paginator>
+
 </div>

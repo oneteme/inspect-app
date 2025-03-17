@@ -51,43 +51,54 @@ mat-form-field.no-subscript {
 }
 
 .vis-item {
-  border-color: #040730 !important;
   color:white !important;
   cursor: pointer !important;
+}
+.overflow .vis-item-overflow {
+    overflow: visible !important;
+    color:#000000 !important;
 }
 
 .vis-item.rest{
   background-color: #3F51B5;
-  
+  border-color: #3F51B5;
 }
 
 .vis-item.ftp{
   background-color: #2196F3;
+  border-color: #2196F3;
 
 }
 .vis-item.smtp{
   background-color: #9C27B0;
+  border-color: #9C27B0;
 
 }
 .vis-item.ldap{
   background-color: #00BCD4;
+  border-color: #00BCD4;
 
 }
 .vis-item.database{
-  background-color: #4CAF50;
+  background-color: #a5673f;
+  border-color: #a5673f;
 
 }
 .vis-item.local{
   background-color: #3b3b38;
+  border-color: #3b3b38;
 
 }
 
 
-.vis-item.client-error{
+.vis-range.client-error{
   border-top: 4px #f9ad4e solid !important;
 }
-.vis-item.error{
+.vis-range.error{
   border-top: 4px #bb2124 solid !important;
+}
+.vis-dot.error{
+  border-color: #bb2124 !important;
 }
 
 .dot {
@@ -164,6 +175,18 @@ mat-form-field.loading {
   font-size: 12px;
   align-items: center;
   justify-content: center;
+}
+.detail-table-loading{
+  display: flex;
+  gap: .5em;
+  height: 80px;
+  color: #707070;
+  font-weight: 500;
+  width: 100%;
+  font-size: 12px;
+  align-items: center;
+  justify-content: center;
+  background: white;
 }
 
 .mdc-data-table__cell:has(chart) {
@@ -276,3 +299,20 @@ loading.hidden {
   word-break: break-all;
 }
 
+
+.stretch-badge > .mat-badge-content {
+  width: auto;
+  right: unset !important;
+  padding-left: 3px;
+  padding-right: 3px;
+}
+
+.mat-badge-content{
+  border-radius: 7px;
+}
+
+.hash{
+  font-size:.7em;
+  margin:0 0 0 2px;
+  opacity:.75
+}
