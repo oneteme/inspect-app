@@ -233,3 +233,19 @@ export function getErrorClassName(o:any): string{
     }
     return '';
 }
+
+export function groupByField(arr: any[], field: string): {[key: string]: any[]}{
+    return arr.reduce((acc: {[key: string]: any[]}, o)=> {
+        let key: string = o[field];
+        (acc[key] = acc[key] || []).push(o);
+        return acc;
+    }, {});
+}
+
+
+export function countByFields<T>(arr: any[], combiner: (args: any[], o: string)=> T, fields: string[]): {[key: string]: T}{
+    return fields.reduce((acc: {[key: string]: T}, o)=> {
+        acc[o] = combiner(arr, o);
+        return acc;
+    }, {});
+}

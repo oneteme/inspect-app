@@ -1,46 +1,6 @@
+import {Application, IStep, IStepFrom, Period} from "src/app/model/conf.model";
 
-import {Application, ApplicationNew, IStep, IStepFrom, Period} from "src/app/model/conf.model";
-
-export const DEFAULT_ENV = "prd";
-
-export const environment = {
-  production: false,
-};
-
-/**
- * @deprecated use the new configuration ApplicationNew
- */
-export const application: Application = {
-  default_env: DEFAULT_ENV,
-  session: {
-    api: {
-      default_period: makeDateTimePeriod(60)
-    },
-    main: {
-      default_period: makeDateTimePeriod(60)
-    }
-  },
-  dashboard: {
-    default_period: makeDatePeriod(0, 1),
-    home: {
-      default_period : makeDatePeriod (0, 1)
-    },
-    api : {
-      default_period: undefined
-    },
-    app: {
-      default_period: undefined
-    },
-    database: {
-      default_period: undefined
-    },
-    user: {
-      default_period: undefined
-    }
-  }
-}
-
-export const app: ApplicationNew = {
+export const app: Application = {
   host : "http://localhost:9000",
   defaultEnv : "prd",
   gridViewPeriod:  "LAST_60",

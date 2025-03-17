@@ -17,8 +17,10 @@ export class ProtocolExceptionComponent {
 
     @ViewChild("paginator", { static: true }) paginator: MatPaginator;
     @ViewChild("sort", { static: true }) sort: MatSort;
-    table: MatTableDataSource<{ date: string, err_type: string, count: number }> 
+
+    table: MatTableDataSource<{ date: string, errorType: string, count: number }>
     protocolExceptionsDisplyedColumns: string[] = ["date", "err_type", "count"];
+
     constructor(public dialogRef: MatDialogRef<ProtocolExceptionComponent>,
         @Inject(MAT_DIALOG_DATA) public exceptions: any) { 
           

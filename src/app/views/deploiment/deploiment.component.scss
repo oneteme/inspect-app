@@ -5,4 +5,14 @@ table {
     table-layout: fixed;
 }
 
+div.label-chip {
+    display:inline-block;
+    padding:.2em .7em;
+    font-size: 12px;
+    background-color:#696969;
+    color:#fff;
+    border-radius:6px;
+    position:relative
+}
+
 

@@ -5,11 +5,11 @@ import {combineLatest, finalize, forkJoin, Subscription} from "rxjs";
 import {Timeline} from 'vis-timeline';
 import {DatePipe} from '@angular/common';
 import {TraceService} from 'src/app/service/trace.service';
-import {app, application} from 'src/environments/environment';
+import {app} from 'src/environments/environment';
 import {DatabaseRequest, DatabaseRequestStage, ExceptionInfo} from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
 import {DurationPipe} from "../../../shared/pipe/duration.pipe";
-import { getErrorClassName } from 'src/app/shared/util';
+import {getErrorClassName} from 'src/app/shared/util';
 
 
 const INFINIT = new Date(9999,12,31).getTime();

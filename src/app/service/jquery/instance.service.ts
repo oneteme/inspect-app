@@ -1,7 +1,7 @@
-import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import {filter, Observable} from "rxjs";
-import { LastServerStart, ServerStartByPeriodAndAppname } from "src/app/model/jquery.model";
+import {Injectable} from "@angular/core";
+import {HttpClient} from "@angular/common/http";
+import {map, Observable} from "rxjs";
+import {LastServerStart, ServerStartByPeriodAndAppname} from "src/app/model/jquery.model";
 
 @Injectable({ providedIn: 'root' })
 export class InstanceService {
@@ -16,9 +16,10 @@ export class InstanceService {
 
     getIds(env: string, end: Date, appName: string): Observable<{ id: string }[]> {
         let args: any = {
-            'column.distinct': 'id',
+            'column': 'id',
             'app_name.in': `"${appName}"`,
             'environement': env,
+            'type': 'SERVER',
             'start.lt': end.toISOString(),
         }
         return this.getInstance(args);
@@ -80,13 +81,6 @@ export class InstanceService {
         });
     }
 
-    getVersionStart(filters : {env: string, start: Date, end: Date, appName: string }): Observable<{collector: string, start: number}[]> {
-        return this.getInstance({
-            'column': `view1.collector,view1.start`,
-            'view': `select(collector,start,rank.over(partition(environement,app_name).order(start.asc)):rk).filter(type.eq(CLIENT).and(environement.eq(${filters.env})).and(start.ge(${filters.start.toISOString()})).and(start.lt(${filters.end.toISOString()}))):view1`,
-            'view1.rk': '1', 'order': 'view1.start.desc' });
-    }
-
     getMainSessionApplication(start: Date, end: Date, env: string): Observable<{appName: string, type: string}[]> {
         let args = {
             'column.distinct': 'app_name:appName,main_session.type',
@@ -99,5 +93,51 @@ export class InstanceService {
             'order': 'app_name.asc'
         }
         return this.getInstance(args);
+    }
+
+    // new
+    getLastServerInfo(filters : {env: string, appName: string }): Observable<{appName: string, version: string, collector: string, start: number}> {
+        return this.getInstance({
+            'column': `view1.appName,view1.version,view1.collector,view1.start`,
+            'view': `select(app_name,version,collector,start,rank.over(partition(environement,app_name).order(start.desc)):rk).filter(type.eq(SERVER).and(environement.eq(${filters.env})).and(app_name.eq("${filters.appName}"))):view1`,
+            'view1.rk': '1', 'order': 'view1.start.desc' }).pipe(map(res => res[0]));
+    }
+
+    getCountVersions(filters : {env: string, appName: string }): Observable<number> {
+        return this.getInstance({
+            'column.distinct': 'version',
+            'environement': filters.env,
+            'app_name': `"${filters.appName}"`,
+        }).pipe(map((res: {version: string}[]) => res.length));
+    }
+
+    getCountServerStart(filters : {env: string, appName: string }): Observable<number> {
+        return this.getInstance({
+            'column': 'count:count',
+            'environement': filters.env,
+            'app_name': `"${filters.appName}"`
+        }).pipe(map((res: {count: number}[]) => res[0].count));
+    }
+
+    getVersionsRestSession(filters : {env: string, appName: string, start: Date, end: Date }): Observable<string[]> {
+        return this.getInstance({
+            'column.distinct': 'version',
+            'environement': filters.env,
+            'app_name': `"${filters.appName}"`,
+            'id': 'rest_session.instance_env',
+            'rest_session.start.ge': filters.start.toISOString(),
+            'rest_session.start.lt': filters.end.toISOString()
+        }).pipe(map((res: {version: string}[]) => res.map(r => r.version)));
+    }
+
+    getVersionsMainSession(filters : {env: string, appName: string, start: Date, end: Date }): Observable<string[]> {
+        return this.getInstance({
+            'column.distinct': 'version',
+            'environement': filters.env,
+            'app_name': `"${filters.appName}"`,
+            'id': 'main_session.instance_env',
+            'main_session.start.ge': filters.start.toISOString(),
+            'main_session.start.lt': filters.end.toISOString()
+        }).pipe(map((res: {version: string}[]) => res.map(r => r.version)));
     }
 }

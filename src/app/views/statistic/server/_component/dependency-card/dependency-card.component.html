@@ -1,0 +1,14 @@
+<div class="card-container mat-elevation-z5" style="height: 350px">
+    <div class="title-container"><div class="title">Dépendances</div></div>
+    <div style="display: flex; justify-content: space-between; height: 100%">
+        <div *ngIf="hasDependencies" style="display: flex; flex-direction: column; width: 100%;">
+            <div class="title-container"><div class="sub-title">Serveur Appelant</div></div>
+            <dependency-table [data]="_dependencies.table" [isLoading]="_dependencies.loading"></dependency-table>
+        </div>
+        <mat-divider *ngIf="hasDependencies" style="margin: 5em" [vertical]="true"></mat-divider>
+        <div style="display: flex; flex-direction: column; width: 100%">
+            <div class="title-container"><div class="sub-title">Serveur Appelé</div></div>
+            <dependency-table [data]="_dependents.table" [isLoading]="_dependents.loading"></dependency-table>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,16 @@
+<div style="display: flex;">
+    <batch-repartition-type-card style="width: 50%" [data]="$timeAndTypeResponse.bar" [isLoading]="$timeAndTypeResponse.loading"></batch-repartition-type-card>
+
+    <evol-user-card style="width: 50%" [data]="$evolUserResponse.line" [isLoading]="$evolUserResponse.loading"></evol-user-card>
+</div>
+
+<performance-card [data]="$timeAndTypeResponse.bar" [isLoading]="$timeAndTypeResponse.loading"></performance-card>
+
+<dependency-card [hasDependencies]="false" [dependents]="$dependentsResponse"></dependency-card>
+
+<div class="card-container mat-elevation-z5" style="height: 306px">
+    <div class="title-container">
+        <span class="title">Exceptions</span>
+    </div>
+    <exceptions-table-new [data]="$exceptionsResponse.table" [isLoading]="$exceptionsResponse.loading"></exceptions-table-new>
+</div>

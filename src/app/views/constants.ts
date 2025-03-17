@@ -15,7 +15,7 @@ export class Constants {
         options: {
             chart: {
                 toolbar: {
-                    show: false
+                    show: true
                 }
             },
             legend: {
@@ -490,26 +490,13 @@ export class Constants {
     static REST_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<string, number> = {
    
     
-        height: 150,
+        height: 100,
         continue: true,
         series: [
             { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions REST', color: "#ff0000" },
         ],
         options: {
-            title: {
-                text: 'REST: ',
-            },
-            subtitle: {
-                text :'',
-                offsetY: 20
-            },
             chart: {
-                id: 'sparkline-1',
-                group: 'sparkline',
-                data : {
-                     name : "restRequestExceptionsTable",
-                     type :  "REST"
-                },
                 sparkline: {
                    enabled: true
                 },
@@ -532,6 +519,7 @@ export class Constants {
                         return val.toFixed(2)+"%";
                     },
                 },
+                showForNullSeries: false,
                 max: 100
             }
         }
@@ -539,26 +527,13 @@ export class Constants {
     
     static  DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
       
-        height: 150,
+        height: 100,
         continue: true,
         series: [
             { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions JDBC', color: "#ff0000" }
         ],
         options: {
-            title: {
-                text: 'JDBC: '
-            },
-            subtitle: {
-                text :'',
-                offsetY: 20
-            },
             chart: {
-                id: 'sparkline-2',
-                group: 'sparkline',
-                data : {
-                    name : "databaseRequestExceptionsTable",
-                    type :  "JDBC"
-                },
                 sparkline: {
                     enabled: true
                 },
@@ -580,6 +555,7 @@ export class Constants {
                         return val.toFixed(2)+"%";
                     },
                 },
+                showForNullSeries: false,
                 max: 100
             }
         }
@@ -588,26 +564,13 @@ export class Constants {
     static  FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
 
 
-        height: 150,
+        height: 100,
         continue: true,
         series: [
             { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions FTP', color: "#ff0000"}
         ],
         options: {
-            title: {
-                text: 'FTP: ',
-            },
-            subtitle: {
-                text :'',
-                offsetY: 20
-            },
             chart: {
-                id: 'sparkline-3',
-                group: 'sparkline',
-                data : {
-                    name : "ftpRequestExceptionsTable",
-                    type :  "FTP"
-                },
                 sparkline: {
                     enabled: true
                 },
@@ -629,32 +592,20 @@ export class Constants {
                         return val.toFixed(2)+"%";
                     },
                 },
+                showForNullSeries: false,
                 max: 100
             }
         }
     };
 
     static  SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        height: 150,
+        height: 100,
         continue: true,
         series: [
             { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions SMTP', color: "#ff0000" }
         ],
         options: {
-            title: {
-                text: 'SMTP: ',
-            },
-            subtitle: {
-                text :'',
-                offsetY: 20
-            },
             chart: {
-                id: 'sparkline-4',
-                group: 'sparkline',
-                data : {
-                    name : "smtpRequestExceptionsTable",
-                    type :  "SMTP"
-                },
                 sparkline: {
                     enabled: true
                 },
@@ -676,38 +627,22 @@ export class Constants {
                         return val.toFixed(2)+"%";
                     },
                 },
+                showForNullSeries: false,
                 max: 100
             }
         }
     };
 
     static  LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        height: 150,
+        height: 100,
         continue: true,
         series: [
             { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions LDAP', color: "#ff0000" }
         ],
         options: {
-            title: {
-                text: 'LDAP: ',
-            },
-            subtitle: {
-                text :'',
-                offsetY: 20
-            },
             chart: {
-                id: 'sparkline-5',
-                group: 'sparkline',
-                data : {
-                    name : "ldapRequestExceptionsTable",
-                    type :  "LDAP"
-                },
                 sparkline: {
                     enabled: true
-                },
-                toolbar: {
-                    show: true,
-                    
                 }
             },
             stroke: {
@@ -721,9 +656,11 @@ export class Constants {
             yaxis: {
                 labels: {
                     formatter: function (val: any) {
+
                         return val.toFixed(2)+"%";
                     },
                 },
+                showForNullSeries: false,
                 max: 100
             }
         }

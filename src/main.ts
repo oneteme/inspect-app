@@ -3,7 +3,7 @@ import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
 
 import { AppModule } from './app/app.module';
 import { app, environment } from './environments/environment';
-import { ApplicationNew } from './app/model/conf.model';
+import { Application } from './app/model/conf.model';
 
 if (environment.production) {
   enableProdMode();
@@ -16,7 +16,7 @@ const ENV_PATTERN = /[\w-]/;
 function loadConfig(){
   return fetch('assets/environment.remote.json')
   .then(res => res.json())
-  .then((resp: ApplicationNew) =>{
+  .then((resp: Application) =>{
       matchRegex(resp.host, "host", HOST_PATTERN,) || delete resp.host;
       matchRegex(resp.defaultEnv, "defaultEnv",ENV_PATTERN) || delete resp.defaultEnv;
       matchRegex(resp.gridViewPeriod, "gridViewPeriod", PERIOD_PATTERN) || delete resp.gridViewPeriod;

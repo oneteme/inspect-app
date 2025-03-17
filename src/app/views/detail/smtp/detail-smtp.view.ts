@@ -1,11 +1,11 @@
 import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../service/trace.service";
-import {DataItem, Timeline} from "vis-timeline";
+import {Timeline} from "vis-timeline";
 import {combineLatest, finalize, forkJoin, Subscription} from "rxjs";
 import {ExceptionInfo, Mail, MailRequest, MailRequestStage} from "../../../model/trace.model";
 import {DatePipe} from "@angular/common";
-import {app, application} from "../../../../environments/environment";
+import {app} from "../../../../environments/environment";
 import {EnvRouter} from "../../../service/router.service";
 import {DurationPipe} from "../../../shared/pipe/duration.pipe";
 import {MatTableDataSource} from "@angular/material/table";

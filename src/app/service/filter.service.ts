@@ -40,20 +40,17 @@ export class FilterService implements OnDestroy {
             const existingPresetNameIndex = presets.findIndex(p => p.name === name);
             let newPreset: FilterPreset = { name: name, pageName: pn, values: map };
             if (existingPresetNameIndex != -1) {
-                console.log("existing preset name, editing value")
                 presets[existingPresetNameIndex].values = map;
                 newPreset = presets[existingPresetNameIndex];
             } else {
                 const existingPresetValuesIndex = presets.findIndex(p => JSON.stringify(p.values) === JSON.stringify(map))
                 if (existingPresetValuesIndex != -1) {
-                    console.log("exiqting presets values, editing name")
                     presets[existingPresetValuesIndex].name = name;
                     newPreset = presets[existingPresetValuesIndex];
                 } else {
                     if (presets.length == 5) {
                         presets.shift();
                     }
-                    console.log('new preset, adding ')
                     presets.push(newPreset);
                 }
             }

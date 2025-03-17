@@ -1,7 +1,12 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Observable } from "rxjs";
-import { RestMainExceptionsByPeriodAndappname, RestSessionExceptionsByPeriodAndappname } from "src/app/model/jquery.model";
+import {
+    RepartitionTimeAndTypeResponseByPeriod,
+    RestMainExceptionsByPeriodAndappname,
+    RestSessionExceptionsByPeriodAndappname
+} from "src/app/model/jquery.model";
+import {FilterMap} from "../../views/constants";
 
 
 @Injectable({ providedIn: 'root' })
@@ -18,11 +23,14 @@ export class RestRequestService {
 
     getrestSessionExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<RestSessionExceptionsByPeriodAndappname[]> {
         let args = {
-            'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():err_type,start.${filters.groupedBy}:date,start.year:year`,
+            'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
             'instance.environement': filters.env,
-            'join': 'exception,rest_request.rest_session,rest_session.instance',
+            'instance.type': 'SERVER',
+            'join': 'exception,rest_session,rest_session.instance',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
+            'rest_session.start.ge': filters.start.toISOString(),
+            'rest_session.start.lt': filters.end.toISOString(),
             [filters.app_name]: '',
             'order': 'date.asc'
         }
@@ -31,11 +39,13 @@ export class RestRequestService {
 
     getrestMainExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<RestMainExceptionsByPeriodAndappname[]>{
         let args = {
-            'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():err_type,start.${filters.groupedBy}:date,start.year:year`,
+            'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
             'instance.environement': filters.env,
-            'join': 'exception,rest_request.main_session,main_session.instance',
+            'join': 'exception,main_session,main_session.instance',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
+            'main_session.start.ge': filters.start.toISOString(),
+            'main_session.start.lt': filters.end.toISOString(),
             [filters.app_name]: '',
             'order': 'date.asc'
         }
@@ -57,6 +67,5 @@ export class RestRequestService {
             'order': 'year.asc,date.asc'
         });
     }
-
 
 }

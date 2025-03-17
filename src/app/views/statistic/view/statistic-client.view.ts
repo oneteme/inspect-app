@@ -1,16 +1,15 @@
 import {Component, inject, OnDestroy, OnInit} from "@angular/core";
 import {MainSessionService} from "../../../service/jquery/main-session.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
-import {combineLatest, finalize, map, Observable, of, Subscription, tap} from "rxjs";
+import {combineLatest, finalize, map, Observable, Subscription} from "rxjs";
 import {ActivatedRoute, Params} from "@angular/router";
-import {app, application, makeDatePeriod} from "../../../../environments/environment";
-import {formatters, periodManagement} from "../../../shared/util";
+import {app, makeDatePeriod} from "../../../../environments/environment";
+import {countByFields, formatters, groupByField, periodManagement} from "../../../shared/util";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {EnvRouter} from "../../../service/router.service";
 import {DatePipe, Location} from "@angular/common";
 import {Constants} from "../../constants";
 import {RestRequestService} from "../../../service/jquery/rest-request.service";
-import {countByFields, groupByField} from "../rest/statistic-rest.view";
 
 @Component({
     templateUrl: './statistic-client.view.html',
@@ -44,8 +43,8 @@ export class StatisticClientView implements OnInit, OnDestroy {
         }).subscribe({
             next: (v: { params: Params, queryParams: Params }) => {
                 this.params = {name: v.params.client_name, env: v.queryParams.env || app.defaultEnv};
-                this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : (application.dashboard.database.default_period || application.dashboard.default_period || makeDatePeriod(6)).start;
-                this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.database.default_period || application.dashboard.default_period || makeDatePeriod(6, 1)).end;
+                this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(6).start;
+                this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(6, 1).end;
                 this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
                 this.init();
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}`)
@@ -114,7 +113,6 @@ export class StatisticClientView implements OnInit, OnDestroy {
             countSessionByDate: {
                 observable: this._mainSessionService.getCountSessionByDateAndUser({env: env, start: start, end: end, groupedBy: groupedBy, appName: name}).pipe(map(res => {
                     formatters[groupedBy](res, this._datePipe);
-                    console.log(res)
                     let groupByDate = groupByField(res, "date");
                     return {
                         view: Object.keys(groupByDate).map(k => {

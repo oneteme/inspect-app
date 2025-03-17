@@ -1,0 +1,8 @@
+<div class="card-container mat-elevation-z5">
+    <div class="title-container">
+        <span class="title">Evolution du nombre d'utilisateur</span>
+    </div>
+    <chart type="area" [config]="EVOL_USER_BY_PERIOD_LINE"
+           [data]="_data"
+           [isLoading]="isLoading"></chart>
+</div>

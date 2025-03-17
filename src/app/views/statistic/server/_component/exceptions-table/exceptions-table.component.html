@@ -1,0 +1,39 @@
+<div [hidden]="!dataSource?.data?.length">
+    <table mat-table [dataSource]="dataSource" #sort="matSort"
+           matSort matSortActive="date" matSortDirection="desc">
+
+        <ng-container matColumnDef="date">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width: 10%">Instant</th>
+            <td mat-cell *matCellDef="let row">
+                {{ row.date }}
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="errorType">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header>Exception</th>
+            <td mat-cell *matCellDef="let row">
+                <span> {{removePackage(row.errorType)}}  </span>
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="count">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width: 10%">Taux</th>
+            <td mat-cell *matCellDef="let row">
+                <span [matTooltip]="row.count+'/'+row.countok" style="font-weight: bold; color: #ff0000;">{{
+                        (row.count*100)/row.countok | number : '1.0-2' }}%</span>
+            </td>
+        </ng-container>
+
+        <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+    </table>
+    <div [hidden]="dataSource?.data.length < 4">
+        <mat-paginator [pageSize]="3" [hidePageSize]="true" showFirstLastButtons></mat-paginator>
+    </div>
+</div>
+
+<div [hidden]="dataSource?.data?.length" style="height: 100%">
+    <div class="loading">
+        {{isLoading ? 'Chargement des données...' : 'Aucune donnée'}}
+    </div>
+</div>

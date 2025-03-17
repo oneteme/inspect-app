@@ -1,55 +1,13 @@
 export interface Application {
-    default_env: string;
-    session: Partial<Session>;
-    dashboard: Partial<Dashboard>;
-}
-
-export interface ApplicationNew{
     host: string; 
     defaultEnv: string;
     gridViewPeriod: string; 
     kpiViewPeriod: string;
 }
 
-interface Session {
-    api: Partial<Api>;
-    main: Partial<Main>;
-}
-
-interface Main {
-    default_period: Period;
-}
-
-interface Dashboard {
-    default_period: Partial<Period>;
-    home: Partial<Home>;
-    api: Partial<Api>;
-    app: Partial<App>;
-    database: Partial<Database>;
-    user: Partial<User>;
-}
-
-interface Api {
-    default_period: Period;
-}
-
-interface App {
-    default_period: Partial<Period>;
-}
-
-interface Database {
-    default_period: Partial<Period>;
-}
-
-interface User {
-    default_period: Partial<Period>;
-}
-
-interface Home{
-    default_period: Partial<Period>;
-}
-
 export class QueryParams {
+    private _optional: {[key: string]: any} = {};
+
     constructor(public _period: Period, public _env: string, public _servers: string[]) {
     }
 
@@ -73,8 +31,19 @@ export class QueryParams {
         return this._servers;
     }
 
+    get optional(): {[key: string]: any} {
+        return this._optional;
+    }
+
+    set optional(optional: {[key: string]: any}) {
+        this._optional = {};
+        Object.entries(optional).forEach(([key, value]) => {
+            if(value && value.length) this._optional[key] = value;
+        })
+    }
+
     buildParams(): { [key: string]: any } {
-        let params = { ...this.period.buildParams() };
+        let params = { ...this.period.buildParams(), ...this.optional };
         if(this.servers && this.servers.length > 0){
             params = { ...params, server: this.servers.length == 1 ? this.servers[0] : this.servers};
         }

@@ -5,8 +5,8 @@
                                     session.status >= 300 && session.status < 500 ? '4px solid orange' : '4px solid red'}">
             <mat-card-title>
                 <a style="display: flex; align-items: center; gap: 0.5em"
-                   [routerLink]="'/dashboard/server/'+instance.name+'/rest/'+ session.name"
-                   [queryParams]="{'env': instance.env}"
+                   [routerLink]="'/dashboard/server/'+instance.name"
+                   [queryParams]="{'env': instance.env, 'api_name': session.name}"
                    matTooltip="Statistiques Appel REST">
                     <mat-icon>call_received</mat-icon>
                     {{ session.name || 'N/A' }}
@@ -61,13 +61,15 @@
         </mat-card>
         <mat-card style="width: 40vw;">
             <mat-card-title>
-                <a style="display: flex; align-items: center; gap: 0.5em"
-                   [routerLink]="'/dashboard/server/'+ instance.name"
-                   [queryParams]="{'env': instance.env}" matTooltip="Statistiques Application">
+                <div style="display: flex; align-items: center; gap: 0.5em">
                     <mat-icon>widgets</mat-icon>
-                    <div>{{instance.name}} <span style="font-size: 12px; font-style: italic; font-weight: normal;">{{instance.version}}</span></div>
+                    <div>
+                      <a [routerLink]="'/dashboard/server/'+ instance.name"
+                         [queryParams]="{'env': instance.env}" matTooltip="Statistiques Application">{{instance.name}}</a>
+                      <span style="font-size: 12px; font-style: italic; font-weight: normal; margin-left: 0.5em" [matTooltip]="instance.collector">{{instance.version}}</span>
+                    </div>
 
-                </a>
+                </div>
                 <div class="right">
                     <button mat-icon-button (click)="onClickDump($event)" matTooltip="Processus">
                         <mat-icon>view_timeline</mat-icon>
@@ -95,10 +97,7 @@
                     {{instance.user || "N/A"}}
                      le {{ (instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss': 'fr' }}
                 </div>
-                <mat-icon *ngIf="instance.collector" [matTooltip]="instance.collector"  style="margin-left: auto;" matTooltipClass="mat-tooltip">
-                    code
-                </mat-icon>
-                <span *ngIf="instance.end" class="badge" [ngStyle]="{'background-color': 'gray'}" [matTooltip]="((instance.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss': 'fr')" TooltipPosition="below">
+                <span *ngIf="instance.end" class="badge" [ngStyle]="{'background-color': 'gray'}" [matTooltip]="((instance.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss': 'fr')">
                     {{((instance.end - instance.instant) | duration)}}
                 </span>
             </mat-card-footer>

@@ -7,9 +7,8 @@ import {Location} from '@angular/common';
 import {ActivatedRoute, Params} from '@angular/router';
 import {BehaviorSubject, finalize, Subscription} from 'rxjs';
 import {extractPeriod, Utils} from 'src/app/shared/util';
-import {JQueryService} from 'src/app/service/jquery/jquery.service';
 import {TraceService} from 'src/app/service/trace.service';
-import {app, application, makeDatePeriod, } from 'src/environments/environment';
+import {app, makeDatePeriod,} from 'src/environments/environment';
 import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constants';
 import {FilterService} from 'src/app/service/filter.service';
 import {InstanceRestSession} from 'src/app/model/trace.model';
@@ -78,6 +77,7 @@ export class SearchRestView implements OnInit, OnDestroy {
     let end = this.serverFilterForm.controls.dateRangePicker.controls.end.value || null;
     this.queryParams.period = new IPeriod(start, end);
   }
+
 
   onChangeEnd(event) {
     this.serverFilterForm.controls.dateRangePicker.controls.start.updateValueAndValidity({onlySelf: true})

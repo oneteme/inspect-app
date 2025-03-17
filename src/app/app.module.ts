@@ -11,7 +11,7 @@ import {SharedModule} from './shared/shared.module';
 // main layout
 import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 
-import {DatePipe, DecimalPipe, registerLocaleData} from '@angular/common';
+import {DatePipe, DecimalPipe, I18nPluralPipe, registerLocaleData} from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 import {SearchRestView} from "./views/search/rest/search-rest.view";
 import {DetailSessionRestView} from "./views/detail/session/rest/detail-session-rest.view";
@@ -21,8 +21,6 @@ import {DetailLdapView} from "./views/detail/ldap/detail-ldap.view";
 import {DetailSmtpView} from "./views/detail/smtp/detail-smtp.view";
 import {SearchMainView} from "./views/search/main/search-main.view";
 import {DetailSessionMainView} from "./views/detail/session/main/detail-session-main.view";
-import {StatisticApplicationView} from "./views/statistic/application/statistic-application.view";
-import {StatisticRestView} from "./views/statistic/rest/statistic-rest.view";
 import {StatisticUserView} from "./views/statistic/user/statistic-user.view";
 import {StatisticDatabaseView} from "./views/statistic/database/statistic-database.view";
 import {DashboardComponent} from "./views/dashboard/dashboard.component";
@@ -30,11 +28,12 @@ import {EnvRouter} from "./service/router.service";
 import {DurationPipe} from "./shared/pipe/duration.pipe";
 import {StatisticClientView} from "./views/statistic/view/statistic-client.view";
 import {ArchitectureView} from "./views/architecture/architecture.view";
-import { NumberFormatterPipe } from './shared/pipe/number.pipe';
-import { TreeView } from './views/tree/tree.view';
+import {NumberFormatterPipe} from './shared/pipe/number.pipe';
+import {TreeView} from './views/tree/tree.view';
 import {SizePipe} from "./shared/pipe/size.pipe";
 import {DumpView} from "./views/dump/dump.view";
-import { DeploimentComponent } from './views/deploiment/deploiment.component';
+import {StatisticServerView} from "./views/statistic/server/statistic-server.view";
+import {DeploimentComponent} from './views/deploiment/deploiment.component';
 import {Interceptor} from "./shared/interceptor/interceptor";
 
 
@@ -215,16 +214,9 @@ const routes: Route[] = [
     children: [
       {
         path: 'server/:server_name',
-        component: StatisticApplicationView,
+        component: StatisticServerView,
         title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
           return `Dashboard > ${route.paramMap.get('server_name')}`;
-        }
-      },
-      {
-        path: 'server/:server_name/rest/:rest_name',
-        component: StatisticRestView,
-        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          return `Dashboard > ${route.paramMap.get('server_name')} > ${route.paramMap.get('rest_name')}`;
         }
       },
       {
@@ -288,6 +280,7 @@ const routes: Route[] = [
     DatePipe,
     DecimalPipe,
     DurationPipe,
+    I18nPluralPipe,
     EnvRouter,
     { provide: LOCALE_ID, useValue: 'fr-FR' },
     NumberFormatterPipe,

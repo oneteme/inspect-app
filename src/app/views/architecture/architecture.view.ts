@@ -5,7 +5,7 @@ import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {EnvRouter} from "../../service/router.service";
 import {ActivatedRoute, Params} from "@angular/router";
 import {combineLatest, finalize, forkJoin, fromEvent, map, Subscription} from "rxjs";
-import {app, application, makeDatePeriod} from "../../../environments/environment";
+import {app, makeDatePeriod} from "../../../environments/environment";
 import {Location} from "@angular/common";
 import {TreeService} from "../../service/tree.service";
 import {mxCell} from "mxgraph";
@@ -13,7 +13,7 @@ import {ArchitectureTree} from "./model/architecture.model";
 import mx from "../../../mxgraph";
 import {InstanceService} from "../../service/jquery/instance.service";
 import {MainSessionService} from "../../service/jquery/main-session.service";
-import { NumberFormatterPipe } from "src/app/shared/pipe/number.pipe";
+import {NumberFormatterPipe} from "src/app/shared/pipe/number.pipe";
 import {SizePipe} from "../../shared/pipe/size.pipe";
 
 @Component({
@@ -188,8 +188,8 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
         }).subscribe({
             next: (v: { params: Params, queryParams: Params }) => {
                 this.params.env = v.queryParams.env || app.defaultEnv;
-                this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : (application.dashboard.api.default_period || application.dashboard.default_period || makeDatePeriod(6)).start;
-                this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : (application.dashboard.api.default_period || application.dashboard.default_period || makeDatePeriod(6, 1)).end;
+                this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(6).start;
+                this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(6, 1).end;
                 this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
                 this.init();
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}`);
