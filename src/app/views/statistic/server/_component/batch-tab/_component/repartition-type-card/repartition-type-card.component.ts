@@ -1,6 +1,6 @@
 import {Component, inject, Input} from "@angular/core";
-import {ChartProvider, field} from "../../../../../../../../../../../jarvis/jquery-charts/dist/oneteme/jquery-core";
 import {DecimalPipe} from "@angular/common";
+import {ChartProvider, field} from "@oneteme/jquery-core";
 
 @Component({
   selector: 'batch-repartition-type-card',
