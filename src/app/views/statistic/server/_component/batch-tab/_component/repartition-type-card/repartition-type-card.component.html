@@ -1,0 +1,18 @@
+<div class="card-container mat-elevation-z5">
+    <div class="title-container">
+        <span class="title" style="width: 40%">Repartition des Appels</span>
+        <div class="stats-container" style="width: 60%">
+            <div class="stat" style="color: #33cc33;">
+                <div class="label" [matTooltip]="(_stats.statCountOk | number : '1.0-0') + ' / ' + (_stats.statCount | number : '1.0-0')">{{ (_stats.statCountOk / _stats.statCount) * 100 | number : '1.0-2'  }}%</div>
+                <div class="sub-label">Succès</div>
+            </div>
+            <div class="stat" style="color: #ff0000">
+                <div class="label" [matTooltip]="(_stats.statCountErr | number : '1.0-0') + ' / ' + (_stats.statCount | number : '1.0-0')">{{ (_stats.statCountErr / _stats.statCount) * 100 | number : '1.0-2' }}%</div>
+                <div class="sub-label">Erreur</div>
+            </div>
+        </div>
+    </div>
+    <chart type="column" [config]="REPARTITION_TYPE_RESPONSE_BAR"
+           [data]="_data"
+           [isLoading]="isLoading"></chart>
+</div>

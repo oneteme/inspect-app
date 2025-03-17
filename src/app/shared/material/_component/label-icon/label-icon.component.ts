@@ -9,7 +9,9 @@ import {Component, Input} from "@angular/core";
             style="margin-right: 0.5em;"
             [ngStyle]="{ color : color, 'width.px': size, 'height.px': size, 'font-size.px': size}"
         >{{ icon }}</mat-icon>
-        <ng-content></ng-content>
+        <div [ngStyle]="{'font-size.px': size}">
+            <ng-content></ng-content>
+        </div>
     </div>
     `,
 })

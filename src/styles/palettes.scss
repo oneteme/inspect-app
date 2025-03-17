@@ -1,0 +1,92 @@
+@use '@angular/material' as mat;
+
+$inspect-md-light-blue: #6e9ef2;
+$inspect-blue: #1464dc;
+$inspect-dark-blue: #034396;
+
+$inspect-green: #56ac00;
+$inspect-dark-green: #277b00;
+
+$inspect-orange: #e27900;
+$inspect-dark-orange: #cc5200;
+
+$inspect-red: #cd0606;
+$inspect-dark-red: #880808;
+
+:root {
+
+  --inspect-md-light-blue: #{$inspect-md-light-blue};
+  --inspect-blue: #{$inspect-blue};
+  --inspect-dark-blue: #{$inspect-dark-blue};
+
+  --inspect-green: #{$inspect-green};
+  --inspect-dark-green: #{$inspect-dark-green};
+
+  --inspect-orange: #{$inspect-orange};
+  --inspect-dark-orange: #{$inspect-dark-orange};
+
+  --inspect-red: #{$inspect-red};
+  --inspect-dark-red: #{$inspect-dark-red};
+
+  --mat-sidenav-content-background-color: white;
+}
+
+$blue: mat.define-palette((
+  100 : $inspect-md-light-blue,
+  200 : $inspect-md-light-blue,
+  300 : $inspect-md-light-blue,
+  400 : $inspect-blue,
+  500 : $inspect-blue,
+  600 : $inspect-blue,
+  700 : $inspect-blue,
+  800 : $inspect-dark-blue,
+  900 : $inspect-dark-blue,
+  contrast: (
+          500 : #fff
+  )
+));
+
+$green: mat.define-palette((
+  100 : $inspect-green,
+  200 : $inspect-green,
+  300 : $inspect-green,
+  400 : $inspect-green,
+  500 : $inspect-green,
+  600 : $inspect-green,
+  700 : $inspect-green,
+  800 : $inspect-dark-green,
+  900 : $inspect-dark-green,
+  contrast: (
+          500 : #fff
+  )
+));
+
+$orange: mat.define-palette((
+  100 : $inspect-orange,
+  200 : $inspect-orange,
+  300 : $inspect-orange,
+  400 : $inspect-orange,
+  500 : $inspect-orange,
+  600 : $inspect-orange,
+  700 : $inspect-orange,
+  800 : $inspect-dark-orange,
+  900 : $inspect-dark-orange,
+  contrast: (
+          500 : #fff
+  )
+));
+
+$red: mat.define-palette((
+  100 : $inspect-red,
+  200 : $inspect-red,
+  300 : $inspect-red,
+  400 : $inspect-red,
+  500 : $inspect-red,
+  600 : $inspect-red,
+  700 : $inspect-red,
+  800 : $inspect-dark-red,
+  900 : $inspect-dark-red,
+  contrast: (
+          500 : #fff
+  )
+));

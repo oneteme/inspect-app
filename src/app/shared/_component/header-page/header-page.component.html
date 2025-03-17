@@ -1,5 +1,5 @@
 <div class="title-container">
-    <label-icon [icon]="titleIcon" [iconOutlined]="true" [size]="35"></label-icon>
+    <label-icon [icon]="titleIcon" [iconOutlined]="true" [size]="48"></label-icon>
     <div class="title">
         <div *ngIf="title" class="main">{{title}}</div>
         <div *ngIf="subTitle || templateSubTitle" class="sub">
@@ -8,6 +8,4 @@
         </div>
     </div>
 </div>
-<div class="right">
-    <ng-content></ng-content>
-</div>
+<ng-content></ng-content>

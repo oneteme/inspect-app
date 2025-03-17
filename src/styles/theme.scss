@@ -1,0 +1,42 @@
+@use '@angular/material' as mat;
+@use 'palettes' as p;
+
+@import 'styles.scss';
+
+$inspect-font-family: 'Public sans', 'Segoe UI', sans-serif;
+$inspect-font-size: 14px;
+
+:root {
+  font-family: $inspect-font-family;
+  font-size: $inspect-font-size;
+}
+
+$nova-typo: mat.define-typography-config(
+        $font-family: $inspect-font-family,
+        $body-1: mat.define-typography-level($font-size: $inspect-font-size, $line-height: 1.7),
+        $body-2: mat.define-typography-level($font-size: $inspect-font-size, $line-height: 1.7),
+);
+
+$blue-orange-red-theme: mat.define-light-theme((
+        color: ( primary: p.$blue, accent: p.$orange, warn: p.$red ),
+        typography: $nova-typo
+));
+
+$green-orange-red-theme: mat.define-light-theme((
+        color: ( primary: p.$green, accent: p.$orange, warn: p.$red )
+));
+
+@include mat.core();
+@include mat.all-component-themes($blue-orange-red-theme);
+
+.md-1 {
+  @include mat.all-component-densities(-1);
+}
+
+.md-2 {
+  @include mat.all-component-densities(-2);
+}
+
+.md-3 {
+  @include mat.all-component-densities(-3);
+}

@@ -10,7 +10,7 @@ export const DEFAULT_ENV = "dev";
 
 export const environment = {
   production: false,
-  url: "http://localhost:9006",
+  url: "http://localhost:9000",
 };
 
 /**
@@ -50,7 +50,7 @@ export const app: ApplicationNew = {
   host : "http://localhost:9006",
   defaultEnv : "dev",
   gridViewPeriod:  "LAST_60",
-  kpiViewPeriod: "LAST_60"
+  kpiViewPeriod: "LAST_1440"
 }
 
 

@@ -49,10 +49,20 @@ import {DialogModule} from '@angular/cdk/dialog';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {LabelIconComponent} from "./_component/label-icon/label-icon.component";
 import {CommonModule} from "@angular/common";
+import {LabelChipComponent} from "./_component/label-chip/label-chip.component";
+import {AutocompleteChipComponent} from "./_component/autocomplete-chip/autocomplete-chip.component";
+import {ReactiveFormsModule} from "@angular/forms";
 
 @NgModule({
-  imports: [CommonModule, MatIconModule],
-  declarations: [LabelIconComponent],
+  imports: [
+    CommonModule,
+    MatIconModule,
+    ReactiveFormsModule,
+    MatChipsModule,
+    MatAutocompleteModule,
+    MatInputModule
+  ],
+  declarations: [LabelIconComponent, LabelChipComponent, AutocompleteChipComponent],
   exports: [
     BrowserAnimationsModule,
     A11yModule,
@@ -63,6 +73,7 @@ import {CommonModule} from "@angular/common";
     CdkStepperModule,
     CdkTableModule,
     CdkTreeModule,
+    OverlayModule,
     DragDropModule,
     MatAutocompleteModule,
     MatBadgeModule,
@@ -103,7 +114,9 @@ import {CommonModule} from "@angular/common";
     PortalModule,
     ScrollingModule,
     DialogModule,
-    LabelIconComponent
+    LabelIconComponent,
+    LabelChipComponent,
+    AutocompleteChipComponent
   ]
 })
 export class MaterialModule {}

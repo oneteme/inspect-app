@@ -50,6 +50,8 @@ interface Home{
 }
 
 export class QueryParams {
+    private _optional: {[key: string]: any} = {};
+
     constructor(public _period: Period, public _env: string, public _servers: string[]) {
     }
 
@@ -73,8 +75,19 @@ export class QueryParams {
         return this._servers;
     }
 
+    get optional(): {[key: string]: any} {
+        return this._optional;
+    }
+
+    set optional(optional: {[key: string]: any}) {
+        this._optional = {};
+        Object.entries(optional).forEach(([key, value]) => {
+            if(value && value.length) this._optional[key] = value;
+        })
+    }
+
     buildParams(): { [key: string]: any } {
-        let params = { ...this.period.buildParams() };
+        let params = { ...this.period.buildParams(), ...this.optional };
         if(this.servers && this.servers.length > 0){
             params = { ...params, server: this.servers.length == 1 ? this.servers[0] : this.servers};
         }

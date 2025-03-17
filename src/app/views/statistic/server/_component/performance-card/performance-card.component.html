@@ -1,0 +1,47 @@
+<div class="card-container mat-elevation-z5">
+    <div class="title-container">
+        <div class="title">Performances</div>
+    </div>
+    <div style="display: flex;">
+        <div style="display: flex; flex-direction: column; width: 50%">
+            <div class="title-container">
+                <div class="sub-title" style="width: 30%">Appels par tranche de temps</div>
+                <div class="stats-container"  style="width: 70%">
+                    <div class="stat" style="color: #81D4FA">
+                        <div class="label" [matTooltip]="(_stats.statCountElapsedTimeFastest | number:'1.0-0') + '/' + (_stats.statCount | number:'1.0-0')">{{ (_stats.statCountElapsedTimeFastest / _stats.statCount) * 100 | number : '1.0-2'  }}%</div>
+                        <div class="sub-label">< 1s</div>
+                    </div>
+                    <div class="stat" style="color: #82C0DC">
+                        <div class="label" [matTooltip]="(_stats.statCountElapsedTimeFast | number:'1.0-0') + '/' + (_stats.statCount | number:'1.0-0')">{{ (_stats.statCountElapsedTimeFast / _stats.statCount) * 100 | number : '1.0-2'  }}%</div>
+                        <div class="sub-label">1s <> 3s</div>
+                    </div>
+                    <div class="stat" style="color: #83ACBF">
+                        <div class="label" [matTooltip]="(_stats.statCountElapsedTimeMedium | number:'1.0-0') + '/' + (_stats.statCount | number:'1.0-0')">{{ (_stats.statCountElapsedTimeMedium / _stats.statCount) * 100 | number : '1.0-2'  }}%</div>
+                        <div class="sub-label">3s <> 5s</div>
+                    </div>
+                    <div class="stat" style="color: #8397A1">
+                        <div class="label" [matTooltip]="(_stats.statCountElapsedTimeSlow | number:'1.0-0') + '/' + (_stats.statCount | number:'1.0-0')">{{ (_stats.statCountElapsedTimeSlow / _stats.statCount) * 100 | number : '1.0-2'  }}%</div>
+                        <div class="sub-label">5s <> 10s</div>
+                    </div>
+                    <div class="stat" style="color: #848383">
+                        <div class="label" [matTooltip]="(_stats.statCountElapsedTimeSlowest | number:'1.0-0') + '/' + (_stats.statCount | number:'1.0-0')">{{ (_stats.statCountElapsedTimeSlowest / _stats.statCount) * 100 | number : '1.0-2'  }}%</div>
+                        <div class="sub-label">> 10s</div>
+                    </div>
+                </div>
+            </div>
+            <chart type="column" [config]="REPARTITION_SPEED_BAR"
+                   [data]="_data"
+                   [isLoading]="isLoading"></chart>
+        </div>
+        <div style="display: flex; flex-direction: column; width: 50%">
+            <div class="title-container"><div class="sub-title">Temps de reponse moyen et maximum</div></div>
+            <chart type="line"
+                   [config]="REPARTITION_MAX_BY_PERIOD_LINE"
+                   [data]="_data"
+                   [isLoading]="isLoading" />
+            <chart type="line" [config]="REPARTITION_AVG_BY_PERIOD_LINE"
+                   [data]="_data"
+                   [isLoading]="isLoading" />
+        </div>
+    </div>
+</div>

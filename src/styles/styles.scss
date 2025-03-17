@@ -1,19 +1,8 @@
 /* You can add global styles to this file, and also import other style files */
 /* You can add global styles to this file, and also import other style files */
-@use '@angular/material' as mat;
-@import '@angular/material/prebuilt-themes/indigo-pink.css';
 
 body {
   margin: 0;
-}
-  
-.blue-gradient {
-  background: -webkit-linear-gradient(50deg, #45cafc, #303f9f);
-  background: linear-gradient(40deg, #45cafc, #4285f4);
-}
-
-.white-space{
-  white-space: pre-line;
 }
 
 .noDataMessage{
@@ -57,48 +46,9 @@ mat-form-field.no-subscript {
   }
 }
 
-.md-1 {
-  @include mat.all-component-densities(-1);
-}
-
-.md-2 {
-  @include mat.all-component-densities(-2);
-}
-
-.md-3 {
-  @include mat.all-component-densities(-3);
-}
-
 .mdc-data-table__cell:has(#pie-chart) {
   overflow: visible !important;
 }
-
-.flow {
-  stroke-dasharray: 8;
-  animation: dash 0.5s linear;
-  animation-iteration-count: infinite;
-}
-
-@keyframes dash {
-  to {
-     stroke-dashoffset: -16;
-  }
-}
-
-
-.mxTooltip{
-  background-color: #f9f9f9!important;
-  border: 1px solid #d3d3d3!important;
-  border-radius:  4px!important;
-  padding: 8px!important;
-  font-size: 14px!important;
-  color: #333!important;
-}
-
-.mat-date-range-input-inner {
-  letter-spacing: var(--mat-form-field-container-text-tracking);
-}
-
 
 .vis-item {
   border-color: #040730 !important;
@@ -146,26 +96,6 @@ mat-form-field.no-subscript {
   border-radius: 50%;
   display: inline-block;
   color:white;
-}
-
-.spinner{
-  margin: auto;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
-}
-.transparent {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%, -50%);
-  color: black;
-  font-weight: bold;
-  text-align: center;
-  padding: 20px;
-  background: rgb(165 157 157 / 50%);
 }
 
 .vis-custom-time { // makes markers not draggable 
@@ -264,10 +194,85 @@ mat-form-field.loading {
 }
 
 .chart-test > div:first-child{
-      height: 100%;
+  height: 100%;
 }
 
 .mat-tooltip {
   white-space: pre-line; // Allow line break
+}
+
+.card-container {
+  display: flex;
+  flex-direction: column;
+  margin: 1em;
+
+  .title-container {
+    display: flex;
+    justify-content: space-between;
+    height: 50px;
+    font-size: 16px;
+    margin-left: 16px;
+
+    .title {
+      display: flex;
+      font-weight: 700;
+      align-items: center;
+    }
+
+    .sub-title {
+      display: flex;
+      font-size: 14px;
+      font-style: italic;
+      font-weight: 600;
+      align-items: center;
+    }
+
+    .stats-container {
+      display: flex;
+      gap: 0.5em;
+      justify-content: space-evenly;
+
+      .stat {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+
+        .label {
+          font-weight: bold
+        }
+
+        .sub-label {
+          font-size: 12px;
+          font-weight: 200
+        }
+      }
+    }
+  }
+}
+
+.loading {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  color: #6c6c6c;
+}
+
+loading.hidden {
+  display: none;
+}
+
+.mat-mdc-tab-body-content {
+  overflow: hidden !important;
+}
+
+.mat-mdc-standard-chip .mdc-evolution-chip__cell--primary, .mat-mdc-standard-chip .mdc-evolution-chip__action--primary, .mat-mdc-standard-chip .mat-mdc-chip-action-label {
+  overflow: hidden !important;
+}
+
+.mat-mdc-option .mdc-list-item__primary-text {
+  word-break: break-all;
 }
 

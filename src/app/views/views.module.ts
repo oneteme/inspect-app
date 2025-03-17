@@ -48,6 +48,23 @@ import {ArchitectureView} from "./architecture/architecture.view";
 import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
 import {DumpView} from "./dump/dump.view";
 import {DumpTimelineComponent} from "./dump/timeline/dump-timeline.component";
+import {StatisticServerView} from "./statistic/server/statistic-server.view";
+import {RestTabComponent} from "./statistic/server/_component/rest-tab/rest-tab.component";
+import {BatchTabComponent} from "./statistic/server/_component/batch-tab/batch-tab.component";
+import {
+  DependencyTableComponent
+} from "./statistic/server/_component/dependency-table/dependency-table.component";
+import {ExceptionsTableComponent} from "./statistic/server/_component/exceptions-table/exceptions-table.component";
+import {
+  RepartitionTypeCardComponent as RestRepartitionTypeCardComponent
+} from "./statistic/server/_component/rest-tab/_component/repartition-type-card/repartition-type-card.component";
+import {
+  RepartitionTypeCardComponent as BatchRepartitionTypeCardComponent
+} from "./statistic/server/_component/batch-tab/_component/repartition-type-card/repartition-type-card.component";
+import {EvolUserCardComponent} from "./statistic/server/_component/evol-user-card/evol-user-card.component";
+import {PerformanceCardComponent} from "./statistic/server/_component/performance-card/performance-card.component";
+import {DependencyCardComponent} from "./statistic/server/_component/dependency-card/dependency-card.component";
+import {ServerStartTableComponent} from "./dashboard/components/server-start-table/server-start-table.component";
 
 
 @NgModule({
@@ -93,7 +110,19 @@ import {DumpTimelineComponent} from "./dump/timeline/dump-timeline.component";
     ArchitectureView,
     TreeView,
     DumpView,
-    DumpTimelineComponent
+    DumpTimelineComponent,
+
+    StatisticServerView,
+    RestTabComponent,
+    BatchTabComponent,
+    DependencyTableComponent,
+    ExceptionsTableComponent,
+    BatchRepartitionTypeCardComponent,
+    RestRepartitionTypeCardComponent,
+    EvolUserCardComponent,
+    PerformanceCardComponent,
+    DependencyCardComponent,
+    ServerStartTableComponent
   ]
 })
 export class ViewsModule { }

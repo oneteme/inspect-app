@@ -81,6 +81,7 @@ export class SearchRestView implements OnInit, OnDestroy {
     this.queryParams.period = new IPeriod(start, end);
   }
 
+
   onChangeEnd(event) {
     this.serverFilterForm.controls.dateRangePicker.controls.start.updateValueAndValidity({onlySelf: true})
     let start = this.serverFilterForm.controls.dateRangePicker.controls.start.value || null;

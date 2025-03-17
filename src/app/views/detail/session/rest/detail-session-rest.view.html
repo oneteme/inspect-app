@@ -5,8 +5,8 @@
                                     session.status >= 300 && session.status < 500 ? '4px solid orange' : '4px solid red'}">
             <mat-card-title>
                 <a style="display: flex; align-items: center; gap: 0.5em"
-                   [routerLink]="'/dashboard/server/'+instance.name+'/rest/'+ session.name"
-                   [queryParams]="{'env': instance.env}"
+                   [routerLink]="'/dashboard/server/'+instance.name"
+                   [queryParams]="{'env': instance.env, 'api_name': session.name}"
                    matTooltip="Statistiques Appel REST">
                     <mat-icon>call_received</mat-icon>
                     {{ session.name || 'N/A' }}

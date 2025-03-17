@@ -11,7 +11,7 @@ import {SharedModule} from './shared/shared.module';
 // main layout
 import {HttpClientModule} from '@angular/common/http';
 
-import {DatePipe, DecimalPipe, registerLocaleData} from '@angular/common';
+import {DatePipe, DecimalPipe, I18nPluralPipe, registerLocaleData} from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
 import {SearchRestView} from "./views/search/rest/search-rest.view";
 import {DetailSessionRestView} from "./views/detail/session/rest/detail-session-rest.view";
@@ -34,6 +34,7 @@ import { NumberFormatterPipe } from './shared/pipe/number.pipe';
 import { TreeView } from './views/tree/tree.view';
 import {SizePipe} from "./shared/pipe/size.pipe";
 import {DumpView} from "./views/dump/dump.view";
+import {StatisticServerView} from "./views/statistic/server/statistic-server.view";
 
 
 registerLocaleData(localeFr, 'fr-FR');
@@ -213,16 +214,9 @@ const routes: Route[] = [
     children: [
       {
         path: 'server/:server_name',
-        component: StatisticApplicationView,
+        component: StatisticServerView,
         title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
           return `Dashboard > ${route.paramMap.get('server_name')}`;
-        }
-      },
-      {
-        path: 'server/:server_name/rest/:rest_name',
-        component: StatisticRestView,
-        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          return `Dashboard > ${route.paramMap.get('server_name')} > ${route.paramMap.get('rest_name')}`;
         }
       },
       {
@@ -281,6 +275,7 @@ const routes: Route[] = [
     DatePipe,
     DecimalPipe,
     DurationPipe,
+    I18nPluralPipe,
     EnvRouter,
     { provide: LOCALE_ID, useValue: 'fr-FR' },
     NumberFormatterPipe

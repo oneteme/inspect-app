@@ -1,0 +1,18 @@
+<mat-form-field style="width: 320px" class="no-subscript md-3" appearance="outline">
+    <mat-label>{{label}}</mat-label>
+    <mat-chip-grid #chipGrid style="max-height: 100px; overflow-y: auto; overflow-x: hidden">
+        <mat-chip-row *ngFor="let s of _selected" (removed)="onRemove(s)">
+            {{s}}
+            <button matChipRemove>
+                <mat-icon>cancel</mat-icon>
+            </button>
+        </mat-chip-row>
+    </mat-chip-grid>
+    <input placeholder="Recherche..." #input [formControl]="formCtrl"
+           [matChipInputFor]="chipGrid" [matAutocomplete]="auto"/>
+    <mat-autocomplete #auto="matAutocomplete" (optionSelected)="onSelect($event)">
+        <mat-option *ngFor="let f of filtered | async" [value]="f">
+            {{f}}
+        </mat-option>
+    </mat-autocomplete>
+</mat-form-field>
