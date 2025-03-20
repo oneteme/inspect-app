@@ -301,14 +301,14 @@ loading.hidden {
 
 
 .stretch-badge > .mat-badge-content {
-  width: auto;
+  width: auto !important;
   right: unset !important;
   padding-left: 3px;
   padding-right: 3px;
 }
 
 .mat-badge-content{
-  border-radius: 7px;
+  border-radius: 7px !important;
 }
 
 .hash{
