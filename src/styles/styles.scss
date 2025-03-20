@@ -51,9 +51,9 @@ mat-form-field.no-subscript {
 }
 
 .vis-item {
-  color:white !important;
   cursor: pointer !important;
 }
+
 .overflow .vis-item-overflow {
     overflow: visible !important;
     color:#000000 !important;
@@ -62,32 +62,33 @@ mat-form-field.no-subscript {
 .vis-item.rest{
   background-color: #3F51B5;
   border-color: #3F51B5;
+  color:white !important;
 }
 
 .vis-item.ftp{
   background-color: #2196F3;
   border-color: #2196F3;
-
+  color:white !important;
 }
 .vis-item.smtp{
   background-color: #9C27B0;
   border-color: #9C27B0;
-
+  color:white !important;
 }
 .vis-item.ldap{
   background-color: #00BCD4;
   border-color: #00BCD4;
-
+  color:white !important;
 }
 .vis-item.database{
   background-color: #a5673f;
   border-color: #a5673f;
-
+  color:white !important;
 }
 .vis-item.local{
   background-color: #3b3b38;
   border-color: #3b3b38;
-
+  color:white !important;
 }
 
 

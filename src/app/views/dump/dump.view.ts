@@ -83,11 +83,12 @@ export class DumpView implements OnInit, OnDestroy {
                 start: s.start * 1000,
                 end: s.end * 1000,
                 title: `<span>${this.pipe.transform(new Date(s.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(s.end * 1000), 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform({start: s.start, end: s.end})})<br>`,
-                content: `[${s.method}] ${s?.path ? s?.path : ''}${s?.query ? '?' + s?.query : ''}`
+                content: `[${s.method}] ${s?.path ? s?.path : ''}${s?.query ? '?' + s?.query : ''}`,
+                className: 'rest'
             };
             item.type = item.end > item.start ? 'range': 'point';
             if (s.exception?.message || s.exception?.type) {
-                item.className = 'bdd-failed';
+                item.className += ' error';
             }
             return item;
         }), this.mainSessions.map(s => {
@@ -97,11 +98,12 @@ export class DumpView implements OnInit, OnDestroy {
                 start: s.start * 1000,
                 end: s.end * 1000,
                 title: `<span>${this.pipe.transform(new Date(s.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(s.end * 1000), 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform({start: s.start, end: s.end})})<br>`,
-                content: `[${s.type}] ${s?.name}`
+                content: `[${s.type}] ${s?.name}`,
+                className: 'rest'
             };
             item.type = item.end > item.start ? 'range': 'point';
             if (s.exception?.message || s.exception?.type) {
-                item.className = 'bdd-failed';
+                item.className += ' error';
             }
             return item;
         })].flat();
