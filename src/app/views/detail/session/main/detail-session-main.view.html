@@ -1,6 +1,6 @@
 <div *ngIf="session && instance">
     <div class="header-card">
-        <mat-card style="width: 60vw; min-width: 60vw; border-left: 4px solid green"
+        <mat-card style="width: 50vw; min-width: 50vw; border-left: 4px solid green"
                   [ngStyle]="{'border-left': session.exception?.type || session.exception?.message ? '4px solid red' : '4px solid green'}">
             <mat-card-title>
                 <span style="display: flex; align-items: center; gap: 0.5em">
@@ -9,7 +9,7 @@
                 </span>
                 <div class="right">
                     <button mat-icon-button (click)="navigate($event,'tree')" matTooltip="Arbre d'appels">
-                        <mat-icon>lan</mat-icon>
+                        <mat-icon class="material-symbols-outlined">lan</mat-icon>
                     </button>
                 </div>
             </mat-card-title>
@@ -37,12 +37,12 @@
                     </a>
                     le {{ (session.start * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
                 </div>
-                <div class="right">
+                <div class="right" [matTooltip]="((session.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss': 'fr')">
                     en <span style="font-weight: bold">{{{ start: session.start, end: session.end } | duration }}</span>
                 </div>
             </mat-card-footer>
         </mat-card>
-        <mat-card style="width: 40vw;">
+        <mat-card style="width: 50vw;">
             <mat-card-title>
               <div style="display: flex; align-items: center; gap: 0.5em">
                 <mat-icon>widgets</mat-icon>
@@ -57,7 +57,7 @@
               </div>
               <div class="right">
                   <button [hidden]="session.type == 'VIEW'" mat-icon-button (click)="onClickDump($event)" matTooltip="Processus">
-                      <mat-icon>view_timeline</mat-icon>
+                      <mat-icon class="material-symbols-outlined">view_timeline</mat-icon>
                   </button>
               </div>
             </mat-card-title>
@@ -82,9 +82,9 @@
                     {{instance.user || "N/A"}}
                      le {{ (instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss': 'fr' }}
                 </div>
-                <span *ngIf="instance.end" class="badge" [ngStyle]="{'background-color': 'gray'}" [matTooltip]="((instance.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss': 'fr')" TooltipPosition="below">
-                    {{((instance.end - instance.instant) | duration)}}
-                </span>
+                <div *ngIf="instance.end" class="right" [matTooltip]="((instance.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss': 'fr')">
+                  en <span style="font-weight: bold">{{((instance.end - instance.instant) | duration)}}</span>
+                </div>
             </mat-card-footer>
         </mat-card>
     </div>
