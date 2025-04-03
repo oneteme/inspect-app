@@ -67,6 +67,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   focusFieldName: any;
   expandStatus: boolean;
   subscriptions: Subscription[] = [];
+  subscription: Subscription;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -149,6 +150,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   }
 
   getIncomingRequest() {
+    if(this.subscription) this.subscription.unsubscribe();
     let params = {
       'env': this.queryParams.env,
       'appname': this.queryParams.servers,
@@ -163,7 +165,7 @@ export class SearchRestView implements OnInit, OnDestroy {
     this.dataSource = new MatTableDataSource([]);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    this.subscriptions.push(this._traceService.getRestSessions(params)
+    this.subscription = this._traceService.getRestSessions(params)
       .subscribe({
         next: (d: InstanceRestSession[]) => {
           if (d) {
@@ -180,7 +182,7 @@ export class SearchRestView implements OnInit, OnDestroy {
         error: err => {
           this.isLoading = false;
         }
-      }));
+      });
   }
 
   patchDateValue(start: Date, end: Date) {

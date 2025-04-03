@@ -284,7 +284,7 @@ const routes: Route[] = [
     EnvRouter,
     { provide: LOCALE_ID, useValue: 'fr-FR' },
     NumberFormatterPipe,
-    {provide: HTTP_INTERCEPTORS, useClass: Interceptor, multi:true}
+    {provide: HTTP_INTERCEPTORS, useClass: Interceptor, multi: true}
   ],
   bootstrap: [AppComponent]
 })

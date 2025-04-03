@@ -4,7 +4,7 @@ import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import {ActivatedRoute} from '@angular/router';
-import {combineLatest, finalize, Subscription} from 'rxjs';
+import {combineLatest, distinctUntilChanged, finalize, Subscription, take} from 'rxjs';
 import {Location} from '@angular/common';
 import {extractPeriod, Utils} from 'src/app/shared/util';
 import {TraceService} from 'src/app/service/trace.service';
@@ -21,6 +21,7 @@ import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
 import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-date-range-selection-strategy";
 import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../model/conf.model";
 import {shallowEqual} from "../rest/search-rest.view";
+import * as timers from "node:timers";
 
 
 @Component({
@@ -61,6 +62,7 @@ export class SearchMainView implements OnInit, OnDestroy {
     });
     nameDataList: any[];
     subscriptions: Subscription[] = [];
+    subscription: Subscription;
     isLoading = false;
     advancedParams: Partial<{ [key: string]: any }>
     focusFieldName: any
@@ -74,7 +76,6 @@ export class SearchMainView implements OnInit, OnDestroy {
     @ViewChild(MatSort) sort: MatSort;
 
     constructor() {
-
         this.subscriptions.push(combineLatest([
             this._activatedRoute.params,
             this._activatedRoute.queryParams
@@ -137,6 +138,7 @@ export class SearchMainView implements OnInit, OnDestroy {
     }
 
     getMainRequests() {
+        if(this.subscription) this.subscription.unsubscribe();
         let params = {
             'appname': this.queryParams.servers,
             'env': this.queryParams.env,
@@ -153,7 +155,7 @@ export class SearchMainView implements OnInit, OnDestroy {
         this.dataSource.data = [];
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort
-        this.subscriptions.push(this._traceService.getMainSessions(params).subscribe((d: InstanceMainSession[]) => {
+        this.subscription = this._traceService.getMainSessions(params).subscribe((d: InstanceMainSession[]) => {
             if (d) {
                 this.dataSource = new MatTableDataSource(d);
                 this.dataSource.paginator = this.paginator;
@@ -166,7 +168,7 @@ export class SearchMainView implements OnInit, OnDestroy {
             }
         }, error => {
             this.isLoading = false;
-        }));
+        });
     }
 
 

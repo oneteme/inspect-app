@@ -14,14 +14,14 @@
                 <mat-icon>{{ MAPPING_TYPE['rest'].icon }}</mat-icon>
                 <span>{{ MAPPING_TYPE['rest'].title }}</span>
             </button>
-            <button mat-menu-item [routerLink]="['session/main/batch']" routerLinkActive="item-selected"
+            <button mat-menu-item [routerLink]="['session/main/batch']" routerLinkActive="item-se²lected"
                     [queryParams]="{env: env.value}">
                 <mat-icon class="material-symbols-outlined">{{ MAPPING_TYPE['batch'].icon }}</mat-icon>
                 <span>{{ MAPPING_TYPE['batch'].title }}</span>
             </button>
             <button mat-menu-item [routerLink]="['session/main/startup']" routerLinkActive="item-selected"
                     [queryParams]="{env: env.value}">
-                <span class="material-symbols-outlined" style="margin-right: 16px;">{{ MAPPING_TYPE['startup'].icon }}</span>
+                <mat-icon class="material-symbols-outlined">{{ MAPPING_TYPE['startup'].icon }}</mat-icon>
                 <span>{{ MAPPING_TYPE['startup'].title }}</span>
             </button>
             <button mat-menu-item [routerLink]="['session/main/view']" routerLinkActive="item-selected"

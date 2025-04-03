@@ -71,65 +71,6 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
             .subscribe());
     }
 
-    selectedRequest(event: { event: MouseEvent, row: any }) {
-        if (event.row) {
-            if (event.event.ctrlKey) {
-                this._router.open(`#/session/rest/${event.row}`, '_blank',)
-            } else {
-                this._router.navigate(['/session', 'rest', event.row], { queryParams: { env: this.env } }); // TODO remove env FIX BUG
-            }
-        }
-    }
-
-    selectedFtp(event: { event: MouseEvent, row: any }) { // TODO finish this
-        if (event.row) {
-            if (event.event.ctrlKey) {
-                this._router.open(`#/session/rest/${this.session.id}/ftp/${event.row}`, '_blank',)
-            } else {
-                this._router.navigate(['/session/rest', this.session.id, 'ftp', event.row], {
-                    queryParams: { env: this.instance.env }
-                });
-            }
-        }
-    }
-
-    selectedLdap(event: { event: MouseEvent, row: any }) { // TODO finish this
-        if (event.row) {
-            if (event.event.ctrlKey) {
-                this._router.open(`#/session/rest/${this.session.id}/ldap/${event.row}`, '_blank',)
-            } else {
-                this._router.navigate(['/session/rest', this.session.id, 'ldap', event.row], {
-                    queryParams: { env: this.instance.env }
-                });
-            }
-        }
-    }
-
-    selectedSmtp(event: { event: MouseEvent, row: any }) { // TODO finish this
-        if (event.row) {
-            if (event.event.ctrlKey) {
-                this._router.open(`#/session/rest/${this.session.id}/smtp/${event.row}`, '_blank',)
-            } else {
-                this._router.navigate(['/session/rest', this.session.id, 'smtp', event.row], {
-                    queryParams: { env: this.instance.env }
-                });
-            }
-        }
-    }
-
-    selectedQuery(event: { event: MouseEvent, row: any }) { // TODO finish this
-        if (event.row) {
-            if (event.event.ctrlKey) {
-                this._router.open(`#/session/rest/${this.session.id}/database/${event.row}`, '_blank',)
-            } else {
-                this._router.navigate(['/session/rest', this.session.id, 'database', event.row], {
-                    queryParams: { env: this.instance.env }
-                });
-            }
-        }
-    }
-
-
     getSessionUrl() {
         return Utils.getSessionUrl(this.session);
     }

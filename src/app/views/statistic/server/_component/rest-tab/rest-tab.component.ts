@@ -33,6 +33,7 @@ export class RestTabComponent implements OnDestroy {
       Object.entries(httpParams.params.optional).forEach(([key, value]) => {
         if(value && Array.isArray(value)) advancedParams[`${key}`] = (<Array<string>>value).map(v => `"${v}"`).join(',');
       });
+      console.log(advancedParams)
       this.subscriptions.forEach(s => s.unsubscribe());
       this.subscriptions.push(this.getTimeAndTypeResponse(httpParams, groupedBy, advancedParams));
       this.subscriptions.push(this.getUsersByPeriod(httpParams, groupedBy, advancedParams));
@@ -52,8 +53,8 @@ export class RestTabComponent implements OnDestroy {
       env: httpParams.params.env,
       server: httpParams.server,
       apiNames: advancedParams.api_name,
-      versions: advancedParams.version,
-      users: advancedParams.user
+      versions: advancedParams.api_version,
+      users: advancedParams.api_user
     }).pipe(
       map(r => {
         formatters[groupedBy](r, this._datePipe);
@@ -76,8 +77,8 @@ export class RestTabComponent implements OnDestroy {
       env: httpParams.params.env,
       server: httpParams.server,
       apiNames: advancedParams.api_name,
-      versions: advancedParams.version,
-      users: advancedParams.user
+      versions: advancedParams.api_version,
+      users: advancedParams.api_user
     }).pipe(
         finalize(() => this.$evolUserResponse.loading = false),
         map(r => {
@@ -103,8 +104,8 @@ export class RestTabComponent implements OnDestroy {
         env: httpParams.params.env,
         server: httpParams.server,
         apiNames: advancedParams.api_name,
-        versions: advancedParams.version,
-        users: advancedParams.user
+        versions: advancedParams.api_version,
+        users: advancedParams.api_user
       })
       .pipe(finalize(() => this.$dependenciesResponse.loading = false))
       .subscribe({
@@ -123,8 +124,8 @@ export class RestTabComponent implements OnDestroy {
         env: httpParams.params.env,
         server: httpParams.server,
         apiNames: advancedParams.api_name,
-        versions: advancedParams.version,
-        users: advancedParams.user
+        versions: advancedParams.api_version,
+        users: advancedParams.api_user
       })
       .pipe(finalize(() => this.$dependentsResponse.loading = false))
       .subscribe({
