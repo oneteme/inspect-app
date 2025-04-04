@@ -2,10 +2,10 @@
     <table mat-table [dataSource]="dataSource" #sort="matSort"
            matSort matSortActive="date" matSortDirection="desc">
 
-        <ng-container matColumnDef="date">
+        <ng-container matColumnDef="stringDate">
             <th mat-header-cell *matHeaderCellDef mat-sort-header style="width: 10%">Instant</th>
             <td mat-cell *matCellDef="let row">
-                {{ row.date }}
+                {{ row.stringDate }}
             </td>
         </ng-container>
 

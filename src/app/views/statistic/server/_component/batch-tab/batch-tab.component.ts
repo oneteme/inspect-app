@@ -121,7 +121,7 @@ export class BatchTabComponent implements OnDestroy {
         }).pipe(
             finalize(() => this.$exceptionsResponse.loading = false),
             map(res => {
-                formatters[groupedBy](res, this._datePipe);
+                formatters[groupedBy](res, this._datePipe, 'stringDate');
                 return res.filter(r => r.errorType != null)
             }))
           .subscribe({
