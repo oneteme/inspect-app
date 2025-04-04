@@ -71,6 +71,8 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
 
     MAPPING_TYPE = Constants.MAPPING_TYPE;
     subscriptions: Subscription[] = [];
+    chartSubscriptions: Subscription[] = [];
+    tabSubscriptions: Subscription[] = [];
     tabRequests: { [key: string]: { observable?: Observable<Object>, data?: any[], isLoading?: boolean, key?: string } } = {};
     chartRequests: { [key: string]: { observable?: Observable<Object>, data?: any[], chart?:any[], isLoading?: boolean, key?: string, title?: string, subtitle?: string } } = {};
     serverFilterForm = new FormGroup({
@@ -122,10 +124,11 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
     }
 
     initCharts() { //TODO REFACTO
+        this.chartSubscriptions.forEach(t => t.unsubscribe());
         Object.keys(this.chartRequests).forEach(k => {
             this.chartRequests[k].chart = [];
             this.chartRequests[k].isLoading = true;
-            this.subscriptions.push(this.chartRequests[k].observable
+            this.chartSubscriptions.push(this.chartRequests[k].observable
                 .pipe(finalize(() => {   this.chartRequests[k].isLoading = false;  })).pipe(take(1))
                 .subscribe({
                     next: (res: any) => {
@@ -140,10 +143,11 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
 
 
     initTab() {
+        this.tabSubscriptions.forEach(t => t.unsubscribe());
         Object.keys(this.tabRequests).forEach(i => {
             this.tabRequests[i].data = [];
             this.tabRequests[i].isLoading = true;
-            this.subscriptions.push(this.tabRequests[i].observable
+            this.tabSubscriptions.push(this.tabRequests[i].observable
                 .pipe(finalize(() => {   this.tabRequests[i].isLoading = false;  })).pipe(take(1))
                 .subscribe({
                     next: (res: any[]) => {
@@ -263,7 +267,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
             sessionExceptionsTable: {
                 observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map(((result: SessionExceptionsByPeriodAndAppname[]) => {
-                        formatters[groupedBy](result, this._datePipe)
+                        formatters[groupedBy](result, this._datePipe, 'stringDate');
                         return result.filter(r => r.errorType != null); // rename errorType to errType in backend
                     })))
             },
@@ -271,7 +275,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
             batchExceptionTable: {
                 observable: this._mainService.getMainExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map(((result: SessionExceptionsByPeriodAndAppname[]) => {
-                        formatters[groupedBy](result, this._datePipe)
+                        formatters[groupedBy](result, this._datePipe, 'stringDate')
                         return result.filter(r => r.errorType != null);
                     })))
             },

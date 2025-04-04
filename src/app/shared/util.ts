@@ -147,37 +147,37 @@ export function periodManagement(start: Date, end: Date): string {
 
 export const formatters: any = {
 
-    year: function byYear(r: any[], _datePipe: DatePipe) {
+    year: function byYear(r: any[], _datePipe: DatePipe, nameOutput: string = 'date') {
         r.forEach(e => {
             var date = new Date(e['date'], 0);
-            e['date'] = _datePipe.transform(date, 'y');
+            e[nameOutput] = _datePipe.transform(date, 'y');
         });
     },
 
-    month: function byMonth(r: any[], _datePipe: DatePipe) {
+    month: function byMonth(r: any[], _datePipe: DatePipe, nameOutput: string = 'date') {
         r.forEach(e => {
             var date = new Date(e['year'], e['date'] - 1, 1);
-            e['date'] = _datePipe.transform(date, 'MMM yy');
+            e[nameOutput] = _datePipe.transform(date, 'MMM yy');
         });
     },
 
-    week: function byWeek(r: any[], _datePipe: DatePipe) {
+    week: function byWeek(r: any[], _datePipe: DatePipe, nameOutput: string = 'date') {
         r.forEach(e => {
-            e['date'] = `sem. ${e['date']}, ${e['year']}`
+            e[nameOutput] = `sem. ${e['date']}, ${e['year']}`
         });
     },
 
-    date: function byDay(r: any[], _datePipe: DatePipe) {
+    date: function byDay(r: any[], _datePipe: DatePipe, nameOutput: string = 'date') {
         r.forEach(e => {
             var date = new Date(e['date']);
-            e['date'] = _datePipe.transform(date, 'd MMM yy');
+            e[nameOutput] = _datePipe.transform(date, 'd MMM yy');
         });
     },
 
-    hour: function byHour(r: any[], _datePipe: DatePipe) {
+    hour: function byHour(r: any[], _datePipe: DatePipe, nameOutput: string = 'date') {
         r.forEach(e => {
             var date = new Date(2000, 1, 1, e['date']);
-            e['date'] = _datePipe.transform(date, 'shortTime');
+            e[nameOutput] = _datePipe.transform(date, 'shortTime');
         });
     }
 }

@@ -20,6 +20,16 @@ export class ServerStartTableComponent {
     if (objects?.length) {
       this.dataSource = new MatTableDataSource(objects);
       this.dataSource.paginator = this.paginator;
+      this.dataSource.sortData = (data: { appName: string, version: string, start:number }[], sort: MatSort) => {
+        return data.sort((a, b) => {
+          switch (sort.active) {
+            case 'duree': return compare(a.start, b.start, sort.direction === 'desc');
+            case 'appName': return compare(a.appName, b.appName, sort.direction === 'asc');
+            case 'version': return compare(a.version, b.version, sort.direction === 'asc');
+            default: return 0;
+          }
+        })
+      }
       this.dataSource.sort = this.sort;
     } else {
       this.dataSource = new MatTableDataSource([]);
@@ -27,4 +37,9 @@ export class ServerStartTableComponent {
   }
 
   @Input() isLoading: boolean;
+
+}
+
+function compare(a: number | string, b: number | string, isAsc: boolean) {
+  return (a < b ? -1 : 1) * (isAsc ? 1 : -1);
 }

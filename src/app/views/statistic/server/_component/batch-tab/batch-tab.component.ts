@@ -45,8 +45,8 @@ export class BatchTabComponent implements OnDestroy {
             env: httpParams.params.env,
             server: httpParams.server,
             apiNames: advancedParams.batch_name,
-            versions: advancedParams.version,
-            users: advancedParams.user
+            versions: advancedParams.batch_version,
+            users: advancedParams.batch_user
         }).pipe(
           map(r => {
               formatters[groupedBy](r, this._datePipe);
@@ -69,8 +69,8 @@ export class BatchTabComponent implements OnDestroy {
             env: httpParams.params.env,
             server: httpParams.server,
             apiNames: advancedParams.batch_name,
-            versions: advancedParams.version,
-            users: advancedParams.user
+            versions: advancedParams.batch_version,
+            users: advancedParams.batch_user
         }).pipe(
             finalize(() => this.$evolUserResponse.loading = false),
             map(r => {
@@ -97,8 +97,8 @@ export class BatchTabComponent implements OnDestroy {
               env: httpParams.params.env,
               server: httpParams.server,
               apiNames: advancedParams.batch_name,
-              versions: advancedParams.version,
-              users: advancedParams.user
+              versions: advancedParams.batch_version,
+              users: advancedParams.batch_user
           })
           .pipe(finalize(() => this.$dependentsResponse.loading = false))
           .subscribe({
@@ -121,7 +121,7 @@ export class BatchTabComponent implements OnDestroy {
         }).pipe(
             finalize(() => this.$exceptionsResponse.loading = false),
             map(res => {
-                formatters[groupedBy](res, this._datePipe);
+                formatters[groupedBy](res, this._datePipe, 'stringDate');
                 return res.filter(r => r.errorType != null)
             }))
           .subscribe({

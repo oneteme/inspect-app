@@ -52,8 +52,8 @@ export class RestTabComponent implements OnDestroy {
       env: httpParams.params.env,
       server: httpParams.server,
       apiNames: advancedParams.api_name,
-      versions: advancedParams.version,
-      users: advancedParams.user
+      versions: advancedParams.api_version,
+      users: advancedParams.api_user
     }).pipe(
       map(r => {
         formatters[groupedBy](r, this._datePipe);
@@ -76,8 +76,8 @@ export class RestTabComponent implements OnDestroy {
       env: httpParams.params.env,
       server: httpParams.server,
       apiNames: advancedParams.api_name,
-      versions: advancedParams.version,
-      users: advancedParams.user
+      versions: advancedParams.api_version,
+      users: advancedParams.api_user
     }).pipe(
         finalize(() => this.$evolUserResponse.loading = false),
         map(r => {
@@ -103,8 +103,8 @@ export class RestTabComponent implements OnDestroy {
         env: httpParams.params.env,
         server: httpParams.server,
         apiNames: advancedParams.api_name,
-        versions: advancedParams.version,
-        users: advancedParams.user
+        versions: advancedParams.api_version,
+        users: advancedParams.api_user
       })
       .pipe(finalize(() => this.$dependenciesResponse.loading = false))
       .subscribe({
@@ -123,8 +123,8 @@ export class RestTabComponent implements OnDestroy {
         env: httpParams.params.env,
         server: httpParams.server,
         apiNames: advancedParams.api_name,
-        versions: advancedParams.version,
-        users: advancedParams.user
+        versions: advancedParams.api_version,
+        users: advancedParams.api_user
       })
       .pipe(finalize(() => this.$dependentsResponse.loading = false))
       .subscribe({
@@ -146,7 +146,7 @@ export class RestTabComponent implements OnDestroy {
     }).pipe(
       finalize(() => this.$exceptionsResponse.loading = false),
       map(res => {
-        formatters[groupedBy](res, this._datePipe);
+        formatters[groupedBy](res, this._datePipe, 'stringDate');
         return res.filter(r => r.errorType != null)
       }))
       .subscribe({

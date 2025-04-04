@@ -12,12 +12,15 @@ export class Interceptor implements  HttpInterceptor {
                     if(error.status === 404){
                         return throwError(()=>error)
                     }
-                    this._snackBar.open(error.error && error.status ? error.error.message : error.message, "Fermer",
-                        {
-                            horizontalPosition: "center",
-                            verticalPosition: "top",
-                            duration: 5000
-                        });
+                    if(!this._snackBar._openedSnackBarRef) {
+                        let msg = error.error && error.status ? error.error.message : error.message;
+                        this._snackBar.open(msg ? msg : "Erreur survenue sur le serveur", "Fermer",
+                            {
+                                horizontalPosition: "center",
+                                verticalPosition: "top",
+                                duration: 5000
+                            });
+                    }
 
                     return throwError(()=>error)
                 }

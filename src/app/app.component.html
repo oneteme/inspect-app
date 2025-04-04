@@ -21,7 +21,7 @@
             </button>
             <button mat-menu-item [routerLink]="['session/main/startup']" routerLinkActive="item-selected"
                     [queryParams]="{env: env.value}">
-                <span class="material-symbols-outlined" style="margin-right: 16px;">{{ MAPPING_TYPE['startup'].icon }}</span>
+                <mat-icon class="material-symbols-outlined">{{ MAPPING_TYPE['startup'].icon }}</mat-icon>
                 <span>{{ MAPPING_TYPE['startup'].title }}</span>
             </button>
             <button mat-menu-item [routerLink]="['session/main/view']" routerLinkActive="item-selected"

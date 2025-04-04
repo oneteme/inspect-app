@@ -115,7 +115,8 @@ export class InstanceService {
         return this.getInstance({
             'column': 'count:count',
             'environement': filters.env,
-            'app_name': `"${filters.appName}"`
+            'app_name': `"${filters.appName}"`,
+            'type': 'SERVER'
         }).pipe(map((res: {count: number}[]) => res[0].count));
     }
 
