@@ -33,7 +33,6 @@ export class RestTabComponent implements OnDestroy {
       Object.entries(httpParams.params.optional).forEach(([key, value]) => {
         if(value && Array.isArray(value)) advancedParams[`${key}`] = (<Array<string>>value).map(v => `"${v}"`).join(',');
       });
-      console.log(advancedParams)
       this.subscriptions.forEach(s => s.unsubscribe());
       this.subscriptions.push(this.getTimeAndTypeResponse(httpParams, groupedBy, advancedParams));
       this.subscriptions.push(this.getUsersByPeriod(httpParams, groupedBy, advancedParams));
