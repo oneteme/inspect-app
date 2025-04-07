@@ -17,7 +17,6 @@
 - ## [Integration](#%EF%B8%8F-integration)
     - ### [Setup](#setup-1)
 
-
 ---
 
 # 🛠️ Integration
