@@ -7,6 +7,7 @@ import {
     RestSessionExceptionsByPeriodAndappname
 } from "src/app/model/jquery.model";
 import {FilterMap} from "../../views/constants";
+import {InstanceRestSession, RestRequest} from "../../model/trace.model";
 
 
 @Injectable({ providedIn: 'root' })
@@ -14,11 +15,17 @@ export class RestRequestService {
     constructor(private http: HttpClient) {
 
     }
+    server = `${localStorage.getItem('server')}/v3/trace`;
 
-    getRestRequest<T>(params: any): Observable<T> {
+    getRestRequest<T>(params?: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/request/rest`;
         return this.http.get<T>(url, { params: params });
     }
+
+    getRestRequests(params: any): Observable<Array<RestRequest>> {
+        return this.http.get<Array<RestRequest>>(`${this.server}/request/rest`, { params: params });
+    }
+
 
 
     getrestSessionExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<RestSessionExceptionsByPeriodAndappname[]> {

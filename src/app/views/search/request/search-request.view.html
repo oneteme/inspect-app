@@ -1,0 +1,152 @@
+<header-page [titleIcon]="MAPPING_TYPE['request'].icon" [ui-title]="MAPPING_TYPE['request'].title">
+  <form [formGroup]="requestFilterForm" class="header-filter md-2">
+
+    <mat-form-field style="width: 360px" class="no-subscript" appearance="outline" >
+      <mat-label>Période</mat-label>
+      <mat-date-range-input [formGroup]="requestFilterForm.controls.dateRangePicker" [rangePicker]="picker">
+        <input matStartDate  formControlName="start" placeholder="Start date" (dateChange)="onChangeStart($event)">
+        <input matEndDate formControlName="end" placeholder="End date" (dateChange)="onChangeEnd($event)">
+      </mat-date-range-input>
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-date-range-picker #picker></mat-date-range-picker>
+    </mat-form-field>
+
+      <mat-form-field class="no-subscript" appearance="outline">
+          <mat-label>Type</mat-label>
+          <mat-select [formControl]="requestFilterForm.controls.requestType" (selectionChange)="onChangeRequestType($event)">
+              <mat-option  value="REST">REST</mat-option>
+              <mat-option  value="JDBC">JDBC</mat-option>
+              <mat-option  value="FTP">FTP</mat-option>
+              <mat-option  value="SMTP">SMTP</mat-option>
+              <mat-option  value="LDAP">LDAP</mat-option>
+          </mat-select>
+      </mat-form-field>
+
+    <mat-form-field class="no-subscript" [class.loading]="serverNameIsLoading" appearance="outline">
+      <mat-label>Serveur</mat-label>
+      <mat-select [formControl]="requestFilterForm.controls.appname" multiple (selectionChange)="onChangeServer($event)">
+        
+        <span *ngIf="serverNameIsLoading && queryParams.servers && queryParams.servers[0]!=''"><mat-option *ngFor="let s of queryParams.servers" [value]="s">{{s}}</mat-option></span>
+        <mat-option *ngFor="let d of nameDataList" [value]="d">{{d}}</mat-option>
+      </mat-select>
+      <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>
+    </mat-form-field>
+    <button mat-mini-fab color="primary"  (click)="search()">
+      <mat-icon matSuffix>search</mat-icon>
+    </button>
+  </form>
+</header-page>
+<div style="display: flex; justify-content: space-between; margin-bottom: 0.2em;">
+  <mat-form-field  appearance="outline" class="searchwidth md-2 no-subscript">
+    <input [disabled]="isLoading"  matInput #input (keyup)="applyFilter($event)" placeholder="Filtrer..." autocomplete="off">
+    <mat-icon matSuffix>search</mat-icon>
+  </mat-form-field>
+
+  <mat-button-toggle-group #group="matButtonToggleGroup" multiple
+   [disabled]="isLoading" (change)="toggleFilter($event.value)">
+    <mat-button-toggle value="2xx" matTooltip="2xx">
+      <span class="material-symbols-outlined" style="color: #22bb33;">
+        done
+      </span>
+    </mat-button-toggle>
+    <mat-button-toggle value="4xx" matTooltip="4xx">
+      <span class="material-symbols-outlined" style="color: #f9ad4e;">
+        error
+      </span>
+    </mat-button-toggle>
+    <mat-button-toggle value="5xx" matTooltip="5xx">
+      <span class="material-symbols-outlined" style="color: #bb2124;">
+        warning
+      </span>
+    </mat-button-toggle>
+  </mat-button-toggle-group>
+</div>
+
+
+<div class="mat-elevation-z5">
+  <!-- <div *ngIf="isLoading" class="example-loading-shade">
+    <mat-spinner></mat-spinner>
+  </div> -->
+  <div class="example-table-container">
+    <table class="fullwidth" mat-table [dataSource]="dataSource" matSort matSortActive="start" matSortDirection="desc">
+
+        <ng-container matColumnDef="status">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:1%">
+            </th>
+            <td [ngStyle]="{'border-left': row.status >= 200 && row.status < 300 ? '4px solid green' :
+                                    row.status >= 300 && row.status < 500 ? '4px solid orange' : '4px solid red'}"
+                mat-cell *matCellDef="let row"
+                [matTooltip]="(row.exception?.type | exceptionType) + ' ' + (row.exception?.message | truncString: 100)" matTooltipPosition="after">
+            </td>
+        </ng-container>
+
+      <ng-container matColumnDef="app_name">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Serveur </th>
+        <td mat-cell *matCellDef="let row">
+          {{row.appName || ''}}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="method/path">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> API </th>
+        <td mat-cell *matCellDef="let row" class="ellipsis">
+          <span [ngStyle]="{'color': row.protocol=='https' ? 'green':'gray'}">[{{row.method}}] </span><br>
+          {{row.path}}
+        </td>
+
+      </ng-container>
+
+      <ng-container matColumnDef="query">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Paramètres </th>
+        <td mat-cell *matCellDef="let row" class="ellipsis">
+          {{row.query}}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="start">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Début</th>
+        <td mat-cell *matCellDef="let row">
+          {{ row.start*1000 | date:'dd/MM/yyyy' }}
+          <br>
+          {{ row.start*1000 | date:'HH:mm:ss.SSS' }}
+        </td>
+      </ng-container>
+
+
+      <ng-container matColumnDef="durée">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Durée</th>
+        <td mat-cell *matCellDef="let row">
+          <div
+            [matTooltip]="(row.start*1000| date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr') +' | '+ row.inDataSize +'ko ↑ \n '+ (row.end*1000 | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr')+' | '+ row?.outDataSize +'ko ↓' "
+            matTooltipClass="mat-tooltip">{{ { start: row.start, end: row.end } | duration }}</div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="user">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header> Client </th>
+        <td mat-cell *matCellDef="let row"> {{row.user || 'N/A'}} </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns;sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectedRequest($event,row.id)"></tr>
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" colspan="7">
+          <div *ngIf="!isLoading"  class="empty-row" style="align-items: center;">
+            <span class="material-symbols-outlined" >
+              info
+            </span>
+            <span style="font-style: italic;">Aucun résultat</span>
+          </div>
+          <div *ngIf="isLoading" class="loading-row">
+              <span style="display: flex; flex-direction: column; font-style: italic;">
+                Chargement en cours...
+                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+              </span>
+          </div>
+          
+        </td>
+      </tr>
+    </table>
+  </div>
+  <mat-paginator [pageSizeOptions]="[10, 15, 20]" [hidePageSize]="true" showFirstLastButtons></mat-paginator>
+</div>

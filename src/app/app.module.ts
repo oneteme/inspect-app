@@ -35,16 +35,23 @@ import {DumpView} from "./views/dump/dump.view";
 import {StatisticServerView} from "./views/statistic/server/statistic-server.view";
 import {DeploimentComponent} from './views/deploiment/deploiment.component';
 import {Interceptor} from "./shared/interceptor/interceptor";
+import {SearchRequestView} from "./views/search/request/search-request.view";
 
 
 registerLocaleData(localeFr, 'fr-FR');
 const routes: Route[] = [
-  {
+    {
+      path:'request',
+      component: SearchRequestView,
+      title: 'Requests',
+    },
+    {
     path: 'session', children: [
       {
         path: ':app_name/dump',
         component: DumpView
       },
+
       {
         path: 'rest',
         children: [

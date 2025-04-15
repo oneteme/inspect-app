@@ -62,6 +62,7 @@ import {
 import {
   RepartitionTypeCardComponent as BatchRepartitionTypeCardComponent
 } from "./statistic/server/_component/batch-tab/_component/repartition-type-card/repartition-type-card.component";
+import {SearchRequestView} from "./search/request/search-request.view";
 
 
 @NgModule({
@@ -73,7 +74,7 @@ import {
     BrowserModule,
     BrowserAnimationsModule,
     SharedModule,
-    ChartComponent
+    ChartComponent,
   ],
   declarations: [
     SearchRestView,
@@ -118,7 +119,8 @@ import {
     DependencyCardComponent,
     ServerStartTableComponent,
     NumberFormatterPipe,
-    DeploimentComponent
+    DeploimentComponent,
+    SearchRequestView
   ]
 })
 export class ViewsModule { }

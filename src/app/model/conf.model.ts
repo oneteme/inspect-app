@@ -8,7 +8,15 @@ export interface Application {
 export class QueryParams {
     private _optional: {[key: string]: any} = {};
 
-    constructor(public _period: Period, public _env: string, public _servers: string[]) {
+    constructor(public _period: Period, public _env: string, public _servers: string[], public _requestType?: string) {
+    }
+
+    set requestType(requestType: string) {
+        this._requestType= requestType;
+    }
+
+    get requestType(): string {
+        return this._requestType;
     }
 
     set period(period: Period) {
@@ -49,6 +57,9 @@ export class QueryParams {
         }
         if(this.env) {
             params = { ...params, env: this.env };
+        }
+        if(this.requestType){
+            params = { ...params, requestType: this.requestType };
         }
         return params;
     }
