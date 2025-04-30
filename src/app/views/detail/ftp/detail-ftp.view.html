@@ -32,20 +32,10 @@
     </mat-card>
 </div>
 
-
-<div [hidden]="!request">
-    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center;">
-        <mat-divider style="margin-right: 1em; flex: 1 1 0%"></mat-divider>
-        <div style="display: flex; align-items: center; gap: 0.5em; margin-bottom:  0.5em; font-size: 20px; font-weight: 500;">
-            <mat-icon class="material-symbols-outlined">view_timeline</mat-icon>
-            Chronologie
-        </div>
-        <mat-divider style="margin-left: 1em; flex: 1 1 0%"></mat-divider>
-    </div>
-    <div #timeline id="timeline"></div>
-</div>
-
-
+<app-timeline [options]="options"
+                 [groups]="dataGroups"
+                 [items]="dataItems">
+</app-timeline>
 
 <div *ngIf="!isLoading && !request" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">
     <h2>

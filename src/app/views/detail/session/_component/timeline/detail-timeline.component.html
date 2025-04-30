@@ -1,14 +1,18 @@
-<div [hidden]="!instance || !request" class="mat-elevation-z8" #timeline id="timeline">
-    <div style="display: flex; flex-direction: row; justify-content: right; align-items: center; align-content: center; gap:  0.5em;padding :0.5em">
-        <div class="dot" style="background-color:#3F51B5;" ></div><b>API</b>
-        <div class="dot" style="background-color:#2196F3;"></div><b>FTP</b>
-        <div class="dot" style="background-color:#9C27B0;"></div><b>SMTP</b>
-        <div class="dot" style="background-color:#00BCD4;"></div><b>LDAP</b>
-        <div class="dot" style="background-color:#a5673f"></div><b>BDD</b>
-        <div class="dot" style="background-color:#3b3b38;"></div><b>LOCAL</b>
-      </div>
-</div>
-
+<app-timeline *ngIf="instance && request"
+                 [options]="options"
+                 [groups]="dataGroups"
+                 [items]="dataItems"
+                 (onTimelineCreated)="onTimelineCreate($event)">
+  <div class="legend">
+    <div *ngIf="request.restRequests?.length" class="item"><div class="dot api"></div><b>API</b></div>
+    <div *ngIf="request.ftpRequests?.length" class="item"><div class="dot ftp"></div><b>FTP</b></div>
+    <div *ngIf="request.mailRequests?.length" class="item"><div class="dot smtp"></div><b>SMTP</b></div>
+    <div *ngIf="request.ldapRequests?.length" class="item"><div class="dot ldap"></div><b>LDAP</b></div>
+    <div *ngIf="request.databaseRequests?.length" class="item"><div class="dot bdd"></div><b>BDD</b></div>
+    <div *ngIf="request.stages?.length" class="item"><div class="dot local"></div><b>LOCAL</b></div>
+    <div  *ngIf="request['userActions']?.length" class="item"><div class="dot action"></div><b>Actions utilisateur</b></div>
+  </div>
+</app-timeline>
 <div *ngIf="!instance || !request" class="detail-table-loading mat-elevation-z8" >
   <span style="display: flex; flex-direction: column; font-style: italic;">
     Chargement en cours...

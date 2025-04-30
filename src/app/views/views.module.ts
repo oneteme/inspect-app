@@ -20,7 +20,6 @@ import {DetailDatabaseTableComponent} from "./detail/session/_component/database
 import {DetailFtpTableComponent} from "./detail/session/_component/ftp-table/detail-ftp-table.component";
 import {DetailSmtpTableComponent} from "./detail/session/_component/smtp-table/detail-smtp-table.component";
 import {DetailLdapTableComponent} from "./detail/session/_component/ldap-table/detail-ldap-table.component";
-import {DetailTimelineComponent} from "./detail/session/_component/timeline/detail-timeline.component";
 import {DetailSessionComponent} from "./detail/session/_component/detail-session.component";
 import {StatisticUserView} from "./statistic/user/statistic-user.view";
 import {TreeView} from "./tree/tree.view";
@@ -62,7 +61,9 @@ import {
 import {
   RepartitionTypeCardComponent as BatchRepartitionTypeCardComponent
 } from "./statistic/server/_component/batch-tab/_component/repartition-type-card/repartition-type-card.component";
-
+import {AnalyticView} from "./analytic/analytic.view";
+import {DetailTimelineComponent} from "./detail/session/_component/timeline/detail-timeline.component";
+import {ActionTableComponent} from "./detail/session/_component/action-table/action-table.component";
 
 @NgModule({
   imports: [
@@ -118,7 +119,9 @@ import {
     DependencyCardComponent,
     ServerStartTableComponent,
     NumberFormatterPipe,
-    DeploimentComponent
+    DeploimentComponent,
+    AnalyticView,
+    ActionTableComponent
   ]
 })
 export class ViewsModule { }

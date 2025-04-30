@@ -35,6 +35,7 @@ import {DumpView} from "./views/dump/dump.view";
 import {StatisticServerView} from "./views/statistic/server/statistic-server.view";
 import {DeploimentComponent} from './views/deploiment/deploiment.component';
 import {Interceptor} from "./shared/interceptor/interceptor";
+import {AnalyticView} from "./views/analytic/analytic.view";
 
 
 registerLocaleData(localeFr, 'fr-FR');
@@ -242,6 +243,11 @@ const routes: Route[] = [
       },
       { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
     ]
+  },
+  {
+    path: 'analytic/:user',
+    component: AnalyticView,
+    title: 'Action Utilisateur'
   },
   {
     path: 'home',

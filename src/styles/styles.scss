@@ -18,7 +18,6 @@ body {
   width: 100%;
 }
 
-
 .mat-mdc-raised-button.mat-primary {
   --mdc-protected-button-container-color: #1423DC;
   --mdc-protected-button-label-text-color: #fff;
@@ -59,58 +58,49 @@ mat-form-field.no-subscript {
     color:#000000 !important;
 }
 
-.vis-item.rest{
-  background-color: #3F51B5;
-  border-color: #3F51B5;
-  color:white !important;
+.vis-item {
+  color: white !important;
+  &.rest {
+    background-color: #3F51B5;
+    border-color: #3F51B5;
+  }
+  &.ftp {
+    background-color: #2196F3;
+    border-color: #2196F3;
+  }
+  &.ldap {
+    background-color: #00BCD4;
+    border-color: #00BCD4;
+  }
+  &.smtp {
+    background-color: #9C27B0;
+    border-color: #9C27B0;
+  }
+  &.database {
+    background-color: #a5673f;
+    border-color: #a5673f;
+  }
+  &.local {
+    background-color: #3b3b38;
+    border-color: #3b3b38;
+  }
+  &.action {
+    background-color: #FF6F61;
+    border-color: #FF6F61;
+  }
 }
 
-.vis-item.ftp{
-  background-color: #2196F3;
-  border-color: #2196F3;
-  color:white !important;
-}
-.vis-item.smtp{
-  background-color: #9C27B0;
-  border-color: #9C27B0;
-  color:white !important;
-}
-.vis-item.ldap{
-  background-color: #00BCD4;
-  border-color: #00BCD4;
-  color:white !important;
-}
-.vis-item.database{
-  background-color: #a5673f;
-  border-color: #a5673f;
-  color:white !important;
-}
-.vis-item.local{
-  background-color: #3b3b38;
-  border-color: #3b3b38;
-  color:white !important;
-}
-
-
-.vis-range.client-error{
+.vis-range.client-error {
   border-top: 4px #f9ad4e solid !important;
 }
-.vis-range.error{
+.vis-range.error {
   border-top: 4px #bb2124 solid !important;
 }
-.vis-dot.error{
+.vis-dot.error {
   border-color: #bb2124 !important;
 }
 
-.dot {
-  height: 15px;
-  width: 15px;
-  border-radius: 50%;
-  display: inline-block;
-  color:white;
-}
-
-.vis-custom-time { // makes markers not draggable 
+.vis-custom-time { // makes markers not draggable
   pointer-events: none;
 }
 
@@ -146,7 +136,7 @@ mat-form-field.loading {
   .mat-mdc-select-arrow {
     opacity: 0;
   }
-  
+
   mat-spinner.mdc-circular-progress {
     position: absolute;
     top: 50%;
@@ -177,6 +167,7 @@ mat-form-field.loading {
   align-items: center;
   justify-content: center;
 }
+
 .detail-table-loading{
   display: flex;
   gap: .5em;
@@ -204,7 +195,7 @@ mat-form-field.loading {
 
 //to be put in architecture compo
 .arrow_box{
-  display: flex; 
+  display: flex;
   gap: 0.5em;
   margin: 5px;
   flex-direction: column;
@@ -316,4 +307,29 @@ loading.hidden {
   font-size:.7em;
   margin:0 0 0 2px;
   opacity:.75
+}
+
+.no-data-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  background-color: #f5f5f5;
+  margin: 2rem;
+  border-radius: 8px;
+
+  mat-icon {
+    font-size: 48px;
+    height: 48px;
+    width: 48px;
+    margin-bottom: 1rem;
+    color: #9e9e9e;
+  }
+
+  p {
+    font-size: 1.2rem;
+    color: #757575;
+    text-align: center;
+  }
 }
