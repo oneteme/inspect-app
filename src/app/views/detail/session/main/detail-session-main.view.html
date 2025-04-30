@@ -3,14 +3,13 @@
         <mat-card style="width: 50vw; min-width: 50vw; border-left: 4px solid green"
                   [ngStyle]="{'border-left': session.exception?.type || session.exception?.message ? '4px solid red' : '4px solid green'}">
             <mat-card-title>
-                <span style="display: flex; align-items: center; gap: 0.5em">
-                    <mat-icon class="material-symbols-outlined">{{MAPPING_TYPE[type]?.icon}}</mat-icon>
+                <label-icon [icon]="MAPPING_TYPE[type]?.icon">
                     {{ session.name || 'N/A' }}
-                </span>
+                </label-icon>
                 <div class="right">
-                    <button mat-icon-button (click)="navigate($event,'tree')" matTooltip="Arbre d'appels">
-                        <mat-icon class="material-symbols-outlined">lan</mat-icon>
-                    </button>
+                  <button mat-icon-button [matMenuTriggerFor]="menuEndPoint">
+                    <mat-icon>more_vert</mat-icon>
+                  </button>
                 </div>
             </mat-card-title>
             <mat-card-content>
@@ -22,69 +21,50 @@
 
                 <div style="display: flex; align-items: center; gap: 0.5em; color: red; font-weight: 500; margin-top: 0.5em;"
                      *ngIf="session.exception?.type || session.exception?.message"
-                     [matTooltip]="session.exception?.type" TooltipPosition="below">
+                     [matTooltip]="session.exception?.type">
                     <mat-icon class="material-symbols-outlined" style="overflow: initial !important; width: 28px; height: 28px;">warning</mat-icon>
                     <div class="ellipsis">{{ session.exception?.message || session.exception?.type }}</div>
                 </div>
             </mat-card-content>
             <mat-card-footer>
-                <mat-icon style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
-                <div style="display: flex; align-items: center; gap: 0.5em">
-                    <a [style.pointer-events]="session.user ? 'auto' : 'none'"
-                       [routerLink]="'/dashboard/user/' + session.user" [queryParams]="{'env': instance.env}"
-                       matTooltip="Statistiques Utilisateur">
-                        {{ session.user || "N/A" }}
-                    </a>
-                    le {{ (session.start * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
-                </div>
-                <div class="right" [matTooltip]="((session.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss': 'fr')">
-                    en <span style="font-weight: bold">{{{ start: session.start, end: session.end } | duration }}</span>
-                </div>
+              <label-icon icon="person" [iconOutlined]="false" [size]="20">
+                  {{ session.user || "N/A" }}
+                  le {{ (session.start * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
+              </label-icon>
+              <div class="right" [matTooltip]="((session.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')">
+                  en <span style="font-weight: bold">{{{ start: session.start, end: session.end } | duration }}</span>
+              </div>
             </mat-card-footer>
         </mat-card>
         <mat-card style="width: 50vw;">
             <mat-card-title>
-              <div style="display: flex; align-items: center; gap: 0.5em">
-                <mat-icon class="material-symbols-outlined">widgets</mat-icon>
-                <div>
-                  <a *ngIf="session.type == 'VIEW'" [routerLink]="'/dashboard/client/'+ instance.name"
-                     [queryParams]="{'env': instance.env}" matTooltip="Statistiques Client">{{instance.name}}</a>
-                  <a *ngIf="session.type != 'VIEW'" [routerLink]="'/dashboard/server/'+ instance.name"
-                     [queryParams]="{'env': instance.env}" matTooltip="Statistiques Serveur">{{instance.name}}</a>
-                  <span style="font-size: 12px; font-style: italic; font-weight: normal; margin-left: 0.5em" [matTooltip]="instance.collector">{{instance.version}}</span>
-                </div>
-
-              </div>
+              <label-icon style="height: 48px" icon="sdk">
+                {{instance.name}}
+                <span style="font-size: 12px; font-style: italic; font-weight: normal; margin-left: 0.5em" [matTooltip]="instance.collector">{{instance.version}}</span>
+              </label-icon>
               <div class="right">
-                  <button [hidden]="session.type == 'VIEW'" mat-icon-button (click)="onClickDump($event)" matTooltip="Processus">
-                      <mat-icon class="material-symbols-outlined">view_timeline</mat-icon>
-                  </button>
+                <button mat-icon-button [matMenuTriggerFor]="menuServer">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
               </div>
             </mat-card-title>
-            <mat-card-content>
-                <div  style="display: flex; align-items: center;">
-                    <div style="margin-right: 1em; margin-left: 1em;">
-                        <mat-icon class="material-symbols-outlined">{{instance.type==="CLIENT"?"devices":"storage"}}</mat-icon>
-                    </div>
-                    <div>
-                        <a style="font-weight: 500; font-size: 14px;">
-                            {{instance.os}}
-                       </a>
-                       <div style="font-style: italic; font-size: 12px;">
-                           {{instance.re}}
-                       </div>
-                    </div>     
+            <mat-card-content style="margin-left: 1em;" >
+              <label-icon [icon]="instance.type==='CLIENT' ? 'devices' : 'storage'">
+                <div style="font-weight: 500; font-size: 14px;">
+                  {{instance.os}}
                 </div>
+                <div style="font-style: italic; font-size: 12px;">
+                  {{instance.re}}
+                </div>
+              </label-icon>
             </mat-card-content>
             <mat-card-footer>
-                <div style="display: flex; align-items: center; gap: 0.5em;font-style: italic; font-size: 14px;">
-                    <mat-icon style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
-                    {{instance.user || "N/A"}}
-                     le {{ (instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss': 'fr' }}
-                </div>
-                <div *ngIf="instance.end" class="right" [matTooltip]="((instance.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss': 'fr')">
-                  en <span style="font-weight: bold">{{((instance.end - instance.instant) | duration)}}</span>
-                </div>
+              <label-icon icon="person" [iconOutlined]="false" [size]="20">
+                {{instance.user || "N/A"}} le {{ (instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
+              </label-icon>
+              <div *ngIf="instance.end" class="right" [matTooltip]="((instance.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')">
+                en <span style="font-weight: bold">{{((instance.end - instance.instant) | duration)}}</span>
+              </div>
             </mat-card-footer>
         </mat-card>
     </div>
@@ -100,3 +80,24 @@
 <div *ngIf="isLoading && !session && !instance" style="width: 100%; height: calc(100vh - 50px - 1em); display: flex; flex-direction: row; align-items: center; justify-content: center; font-style: italic; gap: 0.5em">
     <mat-progress-spinner diameter="30" mode="indeterminate"></mat-progress-spinner> Chargement en cours...
 </div>
+
+<mat-menu #menuEndPoint="matMenu" xPosition="after">
+  <button (click)="_router.navigateOnClick($event, ['session', 'main', session.type, session.id, 'tree'])" mat-menu-item>
+    <mat-icon>lan</mat-icon>
+    Arbre d'appels
+  </button>
+  <button [disabled]="!session.user" *ngIf="session.type == 'VIEW'" (click)="_router.navigateOnClick($event, ['analytic', session.user], {queryParams: {env: instance.env, date: getDate(this.session.start * 1000).toISOString()}})" mat-menu-item><mat-icon class="material-symbols-outlined">web_traffic</mat-icon>Actions Utilisateur</button>
+  <button *ngIf="session.type == 'BATCH'" mat-menu-item [matMenuTriggerFor]="menuStatistic"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>Statistiques</button>
+  <button [disabled]="!session.user" *ngIf="session.type != 'BATCH'" (click)="_router.navigateOnClick($event, ['dashboard', 'user', session.user])" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>Statistiques Utilisateur</button>
+</mat-menu>
+
+<mat-menu #menuStatistic="matMenu">
+  <button (click)="_router.navigateOnClick($event, ['dashboard', 'server', instance.name], {queryParams: {tab: 1, batch_name: session.name, env: instance.env}})" mat-menu-item><mat-icon class="material-symbols-outlined">manufacturing</mat-icon>Batch</button>
+  <button [disabled]="!session.user" (click)="_router.navigateOnClick($event, ['dashboard', 'user', session.user])" mat-menu-item><mat-icon>person</mat-icon>Utilisateur</button>
+</mat-menu>
+
+<mat-menu #menuServer="matMenu">
+  <button *ngIf="session.type != 'VIEW'" (click)="_router.navigateOnClick($event, ['session', instance.name, 'dump'], {queryParams: {env: instance.env, date: getDate(session.start * 1000).toISOString()}})" mat-menu-item><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Processus</button>
+  <button *ngIf="session.type != 'VIEW'" (click)="_router.navigateOnClick($event, ['dashboard', 'server', instance.name], {queryParams: {env: instance.env}})" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>Statistiques Serveur</button>
+  <button *ngIf="session.type == 'VIEW'" (click)="_router.navigateOnClick($event, ['dashboard', 'client', instance.name], {queryParams: {env: instance.env}})" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>Statistiques Client</button>
+</mat-menu>

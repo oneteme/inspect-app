@@ -12,6 +12,8 @@ import { SizePipe } from './pipe/size.pipe';
 import {TitleCasePipe} from "./pipe/title-case.pipe";
 import {ExceptionTypePipe} from "./pipe/exception-type.pipe";
 import {TruncStringPipe} from "./pipe/trunc-string.pipe";
+import {TimelineComponent} from "./_component/timeline/timeline.component";
+import {HeaderSectionComponent} from "./_component/header-section/header-section.component";
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -45,7 +47,9 @@ export const MY_DATE_FORMATS = {
     SizePipe,
     TitleCasePipe,
     ExceptionTypePipe,
-    TruncStringPipe
+    TruncStringPipe,
+    TimelineComponent,
+    HeaderSectionComponent
   ],
   exports: [
     MaterialModule,
@@ -57,7 +61,9 @@ export const MY_DATE_FORMATS = {
     SizePipe,
     TitleCasePipe,
     ExceptionTypePipe,
-    TruncStringPipe
+    TruncStringPipe,
+    TimelineComponent,
+    HeaderSectionComponent
   ]
 })
 export class SharedModule { }

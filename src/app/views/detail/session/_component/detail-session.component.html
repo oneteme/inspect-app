@@ -1,88 +1,58 @@
-<div [hidden]="!session.restRequests" style="margin-bottom: 2em;">
-    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
-        <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
-        <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
-            <mat-icon>call_made</mat-icon>
-            <div  [matBadgeHidden]="session.restRequests?.length==0" [matBadge]="session.restRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.restRequests?.length | numberFormat).length > 2">API</div>
-            
-        </div>
-        <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
-    </div>
+<div [hidden]="!session.restRequests?.length" style="margin-bottom: 2em;">
+    <header-section icon="call_made" [iconOutlined]="false">
+        <div  [matBadgeHidden]="session.restRequests?.length==0" [matBadge]="session.restRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.restRequests?.length | numberFormat).length > 2">API</div>
+    </header-section>
     <rest-table  [requests]="session.restRequests"
                 (onClickRow)="selectedRequest($event)"></rest-table>
 </div>
-<div [hidden]="!session.stages"  style="margin-bottom: 2em;">
-    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
-        <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
-        <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
-            <mat-icon>memory</mat-icon>
-            <div [matBadgeHidden]="session.stages?.length==0" [matBadge]="session.stages?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.stages?.length | numberFormat).length > 2">LOCAL</div>
-        </div>
-        <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
-    </div>
+<div [hidden]="!session.stages?.length"  style="margin-bottom: 2em;">
+    <header-section icon="memory" [iconOutlined]="false">
+        <div [matBadgeHidden]="session.stages?.length==0" [matBadge]="session.stages?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.stages?.length | numberFormat).length > 2">LOCAL</div>
+    </header-section>
     <local-table [requests]="session.stages" ></local-table>
 </div>
-<div [hidden]="!session.ftpRequests"  style="margin-bottom: 2em;">
-    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
-        <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
-        <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
-            <mat-icon class="material-symbols-outlined">smb_share</mat-icon>
-            <div [matBadgeHidden]="session.ftpRequests?.length==0" [matBadge]="session.ftpRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.ftpRequests?.length | numberFormat).length > 2">FTP</div>
-        </div>
-        <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
-    </div>
+<div [hidden]="!session.ftpRequests?.length"  style="margin-bottom: 2em;">
+    <header-section icon="smb_share">
+        <div [matBadgeHidden]="session.ftpRequests?.length==0" [matBadge]="session.ftpRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.ftpRequests?.length | numberFormat).length > 2">FTP</div>
+    </header-section>
     <ftp-table [requests]="session.ftpRequests" 
                (onClickRow)="selectedFtp($event)">
     </ftp-table>
 </div>
-<div [hidden]="!session.mailRequests"  style="margin-bottom: 2em;">
-    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
-        <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
-        <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
-            <mat-icon class="material-symbols-outlined">outgoing_mail</mat-icon>
-            <div [matBadgeHidden]="session.mailRequests?.length==0" [matBadge]="session.mailRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.mailRequests?.length | numberFormat).length > 2">SMTP</div>
-        </div>
-        <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
-    </div>
+<div [hidden]="!session.mailRequests?.length"  style="margin-bottom: 2em;">
+    <header-section icon="outgoing_mail">
+        <div [matBadgeHidden]="session.mailRequests?.length==0" [matBadge]="session.mailRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.mailRequests?.length | numberFormat).length > 2">SMTP</div>
+    </header-section>
     <smtp-table [requests]="session.mailRequests" 
                 (onClickRow)="selectedSmtp($event)">
     </smtp-table>
 </div>
 
-<div [hidden]="!session.ldapRequests" style="margin-bottom: 2em;">
-    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
-        <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
-        <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
-            <mat-icon class="material-symbols-outlined">user_attributes</mat-icon>
-            <div [matBadgeHidden]="session.ldapRequests?.length==0" [matBadge]="session.ldapRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.ldapRequests?.length | numberFormat).length > 2">LDAP</div>
-        </div>
-        <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
-    </div>
+<div [hidden]="!session.ldapRequests?.length" style="margin-bottom: 2em;">
+    <header-section icon="user_attributes">
+        <div [matBadgeHidden]="session.ldapRequests?.length==0" [matBadge]="session.ldapRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.ldapRequests?.length | numberFormat).length > 2">LDAP</div>
+    </header-section>
     <ldap-table [requests]="session.ldapRequests"
                 (onClickRow)="selectedLdap($event)">
     </ldap-table>
 </div>
-<div [hidden]="!session.databaseRequests" style="margin-bottom: 2em;">
-    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center;  margin-bottom:  0.5em;">
-        <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
-        <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
-            <mat-icon class="material-symbols-outlined">Database</mat-icon>
-            <div [matBadgeHidden]="session.databaseRequests?.length==0" [matBadge]="(session.databaseRequests?.length | numberFormat:0:'≈')" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.databaseRequests?.length | numberFormat).length > 2">BDD</div>
-        </div>
-        <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
-    </div>
+<div [hidden]="!session.databaseRequests?.length" style="margin-bottom: 2em;">
+    <header-section icon="database">
+        <div [matBadgeHidden]="session.databaseRequests?.length==0" [matBadge]="(session.databaseRequests?.length | numberFormat:0:'≈')" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.databaseRequests?.length | numberFormat).length > 2">BDD</div>
+    </header-section>
     <database-table [requests]="session.databaseRequests" 
                     (onClickRow)="selectedQuery($event)">
     </database-table>
 </div>
-<div *ngIf="(!completedSession)||(completedSession?.databaseRequests?.length || completedSession?.restRequests?.length || completedSession?.stages?.length || completedSession?.ldapRequests?.length || completedSession?.ftpRequests?.length || completedSession?.mailRequests?.length)" style="margin-bottom: 1em;"  >
-    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
-        <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
-        <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
-            <mat-icon class="material-symbols-outlined">view_timeline</mat-icon>
-            Chronologie
-        </div>
-        <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
-    </div>
-    <timeline-table [request]="completedSession" [instance]="instance"></timeline-table>
+
+<div [hidden]="!session['userActions']?.length" style="margin-bottom: 2em;">
+  <header-section icon="web_traffic">
+    <div [matBadgeHidden]="session['userActions']?.length==0" [matBadge]="(session['userActions']?.length | numberFormat:0:'≈')" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session['userActions']?.length | numberFormat).length > 2">Actions Utilisateur</div>
+  </header-section>
+  <action-table [requests]="session['userActions']">
+  </action-table>
 </div>
+
+<detail-timeline [request]="completedSession"
+                 [instance]="instance">
+</detail-timeline>

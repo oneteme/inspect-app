@@ -1,5 +1,15 @@
 import { ChartProvider, field, values } from "@oneteme/jquery-core";
 import { DashboardComponent } from "./dashboard/dashboard.component";
+import {UserAction} from "../model/trace.model";
+
+export const INFINITY = new Date(9999,12,31).getTime();
+
+export const ANALYTIC_MAPPING : {[key: string]: (param: UserAction) => string} = {
+    DOMContentLoaded: (param: UserAction) => `L'utilisateur a chargé la page.`,
+    click: (param: UserAction) => `L'utilisateur a cliqué sur l'êlement "${param.name}" de type "${param.nodeName}".`,
+    scroll: (param: UserAction) => `L'utilisateur a scrollé sur la page.`,
+    change: (param: UserAction) => `L'utilisateur a changé la valeur de l'élement "${param.name}" de type "${param.nodeName}".`
+};
 
 export class Constants {
 

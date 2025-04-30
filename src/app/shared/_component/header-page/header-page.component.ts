@@ -7,6 +7,7 @@ import { Component, Input, TemplateRef } from "@angular/core";
 })
 export class HeaderPageComponent {
     @Input() titleIcon: string;
+    @Input() iconOutlined: boolean;
     @Input('ui-title') title: string;
     @Input('ui-subtitle') subTitle: string;
     @Input() templateSubTitle: TemplateRef<any>; 

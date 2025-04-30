@@ -31,6 +31,7 @@ export interface MainSession extends LocalRequest {
     ftpRequests: Array<FtpRequest>;
     mailRequests: Array<MailRequest>;
     ldapRequests: Array<NamingRequest>;
+    userActions: Array<UserAction>;
 }
 
 export interface RestRequest extends SessionStage<number> {
@@ -91,6 +92,13 @@ export interface LocalRequest extends SessionStage<boolean> {
     exception: ExceptionInfo;
 }
 
+export interface UserAction {
+    name: string;
+    nodeName: string;
+    type: string;
+    start: Date;
+}
+
 export interface NamingRequest extends SessionStage<boolean> {
     protocol: string;
     host: string;
@@ -142,8 +150,7 @@ export interface SessionStage<T> {
     end: number;
     threadName: string;
     status: T
-    exception?: ExceptionInfo
-
+    exception?: ExceptionInfo;
     idRequest?: number;
 }
 

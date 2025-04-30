@@ -63,4 +63,12 @@ export class EnvRouter {
         return window.open(url, target, features);
     }
 
+    navigateOnClick(event: MouseEvent, commands: any[], extras?: NavigationExtras) {
+        if (event.ctrlKey) {
+            let url = this.createUrlTree(commands, extras).toString();
+            this.open(`#/${url}`, '_blank');
+        } else {
+            this.navigate(commands, extras);
+        }
+    }
 }

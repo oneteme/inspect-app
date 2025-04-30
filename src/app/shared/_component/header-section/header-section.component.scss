@@ -1,0 +1,19 @@
+:host {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  align-content: center;
+  margin-bottom: 0.5em;
+  font-weight: 500;
+}
+
+mat-divider {
+  flex: 1 1 0;
+  &.left {
+    margin-right: 1em;
+  }
+  &.right {
+      margin-left: 1em;
+  }
+}
