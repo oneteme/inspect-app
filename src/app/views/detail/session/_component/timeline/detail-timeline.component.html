@@ -10,7 +10,7 @@
     <div *ngIf="request.ldapRequests?.length" class="item"><div class="dot ldap"></div><b>LDAP</b></div>
     <div *ngIf="request.databaseRequests?.length" class="item"><div class="dot bdd"></div><b>BDD</b></div>
     <div *ngIf="request.stages?.length" class="item"><div class="dot local"></div><b>LOCAL</b></div>
-    <div  *ngIf="request['userActions']?.length" class="item"><div class="dot action"></div><b>Actions utilisateur</b></div>
+    <div  *ngIf="request['userActions']?.length" class="item"><div class="dot action"></div><b>Action</b></div>
   </div>
 </app-timeline>
 <div *ngIf="!instance || !request" class="detail-table-loading mat-elevation-z8" >

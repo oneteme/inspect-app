@@ -1,4 +1,4 @@
-<header-page titleIcon="web_traffic" [ui-title]="'Actions de l\'utilisateur ' + params.user">
+<header-page titleIcon="web_traffic" [iconOutlined]="true" [ui-title]="'Actions de l\'utilisateur ' + params.user">
     <div class="header-right" [formGroup]="filterForm">
         <mat-form-field style="width: 200px" class="no-subscript md-3" appearance="outline">
             <mat-label>Choisir une date</mat-label>
@@ -16,9 +16,13 @@
 </header-page>
 
 <div class="timeline">
-    <div *ngIf="sessions.length === 0" class="no-data-container">
+    <div *ngIf="sessions.length === 0 && !loading" class="no-data-container">
         <mat-icon>info</mat-icon>
         <p>Aucune donnée disponible pour cet utilisateur à cette date</p>
+    </div>
+    <div *ngIf="sessions.length === 0 && loading" class="no-data-container">
+      <p>En cours de chargement</p>
+      <mat-progress-bar style="width: 50%" mode="query"></mat-progress-bar>
     </div>
     <div *ngFor="let session of sessions" class="timeline-section" (click)="onClickSession($event, session)">
         <div style="margin-bottom: 1rem; margin-top: 1rem;">
