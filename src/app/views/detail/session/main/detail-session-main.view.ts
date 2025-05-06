@@ -71,8 +71,10 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
             .subscribe();
     }
 
-    getDate(start: number) {
-        return new Date(start);
+    getDate(start: number, complete: boolean) {
+        let date = new Date(start);
+        if(complete) {return date;}
+        else { return new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours(), date.getMinutes(), 0, 0); }
     }
 
     ngOnDestroy() {

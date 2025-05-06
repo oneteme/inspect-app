@@ -47,7 +47,7 @@
 
 <div [hidden]="!session['userActions']?.length" style="margin-bottom: 2em;">
   <header-section icon="web_traffic">
-    <div [matBadgeHidden]="session['userActions']?.length==0" [matBadge]="(session['userActions']?.length | numberFormat:0:'≈')" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session['userActions']?.length | numberFormat).length > 2">Actions Utilisateur</div>
+    <div [matBadgeHidden]="session['userActions']?.length==0" [matBadge]="(session['userActions']?.length | numberFormat:0:'≈')" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session['userActions']?.length | numberFormat).length > 2">Action</div>
   </header-section>
   <action-table [requests]="session['userActions']">
   </action-table>

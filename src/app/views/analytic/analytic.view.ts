@@ -1,7 +1,7 @@
 import {Component, inject, OnDestroy} from "@angular/core";
 import {AnalyticService} from "../../service/analytic.service";
 import {MainSession, UserAction} from "../../model/trace.model";
-import {combineLatest, distinctUntilChanged, filter, Observable, Subject, takeUntil} from "rxjs";
+import {combineLatest, distinctUntilChanged, filter, finalize, Observable, Subject, takeUntil} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {EnvRouter} from "../../service/router.service";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
@@ -44,6 +44,8 @@ export class AnalyticView implements OnDestroy {
 
     params: Partial<{env: string, user: string, date: Date, offset: number, limit: number}> = {};
 
+    loading: boolean;
+
     constructor() {
         this.onRouteChange();
         this.onChangeForm();
@@ -55,8 +57,9 @@ export class AnalyticView implements OnDestroy {
     }
 
     getUserActions() {
+        this.loading = true;
         this._analyticService.getUserActionsByUser(this.params.user, this.params.date, this.params.offset, this.params.limit)
-            .pipe(takeUntil(this.$destroy))
+            .pipe(takeUntil(this.$destroy), finalize(() => this.loading = false))
             .subscribe({
                 next: result => {
                     this.sessions = result;
@@ -100,8 +103,7 @@ export class AnalyticView implements OnDestroy {
                 );
             })
         ).subscribe(d => {
-            console.log(d);
-            this._router.navigate(['/analytic-poc', d.user], {
+            this._router.navigate(['/analytic', d.user], {
                 queryParams: {date: d.date.toISOString(), env: this.params.env}
             });
         });
