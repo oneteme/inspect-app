@@ -44,9 +44,9 @@
             <div class="content">
                 <div class="dot"></div>
                 <span class="timestamp">{{userAction.start * 1000 | date: 'dd/MM/yyyy à HH:mm:ss': 'fr'}}</span>
-                <span style="width: 200px">{{userAction.type}}</span>
+                <span style="width: 200px">{{ANALYTIC_MAPPING[userAction.type] ? ANALYTIC_MAPPING[userAction.type].label : userAction.type}}</span>
                 <mat-icon>arrow_right_alt</mat-icon>
-                <p>{{ANALYTIC_MAPPING[userAction.type] ? ANALYTIC_MAPPING[userAction.type](userAction) : 'Action non mappé'}}</p>
+                <p>{{ANALYTIC_MAPPING[userAction.type] ? ANALYTIC_MAPPING[userAction.type].text(userAction) : 'Action non mappé'}}</p>
             </div>
             <div *ngIf="!last" class="border"></div>
         </div>

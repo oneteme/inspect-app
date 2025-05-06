@@ -3,6 +3,7 @@ import {MailRequest, UserAction} from "../../../../../model/trace.model";
 import {MatTableDataSource} from "@angular/material/table";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
+import {ANALYTIC_MAPPING} from "../../../../constants";
 
 @Component({
     selector: 'action-table',
@@ -10,6 +11,7 @@ import {MatSort} from "@angular/material/sort";
     styleUrls: ['./action-table.component.scss']
 })
 export class ActionTableComponent {
+    protected readonly ANALYTIC_MAPPING = ANALYTIC_MAPPING;
     displayedColumns: string[] = ['type', 'node', 'name', 'date'];
     dataSource: MatTableDataSource<UserAction> = new MatTableDataSource();
 

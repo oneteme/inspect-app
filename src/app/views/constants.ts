@@ -4,11 +4,23 @@ import {UserAction} from "../model/trace.model";
 
 export const INFINITY = new Date(9999,12,31).getTime();
 
-export const ANALYTIC_MAPPING : {[key: string]: (param: UserAction) => string} = {
-    DOMContentLoaded: (param: UserAction) => `L'utilisateur a chargé la page.`,
-    click: (param: UserAction) => `L'utilisateur a cliqué sur l'êlement "${param.name}" de type "${param.nodeName}".`,
-    scroll: (param: UserAction) => `L'utilisateur a scrollé sur la page.`,
-    change: (param: UserAction) => `L'utilisateur a changé la valeur de l'élement "${param.name}" de type "${param.nodeName}".`
+export const ANALYTIC_MAPPING : {[key: string]: {label: string, text: (param: UserAction) => string}} = {
+    DOMContentLoaded: {
+        label: 'Initialisation',
+        text: (param: UserAction) => `Chargement de la page.`
+    },
+    click: {
+        label: 'Click',
+        text: (param: UserAction) => `Clique sur l'êlement "${param.name}" de type "${param.nodeName}".`
+    },
+    scroll: {
+        label: 'Scroll',
+        text: (param: UserAction) => `Scroll sur la page.`
+    },
+    change: {
+        label: 'Change',
+        text: (param: UserAction) => `Changement sur l'êlement "${param.name}" de type "${param.nodeName}".`
+    }
 };
 
 export class Constants {

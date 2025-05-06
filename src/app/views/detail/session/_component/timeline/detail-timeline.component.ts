@@ -128,7 +128,7 @@ export class DetailTimelineComponent implements OnChanges {
                 end: end,
                 title: c.typeTimeline == 'action' ?
                     `${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')}</span><br>
-                     <h4>${this.ANALYTIC_MAPPING[c['type']](c)}</h4>` :
+                     <h4>${this.ANALYTIC_MAPPING[c['type']].text(c)}</h4>` :
                     `${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${c.end ? this.pipe.transform(new Date(end), 'HH:mm:ss.SSS'):"?"}</span> ${c.end ? `(${this.durationPipe.transform({start: c.start, end: end / 1000})})`:""}<br>
                      <h4>${c['path'] || ''}</h4>`,
                 className: c.typeTimeline != 'stage' ? c.typeTimeline : "",
