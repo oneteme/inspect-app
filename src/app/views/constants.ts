@@ -478,14 +478,22 @@ export class Constants {
     };
 
     static readonly MAPPING_TYPE: {[key: string]: {title: string, icon: string}} = {
-        rest: {title: 'Appel d\'API', icon: 'call_received'},
         request: {title: 'Request', icon: 'call_received'},
+        rest: {title: 'Appel d\'API entrant', icon: 'call_received'},
         batch: {title: 'Lancement de Batch', icon: 'manufacturing'},
         startup: {title: 'Lancement de Serveur', icon: 'restart_alt'},
         view: {title: 'Navigation', icon: 'ads_click'},
         dashboard: {title:'Page d\'Accueil', icon: 'home'},
-        deploiment: {title:'Versions déployées', icon:'deployed_code'}
+        deploiment: {title:'Versions déployées', icon:'deployed_code'},
     }
+    static readonly REQUEST_MAPPING_TYPE: {[key: string]: {title: string, icon: string}} = {
+        rest: {title: 'Appel d\'API sortant', icon: 'api'},
+        database: {title: 'Requêtes de base de données', icon: 'storage'},
+        ftp: {title: 'Transferts de fichiers', icon: 'cloud_upload'},
+        smtp: {title: 'Envoi d\'e-mails', icon: 'email'},
+        ldap: {title: 'Requêtes LDAP', icon: 'account_tree'},
+    }
+
 
     
     static REST_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<string, number> = {

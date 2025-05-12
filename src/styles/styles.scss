@@ -317,3 +317,7 @@ loading.hidden {
   margin:0 0 0 2px;
   opacity:.75
 }
+
+.md-2 .mat-mdc-form-field-infix { // remove this
+  max-height: 40px !important;
+}

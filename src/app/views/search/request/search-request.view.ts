@@ -5,7 +5,7 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import {Location} from '@angular/common';
 import {ActivatedRoute, Params} from '@angular/router';
-import {BehaviorSubject, finalize, Observable, Subscription} from 'rxjs';
+import {BehaviorSubject, combineLatest, finalize, Observable, Subscription} from 'rxjs';
 import {extractPeriod, Utils} from 'src/app/shared/util';
 import {TraceService} from 'src/app/service/trace.service';
 import {app, makeDatePeriod,} from 'src/environments/environment';
@@ -51,28 +51,25 @@ import {LdapRequestService} from "../../../service/jquery/ldap-request.service";
   ]
 })
 export class SearchRequestView implements OnInit, OnDestroy {
-  private _router = inject(EnvRouter);
-  private _instanceService = inject(InstanceService);
-  private _restRequestService = inject(RestRequestService);
-  private _databaseRequestService = inject(DatabaseRequestService);
-  private _ftpRequestService = inject(FtpRequestService);
-  private _smtpRequestService = inject(smtpRequestService);
-  private _ldapRequestService = inject(LdapRequestService);
-  private _activatedRoute = inject(ActivatedRoute);
-  private _location = inject(Location);
+  private readonly _router = inject(EnvRouter);
+  private readonly _restRequestService = inject(RestRequestService);
+  private readonly _databaseRequestService = inject(DatabaseRequestService);
+  private readonly _ftpRequestService = inject(FtpRequestService);
+  private readonly _smtpRequestService = inject(smtpRequestService);
+  private readonly _ldapRequestService = inject(LdapRequestService);
+  private readonly _activatedRoute = inject(ActivatedRoute);
+  private readonly _location = inject(Location);
 
 
-  MAPPING_TYPE = Constants.MAPPING_TYPE;
-  filterConstants = FilterConstants;
+  REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
   nameDataList: any[];
-  displayedColumns: string[] = ['status', 'app_name', 'method/path', 'query', 'start', 'durée', 'user'];
-  dataSource: MatTableDataSource<RestRequest|DatabaseRequest|FtpRequest|MailRequest|NamingRequest> = new MatTableDataSource();
+  displayedColumns: string[] = ['rangestatus', 'app_name', 'method/path', 'query', 'start', 'durée', 'user'];
+  requests:any[];
   isLoading = true;
   serverNameIsLoading = true;
-  
   requestFilterForm = new FormGroup({
-    appname: new FormControl([]),
-    requestType : new FormControl('REST'),
+    host: new FormControl([]),
+    rangestatus: new FormControl([]),
     dateRangePicker: new FormGroup({
       start: new FormControl<Date | null>(null, [Validators.required]),
       end: new FormControl<Date | null>(null, [Validators.required])
@@ -80,17 +77,22 @@ export class SearchRequestView implements OnInit, OnDestroy {
   });
 
   filterTable = new Map<string, any>();
-  queryParams: Partial<QueryParams> = {};
-  subscriptions: Subscription[] = [];
-  subscription: Subscription;
 
-  seviceType: { [key: string]: (params :any) => Observable<RestRequest[]|DatabaseRequest[]|FtpRequest[]|MailRequest[]|NamingRequest[]> } =
+  queryParams: Partial<QueryParams> = {};
+  params: Partial<Params> = {};
+  subscriptions: Subscription[] = [];
+  hostSubscription: Subscription;
+  RequestSubscription: Subscription;
+  seviceType: { [key: string]: {service : RestRequestService | DatabaseRequestService | FtpRequestService | smtpRequestService | LdapRequestService,
+                                filters: {icon: string, label: string,color: string, value: any}[]
+  }
+  } =
       {
-        "REST": (params) => this._restRequestService.getRestRequests(params),
-        "JDBC": (params) => this._databaseRequestService.getDatabaseRequest(params),
-        "FTP": (params) => this._ftpRequestService.getftp(params),
-        "SMTP": (params) => this._smtpRequestService.getsmtp(params),
-        "LDAP": (params) => this._ldapRequestService.getLdap(params),
+        "rest": { service: this._restRequestService, filters:  [{icon: 'warning', label: '5xx',color:'#bb2124', value:'5xx'}, {icon: 'error', label: '4xx',color:'#f9ad4e', value:'4xx'}, {icon: 'done', label: '2xx',color:'#22bb33', value:'2xx'}]},
+        "database": { service: this._databaseRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: false}, {icon: 'done', label: 'OK',color:'#22bb33', value: true}] },
+        "ftp" :  { service: this._ftpRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: false}, {icon: 'done', label: 'OK',color:'#22bb33', value: true}] },
+        "smtp": { service: this._smtpRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: false}, {icon: 'done', label: 'OK',color:'#22bb33', value: true}] },
+        "ldap": { service: this._ldapRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: false}, {icon: 'done', label: 'OK',color:'#22bb33', value: true}] },
       }
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -100,7 +102,13 @@ export class SearchRequestView implements OnInit, OnDestroy {
     this.requestFilterForm.controls.dateRangePicker.controls.end.updateValueAndValidity({onlySelf: true})
     let start = this.requestFilterForm.controls.dateRangePicker.controls.start.value;
     let end = this.requestFilterForm.controls.dateRangePicker.controls.end.value || null;
+    console.log(this.requestFilterForm.controls.dateRangePicker.controls.end.valid)
     this.queryParams.period = new IPeriod(start, end);
+    if(start && end /*&& this.requestFilterForm.controls.dateRangePicker.controls.end.valid && start != this.queryParams.period.start*/){
+      console.log("getting host from start ")
+      this.getHosts()
+    }
+
   }
 
 
@@ -108,48 +116,50 @@ export class SearchRequestView implements OnInit, OnDestroy {
     this.requestFilterForm.controls.dateRangePicker.controls.start.updateValueAndValidity({onlySelf: true})
     let start = this.requestFilterForm.controls.dateRangePicker.controls.start.value || null;
     let end = this.requestFilterForm.controls.dateRangePicker.controls.end.value;
+
     this.queryParams.period = new IPeriod(start, end ? new Date(end.getFullYear(), end.getMonth(), end.getDate(), end.getHours(), end.getMinutes() + 1) : null);
+    if(start && end /*&& end != this.queryParams.period.end*/){
+      console.log("getting host from end ")
+      this.getHosts()
+    }
   }
 
-  onChangeServer($event){
-    this.queryParams.servers = this.requestFilterForm.controls.appname.value;
+  onChangeHost($event){
+    this.queryParams.hosts = this.requestFilterForm.controls.host.value;
+  }
+  onChangeStatus($event){
+    /*if(this.requestFilterForm.controls.rangestatus.value.length == this.seviceType[this.params.type].filters.length) { // might remove this ? or improve it ?
+      this.requestFilterForm.controls.rangestatus.setValue([]);
+    }*/
+    this.queryParams.rangestatus = this.requestFilterForm.controls.rangestatus.value && this.requestFilterForm.controls.rangestatus.value.map((f:{icon: string, label: string,color: string, value: any}) => f.value)
+
+    console.log(this.queryParams.buildParams())
   }
 
-  onChangeRequestType($event){
-    this.queryParams.requestType = this.requestFilterForm.controls.requestType.value;
-  }
+
 
   constructor() {
 
-    this.subscriptions.push(this._activatedRoute.queryParams
-      .subscribe({
-        next: (params: Params) => {
-           if(params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.env ||  app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server],!params.requestType ? "REST" : params.requestType)
-           if(!params.start && !params.end)  {
+    this.subscriptions.push(combineLatest([
+      this._activatedRoute.params,
+      this._activatedRoute.queryParams
+      ]).subscribe({
+      next: ([params, queryParams]) => {
+          this.params.type = params.type || 'rest';
+          if(queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env ||  app.defaultEnv,null,!queryParams.host ? [] : Array.isArray(queryParams.host) ? queryParams.host : [queryParams.host],!queryParams.rangestatus ? [/*this.seviceType[this.params.type].filters[0].value*/]: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] )
+          if(!queryParams.start && !queryParams.end){
             let period;
-            if(params.step && params.from){
-                period = new IStepFrom(params.step, params.from);
-            } else if(params.step){
-                period = new IStep(params.step);
+            if(queryParams.step && queryParams.from){
+                period = new IStepFrom(queryParams.step, queryParams.from);
+            } else if(queryParams.step){
+                period = new IStep(queryParams.step);
             }
-            this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), params.env || app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server],!params.requestType ? "REST" : params.requestType);
+            this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.env || app.defaultEnv, null, !queryParams.host ? [] : Array.isArray(queryParams.host) ? queryParams.host : [queryParams.host],!queryParams.rangestatus ? [/*this.seviceType[this.params.type].filters[0].value*/]: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] );
           }
-          this.patchRequestTypeValue(this.queryParams.requestType);
-          this.patchServerValue(this.queryParams.servers);
+          this.patchStatusValue(this.queryParams.rangestatus)
+          this.patchHostValue(this.queryParams.hosts);
           this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
-
-
-          this.subscriptions.push(this._instanceService.getApplications('SERVER')
-            .pipe(finalize(()=> this.serverNameIsLoading = false))
-            .subscribe({
-              next: res => {
-                this.nameDataList = res.map(r => r.appName);
-                this.patchServerValue(this.queryParams.servers);
-              }, error: (e) => {
-                console.log(e)
-              }
-            }));
-          // add type
+          this.getHosts();
           this.getRequests();
           this._location.replaceState(`${this._router.url.split('?')[0]}?${this.queryParams.buildPath()}`);
         }
@@ -166,6 +176,8 @@ export class SearchRequestView implements OnInit, OnDestroy {
 
   search() {
     if (this.requestFilterForm.valid) {
+      this.queryParams.buildParams()
+      console.log(this.queryParams)
       if(!shallowEqual(this._activatedRoute.snapshot.queryParams, this.queryParams.buildParams())) {
         this._router.navigate([], {
           relativeTo: this._activatedRoute,
@@ -180,30 +192,45 @@ export class SearchRequestView implements OnInit, OnDestroy {
     }
   }
 
+  getHosts(){
+    if(this.hostSubscription){
+        this.hostSubscription.unsubscribe();
+    }
+    this.nameDataList =null;
+    this.serverNameIsLoading =true;
+    this.hostSubscription = this.seviceType[this.params.type].service.getHost({ env: this.queryParams.env, start: this.queryParams.period.start, end: this.queryParams.period.end, type: 'SERVER'})
+        .pipe(finalize(()=> this.serverNameIsLoading = false))
+        .subscribe({
+          next: res => {
+            this.nameDataList = res.map(r => r.host);
+            this.patchHostValue(this.queryParams.hosts);
+          }, error: (e) => {
+            console.log(e)
+          }
+        });
+  }
+
   getRequests() {
-    if(this.subscription) this.subscription.unsubscribe();
+
+    if(this.RequestSubscription){
+      this.RequestSubscription.unsubscribe();
+      this.isLoading =false;
+    }
     let params = {
       'env': this.queryParams.env,
-      'appname': this.queryParams.servers,
+      'host': this.queryParams.hosts,
+      'rangestatus': this.queryParams.rangestatus,
       'start': this.queryParams.period.start.toISOString(),
       'end': this.queryParams.period.end.toISOString()
     };
-
+    this.requests = null;
     this.isLoading = true;
-    this.dataSource = new MatTableDataSource([]);
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort;
-    this.subscription = this.seviceType[this.queryParams.requestType](params)
+    this.RequestSubscription = (<any>this.seviceType[this.params.type]).service.getRequests(params)
+      .pipe(finalize(()=> this.isLoading = false))
       .subscribe({
         next: (d: any) => {
           if (d) {
-            this.dataSource = new MatTableDataSource(d);
-            this.dataSource.paginator = this.paginator;
-            this.dataSource.sort = this.sort;
-            this.dataSource.sortingDataAccessor = sortingDataAccessor;
-            this.dataSource.filterPredicate = filterPredicate;
-            this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
-            this.dataSource.paginator.pageIndex = 0;
+            this.requests = d
           }
           this.isLoading = false;
         },
@@ -222,41 +249,86 @@ export class SearchRequestView implements OnInit, OnDestroy {
     }, { emitEvent: false });
   }
 
-  patchServerValue(servers: any[]) {
+  patchHostValue(hosts: any[]) {
     this.requestFilterForm.patchValue({
-      appname: servers
+      host: hosts
     },{ emitEvent: false })
   }
 
-  patchRequestTypeValue(requestType: string){
+  patchStatusValue(rangestatus:any[]){
     this.requestFilterForm.patchValue({
-      requestType: requestType,
-    },  { emitEvent: false });
+      rangestatus: this.seviceType[this.params.type].filters.filter((f:any)=> rangestatus.includes(f.value))
+    },{ emitEvent: false })
   }
 
-  selectedRequest(event: MouseEvent, row: any) {
-    if (event.ctrlKey) {
-      this._router.open(`#/session/rest/${row}`, '_blank')
+  selectedRestRequest(event: { event: MouseEvent, row: any }) {
+    event.event.stopPropagation();
+    if (event.event.ctrlKey) {
+      this._router.open(`#/session/rest/${event.row}`, '_blank')
     } else {
-      this._router.navigate(['/session/rest', row], {
-        queryParams: { 'env': this.queryParams.env }
-      });
+      this._router.navigate(['/session/rest', event.row]);
     }
   }
 
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.filterTable.set('filter', filterValue.trim().toLowerCase());
-    this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
+
+  selectedSmtp(event: { event: MouseEvent, row: any }) { // TODO finish this
+    console.log(event)
+    if (event.row) {
+      let segment = 'rest';
+      if(event.row.type) segment = `main/${event.row.type}`;
+      if (event.event.ctrlKey) {
+        this._router.open(`#/session/${segment}/${event.row.id}/smtp/${event.row.idRequest}`, '_blank',)
+      } else {
+        console.log(`#/session/${segment}/${event.row.id}/smtp/${event.row.idRequest}`)
+        this._router.navigate([`/session/${segment}`, event.row.id, 'smtp', event.row.idRequest], {
+          queryParams: { env: this.queryParams.env }
+        });
+      }
     }
   }
 
-  toggleFilter(filter: string[]) {
-    this.filterTable.set('status', filter);
-    this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
+  selectedLdap(event: { event: MouseEvent, row: any }) { // TODO finish this
+    if (event.row) {
+      let segment = 'rest';
+      if(event.row.type) segment = `main/${event.row.type}`;
+      if (event.event.ctrlKey) {
+        this._router.open(`#/session/${segment}/${event.row.id}/ldap/${event.row.idRequest}`, '_blank',)
+      } else {
+        this._router.navigate([`/session/${segment}`, event.row.id, 'ldap', event.row.idRequest], {
+          queryParams: { env: this.queryParams.env }
+        });
+      }
+    }
   }
+
+  selectedFtp(event: { event: MouseEvent, row: any }) { // TODO finish this
+    if (event.row) {
+      let segment = 'rest';
+      if(event.row.type) segment = `main/${event.row.type}`;
+      if (event.event.ctrlKey) {
+        this._router.open(`#/session/${segment}/${event.row.id}/ftp/${event.row.idRequest}`, '_blank',)
+      } else {
+        this._router.navigate([`/session/${segment}`, event.row.id, 'ftp', event.row.idRequest], {
+          queryParams: { env: this.queryParams.env }
+        });
+      }
+    }
+  }
+
+  selectedQuery(event: { event: MouseEvent, row: any }) { // TODO finish this
+    if (event.row) {
+      let segment = 'rest';
+      if(event.row.type) segment = `main/${event.row.type}`;
+      if (event.event.ctrlKey) {
+        this._router.open(`#/session/${segment}/${event.row.id}/database/${event.row.idRequest}`, '_blank',)
+      } else {
+        this._router.navigate([`/session/${segment}`, event.row.id, 'database', event.row.idRequest], {
+          queryParams: { env: this.queryParams.env }
+        });
+      }
+    }
+}
+
 
 
 }
@@ -279,7 +351,7 @@ const filterPredicate = (data: InstanceRestSession, filter: string) => {
       isMatch = isMatch && (value == '' || (data.appName?.toLowerCase().includes(value) ||
           data.method?.toLowerCase().includes(value) || data.query?.toLowerCase().includes(value) ||
           data.user?.toLowerCase().includes(value) || data.path?.toLowerCase().includes(value)));
-    } else if (key == 'status') {
+    } else if (key == 'statusx') {
       const s = data.status.toString();
       isMatch = isMatch && (!value.length || (value.some((status: any) => {
         return s.startsWith(status[0]);
@@ -288,6 +360,8 @@ const filterPredicate = (data: InstanceRestSession, filter: string) => {
   }
   return isMatch;
 };
+
+
 
 export function shallowEqual(
     a: {[key: string | symbol]: any},

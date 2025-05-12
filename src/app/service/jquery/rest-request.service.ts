@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
+import {forkJoin,map, Observable} from "rxjs";
 import {
     RepartitionTimeAndTypeResponseByPeriod,
     RestMainExceptionsByPeriodAndappname,
@@ -15,6 +15,7 @@ export class RestRequestService {
     constructor(private http: HttpClient) {
 
     }
+
     server = `${localStorage.getItem('server')}/v3/trace`;
 
     getRestRequest<T>(params?: any): Observable<T> {
@@ -22,10 +23,29 @@ export class RestRequestService {
         return this.http.get<T>(url, { params: params });
     }
 
-    getRestRequests(params: any): Observable<Array<RestRequest>> {
+    getRequests(params: any): Observable<Array<RestRequest>> {
         return this.http.get<Array<RestRequest>>(`${this.server}/request/rest`, { params: params });
     }
 
+    getRequestById(id: string): Observable<RestRequest> {
+        return this.http.get<RestRequest>(`${this.server}/request/rest/${id}`);
+    }
+
+    getHost(filters: { env: string, start: Date, end: Date, type: string }): Observable<{ host: string }[]> {
+        let arg  = {
+            'column.distinct': 'host',
+            'host.notNull': '',
+            'instance.type': filters.type,
+            'instance.environement': filters.env,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'order': 'host.asc'
+        }
+        return forkJoin({
+            rest: this.getRestRequest({...arg,'join': 'rest_session,rest_session.instance'}),
+            main: this.getRestRequest({...arg,'join': 'main_session,main_session.instance',})
+        }).pipe(map((result: {rest:any,main:any})=> ([...result.rest,...result.main])))
+    }
 
 
     getrestSessionExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<RestSessionExceptionsByPeriodAndappname[]> {

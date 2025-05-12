@@ -135,6 +135,9 @@ export class SearchRestView implements OnInit, OnDestroy {
 
   search() {
     if (this.serverFilterForm.valid) {
+      console.log(this._activatedRoute.snapshot.queryParams)
+      console.log(this.queryParams.buildParams())
+      console.log(shallowEqual(this._activatedRoute.snapshot.queryParams, this.queryParams.buildParams()))
       if(!shallowEqual(this._activatedRoute.snapshot.queryParams, this.queryParams.buildParams())) {
         this._router.navigate([], {
           relativeTo: this._activatedRoute,

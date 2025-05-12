@@ -7,7 +7,6 @@ import {AppComponent} from './app.component';
 
 import {ViewsModule} from './views/views.module';
 import {SharedModule} from './shared/shared.module';
-
 // main layout
 import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 
@@ -36,14 +35,20 @@ import {StatisticServerView} from "./views/statistic/server/statistic-server.vie
 import {DeploimentComponent} from './views/deploiment/deploiment.component';
 import {Interceptor} from "./shared/interceptor/interceptor";
 import {SearchRequestView} from "./views/search/request/search-request.view";
+import {Constants} from "./views/constants";
 
 
 registerLocaleData(localeFr, 'fr-FR');
 const routes: Route[] = [
     {
-      path:'request',
-      component: SearchRequestView,
-      title: 'Requests',
+      path:'request', children : [
+        {
+          path:':type',
+          component: SearchRequestView,
+          title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title,
+        },
+        { path: '**', pathMatch: 'full', redirectTo: `/request/rest` }
+      ]
     },
     {
     path: 'session', children: [
