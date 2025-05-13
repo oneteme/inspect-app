@@ -92,7 +92,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   constructor() {
 
     this._activatedRoute.queryParams
-        .pipe(takeUntil(this.$destroy)).subscribe({
+        .subscribe({
         next: (params: Params) => {
            if(params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.env ||  app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server])
            if(!params.start && !params.end)  {

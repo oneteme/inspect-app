@@ -77,7 +77,7 @@ export class SearchMainView implements OnInit, OnDestroy {
         combineLatest([
             this._activatedRoute.params,
             this._activatedRoute.queryParams
-        ]).pipe(takeUntil(this.$destroy)).subscribe({
+        ]).subscribe({
             next: ([params, queryParams]) => {
                 this.type = params.type_main;
                 if(queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env || app.defaultEnv, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server])
