@@ -43,7 +43,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
         combineLatest([
             this._activatedRoute.params,
             this._activatedRoute.queryParams
-        ]).pipe(takeUntil(this.$destroy)).subscribe({
+        ]).subscribe({
             next: ([params, queryParams]) => {
                 this.env = queryParams.env || app.defaultEnv;
                 this.getSession(params.id_session);

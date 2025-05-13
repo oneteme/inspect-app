@@ -57,7 +57,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
             this._activatedRoute.params,
             this._activatedRoute.data,
             this._activatedRoute.queryParams
-        ]).pipe(takeUntil(this.$destroy)).subscribe({
+        ]).subscribe({
             next: ([params, data, queryParams]) => {
                 this.params = {idSession: params.id_session, idJdbc: params.id_jdbc,
                     typeSession: data.type, typeMain: params.type_main, env: queryParams.env || app.defaultEnv};

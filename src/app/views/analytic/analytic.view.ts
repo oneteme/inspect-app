@@ -76,7 +76,7 @@ export class AnalyticView implements OnDestroy {
         combineLatest([
             this._activatedRoute.params,
             this._activatedRoute.queryParams
-        ]).pipe(takeUntil(this.$destroy)).subscribe({
+        ]).subscribe({
             next: ([params, queryParams]) => {
                 this.params.user = params.user;
                 this.params.env = queryParams.env || app.defaultEnv;

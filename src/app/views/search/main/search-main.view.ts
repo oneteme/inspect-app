@@ -77,7 +77,7 @@ export class SearchMainView implements OnInit, OnDestroy {
         combineLatest([
             this._activatedRoute.params,
             this._activatedRoute.queryParams
-        ]).pipe(takeUntil(this.$destroy)).subscribe({
+        ]).subscribe({
             next: ([params, queryParams]) => {
                 this.type = params.type_main;
                 if(queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env || app.defaultEnv, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server])
@@ -94,7 +94,7 @@ export class SearchMainView implements OnInit, OnDestroy {
                 this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
                 this._instanceService.getApplications(this.type == 'view' ? 'CLIENT' : 'SERVER' )
-                    .pipe(takeUntil(this.$destroy), finalize(()=> this.serverNameIsLoading = false))
+                    .pipe(finalize(()=> this.serverNameIsLoading = false))
                     .subscribe({
                         next: res => {
                             this.nameDataList = res.map(r => r.appName);

@@ -92,7 +92,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   constructor() {
 
     this._activatedRoute.queryParams
-        .pipe(takeUntil(this.$destroy)).subscribe({
+        .subscribe({
         next: (params: Params) => {
            if(params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.env ||  app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server])
            if(!params.start && !params.end)  {
@@ -108,7 +108,7 @@ export class SearchRestView implements OnInit, OnDestroy {
           this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
           this._instanceService.getApplications('SERVER')
-            .pipe(takeUntil(this.$destroy), finalize(()=> this.serverNameIsLoading = false))
+            .pipe(finalize(()=> this.serverNameIsLoading = false))
             .subscribe({
               next: res => {
                 this.nameDataList = res.map(r => r.appName);

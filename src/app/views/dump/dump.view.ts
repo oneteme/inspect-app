@@ -36,7 +36,7 @@ export class DumpView implements OnInit, OnDestroy {
         combineLatest([
             this._activatedRoute.params,
             this._activatedRoute.queryParams
-        ]).pipe(takeUntil(this.$destroy)).subscribe({
+        ]).subscribe({
             next: ([params, queryParams]) => {
                 this.params.app = params.app_name;
                 this.params.env = queryParams.env;

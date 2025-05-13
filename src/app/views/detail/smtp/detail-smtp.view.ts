@@ -41,7 +41,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
             this._activatedRoute.params,
             this._activatedRoute.data,
             this._activatedRoute.queryParams
-        ]).pipe(takeUntil(this.$destroy)).subscribe({
+        ]).subscribe({
             next: ([params, data, queryParams]) => {
                 this.params = {idSession: params.id_session, idSmtp: params.id_smtp,
                     typeSession: data.type, typeMain: params.type_main, env: queryParams.env || app.defaultEnv};
