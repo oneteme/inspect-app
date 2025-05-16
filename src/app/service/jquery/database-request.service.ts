@@ -1,7 +1,8 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
+import {forkJoin, map, Observable} from "rxjs";
 import {JdbcMainExceptionsByPeriodAndappname, JdbcSessionExceptionsByPeriodAndappname, RepartitionRequestByPeriod} from "../../model/jquery.model";
+import {DatabaseRequest} from "../../model/trace.model";
 
 @Injectable({ providedIn: 'root' })
 export class DatabaseRequestService {
@@ -9,9 +10,35 @@ export class DatabaseRequestService {
 
     }
 
+    server = `${localStorage.getItem('server')}/v3/trace`;
+
     getDatabaseRequest<T>(params: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/request/database`;
         return this.http.get<T>(url, { params: params });
+    }
+
+    getRequests(params: any): Observable<Array<DatabaseRequest>> {
+        return this.http.get<Array<DatabaseRequest>>(`${this.server}/request/database`, { params: params });
+    }
+
+    getRequestsById(id: string): Observable<DatabaseRequest> {
+        return this.http.get<DatabaseRequest>(`${this.server}/request/database/${id}`);
+    }
+
+    getHost(filters: { env: string, start: Date, end: Date, type: string }): Observable<{ host: string }[]> {
+        let arg  = {
+            'column.distinct': 'host',
+            'host.notNull': '',
+            'instance.type': filters.type,
+            'instance.environement': filters.env,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'order': 'host.asc'
+        }
+        return forkJoin({
+            rest: this.getDatabaseRequest({...arg,'join': 'rest_session,rest_session.instance'}),
+            main: this.getDatabaseRequest({...arg,'join': 'main_session,main_session.instance',})
+        }).pipe(map((result: {rest:any,main:any})=> ([...new Set([...result.rest.map(r=>(r.host)), ...result.main.map(r=>(r.host))])])))
     }
 
     getRepartitionRequestByPeriod(filters: {start: Date, end: Date, groupedBy: string, database: string, env: string}): Observable<RepartitionRequestByPeriod> {

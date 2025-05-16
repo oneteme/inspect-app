@@ -21,6 +21,7 @@ export class AppComponent implements OnDestroy {
     private readonly _router: EnvRouter = inject(EnvRouter);
 
     MAPPING_TYPE = Constants.MAPPING_TYPE;
+    REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
     envs: any[];
     env: FormControl<string> = new FormControl();
     isLoadingEnv = false;

@@ -1,7 +1,6 @@
 import { DatePipe } from "@angular/common";
 import { ChartGroup } from "../model/chart.model";
 import { Filter, FilterMap, Operation } from "../views/constants";
-import { InstanceRestSession } from "../model/trace.model";
 import { makeDateTimePeriod, makeDateTimePeriodFrom } from "src/environments/environment";
 
 export class Utils {
@@ -106,7 +105,7 @@ export class Utils {
         return result;
     }
 
-    static getSessionUrl(selectedSession: InstanceRestSession) {
+    static getSessionUrl(selectedSession: any) {
         return `${selectedSession?.protocol ? selectedSession?.protocol + '://' : ''}${selectedSession?.host ? selectedSession?.host : ''}${selectedSession?.port > 0 ? ':' + selectedSession?.port : ''}${selectedSession?.path ? selectedSession?.path : ''}${selectedSession?.query ? '?' + selectedSession?.query : ''}`
     }
 

@@ -1,12 +1,19 @@
+<div *ngIf="useFilter" style="display: flex; justify-content: space-between; margin-bottom: 0.2em;" >
+    <mat-form-field  appearance="outline" class="searchwidth md-2 no-subscript">
+        <input [disabled]="isLoading"  matInput #input (keyup)="applyFilter($event)" placeholder="Filtrer..." autocomplete="off">
+        <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+</div>
 <div class="mat-elevation-z8">
     <table mat-table [dataSource]="dataSource" style="width:100%;" #sort="matSort" matSort
-        matSortActive="date_debut" matSortDirection="desc">
+        matSortActive="date_debut" matSortDirection="desc" class="fullwidthFixed">
 
         <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef style="width:1%"></th>
             <td [ngStyle]="{'border-left': element.status ? '4px solid green' : '4px solid red'}" mat-cell *matCellDef="let element">
             </td>
         </ng-container>
+
         <ng-container matColumnDef="host">
             <th mat-header-cell *matHeaderCellDef mat-sort-header> Hôte </th>
             <td mat-cell *matCellDef="let element" [matTooltip]="element['databaseVersion']" matTooltipPosition="below">
@@ -47,20 +54,27 @@
         </ng-container>
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-            (click)="selectedQuery($event, row.idRequest)">
+            (click)="selectedQuery($event, row)">
         </tr>
         <tr class="mat-row" *matNoDataRow>
             <td class="mat-cell" colspan="7">
-              <div *ngIf="!requests" class="detail-table-loading">
+                <div *ngIf="!isLoading" class="detail-table-loading">
+                <span class="material-symbols-outlined">
+                  info
+                </span>
+                    <span style="font-style: italic;">Aucun résultat</span>
+                </div>
+                <div *ngIf="isLoading" class="detail-table-loading">
                   <span style="display: flex; flex-direction: column; font-style: italic;">
                     Chargement en cours...
                     <mat-progress-bar mode="indeterminate"></mat-progress-bar>
                   </span>
-              </div>
+                </div>
             </td>
         </tr>
     </table>
-    <mat-paginator #paginator [pageSize]="3"
-        [pageSizeOptions]="[3, 5, 10, 20]" [hidePageSize]="true"
-        showFirstLastButtons></mat-paginator>
+    <mat-paginator #paginator [pageSize]="pageSize || 3"
+                   [pageSizeOptions]="[3, 5, 10, 20]" [hidePageSize]="true"
+                   showFirstLastButtons>
+    </mat-paginator>
 </div>

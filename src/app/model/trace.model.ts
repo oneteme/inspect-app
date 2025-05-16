@@ -61,7 +61,7 @@ export interface DatabaseRequest extends SessionStage<boolean> {
     productName: string;
     productVersion: string;
     actions: Array<DatabaseRequestStage>;
-    commands: Array<string>;
+    command: string
     count?: number;
 }
 
@@ -309,7 +309,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
     formatLink(field: Label): string {
         switch (field) {
             case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
-            case Label.METHOD_RESOURCE: return `${this.nodeObject?.commands || '?'}`;
+            case Label.METHOD_RESOURCE: return `${this.nodeObject?.command || '?'}`;
             case Label.SIZE_COMPRESSION: return this.nodeObject?.count < 0 ? '0': this.nodeObject?.count!= undefined? this.nodeObject?.count.toString() : '?'; // remove undefined condition 
             case Label.PROTOCOL_SCHEME: return "JDBC/Basic"
             case Label.STATUS_EXCEPTION: return this.nodeObject.exception && 'FAIL:' + this.nodeObject.exception?.type || 'OK'

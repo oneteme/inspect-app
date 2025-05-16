@@ -128,16 +128,16 @@
             <tr class="mat-row" *matNoDataRow>
                 <td class="mat-cell" colspan="7">
                     <div *ngIf="!isLoading" class="empty-row" style="align-items: center;">
-            <span class="material-symbols-outlined">
-              info
-            </span>
+                        <span class="material-symbols-outlined">
+                          info
+                        </span>
                         <span style="font-style: italic;">Aucun résultat</span>
                     </div>
                     <div *ngIf="isLoading" class="loading-row">
-              <span style="display: flex; flex-direction: column; font-style: italic;">
-                Chargement en cours...
-                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-              </span>
+                      <span style="display: flex; flex-direction: column; font-style: italic;">
+                        Chargement en cours...
+                        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                      </span>
                     </div>
                 </td>
             </tr>

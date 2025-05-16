@@ -8,7 +8,7 @@ export interface Application {
 export class QueryParams {
     private _optional: {[key: string]: any} = {};
 
-    constructor(public _period: Period, public _env: string, public _servers: string[]) {
+    constructor(public _period: Period, public _env: string, public _servers?: string[], public _hosts?: string[], public _rangestatus?: string[]|boolean[]) {
     }
 
     set period(period: Period) {
@@ -31,6 +31,22 @@ export class QueryParams {
         return this._servers;
     }
 
+    set hosts(servers: string[]) {
+        this._hosts = servers;
+    }
+
+    get hosts(): string[] {
+        return this._hosts;
+    }
+
+    set rangestatus(rangestatus: string[] | boolean[]) {
+        this._rangestatus = rangestatus;
+    }
+
+    get rangestatus(): string[] | boolean[] {
+        return this._rangestatus;
+    }
+
     get optional(): {[key: string]: any} {
         return this._optional;
     }
@@ -46,6 +62,12 @@ export class QueryParams {
         let params = { ...this.period.buildParams(), ...this.optional };
         if(this.servers && this.servers.length > 0){
             params = { ...params, server: this.servers.length == 1 ? this.servers[0] : this.servers};
+        }
+        if(this.hosts && this.hosts.length > 0){
+            params = { ...params, host: this.hosts.length == 1 ? this.hosts[0] : this.hosts};
+        }
+        if(this.rangestatus && this.rangestatus.length > 0){
+            params = { ...params, rangestatus: this.rangestatus.length == 1 ? this.rangestatus[0] : this.rangestatus};
         }
         if(this.env) {
             params = { ...params, env: this.env };

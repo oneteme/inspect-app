@@ -1,12 +1,11 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
+import {forkJoin,map, Observable} from "rxjs";
 import {
-    RepartitionTimeAndTypeResponseByPeriod,
     RestMainExceptionsByPeriodAndappname,
     RestSessionExceptionsByPeriodAndappname
 } from "src/app/model/jquery.model";
-import {FilterMap} from "../../views/constants";
+import {RestRequest} from "../../model/trace.model";
 
 
 @Injectable({ providedIn: 'root' })
@@ -15,9 +14,35 @@ export class RestRequestService {
 
     }
 
-    getRestRequest<T>(params: any): Observable<T> {
+    server = `${localStorage.getItem('server')}/v3/trace`;
+
+    getRestRequest<T>(params?: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/request/rest`;
         return this.http.get<T>(url, { params: params });
+    }
+
+    getRequests(params: any): Observable<Array<RestRequest>> {
+        return this.http.get<Array<RestRequest>>(`${this.server}/request/rest`, { params: params });
+    }
+
+    getRequestById(id: string): Observable<RestRequest> {
+        return this.http.get<RestRequest>(`${this.server}/request/rest/${id}`);
+    }
+
+    getHost(filters: { env: string, start: Date, end: Date, type: string }): Observable<{ host: string }[]> {
+        let arg  = {
+            'column.distinct': 'host',
+            'host.notNull': '',
+            'instance.type': filters.type,
+            'instance.environement': filters.env,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'order': 'host.asc'
+        }
+        return forkJoin({
+            rest: this.getRestRequest({...arg,'join': 'rest_session,rest_session.instance'}),
+            main: this.getRestRequest({...arg,'join': 'main_session,main_session.instance',})
+        }).pipe(map((result: {rest:any,main:any})=> ([...new Set([...result.rest.map(r=>(r.host)), ...result.main.map(r=>(r.host))])])))
     }
 
 

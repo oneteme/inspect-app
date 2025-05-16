@@ -1,6 +1,12 @@
+<div *ngIf="useFilter" style="display: flex; justify-content: space-between; margin-bottom: 0.2em;" >
+    <mat-form-field  appearance="outline" class="searchwidth md-2 no-subscript">
+        <input [disabled]="isLoading"  matInput #input (keyup)="applyFilter($event)" placeholder="Filtrer..." autocomplete="off">
+        <mat-icon matSuffix>search</mat-icon>
+    </mat-form-field>
+</div>
 <div class="mat-elevation-z8">
     <table mat-table [dataSource]="dataSource" #sort="matSort" matSort
-        matSortActive="date_debut" matSortDirection="desc">
+        matSortActive="date_debut" matSortDirection="desc" class="fullwidthFixed">
 
 
         <ng-container matColumnDef="status">
@@ -44,20 +50,27 @@
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns;"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns;"
-            (click)="selectedRequest($event, row.idRequest)">
+            (click)="selectedRequest($event, row)">
         </tr>
         <tr class="mat-row" *matNoDataRow>
             <td class="mat-cell" colspan="7">
-              <div *ngIf="!requests" class="detail-table-loading">
+                <div *ngIf="!isLoading" class="detail-table-loading">
+                <span class="material-symbols-outlined">
+                  info
+                </span>
+                    <span style="font-style: italic;">Aucun résultat</span>
+                </div>
+                <div *ngIf="isLoading" class="detail-table-loading">
                   <span style="display: flex; flex-direction: column; font-style: italic;">
                     Chargement en cours...
                     <mat-progress-bar mode="indeterminate"></mat-progress-bar>
                   </span>
-              </div>
+                </div>
             </td>
         </tr>
     </table>
-    <mat-paginator #paginator [pageSize]="3"
-        [pageSizeOptions]="[3, 5, 10, 20]" [hidePageSize]="true"
-        showFirstLastButtons></mat-paginator>
+    <mat-paginator #paginator [pageSize]="pageSize || 3"
+                   [pageSizeOptions]="[3, 5, 10, 20]" [hidePageSize]="true"
+                   showFirstLastButtons>
+    </mat-paginator>
 </div>

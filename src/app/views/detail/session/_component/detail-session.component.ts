@@ -1,4 +1,4 @@
-import {Component, inject, Input, OnInit} from "@angular/core";
+import {Component, inject, Input} from "@angular/core";
 import {InstanceEnvironment, InstanceMainSession, InstanceRestSession} from "../../../../model/trace.model";
 import {EnvRouter} from "../../../../service/router.service";
 
@@ -29,9 +29,9 @@ export class DetailSessionComponent {
             let segment = 'rest';
             if(this.session.type) segment = `main/${this.session.type.toLowerCase()}`;
             if (event.event.ctrlKey) {
-                this._router.open(`#/session/${segment}/${this.session.id}/ftp/${event.row}`, '_blank',)
+                this._router.open(`#/session/${segment}/${this.session.id}/ftp/${event.row.idRequest}`, '_blank',)
             } else {
-                this._router.navigate([`/session/${segment}`, this.session.id, 'ftp', event.row], {
+                this._router.navigate([`/session/${segment}`, this.session.id, 'ftp', event.row.idRequest], {
                     queryParams: { env: this.instance.env }
                 });
             }
@@ -43,9 +43,9 @@ export class DetailSessionComponent {
             let segment = 'rest';
             if(this.session.type) segment = `main/${this.session.type.toLowerCase()}`;
             if (event.event.ctrlKey) {
-                this._router.open(`#/session/${segment}/${this.session.id}/ldap/${event.row}`, '_blank',)
+                this._router.open(`#/session/${segment}/${this.session.id}/ldap/${event.row.idRequest}`, '_blank',)
             } else {
-                this._router.navigate([`/session/${segment}`, this.session.id, 'ldap', event.row], {
+                this._router.navigate([`/session/${segment}`, this.session.id, 'ldap', event.row.idRequest], {
                     queryParams: { env: this.instance.env }
                 });
             }
@@ -57,9 +57,9 @@ export class DetailSessionComponent {
             let segment = 'rest';
             if(this.session.type) segment = `main/${this.session.type.toLowerCase()}`;
             if (event.event.ctrlKey) {
-                this._router.open(`#/session/${segment}/${this.session.id}/smtp/${event.row}`, '_blank',)
+                this._router.open(`#/session/${segment}/${this.session.id}/smtp/${event.row.idRequest}`, '_blank',)
             } else {
-                this._router.navigate([`/session/${segment}`, this.session.id, 'smtp', event.row], {
+                this._router.navigate([`/session/${segment}`, this.session.id, 'smtp', event.row.idRequest], {
                     queryParams: { env: this.instance.env }
                 });
             }
@@ -71,9 +71,9 @@ export class DetailSessionComponent {
             let segment = 'rest';
             if(this.session.type) segment = `main/${this.session.type.toLowerCase()}`;
             if (event.event.ctrlKey) {
-                this._router.open(`#/session/${segment}/${this.session.id}/database/${event.row}`, '_blank',)
+                this._router.open(`#/session/${segment}/${this.session.id}/database/${event.row.idRequest}`, '_blank',)
             } else {
-                this._router.navigate([`/session/${segment}`, this.session.id, 'database', event.row], {
+                this._router.navigate([`/session/${segment}`, this.session.id, 'database', event.row.idRequest], {
                     queryParams: { env: this.instance.env }
                 });
             }
