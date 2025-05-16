@@ -73,7 +73,6 @@ export class DetailRestTableComponent {
                 .pipe(finalize(() => this.isRequestDetailLoading = false))
                 .subscribe(data => {
                     this.requestDetail = data;
-                    console.log(this.requestDetail)
                 })
         }
     }
