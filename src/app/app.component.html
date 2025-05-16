@@ -8,7 +8,7 @@
         <mat-menu #menu="matMenu">
             <button mat-menu-item [routerLink]="['session/rest']" routerLinkActive="item-selected"
                     [queryParams]="{env: env.value}">
-                <mat-icon>{{ MAPPING_TYPE['rest'].icon }}</mat-icon>
+                <mat-icon class="material-symbols-outlined">{{ MAPPING_TYPE['rest'].icon }}</mat-icon>
                 <span>{{ MAPPING_TYPE['rest'].title }}</span>
             </button>
             <button mat-menu-item  routerLinkActive="item-selected"
