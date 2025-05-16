@@ -1,26 +1,14 @@
 import {Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {MatPaginator} from '@angular/material/paginator';
-import {MatSort} from '@angular/material/sort';
-import {MatTableDataSource} from '@angular/material/table';
+import {MatSort} from '@angular/material/sort'
 import {Location} from '@angular/common';
 import {ActivatedRoute, Params} from '@angular/router';
-import {BehaviorSubject, combineLatest, finalize, Observable, Subscription} from 'rxjs';
-import {extractPeriod, Utils} from 'src/app/shared/util';
-import {TraceService} from 'src/app/service/trace.service';
-import {app, makeDatePeriod,} from 'src/environments/environment';
-import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constants';
-import {FilterService} from 'src/app/service/filter.service';
-import {
-  DatabaseRequest,
-  FtpRequest,
-  InstanceRestSession,
-  Label,
-  MailRequest, NamingRequest,
-  RestRequest
-} from 'src/app/model/trace.model';
+import {combineLatest, finalize, Subscription} from 'rxjs';
+import {extractPeriod} from 'src/app/shared/util';
+import {app} from 'src/environments/environment';
+import {Constants} from '../../constants';
 import {EnvRouter} from "../../../service/router.service";
-import {InstanceService} from "../../../service/jquery/instance.service";
 import {DateAdapter, MAT_DATE_FORMATS,} from "@angular/material/core";
 import {CustomDateAdapter} from "../../../shared/material/custom-date-adapter";
 import {MY_DATE_FORMATS} from "../../../shared/shared.module";
@@ -102,24 +90,15 @@ export class SearchRequestView implements OnInit, OnDestroy {
     this.requestFilterForm.controls.dateRangePicker.controls.end.updateValueAndValidity({onlySelf: true})
     let start = this.requestFilterForm.controls.dateRangePicker.controls.start.value;
     let end = this.requestFilterForm.controls.dateRangePicker.controls.end.value || null;
-    console.log(this.requestFilterForm.controls.dateRangePicker.controls.end.valid)
     this.queryParams.period = new IPeriod(start, end);
-    if(start && end /*&& this.requestFilterForm.controls.dateRangePicker.controls.end.valid && start != this.queryParams.period.start*/){
-      console.log("getting host from start ")
-      this.getHosts()
-    }
-
   }
-
 
   onChangeEnd(event) {
     this.requestFilterForm.controls.dateRangePicker.controls.start.updateValueAndValidity({onlySelf: true})
     let start = this.requestFilterForm.controls.dateRangePicker.controls.start.value || null;
     let end = this.requestFilterForm.controls.dateRangePicker.controls.end.value;
-
     this.queryParams.period = new IPeriod(start, end ? new Date(end.getFullYear(), end.getMonth(), end.getDate(), end.getHours(), end.getMinutes() + 1) : null);
-    if(start && end /*&& end != this.queryParams.period.end*/){
-      console.log("getting host from end ")
+    if(start && end){
       this.getHosts()
     }
   }
@@ -132,8 +111,6 @@ export class SearchRequestView implements OnInit, OnDestroy {
       this.requestFilterForm.controls.rangestatus.setValue([]);
     }*/
     this.queryParams.rangestatus = this.requestFilterForm.controls.rangestatus.value && this.requestFilterForm.controls.rangestatus.value.map((f:{icon: string, label: string,color: string, value: any}) => f.value)
-
-    console.log(this.queryParams.buildParams())
   }
 
 
@@ -172,12 +149,13 @@ export class SearchRequestView implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(s => s.unsubscribe());
+    this.hostSubscription.unsubscribe();
+    this.RequestSubscription.unsubscribe();
   }
 
   search() {
     if (this.requestFilterForm.valid) {
       this.queryParams.buildParams()
-      console.log(this.queryParams)
       if(!shallowEqual(this._activatedRoute.snapshot.queryParams, this.queryParams.buildParams())) {
         this._router.navigate([], {
           relativeTo: this._activatedRoute,
@@ -202,7 +180,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
         .pipe(finalize(()=> this.serverNameIsLoading = false))
         .subscribe({
           next: res => {
-            this.nameDataList = res.map(r => r.host);
+            this.nameDataList = res;
             this.patchHostValue(this.queryParams.hosts);
           }, error: (e) => {
             console.log(e)
@@ -272,14 +250,12 @@ export class SearchRequestView implements OnInit, OnDestroy {
 
 
   selectedSmtp(event: { event: MouseEvent, row: any }) { // TODO finish this
-    console.log(event)
     if (event.row) {
       let segment = 'rest';
       if(event.row.type) segment = `main/${event.row.type}`;
       if (event.event.ctrlKey) {
         this._router.open(`#/session/${segment}/${event.row.id}/smtp/${event.row.idRequest}`, '_blank',)
       } else {
-        console.log(`#/session/${segment}/${event.row.id}/smtp/${event.row.idRequest}`)
         this._router.navigate([`/session/${segment}`, event.row.id, 'smtp', event.row.idRequest], {
           queryParams: { env: this.queryParams.env }
         });
@@ -317,7 +293,8 @@ export class SearchRequestView implements OnInit, OnDestroy {
 
   selectedQuery(event: { event: MouseEvent, row: any }) { // TODO finish this
     if (event.row) {
-      let segment = 'rest';
+
+      let segment = event.row.sessionType;
       if(event.row.type) segment = `main/${event.row.type}`;
       if (event.event.ctrlKey) {
         this._router.open(`#/session/${segment}/${event.row.id}/database/${event.row.idRequest}`, '_blank',)
@@ -329,37 +306,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
     }
 }
 
-
-
 }
-
-const sortingDataAccessor = (row: any, columnName: string) => {
-  if (columnName == "app_name") return row["appName"] as string;
-  if (columnName == "name/port") return row["host"] + ":" + row["port"] as string;
-  if (columnName == "method/path") return row['path'] as string;
-  if (columnName == "start") return row['start'] as string;
-  if (columnName == "durée") return (row["end"] - row["start"])
-
-  return row[columnName as keyof any] as string;
-};
-
-const filterPredicate = (data: InstanceRestSession, filter: string) => {
-  var map: Map<string, any> = new Map(JSON.parse(filter));
-  let isMatch = true;
-  for (let [key, value] of map.entries()) {
-    if (key == 'filter') {
-      isMatch = isMatch && (value == '' || (data.appName?.toLowerCase().includes(value) ||
-          data.method?.toLowerCase().includes(value) || data.query?.toLowerCase().includes(value) ||
-          data.user?.toLowerCase().includes(value) || data.path?.toLowerCase().includes(value)));
-    } else if (key == 'statusx') {
-      const s = data.status.toString();
-      isMatch = isMatch && (!value.length || (value.some((status: any) => {
-        return s.startsWith(status[0]);
-      })));
-    }
-  }
-  return isMatch;
-};
 
 
 

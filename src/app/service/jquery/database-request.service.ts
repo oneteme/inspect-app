@@ -2,7 +2,7 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {forkJoin, map, Observable} from "rxjs";
 import {JdbcMainExceptionsByPeriodAndappname, JdbcSessionExceptionsByPeriodAndappname, RepartitionRequestByPeriod} from "../../model/jquery.model";
-import {DatabaseRequest, RestRequest} from "../../model/trace.model";
+import {DatabaseRequest} from "../../model/trace.model";
 
 @Injectable({ providedIn: 'root' })
 export class DatabaseRequestService {
@@ -38,7 +38,7 @@ export class DatabaseRequestService {
         return forkJoin({
             rest: this.getDatabaseRequest({...arg,'join': 'rest_session,rest_session.instance'}),
             main: this.getDatabaseRequest({...arg,'join': 'main_session,main_session.instance',})
-        }).pipe(map((result: {rest:any,main:any})=> ([...result.rest,...result.main])))
+        }).pipe(map((result: {rest:any,main:any})=> ([...new Set([...result.rest.map(r=>(r.host)), ...result.main.map(r=>(r.host))])])))
     }
 
     getRepartitionRequestByPeriod(filters: {start: Date, end: Date, groupedBy: string, database: string, env: string}): Observable<RepartitionRequestByPeriod> {

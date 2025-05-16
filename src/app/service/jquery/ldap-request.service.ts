@@ -35,7 +35,7 @@ export class LdapRequestService {
         return forkJoin({
             rest: this.getLdap({...arg,'join': 'rest_session,rest_session.instance'}),
             main: this.getLdap({...arg,'join': 'main_session,main_session.instance',})
-        }).pipe(map((result: {rest:any,main:any})=> ([...result.rest,...result.main])))
+        }).pipe(map((result: {rest:any,main:any})=> ([...new Set([...result.rest.map(r=>(r.host)), ...result.main.map(r=>(r.host))])])))
     }
 
     getLdapSessionExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<LdapSessionExceptionsByPeriodAndappname[]> {

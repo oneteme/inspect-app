@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import {forkJoin, map, Observable} from "rxjs";
 import { SmtpMainExceptionsByPeriodAndappname, SmtpSessionExceptionsByPeriodAndappname } from "src/app/model/jquery.model";
-import {MailRequest, RestRequest} from "../../model/trace.model";
+import {MailRequest} from "../../model/trace.model";
 
 
 @Injectable({ providedIn: 'root' })
@@ -34,7 +34,7 @@ export class smtpRequestService {
         return forkJoin({
             rest: this.getsmtp({...arg,'join': 'rest_session,rest_session.instance'}),
             main: this.getsmtp({...arg,'join': 'main_session,main_session.instance',})
-        }).pipe(map((result: {rest:any,main:any})=> ([...result.rest,...result.main])))
+        }).pipe(map((result: {rest:any,main:any})=> ([...new Set([...result.rest.map(r=>(r.host)), ...result.main.map(r=>(r.host))])])))
     }
 
 

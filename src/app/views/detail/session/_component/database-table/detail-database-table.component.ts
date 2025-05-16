@@ -2,7 +2,8 @@ import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
-import {DatabaseRequest, RestRequest} from "src/app/model/trace.model";
+import {DatabaseRequest} from "src/app/model/trace.model";
+import {DatePipe} from "@angular/common";
 
 @Component({
     selector: 'database-table',
@@ -10,6 +11,7 @@ import {DatabaseRequest, RestRequest} from "src/app/model/trace.model";
     styleUrls: ['./detail-database-table.component.scss']
 })
 export class DetailDatabaseTableComponent {
+    private readonly pipe = new DatePipe('fr-FR');
     displayedColumns: string[] = ['status', 'host', 'schema', 'start', 'duree'];
     dataSource: MatTableDataSource<DatabaseRequest> = new MatTableDataSource();
     filterTable :string;
@@ -22,8 +24,8 @@ export class DetailDatabaseTableComponent {
             this.dataSource = new MatTableDataSource(requests);
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
-            this.dataSource.sortingDataAccessor = sortingDataAccessor;
-            this.dataSource.filterPredicate = this.useFilter && filterPredicate;
+            this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
+            this.dataSource.filterPredicate = this.useFilter && this.filterPredicate;
             this.dataSource.filter = JSON.stringify(this.filterTable)
         }
     }
@@ -51,23 +53,25 @@ export class DetailDatabaseTableComponent {
             this.dataSource.paginator.firstPage();
         }
     }
-}
 
-const sortingDataAccessor = (row: any, columnName: string) => {
-    if (columnName == "start") return row['start'] as string;
-    if (columnName == "duree") return (row["end"] - row["start"])
-    return row[columnName as keyof any] as string;
-}
+    filterPredicate = (data: DatabaseRequest, filter: string) => {
+        let date = new Date(data.start*1000)
+        filter = JSON.parse(filter)
+        let isMatch = true;
+        return  isMatch && (filter == '' ||
+            (data.host?.toLowerCase().includes(filter) ||
+                data.name?.toLowerCase().includes(filter) ||
+                data.schema?.toLowerCase().includes(filter) ||
+                data.command?.toLowerCase().includes(filter) ||
+                data.status?.toString().toLowerCase().includes(filter) ||
+                this.pipe.transform(date,"dd/MM/yyyy").toLowerCase().includes(filter) ||
+                this.pipe.transform(date,"HH:mm:ss.SSS").toLowerCase().includes(filter)
+            ));
+    };
 
-const filterPredicate = (data: DatabaseRequest, filter: string) => {
-    filter = JSON.parse(filter)
-    let isMatch = true;
-    return  isMatch && (filter == '' ||
-        (data.host?.toLowerCase().includes(filter) ||
-            data.name?.toLowerCase().includes(filter) ||
-            data.schema?.toLowerCase().includes(filter) ||
-            data.command?.toLowerCase().includes(filter) ||
-            data.status?.toString().toLowerCase().includes(filter)
-            //add  start and end filter
-        ));
-};
+    sortingDataAccessor = (row: any, columnName: string) => {
+        if (columnName == "start") return row['start'] as string;
+        if (columnName == "duree") return (row["end"] - row["start"])
+        return row[columnName as keyof any] as string;
+    }
+}

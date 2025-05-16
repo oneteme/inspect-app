@@ -5,8 +5,8 @@
     </mat-form-field>
 </div>
 <div class="mat-elevation-z8">
-    <table mat-table [dataSource]="dataSource" #sort="matSort" matSort
-        matSortActive="date_debut" matSortDirection="desc"   multiTemplateDataRows>
+    <table mat-table [dataSource]="dataSource" #sort="matSort" matSort fixedLayout="true"
+        matSortActive="date_debut" matSortDirection="desc" class="fullwidthFixed"   multiTemplateDataRows>
 
 
         <ng-container matColumnDef="status">
@@ -83,23 +83,18 @@
                         <mat-card class="request-card">
                             <mat-card-header>
                                 <mat-card-title>
-                                    <span class="request-id" style="display: flex; align-items: center;gap: 0.5em;">
-                                            <mat-icon>call_received</mat-icon>
-                                            {{ requestDetail.path || 'N/A' }}
+                                    <span  style="display: flex; align-items: center;gap: 0.5em;">
+                                    {{ element.appName || ''}}
+                                    <mat-icon>call_made</mat-icon>
+                                    {{ requestDetail.path || '' }}
                                     </span>
                                 </mat-card-title>
                             </mat-card-header>
                             <mat-card-content>
                                 <div style="display:flex; gap:0.2em">
-                                    <div class="label-chip"  style="display:flex; gap:0.2em">
-                                        {{ element.appName }}
-                                    </div>
-                                    <span class="material-symbols-outlined">
-                                        arrow_forward
-                                    </span>
-                                    <div class="label-chip ellipsis">
-                                        [{{requestDetail.method}}] {{requestDetail.protocol}}://{{requestDetail.host}}
-                                    </div>
+                                    <a class="url" [href]="getSessionUrl()" target="_blank">
+                                        [{{ requestDetail.method }}] {{ getSessionUrl()}}
+                                    </a>
                                 </div>
                                 <div style="display: flex; align-items: center; gap: 0.5em; color: red; font-weight: 500; margin-top: 0.5em;"
                                      *ngIf="requestDetail.exception?.type || requestDetail.exception?.message"
@@ -109,81 +104,7 @@
                                 </div>
 
 
-                                <!--<mat-list>
-                                    <mat-list-item>
-                                        <div style="display:flex; gap:0.2em">
-                                            <mat-icon color="primary">http</mat-icon>
-                                            <strong>Méthode :</strong> {{ requestDetail.method }}
-                                        </div>
 
-                                    </mat-list-item>
-                                    <mat-list-item>
-                                        <div style="display:flex; gap:0.2em">
-                                            <mat-icon color="accent">security</mat-icon>
-                                            <strong>Protocole :</strong> {{ requestDetail.protocol }}
-                                        </div>
-                                    </mat-list-item>
-                                    <mat-list-item>
-                                        <div style="display:flex; gap:0.2em">
-                                            <mat-icon color="warn">dns</mat-icon>
-                                            <strong>Hôte :</strong> {{ requestDetail.host }}
-                                        </div>
-                                    </mat-list-item>
-                                    <mat-list-item>
-                                        <div style="display:flex; gap:0.2em">
-                                            <mat-icon color="primary">settings_ethernet</mat-icon>
-                                            <strong>Port :</strong> {{ requestDetail.port }}
-                                        </div>
-                                    </mat-list-item>
-                                    <mat-list-item>
-                                        <div style="display:flex; gap:0.2em">
-                                            <mat-icon color="accent">link</mat-icon>
-                                            <strong>Chemin :</strong> {{ requestDetail.path }}
-                                        </div>
-                                    </mat-list-item>
-                                    <mat-list-item>
-                                        <div style="display:flex; gap:0.2em">
-                                            <mat-icon color="warn">lock</mat-icon>
-                                            <strong>Schéma d'authentification :</strong> {{ requestDetail.authScheme }}
-                                        </div>
-                                    </mat-list-item>
-                                    <mat-list-item>
-                                        <div style="display:flex; gap:0.2em">
-                                            <mat-icon color="primary">check_circle</mat-icon>
-                                            <strong>Statut :</strong> {{ requestDetail.status }}
-                                        </div>
-                                    </mat-list-item>
-                                    <mat-list-item>
-                                        <div style="display:flex; gap:0.2em">
-                                             <mat-icon color="accent">arrow_downward</mat-icon>
-                                             <strong>Taille des données entrantes :</strong> {{ requestDetail.inDataSize }} octets
-                                        </div>
-                                    </mat-list-item>
-                                    <mat-list-item>
-                                        <div style="display:flex; gap:0.2em">
-                                             <mat-icon color="warn">arrow_upward</mat-icon>
-                                             <strong>Taille des données sortantes :</strong> {{ requestDetail.outDataSize }} octets
-                                        </div>
-                                    </mat-list-item>
-                                    <mat-list-item>
-                                        <div style="display:flex; gap:0.2em">
-                                              <mat-icon color="primary">schedule</mat-icon>
-                                              <strong>Début :</strong> {{ requestDetail.start * 1000 | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr' }}
-                                        </div>
-                                    </mat-list-item>
-                                    <mat-list-item>
-                                        <div style="display:flex; gap:0.2em">
-                                              <mat-icon color="accent">schedule</mat-icon>
-                                              <strong>Fin :</strong> {{ requestDetail.end * 1000 | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr' }}
-                                        </div>
-                                    </mat-list-item>
-                                    <mat-list-item>
-                                        <div style="display:flex; gap:0.2em">
-                                              <mat-icon color="warn">person</mat-icon>
-                                             <strong>Nom du thread :</strong> {{ requestDetail.threadName }}
-                                        </div>
-                                    </mat-list-item>
-                                </mat-list>-->
                             </mat-card-content>
                             <mat-card-footer>
                                 <mat-icon style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
@@ -194,9 +115,6 @@
                                     le {{ (requestDetail.start * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
                                 </div>
                                 <div class="right">
-                                    <span class="material-symbols-outlined">
-                                        file_json
-                                    </span>
                                     {{ requestDetail.inDataSize || 0 }}o
                                     <mat-icon style="width: 20px; height: 20px; font-size: 20px;">swap_vert</mat-icon>
                                     {{ requestDetail.outDataSize }}o en <span [matTooltip]="((requestDetail.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss': 'fr')" style="font-weight: bold">{{{ start: requestDetail.start, end: requestDetail.end } | duration}}</span>

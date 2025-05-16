@@ -2,12 +2,10 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import {forkJoin,map, Observable} from "rxjs";
 import {
-    RepartitionTimeAndTypeResponseByPeriod,
     RestMainExceptionsByPeriodAndappname,
     RestSessionExceptionsByPeriodAndappname
 } from "src/app/model/jquery.model";
-import {FilterMap} from "../../views/constants";
-import {InstanceRestSession, RestRequest} from "../../model/trace.model";
+import {RestRequest} from "../../model/trace.model";
 
 
 @Injectable({ providedIn: 'root' })
@@ -44,7 +42,7 @@ export class RestRequestService {
         return forkJoin({
             rest: this.getRestRequest({...arg,'join': 'rest_session,rest_session.instance'}),
             main: this.getRestRequest({...arg,'join': 'main_session,main_session.instance',})
-        }).pipe(map((result: {rest:any,main:any})=> ([...result.rest,...result.main])))
+        }).pipe(map((result: {rest:any,main:any})=> ([...new Set([...result.rest.map(r=>(r.host)), ...result.main.map(r=>(r.host))])])))
     }
 
 

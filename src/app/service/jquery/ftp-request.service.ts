@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import {forkJoin, map, Observable} from "rxjs";
 import { FtpMainExceptionsByPeriodAndappname, FtpSessionExceptionsByPeriodAndappname } from "src/app/model/jquery.model";
-import {FtpRequest, NamingRequest} from "../../model/trace.model";
+import {FtpRequest} from "../../model/trace.model";
 
 
 @Injectable({ providedIn: 'root' })
@@ -39,7 +39,7 @@ export class FtpRequestService {
         return forkJoin({
             rest: this.getftp({...arg,'join': 'rest_session,rest_session.instance'}),
             main: this.getftp({...arg,'join': 'main_session,main_session.instance',})
-        }).pipe(map((result: {rest:any,main:any})=> ([...result.rest,...result.main])))
+        }).pipe(map((result: {rest:any,main:any})=> ([...new Set([...result.rest.map(r=>(r.host)), ...result.main.map(r=>(r.host))])])))
     }
 
 

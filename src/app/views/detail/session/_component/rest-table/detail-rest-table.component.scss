@@ -29,11 +29,6 @@ tr.description-row {
     border-radius: 8px;
 }
 
-.request-id {
-    font-weight: bold;
-    color: #3f51b5;
-}
-
 .session-info {
     font-style: italic;
     color: #757575;
@@ -93,3 +88,26 @@ mat-card-title {
         margin-left: auto;
     }
 }
+
+.mat-column-host {
+    width: 20% !important;
+}
+
+.mat-column-path {
+    width: 50% !important;
+}
+
+.mat-column-start {
+    width: 10% !important;
+}
+
+.mat-column-duree {
+    width: 10% !important;
+}
+
+.mat-column-remote {
+    width: 10% !important;
+}
+
+
+

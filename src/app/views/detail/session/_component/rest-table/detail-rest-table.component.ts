@@ -1,12 +1,14 @@
-import {Component, EventEmitter, inject, Input, OnInit, Output, ViewChild} from "@angular/core";
+import {Component, EventEmitter, inject, Input, Output, ViewChild} from "@angular/core";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
-import {InstanceRestSession, RestRequest} from "src/app/model/trace.model";
+import {RestRequest} from "src/app/model/trace.model";
 import {animate, state, style, transition, trigger} from "@angular/animations";
 import {EnvRouter} from "../../../../../service/router.service";
 import {RestRequestService} from "../../../../../service/jquery/rest-request.service";
 import {finalize, Subscription} from "rxjs";
+import {DatePipe} from "@angular/common";
+import {Utils} from "../../../../../shared/util";
 
 @Component({
     selector: 'rest-table',
@@ -21,7 +23,8 @@ import {finalize, Subscription} from "rxjs";
     ],
 })
 export class DetailRestTableComponent {
-    private _router = inject(EnvRouter);
+    private readonly _router = inject(EnvRouter);
+    private readonly pipe = new DatePipe('fr-FR');
     private readonly _restRequestService = inject(RestRequestService);
     displayedColumns: string[] = ['status', 'host', 'path', 'start', 'duree', 'remote'];
     dataSource: MatTableDataSource<RestRequest> = new MatTableDataSource();
@@ -42,10 +45,10 @@ export class DetailRestTableComponent {
             this.dataSource = new MatTableDataSource(requests);
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
-            this.dataSource.sortingDataAccessor = sortingDataAccessor;
-            this.dataSource.filterPredicate = this.useFilter && filterPredicate;
+            this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
+            this.dataSource.filterPredicate = this.useFilter && this.filterPredicate;
             this.dataSource.filter = JSON.stringify(this.filterTable);
-          //  this.dataSource.paginator.pageIndex = 0;
+            this.dataSource.paginator.pageIndex = 0;
         }else{
             this.dataSource = new MatTableDataSource();
         }
@@ -82,22 +85,28 @@ export class DetailRestTableComponent {
             this.dataSource.paginator.firstPage();
         }
     }
-}
 
-const sortingDataAccessor = (row: any, columnName: string) => {
-    if (columnName == "host") return row["host"] + ":" + row["port"] as string;
-    if (columnName == "start") return row['start'] as string;
-    if (columnName == "duree") return (row["end"] - row["start"]);
-    return row[columnName as keyof any] as string;
-}
+    filterPredicate = (data: RestRequest, filter: string) => {
+        let date = new Date(data.start*1000)
+        filter = JSON.parse(filter)
+        let isMatch = true;
+        return  isMatch && (filter == '' ||
+            (data.host?.toLowerCase().includes(filter) ||
+                data.path?.toLowerCase().includes(filter) ||
+                data.status?.toString().toLowerCase().includes(filter) ||
+                this.pipe.transform(date,"dd/MM/yyyy").toLowerCase().includes(filter) ||
+                this.pipe.transform(date,"HH:mm:ss.SSS").toLowerCase().includes(filter)
+            ));
+    };
 
-const filterPredicate = (data: RestRequest, filter: string) => {
-    filter = JSON.parse(filter)
-    let isMatch = true;
-    return  isMatch && (filter == '' ||
-                (data.host?.toLowerCase().includes(filter) ||
-                 data.path?.toLowerCase().includes(filter) ||
-                 data.status?.toString().toLowerCase().includes(filter)
-                    //add  start and end filter
-                ));
-};
+    sortingDataAccessor = (row: any, columnName: string) => {
+        if (columnName == "host") return row["host"] + ":" + row["port"] as string;
+        if (columnName == "start") return row['start'] as string;
+        if (columnName == "duree") return (row["end"] - row["start"]);
+        return row[columnName as keyof any] as string;
+    }
+
+    getSessionUrl() {
+        return Utils.getSessionUrl(this.requestDetail);
+    }
+}
