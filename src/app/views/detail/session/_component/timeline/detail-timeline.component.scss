@@ -1,0 +1,29 @@
+.legend {
+  display: flex;
+  flex-direction: row;
+  justify-content: right;
+  align-items: center;
+  align-content: center;
+  gap:  0.5em;
+  padding :0.5em;
+
+  .item {
+    display: flex;
+    gap: 0.5em;
+
+    .dot {
+      height: 15px;
+      width: 15px;
+      border-radius: 50%;
+      color: white;
+
+      &.api { background-color:#3F51B5; }
+      &.ftp { background-color:#2196F3; }
+      &.smtp { background-color:#9C27B0; }
+      &.ldap { background-color:#00BCD4; }
+      &.bdd { background-color:#a5673f; }
+      &.local { background-color:#3b3b38; }
+      &.action { background-color: #FF6F61; }
+    }
+  }
+}

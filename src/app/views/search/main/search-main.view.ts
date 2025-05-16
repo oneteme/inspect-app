@@ -4,7 +4,7 @@ import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import {ActivatedRoute} from '@angular/router';
-import {combineLatest, distinctUntilChanged, finalize, Subscription, take} from 'rxjs';
+import {combineLatest, distinctUntilChanged, finalize, Subject, Subscription, take, takeUntil} from 'rxjs';
 import {Location} from '@angular/common';
 import {extractPeriod, Utils} from 'src/app/shared/util';
 import {TraceService} from 'src/app/service/trace.service';
@@ -40,16 +40,16 @@ import * as timers from "node:timers";
     ]
 })
 export class SearchMainView implements OnInit, OnDestroy {
-    private _router = inject(EnvRouter);
-    private _traceService = inject(TraceService);
-    private _instanceService = inject(InstanceService);
-    private _activatedRoute = inject(ActivatedRoute);
-    private _location = inject(Location);
-    private _filter = inject(FilterService);
+    private readonly _router = inject(EnvRouter);
+    private readonly _traceService = inject(TraceService);
+    private readonly _instanceService = inject(InstanceService);
+    private readonly _activatedRoute = inject(ActivatedRoute);
+    private readonly _location = inject(Location);
+    private readonly _filter = inject(FilterService);
+    private readonly $destroy = new Subject<void>();
 
     MAPPING_TYPE = Constants.MAPPING_TYPE;
     filterConstants = FilterConstants;
-    utils: Utils = new Utils();
     displayedColumns: string[] = ['status', 'app_name', 'name', 'location', 'start', 'durée', 'user'];
     dataSource: MatTableDataSource<InstanceMainSession> = new MatTableDataSource();
     serverNameIsLoading = true;
@@ -61,8 +61,6 @@ export class SearchMainView implements OnInit, OnDestroy {
         })
     });
     nameDataList: any[];
-    subscriptions: Subscription[] = [];
-    subscription: Subscription;
     isLoading = false;
     advancedParams: Partial<{ [key: string]: any }>
     focusFieldName: any
@@ -76,7 +74,7 @@ export class SearchMainView implements OnInit, OnDestroy {
     @ViewChild(MatSort) sort: MatSort;
 
     constructor() {
-        this.subscriptions.push(combineLatest([
+        combineLatest([
             this._activatedRoute.params,
             this._activatedRoute.queryParams
         ]).subscribe({
@@ -95,7 +93,7 @@ export class SearchMainView implements OnInit, OnDestroy {
                 this.patchServerValue(this.queryParams.servers);
                 this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
-                this.subscriptions.push(this._instanceService.getApplications(this.type == 'view' ? 'CLIENT' : 'SERVER' )
+                this._instanceService.getApplications(this.type == 'view' ? 'CLIENT' : 'SERVER' )
                     .pipe(finalize(()=> this.serverNameIsLoading = false))
                     .subscribe({
                         next: res => {
@@ -104,11 +102,11 @@ export class SearchMainView implements OnInit, OnDestroy {
                         }, error: (e) => {
                             console.log(e)
                         }
-                    }));
+                    });
                 this.getMainRequests();
                 this._location.replaceState(`${this._router.url.split('?')[0]}?${this.queryParams.buildPath()}`);
             }
-        }));
+        });
     }
 
     onChangeStart(event) {
@@ -134,11 +132,12 @@ export class SearchMainView implements OnInit, OnDestroy {
     }
 
     ngOnDestroy(): void {
-        this.subscriptions.forEach(s => s.unsubscribe());
+        this.$destroy.next();
+        this.$destroy.complete();
     }
 
     getMainRequests() {
-        if(this.subscription) this.subscription.unsubscribe();
+        this.$destroy.next();
         let params = {
             'appname': this.queryParams.servers,
             'env': this.queryParams.env,
@@ -155,7 +154,7 @@ export class SearchMainView implements OnInit, OnDestroy {
         this.dataSource.data = [];
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort
-        this.subscription = this._traceService.getMainSessions(params).subscribe((d: InstanceMainSession[]) => {
+        this._traceService.getMainSessions(params).pipe(takeUntil(this.$destroy)).subscribe((d: InstanceMainSession[]) => {
             if (d) {
                 this.dataSource = new MatTableDataSource(d);
                 this.dataSource.paginator = this.paginator;

@@ -1,15 +1,7 @@
 import {Component, ElementRef, EventEmitter, Input, OnChanges, Output, SimpleChanges, ViewChild} from "@angular/core";
-import {COMMA, ENTER} from "@angular/cdk/keycodes";
 import {FormControl} from "@angular/forms";
 import {map, Observable, startWith} from "rxjs";
-import {MatChipInputEvent} from "@angular/material/chips";
 import {MatAutocompleteSelectedEvent} from "@angular/material/autocomplete";
-
-export interface Option {
-  group?: string;
-  color?: string;
-  value: string;
-}
 
 @Component({
   selector: 'autocomplete-chip',

@@ -5,7 +5,7 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import {Location} from '@angular/common';
 import {ActivatedRoute, Params} from '@angular/router';
-import {BehaviorSubject, finalize, Subscription} from 'rxjs';
+import {BehaviorSubject, finalize, Subject, Subscription, takeUntil} from 'rxjs';
 import {extractPeriod, Utils} from 'src/app/shared/util';
 import {TraceService} from 'src/app/service/trace.service';
 import {app, makeDatePeriod,} from 'src/environments/environment';
@@ -38,12 +38,13 @@ import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../model/conf.model"
   ]
 })
 export class SearchRestView implements OnInit, OnDestroy {
-  private _router = inject(EnvRouter);
-  private _instanceService = inject(InstanceService);
-  private _traceService = inject(TraceService);
-  private _activatedRoute = inject(ActivatedRoute);
-  private _location = inject(Location);
-  private _filter = inject(FilterService);
+  private readonly _router = inject(EnvRouter);
+  private readonly _instanceService = inject(InstanceService);
+  private readonly _traceService = inject(TraceService);
+  private readonly _activatedRoute = inject(ActivatedRoute);
+  private readonly _location = inject(Location);
+  private readonly _filter = inject(FilterService);
+  private readonly $destroy = new Subject<void>();
 
   MAPPING_TYPE = Constants.MAPPING_TYPE;
   filterConstants = FilterConstants;
@@ -65,9 +66,6 @@ export class SearchRestView implements OnInit, OnDestroy {
   advancedParams: Partial<{ [key: string]: any }> ={}
   queryParams: Partial<QueryParams> = {};
   focusFieldName: any;
-  expandStatus: boolean;
-  subscriptions: Subscription[] = [];
-  subscription: Subscription;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild(MatSort, { static: true }) sort: MatSort;
@@ -93,8 +91,8 @@ export class SearchRestView implements OnInit, OnDestroy {
 
   constructor() {
 
-    this.subscriptions.push(this._activatedRoute.queryParams
-      .subscribe({
+    this._activatedRoute.queryParams
+        .subscribe({
         next: (params: Params) => {
            if(params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.env ||  app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server])
            if(!params.start && !params.end)  {
@@ -109,7 +107,7 @@ export class SearchRestView implements OnInit, OnDestroy {
           this.patchServerValue(this.queryParams.servers);
           this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
-          this.subscriptions.push(this._instanceService.getApplications('SERVER')
+          this._instanceService.getApplications('SERVER')
             .pipe(finalize(()=> this.serverNameIsLoading = false))
             .subscribe({
               next: res => {
@@ -118,11 +116,11 @@ export class SearchRestView implements OnInit, OnDestroy {
               }, error: (e) => {
                 console.log(e)
               }
-            }));
+            });
           this.getIncomingRequest();
           this._location.replaceState(`${this._router.url.split('?')[0]}?${this.queryParams.buildPath()}`);
         }
-      }));
+      });
   }
 
   ngOnInit(): void {
@@ -130,7 +128,8 @@ export class SearchRestView implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.subscriptions.forEach(s => s.unsubscribe());
+    this.$destroy.next();
+    this.$destroy.complete();
   }
 
   search() {
@@ -153,7 +152,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   }
 
   getIncomingRequest() {
-    if(this.subscription) this.subscription.unsubscribe();
+    this.$destroy.next();
     let params = {
       'env': this.queryParams.env,
       'appname': this.queryParams.servers,
@@ -168,7 +167,8 @@ export class SearchRestView implements OnInit, OnDestroy {
     this.dataSource = new MatTableDataSource([]);
     this.dataSource.paginator = this.paginator;
     this.dataSource.sort = this.sort;
-    this.subscription = this._traceService.getRestSessions(params)
+    this._traceService.getRestSessions(params)
+      .pipe(takeUntil(this.$destroy))
       .subscribe({
         next: (d: InstanceRestSession[]) => {
           if (d) {

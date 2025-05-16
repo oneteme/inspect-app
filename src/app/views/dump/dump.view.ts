@@ -1,5 +1,5 @@
 import {Component, ElementRef, inject, OnDestroy, OnInit, Signal, signal, ViewChild} from "@angular/core";
-import {combineLatest, finalize, forkJoin, Subscription} from "rxjs";
+import {combineLatest, finalize, forkJoin, Subject, Subscription, takeUntil} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {DatePipe, Location} from "@angular/common";
 import {EnvRouter} from "../../service/router.service";
@@ -14,14 +14,14 @@ import {sign} from "node:crypto";
     styleUrls: ['./dump.view.scss'],
 })
 export class DumpView implements OnInit, OnDestroy {
-    private _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
-    private _router: EnvRouter = inject(EnvRouter);
-    private _location: Location = inject(Location);
-    private _traceService: TraceService = inject(TraceService);
+    private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+    private readonly _router: EnvRouter = inject(EnvRouter);
+    private readonly _location: Location = inject(Location);
+    private readonly _traceService: TraceService = inject(TraceService);
 
-    private pipe = new DatePipe('fr-FR');
-    private durationPipe = new DurationPipe();
-
+    private readonly pipe = new DatePipe('fr-FR');
+    private readonly durationPipe = new DurationPipe();
+    private readonly $destroy = new Subject<void>();
 
     restSessions: Array<InstanceRestSession> = [];
     mainSessions: Array<InstanceMainSession> = [];
@@ -29,7 +29,6 @@ export class DumpView implements OnInit, OnDestroy {
     zoomableIn = signal(false);
     groups: DataGroup[];
     items: DataItem[];
-    subscription: Subscription;
 
     params: Partial<{env: string, app: string, date: Date, step: number}> = {};
 
@@ -50,19 +49,20 @@ export class DumpView implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        this.subscription.unsubscribe();
+        this.$destroy.next();
+        this.$destroy.complete();
     }
 
     getSession() {
-        if(this.subscription) this.subscription.unsubscribe();
+        this.$destroy.next();
         this.loading.set(true);
         this.zoomableIn.set(this.params.step != 1);
         let start = new Date(this.params.date.getFullYear(), this.params.date.getMonth(), this.params.date.getDate(), this.params.date.getHours(), this.params.date.getMinutes() - this.params.step, this.params.date.getSeconds());
         let end = new Date(this.params.date.getFullYear(), this.params.date.getMonth(), this.params.date.getDate(), this.params.date.getHours(), this.params.date.getMinutes() + this.params.step, this.params.date.getSeconds());
-        this.subscription = forkJoin(
+        forkJoin(
             [this._traceService.getRestSessionsForDump(this.params.env, this.params.app, start, end), this._traceService.getMainSessionsForDump(this.params.env, this.params.app, start, end)]
         )
-            .pipe(finalize(() =>  {}))
+            .pipe(takeUntil(this.$destroy), finalize(() =>  {}))
             .subscribe({
                 next: (sessions) => {
                     this.restSessions = sessions[0];

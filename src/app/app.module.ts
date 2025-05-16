@@ -7,6 +7,7 @@ import {AppComponent} from './app.component';
 
 import {ViewsModule} from './views/views.module';
 import {SharedModule} from './shared/shared.module';
+
 // main layout
 import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 
@@ -34,6 +35,7 @@ import {DumpView} from "./views/dump/dump.view";
 import {StatisticServerView} from "./views/statistic/server/statistic-server.view";
 import {DeploimentComponent} from './views/deploiment/deploiment.component';
 import {Interceptor} from "./shared/interceptor/interceptor";
+import {AnalyticView} from "./views/analytic/analytic.view";
 import {SearchRequestView} from "./views/search/request/search-request.view";
 import {Constants} from "./views/constants";
 
@@ -254,6 +256,11 @@ const routes: Route[] = [
       },
       { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
     ]
+  },
+  {
+    path: 'analytic/:user',
+    component: AnalyticView,
+    title: 'Action Utilisateur'
   },
   {
     path: 'home',

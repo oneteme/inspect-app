@@ -1,9 +1,14 @@
 :host {
     display: flex; 
     flex-direction: column;
-    height: 100vh;
 }
 
 .item-selected {
     background-color: var(--mat-menu-item-hover-state-layer-color);
+}
+
+mat-drawer-content {
+    overflow-x: hidden;
+    padding: 7px;
+    height: calc(100vh - 48px - 14px);
 }

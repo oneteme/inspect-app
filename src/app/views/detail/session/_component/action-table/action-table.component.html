@@ -1,0 +1,57 @@
+<div class="mat-elevation-z8">
+  <table mat-table [dataSource]="dataSource" #sort="matSort" matSort
+         matSortActive="date" matSortDirection="desc">
+
+
+    <ng-container matColumnDef="type">
+      <th mat-header-cell *matHeaderCellDef>Type</th>
+      <td mat-cell *matCellDef="let element">
+        {{ANALYTIC_MAPPING[element.type] ? ANALYTIC_MAPPING[element.type].label : element.type || 'N/A'}}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="node">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Tag</th>
+      <td mat-cell *matCellDef="let element">
+        {{element.nodeName || 'N/A'}}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header> Nom</th>
+      <td mat-cell *matCellDef="let element">
+        {{element.name || 'N/A'}}
+      </td>
+    </ng-container>
+
+    <ng-container matColumnDef="date">
+      <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
+      <td mat-cell *matCellDef="let element">
+        <div class="table-column-content">
+          {{ (element.start * 1000 | date:'dd/MM/yyyy')}}
+        </div>
+        <br>
+        <div class="table-column-content">
+          {{ (element.start * 1000 | date:'HH:mm:ss.SSS')}}
+        </div>
+      </td>
+    </ng-container>
+
+    <tr mat-header-row *matHeaderRowDef="displayedColumns;"></tr>
+    <tr mat-row *matRowDef="let row;columns: displayedColumns;">
+    </tr>
+    <tr class="mat-row" *matNoDataRow>
+      <td class="mat-cell" colspan="7">
+        <div class="detail-table-loading">
+            <span style="display: flex; flex-direction: column; font-style: italic;">
+              Chargement en cours...
+              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+            </span>
+        </div>
+      </td>
+    </tr>
+  </table>
+  <mat-paginator #paginator [pageSize]="3"
+                 [pageSizeOptions]="[3, 5, 10, 20]" [hidePageSize]="true"
+                 showFirstLastButtons></mat-paginator>
+</div>

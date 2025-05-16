@@ -1,31 +1,33 @@
-import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from "@angular/core";
+import {Component, inject, OnDestroy, OnInit} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../service/trace.service";
-import {Timeline} from "vis-timeline";
-import {combineLatest, finalize, forkJoin, Subscription} from "rxjs";
+import {DataGroup, DataItem, TimelineOptions} from "vis-timeline";
+import {combineLatest, finalize, forkJoin, Subject, takeUntil} from "rxjs";
 import {ExceptionInfo, Mail, MailRequest, MailRequestStage} from "../../../model/trace.model";
 import {DatePipe} from "@angular/common";
 import {app} from "../../../../environments/environment";
 import {EnvRouter} from "../../../service/router.service";
 import {DurationPipe} from "../../../shared/pipe/duration.pipe";
 import {MatTableDataSource} from "@angular/material/table";
-
-const INFINIT = new Date(9999,12,31).getTime();
+import {INFINITY} from "../../constants";
 
 @Component({
     templateUrl: './detail-smtp.view.html',
     styleUrls: ['./detail-smtp.view.scss'],
 })
 export class DetailSmtpView implements OnInit, OnDestroy {
-    private _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
-    private _traceService: TraceService = inject(TraceService);
-    private _router: EnvRouter = inject(EnvRouter);
+    private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+    private readonly _traceService: TraceService = inject(TraceService);
+    private readonly _router: EnvRouter = inject(EnvRouter);
+    private readonly pipe = new DatePipe('fr-FR');
+    private readonly durationPipe = new DurationPipe();
+    private readonly $destroy = new Subject<void>();
 
-    private timeLine: Timeline;
-    private subscription: Subscription[] = [];
     private params: Partial<{idSession: string, idSmtp: number, typeSession: string, typeMain: string, env: string}> = {};
-    private pipe = new DatePipe('fr-FR');
-    private durationPipe = new DurationPipe();
+
+    options: TimelineOptions;
+    dataItems: DataItem[];
+    dataGroups: DataGroup[];
 
     request: MailRequest;
     exception: ExceptionInfo;
@@ -34,10 +36,8 @@ export class DetailSmtpView implements OnInit, OnDestroy {
     displayedColumns: string[] = ['subject', 'from', 'recipients', 'replyTo'];
     dataSource: MatTableDataSource<Mail> = new MatTableDataSource();
 
-    @ViewChild('timeline') timelineContainer: ElementRef;
-
     ngOnInit() {
-        this.subscription.push(combineLatest([
+        combineLatest([
             this._activatedRoute.params,
             this._activatedRoute.data,
             this._activatedRoute.queryParams
@@ -45,24 +45,24 @@ export class DetailSmtpView implements OnInit, OnDestroy {
             next: ([params, data, queryParams]) => {
                 this.params = {idSession: params.id_session, idSmtp: params.id_smtp,
                     typeSession: data.type, typeMain: params.type_main, env: queryParams.env || app.defaultEnv};
-                this.request = null;
                 this.getRequest();
             }
-        }));
+        });
     }
 
     ngOnDestroy() {
-        this.subscription.forEach(s => s.unsubscribe());
-        this.timeLine.destroy();
+        this.$destroy.next();
+        this.$destroy.complete();
     }
 
     getRequest() {
+        this.request = null;
         this.isLoading = true;
-        this.subscription.push(forkJoin({
+        forkJoin({
             request: this._traceService.getSmtpRequests(this.params.idSession, this.params.idSmtp),
             stages: this._traceService.getSmtpRequestStages(this.params.idSession, this.params.idSmtp),
             mails: this._traceService.getSmtpRequestMails(this.params.idSession, this.params.idSmtp)
-        }).pipe(finalize(() => this.isLoading = false)).subscribe({
+        }).pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false)).subscribe({
             next: (value: {request: MailRequest, stages: MailRequestStage[], mails: Mail[]}) => {
                 this.request = value.request;
                 this.request.actions = value.stages;
@@ -71,16 +71,16 @@ export class DetailSmtpView implements OnInit, OnDestroy {
                 this.dataSource = new MatTableDataSource(this.request.mails);
                 this.createTimeline();
             }
-        }));
+        });
     }
 
     createTimeline() {
-        let timeline_start = Math.trunc(this.request.start * 1000);
-        let timeline_end = this.request.end ? Math.trunc(this.request.end * 1000) : INFINIT;
+        let timelineStart = Math.trunc(this.request.start * 1000);
+        let timelineEnd = this.request.end ? Math.trunc(this.request.end * 1000) : INFINITY;
 
         let items = this.request.actions.map((a:MailRequestStage, i:number) => {
             let start = Math.trunc(a.start * 1000);
-            let end = a.end? Math.trunc(a.end * 1000) :INFINIT;
+            let end = a.end? Math.trunc(a.end * 1000) : INFINITY;
             return  {
                 group: `${i}`,
                 start: start,
@@ -95,29 +95,27 @@ export class DetailSmtpView implements OnInit, OnDestroy {
         items.splice(0,0,{
             title: '',
             group:'parent',
-            start: timeline_start,
-            end: timeline_end,
+            start: timelineStart,
+            end: timelineEnd,
             content: (this.request.host || 'N/A'),
             className: "overflow",
             type:"background"
-           })
+        });
 
         let groups:any[]=this.request.actions.map((a:MailRequestStage, i:number) => ({ id: i, content: a?.name,treeLevel: 2}))
         groups.splice(0,0,{id:'parent', content: this.request.threadName,treeLevel: 1, nestedGroups:groups.map(g=>(g.id))})
-        let padding = (Math.ceil((timeline_end - timeline_start)*0.01));
-        let options = {
-            start: timeline_start - padding,
-            end: timeline_end + padding,
+        let padding = (Math.ceil((timelineEnd - timelineStart)*0.01));
+        this.dataItems = items;
+        this.dataGroups = groups;
+        this.options = {
+            start: timelineStart - padding,
+            end: timelineEnd + padding,
             selectable : false,
             clickToUse: true,
             tooltip: {
                 followMouse: true
             }
         }
-        if (this.timeLine) {  // destroy if exists 
-            this.timeLine.destroy();
-        }
-        this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, groups, options);
     }
 
     navigate(event: MouseEvent, targetType: string, extraParam?: string) {

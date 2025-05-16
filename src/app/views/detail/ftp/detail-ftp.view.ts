@@ -1,39 +1,40 @@
-import {Component, ElementRef, inject, OnDestroy, OnInit, ViewChild} from "@angular/core";
-import {Timeline} from "vis-timeline";
+import {Component, inject, OnDestroy, OnInit} from "@angular/core";
+import {DataGroup, DataItem, TimelineOptions} from "vis-timeline";
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../service/trace.service";
 import {DatePipe} from "@angular/common";
-import {combineLatest, finalize, forkJoin, map, Subscription} from "rxjs";
+import {combineLatest, finalize, forkJoin, map, Subject, takeUntil} from "rxjs";
 import {app} from "../../../../environments/environment";
 import {ExceptionInfo, FtpRequest, FtpRequestStage} from "../../../model/trace.model";
 import {EnvRouter} from "../../../service/router.service";
 import {getErrorClassName, Utils} from "../../../shared/util";
 import {DurationPipe} from "../../../shared/pipe/duration.pipe";
+import {INFINITY} from "../../constants";
 
-const INFINIT = new Date(9999,12,31).getTime();
 @Component({
     templateUrl: './detail-ftp.view.html',
     styleUrls: ['./detail-ftp.view.scss'],
 })
 export class DetailFtpView implements OnInit, OnDestroy {
-    private _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
-    private _traceService: TraceService = inject(TraceService);
-    private _router: EnvRouter = inject(EnvRouter);
+    private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+    private readonly _traceService: TraceService = inject(TraceService);
+    private readonly _router: EnvRouter = inject(EnvRouter);
+    private readonly pipe = new DatePipe('fr-FR');
+    private readonly durationPipe = new DurationPipe();
+    private readonly $destroy = new Subject<void>();
 
-    private timeLine: Timeline;
-    private subscription: Subscription[] = [];
     private params: Partial<{idSession: string, idFtp: number, typeSession: string, typeMain: string, env: string}> = {};
-    private pipe = new DatePipe('fr-FR');
-    private durationPipe = new DurationPipe();
+
+    options: TimelineOptions;
+    dataItems: DataItem[];
+    dataGroups: DataGroup[];
 
     request: FtpRequest;
     exception: ExceptionInfo;
     isLoading: boolean;
 
-    @ViewChild('timeline') timelineContainer: ElementRef;
-
     ngOnInit() {
-        this.subscription.push(combineLatest([
+        combineLatest([
             this._activatedRoute.params,
             this._activatedRoute.data,
             this._activatedRoute.queryParams
@@ -41,38 +42,38 @@ export class DetailFtpView implements OnInit, OnDestroy {
             next: ([params, data, queryParams]) => {
                 this.params = {idSession: params.id_session, idFtp: params.id_ftp,
                     typeSession: data.type, typeMain: params.type_main, env: queryParams.env || app.defaultEnv};
-                this.request = null;
                 this.getRequest();
             }
-        }));
+        });
     }
 
     ngOnDestroy() {
-        this.subscription.forEach(s => s.unsubscribe());
-        this.timeLine.destroy();
+        this.$destroy.next();
+        this.$destroy.complete();
     }
 
     getRequest() {
+        this.request = null;
         this.isLoading = true;
-        this.subscription.push(forkJoin({
+        forkJoin({
             request: this._traceService.getFtpRequests(this.params.idSession, this.params.idFtp).pipe(map(f => ({...f, duration: Utils.getElapsedTime(f.start, f.end)}))),
             stages: this._traceService.getFtpRequestStages(this.params.idSession, this.params.idFtp)
-        }).pipe(finalize(() => this.isLoading = false)).subscribe({
+        }).pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false)).subscribe({
             next: (value: {request: FtpRequest, stages: FtpRequestStage[]}) => {
                 this.request = value.request;
                 this.request.actions = value.stages;
                 this.exception = value.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
                 this.createTimeline();
             }
-        }));
+        });
     }
 
     createTimeline() {
-        let timeline_start = Math.trunc(this.request.start * 1000);
-        let timeline_end = this.request.end ? Math.trunc(this.request.end * 1000) : INFINIT;
+        let timelineStart = Math.trunc(this.request.start * 1000);
+        let timelineEnd = this.request.end ? Math.trunc(this.request.end * 1000) : INFINITY;
         let items = this.request.actions.map((a: FtpRequestStage, i:number) => {
             let start = Math.trunc(a.start * 1000);
-            let end = a.end ? Math.trunc(a.end * 1000) : INFINIT;
+            let end = a.end ? Math.trunc(a.end * 1000) : INFINITY;
             return {
                 group: `${i}`,
                 start: start,
@@ -88,8 +89,8 @@ export class DetailFtpView implements OnInit, OnDestroy {
         items.splice(0,0,{
             title: '',
             group:'parent',
-            start: timeline_start,
-            end: timeline_end,
+            start: timelineStart,
+            end: timelineEnd,
             content: (this.request.host || 'N/A'),
             className: "overflow",
             type:"background"
@@ -97,20 +98,18 @@ export class DetailFtpView implements OnInit, OnDestroy {
 
         let groups:any[]= this.request.actions.map((a: FtpRequestStage, i:number) => ({ id: i, content: a?.name, treeLevel: 2}))
         groups.splice(0,0,{id:'parent', content: this.request.threadName,treeLevel: 1, nestedGroups:groups.map(g=>(g.id))})
-        let padding = Math.ceil((timeline_end - timeline_start)*0.01);
-        let options = {
-            start: timeline_start - padding,
-            end: timeline_end + padding,
+        let padding = Math.ceil((timelineEnd - timelineStart)*0.01);
+        this.dataItems = items;
+        this.dataGroups = groups;
+        this.options = {
+            start: timelineStart - padding,
+            end: timelineEnd + padding,
             selectable : false,
             clickToUse: true,
             tooltip: {
                 followMouse: true
             }
         }
-        if (this.timeLine) {
-            this.timeLine.destroy();
-        }
-        this.timeLine = new Timeline(this.timelineContainer.nativeElement, items, groups, options);
     }
 
     navigate(event: MouseEvent, targetType: string, extraParam?: string) {

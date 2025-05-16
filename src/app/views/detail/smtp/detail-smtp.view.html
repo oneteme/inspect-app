@@ -33,27 +33,13 @@
 </div>
 
 
-<div [hidden]="!request" style="margin-bottom: 2em;">
-    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center;">
-        <mat-divider style="margin-right: 1em; flex: 1 1 0%"></mat-divider>
-        <div style="display: flex; align-items: center; gap: 0.5em; margin-bottom:  0.5em; font-size: 20px; font-weight: 500;">
-            <mat-icon class="material-symbols-outlined">view_timeline</mat-icon>
-            Chronologie
-        </div>
-        <mat-divider style="margin-left: 1em; flex: 1 1 0%"></mat-divider>
-    </div>
-    <div #timeline id="timeline"></div>
-</div>
+<app-timeline [options]="options"
+                 [groups]="dataGroups"
+                 [items]="dataItems">
+</app-timeline>
 
-<div *ngIf="!isLoading && request && request.mails?.length" style="margin-bottom: 2em;">
-    <div style="display: flex; flex-direction: row; justify-content: center; align-items: center; align-content: center; margin-bottom:  0.5em;">
-        <mat-divider style="margin-right: 2em; flex: 1 1 0"></mat-divider>
-        <div style="display: flex; align-items: center; gap: 0.5em; font-size: 20px; font-weight: 500;">
-            <mat-icon class="material-symbols-outlined">attach_email</mat-icon>
-            Mails
-        </div>
-        <mat-divider style="margin-left: 2em; flex: 1 1 0"></mat-divider>
-    </div>
+<div *ngIf="!isLoading && request && request.mails?.length" style="margin-bottom: 2em; margin-top: 1em">
+    <header-section icon="attach_email">Mails</header-section>
     <div class="mat-elevation-z8">
         <table mat-table [dataSource]="dataSource">
             <ng-container matColumnDef="subject">
@@ -106,7 +92,6 @@
         </table>
     </div>
 </div>
-
 
 
 <div *ngIf="!isLoading && !request" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">

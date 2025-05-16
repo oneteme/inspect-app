@@ -48,24 +48,6 @@ export class MainSessionService {
         return this.getMainSession(args);
     }
 
-    getDependencies(filters: {start: Date, end: Date, advancedParams: FilterMap, ids: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, appName: string, type: string}[]> {
-        let args: any = {
-            'column': `rest_request.count:count,rest_request.count_succes:countSucces,rest_request.count_error_client:countErrClient,rest_request.count_error_server:countErrServer,instance.app_name:name,instance.type`,
-            'instance.id':  'instance_env',
-            'id': 'rest_request.parent',
-            'rest_request.remote': 'rest_session_join.id',
-            'rest_session_join.start.ge': filters.start.toISOString(),
-            'rest_session_join.start.lt': filters.end.toISOString(),
-            'rest_session_join.instance_env.in': filters.ids,
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString(),
-            'view': 'rest_session:rest_session_join',
-            'order': 'count.desc',
-            ...filters.advancedParams
-        }
-        return this.getMainSession(args);
-    }
-
     getDependents(filters: {env: string, start: Date, end: Date, appName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string}[]> {
         return this.getMainSession({
             'column': 'rest_request.count:count,rest_request.count_succes:countSucces,rest_request.count_error_client:countErrClient,rest_request.count_error_server:countErrServer,instance_join.app_name:name',
@@ -143,21 +125,6 @@ export class MainSessionService {
             'instance_join.environement': filters.env,
             'order': 'origin.asc,target.asc'
         });
-    }
-
-    getRepartitionTimeAndTypeResponseByPeriod(filters: {start: Date, end: Date, groupedBy: string, advancedParams: FilterMap, ids: string}): Observable<RepartitionTimeAndTypeResponseByPeriod> {
-        let args: any = {
-            'column': `rest_request.count_succes:countSucces,rest_request.count_error_client:countErrorClient,rest_request.count_error_server:countErrorServer,rest_request.count_unavailable_server:countUnavailableServer,rest_request.count_slowest:elapsedTimeSlowest,rest_request.count_slow:elapsedTimeSlow,rest_request.count_medium:elapsedTimeMedium,rest_request.count_fast:elapsedTimeFast,rest_request.count_fastest:elapsedTimeFastest,rest_request.elapsedtime.avg:avg,rest_request.elapsedtime.max:max,rest_request.start.${filters.groupedBy}:date,rest_request.start.year:year`,
-            'id': 'rest_request.parent',
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString(),
-            'rest_request.start.ge': filters.start.toISOString(),
-            'rest_request.start.lt': filters.end.toISOString(),
-            'instance_env.in': filters.ids,
-            'type': 'BATCH',
-            'order': `year.asc,date.asc`
-        }
-        return this.getMainSession(args);
     }
 
     getRepartitionTimeAndTypeResponseByPeriodNew(filters: {server: string, env: string, start: Date, end: Date, groupedBy: string, apiNames: string, users: string, versions: string}): Observable<RepartitionTimeAndTypeResponseByPeriod> {
@@ -276,6 +243,18 @@ export class MainSessionService {
             'instance.environement': filters.env,
             'instance.app_name': `"${filters.appName}"`,
             'instance.type': 'SERVER'
+        }).pipe(map((data: {user: string}[]) => (data.map(d => d.user))));
+    }
+
+    getUsersView(filters: {env: string, date: Date}): Observable<string[]> {
+        return this.getMainSession({
+            'column.distinct': 'user',
+            'join': 'instance',
+            'user.notNull': '',
+            'start.ge': filters.date.toISOString(),
+            'type': 'VIEW',
+            'instance.environement': filters.env,
+            'instance.type': 'CLIENT'
         }).pipe(map((data: {user: string}[]) => (data.map(d => d.user))));
     }
 }

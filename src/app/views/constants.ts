@@ -1,4 +1,28 @@
 import { ChartProvider, field, values } from "@oneteme/jquery-core";
+import { DashboardComponent } from "./dashboard/dashboard.component";
+import {UserAction} from "../model/trace.model";
+
+export const INFINITY = new Date(9999,12,31).getTime();
+
+export const ANALYTIC_MAPPING : {[key: string]: {label: string, text: (param: UserAction) => string}} = {
+    DOMContentLoaded: {
+        label: 'Initialisation',
+        text: (param: UserAction) => `Chargement de la page.`
+    },
+    click: {
+        label: 'Click',
+        text: (param: UserAction) => `Clique sur l'êlement "${param.name}" de type "${param.nodeName}".`
+    },
+    scroll: {
+        label: 'Scroll',
+        text: (param: UserAction) => `Scroll sur la page.`
+    },
+    change: {
+        label: 'Change',
+        text: (param: UserAction) => `Changement sur l'êlement "${param.name}" de type "${param.nodeName}".`
+    }
+};
+
 export class Constants {
 
     static readonly REPARTITION_TYPE_RESPONSE_PIE: ChartProvider<string, number> = {
@@ -494,7 +518,7 @@ export class Constants {
 
 
     
-    static  REST_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<string, number> = {
+    static REST_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<string, number> = {
    
     
         height: 100,

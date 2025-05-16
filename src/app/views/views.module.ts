@@ -20,7 +20,6 @@ import {DetailDatabaseTableComponent} from "./detail/session/_component/database
 import {DetailFtpTableComponent} from "./detail/session/_component/ftp-table/detail-ftp-table.component";
 import {DetailSmtpTableComponent} from "./detail/session/_component/smtp-table/detail-smtp-table.component";
 import {DetailLdapTableComponent} from "./detail/session/_component/ldap-table/detail-ldap-table.component";
-import {DetailTimelineComponent} from "./detail/session/_component/timeline/detail-timeline.component";
 import {DetailSessionComponent} from "./detail/session/_component/detail-session.component";
 import {StatisticUserView} from "./statistic/user/statistic-user.view";
 import {TreeView} from "./tree/tree.view";
@@ -63,6 +62,10 @@ import {
   RepartitionTypeCardComponent as BatchRepartitionTypeCardComponent
 } from "./statistic/server/_component/batch-tab/_component/repartition-type-card/repartition-type-card.component";
 import {SearchRequestView} from "./search/request/search-request.view";
+import {AnalyticView} from "./analytic/analytic.view";
+import {DetailTimelineComponent} from "./detail/session/_component/timeline/detail-timeline.component";
+import {ActionTableComponent} from "./detail/session/_component/action-table/action-table.component";
+
 
 
 @NgModule({
@@ -74,7 +77,7 @@ import {SearchRequestView} from "./search/request/search-request.view";
     BrowserModule,
     BrowserAnimationsModule,
     SharedModule,
-    ChartComponent,
+    ChartComponent
   ],
   declarations: [
     SearchRestView,
@@ -120,7 +123,9 @@ import {SearchRequestView} from "./search/request/search-request.view";
     ServerStartTableComponent,
     NumberFormatterPipe,
     DeploimentComponent,
-    SearchRequestView
+    AnalyticView,
+    ActionTableComponent,
+      SearchRequestView
   ]
 })
 export class ViewsModule { }

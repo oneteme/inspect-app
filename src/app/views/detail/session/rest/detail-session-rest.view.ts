@@ -3,7 +3,19 @@ import {InstanceEnvironment, InstanceRestSession} from "../../../../model/trace.
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {Location} from "@angular/common";
-import {catchError, combineLatest, finalize, of, Subscription, switchMap, merge, map,defer} from "rxjs";
+import {
+    catchError,
+    combineLatest,
+    finalize,
+    of,
+    Subscription,
+    switchMap,
+    merge,
+    map,
+    defer,
+    Subject,
+    takeUntil
+} from "rxjs";
 import {app} from "../../../../../environments/environment";
 import {Utils} from "../../../../shared/util";
 import {EnvRouter} from "../../../../service/router.service";
@@ -15,20 +27,20 @@ import {EnvRouter} from "../../../../service/router.service";
 export class DetailSessionRestView implements OnInit, OnDestroy {
     private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
     private readonly _traceService: TraceService = inject(TraceService);
-    private readonly _router: EnvRouter = inject(EnvRouter);
     private readonly _location: Location = inject(Location);
+    private readonly $destroy = new Subject<void>();
+    protected readonly _router: EnvRouter = inject(EnvRouter);
 
     session: InstanceRestSession;
     instance: InstanceEnvironment;
     completedSession: InstanceRestSession
     sessionParent: { id: string, type: string };
     isLoading: boolean = false;
-    parentLoading: boolean =false;
-    subscriptions: Array<Subscription> = [];
+    parentLoading: boolean = false;
     env: string;
 
     ngOnInit() {
-        this.subscriptions.push(combineLatest([
+        combineLatest([
             this._activatedRoute.params,
             this._activatedRoute.queryParams
         ]).subscribe({
@@ -37,7 +49,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
                 this.getSession(params.id_session);
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}`)
             }
-        }));
+        });
     }
 
     getSession(id: string) {
@@ -46,9 +58,10 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
         this.session = null;
         this.completedSession =null;
         this.sessionParent=null;
-        this.subscriptions.push(this._traceService.getSessionParent(id).pipe(catchError(() => of(null)),finalize(()=>(this.parentLoading = false))).subscribe(d=>this.sessionParent=d))
-        this.subscriptions.push(this._traceService.getRestSession(id)
+        this._traceService.getSessionParent(id).pipe(takeUntil(this.$destroy), catchError(() => of(null)),finalize(()=>(this.parentLoading = false))).subscribe(d=>this.sessionParent = d);
+        this._traceService.getRestSession(id)
             .pipe(
+                takeUntil(this.$destroy),
                 switchMap(s => {
                     return of(s).pipe(
                         map(s=>{
@@ -68,59 +81,19 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
                 }),
                 finalize(() =>{ this.completedSession = this.session; this.isLoading = false;})
             )
-            .subscribe());
+            .subscribe();
     }
 
     getSessionUrl() {
         return Utils.getSessionUrl(this.session);
     }
 
-    navigate(event: MouseEvent, targetType: string, extraParam?: string) {
-        let params: any[] = [];
-        switch (targetType) {
-            case "rest":
-                params.push('statistic', 'rest', this.session.name);
-                break;
-            case "dump":
-                params.push('session', this.instance.name, 'dump')
-                break;
-            case "tree":
-                params.push('session', 'rest', this.session.id, 'tree')
-                break;
-            case "parent":
-                if(this.sessionParent.type == 'rest') {
-                    params.push('session', 'rest', this.sessionParent.id)
-                } else {
-                    params.push('session', 'main', this.sessionParent.type.toLowerCase(), this.sessionParent.id)
-                }
-        }
-        if (event.ctrlKey) {
-            this._router.open(`#/${params.join('/')}`, '_blank')
-        } else {
-            this._router.navigate(params, {
-                queryParams: { env: this.instance.env }
-            });
-        }
-    }
-
-    onClickDump(event: MouseEvent) {
-        let params: {fragments: string[], queryParams: any} = {
-            fragments: ['session', this.instance.name, 'dump'],
-            queryParams:  { env: this.instance.env, date: new Date(this.session.start * 1000).toISOString() }
-        };
-        if (event.ctrlKey) {
-            let url = this._router.createUrlTree(params.fragments, {
-                queryParams: params.queryParams }
-            ).toString();
-            this._router.open(`#/${url}`, '_blank');
-        } else {
-            this._router.navigate(params.fragments, {
-                queryParams: params.queryParams
-            });
-        }
+    getDate(start: number) {
+        return new Date(start);
     }
 
     ngOnDestroy() {
-        this.subscriptions.forEach(s => s.unsubscribe());
+        this.$destroy.next();
+        this.$destroy.complete();
     }
 }
