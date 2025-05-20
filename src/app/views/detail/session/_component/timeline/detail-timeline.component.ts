@@ -59,7 +59,6 @@ export class DetailTimelineComponent implements OnChanges {
                     (this.request.ldapRequests ?? []).map(r => ({...r, typeTimeline: 'ldap'})),
                     (this.request.databaseRequests ?? []).map(r => ({...r, typeTimeline: 'database'})),
                     (this.request.stages ?? []).map(r => ({...r, typeTimeline: 'local'})))
-                console.log(this.dataArray);
                 this.dataArray.splice(0, 0, { ...this.request, typeTimeline: 'stage' });
                 this.sortInnerArrayByDate(this.dataArray);
                 if (this.request.type != null && this.request.type === "VIEW") {

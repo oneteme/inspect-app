@@ -53,7 +53,8 @@ export class DetailFtpTableComponent {
         return  isMatch && (filter == '' ||
             (data.host?.toLowerCase().includes(filter)||
             this.pipe.transform(date,"dd/MM/yyyy").toLowerCase().includes(filter) ||
-            this.pipe.transform(date,"HH:mm:ss.SSS").toLowerCase().includes(filter)
+            this.pipe.transform(date,"HH:mm:ss.SSS").toLowerCase().includes(filter) ||
+            data.exception?.message.toString().toLowerCase().includes(filter)
             ));
     };
 

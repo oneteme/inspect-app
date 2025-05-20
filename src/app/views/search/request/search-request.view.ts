@@ -76,7 +76,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
   }
   } =
       {
-        "rest": { service: this._restRequestService, filters:  [{icon: 'warning', label: '5xx',color:'#bb2124', value:'5xx'}, {icon: 'error', label: '4xx',color:'#f9ad4e', value:'4xx'}, {icon: 'done', label: '2xx',color:'#22bb33', value:'2xx'}]},
+        "rest": { service: this._restRequestService, filters:  [{icon: 'warning', label: '5xx',color:'#bb2124', value:'5xx'}, {icon: 'error', label: '4xx',color:'#f9ad4e', value:'4xx'}, {icon: 'done', label: '2xx',color:'#22bb33', value:'2xx'},{icon: 'priority_high', label: '0',color:'gray', value:'0xx'}]},
         "database": { service: this._databaseRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: false}, {icon: 'done', label: 'OK',color:'#22bb33', value: true}] },
         "ftp" :  { service: this._ftpRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: false}, {icon: 'done', label: 'OK',color:'#22bb33', value: true}] },
         "smtp": { service: this._smtpRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: false}, {icon: 'done', label: 'OK',color:'#22bb33', value: true}] },
@@ -107,9 +107,6 @@ export class SearchRequestView implements OnInit, OnDestroy {
     this.queryParams.hosts = this.requestFilterForm.controls.host.value;
   }
   onChangeStatus($event){
-    /*if(this.requestFilterForm.controls.rangestatus.value.length == this.seviceType[this.params.type].filters.length) { // might remove this ? or improve it ?
-      this.requestFilterForm.controls.rangestatus.setValue([]);
-    }*/
     this.queryParams.rangestatus = this.requestFilterForm.controls.rangestatus.value && this.requestFilterForm.controls.rangestatus.value.map((f:{icon: string, label: string,color: string, value: any}) => f.value)
   }
 
@@ -176,7 +173,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
     }
     this.nameDataList =null;
     this.serverNameIsLoading =true;
-    this.hostSubscription = this.seviceType[this.params.type].service.getHost({ env: this.queryParams.env, start: this.queryParams.period.start, end: this.queryParams.period.end, type: 'SERVER'})
+    this.hostSubscription = this.seviceType[this.params.type].service.getHost(this.params.type, { env: this.queryParams.env, start: this.queryParams.period.start.toISOString(), end: this.queryParams.period.end.toISOString()})
         .pipe(finalize(()=> this.serverNameIsLoading = false))
         .subscribe({
           next: res => {
@@ -194,16 +191,15 @@ export class SearchRequestView implements OnInit, OnDestroy {
       this.RequestSubscription.unsubscribe();
       this.isLoading =false;
     }
-    let params = {
+    this.requests = null;
+    this.isLoading = true;
+    this.RequestSubscription = (<any>this.seviceType[this.params.type]).service.getRequests({
       'env': this.queryParams.env,
       'host': this.queryParams.hosts,
       'rangestatus': this.queryParams.rangestatus,
       'start': this.queryParams.period.start.toISOString(),
       'end': this.queryParams.period.end.toISOString()
-    };
-    this.requests = null;
-    this.isLoading = true;
-    this.RequestSubscription = (<any>this.seviceType[this.params.type]).service.getRequests(params)
+    })
       .pipe(finalize(()=> this.isLoading = false))
       .subscribe({
         next: (d: any) => {
@@ -235,7 +231,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
 
   patchStatusValue(rangestatus:any[]){
     this.requestFilterForm.patchValue({
-      rangestatus: this.seviceType[this.params.type].filters.filter((f:any)=> rangestatus.includes(f.value))
+      rangestatus: this.seviceType[this.params.type].filters.filter((f:any)=> rangestatus.toString().includes(f.value))
     },{ emitEvent: false })
   }
 
@@ -249,7 +245,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
   }
 
 
-  selectedSmtp(event: { event: MouseEvent, row: any }) { // TODO finish this
+  selectedSmtp(event: { event: MouseEvent, row: any }) {
     if (event.row) {
       let segment = 'rest';
       if(event.row.type) segment = `main/${event.row.type}`;
@@ -263,7 +259,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
     }
   }
 
-  selectedLdap(event: { event: MouseEvent, row: any }) { // TODO finish this
+  selectedLdap(event: { event: MouseEvent, row: any }) {
     if (event.row) {
       let segment = 'rest';
       if(event.row.type) segment = `main/${event.row.type}`;
@@ -277,7 +273,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
     }
   }
 
-  selectedFtp(event: { event: MouseEvent, row: any }) { // TODO finish this
+  selectedFtp(event: { event: MouseEvent, row: any }) {
     if (event.row) {
       let segment = 'rest';
       if(event.row.type) segment = `main/${event.row.type}`;
@@ -291,7 +287,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
     }
   }
 
-  selectedQuery(event: { event: MouseEvent, row: any }) { // TODO finish this
+  selectedQuery(event: { event: MouseEvent, row: any }) {
     if (event.row) {
 
       let segment = event.row.sessionType;
