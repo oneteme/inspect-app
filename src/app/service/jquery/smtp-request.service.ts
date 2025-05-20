@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import {forkJoin, map, Observable} from "rxjs";
 import { SmtpMainExceptionsByPeriodAndappname, SmtpSessionExceptionsByPeriodAndappname } from "src/app/model/jquery.model";
-import {MailRequest} from "../../model/trace.model";
+import {MailRequest, RestRequest} from "../../model/trace.model";
 
 
 @Injectable({ providedIn: 'root' })
@@ -21,20 +21,8 @@ export class smtpRequestService {
         return this.http.get<Array<MailRequest>>(`${this.server}/request/smtp`, { params: params });
     }
 
-    getHost(filters: { env: string, start: Date, end: Date, type: string }): Observable<{ host: string }[]> {
-        let arg  = {
-            'column.distinct': 'host',
-            'host.notNull': '',
-            'instance.type': filters.type,
-            'instance.environement': filters.env,
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString(),
-            'order': 'host.asc'
-        }
-        return forkJoin({
-            rest: this.getsmtp({...arg,'join': 'rest_session,rest_session.instance'}),
-            main: this.getsmtp({...arg,'join': 'main_session,main_session.instance',})
-        }).pipe(map((result: {rest:any,main:any})=> ([...new Set([...result.rest.map(r=>(r.host)), ...result.main.map(r=>(r.host))])])))
+    getHost(type: string, filters: any): Observable<{ host: string }[]> {
+        return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, { params: filters });
     }
 
 
