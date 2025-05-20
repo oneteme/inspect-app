@@ -89,12 +89,14 @@ export class DetailRestTableComponent {
         let date = new Date(data.start*1000)
         filter = JSON.parse(filter)
         let isMatch = true;
+        console.log(data)
         return  isMatch && (filter == '' ||
             (data.host?.toLowerCase().includes(filter) ||
                 data.path?.toLowerCase().includes(filter) ||
                 data.status?.toString().toLowerCase().includes(filter) ||
                 this.pipe.transform(date,"dd/MM/yyyy").toLowerCase().includes(filter) ||
-                this.pipe.transform(date,"HH:mm:ss.SSS").toLowerCase().includes(filter)
+                this.pipe.transform(date,"HH:mm:ss.SSS").toLowerCase().includes(filter) ||
+                data.exception?.message.toString().toLowerCase().includes(filter)
             ));
     };
 
