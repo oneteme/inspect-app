@@ -86,7 +86,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   }
 
   onChangeServer($event){
-    this.queryParams.servers = this.serverFilterForm.controls.appname.value;
+    this.queryParams.appname = this.serverFilterForm.controls.appname.value;
   }
 
   constructor() {
@@ -104,7 +104,7 @@ export class SearchRestView implements OnInit, OnDestroy {
             }
             this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), params.env || app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server]); 
           }
-          this.patchServerValue(this.queryParams.servers);
+          this.patchServerValue(this.queryParams.appname);
           this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
           this._instanceService.getApplications('SERVER')
@@ -112,7 +112,7 @@ export class SearchRestView implements OnInit, OnDestroy {
             .subscribe({
               next: res => {
                 this.nameDataList = res.map(r => r.appName);
-                this.patchServerValue(this.queryParams.servers);
+                this.patchServerValue(this.queryParams.appname);
               }, error: (e) => {
                 console.log(e)
               }
@@ -152,10 +152,10 @@ export class SearchRestView implements OnInit, OnDestroy {
     this.$destroy.next();
     let params = {
       'env': this.queryParams.env,
-      'appname': this.queryParams.servers,
+      'appname': this.queryParams.appname,
       'start': this.queryParams.period.start.toISOString(),
       'end': this.queryParams.period.end.toISOString()
-    }; 
+    };
     if(this.advancedParams){
       Object.assign(params, this.advancedParams);
     }
@@ -198,6 +198,7 @@ export class SearchRestView implements OnInit, OnDestroy {
     this.serverFilterForm.patchValue({
       appname: servers
     },{ emitEvent: false })
+    this.queryParams.appname = servers
   }
 
   selectedRequest(event: MouseEvent, row: any) {
@@ -248,6 +249,7 @@ export class SearchRestView implements OnInit, OnDestroy {
         this.serverFilterForm.patchValue({
           [key]: value
         })
+        this.queryParams[key] = value;
         delete filterPreset.values[key];
      }
     },{})
