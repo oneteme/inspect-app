@@ -4,7 +4,16 @@ import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import {ActivatedRoute} from '@angular/router';
-import {combineLatest, distinctUntilChanged, finalize, Subject, Subscription, take, takeUntil} from 'rxjs';
+import {
+    BehaviorSubject,
+    combineLatest,
+    distinctUntilChanged,
+    finalize,
+    Subject,
+    Subscription,
+    take,
+    takeUntil
+} from 'rxjs';
 import {Location} from '@angular/common';
 import {extractPeriod, Utils} from 'src/app/shared/util';
 import {TraceService} from 'src/app/service/trace.service';
@@ -90,7 +99,7 @@ export class SearchMainView implements OnInit, OnDestroy {
                     }
                     this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.env || app.defaultEnv, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server]);
                 }
-                this.patchServerValue(this.queryParams.servers);
+                this.patchServerValue(this.queryParams.appname);
                 this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
                 this._instanceService.getApplications(this.type == 'view' ? 'CLIENT' : 'SERVER' )
@@ -98,7 +107,7 @@ export class SearchMainView implements OnInit, OnDestroy {
                     .subscribe({
                         next: res => {
                             this.nameDataList = res.map(r => r.appName);
-                            this.patchServerValue(this.queryParams.servers);
+                            this.patchServerValue(this.queryParams.appname);
                         }, error: (e) => {
                             console.log(e)
                         }
@@ -124,11 +133,15 @@ export class SearchMainView implements OnInit, OnDestroy {
     }
 
     onChangeServer($event){
-        this.queryParams.servers = this.serverFilterForm.controls.appname.value;
+        this.queryParams.appname = this.serverFilterForm.controls.appname.value;
     }
 
-    ngOnInit(): void {
+    ngOnInit() {
+        this._filter.registerGetallFilters(this.filtersSupplier.bind(this));
+    }
 
+    filtersSupplier(): BehaviorSubject<FilterMap> { //change
+        return new BehaviorSubject<FilterMap>({});
     }
 
     ngOnDestroy(): void {
@@ -139,7 +152,7 @@ export class SearchMainView implements OnInit, OnDestroy {
     getMainRequests() {
         this.$destroy.next();
         let params = {
-            'appname': this.queryParams.servers,
+            'appname': this.queryParams.appname,
             'env': this.queryParams.env,
             'launchmode': this.type.toUpperCase(),
             'start': this.queryParams.period.start.toISOString(),
@@ -196,10 +209,12 @@ export class SearchMainView implements OnInit, OnDestroy {
         }, {emitEvent: false});
     }
 
-    patchServerValue(servers: any[]) {
+    patchServerValue(appname: any[]) {
         this.serverFilterForm.patchValue({
-            appname: servers
+            appname: appname
         },{ emitEvent: false })
+        this.queryParams.appname = appname
+
     }
 
     selectedRequest(event: MouseEvent, row: any) {
@@ -240,6 +255,7 @@ export class SearchMainView implements OnInit, OnDestroy {
                 this.serverFilterForm.patchValue({
                     [key]: value
                 })
+                this.queryParams[key] = value;
                 delete filterPreset.values[key];
             }
         }, {})

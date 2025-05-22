@@ -26,6 +26,8 @@ export class DetailLdapTableComponent {
             this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
             this.dataSource.filterPredicate = this.useFilter && this.filterPredicate;
             this.dataSource.filter = JSON.stringify(this.filterTable)
+        }else{
+            this.dataSource = new MatTableDataSource();
         }
     }
 

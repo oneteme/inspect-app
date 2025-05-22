@@ -1,4 +1,4 @@
-<header-page [iconOutlined]="true"  [titleIcon]="REQUEST_TYPE[params.type].icon" [ui-title]="REQUEST_TYPE[params.type].title">
+<header-page [iconOutlined]="true"  [titleIcon]="REQUEST_TYPE[params.type].icon" [ui-title]="REQUEST_TYPE[params.type].prefix+' '+REQUEST_TYPE[params.type].title+' émis'">
   <form [formGroup]="requestFilterForm" class="header-filter md-2">
 
 
@@ -18,7 +18,7 @@
       <mat-label>Host</mat-label>
       <mat-select [formControl]="requestFilterForm.controls.host" multiple (selectionChange)="onChangeHost($event)">
         
-        <span *ngIf="serverNameIsLoading && queryParams.servers && queryParams.servers[0]!=''"><mat-option *ngFor="let s of queryParams.servers">{{s}}</mat-option></span>
+        <span *ngIf="serverNameIsLoading && queryParams.appname && queryParams.appname[0]!=''"><mat-option *ngFor="let s of queryParams.appname">{{s}}</mat-option></span>
         <mat-option *ngFor="let d of nameDataList" [value]="d">{{d}}</mat-option>
       </mat-select>
       <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>

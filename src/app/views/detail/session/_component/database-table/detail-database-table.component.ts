@@ -4,7 +4,7 @@ import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
 import {DatabaseRequest} from "src/app/model/trace.model";
 import {DatePipe} from "@angular/common";
-
+import {INFINITY} from "../../../../constants";
 @Component({
     selector: 'database-table',
     templateUrl: './detail-database-table.component.html',
@@ -27,6 +27,8 @@ export class DetailDatabaseTableComponent {
             this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
             this.dataSource.filterPredicate = this.useFilter && this.filterPredicate;
             this.dataSource.filter = JSON.stringify(this.filterTable)
+        }else{
+            this.dataSource = new MatTableDataSource();
         }
     }
     @Input() useFilter: boolean;
@@ -72,7 +74,7 @@ export class DetailDatabaseTableComponent {
 
     sortingDataAccessor = (row: any, columnName: string) => {
         if (columnName == "start") return row['start'] as string;
-        if (columnName == "duree") return (row["end"] - row["start"])
+        if (columnName == "duree") return row['end'] ? row["end"] - row["start"] : INFINITY;
         return row[columnName as keyof any] as string;
     }
 }

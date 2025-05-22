@@ -32,6 +32,7 @@ export class AdvancedFilterTriggerComponent implements OnInit, OnDestroy {
     @Output() handleFilterReset = new EventEmitter<void>();
     @Input() filterConfig: FilterConstants
     @Input() pageName: string;
+    @Input() additionalFilter:FilterMap;
     @Input() set focusField(fieldName: string) {
         if (fieldName) {
             this.HandleOpenFilterDialog(fieldName);
@@ -55,6 +56,7 @@ export class AdvancedFilterTriggerComponent implements OnInit, OnDestroy {
                 filterConfig: this.filterConfig,
                 focusField: focusField,
                 pageName: this.pageName,
+                additionalFilter: this.additionalFilter
             }
         })
         this.subscriptions.push(dialog.afterClosed().subscribe(result => {
