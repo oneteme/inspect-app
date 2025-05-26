@@ -89,7 +89,6 @@ export class DetailRestTableComponent {
         let date = new Date(data.start*1000)
         filter = JSON.parse(filter)
         let isMatch = true;
-        console.log(data)
         return  isMatch && (filter == '' ||
             (data.host?.toLowerCase().includes(filter) ||
                 data.path?.toLowerCase().includes(filter) ||
