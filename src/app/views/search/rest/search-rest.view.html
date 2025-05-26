@@ -19,6 +19,27 @@
       </mat-select>
       <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>
     </mat-form-field>
+      <mat-form-field class="no-subscript" appearance="outline">
+          <mat-label>Status</mat-label>
+          <mat-select [formControl]="serverFilterForm.controls.rangestatus" multiple (selectionChange)="onChangeStatus($event)">
+              <mat-select-trigger style="display: flex;gap: 0.5em;">
+                  <div style="display: flex; align-content: center; flex: 1;align-items: center;" *ngFor="let s of serverFilterForm.controls.rangestatus.value">
+                      <mat-icon [style.color]="s.color" >
+                          {{s.icon}}
+                      </mat-icon>
+                      {{s.label}}
+                  </div>
+              </mat-select-trigger>
+              <mat-option *ngFor="let s of  filters" [value]="s">
+                  <div style="display: flex; align-content: center">
+                      <mat-icon [style.color]="s.color">
+                          {{s.icon}}
+                      </mat-icon>
+                      {{s.label}}
+                  </div>
+              </mat-option>
+          </mat-select>
+      </mat-form-field>
     <button mat-mini-fab color="primary"  (click)="search()">
       <mat-icon matSuffix>search</mat-icon>
     </button>

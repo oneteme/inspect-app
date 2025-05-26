@@ -7,18 +7,15 @@ import {ActivatedRoute} from '@angular/router';
 import {
     BehaviorSubject,
     combineLatest,
-    distinctUntilChanged,
     finalize,
     Subject,
-    Subscription,
-    take,
     takeUntil
 } from 'rxjs';
-import {Location} from '@angular/common';
-import {extractPeriod, Utils} from 'src/app/shared/util';
+import {DatePipe, Location} from '@angular/common';
+import {extractPeriod, } from 'src/app/shared/util';
 import {TraceService} from 'src/app/service/trace.service';
 import {app, makeDatePeriod } from 'src/environments/environment';
-import {Constants, Filter, FilterConstants, FilterMap, FilterPreset} from '../../constants';
+import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constants';
 import {FilterService} from 'src/app/service/filter.service';
 import {InstanceMainSession, } from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
@@ -30,8 +27,6 @@ import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
 import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-date-range-selection-strategy";
 import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../model/conf.model";
 import {shallowEqual} from "../rest/search-rest.view";
-import * as timers from "node:timers";
-
 
 @Component({
     templateUrl: './search-main.view.html',
@@ -56,6 +51,7 @@ export class SearchMainView implements OnInit, OnDestroy {
     private readonly _location = inject(Location);
     private readonly _filter = inject(FilterService);
     private readonly $destroy = new Subject<void>();
+    private readonly pipe = new DatePipe('fr-FR');
 
     MAPPING_TYPE = Constants.MAPPING_TYPE;
     filterConstants = FilterConstants;
@@ -64,6 +60,7 @@ export class SearchMainView implements OnInit, OnDestroy {
     serverNameIsLoading = true;
     serverFilterForm = new FormGroup({
         appname: new FormControl([""]),
+        rangestatus: new FormControl([]),
         dateRangePicker: new FormGroup({
             start: new FormControl<Date | null>(null, [Validators.required]),
             end: new FormControl<Date | null>(null, [Validators.required]),
@@ -71,6 +68,7 @@ export class SearchMainView implements OnInit, OnDestroy {
     });
     nameDataList: any[];
     isLoading = false;
+    filters: {icon: string, label: string,color: string, value: any} [] = [{icon: 'warning', label: 'KO',color:'#bb2124', value: false}, {icon: 'done', label: 'OK',color:'#22bb33', value: true}]
     advancedParams: Partial<{ [key: string]: any }>
     focusFieldName: any
     filterTable = new Map<string, any>();
@@ -89,7 +87,7 @@ export class SearchMainView implements OnInit, OnDestroy {
         ]).subscribe({
             next: ([params, queryParams]) => {
                 this.type = params.type_main;
-                if(queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env || app.defaultEnv, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server])
+                if(queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env || app.defaultEnv, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server],null,!queryParams.rangestatus ? []: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] )
                 if(!queryParams.start && !queryParams.end)  {
                     let period;
                     if(queryParams.step && queryParams.from){
@@ -97,8 +95,9 @@ export class SearchMainView implements OnInit, OnDestroy {
                     } else if(queryParams.step){
                         period = new IStep(queryParams.step);
                     }
-                    this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.env || app.defaultEnv, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server]);
+                    this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.env || app.defaultEnv, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server],null, !queryParams.rangestatus ? []: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] );
                 }
+                this.patchStatusValue(this.queryParams.rangestatus)
                 this.patchServerValue(this.queryParams.appname);
                 this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
@@ -136,6 +135,10 @@ export class SearchMainView implements OnInit, OnDestroy {
         this.queryParams.appname = this.serverFilterForm.controls.appname.value;
     }
 
+    onChangeStatus($event){
+        this.queryParams.rangestatus = this.serverFilterForm.controls.rangestatus.value && this.serverFilterForm.controls.rangestatus.value.map((f:{icon: string, label: string,color: string, value: any}) => f.value)
+    }
+
     ngOnInit() {
         this._filter.registerGetallFilters(this.filtersSupplier.bind(this));
     }
@@ -155,6 +158,7 @@ export class SearchMainView implements OnInit, OnDestroy {
             'appname': this.queryParams.appname,
             'env': this.queryParams.env,
             'launchmode': this.type.toUpperCase(),
+            'rangestatus': this.queryParams.rangestatus,
             'start': this.queryParams.period.start.toISOString(),
             'end': this.queryParams.period.end.toISOString(),
             'lazy': false
@@ -172,8 +176,8 @@ export class SearchMainView implements OnInit, OnDestroy {
                 this.dataSource = new MatTableDataSource(d);
                 this.dataSource.paginator = this.paginator;
                 this.dataSource.sort = this.sort
-                this.dataSource.sortingDataAccessor = sortingDataAccessor;
-                this.dataSource.filterPredicate = filterPredicate;
+                this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
+                this.dataSource.filterPredicate = this.filterPredicate;
                 this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
                 this.dataSource.paginator.pageIndex = 0;
                 this.isLoading = false;
@@ -217,6 +221,12 @@ export class SearchMainView implements OnInit, OnDestroy {
 
     }
 
+    patchStatusValue(rangestatus:any[]){
+        this.serverFilterForm.patchValue({
+            rangestatus: this.filters.filter((f:any)=> rangestatus.toString().includes(f.value))
+        },{ emitEvent: false })
+    }
+
     selectedRequest(event: MouseEvent, row: any) {
         if (event.ctrlKey) {
             this._router.open(`#/session/main/${row.type.toLowerCase()}/${row.id}`, '_blank')
@@ -234,11 +244,6 @@ export class SearchMainView implements OnInit, OnDestroy {
         if (this.dataSource.paginator) {
             this.dataSource.paginator.firstPage();
         }
-    }
-
-    toggleFilter(filter: string[]) {
-        this.filterTable.set('status', filter);
-        this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
     }
 
     resetFilters() {
@@ -290,35 +295,42 @@ export class SearchMainView implements OnInit, OnDestroy {
         }
     }
 
+    sortingDataAccessor = (row: any, columnName: string) => {
+        if (columnName == "app_name") return row["appName"] as string;
+        if (columnName == "name") return row["name"] as string;
+        if (columnName == "location") return row['location'] as string;
+        if (columnName == "start") return row['start'] as string;
+        if (columnName == "durée") return (row["end"] - row["start"])
+
+        var columnValue = row[columnName as keyof any] as string;
+        return columnValue;
+    };
+
+    filterPredicate = (data: InstanceMainSession, filter: string) => {
+        var map: Map<string, any> = new Map(JSON.parse(filter));
+        let isMatch = true;
+        let date = new Date(data.start*1000)
+        for (let [key, value] of map.entries()) {
+            if (key == 'filter') {
+                isMatch = isMatch && (value == '' || (data.appName?.toLowerCase().includes(value) ||
+                        data.name?.toLowerCase().includes(value) || data.location?.toLowerCase().includes(value) ||
+                        data.user?.toLowerCase().includes(value)) ||
+                    this.pipe.transform(date,"dd/MM/yyyy").toLowerCase().includes(value) ||
+                    this.pipe.transform(date,"HH:mm:ss.SSS").toLowerCase().includes(value) ||
+                    data.exception?.message.toString().toLowerCase().includes(value) ||
+                    data.exception?.type.toString().toLowerCase().includes(value));
+            } else if (key == 'status') {
+                const s = data.exception?.type || data.exception?.message ? "KO" : "OK";
+                isMatch = isMatch && (!value.length || (value.some((status: any) => {
+                    return s == status;
+                })));
+            }
+        }
+        return isMatch;
+    };
+
+
 }
 
-const sortingDataAccessor = (row: any, columnName: string) => {
-    if (columnName == "app_name") return row["appName"] as string;
-    if (columnName == "name") return row["name"] as string;
-    if (columnName == "location") return row['location'] as string;
-    if (columnName == "start") return row['start'] as string;
-    if (columnName == "durée") return (row["end"] - row["start"])
-
-    var columnValue = row[columnName as keyof any] as string;
-    return columnValue;
-};
-
-const filterPredicate = (data: InstanceMainSession, filter: string) => {
-    var map: Map<string, any> = new Map(JSON.parse(filter));
-    let isMatch = true;
-    for (let [key, value] of map.entries()) {
-        if (key == 'filter') {
-            isMatch = isMatch && (value == '' || (data.appName?.toLowerCase().includes(value) ||
-                data.name?.toLowerCase().includes(value) || data.location?.toLowerCase().includes(value) ||
-                data.user?.toLowerCase().includes(value)));
-        } else if (key == 'status') {
-            const s = data.exception?.type || data.exception?.message ? "KO" : "OK";
-            isMatch = isMatch && (!value.length || (value.some((status: any) => {
-                return s == status;
-            })));
-        }
-    }
-    return isMatch;
-};
 
 

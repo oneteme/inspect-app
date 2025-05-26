@@ -120,7 +120,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
       ]).subscribe({
       next: ([params, queryParams]) => {
           this.params.type = params.type || 'rest';
-          if(queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env ||  app.defaultEnv,null,!queryParams.host ? [] : Array.isArray(queryParams.host) ? queryParams.host : [queryParams.host],!queryParams.rangestatus ? [/*this.seviceType[this.params.type].filters[0].value*/]: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] )
+          if(queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env ||  app.defaultEnv,null,!queryParams.host ? [] : Array.isArray(queryParams.host) ? queryParams.host : [queryParams.host],!queryParams.rangestatus ? []: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] )
           if(!queryParams.start && !queryParams.end){
             let period;
             if(queryParams.step && queryParams.from){
