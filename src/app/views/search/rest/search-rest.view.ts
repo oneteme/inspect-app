@@ -239,11 +239,6 @@ export class SearchRestView implements OnInit, OnDestroy {
     }
   }
 
-  toggleFilter(filter: string[]) {
-    this.filterTable.set('status', filter);
-    this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
-  }
-
   resetFilters(){
     this.patchDateValue((extractPeriod(app.gridViewPeriod, "gridViewPeriod")|| makeDatePeriod(0)).start,(extractPeriod(app.gridViewPeriod, "gridViewPeriod") || makeDatePeriod(0, 1)).end);
     this.patchServerValue([]);
