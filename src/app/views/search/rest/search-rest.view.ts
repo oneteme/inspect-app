@@ -314,8 +314,8 @@ export class SearchRestView implements OnInit, OnDestroy {
                 data.user?.toLowerCase().includes(value) || data.path?.toLowerCase().includes(value)) ||
                 this.pipe.transform(date,"dd/MM/yyyy").toLowerCase().includes(value) ||
                 this.pipe.transform(date,"HH:mm:ss.SSS").toLowerCase().includes(value) ||
-                data.exception?.message.toString().toLowerCase().includes(value) ||
-                data.exception?.type.toString().toLowerCase().includes(value));
+                data.exception?.message?.toString().toLowerCase().includes(value) ||
+                data.exception?.type?.toString().toLowerCase().includes(value));
       } else if (key == 'status') {
         const s = data.status.toString();
         isMatch = isMatch && (!value.length || (value.some((status: any) => {
