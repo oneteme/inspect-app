@@ -1,6 +1,6 @@
 <nav>
     <mat-toolbar color="primary" style="display: flex; align-items: center; height: 48px;">
-        <span style="margin-right: 0.5em;cursor:pointer" [routerLink]="['home']"  [queryParams]="{env: env.value}">INSPECT</span>
+        <span style="margin-right: 0.5em;cursor:pointer" (click)="gotoHome($event)">INSPECT</span>
 
         <button mat-icon-button [matMenuTriggerFor]="menu">
             <mat-icon>more_vert</mat-icon>

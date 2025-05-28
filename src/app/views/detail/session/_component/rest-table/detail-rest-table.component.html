@@ -102,16 +102,9 @@
                                     <mat-icon class="material-symbols-outlined" style="overflow: initial !important; width: 28px; height: 28px;">warning</mat-icon>
                                     <div class="ellipsis" >{{ requestDetail.exception?.message || requestDetail.exception?.type }}</div>
                                 </div>
-
-
-
                             </mat-card-content>
                             <mat-card-footer>
-                                <mat-icon style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
                                 <div style="display: flex; align-items: center; gap: 0.5em">
-                                    <p>
-                                        {{ requestDetail.user || "N/A" }}
-                                    </p>
                                     le {{ (requestDetail.start * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
                                 </div>
                                 <div class="right">

@@ -50,32 +50,6 @@
     </button>
   </form>
 </header-page>
-<!--<div style="display: flex; justify-content: space-between; margin-bottom: 0.2em;">
-  <mat-form-field  appearance="outline" class="searchwidth md-2 no-subscript">
-    <input [disabled]="isLoading"  matInput #input (keyup)="applyFilter($event)" placeholder="Filtrer..." autocomplete="off">
-    <mat-icon matSuffix>search</mat-icon>
-  </mat-form-field>
-    <mat-button-toggle-group #group="matButtonToggleGroup" multiple value="5xx"
-                             [disabled]="isLoading" (change)="toggleFilter($event.value)">
-        <mat-button-toggle value="2xx" matTooltip="2xx">
-      <span class="material-symbols-outlined" style="color: #22bb33;">
-        done
-      </span>
-        </mat-button-toggle>
-        <mat-button-toggle value="4xx" matTooltip="4xx">
-      <span class="material-symbols-outlined" style="color: #f9ad4e;">
-        error
-      </span>
-        </mat-button-toggle>
-        <mat-button-toggle value="5xx" matTooltip="5xx">
-      <span class="material-symbols-outlined" style="color: #bb2124;">
-        warning
-      </span>
-        </mat-button-toggle>
-    </mat-button-toggle-group>
-
-</div>-->
-
 
 <div  *ngIf="params.type=='rest'"  style="margin-bottom: 2em;">
     <rest-table

@@ -82,4 +82,14 @@ export class AppComponent implements OnDestroy {
     unsubscribe() {
         this.subscriptions.forEach(s => s.unsubscribe());
     }
+
+    gotoHome(event: MouseEvent){
+        if (event.ctrlKey) {
+            this._router.open(`#/home?env=${this.env.value}`, '_blank',)
+        } else {
+            this._router.navigate([`home`], {
+                queryParams: { env: this.env.value }
+            });
+        }
+    }
 }
