@@ -21,6 +21,7 @@ export class AppComponent implements OnDestroy {
     private readonly _router: EnvRouter = inject(EnvRouter);
 
     MAPPING_TYPE = Constants.MAPPING_TYPE;
+    REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
     envs: any[];
     env: FormControl<string> = new FormControl();
     isLoadingEnv = false;
@@ -80,5 +81,15 @@ export class AppComponent implements OnDestroy {
 
     unsubscribe() {
         this.subscriptions.forEach(s => s.unsubscribe());
+    }
+
+    gotoHome(event: MouseEvent){
+        if (event.ctrlKey) {
+            this._router.open(`#/home?env=${this.env.value}`, '_blank',)
+        } else {
+            this._router.navigate([`home`], {
+                queryParams: { env: this.env.value }
+            });
+        }
     }
 }

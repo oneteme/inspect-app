@@ -15,16 +15,40 @@
             <mat-label>Serveur</mat-label>
             <mat-select [formControl]="serverFilterForm.controls.appname" multiple (selectionChange)="onChangeServer($event)">
 
-                <span *ngIf="serverNameIsLoading && queryParams.servers[0]!=''"><mat-option *ngFor="let s of queryParams.servers" [value]="s">{{s}}</mat-option></span>
+                <span *ngIf="serverNameIsLoading && queryParams.appname[0]!=''"><mat-option *ngFor="let s of queryParams.appname" [value]="s">{{s}}</mat-option></span>
                 <mat-option *ngFor="let d of nameDataList" [value]="d">{{d}}</mat-option>
             </mat-select>
             <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>
         </mat-form-field>
+        <mat-form-field class="no-subscript" appearance="outline">
+            <mat-label>Status</mat-label>
+            <mat-select [formControl]="serverFilterForm.controls.rangestatus" multiple (selectionChange)="onChangeStatus($event)">
+                <mat-select-trigger style="display: flex;gap: 0.5em;">
+                    <div style="display: flex; align-content: center; flex: 1;align-items: center;" *ngFor="let s of serverFilterForm.controls.rangestatus.value">
+                        <mat-icon [style.color]="s.color" >
+                            {{s.icon}}
+                        </mat-icon>
+                        {{s.label}}
+                    </div>
+                </mat-select-trigger>
+                <mat-option *ngFor="let s of  filters" [value]="s">
+                    <div style="display: flex; align-content: center">
+                        <mat-icon [style.color]="s.color">
+                            {{s.icon}}
+                        </mat-icon>
+                        {{s.label}}
+                    </div>
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
         <button mat-mini-fab color="primary" (click)="search()">
             <mat-icon matSuffix>search</mat-icon>
         </button>
-        <advanced-filter-trigger [pageName]="'session-main'" [filterConfig]="filterConstants.SEARCH[type]"
-                                 [focusField]="focusFieldName" (handleDialogclose)="handledialogclose($event)"
+        <advanced-filter-trigger [pageName]="'session-main'"
+                                 [filterConfig]="filterConstants.SEARCH[type]"
+                                 [focusField]="focusFieldName"
+                                 [additionalFilter]="{'start.ge':queryParams.period.start?.toISOString(),'start.lt': queryParams.period.end?.toISOString()}"
+                                 (handleDialogclose)="handledialogclose($event)"
                                  (handlePresetSelection)="handlePresetSelection($event)"
                                  (handlePresetSelectionReset)="handlePresetSelectionReset()"
                                  (handleFilterReset)="handleFilterReset()"></advanced-filter-trigger>
@@ -36,20 +60,6 @@
                autocomplete="off">
         <mat-icon matSuffix>search</mat-icon>
     </mat-form-field>
-
-    <mat-button-toggle-group *ngIf="type != 'view'" #group="matButtonToggleGroup" multiple
-                             [disabled]="isLoading" (change)="toggleFilter($event.value)">
-        <mat-button-toggle value="OK">
-          <span class="material-symbols-outlined" style="color: #22bb33;">
-            done
-          </span>
-        </mat-button-toggle>
-        <mat-button-toggle value="KO">
-          <span class="material-symbols-outlined" style="color: #bb2124;">
-            warning
-          </span>
-        </mat-button-toggle>
-    </mat-button-toggle-group>
 </div>
 <div class="mat-elevation-z8">
     <div class="example-table-container">
@@ -128,16 +138,16 @@
             <tr class="mat-row" *matNoDataRow>
                 <td class="mat-cell" colspan="7">
                     <div *ngIf="!isLoading" class="empty-row" style="align-items: center;">
-            <span class="material-symbols-outlined">
-              info
-            </span>
+                        <span class="material-symbols-outlined">
+                          info
+                        </span>
                         <span style="font-style: italic;">Aucun résultat</span>
                     </div>
                     <div *ngIf="isLoading" class="loading-row">
-              <span style="display: flex; flex-direction: column; font-style: italic;">
-                Chargement en cours...
-                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-              </span>
+                      <span style="display: flex; flex-direction: column; font-style: italic;">
+                        Chargement en cours...
+                        <mat-progress-bar mode="indeterminate"></mat-progress-bar>
+                      </span>
                     </div>
                 </td>
             </tr>

@@ -36,16 +36,29 @@ import {StatisticServerView} from "./views/statistic/server/statistic-server.vie
 import {DeploimentComponent} from './views/deploiment/deploiment.component';
 import {Interceptor} from "./shared/interceptor/interceptor";
 import {AnalyticView} from "./views/analytic/analytic.view";
+import {SearchRequestView} from "./views/search/request/search-request.view";
+import {Constants} from "./views/constants";
 
 
 registerLocaleData(localeFr, 'fr-FR');
 const routes: Route[] = [
-  {
+    {
+      path:'request', children : [
+        {
+          path:':type',
+          component: SearchRequestView,
+          title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title,
+        },
+        { path: '**', pathMatch: 'full', redirectTo: `/request/rest` }
+      ]
+    },
+    {
     path: 'session', children: [
       {
         path: ':app_name/dump',
         component: DumpView
       },
+
       {
         path: 'rest',
         children: [

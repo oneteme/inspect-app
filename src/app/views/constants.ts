@@ -500,13 +500,22 @@ export class Constants {
     };
 
     static readonly MAPPING_TYPE: {[key: string]: {title: string, icon: string}} = {
-        rest: {title: 'Appel d\'API', icon: 'call_received'},
+        request: {title: 'Appels émis', icon: 'call_made'},
+        rest: {title: 'Appels reçus', icon: 'call_received'},
         batch: {title: 'Lancement de Batch', icon: 'manufacturing'},
         startup: {title: 'Lancement de Serveur', icon: 'restart_alt'},
         view: {title: 'Navigation', icon: 'ads_click'},
         dashboard: {title:'Page d\'Accueil', icon: 'home'},
-        deploiment: {title:'Versions déployées', icon:'deployed_code'}
+        deploiment: {title:'Versions déployées', icon:'deployed_code'},
     }
+    static readonly REQUEST_MAPPING_TYPE: {[key: string]: {title: string, icon: string, prefix:string}} = {
+        rest: {title: 'HTTP', icon: 'call_made', prefix: 'Appels'},
+        database: {title: 'BDD', icon: 'Database', prefix: 'Requêtes'},
+        ftp: {title: 'FTP', icon: 'smb_share', prefix: 'Requêtes'},
+        smtp: {title: 'SMTP', icon: 'outgoing_mail', prefix: 'Requêtes'},
+        ldap: {title: 'LDAP', icon: 'user_attributes', prefix: 'Requêtes'},
+    }
+
 
     
     static REST_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<string, number> = {
@@ -714,14 +723,6 @@ export interface FilterPreset {
     values: { [key: string]: any };
 }
 
-/*export enum Operation { //  remove.
-    eq = "",
-    gt = "gt",
-    ge = "ge",
-    lt = "lt",
-    le = "le",
-    like = 'like'
-}*/
 
 export const Operation = {
     eq: { value: "", display: "Egal" },
@@ -736,7 +737,7 @@ export class FilterConstants {
     static readonly SEARCH: {[key: string]: Filter[]} = {
         rest: [
             { key: 'query', label: 'Query params', type: 'input', row: 2, col: 1, op: Operation.like },
-            { key: 'status', label: 'Status', type: 'select', row: 3, col: 1, endpoint: "session/rest", query: { 'column.distinct': 'status:status', 'order': 'status.asc' }, op: Operation.eq },
+            //{ key: 'status', label: 'Status', type: 'select', row: 3, col: 1, endpoint: "session/rest", query: { 'column.distinct': 'status:status', 'order': 'status.asc' }, op: Operation.eq },
             { key: 'method', label: 'Method', type: 'select', width: 20, row: 1, col: 1, endpoint: "session/rest",  query: { 'column.distinct': 'method:method', 'order': 'method.asc' }, op: Operation.eq },
             { key: 'path', label: 'Path', type: 'input', row: 1, col: 2, op: Operation.like },
             { key: 'apiName', label: 'Nom API', type: 'select', row: 3, col: 2, endpoint: "session/rest", query: { 'column.distinct': 'api_name', 'api_name.notNull': '', 'order': 'api_name.asc' }, op: Operation.eq  },

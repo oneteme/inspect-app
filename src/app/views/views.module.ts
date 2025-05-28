@@ -61,9 +61,12 @@ import {
 import {
   RepartitionTypeCardComponent as BatchRepartitionTypeCardComponent
 } from "./statistic/server/_component/batch-tab/_component/repartition-type-card/repartition-type-card.component";
+import {SearchRequestView} from "./search/request/search-request.view";
 import {AnalyticView} from "./analytic/analytic.view";
 import {DetailTimelineComponent} from "./detail/session/_component/timeline/detail-timeline.component";
 import {ActionTableComponent} from "./detail/session/_component/action-table/action-table.component";
+
+
 
 @NgModule({
   imports: [
@@ -121,7 +124,8 @@ import {ActionTableComponent} from "./detail/session/_component/action-table/act
     NumberFormatterPipe,
     DeploimentComponent,
     AnalyticView,
-    ActionTableComponent
+    ActionTableComponent,
+      SearchRequestView
   ]
 })
 export class ViewsModule { }

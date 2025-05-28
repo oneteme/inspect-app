@@ -34,7 +34,7 @@ export class AdvancedFilterComponent implements OnInit, AfterContentChecked, OnD
     isFormEmpty: boolean = false;
     cloneFilterValue: any = {}
     constructor(public dialogRef: MatDialogRef<AdvancedFilterComponent>,
-        @Inject(MAT_DIALOG_DATA) public data: { filterConfig: Filter[], focusField?: string, pageName: string }) { }
+        @Inject(MAT_DIALOG_DATA) public data: { filterConfig: Filter[], focusField?: string, pageName: string, additionalFilter?: FilterMap }) { }
 
 
     ngOnInit(): void {
@@ -58,16 +58,14 @@ export class AdvancedFilterComponent implements OnInit, AfterContentChecked, OnD
 
                 control = this._fb.control(value)
                 group.addControl(field.key, control)
-
                 if (field.type != 'chip') {
                     this.subscriptions.push(control.valueChanges.subscribe(value => {
                         this.cloneFilterValue[field.key] = value
                         this.isFormEmpty = this.checkIfFormEmpty()
                     }))
                 }
-
-                if (field.query && !field.options) {
-                    this.getSelectData(field);
+                if (field.query){
+                        this.getSelectData(field,  this.data.additionalFilter);
                 }
             });
         }));
@@ -120,9 +118,9 @@ export class AdvancedFilterComponent implements OnInit, AfterContentChecked, OnD
 
 
 
-    getSelectData(field: Filter) {
+    getSelectData(field: Filter, additionalFilter?: FilterMap) {
         field.isLoading = true;
-        this.subscriptions.push(this._statsService.getJqueryData(field.endpoint, field.query) // url 
+        this.subscriptions.push(this._statsService.getJqueryData(field.endpoint, {...field.query,...additionalFilter}) // url
             .pipe(finalize(() => { field.isLoading = false; }))
             .pipe(
                 catchError(error => {
@@ -138,12 +136,13 @@ export class AdvancedFilterComponent implements OnInit, AfterContentChecked, OnD
     }
 
     removeNullEntries(object: any) {
-        return Object.entries(this.cloneFilterValue).reduce((accumulator: any, [key, value]: any) => {
+        let a =Object.entries(this.cloneFilterValue).reduce((accumulator: any, [key, value]: any) => {
             if ((value != null && value != '') || (Array.isArray(value) && value.length > 0)) {
-                accumulator[key.toLowerCase()] = value;
+                accumulator[key] = value;
             }
             return accumulator;
         }, {})
+        return a;
     }
 
     ngOnDestroy(): void {

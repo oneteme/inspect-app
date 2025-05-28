@@ -1,7 +1,8 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
+import {forkJoin, map, Observable} from "rxjs";
 import {JdbcMainExceptionsByPeriodAndappname, JdbcSessionExceptionsByPeriodAndappname, RepartitionRequestByPeriod} from "../../model/jquery.model";
+import {DatabaseRequest} from "../../model/trace.model";
 
 @Injectable({ providedIn: 'root' })
 export class DatabaseRequestService {
@@ -9,9 +10,23 @@ export class DatabaseRequestService {
 
     }
 
+    server = `${localStorage.getItem('server')}/v3/trace`;
+
     getDatabaseRequest<T>(params: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/request/database`;
         return this.http.get<T>(url, { params: params });
+    }
+
+    getRequests(params: any): Observable<Array<DatabaseRequest>> {
+        return this.http.get<Array<DatabaseRequest>>(`${this.server}/request/database`, { params: params });
+    }
+
+    getRequestsById(id: string): Observable<DatabaseRequest> {
+        return this.http.get<DatabaseRequest>(`${this.server}/request/database/${id}`);
+    }
+
+    getHost(type: string, filters: any): Observable<{ host: string }[]> {
+        return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, { params: filters });
     }
 
     getRepartitionRequestByPeriod(filters: {start: Date, end: Date, groupedBy: string, database: string, env: string}): Observable<RepartitionRequestByPeriod> {

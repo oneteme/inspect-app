@@ -1,7 +1,26 @@
+.searchwidth {
+    flex-grow: 1;
+}
 .mat-mdc-row .mat-mdc-cell {
     cursor: pointer;
 }
 
 .mat-mdc-row:hover .mat-mdc-cell {
     background-color: rgb(206, 206, 206);
+}
+
+.mat-column-host {
+    width: 60% !important;
+}
+
+.mat-column-schema {
+    width: 20% !important;
+}
+
+.mat-column-start {
+    width: 10% !important;
+}
+
+.mat-column-duree {
+    width: 10% !important;
 }

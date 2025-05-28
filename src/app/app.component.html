@@ -1,18 +1,20 @@
 <nav>
     <mat-toolbar color="primary" style="display: flex; align-items: center; height: 48px;">
-        <span style="margin-right: 0.5em;cursor:pointer" [routerLink]="['home']">INSPECT</span>
+        <span style="margin-right: 0.5em;cursor:pointer" (click)="gotoHome($event)">INSPECT</span>
 
         <button mat-icon-button [matMenuTriggerFor]="menu">
             <mat-icon>more_vert</mat-icon>
         </button>
-        <!--<button mat-icon-button [routerLink]="['architecture']">
-            <mat-icon class="material-symbols-outlined">lan</mat-icon>
-        </button>-->
         <mat-menu #menu="matMenu">
             <button mat-menu-item [routerLink]="['session/rest']" routerLinkActive="item-selected"
                     [queryParams]="{env: env.value}">
-                <mat-icon>{{ MAPPING_TYPE['rest'].icon }}</mat-icon>
+                <mat-icon class="material-symbols-outlined">{{ MAPPING_TYPE['rest'].icon }}</mat-icon>
                 <span>{{ MAPPING_TYPE['rest'].title }}</span>
+            </button>
+            <button mat-menu-item  routerLinkActive="item-selected"
+                    [matMenuTriggerFor]="requests">
+                <mat-icon>{{ MAPPING_TYPE['request'].icon }}</mat-icon>
+                <span>{{ MAPPING_TYPE['request'].title }}</span>
             </button>
             <button mat-menu-item [routerLink]="['session/main/batch']" routerLinkActive="item-selected"
                     [queryParams]="{env: env.value}">
@@ -28,6 +30,34 @@
                     [queryParams]="{env: env.value}">
                 <mat-icon>{{ MAPPING_TYPE['view'].icon }}</mat-icon>
                 <span>{{ MAPPING_TYPE['view'].title }}</span>
+            </button>
+        </mat-menu>
+
+        <mat-menu #requests="matMenu">
+            <button mat-menu-item [routerLink]="['request/rest']" routerLinkActive="item-selected"
+                    [queryParams]="{env: env.value}">
+                <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['rest'].icon }}</mat-icon>
+                <span>{{ REQUEST_TYPE['rest'].title }}</span>
+            </button>
+            <button mat-menu-item [routerLink]="['request/database']" routerLinkActive="item-selected"
+                    [queryParams]="{env: env.value}">
+                <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['database'].icon }}</mat-icon>
+                <span>{{ REQUEST_TYPE['database'].title }}</span>
+            </button>
+            <button mat-menu-item [routerLink]="['request/ftp']" routerLinkActive="item-selected"
+                    [queryParams]="{env: env.value}">
+                <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['ftp'].icon }}</mat-icon>
+                <span>{{ REQUEST_TYPE['ftp'].title }}</span>
+            </button>
+            <button mat-menu-item [routerLink]="['request/smtp']" routerLinkActive="item-selected"
+                    [queryParams]="{env: env.value}">
+                <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['smtp'].icon }}</mat-icon>
+                <span>{{ REQUEST_TYPE['smtp'].title }}</span>
+            </button>
+            <button mat-menu-item [routerLink]="['request/ldap']" routerLinkActive="item-selected"
+                    [queryParams]="{env: env.value}">
+                <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['ldap'].icon }}</mat-icon>
+                <span>{{ REQUEST_TYPE['ldap'].title }}</span>
             </button>
         </mat-menu>
         <span style="flex-grow: 1;"></span>

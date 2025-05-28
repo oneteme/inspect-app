@@ -1,12 +1,11 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
+import {forkJoin,map, Observable} from "rxjs";
 import {
-    RepartitionTimeAndTypeResponseByPeriod,
     RestMainExceptionsByPeriodAndappname,
     RestSessionExceptionsByPeriodAndappname
 } from "src/app/model/jquery.model";
-import {FilterMap} from "../../views/constants";
+import {RestRequest} from "../../model/trace.model";
 
 
 @Injectable({ providedIn: 'root' })
@@ -15,10 +14,26 @@ export class RestRequestService {
 
     }
 
-    getRestRequest<T>(params: any): Observable<T> {
+    server = `${localStorage.getItem('server')}/v3/trace`;
+
+    getRestRequest<T>(params?: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/request/rest`;
         return this.http.get<T>(url, { params: params });
     }
+
+    getRequests(params: any): Observable<Array<RestRequest>> {
+        return this.http.get<Array<RestRequest>>(`${this.server}/request/rest`, { params: params });
+    }
+
+    getRequestById(id: string): Observable<RestRequest> {
+        return this.http.get<RestRequest>(`${this.server}/request/rest/${id}`);
+    }
+
+    getHost(type: string, filters: any): Observable<{ host: string }[]> {
+        return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, { params: filters });
+    }
+
+
 
 
     getrestSessionExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<RestSessionExceptionsByPeriodAndappname[]> {

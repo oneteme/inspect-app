@@ -3,7 +3,7 @@ import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
-import {Location} from '@angular/common';
+import {DatePipe, Location} from '@angular/common';
 import {ActivatedRoute, Params} from '@angular/router';
 import {BehaviorSubject, finalize, Subject, Subscription, takeUntil} from 'rxjs';
 import {extractPeriod, Utils} from 'src/app/shared/util';
@@ -45,6 +45,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   private readonly _location = inject(Location);
   private readonly _filter = inject(FilterService);
   private readonly $destroy = new Subject<void>();
+  private readonly pipe = new DatePipe('fr-FR');
 
   MAPPING_TYPE = Constants.MAPPING_TYPE;
   filterConstants = FilterConstants;
@@ -55,6 +56,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   serverNameIsLoading = true;
   serverFilterForm = new FormGroup({
     appname: new FormControl([]),
+    rangestatus: new FormControl([]),
     dateRangePicker: new FormGroup({
       start: new FormControl<Date | null>(null, [Validators.required]),
       end: new FormControl<Date | null>(null, [Validators.required])
@@ -62,7 +64,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   });
 
   filterTable = new Map<string, any>();
-
+  filters: {icon: string, label: string,color: string, value: any} [] =[{icon: 'warning', label: '5xx',color:'#bb2124', value:'5xx'}, {icon: 'error', label: '4xx',color:'#f9ad4e', value:'4xx'}, {icon: 'done', label: '2xx',color:'#22bb33', value:'2xx'}]
   advancedParams: Partial<{ [key: string]: any }> ={}
   queryParams: Partial<QueryParams> = {};
   focusFieldName: any;
@@ -86,7 +88,11 @@ export class SearchRestView implements OnInit, OnDestroy {
   }
 
   onChangeServer($event){
-    this.queryParams.servers = this.serverFilterForm.controls.appname.value;
+    this.queryParams.appname = this.serverFilterForm.controls.appname.value;
+  }
+
+  onChangeStatus($event){
+    this.queryParams.rangestatus = this.serverFilterForm.controls.rangestatus.value && this.serverFilterForm.controls.rangestatus.value.map((f:{icon: string, label: string,color: string, value: any}) => f.value)
   }
 
   constructor() {
@@ -94,7 +100,7 @@ export class SearchRestView implements OnInit, OnDestroy {
     this._activatedRoute.queryParams
         .subscribe({
         next: (params: Params) => {
-           if(params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.env ||  app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server])
+           if(params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.env ||  app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server],null,!params.rangestatus ? []: Array.isArray(params.rangestatus) ? params.rangestatus : [params.rangestatus] )
            if(!params.start && !params.end)  {
             let period;
             if(params.step && params.from){
@@ -102,9 +108,10 @@ export class SearchRestView implements OnInit, OnDestroy {
             } else if(params.step){
                 period = new IStep(params.step);
             }
-            this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), params.env || app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server]); 
+            this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), params.env || app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server], null, !params.rangestatus ? []: Array.isArray(params.rangestatus) ? params.rangestatus : [params.rangestatus]);
           }
-          this.patchServerValue(this.queryParams.servers);
+          this.patchStatusValue(this.queryParams.rangestatus)
+          this.patchServerValue(this.queryParams.appname);
           this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
           this._instanceService.getApplications('SERVER')
@@ -112,7 +119,7 @@ export class SearchRestView implements OnInit, OnDestroy {
             .subscribe({
               next: res => {
                 this.nameDataList = res.map(r => r.appName);
-                this.patchServerValue(this.queryParams.servers);
+                this.patchServerValue(this.queryParams.appname);
               }, error: (e) => {
                 console.log(e)
               }
@@ -152,10 +159,11 @@ export class SearchRestView implements OnInit, OnDestroy {
     this.$destroy.next();
     let params = {
       'env': this.queryParams.env,
-      'appname': this.queryParams.servers,
+      'appname': this.queryParams.appname,
+      'rangestatus': this.queryParams.rangestatus,
       'start': this.queryParams.period.start.toISOString(),
       'end': this.queryParams.period.end.toISOString()
-    }; 
+    };
     if(this.advancedParams){
       Object.assign(params, this.advancedParams);
     }
@@ -172,8 +180,8 @@ export class SearchRestView implements OnInit, OnDestroy {
             this.dataSource = new MatTableDataSource(d);
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
-            this.dataSource.sortingDataAccessor = sortingDataAccessor;
-            this.dataSource.filterPredicate = filterPredicate;
+            this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
+            this.dataSource.filterPredicate = this.filterPredicate;
             this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
             this.dataSource.paginator.pageIndex = 0;
           }
@@ -197,6 +205,13 @@ export class SearchRestView implements OnInit, OnDestroy {
   patchServerValue(servers: any[]) {
     this.serverFilterForm.patchValue({
       appname: servers
+    },{ emitEvent: false })
+    this.queryParams.appname = servers
+  }
+
+  patchStatusValue(rangestatus:any[]){
+    this.serverFilterForm.patchValue({
+      rangestatus: this.filters.filter((f:any)=> rangestatus.toString().includes(f.value))
     },{ emitEvent: false })
   }
 
@@ -224,11 +239,6 @@ export class SearchRestView implements OnInit, OnDestroy {
     }
   }
 
-  toggleFilter(filter: string[]) {
-    this.filterTable.set('status', filter);
-    this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
-  }
-
   resetFilters(){
     this.patchDateValue((extractPeriod(app.gridViewPeriod, "gridViewPeriod")|| makeDatePeriod(0)).start,(extractPeriod(app.gridViewPeriod, "gridViewPeriod") || makeDatePeriod(0, 1)).end);
     this.patchServerValue([]);
@@ -248,6 +258,7 @@ export class SearchRestView implements OnInit, OnDestroy {
         this.serverFilterForm.patchValue({
           [key]: value
         })
+        this.queryParams[key] = value;
         delete filterPreset.values[key];
      }
     },{})
@@ -282,35 +293,42 @@ export class SearchRestView implements OnInit, OnDestroy {
     }
   }
 
+   sortingDataAccessor = (row: any, columnName: string) => {
+    if (columnName == "app_name") return row["appName"] as string;
+    if (columnName == "name/port") return row["host"] + ":" + row["port"] as string;
+    if (columnName == "method/path") return row['path'] as string;
+    if (columnName == "start") return row['start'] as string;
+    if (columnName == "durée") return (row["end"] - row["start"])
+
+    return row[columnName as keyof any] as string;
+  };
+
+   filterPredicate = (data: InstanceRestSession, filter: string) => {
+    var map: Map<string, any> = new Map(JSON.parse(filter));
+    let isMatch = true;
+    let date = new Date(data.start*1000)
+    for (let [key, value] of map.entries()) {
+      if (key == 'filter') {
+        isMatch = isMatch && (value == '' || (data.appName?.toLowerCase().includes(value) ||
+                data.method?.toLowerCase().includes(value) || data.query?.toLowerCase().includes(value) ||
+                data.user?.toLowerCase().includes(value) || data.path?.toLowerCase().includes(value)) ||
+                this.pipe.transform(date,"dd/MM/yyyy").toLowerCase().includes(value) ||
+                this.pipe.transform(date,"HH:mm:ss.SSS").toLowerCase().includes(value) ||
+                data.exception?.message.toString().toLowerCase().includes(value) ||
+                data.exception?.type.toString().toLowerCase().includes(value));
+      } else if (key == 'status') {
+        const s = data.status.toString();
+        isMatch = isMatch && (!value.length || (value.some((status: any) => {
+          return s.startsWith(status[0]);
+        })));
+      }
+    }
+    return isMatch;
+  };
+
 }
 
-const sortingDataAccessor = (row: any, columnName: string) => {
-  if (columnName == "app_name") return row["appName"] as string;
-  if (columnName == "name/port") return row["host"] + ":" + row["port"] as string;
-  if (columnName == "method/path") return row['path'] as string;
-  if (columnName == "start") return row['start'] as string;
-  if (columnName == "durée") return (row["end"] - row["start"])
 
-  return row[columnName as keyof any] as string;
-};
-
-const filterPredicate = (data: InstanceRestSession, filter: string) => {
-  var map: Map<string, any> = new Map(JSON.parse(filter));
-  let isMatch = true;
-  for (let [key, value] of map.entries()) {
-    if (key == 'filter') {
-      isMatch = isMatch && (value == '' || (data.appName?.toLowerCase().includes(value) ||
-          data.method?.toLowerCase().includes(value) || data.query?.toLowerCase().includes(value) ||
-          data.user?.toLowerCase().includes(value) || data.path?.toLowerCase().includes(value)));
-    } else if (key == 'status') {
-      const s = data.status.toString();
-      isMatch = isMatch && (!value.length || (value.some((status: any) => {
-        return s.startsWith(status[0]);
-      })));
-    }
-  }
-  return isMatch;
-};
 
 export function shallowEqual(
     a: {[key: string | symbol]: any},

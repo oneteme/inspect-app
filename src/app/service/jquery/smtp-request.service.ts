@@ -1,7 +1,8 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Observable } from "rxjs";
+import {forkJoin, map, Observable} from "rxjs";
 import { SmtpMainExceptionsByPeriodAndappname, SmtpSessionExceptionsByPeriodAndappname } from "src/app/model/jquery.model";
+import {MailRequest, RestRequest} from "../../model/trace.model";
 
 
 @Injectable({ providedIn: 'root' })
@@ -9,10 +10,19 @@ export class smtpRequestService {
     constructor(private http: HttpClient) {
 
     }
+    server = `${localStorage.getItem('server')}/v3/trace`;
 
     getsmtp<T>(params: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/request/smtp`;
         return this.http.get<T>(url, { params: params });
+    }
+
+    getRequests(params: any): Observable<Array<MailRequest>> {
+        return this.http.get<Array<MailRequest>>(`${this.server}/request/smtp`, { params: params });
+    }
+
+    getHost(type: string, filters: any): Observable<{ host: string }[]> {
+        return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, { params: filters });
     }
 
 

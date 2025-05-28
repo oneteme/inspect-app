@@ -22,7 +22,10 @@ export class DetailLocalTableComponent{
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
             this.dataSource.sortingDataAccessor = sortingDataAccessor;
+        }else{
+            this.dataSource = new MatTableDataSource();
         }
+
     }
 }
 
