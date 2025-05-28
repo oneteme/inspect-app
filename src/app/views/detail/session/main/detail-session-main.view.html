@@ -86,7 +86,7 @@
     <mat-icon>lan</mat-icon>
     Arbre d'appels
   </button>
-  <button [disabled]="!session?.user" *ngIf="session?.type == 'VIEW'" (click)="_router.navigateOnClick($event, ['analytic', session.user], {queryParams: {env: instance.env, date: getDate(this.session.start * 1000, false).toISOString()}})" mat-menu-item><mat-icon class="material-symbols-outlined">web_traffic</mat-icon>Actions Utilisateur</button>
+  <button [disabled]="!session?.user" *ngIf="session?.type == 'VIEW'" (click)="_router.navigateOnClick($event, ['analytic', session.user], {queryParams: {env: instance.env, date: getDate(this.session.start * 1000, false).toISOString()}})" mat-menu-item><mat-icon class="material-symbols-outlined">web_traffic</mat-icon>Parcours Utilisateur</button>
   <button *ngIf="session?.type == 'BATCH'" mat-menu-item [matMenuTriggerFor]="menuStatistic"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>Statistiques</button>
   <button [disabled]="!session?.user" *ngIf="session?.type != 'BATCH'" (click)="_router.navigateOnClick($event, ['dashboard', 'user', session.user])" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>Statistiques Utilisateur</button>
 </mat-menu>
