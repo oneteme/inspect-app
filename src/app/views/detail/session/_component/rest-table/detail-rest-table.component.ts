@@ -6,9 +6,10 @@ import {RestRequest} from "src/app/model/trace.model";
 import {animate, state, style, transition, trigger} from "@angular/animations";
 import {EnvRouter} from "../../../../../service/router.service";
 import {RestRequestService} from "../../../../../service/jquery/rest-request.service";
-import {finalize, Subscription} from "rxjs";
+import {finalize, Subscription, map} from "rxjs";
 import {DatePipe} from "@angular/common";
 import {Utils} from "../../../../../shared/util";
+import {DurationPipe} from "../../../../../shared/pipe/duration.pipe";
 
 @Component({
     selector: 'rest-table',
@@ -26,6 +27,7 @@ export class DetailRestTableComponent {
     private readonly _router = inject(EnvRouter);
     private readonly pipe = new DatePipe('fr-FR');
     private readonly _restRequestService = inject(RestRequestService);
+    private readonly _durationPipe = inject(DurationPipe);
     displayedColumns: string[] = ['status', 'host', 'path', 'start', 'duree', 'remote'];
     dataSource: MatTableDataSource<RestRequest> = new MatTableDataSource();
     expandedElement: RestRequest | null;
@@ -33,7 +35,7 @@ export class DetailRestTableComponent {
     isRequestDetailLoading: boolean = false;
     restRequestDetailSubscription: Subscription;
     filterTable :string;
-
+    stats: { host: number, longestRequest: string, shortestRequest: string , methods: string[], errorRate: number };
     @ViewChild('paginator', {static: true}) paginator: MatPaginator;
     @ViewChild('sort', {static: true}) sort: MatSort;
 
@@ -49,13 +51,24 @@ export class DetailRestTableComponent {
             this.dataSource.filterPredicate = this.useFilter && this.filterPredicate;
             this.dataSource.filter = JSON.stringify(this.filterTable);
             this.dataSource.paginator.pageIndex = 0;
+            this.configStats(requests);
         }else{
             this.dataSource = new MatTableDataSource();
         }
     }
     @Output() onClickRow: EventEmitter<{event: MouseEvent, row: any}> = new EventEmitter();
 
-    
+
+    configStats(requests: RestRequest[]){
+        this.stats = {
+            host: new Set(requests.map(r => r.host)).size,
+            longestRequest:  this._durationPipe.transform(Math.max(...requests.map(r => (r.end ?? 0) - (r.start ?? 0)))),
+            shortestRequest: this._durationPipe.transform(Math.min(...requests.map(r => (r.end ?? 0) - (r.start ?? 0)))),
+            methods: Array.from(new Set(requests.map(r => r.method))),
+            errorRate: requests.length ? (requests.filter(r => r.status >= 400).length / requests.length) * 100 : 0
+        };
+        console.log(this.stats)
+    }
 
     selectedRequest(event: MouseEvent, row: any) {
         this.onClickRow.emit({event: event, row: row});

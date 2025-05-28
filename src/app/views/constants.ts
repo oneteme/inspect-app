@@ -533,8 +533,14 @@ export class Constants {
                 },
                 toolbar: {
                     show: false
+                },
+                events: {
+                    click(event, chartContext, opts) {
+                        console.log(opts.config.series[opts.seriesIndex])
+                        console.log(opts.config.series[opts.seriesIndex].name)
+                        console.log(opts.config.series[opts.seriesIndex].data[opts.dataPointIndex])
+                    }
                 }
-                
             },
             stroke: {
                 curve: 'straight'

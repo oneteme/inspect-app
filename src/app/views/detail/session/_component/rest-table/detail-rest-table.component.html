@@ -1,3 +1,41 @@
+
+
+
+<!-- Cartes de statistiques -->
+<div class="stats-cards" style="display: flex; gap: 1.5em; margin-bottom: 2em; flex-wrap: wrap;margin-top: 2em">
+    <mat-card style="flex: 1 1 200px; min-width: 200px;">
+        <mat-card-title>Hosts</mat-card-title>
+        <mat-card-content>
+            <span style="font-size: 2em; font-weight: bold;">{{stats?.host}}</span>
+        </mat-card-content>
+    </mat-card>
+    <mat-card style="flex: 1 1 200px; min-width: 200px;">
+        <mat-card-title>Requête la plus longue</mat-card-title>
+        <mat-card-content>
+            <span style="font-size: 1.5em; font-weight: bold;">{{ stats?.longestRequest }}</span>
+        </mat-card-content>
+    </mat-card>
+    <mat-card style="flex: 1 1 200px; min-width: 200px;">
+        <mat-card-title>Requête la plus courte</mat-card-title>
+        <mat-card-content>
+            <span style="font-size: 1.5em; font-weight: bold;">{{ stats?.shortestRequest }}</span>
+        </mat-card-content>
+    </mat-card>
+    <mat-card style="flex: 1 1 200px; min-width: 200px;">
+        <mat-card-title>Methods</mat-card-title>
+        <mat-card-content>
+            <div *ngFor="let method of stats?.methods" style="display: flex; align-items: center; gap: 0.5em;">
+                <span style="font-weight: bold;">{{ method }}</span>
+            </div>
+        </mat-card-content>
+    </mat-card>
+    <mat-card style="flex: 1 1 200px; min-width: 200px;">
+        <mat-card-title>Taux d'erreur</mat-card-title>
+        <mat-card-content>
+            <span style="font-size: 2em; font-weight: bold;">{{stats?.errorRate | number:'1.2-2'}}%</span>
+        </mat-card-content>
+    </mat-card>
+</div>
 <div *ngIf="useFilter" style="display: flex; justify-content: space-between; margin-bottom: 0.2em;" >
     <mat-form-field  appearance="outline" class="searchwidth md-2 no-subscript">
         <input [disabled]="isLoading"  matInput #input (keyup)="applyFilter($event)" placeholder="Filtrer..." autocomplete="off">
