@@ -57,7 +57,7 @@ export class DetailLdapTableComponent {
             (data.host?.toLowerCase().includes(filter) ||
             this.pipe.transform(date,"dd/MM/yyyy").toLowerCase().includes(filter) ||
             this.pipe.transform(date,"HH:mm:ss.SSS").toLowerCase().includes(filter) ||
-            data.exception?.message.toString().toLowerCase().includes(filter) ||
+            data.exception?.message?.toString().toLowerCase().includes(filter) ||
             data.exception?.type?.toString().toLowerCase().includes(filter)
             ));
     };
