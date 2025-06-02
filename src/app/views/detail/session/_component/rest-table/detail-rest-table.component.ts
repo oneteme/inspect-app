@@ -111,8 +111,8 @@ export class DetailRestTableComponent {
         return Utils.getSessionUrl(this.requestDetail);
     }
 
+
     navigate(event: MouseEvent, element: any) {
-        console.log( element)
             let segment = 'rest';
             if(element.type) segment = `main/${element.type}`;
             if (event.ctrlKey) {

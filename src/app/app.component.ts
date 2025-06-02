@@ -92,4 +92,14 @@ export class AppComponent implements OnDestroy {
             });
         }
     }
+
+    navigate(event: MouseEvent, path: string ) {
+        if (event.ctrlKey) {
+            this._router.open(`#/${path}?env=${this.env.value}`, '_blank',)
+        } else {
+            this._router.navigate([`${path}`], {
+                queryParams: { env: this.env.value }
+            });
+        }
+    }
 }
