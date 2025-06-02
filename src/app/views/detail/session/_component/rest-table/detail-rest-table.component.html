@@ -81,15 +81,19 @@
                     <div *ngIf="requestDetail">
 
                         <mat-card class="request-card">
-                            <mat-card-header>
-                                <mat-card-title>
-                                    <span  style="display: flex; align-items: center;gap: 0.5em;">
-                                    {{ element.appName || ''}}
-                                    <mat-icon>call_made</mat-icon>
-                                    {{ requestDetail.path || '' }}
-                                    </span>
-                                </mat-card-title>
-                            </mat-card-header>
+                            <mat-card-title>
+                                <div  style="display: flex; align-items: center;gap: 0.5em;">
+                                {{ element.appName || ''}}
+                                <mat-icon>call_made</mat-icon>
+                                {{ requestDetail.path || '' }}
+                                </div>
+
+                                <div class="right">
+                                    <button mat-icon-button (click)="navigate($event,element)" matTooltip="Détail de l'appel parent">
+                                        <mat-icon>move_up</mat-icon>
+                                    </button>
+                                </div>
+                            </mat-card-title>
                             <mat-card-content>
                                 <div style="display:flex; gap:0.2em" class="ellipsis">
                                     <a class="url" [href]="getSessionUrl()" target="_blank">
