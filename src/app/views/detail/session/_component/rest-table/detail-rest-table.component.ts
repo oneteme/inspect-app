@@ -110,4 +110,17 @@ export class DetailRestTableComponent {
     getSessionUrl() {
         return Utils.getSessionUrl(this.requestDetail);
     }
+
+    navigate(event: MouseEvent, element: any) {
+        console.log( element)
+            let segment = 'rest';
+            if(element.type) segment = `main/${element.type}`;
+            if (event.ctrlKey) {
+                this._router.open(`#/session/${segment}/${element.parent}`, '_blank',)
+            } else {
+                this._router.navigate([`/session/${segment}`, element.parent,], {
+                    queryParams: { env: element.env }
+                });
+            }
+    }
 }
