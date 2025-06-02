@@ -2,7 +2,7 @@
   <form [formGroup]="requestFilterForm" class="header-filter md-2">
 
 
-    <mat-form-field style="width: 360px" class="no-subscript" appearance="outline" >
+    <mat-form-field style="width: 315px" class="no-subscript" appearance="outline" >
       <mat-label>Période</mat-label>
       <mat-date-range-input [formGroup]="requestFilterForm.controls.dateRangePicker" [rangePicker]="picker">
         <input matStartDate  formControlName="start" placeholder="Start date" (dateChange)="onChangeStart($event)">
