@@ -43,7 +43,6 @@ import {StatisticClientView} from "./statistic/view/statistic-client.view";
 import {ArchitectureView} from "./architecture/architecture.view";
 import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
 import {DumpView} from "./dump/dump.view";
-import {DumpTimelineComponent} from "./dump/timeline/dump-timeline.component";
 import { NumberFormatterPipe } from '../shared/pipe/number.pipe';
 import { DeploimentComponent } from './deploiment/deploiment.component';
 import {StatisticServerView} from "./statistic/server/statistic-server.view";
@@ -108,7 +107,6 @@ import {ActionTableComponent} from "./detail/session/_component/action-table/act
     ArchitectureView,
     TreeView,
     DumpView,
-    DumpTimelineComponent,
 
     StatisticServerView,
     RestTabComponent,

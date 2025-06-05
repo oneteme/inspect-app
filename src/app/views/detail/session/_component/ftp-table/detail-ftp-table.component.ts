@@ -12,7 +12,7 @@ import {DatePipe} from "@angular/common";
 })
 export class DetailFtpTableComponent {
     private readonly pipe = new DatePipe('fr-FR');
-    displayedColumns: string[] = ['status', 'host', 'start', 'duree'];
+    displayedColumns: string[] = ['status', 'host', 'start', 'duree', 'action'];
     dataSource: MatTableDataSource<FtpRequest> = new MatTableDataSource();
     filterTable :string;
 

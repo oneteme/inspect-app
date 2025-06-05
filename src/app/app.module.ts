@@ -47,7 +47,7 @@ const routes: Route[] = [
         {
           path:':type',
           component: SearchRequestView,
-          title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) =>Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].prefix+' '+ Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title,
+          title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => 'Requêtes '+ Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title,
         },
         { path: '**', pathMatch: 'full', redirectTo: `/request/rest` }
       ]

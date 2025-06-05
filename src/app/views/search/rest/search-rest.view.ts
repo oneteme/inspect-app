@@ -50,7 +50,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   MAPPING_TYPE = Constants.MAPPING_TYPE;
   filterConstants = FilterConstants;
   nameDataList: any[];
-  displayedColumns: string[] = ['status', 'app_name', 'method/path', 'query', 'start', 'durée', 'user'];
+  displayedColumns: string[] = ['status', 'app_name', 'method/path', 'query', 'start', 'durée', 'user', 'action'];
   dataSource: MatTableDataSource<InstanceRestSession> = new MatTableDataSource();
   isLoading = true;
   serverNameIsLoading = true;
@@ -216,10 +216,11 @@ export class SearchRestView implements OnInit, OnDestroy {
   }
 
   selectedRequest(event: MouseEvent, row: any) {
+    console.log(row)
     if (event.ctrlKey) {
-      this._router.open(`#/session/rest/${row}`, '_blank')
+      this._router.open(`#/session/rest/${row.id}`, '_blank')
     } else {
-      this._router.navigate(['/session/rest', row], {
+      this._router.navigate(['/session/rest', row.id], {
         queryParams: { 'env': this.queryParams.env }
       });
     }
