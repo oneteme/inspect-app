@@ -12,7 +12,7 @@ import {INFINITY} from "../../../../constants";
 })
 export class DetailDatabaseTableComponent {
     private readonly pipe = new DatePipe('fr-FR');
-    displayedColumns: string[] = ['status', 'host', 'schema', 'start', 'duree'];
+    displayedColumns: string[] = ['status', 'host', 'schema', 'start', 'duree', 'action'];
     dataSource: MatTableDataSource<DatabaseRequest> = new MatTableDataSource();
     filterTable :string;
 

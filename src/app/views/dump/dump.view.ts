@@ -5,7 +5,7 @@ import {DatePipe, Location} from "@angular/common";
 import {EnvRouter} from "../../service/router.service";
 import {TraceService} from "../../service/trace.service";
 import {InstanceMainSession, InstanceRestSession} from "../../model/trace.model";
-import {DataGroup, DataItem, Timeline} from "vis-timeline";
+import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
 import {DurationPipe} from "../../shared/pipe/duration.pipe";
 import {sign} from "node:crypto";
 
@@ -25,12 +25,23 @@ export class DumpView implements OnInit, OnDestroy {
 
     restSessions: Array<InstanceRestSession> = [];
     mainSessions: Array<InstanceMainSession> = [];
-    loading = signal(false);
-    zoomableIn = signal(false);
+    loading = signal(true);
+
+    options: TimelineOptions = {
+        margin: {
+            item: {
+                horizontal: -1
+            }
+        },
+        verticalScroll: true,
+        zoomKey: 'ctrlKey',
+        maxHeight: 'calc(100vh - 56px - 48px - 1.5em)'
+    };
+
     groups: DataGroup[];
     items: DataItem[];
 
-    params: Partial<{env: string, app: string, date: Date, step: number}> = {};
+    params: Partial<{env: string, app: string, date: Date}> = {};
 
     ngOnInit() {
         combineLatest([
@@ -41,9 +52,9 @@ export class DumpView implements OnInit, OnDestroy {
                 this.params.app = params.app_name;
                 this.params.env = queryParams.env;
                 this.params.date = new Date(queryParams.date);
-                this.params.step = Number.parseInt(queryParams.step) || 10;
-                this.getSession();
-                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&date=${this.params.date.toISOString()}&step=${this.params.step}`);
+                this.groups = [];
+                this.items = [];
+                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&date=${this.params.date.toISOString()}`);
             }
         });
     }
@@ -53,38 +64,38 @@ export class DumpView implements OnInit, OnDestroy {
         this.$destroy.complete();
     }
 
-    getSession() {
-        this.$destroy.next();
+    getSession(start: Date, end: Date, fn: () => void) {
         this.loading.set(true);
-        this.zoomableIn.set(this.params.step != 1);
-        let start = new Date(this.params.date.getFullYear(), this.params.date.getMonth(), this.params.date.getDate(), this.params.date.getHours(), this.params.date.getMinutes() - this.params.step, this.params.date.getSeconds());
-        let end = new Date(this.params.date.getFullYear(), this.params.date.getMonth(), this.params.date.getDate(), this.params.date.getHours(), this.params.date.getMinutes() + this.params.step, this.params.date.getSeconds());
         forkJoin(
             [this._traceService.getRestSessionsForDump(this.params.env, this.params.app, start, end), this._traceService.getMainSessionsForDump(this.params.env, this.params.app, start, end)]
         )
-            .pipe(takeUntil(this.$destroy), finalize(() =>  {}))
+            .pipe(finalize(() =>  this.loading.set(false)))
             .subscribe({
                 next: (sessions) => {
                     this.restSessions = sessions[0];
                     this.mainSessions = sessions[1];
-                    this.initTimeline();
+                    fn();
                 }
             });
     }
 
-    initTimeline() {
+    getDataGroups(): DataGroup[] {
         let restGroups = this.restSessions.map(s => ({id: s.threadName, start: s.start}));
         let mainGroups = this.mainSessions.map(s => ({id: s.threadName, start: s.start}));
-        this.groups = [...new Set([restGroups, mainGroups].flat().sort((a, b) => a.start - b.start).map(g => g.id))].map(g => ({id: g, content: g}));
-        this.items = [this.restSessions.map(s => {
+        return [...new Set([restGroups, mainGroups].flat().sort((a, b) => a.start - b.start).map(g => g.id))].map(g => ({id: g, content: g}));
+    }
+
+    getDataItems(): DataItem[] {
+        return [this.restSessions.map(s => {
             let item: DataItem = {
                 id: `${s.id}_rest`,
                 group: s.threadName,
                 start: s.start * 1000,
                 end: s.end * 1000,
-                title: `<span>${this.pipe.transform(new Date(s.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(s.end * 1000), 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform({start: s.start, end: s.end})})<br>`,
-                content: `[${s.method}] ${s?.path ? s?.path : ''}${s?.query ? '?' + s?.query : ''}`,
-                className: 'rest'
+                title: `<span>${this.pipe.transform(new Date(s.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(s.end * 1000), 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform({start: s.start, end: s.end})})<br><br>
+<span><b>[${s.method}] ${s?.path ? s?.path : ''}<br></br>${s?.query ? '?' + s?.query : ''}</b></span>`,
+                content: `[${s.method}] ${s?.path ? s?.path : ''}`,
+                className: 'rest overflow'
             };
             item.type = item.end > item.start ? 'range': 'point';
             if (s.exception?.message || s.exception?.type) {
@@ -97,9 +108,10 @@ export class DumpView implements OnInit, OnDestroy {
                 group: s.threadName,
                 start: s.start * 1000,
                 end: s.end * 1000,
-                title: `<span>${this.pipe.transform(new Date(s.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(s.end * 1000), 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform({start: s.start, end: s.end})})<br>`,
+                title: `<span>${this.pipe.transform(new Date(s.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(s.end * 1000), 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform({start: s.start, end: s.end})})<br>
+<span><b>[${s.type}] ${s?.name}</b></span>`,
                 content: `[${s.type}] ${s?.name}`,
-                className: 'rest'
+                className: 'rest overflow'
             };
             item.type = item.end > item.start ? 'range': 'point';
             if (s.exception?.message || s.exception?.type) {
@@ -107,42 +119,43 @@ export class DumpView implements OnInit, OnDestroy {
             }
             return item;
         })].flat();
-        this.loading.set(false)
     }
 
-    zoomOut() {
-        let step = this.params.step + 1;
-        this._router.navigate([], {
-            relativeTo: this._activatedRoute,
-            queryParamsHandling: 'merge',
-            queryParams: { step:  step }
-        })
-    }
+    onTimelineCreate(timeline: Timeline) {
+        this.getSession(
+          new Date(this.params.date.getFullYear(), this.params.date.getMonth(), this.params.date.getDate(), this.params.date.getHours(), this.params.date.getMinutes() - 10, this.params.date.getSeconds()),
+          new Date(this.params.date.getFullYear(), this.params.date.getMonth(), this.params.date.getDate(), this.params.date.getHours(), this.params.date.getMinutes() + 10, this.params.date.getSeconds()),
+          () => {
+              timeline.setOptions(
+                {...this.options,
+                    zoomMax: 1000 * 60 * 60,
+                    start: new Date(this.params.date.getFullYear(), this.params.date.getMonth(), this.params.date.getDate(), this.params.date.getHours(), this.params.date.getMinutes() - 10, this.params.date.getSeconds()),
+                    end: new Date(this.params.date.getFullYear(), this.params.date.getMonth(), this.params.date.getDate(), this.params.date.getHours(), this.params.date.getMinutes() + 10, this.params.date.getSeconds())
+                });
+              timeline.setGroups(this.getDataGroups());
+              timeline.setItems(this.getDataItems());
+          }
+        );
 
-    zoomIn() {
-        let step = this.params.step - 1;
-        this._router.navigate([], {
-            relativeTo: this._activatedRoute,
-            queryParamsHandling: 'merge',
-            queryParams: { step:  step }
-        })
-    }
+        timeline.on('doubleClick', (props: any)=> {
+            if(props.item) {
+                let id = props.item.split('_')[0];
+                let type_session = props.item.split('_')[1];
+                let type_main = props.item.split('_')[2];
+                type_session == 'main' ? this._router.open(`#/session/${type_session}/${type_main}/${id}`, '_blank') : this._router.open(`#/session/${type_session}/${id}`, '_blank');
+            }
+        });
 
-    previous() {
-        let date = new Date(this.params.date.getFullYear(), this.params.date.getMonth(), this.params.date.getDate(), this.params.date.getHours(), this.params.date.getMinutes() - this.params.step, this.params.date.getSeconds());
-        this._router.navigate([], {
-            relativeTo: this._activatedRoute,
-            queryParamsHandling: 'merge',
-            queryParams: { date:  date }
-        })
-    }
-
-    next() {
-        let date = new Date(this.params.date.getFullYear(), this.params.date.getMonth(), this.params.date.getDate(), this.params.date.getHours(), this.params.date.getMinutes() + this.params.step, this.params.date.getSeconds());
-        this._router.navigate([], {
-            relativeTo: this._activatedRoute,
-            queryParamsHandling: 'merge',
-            queryParams: { date:  date }
-        })
+        timeline.on('rangechanged', (props)=>{
+            if(props.byUser) {
+                this.getSession(
+                  new Date(props.start.getTime()),
+                  new Date(props.end.getTime()),
+                  () => {
+                      timeline.setGroups(this.getDataGroups());
+                      timeline.setItems(this.getDataItems());
+                  });
+            }
+        });
     }
 }

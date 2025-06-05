@@ -41,7 +41,7 @@ body {
 
 .ellipsis:hover {
   text-overflow: clip;
-  white-space:  break-spaces;
+  white-space:  pre-line;
   word-break: break-all;
 }
 
@@ -116,8 +116,8 @@ mat-form-field.no-subscript {
   pointer-events: none;
 }
 
-.error{
-  color:red;
+.error {
+  color: #bb2124 !important;
 }
 
 .badge {
@@ -171,7 +171,7 @@ mat-form-field.loading {
 .loading-row {
   display: flex;
   gap: .5em;
-  height: calc(100vh - 96px - 56px - 48px - 45px - 1.5em);
+  height: calc(100vh - 96px - 56px - 48px - 45px - 25px);
   color: #707070;
   font-weight: 500;
   width: 100%;
@@ -320,10 +320,6 @@ loading.hidden {
   opacity:.75
 }
 
-.md-2 .mat-mdc-form-field-infix { // remove this
-  max-height: 40px !important;
-}
-
 .no-data-container {
   display: flex;
   flex-direction: column;
@@ -347,4 +343,16 @@ loading.hidden {
     color: #757575;
     text-align: center;
   }
+}
+
+.md-2 .mat-mdc-form-field-infix {
+  height: 48px;
+}
+
+.md-3 .mat-mdc-form-field-infix {
+  height: 44px;
+}
+
+.mat-mdc-form-field-icon-prefix>.mat-icon, .mat-mdc-form-field-icon-suffix>.mat-icon {
+  padding: 0 12px 0 0 !important;
 }

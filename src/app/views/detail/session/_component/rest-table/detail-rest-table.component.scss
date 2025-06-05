@@ -89,24 +89,13 @@ mat-card-title {
     }
 }
 
-.mat-column-host {
-    width: 25% !important;
+.table-container {
+    max-height: calc(100vh - 96px - 56px - 48px - 28px);
+    overflow: auto;
 }
 
-.mat-column-path {
-    width: 45% !important;
-}
-
-.mat-column-start {
-    width: 10% !important;
-}
-
-.mat-column-duree {
-    width: 10% !important;
-}
-
-.mat-column-remote {
-    width: 10% !important;
+mat-card-content {
+    padding: 0 16px 16px;
 }
 
 
