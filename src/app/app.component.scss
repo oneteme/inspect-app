@@ -3,8 +3,18 @@
     flex-direction: column;
 }
 
+.mat-mdc-menu-item.menu-active {
+    background-color: var(--mat-menu-item-hover-state-layer-color);
+    color: var(--inspect-blue);
+    font-weight: 500;
+    mat-icon {
+        color: currentColor;
+    }
+}
+
 .item-selected {
     background-color: var(--mat-menu-item-hover-state-layer-color);
+    color: #1464dc;
 }
 
 mat-drawer-content {
