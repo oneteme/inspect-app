@@ -15,4 +15,9 @@ div.label-chip {
     position:relative
 }
 
+.table-container {
+    max-height: calc(100vh - 96px - 56px - 25px);
+    overflow: auto;
+}
+
 

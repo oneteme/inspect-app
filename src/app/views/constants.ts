@@ -500,7 +500,7 @@ export class Constants {
     };
 
     static readonly MAPPING_TYPE: {[key: string]: {title: string, icon: string}} = {
-        request: {title: 'Appels émis', icon: 'call_made'},
+        request: {title: 'Requêtes', icon: 'call_made'},
         rest: {title: 'Appels reçus', icon: 'call_received'},
         batch: {title: 'Lancement de Batch', icon: 'manufacturing'},
         startup: {title: 'Lancement de Serveur', icon: 'restart_alt'},
@@ -509,8 +509,8 @@ export class Constants {
         deploiment: {title:'Versions déployées', icon:'deployed_code'},
     }
     static readonly REQUEST_MAPPING_TYPE: {[key: string]: {title: string, icon: string}} = {
-        rest: {title: 'HTTP', icon: 'call_made'},
-        database: {title: 'BDD', icon: 'Database'},
+        rest: {title: 'HTTP', icon: 'public'},
+        database: {title: 'BDD', icon: 'database'},
         ftp: {title: 'FTP', icon: 'smb_share'},
         smtp: {title: 'SMTP', icon: 'outgoing_mail'},
         ldap: {title: 'LDAP', icon: 'user_attributes'},

@@ -9,7 +9,7 @@
     <header-section icon="memory" [iconOutlined]="false">
         <div [matBadgeHidden]="session.stages?.length==0" [matBadge]="session.stages?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.stages?.length | numberFormat).length > 2">LOCAL</div>
     </header-section>
-    <local-table [requests]="session.stages" ></local-table>
+    <local-table [requests]="session.stages"></local-table>
 </div>
 <div [hidden]="!session.ftpRequests?.length"  style="margin-bottom: 2em;">
     <header-section icon="smb_share">

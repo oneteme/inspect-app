@@ -28,7 +28,7 @@
                 </div>
             </mat-card-content>
             <mat-card-footer>
-              <label-icon icon="person" [iconOutlined]="false" [size]="20">
+              <label-icon icon="person" [iconOutlined]="true" [size]="20">
                 <div style="display: flex; align-items: center; gap: 0.5em">
                   {{ session.user || "N/A" }}
                   le {{ (session.start * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
@@ -58,7 +58,7 @@
               </div>
             </mat-card-title>
             <mat-card-content style="margin-left: 1em;">
-              <label-icon [icon]="instance.type==='CLIENT' ? 'devices' : 'storage'">
+              <label-icon [icon]="'data_table'">
                 <div style="font-weight: 500; font-size: 14px;">
                   {{instance.os}}
                 </div>
@@ -68,7 +68,7 @@
               </label-icon>
             </mat-card-content>
             <mat-card-footer>
-              <label-icon icon="person" [iconOutlined]="false" [size]="20">
+              <label-icon icon="person" [iconOutlined]="true" [size]="20">
                 {{instance.user || "N/A"}}
                 le {{ (instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
               </label-icon>
@@ -102,7 +102,7 @@
     </div>
   </button>
   <button (click)="_router.navigateOnClick($event, ['session', 'rest', session.id, 'tree'])" mat-menu-item>
-    <mat-icon>lan</mat-icon>
+    <mat-icon class="material-symbols-outlined">lan</mat-icon>
     Arbre d'appels
   </button>
   <button mat-menu-item [matMenuTriggerFor]="menuStatistic"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>Statistiques</button>

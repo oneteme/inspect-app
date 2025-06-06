@@ -27,7 +27,7 @@
                 </div>
             </mat-card-content>
             <mat-card-footer>
-              <label-icon icon="person" [iconOutlined]="false" [size]="20">
+              <label-icon icon="person" [size]="20">
                   {{ session.user || "N/A" }}
                   le {{ (session.start * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
               </label-icon>
@@ -38,7 +38,7 @@
         </mat-card>
         <mat-card style="width: 50vw;">
             <mat-card-title>
-              <label-icon style="height: 48px" icon="sdk">
+              <label-icon style="height: 48px" icon="widgets">
                 {{instance.name}}
                 <span style="font-size: 12px; font-style: italic; font-weight: normal; margin-left: 0.5em" [matTooltip]="instance.collector">{{instance.version}}</span>
               </label-icon>
@@ -49,7 +49,7 @@
               </div>
             </mat-card-title>
             <mat-card-content style="margin-left: 1em;" >
-              <label-icon [icon]="instance.type==='CLIENT' ? 'devices' : 'storage'">
+              <label-icon [icon]="instance.type==='CLIENT' ? 'devices' : 'data_table'">
                 <div style="font-weight: 500; font-size: 14px;">
                   {{instance.os}}
                 </div>
@@ -59,7 +59,7 @@
               </label-icon>
             </mat-card-content>
             <mat-card-footer>
-              <label-icon icon="person" [iconOutlined]="false" [size]="20">
+              <label-icon icon="person" [size]="20">
                 {{instance.user || "N/A"}} le {{ (instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
               </label-icon>
               <div *ngIf="instance.end" class="right" [matTooltip]="((instance.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')">
@@ -83,7 +83,7 @@
 
 <mat-menu #menuEndPoint="matMenu" xPosition="after">
   <button (click)="_router.navigateOnClick($event, ['session', 'main', session.type, session.id, 'tree'])" mat-menu-item>
-    <mat-icon>lan</mat-icon>
+    <mat-icon class="material-symbols-outlined">lan</mat-icon>
     Arbre d'appels
   </button>
   <button [disabled]="!session?.user" *ngIf="session?.type == 'VIEW'" (click)="_router.navigateOnClick($event, ['analytic', session.user], {queryParams: {env: instance.env, date: getDate(this.session.start * 1000, false).toISOString()}})" mat-menu-item><mat-icon class="material-symbols-outlined">web_traffic</mat-icon>Parcours Utilisateur</button>
@@ -93,7 +93,7 @@
 
 <mat-menu #menuStatistic="matMenu">
   <button (click)="_router.navigateOnClick($event, ['dashboard', 'server', instance.name], {queryParams: {tab: 1, batch_name: session.name, env: instance.env}})" mat-menu-item><mat-icon class="material-symbols-outlined">manufacturing</mat-icon>Batch</button>
-  <button [disabled]="!session?.user" (click)="_router.navigateOnClick($event, ['dashboard', 'user', session.user])" mat-menu-item><mat-icon>person</mat-icon>Utilisateur</button>
+  <button [disabled]="!session?.user" (click)="_router.navigateOnClick($event, ['dashboard', 'user', session.user])" mat-menu-item><mat-icon class="material-symbols-outlined">person</mat-icon>Utilisateur</button>
 </mat-menu>
 
 <mat-menu #menuServer="matMenu">

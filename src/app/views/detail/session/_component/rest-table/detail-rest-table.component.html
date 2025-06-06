@@ -71,7 +71,7 @@
         <ng-container matColumnDef="description">
             <td mat-cell *matCellDef="let element" [attr.colspan]="6">
                 <div class="description" [@detailExpand]="element == expandedElement ? 'expanded' : 'collapsed'">
-                    <div *ngIf="isRequestDetailLoading" class="detail-table-loading">
+                    <div *ngIf="isRequestDetailLoading" class="loading-row">
                           <span style="display: flex; flex-direction: column; font-style: italic;">
                             Chargement en cours...
                             <mat-progress-bar mode="indeterminate"></mat-progress-bar>
@@ -133,13 +133,13 @@
         <tr mat-row *matRowDef="let   e; columns: ['description']" class="description-row"></tr>
         <tr class="mat-row" *matNoDataRow>
             <td class="mat-cell" colspan="7">
-             <div *ngIf="!isLoading" class="detail-table-loading">
+             <div *ngIf="!isLoading" class="loading-row">
                 <span class="material-symbols-outlined">
                   info
                 </span>
                  <span style="font-style: italic;">Aucun résultat</span>
              </div>
-              <div *ngIf="isLoading" class="detail-table-loading">
+              <div *ngIf="isLoading" class="loading-row">
                   <span style="display: flex; flex-direction: column; font-style: italic;">
                     Chargement en cours...
                     <mat-progress-bar mode="indeterminate"></mat-progress-bar>

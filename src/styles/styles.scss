@@ -171,17 +171,6 @@ mat-form-field.loading {
 .loading-row {
   display: flex;
   gap: .5em;
-  height: calc(100vh - 96px - 56px - 48px - 45px - 25px);
-  color: #707070;
-  font-weight: 500;
-  width: 100%;
-  font-size: 12px;
-  align-items: center;
-  justify-content: center;
-}
-.detail-table-loading{
-  display: flex;
-  gap: .5em;
   height: 80px;
   color: #707070;
   font-weight: 500;
