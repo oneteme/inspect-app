@@ -35,7 +35,7 @@
 
 <app-timeline [options]="options"
                  [groups]="dataGroups"
-                 [items]="dataItems">
+                 [items]="dataItems" [displayHeader]="false">
 </app-timeline>
 
 <div *ngIf="!isLoading && request && request.mails?.length" style="margin-bottom: 2em; margin-top: 1em">
