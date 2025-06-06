@@ -12,7 +12,7 @@ import {DatePipe} from "@angular/common";
 })
 export class DetailLdapTableComponent {
     private readonly pipe = new DatePipe('fr-FR');
-    displayedColumns: string[] = ['status', 'host', 'start', 'duree', 'action'];
+    displayedColumns: string[] = ['status', 'host', 'start', 'duree'];
     dataSource: MatTableDataSource<NamingRequest> = new MatTableDataSource();
     filterTable :string;
     @ViewChild('paginator', {static: true}) paginator: MatPaginator;
