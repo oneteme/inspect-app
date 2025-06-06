@@ -32,9 +32,6 @@ import {
 import {
     StatisticExceptionTableComponent
 } from "./statistic/_component/exception-table/statistic-exception-table.component";
-import {
-    StatisticUserSessionTableComponent
-} from "./statistic/user/_component/session-table/statistic-user-session-table.component";
 import {DashboardComponent} from "./dashboard/dashboard.component";
 import {
     ProtocolExceptionComponent
@@ -100,7 +97,6 @@ import {ActionTableComponent} from "./detail/session/_component/action-table/act
     StatisticDependentsTableComponent,
     StatisticDependenciesTableComponent,
     StatisticExceptionTableComponent,
-    StatisticUserSessionTableComponent,
     StatisticClientView,
     DashboardComponent,
     ProtocolExceptionComponent,
