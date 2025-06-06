@@ -13,7 +13,7 @@
     <div  *ngIf="request['userActions']?.length" class="item"><div class="dot action"></div><b>Action</b></div>
   </div>
 </app-timeline>
-<div *ngIf="!instance || !request" class="detail-table-loading mat-elevation-z8" >
+<div *ngIf="!instance || !request" class="loading-row mat-elevation-z8" >
   <span style="display: flex; flex-direction: column; font-style: italic;">
     Chargement en cours...
     <mat-progress-bar mode="indeterminate"></mat-progress-bar>

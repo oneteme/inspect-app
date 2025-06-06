@@ -26,7 +26,7 @@ export class DetailRestTableComponent {
     private readonly _router = inject(EnvRouter);
     private readonly pipe = new DatePipe('fr-FR');
     private readonly _restRequestService = inject(RestRequestService);
-    displayedColumns: string[] = ['status', 'host', 'path', 'start', 'duree', 'action'];
+    displayedColumns: string[] = ['status', 'host', 'path', 'start', 'duree','remote'];
     dataSource: MatTableDataSource<RestRequest> = new MatTableDataSource();
     expandedElement: RestRequest | null;
     requestDetail: RestRequest;

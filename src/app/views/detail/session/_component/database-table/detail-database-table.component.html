@@ -19,13 +19,13 @@
         </ng-container>
 
         <ng-container matColumnDef="host">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:70%"> Hôte </th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:60%"> Hôte </th>
             <td mat-cell *matCellDef="let element" [matTooltip]="element['databaseVersion']" matTooltipPosition="below">
                 {{element["host"] || 'N/A'}}</td>
         </ng-container>
 
         <ng-container matColumnDef="schema">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:10%"> BDD </th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:20%"> BDD </th>
             <td mat-cell *matCellDef="let element">
                 <span style="font-weight: bold;">{{getCommand(element.command)}}</span>
                 <br>
@@ -56,27 +56,17 @@
                 </span>
             </td>
         </ng-container>
-        <ng-container matColumnDef="action">
-          <th mat-header-cell *matHeaderCellDef style="width:9%"></th>
-          <td mat-cell *matCellDef="let element">
-            <div style="display: flex; justify-content: center">
-              <button mat-icon-button matTooltip="Détail de l'appel BDD" color="primary" (click)="selectedQuery($event, element)">
-                <mat-icon class="material-symbols-outlined">visibility</mat-icon>
-              </button>
-            </div>
-          </td>
-        </ng-container>
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectedQuery($event, row)"></tr>
         <tr class="mat-row" *matNoDataRow>
             <td class="mat-cell" colspan="7">
-                <div *ngIf="!isLoading" class="detail-table-loading">
+                <div *ngIf="!isLoading" class="loading-row">
                 <span class="material-symbols-outlined">
                   info
                 </span>
                     <span style="font-style: italic;">Aucun résultat</span>
                 </div>
-                <div *ngIf="isLoading" class="detail-table-loading">
+                <div *ngIf="isLoading" class="loading-row">
                   <span style="display: flex; flex-direction: column; font-style: italic;">
                     Chargement en cours...
                     <mat-progress-bar mode="indeterminate"></mat-progress-bar>

@@ -49,8 +49,9 @@ export class DetailTimelineComponent implements OnChanges {
     ngOnChanges(changes: SimpleChanges): void {
         if(changes.instance || changes.request){
             if(this.instance && this.request){
-                this.timelineStart = this.request.start * 1000;
+                this.timelineStart = this.request.start * 1000; // -1ms to avoid the first item being out of the range
                 this.timelineEnd = this.request.end * 1000;
+                let padding = (Math.ceil((this.timelineEnd - this.timelineStart) * 0.01))
                 this.dataArray = [].concat(
                     (this.request.hasOwnProperty('userActions') ? (<InstanceMainSession>this.request).userActions ?? [] : []).map(r => ({...r, typeTimeline: 'action'})),
                     (this.request.restRequests ?? []).map(r => ({...r, typeTimeline: 'rest'})),
@@ -76,8 +77,8 @@ export class DetailTimelineComponent implements OnChanges {
 
                 this.options = {
                     ...options,
-                    start: this.timelineStart,
-                    end: this.timelineEnd
+                    start: this.timelineStart - padding,
+                    end: this.timelineEnd + padding
                 };
             }
         }

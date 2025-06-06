@@ -23,7 +23,7 @@
             </div>
         </mat-card-content>
         <mat-card-footer>
-            <mat-icon style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
+            <mat-icon class="material-symbols-outlined" style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
             <div style="display: flex; align-items: center; gap: 0.5em">
                 {{request.user || "N/A"}}  le {{( request.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
                 en <span style="font-weight: bold">{{{ start: request.start, end: request.end } | duration}}</span>
@@ -35,7 +35,7 @@
 
 <app-timeline [options]="options"
                  [groups]="dataGroups"
-                 [items]="dataItems">
+                 [items]="dataItems" [displayHeader]="false">
 </app-timeline>
 
 <div *ngIf="!isLoading && request && request.mails?.length" style="margin-bottom: 2em; margin-top: 1em">
