@@ -97,7 +97,7 @@
 </mat-menu>
 
 <mat-menu #menuServer="matMenu">
-  <button *ngIf="session?.type != 'VIEW'" (click)="_router.navigateOnClick($event, ['session', instance.name, 'dump'], {queryParams: {env: instance.env, date: getDate(session.start * 1000, true).toISOString()}})" mat-menu-item><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Processus</button>
+  <button *ngIf="session?.type != 'VIEW'" (click)="_router.navigateOnClick($event, ['session', instance.name, 'dump'], {queryParams: {env: instance.env, date: getDate(session.start * 1000, true).toISOString()}})" mat-menu-item><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</button>
   <button *ngIf="session?.type != 'VIEW'" (click)="_router.navigateOnClick($event, ['dashboard', 'server', instance.name], {queryParams: {env: instance.env}})" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur</button>
   <button *ngIf="session?.type == 'VIEW'" (click)="_router.navigateOnClick($event, ['dashboard', 'client', instance.name], {queryParams: {env: instance.env}})" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Client</button>
 </mat-menu>

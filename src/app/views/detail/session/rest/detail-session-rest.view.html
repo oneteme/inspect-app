@@ -114,6 +114,6 @@
 </mat-menu>
 
 <mat-menu #menuServer="matMenu">
-  <button (click)="_router.navigateOnClick($event, ['session', instance.name, 'dump'], {queryParams: {env: instance.env, date: getDate(session.start * 1000).toISOString()}})" mat-menu-item><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Processus</button>
+  <button (click)="_router.navigateOnClick($event, ['session', instance.name, 'dump'], {queryParams: {env: instance.env, date: getDate(session.start * 1000).toISOString()}})" mat-menu-item><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</button>
   <button (click)="_router.navigateOnClick($event, ['dashboard', 'server', instance.name], {queryParams: {env: instance.env}})" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur</button>
 </mat-menu>
