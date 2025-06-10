@@ -105,15 +105,15 @@
     <mat-icon class="material-symbols-outlined">lan</mat-icon>
     Arbre d'appels
   </button>
-  <button mat-menu-item [matMenuTriggerFor]="menuStatistic"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>Statistiques</button>
+  <button mat-menu-item [matMenuTriggerFor]="menuStatistic"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI</button>
 </mat-menu>
 
 <mat-menu #menuStatistic="matMenu">
   <button (click)="_router.navigateOnClick($event, ['dashboard', 'server', instance.name], {queryParams: {api_name: session.name, env: instance.env}})" mat-menu-item><mat-icon class="material-symbols-outlined">call_received</mat-icon>Appel REST</button>
-  <button (click)="_router.navigateOnClick($event, ['dashboard', 'user', session.user])" mat-menu-item><mat-icon>person</mat-icon>Utilisateur</button>
+  <button (click)="_router.navigateOnClick($event, ['dashboard', 'user', session.user])" mat-menu-item><mat-icon class="material-symbols-outlined">person</mat-icon>Utilisateur</button>
 </mat-menu>
 
 <mat-menu #menuServer="matMenu">
   <button (click)="_router.navigateOnClick($event, ['session', instance.name, 'dump'], {queryParams: {env: instance.env, date: getDate(session.start * 1000).toISOString()}})" mat-menu-item><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Processus</button>
-  <button (click)="_router.navigateOnClick($event, ['dashboard', 'server', instance.name], {queryParams: {env: instance.env}})" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>Statistiques Serveur</button>
+  <button (click)="_router.navigateOnClick($event, ['dashboard', 'server', instance.name], {queryParams: {env: instance.env}})" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur</button>
 </mat-menu>
