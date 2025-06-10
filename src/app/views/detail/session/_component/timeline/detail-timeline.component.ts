@@ -99,7 +99,7 @@ export class DetailTimelineComponent implements OnChanges {
     }
 
     getErrorClassName(o: any): string{
-        if(o.type === "rest"){
+        if(o.typeTimeline === "rest"){
             if(o.status >=400 && o.status <500)
                 return  "client-error"
             if(o.status >=500 || o.status ==0)
@@ -123,7 +123,7 @@ export class DetailTimelineComponent implements OnChanges {
             let o = {
                 id: id,
                 group: isWebapp ? 0 : c.threadName,
-                content: c.typeTimeline == 'stage' ? '' : c.typeTimeline == 'action' ? this.ANALYTIC_MAPPING[c.type].label : (c.schema || c.name || c.host || 'N/A'),
+                content: c.typeTimeline == 'stage' ? '' : c.typeTimeline == 'action' ? this.ANALYTIC_MAPPING[c.typeTimeline].label : (c.schema || c.name || c.host || 'N/A'),
                 start: c.start * 1000,
                 end: end,
                 title: c.typeTimeline == 'action' ?
