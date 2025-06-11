@@ -33,7 +33,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
 
     session: InstanceRestSession;
     instance: InstanceEnvironment;
-    completedSession: InstanceRestSession
+    completedSession: InstanceRestSession;
     sessionParent: { id: string, type: string };
     isLoading: boolean = false;
     parentLoading: boolean = false;
@@ -46,6 +46,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
         ]).subscribe({
             next: ([params, queryParams]) => {
                 this.env = queryParams.env || app.defaultEnv;
+                console.log("router", params, queryParams);
                 this.getSession(params.id_session);
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}`)
             }
@@ -53,11 +54,12 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     }
 
     getSession(id: string) {
+        this.$destroy.next();
         this.isLoading = true;
         this.parentLoading = true;
         this.session = null;
-        this.completedSession =null;
-        this.sessionParent=null;
+        this.completedSession = null;
+        this.sessionParent = null;
         this._traceService.getSessionParent(id).pipe(takeUntil(this.$destroy), catchError(() => of(null)),finalize(()=>(this.parentLoading = false))).subscribe(d=>this.sessionParent = d);
         this._traceService.getRestSession(id)
             .pipe(

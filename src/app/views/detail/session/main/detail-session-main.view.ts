@@ -43,6 +43,7 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
     }
 
     getSession(id: string) {
+        this.$destroy.next();
         this.isLoading = true;
         this.session = null;
         this.completedSession = null;
