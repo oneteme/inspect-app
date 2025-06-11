@@ -1,7 +1,5 @@
 <header-page titleIcon="monitoring" [iconOutlined]="true" [ui-title]="name">
     <form [formGroup]="serverFilterForm" class="header-filter md-2">
-        <advanced-filter-recap [filters]="advancedParams" (filterRemoved)="handleRemovedFilter($event)"
-            (focusField)="focusField($event)"></advanced-filter-recap>
         <mat-form-field appearance="outline" class="no-subscript">
             <mat-label>Période</mat-label>
             <mat-date-range-input [formGroup]="serverFilterForm.controls.dateRangePicker" [rangePicker]="picker">
@@ -14,11 +12,6 @@
         <button mat-mini-fab color="primary" (click)="search()">
             <mat-icon matSuffix>search</mat-icon>
         </button>
-        <advanced-filter-trigger [pageName]="'stats-user'" [filterConfig]="filterConstants.STATS_USER"
-            [focusField]="focusFieldName" (handleDialogclose)="handledialogclose($event)"
-            (handlePresetSelection)="handlePresetSelection($event)"
-            (handlePresetSelectionReset)="handlePresetSelectionReset()"
-            (handleFilterReset)="handleFilterReset()"></advanced-filter-trigger>
 
     </form>
 </header-page>

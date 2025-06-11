@@ -213,6 +213,7 @@ export class SearchRestView implements OnInit, OnDestroy {
     this.serverFilterForm.patchValue({
       rangestatus: this.filters.filter((f:any)=> rangestatus.toString().includes(f.value))
     },{ emitEvent: false })
+    this.queryParams.rangestatus = rangestatus;
   }
 
   selectedRequest(event: MouseEvent, row: any) {
@@ -242,12 +243,13 @@ export class SearchRestView implements OnInit, OnDestroy {
   resetFilters(){
     this.patchDateValue((extractPeriod(app.gridViewPeriod, "gridViewPeriod")|| makeDatePeriod(0)).start,(extractPeriod(app.gridViewPeriod, "gridViewPeriod") || makeDatePeriod(0, 1)).end);
     this.patchServerValue([]);
+    this.patchStatusValue([]);
     this.advancedParams = {};
     this._filter.setFilterMap({})
   }
 
   filtersSupplier(): BehaviorSubject<FilterMap> { 
-    return new BehaviorSubject<FilterMap>({ 'appname': this.serverFilterForm.getRawValue().appname });
+    return new BehaviorSubject<FilterMap>({ 'appname': this.serverFilterForm.getRawValue().appname, 'rangestatus': this.serverFilterForm.getRawValue().rangestatus.map(r=>(r.value)) });
   }
 
   handlePresetSelection(filterPreset: FilterPreset) {

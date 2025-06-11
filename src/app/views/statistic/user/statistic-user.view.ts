@@ -40,8 +40,6 @@ export class StatisticUserView implements OnInit, OnDestroy {
     name: string;
     start: Date;
     end: Date;
-    advancedParams: Partial<{ [key: string]: any }> = {}
-    focusFieldName: any;
 
     requests: { [key: string]: { observable: Observable<Object>, data?: any, isLoading?: boolean } } = {};
 
@@ -63,7 +61,6 @@ export class StatisticUserView implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this._filter.registerGetallFilters(this.filtersSupplier.bind(this));
     }
 
     ngOnDestroy(): void {
@@ -71,11 +68,7 @@ export class StatisticUserView implements OnInit, OnDestroy {
     }
 
     init(): void {
-        let advancedParams = this.advancedParams;
-        if (advancedParams) {
-            advancedParams = mapParams(this.filterConstants.STATS_APP, advancedParams);
-        }
-        this.requests = this.USER_REQUEST(this.name, this.env, this.start, this.end, advancedParams);
+        this.requests = this.USER_REQUEST(this.name, this.env, this.start, this.end);
         Object.keys(this.requests).forEach(k => {
             this.requests[k].isLoading = true;
             this.subscriptions.push(this.requests[k].observable
@@ -116,11 +109,11 @@ export class StatisticUserView implements OnInit, OnDestroy {
     }
 
     // Stats en fonction du navigateur et du systeme
-    USER_REQUEST = (name: string, env: string, start: Date, end: Date, advancedParams: FilterMap) => {
+    USER_REQUEST = (name: string, env: string, start: Date, end: Date) => {
         let groupedBy = periodManagement(start, end);
         return {
             repartitionTimeAndTypeResponseByPeriod: {
-                observable: this._restSessionService.getRepartitionTimeAndTypeResponseByPeriod({start: start, end: end, groupedBy: groupedBy, advancedParams: advancedParams, user: name, env: env}).pipe(map(r => {
+                observable: this._restSessionService.getRepartitionTimeAndTypeResponseByPeriod({start: start, end: end, groupedBy: groupedBy, user: name, env: env}).pipe(map(r => {
                     formatters[groupedBy](r, this._datePipe);
                     let combiner = (args: any[], f: string)=> args.reduce((acc, o) => {
                         acc += o[f];
@@ -133,67 +126,15 @@ export class StatisticUserView implements OnInit, OnDestroy {
                 }))
             },
             repartitionRequestByPeriodLine: {
-                observable: this._restSessionService.getRepartitionRequestByPeriod({start: start, end: end, groupedBy: groupedBy, advancedParams: advancedParams, user: name, env: env}).pipe(tap(r => {
+                observable: this._restSessionService.getRepartitionRequestByPeriod({start: start, end: end, groupedBy: groupedBy, user: name, env: env}).pipe(tap(r => {
                     formatters[groupedBy](r, this._datePipe);
                 }))
             },
-            repartitionApiBar: { observable: this._restSessionService.getRepartitionApi({start: start, end: end, advancedParams: advancedParams, user: name, env: env}) },
-            exceptionsTable: { observable: this._restSessionService.getExceptions({start: start, end: end, advancedParams: advancedParams, user: name, env: env})},
-            sessionTable: { observable: this._mainSessionService.getInfos({start: start, end: end, advancedParams: advancedParams, user: name, env: env}) }
+            repartitionApiBar: { observable: this._restSessionService.getRepartitionApi({start: start, end: end, user: name, env: env}) },
+            exceptionsTable: { observable: this._restSessionService.getExceptions({start: start, end: end, user: name, env: env})},
+            sessionTable: { observable: this._mainSessionService.getInfos({start: start, end: end, user: name, env: env}) }
         };
     }
 
-    resetFilters() {
-        this.patchDateValue(makeDatePeriod(6).start,
-           makeDatePeriod(6, 1).end);
-        this.advancedParams = {};
-        this._filter.setFilterMap({})
-    }
 
-
-    filtersSupplier(): BehaviorSubject<FilterMap> { //change
-        return new BehaviorSubject<FilterMap>({});
-    }
-
-    handlePresetSelection(filterPreset: FilterPreset) {
-        const formControlNamelist = Object.keys(this.serverFilterForm.controls);
-        Object.entries(filterPreset.values).reduce((accumulator: any, [key, value]) => {
-
-            if (formControlNamelist.includes(key)) {
-                this.serverFilterForm.patchValue({
-                    [key]: value
-                })
-                delete filterPreset.values[key];
-            }
-        }, {})
-        this.advancedParams = filterPreset.values
-        this._filter.setFilterMap(this.advancedParams);
-        this.search()
-    }
-
-    handlePresetSelectionReset() {
-        this.resetFilters();
-        this.search();
-    }
-
-    handleFilterReset() {
-        this.resetFilters();
-    }
-
-    focusField(fieldName: string) {
-        this.focusFieldName = [fieldName];
-    }
-
-    handledialogclose(filterMap: FilterMap) {
-        this.advancedParams = filterMap;
-        this._filter.setFilterMap(this.advancedParams);
-        this.search()
-    }
-
-    handleRemovedFilter(filterName: string) {
-        if (this.advancedParams[filterName]) {
-            delete this.advancedParams[filterName];
-            this._filter.setFilterMap(this.advancedParams);
-        }
-    }
 }

@@ -144,7 +144,7 @@ export class SearchMainView implements OnInit, OnDestroy {
     }
 
     filtersSupplier(): BehaviorSubject<FilterMap> { //change
-        return new BehaviorSubject<FilterMap>({});
+        return new BehaviorSubject<FilterMap>({'appname': this.serverFilterForm.getRawValue().appname, 'rangestatus': this.serverFilterForm.getRawValue().rangestatus.map(r=>(r.value))});
     }
 
     ngOnDestroy(): void {
@@ -225,6 +225,7 @@ export class SearchMainView implements OnInit, OnDestroy {
         this.serverFilterForm.patchValue({
             rangestatus: this.filters.filter((f:any)=> rangestatus.toString().includes(f.value))
         },{ emitEvent: false })
+        this.queryParams.rangestatus = rangestatus;
     }
 
     selectedRequest(event: MouseEvent, row: any) {
@@ -248,6 +249,9 @@ export class SearchMainView implements OnInit, OnDestroy {
 
     resetFilters() {
         this.patchDateValue((extractPeriod(app.gridViewPeriod, "gridViewPeriod") || makeDatePeriod(0)).start, (extractPeriod(app.gridViewPeriod, "gridViewPeriod") || makeDatePeriod(0, 1)).end);
+        this.patchServerValue([]);
+        this.patchStatusValue([]);
+        this.advancedParams = {};
         this.advancedParams = {};
         this._filter.setFilterMap({})
     }
