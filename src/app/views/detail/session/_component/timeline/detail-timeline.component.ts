@@ -123,7 +123,7 @@ export class DetailTimelineComponent implements OnChanges {
             let o = {
                 id: id,
                 group: isWebapp ? 0 : c.threadName,
-                content: c.typeTimeline == 'stage' ? '' : c.typeTimeline == 'action' ? this.ANALYTIC_MAPPING[c.typeTimeline].label : (c.schema || c.name || c.host || 'N/A'),
+                content: c.typeTimeline == 'stage' ? '' : c.typeTimeline == 'action' ? this.ANALYTIC_MAPPING[c.type].label : (c.schema || c.name || c.host || 'N/A'),
                 start: c.start * 1000,
                 end: end,
                 title: c.typeTimeline == 'action' ?
