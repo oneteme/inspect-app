@@ -65,11 +65,12 @@ export class DumpView implements OnInit, OnDestroy {
     }
 
     getSession(start: Date, end: Date, fn: () => void) {
+        this.$destroy.next();
         this.loading.set(true);
         forkJoin(
             [this._traceService.getRestSessionsForDump(this.params.env, this.params.app, start, end), this._traceService.getMainSessionsForDump(this.params.env, this.params.app, start, end)]
         )
-            .pipe(finalize(() =>  this.loading.set(false)))
+            .pipe(takeUntil(this.$destroy), finalize(() =>  this.loading.set(false)))
             .subscribe({
                 next: (sessions) => {
                     this.restSessions = sessions[0];
