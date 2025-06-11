@@ -82,11 +82,11 @@
 </div>
 
 <mat-menu #menuEndPoint="matMenu" xPosition="after">
-  <a [routerLink]="['/session', 'main', session.type, session.id, 'tree']" (click)="_router.navigateOnClick($event, ['session', 'main', session.type, session.id, 'tree'])" mat-menu-item>
+  <a [routerLink]="['/session', 'main', session.type, session.id, 'tree']" mat-menu-item>
     <mat-icon class="material-symbols-outlined">lan</mat-icon>
     Arbre d'appels
   </a>
-  <a [routerLink]="['/analytic', session.user]" [queryParams]="{env: instance.env, date: getDate(this.session.start * 1000, false).toISOString()}" [disabled]="!session?.user" *ngIf="session?.type == 'VIEW'" (click)="_router.navigateOnClick($event, ['analytic', session.user], {queryParams: {env: instance.env, date: getDate(this.session.start * 1000, false).toISOString()}})" mat-menu-item><mat-icon class="material-symbols-outlined">web_traffic</mat-icon>Parcours Utilisateur</a>
+  <a [routerLink]="['/analytic', session.user]" [queryParams]="{env: instance.env, date: getDate(this.session.start * 1000, false).toISOString()}" [disabled]="!session?.user" *ngIf="session?.type == 'VIEW'" mat-menu-item><mat-icon class="material-symbols-outlined">web_traffic</mat-icon>Parcours Utilisateur</a>
   <button *ngIf="session?.type == 'BATCH'" mat-menu-item [matMenuTriggerFor]="menuStatistic"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI</button>
   <a [routerLink]="['/dashboard', 'user', session.user]" [disabled]="!session?.user" *ngIf="session?.type != 'BATCH'" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Utilisateur</a>
 </mat-menu>

@@ -35,7 +35,7 @@ export class DumpView implements OnInit, OnDestroy {
         },
         verticalScroll: true,
         zoomKey: 'ctrlKey',
-        maxHeight: 'calc(100vh - 56px - 48px - 1.5em)'
+        maxHeight: 'calc(100vh - 56px - 48px - 1.5em)',
     };
 
     groups: DataGroup[];
