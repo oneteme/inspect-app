@@ -92,7 +92,7 @@
 </div>
 
 <mat-menu #menuEndPoint="matMenu" xPosition="after">
-  <a mat-menu-item [disabled]="sessionParent == null" [routerLink]="sessionParent.type == 'rest' ? ['/session', 'rest', sessionParent.id] : ['/session', 'main', sessionParent.type.toLowerCase(), sessionParent.id]">
+  <a mat-menu-item [disabled]="sessionParent == null" [ngStyle]="sessionParent == null ? {'pointer-events': 'none'}: ''" [routerLink]="sessionParent?.type == 'rest' ? ['/session', 'rest', sessionParent?.id] : ['/session', 'main', sessionParent?.type.toLowerCase(), sessionParent?.id]" [queryParams]="{env: instance?.env}">
     <div style="display: flex;">
       <mat-progress-spinner *ngIf="parentLoading"  style="margin-right: 16px" diameter="24" mode="indeterminate"
                             matTooltip="Chargement de l'appel parent">
@@ -101,7 +101,7 @@
       Détail de l'appel parent
     </div>
   </a>
-  <a mat-menu-item [routerLink]="['/session', 'rest', session.id, 'tree']">
+  <a mat-menu-item [routerLink]="['/session', 'rest', session?.id, 'tree']">
     <mat-icon class="material-symbols-outlined">lan</mat-icon>
     Arbre d'appels
   </a>
@@ -109,11 +109,11 @@
 </mat-menu>
 
 <mat-menu #menuStatistic="matMenu">
-  <a mat-menu-item [routerLink]="['/dashboard', 'server', instance.name]" [queryParams]="{api_name: session.name, env: instance.env}"><mat-icon class="material-symbols-outlined">call_received</mat-icon>Appel REST</a>
-  <a mat-menu-item [routerLink]="['/dashboard', 'user', session.user]"><mat-icon class="material-symbols-outlined">person</mat-icon>Utilisateur</a>
+  <a mat-menu-item [routerLink]="['/dashboard', 'server', instance?.name]" [queryParams]="{api_name: session?.name, env: instance?.env}"><mat-icon class="material-symbols-outlined">call_received</mat-icon>Appel REST</a>
+  <a mat-menu-item [routerLink]="['/dashboard', 'user', session?.user]"><mat-icon class="material-symbols-outlined">person</mat-icon>Utilisateur</a>
 </mat-menu>
 
 <mat-menu #menuServer="matMenu">
-  <a mat-menu-item [routerLink]="['/session', instance.name, 'dump']" [queryParams]="{env: instance.env, date: getDate(session.start * 1000).toISOString()}"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
-  <a mat-menu-item [routerLink]="['/dashboard', 'server', instance.name]" [queryParams]="{env: instance.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur</a>
+  <a mat-menu-item [routerLink]="['/session', instance?.name, 'dump']" [queryParams]="{env: instance?.env, date: getDate(session?.start * 1000).toISOString()}"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
+  <a mat-menu-item [routerLink]="['/dashboard', 'server', instance?.name]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur</a>
 </mat-menu>

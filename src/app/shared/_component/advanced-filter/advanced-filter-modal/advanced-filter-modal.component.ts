@@ -51,24 +51,22 @@ export class AdvancedFilterComponent implements OnInit, AfterContentChecked, OnD
     createGroup() {
         const group = this._fb.group({});
         let control;
-        this.subscriptions.push(this._filter.filters.subscribe(filter => {
-            this.data.filterConfig.forEach(field => {
-                this.cloneFilterValue = Object.assign({}, filter)
-                const value = this.cloneFilterValue[field.key];
-
-                control = this._fb.control(value)
-                group.addControl(field.key, control)
-                if (field.type != 'chip') {
-                    this.subscriptions.push(control.valueChanges.subscribe(value => {
-                        this.cloneFilterValue[field.key] = value
-                        this.isFormEmpty = this.checkIfFormEmpty()
-                    }))
-                }
-                if (field.query){
-                        this.getSelectData(field,  this.data.additionalFilter);
-                }
-            });
-        }));
+        const filter = this._filter.filters.getValue()
+        this.data.filterConfig.forEach(field => {
+            this.cloneFilterValue = Object.assign({}, filter)
+            const value = this.cloneFilterValue[field.key];
+            control = this._fb.control(value)
+            group.addControl(field.key, control)
+            if (field.type != 'chip') {
+                this.subscriptions.push(control.valueChanges.subscribe(value => {
+                    this.cloneFilterValue[field.key] = value
+                    this.isFormEmpty = this.checkIfFormEmpty()
+                }))
+            }
+            if (field.query){
+                    this.getSelectData(field,  this.data.additionalFilter);
+            }
+        });
 
         return group;
     }

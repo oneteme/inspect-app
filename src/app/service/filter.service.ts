@@ -15,10 +15,19 @@ export class FilterService implements OnDestroy {
 
     getOtherFilters: () => Observable<FilterMap>;
 
+    private lastUrl: string;
 
     constructor() {
-        this.routeSubscription = this._router.events.subscribe((event: NavigationStart) => { // fix 
-            this.filters.next({});
+        const getPath = (url: string) => url.split('?')[0];
+        this.lastUrl = getPath(this._router.url);
+        this.routeSubscription = this._router.events.subscribe((event: NavigationStart) => {
+            if (event instanceof NavigationStart) {
+                const nextPath = getPath(event.url);
+                if (nextPath !== this.lastUrl) {
+                    this.filters.next({});
+                }
+                this.lastUrl = nextPath;
+            }
         });
     }
 

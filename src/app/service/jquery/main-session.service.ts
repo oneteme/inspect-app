@@ -19,7 +19,7 @@ export class MainSessionService {
         return this.http.get<T>(url, { params: params });
     }
 
-    getInfos(filters: { start: Date, end: Date, advancedParams: FilterMap, user: string, env: string }): Observable<{ name: string, date: number, elapsedtime: number, location: string, appName: string }[]> {
+    getInfos(filters: { start: Date, end: Date, user: string, env: string }): Observable<{ name: string, date: number, elapsedtime: number, location: string, appName: string }[]> {
         let args = {
             'column': "name:name,start:date,elapsedtime:elapsedtime,location:location,instance.app_name:appName",
             'main_session.instance_env': 'instance.id',
@@ -28,8 +28,7 @@ export class MainSessionService {
             'start.lt': filters.end.toISOString(),
             'instance.environement': filters.env,
             'type': 'VIEW',
-            'order': 'date.desc',
-            ...filters.advancedParams
+            'order': 'date.desc'
         }
         return this.getMainSession(args)
     }

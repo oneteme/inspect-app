@@ -82,22 +82,22 @@
 </div>
 
 <mat-menu #menuEndPoint="matMenu" xPosition="after">
-  <a [routerLink]="['/session', 'main', session.type, session.id, 'tree']" (click)="_router.navigateOnClick($event, ['session', 'main', session.type, session.id, 'tree'])" mat-menu-item>
+  <a [routerLink]="['/session', 'main', session?.type, session?.id, 'tree']" mat-menu-item>
     <mat-icon class="material-symbols-outlined">lan</mat-icon>
     Arbre d'appels
   </a>
-  <a [routerLink]="['/analytic', session.user]" [queryParams]="{env: instance.env, date: getDate(this.session.start * 1000, false).toISOString()}" [disabled]="!session?.user" *ngIf="session?.type == 'VIEW'" (click)="_router.navigateOnClick($event, ['analytic', session.user], {queryParams: {env: instance.env, date: getDate(this.session.start * 1000, false).toISOString()}})" mat-menu-item><mat-icon class="material-symbols-outlined">web_traffic</mat-icon>Parcours Utilisateur</a>
+  <a [routerLink]="['/analytic', session?.user]" [queryParams]="{env: instance?.env, date: getDate(session?.start * 1000, false).toISOString()}" [disabled]="!session?.user" *ngIf="session?.type == 'VIEW'" mat-menu-item><mat-icon class="material-symbols-outlined">web_traffic</mat-icon>Parcours Utilisateur</a>
   <button *ngIf="session?.type == 'BATCH'" mat-menu-item [matMenuTriggerFor]="menuStatistic"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI</button>
-  <a [routerLink]="['/dashboard', 'user', session.user]" [disabled]="!session?.user" *ngIf="session?.type != 'BATCH'" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Utilisateur</a>
+  <a [routerLink]="['/dashboard', 'user', session?.user]" [disabled]="!session?.user" *ngIf="session?.type != 'BATCH'" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Utilisateur</a>
 </mat-menu>
 
 <mat-menu #menuStatistic="matMenu">
-  <a [routerLink]="['/dashboard', 'server', instance.name]" [queryParams]="{tab: 1, batch_name: session.name, env: instance.env}" mat-menu-item><mat-icon class="material-symbols-outlined">manufacturing</mat-icon>Batch</a>
-  <a [routerLink]="['/dashboard', 'user', session.user]" [disabled]="!session?.user" mat-menu-item><mat-icon class="material-symbols-outlined">person</mat-icon>Utilisateur</a>
+  <a [routerLink]="['/dashboard', 'server', instance?.name]" [queryParams]="{tab: 1, batch_name: session?.name, env: instance?.env}" mat-menu-item><mat-icon class="material-symbols-outlined">manufacturing</mat-icon>Batch</a>
+  <a [routerLink]="['/dashboard', 'user', session?.user]" [disabled]="!session?.user" mat-menu-item><mat-icon class="material-symbols-outlined">person</mat-icon>Utilisateur</a>
 </mat-menu>
 
 <mat-menu #menuServer="matMenu">
-  <a *ngIf="session?.type != 'VIEW'" [routerLink]="['/session', instance.name, 'dump']" [queryParams] = "{env: instance.env, date: getDate(session.start * 1000, true).toISOString()}" mat-menu-item><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
-  <a *ngIf="session?.type != 'VIEW'" [routerLink]="['/dashboard', 'server', instance.name]" [queryParams]="{env: instance.env}" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur</a>
-  <a *ngIf="session?.type == 'VIEW'" [routerLink]="['/dashboard', 'client', instance.name]" [queryParams]="{env: instance.env}" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Client</a>
+  <a *ngIf="session?.type != 'VIEW'" [routerLink]="['/session', instance?.name, 'dump']" [queryParams] = "{env: instance?.env, date: getDate(session?.start * 1000, true).toISOString()}" mat-menu-item><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
+  <a *ngIf="session?.type != 'VIEW'" [routerLink]="['/dashboard', 'server', instance?.name]" [queryParams]="{env: instance?.env}" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur</a>
+  <a *ngIf="session?.type == 'VIEW'" [routerLink]="['/dashboard', 'client', instance?.name]" [queryParams]="{env: instance?.env}" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Client</a>
 </mat-menu>

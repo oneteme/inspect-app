@@ -1,11 +1,11 @@
 import {Component, EventEmitter, Input, OnInit, Output, ViewChild, inject, OnDestroy} from "@angular/core";
-import { Filter, FilterConstants, FilterPreset, FilterMap } from "src/app/views/constants";
+import { FilterConstants, FilterPreset, FilterMap } from "src/app/views/constants";
 import { AdvancedFilterComponent } from "../advanced-filter-modal/advanced-filter-modal.component";
 import { MatDialog } from "@angular/material/dialog";
 import { FilterService } from "src/app/service/filter.service";
 import { MatMenuTrigger } from "@angular/material/menu";
-import { Subscription, finalize, firstValueFrom, throwError } from "rxjs";
-import { error } from "console";
+import { Subscription } from "rxjs";
+
 
 
 @Component({
@@ -45,6 +45,7 @@ export class AdvancedFilterTriggerComponent implements OnInit, OnDestroy {
 
 
     ngOnInit(): void {
+        this.selectedPreset = null;
         this.presetsFilter = this._filter.getPresetsLocalStrorage(this.pageName); // of  ? 
     }
 
