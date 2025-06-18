@@ -104,6 +104,10 @@ export class DetailTimelineComponent implements OnChanges {
                 return  "client-error"
             if(o.status >=500 || o.status ==0)
                 return "error"
+        } else {
+            if(!o.status) {
+                return "error";
+            }
         }
         return '';
     }
@@ -138,7 +142,7 @@ export class DetailTimelineComponent implements OnChanges {
             if (o.end > this.timelineEnd && o.end != INFINITY) {
                 this.timelineEnd = o.end;
             }
-            if(o.type != 'background'){
+            if(o.type == 'range'){
                 o.className += ` ${this.getErrorClassName(c)}`;
             }
             id++;
