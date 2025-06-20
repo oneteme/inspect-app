@@ -18,15 +18,12 @@
         </mat-card-title>
 
         <mat-card-content>
-            <div>
-                <div class="ellipsis"
-                    style="display: flex; gap: 0.5em; color: red; font-weight: 500; margin-top: 0.5em;"
-                    *ngIf="exception"
-                    [matTooltip]="exception.type" TooltipPosition="below">
-                    <mat-icon class="material-symbols-outlined">warning</mat-icon>{{exception.message}}
-                </div>
+            <div style="display: flex; align-items: center; gap: .5em; color: red; font-weight: 500; margin-top: 0.5em;"
+                *ngIf="exception"
+                [matTooltip]="exception.type">
+              <mat-icon style="width: 28px" class="material-symbols-outlined">warning</mat-icon>
+              <div class="ellipsis">{{exception.message}}</div>
             </div>
-
         </mat-card-content>
         <mat-card-footer>
             <mat-icon class="material-symbols-outlined" style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
