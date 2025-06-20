@@ -19,7 +19,7 @@
         </ng-container>
 
         <ng-container matColumnDef="host">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:60%"> Hôte </th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:50%"> Hôte </th>
             <td mat-cell *matCellDef="let element" [matTooltip]="element['databaseVersion']" matTooltipPosition="below">
                 {{element["host"] || 'N/A'}}</td>
         </ng-container>
@@ -34,7 +34,7 @@
         </ng-container>
 
         <ng-container matColumnDef="start">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:10%"> Début </th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:20%"> Début </th>
             <td mat-cell *matCellDef="let element">
                 <div class="table-column-content">
                     {{ (element.start*1000 |date:'dd/MM/yyyy')}}
