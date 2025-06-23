@@ -20,6 +20,7 @@ export interface RestSession extends RestRequest {
     mailRequests: Array<MailRequest>;
     ldapRequests: Array<NamingRequest>;
     userAgent: string;
+    cacheControl: string;
 }
 
 export interface MainSession extends LocalRequest {

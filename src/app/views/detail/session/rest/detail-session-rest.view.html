@@ -34,15 +34,26 @@
                   le {{ (session.start * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
                 </div>
               </label-icon>
+              <div style="display: flex; justify-content: space-between; gap: 1em">
+                <label-icon icon="launch" [ngClass]="{'icon-disabled': !session.userAgent}" [matTooltip]="session.userAgent" [size]="20">
+                </label-icon>
+                <label-icon icon="line_style" [ngClass]="{'icon-disabled': !session.contentType}" [matTooltip]="session.contentType" [size]="20">
+                </label-icon>
+                <label-icon icon="copy_all" [ngClass]="{'icon-disabled': !session.cacheControl}" [matTooltip]="session.cacheControl" [size]="20">
+                </label-icon>
+                <label-icon icon="compress" [ngClass]="{'icon-disabled': !session.outContentEncoding}" [matTooltip]="session.outContentEncoding" [size]="20">
+                </label-icon>
+              </div>
               <div class="right">
                   {{ session.inDataSize || 0 }}o
                   <mat-icon style="width: 20px; height: 20px; font-size: 20px;">swap_vert</mat-icon>
                   {{ session.outDataSize }}o en <span [matTooltip]="((session.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')" style="font-weight: bold">{{{ start: session.start, end: session.end } | duration}}</span>
-              </div>
-              <span class="badge" [ngStyle]="{'background-color': session.status >= 200 && session.status < 300 ? 'green' :
+                  <span class="badge" [ngStyle]="{'background-color': session.status >= 200 && session.status < 300 ? 'green' :
                                               session.status >= 300 && session.status < 500 ? 'orange' : 'red'}">
-                  {{session.status}}
-              </span>
+                    {{session.status}}
+                  </span>
+              </div>
+
             </mat-card-footer>
         </mat-card>
         <mat-card style="width: 50vw;">
