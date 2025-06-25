@@ -27,7 +27,7 @@
         <ng-container matColumnDef="schema">
             <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:20%"> BDD </th>
             <td mat-cell *matCellDef="let element">
-                <span style="font-weight: bold;">{{getCommand(element.command)}}</span>
+                <span style="font-weight: bold;">{{element.command | typeColumnFormat}}</span>
                 <br>
                 {{element["schema"] || element["name"] || 'N/A'}}
             </td>

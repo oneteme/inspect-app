@@ -89,6 +89,7 @@ export interface MailRequest extends SessionStage<boolean> {
 
 export interface LocalRequest extends SessionStage<boolean> {
     name: string;
+    type: string;
     location: string;
     exception: ExceptionInfo;
 }
