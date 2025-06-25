@@ -56,9 +56,9 @@ const routes: Route[] = [
     path: 'session', children: [
       {
         path: ':app_name/dump',
-        component: DumpView
+        component: DumpView,
+        title: 'Pulse'
       },
-
       {
         path: 'rest',
         children: [
@@ -260,7 +260,7 @@ const routes: Route[] = [
   {
     path: 'analytic/:user',
     component: AnalyticView,
-    title: 'Action Utilisateur'
+    title: 'Parcours Utilisateur'
   },
   {
     path: 'home',

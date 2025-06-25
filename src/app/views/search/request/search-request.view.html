@@ -1,7 +1,5 @@
 <header-page [iconOutlined]="true"  [titleIcon]="REQUEST_TYPE[params.type].icon" [ui-title]="'Requêtes '+REQUEST_TYPE[params.type].title">
   <form [formGroup]="requestFilterForm" class="header-filter md-3">
-
-
     <mat-form-field style="width: 315px" class="no-subscript" appearance="outline" >
       <mat-label>Période</mat-label>
       <mat-date-range-input [formGroup]="requestFilterForm.controls.dateRangePicker" [rangePicker]="picker">
@@ -12,10 +10,9 @@
       <mat-date-range-picker #picker></mat-date-range-picker>
     </mat-form-field>
 
-    <mat-form-field style="width: 500px" class="no-subscript" [class.loading]="serverNameIsLoading" appearance="outline">
+    <mat-form-field  class="no-subscript" [class.loading]="serverNameIsLoading" appearance="outline">
       <mat-label>Host</mat-label>
       <mat-select [formControl]="requestFilterForm.controls.host" multiple (selectionChange)="onChangeHost($event)">
-        
         <span *ngIf="serverNameIsLoading && queryParams.appname && queryParams.appname[0]!=''"><mat-option *ngFor="let s of queryParams.appname">{{s}}</mat-option></span>
         <mat-option *ngFor="let d of nameDataList" [value]="d" >{{d}}</mat-option>
       </mat-select>

@@ -13,9 +13,9 @@ export const ANALYTIC_MAPPING : {[key: string]: {label: string, text: (param: Us
         label: 'Click',
         text: (param: UserAction) => `Clique sur l'êlement "${param.name}" de type "${param.nodeName}".`
     },
-    scroll: {
+    scrollend: {
         label: 'Scroll',
-        text: (param: UserAction) => `Scroll sur la page.`
+        text: (param: UserAction) => `Scroll sur l'êlement "${param.nodeName}".`
     },
     change: {
         label: 'Change',
