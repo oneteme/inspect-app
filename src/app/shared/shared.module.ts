@@ -14,6 +14,7 @@ import {ExceptionTypePipe} from "./pipe/exception-type.pipe";
 import {TruncStringPipe} from "./pipe/trunc-string.pipe";
 import {TimelineComponent} from "./_component/timeline/timeline.component";
 import {HeaderSectionComponent} from "./_component/header-section/header-section.component";
+import {TypeColumnFormatPipe} from "./pipe/type-column-format";
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -48,6 +49,7 @@ export const MY_DATE_FORMATS = {
     TitleCasePipe,
     ExceptionTypePipe,
     TruncStringPipe,
+    TypeColumnFormatPipe,
     TimelineComponent,
     HeaderSectionComponent
   ],
@@ -62,6 +64,7 @@ export const MY_DATE_FORMATS = {
     TitleCasePipe,
     ExceptionTypePipe,
     TruncStringPipe,
+    TypeColumnFormatPipe,
     TimelineComponent,
     HeaderSectionComponent
   ]

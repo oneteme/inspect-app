@@ -10,7 +10,7 @@ import {MatSort} from "@angular/material/sort";
     styleUrls: ['./detail-local-table.component.scss']
 })
 export class DetailLocalTableComponent{
-    displayedColumns: string[] = ['status', 'name', 'location',  'start', 'duration'];
+    displayedColumns: string[] = ['status', 'location', 'name',  'start', 'duration'];
     dataSource: MatTableDataSource<LocalRequest> = new MatTableDataSource();
 
     @ViewChild('paginator', {static: true}) paginator: MatPaginator;

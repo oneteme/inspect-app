@@ -36,14 +36,6 @@ export class DetailDatabaseTableComponent {
     @Input() pageSize: number;
     @Output() onClickRow: EventEmitter<{event: MouseEvent, row: any}> = new EventEmitter();
 
-    getCommand(commands: string): string {
-        let command = "--";
-        if (commands) {
-            command = commands;
-        }
-        return `[${command}]`;
-    }
-
     selectedQuery(event: MouseEvent, row: number) {
         this.onClickRow.emit({event: event, row: row});
     }
