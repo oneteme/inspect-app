@@ -11,7 +11,7 @@ export class FtpRequestService {
 
     }
 
-    server = `${localStorage.getItem('server')}/v3/trace`;
+    server = `${localStorage.getItem('server')}/v3/query`;
 
     getftp<T>(params: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/request/ftp`;
