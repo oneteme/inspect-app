@@ -36,7 +36,7 @@ export interface MainSession extends LocalRequest {
 }
 
 export interface RestRequest extends SessionStage<number> {
-    id: string; //TODO
+    id: string;
     method: string;
     protocol: string;
     host: string;
