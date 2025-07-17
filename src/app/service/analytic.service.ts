@@ -5,7 +5,7 @@ import {InstanceRestSession, MainSession, UserAction} from "../model/trace.model
 
 @Injectable({ providedIn: 'root' })
 export class AnalyticService {
-    server = `${localStorage.getItem('server')}/v3/trace`;
+    server = `${localStorage.getItem('server')}/v3/query`;
 
     constructor(private http: HttpClient) {
     }

@@ -10,7 +10,7 @@ export class DatabaseRequestService {
 
     }
 
-    server = `${localStorage.getItem('server')}/v3/trace`;
+    server = `${localStorage.getItem('server')}/v3/query`;
 
     getDatabaseRequest<T>(params: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/request/database`;

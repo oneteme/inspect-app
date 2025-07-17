@@ -10,7 +10,7 @@ export class smtpRequestService {
     constructor(private http: HttpClient) {
 
     }
-    server = `${localStorage.getItem('server')}/v3/trace`;
+    server = `${localStorage.getItem('server')}/v3/query`;
 
     getsmtp<T>(params: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/request/smtp`;

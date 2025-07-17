@@ -77,7 +77,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
   } =
       {
         "rest": { service: this._restRequestService, filters:  [{icon: 'warning', label: '5xx',color:'#bb2124', value:'5xx'}, {icon: 'error', label: '4xx',color:'#f9ad4e', value:'4xx'}, {icon: 'done', label: '2xx',color:'#22bb33', value:'2xx'},{icon: 'priority_high', label: '0',color:'gray', value:'0xx'}]},
-        "database": { service: this._databaseRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: false}, {icon: 'done', label: 'OK',color:'#22bb33', value: true}] },
+        "jdbc": { service: this._databaseRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: false}, {icon: 'done', label: 'OK',color:'#22bb33', value: true}] },
         "ftp" :  { service: this._ftpRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: false}, {icon: 'done', label: 'OK',color:'#22bb33', value: true}] },
         "smtp": { service: this._smtpRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: false}, {icon: 'done', label: 'OK',color:'#22bb33', value: true}] },
         "ldap": { service: this._ldapRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: false}, {icon: 'done', label: 'OK',color:'#22bb33', value: true}] },

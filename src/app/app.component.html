@@ -33,9 +33,9 @@
                 <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['rest'].icon }}</mat-icon>
                 <span>{{ REQUEST_TYPE['rest'].title }}</span>
             </a>
-            <a mat-menu-item [routerLink]="['request/database']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
-                <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['database'].icon }}</mat-icon>
-                <span>{{ REQUEST_TYPE['database'].title }}</span>
+            <a mat-menu-item [routerLink]="['request/jdbc']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
+                <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['jdbc'].icon }}</mat-icon>
+                <span>{{ REQUEST_TYPE['jdbc'].title }}</span>
             </a>
             <a mat-menu-item [routerLink]="['request/ftp']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
                 <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['ftp'].icon }}</mat-icon>

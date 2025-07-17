@@ -510,7 +510,7 @@ export class Constants {
     }
     static readonly REQUEST_MAPPING_TYPE: {[key: string]: {title: string, icon: string}} = {
         rest: {title: 'HTTP', icon: 'public'},
-        database: {title: 'BDD', icon: 'database'},
+        jdbc: {title: 'BDD', icon: 'database'},
         ftp: {title: 'FTP', icon: 'smb_share'},
         smtp: {title: 'SMTP', icon: 'outgoing_mail'},
         ldap: {title: 'LDAP', icon: 'user_attributes'},

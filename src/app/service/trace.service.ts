@@ -22,7 +22,7 @@ import {
 @Injectable({ providedIn: 'root' })
 export class TraceService {
 
-    server = `${localStorage.getItem('server')}/v3/trace`;
+    server = `${localStorage.getItem('server')}/v3/query`;
 
     constructor(private http: HttpClient) {
     }

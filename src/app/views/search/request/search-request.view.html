@@ -81,7 +81,7 @@
     </ldap-table>
 </div>
 
-<div  *ngIf="params.type=='database'">
+<div  *ngIf="params.type=='jdbc'">
     <database-table [useFilter]="true"
                     [requests]="requests"
                     [isLoading]="isLoading"

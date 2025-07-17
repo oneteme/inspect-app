@@ -6,7 +6,7 @@ import {Architecture} from "../views/architecture/architecture.view";
 @Injectable({ providedIn: 'root' })
 export class TreeService {
 
-    server = `${localStorage.getItem('server')}/v3/trace`;
+    server = `${localStorage.getItem('server')}/v3/query`;
     constructor(private http:HttpClient){
 
     }

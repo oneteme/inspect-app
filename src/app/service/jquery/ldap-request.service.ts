@@ -11,7 +11,7 @@ export class LdapRequestService {
 
     }
 
-    server = `${localStorage.getItem('server')}/v3/trace`;
+    server = `${localStorage.getItem('server')}/v3/query`;
 
     getLdap<T>(params: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/request/ldap`;
