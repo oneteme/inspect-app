@@ -79,12 +79,10 @@ export class DatabaseRequestService {
     getJdbcRestSessionExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<JdbcSessionExceptionsByPeriodAndappname[]> {
         let args = {
             'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
+            'join': 'exception,instance',
             'instance.environement': filters.env,
-            'join': 'exception,rest_session,rest_session.instance',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            'rest_session.start.ge': filters.start.toISOString(),
-            'rest_session.start.lt': filters.end.toISOString(),
             [filters.app_name]: '',
             'order': 'date.asc'
         }
