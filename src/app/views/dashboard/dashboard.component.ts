@@ -288,68 +288,44 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         return {
             //------- TABLE + CHART
             restRequestExceptionsTable: {
-                observable: forkJoin({
-                    restSession: this._restService.getrestSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name }),
-                    mainSession: this._restService.getrestMainExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
-                })
-                    .pipe(map(((result: { restSession: RestSessionExceptionsByPeriodAndappname[]; mainSession: RestMainExceptionsByPeriodAndappname[]; }) => {
-                        let r = [...result.restSession, ...result.mainSession]
-                        formatters[groupedBy](r, this._datePipe)
-                        this.sparklineTitles.rest = this.setTitle('REST', [...r]);
-                        return this.setChartData([...r])
+                observable: this._restService.getRestExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
+                    .pipe(map(((result: RestSessionExceptionsByPeriodAndappname[]) => {
+                        formatters[groupedBy](result, this._datePipe)
+                        this.sparklineTitles.rest = this.setTitle('REST', [...result]);
+                        return this.setChartData([...result])
                     })))
             },
 
             databaseRequestExceptionsTable: {
-                observable: forkJoin({
-                    restSession: this._datebaseService.getJdbcRestSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name }),
-                    mainSession: this._datebaseService.getJdbcMainSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
-                })
-                    .pipe(map(((result: { restSession: JdbcSessionExceptionsByPeriodAndappname[]; mainSession: JdbcMainExceptionsByPeriodAndappname[]; }) => {
-                        let r = [...result.restSession, ...result.mainSession]
-                        formatters[groupedBy](r, this._datePipe);
-                        this.sparklineTitles.jdbc = this.setTitle('JDBC', [...r]);
-                        return this.setChartData(r)
-
+                observable: this._datebaseService.getJdbcRestSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
+                    .pipe(map(((result: JdbcSessionExceptionsByPeriodAndappname[]) => {
+                        formatters[groupedBy](result, this._datePipe);
+                        this.sparklineTitles.jdbc = this.setTitle('JDBC', [...result]);
+                        return this.setChartData(result)
                     })))
             },
             ftpRequestExceptionsTable: {
-                observable: forkJoin({
-                    restSession: this._ftpService.getftpSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name }),
-                    mainSession: this._ftpService.getftpMainExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
-                })
-                    .pipe(map(((result: { restSession: FtpSessionExceptionsByPeriodAndappname[]; mainSession: FtpMainExceptionsByPeriodAndappname[]; }) => {
-                        let r = [...result.restSession, ...result.mainSession]
-                        formatters[groupedBy](r, this._datePipe);
-                        this.sparklineTitles.ftp = this.setTitle('FTP', [...r]);
-                        return this.setChartData(r)
-
+                observable: this._ftpService.getftpSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
+                    .pipe(map(((result: FtpSessionExceptionsByPeriodAndappname[]) => {
+                        formatters[groupedBy](result, this._datePipe);
+                        this.sparklineTitles.ftp = this.setTitle('FTP', [...result]);
+                        return this.setChartData(result)
                     })))
             },
             smtpRequestExceptionsTable: {
-                observable: forkJoin({
-                    restSession: this._smtpService.getsmtpSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name }),
-                    mainSession: this._smtpService.getsmtpMainExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
-                })
-                    .pipe(map(((result: { restSession: SmtpSessionExceptionsByPeriodAndappname[]; mainSession: SmtpMainExceptionsByPeriodAndappname[]; }) => {
-                        let r = [...result.restSession, ...result.mainSession]
-                        formatters[groupedBy](r, this._datePipe);
-                        this.sparklineTitles.smtp = this.setTitle('SMTP', [...r]);
-                        return this.setChartData(r)
-
+                observable: this._smtpService.getSmtpExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
+                    .pipe(map(((result: SmtpSessionExceptionsByPeriodAndappname[]) => {
+                        formatters[groupedBy](result, this._datePipe);
+                        this.sparklineTitles.smtp = this.setTitle('SMTP', [...result]);
+                        return this.setChartData(result)
                     })))
             },
             ldapRequestExceptionsTable: {
-                observable: forkJoin({
-                    restSession: this._ldapService.getLdapSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name }),
-                    mainSession: this._ldapService.getLdapMainExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
-                })
-                    .pipe(map(((result: { restSession: LdapSessionExceptionsByPeriodAndappname[]; mainSession: LdapMainExceptionsByPeriodAndappname[]; }) => {
-                        let r = [...result.restSession, ...result.mainSession]
-                        formatters[groupedBy](r, this._datePipe);
-                        this.sparklineTitles.ldap = this.setTitle('LDAP', [...r]);
-                        return  this.setChartData(r)
-
+                observable: this._ldapService.getLdapExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
+                    .pipe(map(((result: LdapSessionExceptionsByPeriodAndappname[]) => {
+                        formatters[groupedBy](result, this._datePipe);
+                        this.sparklineTitles.ldap = this.setTitle('LDAP', [...result]);
+                        return  this.setChartData(result)
                     })))
             },
         }
