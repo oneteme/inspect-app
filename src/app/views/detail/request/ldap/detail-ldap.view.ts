@@ -3,14 +3,13 @@ import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {DataGroup, DataItem, TimelineOptions} from "vis-timeline";
 import {catchError, combineLatest, finalize, forkJoin, of, Subject, takeUntil} from "rxjs";
-import {ExceptionInfo, NamingRequest, NamingRequestStage} from "../../../../model/trace.model";
 import {DatePipe} from "@angular/common";
 import {app} from "../../../../../environments/environment";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {EnvRouter} from "../../../../service/router.service";
 import {INFINITY} from "../../../constants";
-import {DirectoryRequest, DirectoryRequestStage} from "../../../../model/new/trace.model";
-import {RequestType} from "../../../../model/new/request.model";
+import {DirectoryRequest, DirectoryRequestStage, ExceptionInfo} from "../../../../model/trace.model";
+import {RequestType} from "../../../../model/request.model";
 
 @Component({
     templateUrl: './detail-ldap.view.html',
@@ -78,7 +77,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
         let timelineStart = Math.trunc(this.request.start * 1000);
         let timelineEnd = this.request.end ? Math.trunc(this.request.end * 1000) : INFINITY;
 
-        let items = this.stages.map((a: NamingRequestStage, i: number) => {
+        let items = this.stages.map((a: DirectoryRequestStage, i: number) => {
             let start= Math.trunc(a.start * 1000);
             let end = a.end? Math.trunc(a.end * 1000) : INFINITY;
             return {
@@ -102,7 +101,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
             type: "background"
         });
 
-        let groups: any[] = this.stages.map((a:NamingRequestStage, i:number) => ({ id: i, content: a?.name,treeLevel: 2}));
+        let groups: any[] = this.stages.map((a:DirectoryRequestStage, i:number) => ({ id: i, content: a?.name,treeLevel: 2}));
         groups.splice(0, 0, {id: 'parent', content: this.request.threadName, treeLevel: 1, nestedGroups:groups.map(g=>(g.id))});
         let padding = (Math.ceil((timelineEnd - timelineStart)*0.01));
         this.dataItems = items;

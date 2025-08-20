@@ -2,9 +2,8 @@ import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
-import {MailRequest} from "src/app/model/trace.model";
 import {DatePipe} from "@angular/common";
-import {MailRequestDto} from "../../../../../model/new/request.model";
+import {MailRequestDto} from "../../../../../model/request.model";
 
 @Component({
     selector: 'smtp-table',

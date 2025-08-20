@@ -1,5 +1,4 @@
-import { ChartProvider, field, values } from "@oneteme/jquery-core";
-import { DashboardComponent } from "./dashboard/dashboard.component";
+import {ChartProvider, field, values} from "@oneteme/jquery-core";
 import {UserAction} from "../model/trace.model";
 
 export const INFINITY = new Date(9999,12,31).getTime();

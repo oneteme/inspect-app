@@ -2,8 +2,7 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {FtpSessionExceptionsByPeriodAndappname} from "src/app/model/jquery.model";
-import {FtpRequest} from "../../model/trace.model";
-import {FtpRequestDto} from "../../model/new/request.model";
+import {FtpRequestDto} from "../../model/request.model";
 
 
 @Injectable({ providedIn: 'root' })

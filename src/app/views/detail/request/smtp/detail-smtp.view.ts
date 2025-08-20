@@ -9,8 +9,8 @@ import {EnvRouter} from "../../../../service/router.service";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {MatTableDataSource} from "@angular/material/table";
 import {INFINITY} from "../../../constants";
-import {ExceptionInfo, Mail, MailRequest, MailRequestStage} from "../../../../model/new/trace.model";
-import {RequestType} from "../../../../model/new/request.model";
+import {ExceptionInfo, Mail, MailRequest, MailRequestStage} from "../../../../model/trace.model";
+import {RequestType} from "../../../../model/request.model";
 
 @Component({
     templateUrl: './detail-smtp.view.html',

@@ -1,9 +1,11 @@
-import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import {forkJoin, map, Observable} from "rxjs";
-import { SmtpMainExceptionsByPeriodAndappname, SmtpSessionExceptionsByPeriodAndappname } from "src/app/model/jquery.model";
-import {MailRequest, RestRequest} from "../../model/trace.model";
-import {MailRequestDto} from "../../model/new/request.model";
+import {Injectable} from "@angular/core";
+import {HttpClient} from "@angular/common/http";
+import {Observable} from "rxjs";
+import {
+    SmtpMainExceptionsByPeriodAndappname,
+    SmtpSessionExceptionsByPeriodAndappname
+} from "src/app/model/jquery.model";
+import {MailRequestDto} from "../../model/request.model";
 
 
 @Injectable({ providedIn: 'root' })

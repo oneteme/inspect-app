@@ -2,15 +2,11 @@ import {Component, EventEmitter, inject, Input, OnDestroy, Output, ViewChild} fr
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
-import {RestRequest} from "src/app/model/trace.model";
-import {animate, state, style, transition, trigger} from "@angular/animations";
 import {EnvRouter} from "../../../../../service/router.service";
-import {RestRequestService} from "../../../../../service/jquery/rest-request.service";
-import {catchError, finalize, of, Subject, Subscription, takeUntil} from "rxjs";
+import {Subject} from "rxjs";
 import {DatePipe} from "@angular/common";
 import {Utils} from "../../../../../shared/util";
-import {RestRequestDto} from "../../../../../model/new/request.model";
-import {TraceService} from "../../../../../service/trace.service";
+import {RestRequestDto} from "../../../../../model/request.model";
 
 @Component({
     selector: 'rest-table',

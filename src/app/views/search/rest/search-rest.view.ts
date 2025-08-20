@@ -19,7 +19,7 @@ import {MY_DATE_FORMATS} from "../../../shared/shared.module";
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
 import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-date-range-selection-strategy";
 import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../model/conf.model";
-import {RestSessionDto} from "../../../model/new/request.model";
+import {RestSessionDto} from "../../../model/request.model";
 
 
 @Component({

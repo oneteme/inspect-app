@@ -3,12 +3,11 @@ import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {EnvRouter} from "../../../../service/router.service";
 import {catchError, combineLatest, finalize, forkJoin, of, Subject, takeUntil} from "rxjs";
-import {RestRequest} from "../../../../model/new/trace.model";
-import {ExceptionInfo} from "../../../../model/trace.model";
 import {app} from "../../../../../environments/environment";
-import {RequestType, RestRequestDto} from "../../../../model/new/request.model";
+import {RequestType, RestRequestDto} from "../../../../model/request.model";
 import {Utils} from "../../../../shared/util";
 import {Constants} from "../../../constants";
+import {ExceptionInfo} from "../../../../model/trace.model";
 
 @Component({
   templateUrl: './detail-rest.view.html',

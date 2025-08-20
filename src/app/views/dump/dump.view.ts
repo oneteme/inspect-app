@@ -6,7 +6,7 @@ import {EnvRouter} from "../../service/router.service";
 import {TraceService} from "../../service/trace.service";
 import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
 import {DurationPipe} from "../../shared/pipe/duration.pipe";
-import {MainSession, RestSession} from "../../model/new/trace.model";
+import {MainSession, RestSession} from "../../model/trace.model";
 
 @Component({
     templateUrl: './dump.view.html',

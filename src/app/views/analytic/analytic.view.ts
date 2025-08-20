@@ -1,6 +1,5 @@
 import {Component, inject, OnDestroy} from "@angular/core";
 import {AnalyticService} from "../../service/analytic.service";
-import {MainSession, UserAction} from "../../model/trace.model";
 import {combineLatest, distinctUntilChanged, filter, finalize, Observable, Subject, takeUntil} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {EnvRouter} from "../../service/router.service";
@@ -11,6 +10,7 @@ import {MY_DATE_FORMATS} from "../../shared/shared.module";
 import {MainSessionService} from "../../service/jquery/main-session.service";
 import {ANALYTIC_MAPPING} from "../constants";
 import {app} from "../../../environments/environment";
+import {AnalyticDto} from "../../model/request.model";
 
 @Component({
     templateUrl: './analytic.view.html',
@@ -39,7 +39,7 @@ export class AnalyticView implements OnDestroy {
 
     $users: Observable<string[]>;
 
-    sessions: MainSession[] = [];
+    sessions: AnalyticDto[] = [];
     count: number = 0;
 
     params: Partial<{env: string, user: string, date: Date, offset: number, limit: number}> = {};
@@ -109,7 +109,7 @@ export class AnalyticView implements OnDestroy {
         });
     }
 
-    onClickSession(event: MouseEvent, session: MainSession) {
+    onClickSession(event: MouseEvent, session: AnalyticDto) {
         if (event.ctrlKey) {
             this._router.open(`#/session/main/view/` + session.id, '_blank')
         } else {

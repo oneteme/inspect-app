@@ -6,7 +6,7 @@ import {
     JdbcSessionExceptionsByPeriodAndappname,
     RepartitionRequestByPeriod
 } from "../../model/jquery.model";
-import {DatabaseRequestDto} from "../../model/new/request.model";
+import {DatabaseRequestDto} from "../../model/request.model";
 
 @Injectable({ providedIn: 'root' })
 export class DatabaseRequestService {

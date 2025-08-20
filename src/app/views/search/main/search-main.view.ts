@@ -20,7 +20,7 @@ import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
 import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-date-range-selection-strategy";
 import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../model/conf.model";
 import {shallowEqual} from "../rest/search-rest.view";
-import {MainSessionDto} from "../../../model/new/request.model";
+import {MainSessionDto} from "../../../model/request.model";
 
 @Component({
     templateUrl: './search-main.view.html',

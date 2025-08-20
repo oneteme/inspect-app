@@ -2,9 +2,8 @@ import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
-import {FtpRequest} from "src/app/model/trace.model";
 import {DatePipe} from "@angular/common";
-import {FtpRequestDto} from "../../../../../model/new/request.model";
+import {FtpRequestDto} from "../../../../../model/request.model";
 
 @Component({
     selector: 'ftp-table',

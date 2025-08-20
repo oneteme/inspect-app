@@ -11,7 +11,7 @@ export class TreeService {
 
     }
 
-    getFtpRequestStage(ids:any): Observable<{}> {
+        getFtpRequestStage(ids:any): Observable<{}> {
         return this.http.get(`${this.server}/session/request/ftp/stages`, {params: ids})
     }
 
@@ -27,7 +27,7 @@ export class TreeService {
         return this.http.get(`${this.server}/session/request/smtp/stages/count`, {params: ids})
     }
 
-    getJdbcRequestCount(ids:any): Observable<{}> { 
+    getJdbcRequestCount(ids:any): Observable<{}> {
         return this.http.get(`${this.server}/session/request/database/stages/count`, {params: ids})
     }
 

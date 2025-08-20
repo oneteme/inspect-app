@@ -1,6 +1,5 @@
 import {inject, Pipe, PipeTransform} from "@angular/core";
 import {DecimalPipe} from "@angular/common";
-import {Period} from "../../model/trace.model";
 
 @Pipe({
     name:"duration"
@@ -9,7 +8,7 @@ import {Period} from "../../model/trace.model";
 export class DurationPipe implements PipeTransform {
      _decimalPipe = inject(DecimalPipe);
 
-    transform(value: Period | number, ...args: any[]):string {
+    transform(value: {start: number, end: number} | number, ...args: any[]):string {
         let time = typeof value == "object" ? value.end - value.start : value;
         if(!time && time !=0){
             return "?";

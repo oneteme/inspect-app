@@ -10,8 +10,8 @@ import {EnvRouter} from "../../../../service/router.service";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {getErrorClassName} from '../../../../shared/util';
 import {INFINITY} from "../../../constants";
-import {DatabaseRequest, DatabaseRequestStage, ExceptionInfo} from "../../../../model/new/trace.model";
-import {RequestType} from "../../../../model/new/request.model";
+import {DatabaseRequest, DatabaseRequestStage, ExceptionInfo} from "../../../../model/trace.model";
+import {RequestType} from "../../../../model/request.model";
 
 @Component({
     templateUrl: './detail-database.view.html',

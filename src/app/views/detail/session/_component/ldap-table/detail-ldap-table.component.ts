@@ -2,9 +2,8 @@ import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
-import {NamingRequest} from "src/app/model/trace.model";
 import {DatePipe} from "@angular/common";
-import {DirectoryRequestDto} from "../../../../../model/new/request.model";
+import {DirectoryRequestDto} from "../../../../../model/request.model";
 
 @Component({
     selector: 'ldap-table',

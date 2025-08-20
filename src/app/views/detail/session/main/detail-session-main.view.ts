@@ -7,8 +7,8 @@ import {combineLatest, defer, finalize, map, merge, of, Subject, switchMap, take
 import {app} from "../../../../../environments/environment";
 import {Constants} from "../../../constants";
 import {AnalyticService} from "../../../../service/analytic.service";
-import {MainSessionView} from "../../../../model/new/request.model";
-import {InstanceEnvironment} from "../../../../model/new/trace.model";
+import {MainSessionView} from "../../../../model/request.model";
+import {InstanceEnvironment} from "../../../../model/trace.model";
 
 @Component({
     templateUrl: './detail-session-main.view.html',

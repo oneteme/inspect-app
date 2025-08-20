@@ -1,9 +1,9 @@
 import {Component, Input, ViewChild} from "@angular/core";
-import {MailRequest, UserAction} from "../../../../../model/trace.model";
 import {MatTableDataSource} from "@angular/material/table";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {ANALYTIC_MAPPING} from "../../../../constants";
+import {UserAction} from "../../../../../model/trace.model";
 
 @Component({
     selector: 'action-table',

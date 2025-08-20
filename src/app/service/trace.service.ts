@@ -1,27 +1,27 @@
 import {HttpClient} from "@angular/common/http";
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
-import {DatabaseRequestStage, Mail, MailRequestStage,} from "../model/trace.model";
 import {
-    DatabaseRequestDto, DirectoryRequestDto,
-    FtpRequestDto, MailRequestDto,
+    DatabaseRequestDto,
+    DirectoryRequestDto,
+    FtpRequestDto,
+    MailRequestDto,
     MainSessionDto,
     RestRequestDto,
     RestSessionDto
-} from "../model/new/request.model";
+} from "../model/request.model";
 import {
-    DatabaseRequest,
+    DatabaseRequest, DatabaseRequestStage,
     DirectoryRequest,
     DirectoryRequestStage,
     FtpRequest,
     FtpRequestStage,
     InstanceEnvironment,
-    LocalRequest,
-    MailRequest,
+    LocalRequest, Mail,
+    MailRequest, MailRequestStage,
     MainSession,
-    RestRequest,
     RestSession
-} from "../model/new/trace.model";
+} from "../model/trace.model";
 
 @Injectable({ providedIn: 'root' })
 export class TraceService {

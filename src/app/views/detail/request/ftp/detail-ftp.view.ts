@@ -9,8 +9,8 @@ import {EnvRouter} from "../../../../service/router.service";
 import {getErrorClassName, Utils} from "../../../../shared/util";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {INFINITY} from "../../../constants";
-import {ExceptionInfo, FtpRequest, FtpRequestStage} from "../../../../model/new/trace.model";
-import {RequestType} from "../../../../model/new/request.model";
+import {ExceptionInfo, FtpRequest, FtpRequestStage} from "../../../../model/trace.model";
+import {RequestType} from "../../../../model/request.model";
 
 @Component({
     templateUrl: './detail-ftp.view.html',

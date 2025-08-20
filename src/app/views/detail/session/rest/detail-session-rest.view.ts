@@ -6,8 +6,8 @@ import {catchError, combineLatest, defer, finalize, map, merge, of, Subject, swi
 import {app} from "../../../../../environments/environment";
 import {Utils} from "../../../../shared/util";
 import {EnvRouter} from "../../../../service/router.service";
-import {RequestType, RestSessionView} from "../../../../model/new/request.model";
-import {InstanceEnvironment} from "../../../../model/new/trace.model";
+import {RequestType, RestSessionView} from "../../../../model/request.model";
+import {InstanceEnvironment} from "../../../../model/trace.model";
 
 @Component({
     templateUrl: './detail-session-rest.view.html',

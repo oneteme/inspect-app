@@ -1,7 +1,7 @@
 import {Component, inject, Input} from "@angular/core";
 import {EnvRouter} from "../../../../service/router.service";
-import {MainSessionView, RestSessionView} from "../../../../model/new/request.model";
-import {InstanceEnvironment} from "../../../../model/new/trace.model";
+import {MainSessionView, RestSessionView} from "../../../../model/request.model";
+import {InstanceEnvironment} from "../../../../model/trace.model";
 
 @Component({
     selector: 'detail-session',

@@ -36,6 +36,10 @@ export interface DatabaseRequestDto extends DatabaseRequest {
   exception: ExceptionInfo;
 }
 
+export interface AnalyticDto extends MainSession {
+  userActions: Array<UserAction>;
+}
+
 export interface MainSessionView extends MainSession {
   restRequests?: RestRequestDto[];
   databaseRequests?: DatabaseRequestDto[];

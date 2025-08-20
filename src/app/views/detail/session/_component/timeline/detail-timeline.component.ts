@@ -1,10 +1,10 @@
 import {DatePipe} from "@angular/common";
 import {Component, ElementRef, Input, OnChanges, SimpleChanges, ViewChild} from "@angular/core";
 import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
-import {InstanceEnvironment} from "src/app/model/trace.model";
 import {DurationPipe} from "../../../../../shared/pipe/duration.pipe";
 import {ANALYTIC_MAPPING, INFINITY} from "../../../../constants";
-import {MainSessionView, RestSessionView} from "../../../../../model/new/request.model";
+import {MainSessionView, RestSessionView} from "../../../../../model/request.model";
+import {InstanceEnvironment} from "../../../../../model/trace.model";
 
 let options: any = {
     clickToUse: true,

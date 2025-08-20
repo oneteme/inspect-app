@@ -6,26 +6,17 @@ import {Location} from '@angular/common';
 import {TraceService} from 'src/app/service/trace.service';
 import {app} from 'src/environments/environment';
 import {EnvRouter} from "../../service/router.service";
-import {
-  DatabaseRequest,
-  FtpRequest,
-  FtpRequestNode,
-  JdbcRequestNode,
-  Label,
-  LdapRequestNode,
-  LinkRequestNode,
-  MailRequest,
-  MailRequestNode,
-  MainServerNode,
-  NamingRequest,
-  RestRequestNode,
-  RestServerNode,
-  ServerMainSession,
-  ServerRestSession
-} from 'src/app/model/trace.model';
 import {TreeService} from 'src/app/service/tree.service';
 import {FormControl, FormGroup} from '@angular/forms';
-import {LinkConfig, ServerType, TreeGraph} from 'src/app/model/tree.model';
+import {LinkConfig, ServerType, TreeGraph} from '../../model/tree.model';
+import {
+  DatabaseRequestTree,
+  DirectoryRequestTree, FtpRequestNode,
+  FtpRequestTree, JdbcRequestNode, Label, LdapRequestNode, LinkRequestNode, MailRequestNode,
+  MailRequestTree, MainServerNode,
+  MainSessionTree, RestRequestNode, RestServerNode,
+  RestSessionTree
+} from "../../model/tree.model";
 
 
 @Component({
@@ -110,7 +101,7 @@ export class TreeView implements OnDestroy {
 
   getTree(data: any, serverlbl: Label, linklbl: Label) {
     this.isLoading = true;
-    this.subscriptions.push(this._traceService.getTree(this.id, data['type']).pipe(finalize(() => this.isLoading = false)).subscribe((d: ServerRestSession /*| ServerMainSession*/) => {
+    this.subscriptions.push(this._traceService.getTree(this.id, data['type']).pipe(finalize(() => this.isLoading = false)).subscribe((d: RestSessionTree /*| ServerMainSession*/) => {
       this.TreeObj = d;
       let self = this;
       this.tree = TreeGraph.setup(this.graphContainer.nativeElement, tg => {
@@ -133,7 +124,7 @@ export class TreeView implements OnDestroy {
     }
   }
 
-  mergeRestRequests(name: string, array: RestRequestNode[]): ServerRestSession {
+  mergeRestRequests(name: string, array: RestRequestNode[]): RestSessionTree {
     let remote = array[0].nodeObject.remoteTrace ? array[0].nodeObject.remoteTrace : { appName: name };
     let acc: any = { ...remote, 'restRequests': [], 'databaseRequests': [], 'ftpRequests': [], 'mailRequests': [], 'ldapRequests': [], 'remoteList': [] };
     array.forEach(o => {
@@ -146,10 +137,10 @@ export class TreeView implements OnDestroy {
         o.nodeObject.remoteTrace && acc.remoteList.push(('protocol' in o.nodeObject.remoteTrace ? new RestServerNode(o.nodeObject.remoteTrace) : new MainServerNode(o.nodeObject.remoteTrace)))
       }
     })
-    return <ServerRestSession>acc;
+    return <RestSessionTree>acc;
   }
 
-  draw(treeGraph: TreeGraph, server: ServerRestSession | ServerMainSession, serverlbl: Label, linklbl: Label) {
+  draw(treeGraph: TreeGraph, server: RestSessionTree | MainSessionTree, serverlbl: Label, linklbl: Label) {
 
     let serverNode = ('protocol' in server ? new RestServerNode(server) : new MainServerNode(server)); // todo test if has remote returns icons style 
     let icon: ServerType = this.getIcon(serverNode.nodeObject);
@@ -174,7 +165,7 @@ export class TreeView implements OnDestroy {
         }
         else {
           let restRequestNode = v[1][0];
-          b = this.draw(treeGraph, restRequestNode.nodeObject.remoteTrace ? restRequestNode.nodeObject.remoteTrace : <ServerRestSession>{ appName: v[1][0].nodeObject.host }, serverlbl, linklbl)
+          b = this.draw(treeGraph, restRequestNode.nodeObject.remoteTrace ? restRequestNode.nodeObject.remoteTrace : <RestSessionTree>{ appName: v[1][0].nodeObject.host }, serverlbl, linklbl)
           label = restRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[restRequestNode.getLinkStyle()];
         }
@@ -185,13 +176,13 @@ export class TreeView implements OnDestroy {
 
     //databaseRequests
     if (server.databaseRequests) {
-      let res = this.groupBy<DatabaseRequest, JdbcRequestNode>(server.databaseRequests, v => v.name, JdbcRequestNode)
+      let res = this.groupBy<DatabaseRequestTree, JdbcRequestNode>(server.databaseRequests, v => v.name, JdbcRequestNode)
       Object.entries(res).forEach((v: any[]) => {
         let jdbcRequestNode = v[1][0];
         b = treeGraph.insertServer(jdbcRequestNode.formatNode(serverlbl), "JDBC"); // demon server
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<JdbcRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.checkSome<JdbcRequestNode>(v[1], v => { return v.nodeObject.failed }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
         } else {
           label = jdbcRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[jdbcRequestNode.getLinkStyle()];
@@ -202,13 +193,13 @@ export class TreeView implements OnDestroy {
 
     //ftpRequests
     if (server.ftpRequests) {
-      let res = this.groupBy<FtpRequest, FtpRequestNode>(server.ftpRequests, v => v.host, FtpRequestNode)
+      let res = this.groupBy<FtpRequestTree, FtpRequestNode>(server.ftpRequests, v => v.host, FtpRequestNode)
       Object.entries(res).forEach((v: any[]) => {
         let ftpRequestNode = v[1][0];
         b = treeGraph.insertServer(ftpRequestNode.formatNode(serverlbl), "FTP"); // demon server
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<FtpRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.checkSome<FtpRequestNode>(v[1], v => { return v.nodeObject.failed }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
         } else {
           label = ftpRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[ftpRequestNode.getLinkStyle()];
@@ -219,13 +210,13 @@ export class TreeView implements OnDestroy {
 
     //mailRequests
     if (server.mailRequests) {
-      let res = this.groupBy<MailRequest, MailRequestNode>(server.mailRequests, v => v.host, MailRequestNode)
+      let res = this.groupBy<MailRequestTree, MailRequestNode>(server.mailRequests, v => v.host, MailRequestNode)
       Object.entries(res).forEach((v: any[]) => {
         let mailRequestNode = v[1][0];
         b = treeGraph.insertServer(mailRequestNode.formatNode(serverlbl), "SMTP"); // demon server
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<MailRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.checkSome<MailRequestNode>(v[1], v => { return v.nodeObject.failed }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
         } else {
           label = mailRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[mailRequestNode.getLinkStyle()];
@@ -236,13 +227,13 @@ export class TreeView implements OnDestroy {
 
     //ldapRequests
     if (server.ldapRequests) {
-      let res = this.groupBy<NamingRequest, LdapRequestNode>(server.ldapRequests, v => v.host, LdapRequestNode)
+      let res = this.groupBy<DirectoryRequestTree, LdapRequestNode>(server.ldapRequests, v => v.host, LdapRequestNode)
       Object.entries(res).forEach((v: any[]) => {
         let ldapRequestNode = v[1][0];
         b = treeGraph.insertServer(ldapRequestNode.formatNode(serverlbl), "LDAP"); // demon server
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<MailRequestNode>(v[1], v => { return !v.nodeObject.status }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.checkSome<MailRequestNode>(v[1], v => { return v.nodeObject.failed }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
         } else {
           label = ldapRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[ldapRequestNode.getLinkStyle()];
@@ -271,10 +262,8 @@ export class TreeView implements OnDestroy {
   checkSome<T>(arr: T[], fn: (o: T) => any) {
     return arr.some(r => fn(r));
   }
-  
-  check
 
-  getIcon(obj: ServerRestSession | ServerMainSession) {
+  getIcon(obj: RestSessionTree | MainSessionTree) {
     if ("type" in obj) {
       return obj.type == 'VIEW' ? 'VIEW' : 'BATCH'
     }
@@ -313,9 +302,9 @@ export class TreeView implements OnDestroy {
   viewMethodResource() {
     let reqOb: any = {}
     if (!this.LabelIsLoaded['METHOD_RESOURCE']) {
-      let ftpParam = this.getRequestsIds(this.TreeObj, (s) => s.ftpRequests?.map(o => o.idRequest));
-      let mailParam = this.getRequestsIds(this.TreeObj, (s) => s.mailRequests?.map(o => o.idRequest));
-      let ldapParam = this.getRequestsIds(this.TreeObj, (s) => s.ldapRequests?.map(o => o.idRequest));
+      let ftpParam = this.getRequestsIds(this.TreeObj, (s) => s.ftpRequests?.map(o => o.id));
+      let mailParam = this.getRequestsIds(this.TreeObj, (s) => s.mailRequests?.map(o => o.id));
+      let ldapParam = this.getRequestsIds(this.TreeObj, (s) => s.ldapRequests?.map(o => o.id));
       ftpParam.ids?.length && (reqOb.ftp = this._treeService.getFtpRequestStage(ftpParam));
       mailParam.ids?.length && (reqOb.mail = this._treeService.getMailRequestStage(mailParam));
       ldapParam.ids?.length && (reqOb.ldap = this._treeService.getLdapRequestStage(ldapParam));
@@ -327,17 +316,17 @@ export class TreeView implements OnDestroy {
       this.LabelIsLoaded['METHOD_RESOURCE'] = true;
       this.tree.draw(() => this.dr(this.tree, this.TreeObj, this.serverLbl, this.linkLbl = Label.METHOD_RESOURCE))
     })).subscribe((res: { ftp: {}, mail: {}, ldap: {} }) => {
-      this.setRequestProperties(this.TreeObj, res.ftp, (s, actionMap) => s.ftpRequests?.length && s.ftpRequests.forEach(r => r["commands"] = actionMap[r['idRequest']]))
-      this.setRequestProperties(this.TreeObj, res.mail, (s, actionMap) => s.mailRequests?.length && s.mailRequests.forEach(r => r["commands"] = actionMap[r['idRequest']]))
-      this.setRequestProperties(this.TreeObj, res.ldap, (s, actionMap) => s.ldapRequests?.length && s.ldapRequests.forEach(r => r["commands"] = actionMap[r['idRequest']]))
+      this.setRequestProperties(this.TreeObj, res.ftp, (s, actionMap) => s.ftpRequests?.length && s.ftpRequests.forEach(r => r.commands = actionMap[r.id]))
+      this.setRequestProperties(this.TreeObj, res.mail, (s, actionMap) => s.mailRequests?.length && s.mailRequests.forEach(r => r.commands = actionMap[r.id]))
+      this.setRequestProperties(this.TreeObj, res.ldap, (s, actionMap) => s.ldapRequests?.length && s.ldapRequests.forEach(r => r.commands = actionMap[r.id]))
     }))
   }
 
   viewSizeCompression() {
     let reqOb: any = {}
     if (!this.LabelIsLoaded['SIZE_COMPRESSION']) {
-      let jdbcParam = this.getRequestsIds(this.TreeObj, (s) => s.databaseRequests?.map(o => o.idRequest));
-      let mailParam = this.getRequestsIds(this.TreeObj, (s) => s.mailRequests?.map(o => o.idRequest));
+      let jdbcParam = this.getRequestsIds(this.TreeObj, (s) => s.databaseRequests?.map(o => o.id));
+      let mailParam = this.getRequestsIds(this.TreeObj, (s) => s.mailRequests?.map(o => o.id));
       jdbcParam.ids?.length && (reqOb.jdbc = this._treeService.getJdbcRequestCount(jdbcParam));
       mailParam.ids?.length && (reqOb.smtp = this._treeService.getSmtpRequestCount(mailParam));
 
@@ -349,19 +338,19 @@ export class TreeView implements OnDestroy {
       this.LabelIsLoaded['SIZE_COMPRESSION'] = true;
       this.tree.draw(() => this.dr(this.tree, this.TreeObj, this.serverLbl, this.linkLbl = Label.SIZE_COMPRESSION))
     })).subscribe((res: { jdbc: {}, smtp: {} }) => {
-      this.setRequestProperties(this.TreeObj, res.jdbc, (s, actionMap) => s.databaseRequests?.length && s.databaseRequests.forEach(r => r["count"] = actionMap[r['idRequest']]))
-      this.setRequestProperties(this.TreeObj, res.smtp, (s, actionMap) => s.mailRequests?.length && s.mailRequests.forEach(r => r["count"] = actionMap[r['idRequest']]))
+      this.setRequestProperties(this.TreeObj, res.jdbc, (s, actionMap) => s.databaseRequests?.length && s.databaseRequests.forEach(r => r.count = actionMap[r.id]))
+      this.setRequestProperties(this.TreeObj, res.smtp, (s, actionMap) => s.mailRequests?.length && s.mailRequests.forEach(r => r.count = actionMap[r.id]))
     }))
   }
 
   viewStatusException() {
     let reqOb: any = {};
     if (!this.LabelIsLoaded['STATUS_EXCEPTION']) {
-      let jdbcParam = this.getRequestsIds(this.TreeObj, (s) => s.databaseRequests?.filter(o => !o.status).map(o => o.idRequest));
+      let jdbcParam = this.getRequestsIds(this.TreeObj, (s) => s.databaseRequests?.filter(o => o.failed).map(o => o.id));
       //let restParam = this.getRequestsIds(this.TreeObj, (s)=> s.restRequests?.filter(o=> o.status >=400).map(o=> o.idRequest));
-      let ftpParam = this.getRequestsIds(this.TreeObj, (s) => s.ftpRequests?.filter(o => !o.status).map(o => o.idRequest));
-      let smtpParam = this.getRequestsIds(this.TreeObj, (s) => s.mailRequests?.filter(o => !o.status).map(o => o.idRequest));
-      let ldapParam = this.getRequestsIds(this.TreeObj, (s) => s.ldapRequests?.filter(o => !o.status).map(o => o.idRequest));
+      let ftpParam = this.getRequestsIds(this.TreeObj, (s) => s.ftpRequests?.filter(o => o.failed).map(o => o.id));
+      let smtpParam = this.getRequestsIds(this.TreeObj, (s) => s.mailRequests?.filter(o => o.failed).map(o => o.id));
+      let ldapParam = this.getRequestsIds(this.TreeObj, (s) => s.ldapRequests?.filter(o => o.failed).map(o => o.id));
       jdbcParam.ids?.length && (reqOb.jdbc = this._treeService.getJdbcExceptions(jdbcParam));
       ftpParam.ids?.length && (reqOb.ftp = this._treeService.getFtpExceptions(ftpParam));
       smtpParam.ids?.length && (reqOb.smtp = this._treeService.getSmtpExceptions(smtpParam));
@@ -375,30 +364,30 @@ export class TreeView implements OnDestroy {
       this.tree.draw(() => this.dr(this.tree, this.TreeObj, this.serverLbl, this.linkLbl = Label.STATUS_EXCEPTION))
     })).subscribe((res: { jdbc: any, rest: any, ftp: any, smtp: any, ldap: any }) => {
 
-      this.setRequestProperties(this.TreeObj, res.jdbc, (s, actionMap) => s.databaseRequests?.length && s.databaseRequests.forEach(r => r["exception"] = actionMap[r['idRequest']]))
+      this.setRequestProperties(this.TreeObj, res.jdbc, (s, actionMap) => s.databaseRequests?.length && s.databaseRequests.forEach(r => r.exception = actionMap[r.id]))
       //this.setRequestProperties(this.TreeObj, res.rest, "restRequests", "exception", "idRequest" )
-      this.setRequestProperties(this.TreeObj, res.ftp, (s, actionMap) => s.ftpRequests?.length && s.ftpRequests.forEach(r => r["exception"] = actionMap[r['idRequest']]))
-      this.setRequestProperties(this.TreeObj, res.smtp, (s, actionMap) => s.mailRequests?.length && s.mailRequests.forEach(r => r["exception"] = actionMap[r['idRequest']]))
-      this.setRequestProperties(this.TreeObj, res.ldap, (s, actionMap) => s.ldapRequests?.length && s.ldapRequests.forEach(r => r["exception"] = actionMap[r['idRequest']]))
+      this.setRequestProperties(this.TreeObj, res.ftp, (s, actionMap) => s.ftpRequests?.length && s.ftpRequests.forEach(r => r.exception = actionMap[r.id]))
+      this.setRequestProperties(this.TreeObj, res.smtp, (s, actionMap) => s.mailRequests?.length && s.mailRequests.forEach(r => r.exception = actionMap[r.id]))
+      this.setRequestProperties(this.TreeObj, res.ldap, (s, actionMap) => s.ldapRequests?.length && s.ldapRequests.forEach(r => r.exception = actionMap[r.id]))
     }))
   }
 
-  getRequestsIds(treeObj: ServerRestSession | ServerMainSession, f?: (s: ServerRestSession | ServerMainSession) => string[]) {
+  getRequestsIds(treeObj: RestSessionTree | MainSessionTree, f?: (s: RestSessionTree | MainSessionTree) => string[]) {
     let arr: string[] = [];
-    this.deepApply(treeObj, (s: ServerRestSession | ServerMainSession) => {
+    this.deepApply(treeObj, (s: RestSessionTree | MainSessionTree) => {
       let res = f(s);
-      if (res) {
-        arr = arr.concat(res);
+      if (res && res.length) {
+        arr = arr.concat(`"${res}"`);
       }
     });
     return { ids: arr };
   }
 
-  setRequestProperties<T>(treeObj: ServerRestSession | ServerMainSession, actionMap: T, pre: (s: ServerRestSession | ServerMainSession, actionMap: T) => void) {
+  setRequestProperties<T>(treeObj: RestSessionTree | MainSessionTree, actionMap: T, pre: (s: RestSessionTree | MainSessionTree, actionMap: T) => void) {
     this.deepApply(treeObj, s => actionMap && pre(s, actionMap));
   }
 
-  deepApply(treeObj: ServerRestSession | ServerMainSession, fn: (s: ServerRestSession | ServerMainSession) => void) {
+  deepApply(treeObj: RestSessionTree | MainSessionTree, fn: (s: RestSessionTree | MainSessionTree) => void) {
     if (treeObj.restRequests) {
       treeObj.restRequests.forEach((e: any) => {
         if (e.remoteTrace) {
