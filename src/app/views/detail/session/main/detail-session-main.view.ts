@@ -1,13 +1,14 @@
 import {Component, inject, OnDestroy, OnInit} from "@angular/core";
-import {InstanceEnvironment, InstanceMainSession} from "../../../../model/trace.model";
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {EnvRouter} from "../../../../service/router.service";
 import {Location} from "@angular/common";
-import {combineLatest, defer, finalize, map, merge, of, Subject, Subscription, switchMap, takeUntil} from "rxjs";
+import {combineLatest, defer, finalize, map, merge, of, Subject, switchMap, takeUntil} from "rxjs";
 import {app} from "../../../../../environments/environment";
 import {Constants} from "../../../constants";
 import {AnalyticService} from "../../../../service/analytic.service";
+import {MainSessionView} from "../../../../model/new/request.model";
+import {InstanceEnvironment} from "../../../../model/new/trace.model";
 
 @Component({
     templateUrl: './detail-session-main.view.html',
@@ -21,9 +22,9 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
     private readonly $destroy = new Subject<void>();
     protected readonly _router = inject(EnvRouter);
     MAPPING_TYPE = Constants.MAPPING_TYPE;
-    session: InstanceMainSession;
+    session: MainSessionView;
+    completedSession: MainSessionView;
     instance: InstanceEnvironment;
-    completedSession: InstanceMainSession;
     isLoading: boolean = false;
     env: string;
     type: string;
@@ -52,20 +53,20 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
                 switchMap(s => {
                     return of(s).pipe(
                         map(s=>{
-                            this.session = s;
+                            this.session = { ...s };
                         }),
                         switchMap((v)=> {
                             return merge( 
-                                this._traceService.getInstance(this.session.instanceId).pipe(map(d=>(this.instance=d))),
+                                this._traceService.getInstance(this.session.instanceId).pipe(map(d=>(this.instance = d))),
                                 this.session.type === 'VIEW' ? defer(() => {this.session.userActions = []; return this._analyticService.getUserActionsBySession(this.session.id).pipe(map(d=>(this.session.userActions = d)))}) : of(),
-                                (this.session.mask & 4) > 0 ? defer(()=> {this.session.restRequests = []; return this._traceService.getRestRequests(this.session.id).pipe(map(d=>(this.session.restRequests = d)))}) : of(),
-                                (this.session.mask & 2) > 0 ? defer(()=> {this.session.databaseRequests = []; return this._traceService.getDatabaseRequests(this.session.id).pipe(map(d=>{this.session.databaseRequests = d;}))}) : of(),
-                                (this.session.mask & 1) > 0 ? defer(()=> {this.session.stages = []; return this._traceService.getLocalRequests(this.session.id).pipe(map(d=>(this.session.stages = d)))}) : of(),
-                                (this.session.mask & 8) > 0 ? defer(()=> {this.session.ftpRequests = []; return this._traceService.getFtpRequests(this.session.id).pipe(map(d=>(this.session.ftpRequests = d)))}) : of(),
-                                (this.session.mask & 16) > 0 ? defer(()=> {this.session.mailRequests = []; return this._traceService.getSmtpRequests(this.session.id).pipe(map(d=>(this.session.mailRequests = d)))}) : of(),
-                                (this.session.mask & 32) > 0 ? defer(()=> {this.session.ldapRequests = []; return this._traceService.getLdapRequests(this.session.id).pipe(map(d=>(this.session.ldapRequests = d)))}) : of()
+                                (this.session.requestsMask & 4) > 0 ? defer(()=> {this.session.restRequests = []; return this._traceService.getRestRequests(this.session.id).pipe(map(d=>(this.session.restRequests = d)))}) : of(),
+                                (this.session.requestsMask & 2) > 0 ? defer(()=> {this.session.databaseRequests = []; return this._traceService.getDatabaseRequests(this.session.id).pipe(map(d=>{this.session.databaseRequests = d;}))}) : of(),
+                                (this.session.requestsMask & 1) > 0 ? defer(()=> {this.session.localRequests = []; return this._traceService.getLocalRequests(this.session.id).pipe(map(d=>(this.session.localRequests = d)))}) : of(),
+                                (this.session.requestsMask & 8) > 0 ? defer(()=> {this.session.ftpRequests = []; return this._traceService.getFtpRequests(this.session.id).pipe(map(d=>(this.session.ftpRequests = d)))}) : of(),
+                                (this.session.requestsMask & 16) > 0 ? defer(()=> {this.session.mailRequests = []; return this._traceService.getSmtpRequests(this.session.id).pipe(map(d=>(this.session.mailRequests = d)))}) : of(),
+                                (this.session.requestsMask & 32) > 0 ? defer(()=> {this.session.ldapRequests = []; return this._traceService.getLdapRequests(this.session.id).pipe(map(d=>(this.session.ldapRequests = d)))}) : of()
                             )
-                        }))
+                        }));
                 }),
                 finalize(() => {this.completedSession = this.session; this.isLoading = false;})
             )

@@ -1,8 +1,12 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {forkJoin, map, Observable} from "rxjs";
-import {JdbcMainExceptionsByPeriodAndappname, JdbcSessionExceptionsByPeriodAndappname, RepartitionRequestByPeriod} from "../../model/jquery.model";
-import {DatabaseRequest} from "../../model/trace.model";
+import {Observable} from "rxjs";
+import {
+    JdbcMainExceptionsByPeriodAndappname,
+    JdbcSessionExceptionsByPeriodAndappname,
+    RepartitionRequestByPeriod
+} from "../../model/jquery.model";
+import {DatabaseRequestDto} from "../../model/new/request.model";
 
 @Injectable({ providedIn: 'root' })
 export class DatabaseRequestService {
@@ -17,12 +21,8 @@ export class DatabaseRequestService {
         return this.http.get<T>(url, { params: params });
     }
 
-    getRequests(params: any): Observable<Array<DatabaseRequest>> {
-        return this.http.get<Array<DatabaseRequest>>(`${this.server}/request/database`, { params: params });
-    }
-
-    getRequestsById(id: string): Observable<DatabaseRequest> {
-        return this.http.get<DatabaseRequest>(`${this.server}/request/database/${id}`);
+    getRequests(params: any): Observable<Array<DatabaseRequestDto>> {
+        return this.http.get<Array<DatabaseRequestDto>>(`${this.server}/request/database`, { params: params });
     }
 
     getHost(type: string, filters: any): Observable<{ host: string }[]> {

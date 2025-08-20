@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {InstanceRestSession, MainSession, UserAction} from "../model/trace.model";
+import {MainSession, UserAction} from "../model/trace.model";
 
 @Injectable({ providedIn: 'root' })
 export class AnalyticService {

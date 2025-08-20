@@ -11,10 +11,10 @@ import {SearchMainView} from "./search/main/search-main.view";
 import {StatisticDatabaseView} from "./statistic/database/statistic-database.view";
 import {DetailSessionRestView} from "./detail/session/rest/detail-session-rest.view";
 import {DetailSessionMainView} from "./detail/session/main/detail-session-main.view";
-import {DetailDatabaseView} from "./detail/database/detail-database.view";
-import {DetailFtpView} from "./detail/ftp/detail-ftp.view";
-import {DetailLdapView} from "./detail/ldap/detail-ldap.view";
-import {DetailSmtpView} from "./detail/smtp/detail-smtp.view";
+import {DetailDatabaseView} from "./detail/request/database/detail-database.view";
+import {DetailFtpView} from "./detail/request/ftp/detail-ftp.view";
+import {DetailLdapView} from "./detail/request/ldap/detail-ldap.view";
+import {DetailSmtpView} from "./detail/request/smtp/detail-smtp.view";
 import {DetailRestTableComponent} from "./detail/session/_component/rest-table/detail-rest-table.component";
 import {DetailDatabaseTableComponent} from "./detail/session/_component/database-table/detail-database-table.component";
 import {DetailFtpTableComponent} from "./detail/session/_component/ftp-table/detail-ftp-table.component";
@@ -61,6 +61,8 @@ import {SearchRequestView} from "./search/request/search-request.view";
 import {AnalyticView} from "./analytic/analytic.view";
 import {DetailTimelineComponent} from "./detail/session/_component/timeline/detail-timeline.component";
 import {ActionTableComponent} from "./detail/session/_component/action-table/action-table.component";
+import {DetailRequestView} from "./detail/request/detail-request.view";
+import {DetailRestView} from "./detail/request/rest/detail-rest.view";
 
 
 
@@ -79,8 +81,10 @@ import {ActionTableComponent} from "./detail/session/_component/action-table/act
     SearchRestView,
     SearchMainView,
     StatisticDatabaseView,
+    DetailRequestView,
     DetailSessionRestView,
     DetailSessionMainView,
+    DetailRestView,
     DetailDatabaseView,
     DetailFtpView,
     DetailLdapView,

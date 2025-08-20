@@ -6,6 +6,7 @@ import {
     RestSessionExceptionsByPeriodAndappname
 } from "src/app/model/jquery.model";
 import {RestRequest} from "../../model/trace.model";
+import {RestRequestDto} from "../../model/new/request.model";
 
 
 @Injectable({ providedIn: 'root' })
@@ -21,12 +22,12 @@ export class RestRequestService {
         return this.http.get<T>(url, { params: params });
     }
 
-    getRequests(params: any): Observable<Array<RestRequest>> {
-        return this.http.get<Array<RestRequest>>(`${this.server}/request/rest`, { params: params });
+    getRequests(params: any): Observable<Array<RestRequestDto>> {
+        return this.http.get<Array<RestRequestDto>>(`${this.server}/request/rest`, { params: params });
     }
 
-    getRequestById(id: string): Observable<RestRequest> {
-        return this.http.get<RestRequest>(`${this.server}/request/rest/${id}`);
+    getRequestById(id: string): Observable<RestRequestDto> {
+        return this.http.get<RestRequestDto>(`${this.server}/request/rest/${id}`);
     }
 
     getHost(type: string, filters: any): Observable<{ host: string }[]> {

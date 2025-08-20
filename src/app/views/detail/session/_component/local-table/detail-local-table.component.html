@@ -6,7 +6,7 @@
         <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef style="width:1%">
             </th>
-            <td [ngStyle]="{'border-left': element.status ? '4px solid green' :
+            <td [ngStyle]="{'border-left': !element.exception ? '4px solid green' :
                             '4px solid red'}" mat-cell *matCellDef="let element"
                 [matTooltip]="(element.exception?.type | exceptionType) + ' ' + (element.exception?.message | truncString: 100)" matTooltipPosition="after">
             </td>

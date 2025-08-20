@@ -1,9 +1,10 @@
 import {DatePipe} from "@angular/common";
 import {Component, ElementRef, Input, OnChanges, SimpleChanges, ViewChild} from "@angular/core";
 import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
-import {InstanceEnvironment, InstanceMainSession, InstanceRestSession} from "src/app/model/trace.model";
+import {InstanceEnvironment} from "src/app/model/trace.model";
 import {DurationPipe} from "../../../../../shared/pipe/duration.pipe";
 import {ANALYTIC_MAPPING, INFINITY} from "../../../../constants";
+import {MainSessionView, RestSessionView} from "../../../../../model/new/request.model";
 
 let options: any = {
     clickToUse: true,
@@ -44,7 +45,7 @@ export class DetailTimelineComponent implements OnChanges {
     @ViewChild('timeline', {static: true}) timelineElement: ElementRef;
 
     @Input() instance: InstanceEnvironment;
-    @Input() request: InstanceMainSession | InstanceRestSession;
+    @Input() request: MainSessionView | RestSessionView;
 
     ngOnChanges(changes: SimpleChanges): void {
         if(changes.instance || changes.request){
@@ -53,16 +54,16 @@ export class DetailTimelineComponent implements OnChanges {
                 this.timelineEnd = this.request.end * 1000;
                 let padding = (Math.ceil((this.timelineEnd - this.timelineStart) * 0.01))
                 this.dataArray = [].concat(
-                    (this.request.hasOwnProperty('userActions') ? (<InstanceMainSession>this.request).userActions ?? [] : []).map(r => ({...r, typeTimeline: 'action'})),
+                    (this.request.hasOwnProperty('userActions') ? (<MainSessionView>this.request).userActions ?? [] : []).map(r => ({...r, typeTimeline: 'action'})),
                     (this.request.restRequests ?? []).map(r => ({...r, typeTimeline: 'rest'})),
                     (this.request.ftpRequests ?? []).map(r => ({...r, typeTimeline: 'ftp'})),
                     (this.request.mailRequests ?? []).map(r => ({...r, typeTimeline: 'smtp'})),
                     (this.request.ldapRequests ?? []).map(r => ({...r, typeTimeline: 'ldap'})),
                     (this.request.databaseRequests ?? []).map(r => ({...r, typeTimeline: 'database'})),
-                    (this.request.stages ?? []).map(r => ({...r, typeTimeline: 'local'})))
+                    (this.request.localRequests ?? []).map(r => ({...r, typeTimeline: 'local'})))
                 this.dataArray.splice(0, 0, { ...this.request, typeTimeline: 'stage' });
                 this.sortInnerArrayByDate(this.dataArray);
-                if (this.request.type != null && this.request.type === "VIEW") {
+                if (this.request['type'] != null && this.request['type'] === "VIEW") {
                     this.dataGroups = [{ id: 0, content: this.instance.re }];
                     this.isWebApp = true;
                 } else {
@@ -105,7 +106,7 @@ export class DetailTimelineComponent implements OnChanges {
             if(o.status >=500 || o.status ==0)
                 return "error"
         } else {
-            if(!o.status) {
+            if(o.exception) {
                 return "error";
             }
         }

@@ -2,9 +2,10 @@ import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
-import {DatabaseRequest} from "src/app/model/trace.model";
 import {DatePipe} from "@angular/common";
 import {INFINITY} from "../../../../constants";
+import {DatabaseRequestDto} from "../../../../../model/new/request.model";
+
 @Component({
     selector: 'database-table',
     templateUrl: './detail-database-table.component.html',
@@ -13,13 +14,13 @@ import {INFINITY} from "../../../../constants";
 export class DetailDatabaseTableComponent {
     private readonly pipe = new DatePipe('fr-FR');
     displayedColumns: string[] = ['status', 'host', 'schema', 'start', 'duree',];
-    dataSource: MatTableDataSource<DatabaseRequest> = new MatTableDataSource();
+    dataSource: MatTableDataSource<DatabaseRequestDto> = new MatTableDataSource();
     filterTable :string;
 
     @ViewChild('paginator', {static: true}) paginator: MatPaginator;
     @ViewChild('sort', {static: true}) sort: MatSort;
 
-    @Input() set requests(requests: DatabaseRequest[]) {
+    @Input() set requests(requests: DatabaseRequestDto[]) {
         if(requests) {
             this.dataSource = new MatTableDataSource(requests);
             this.dataSource.paginator = this.paginator;
@@ -48,7 +49,7 @@ export class DetailDatabaseTableComponent {
         }
     }
 
-    filterPredicate = (data: DatabaseRequest, filter: string) => {
+    filterPredicate = (data: DatabaseRequestDto, filter: string) => {
         let date = new Date(data.start*1000)
         filter = JSON.parse(filter)
         let isMatch = true;
@@ -57,7 +58,6 @@ export class DetailDatabaseTableComponent {
                 data.name?.toLowerCase().includes(filter) ||
                 data.schema?.toLowerCase().includes(filter) ||
                 data.command?.toLowerCase().includes(filter) ||
-                data.status?.toString().toLowerCase().includes(filter) ||
                 this.pipe.transform(date,"dd/MM/yyyy").toLowerCase().includes(filter) ||
                 this.pipe.transform(date,"HH:mm:ss.SSS").toLowerCase().includes(filter) ||
                 data.exception?.message?.toString().toLowerCase().includes(filter) ||

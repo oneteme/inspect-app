@@ -7,7 +7,7 @@
             </div>
 
             <div class="right">
-                <button mat-icon-button (click)="navigate($event,'parent')" matTooltip="Détail de l'appel parent">
+                <button mat-icon-button [disabled]="sessionParent == null" [ngStyle]="sessionParent == null ? {'pointer-events': 'none'}: ''" (click)="navigate($event,'parent')" matTooltip="Détail de l'appel parent">
                     <mat-icon>move_up</mat-icon>
                 </button>
             </div>
@@ -32,9 +32,10 @@
 </div>
 
 
-<app-timeline [options]="options"
-                 [groups]="dataGroups"
-                 [items]="dataItems" [displayHeader]="false">
+<app-timeline
+        [options]="options"
+        [groups]="dataGroups"
+        [items]="dataItems" [displayHeader]="false">
 </app-timeline>
 
 <div *ngIf="!isLoading && request && request.mails?.length" style="margin-bottom: 2em; margin-top: 1em">

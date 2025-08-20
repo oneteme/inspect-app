@@ -14,15 +14,15 @@
                 <mat-icon>{{ MAPPING_TYPE['request'].icon }}</mat-icon>
                 <span>{{ MAPPING_TYPE['request'].title }}</span>
             </a>
-            <a mat-menu-item [routerLink]="['session/main/batch']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
+            <a mat-menu-item [routerLink]="['session/batch']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
                 <mat-icon class="material-symbols-outlined">{{ MAPPING_TYPE['batch'].icon }}</mat-icon>
                 <span>{{ MAPPING_TYPE['batch'].title }}</span>
             </a>
-            <a mat-menu-item [routerLink]="['session/main/startup']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
+            <a mat-menu-item [routerLink]="['session/startup']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
                 <mat-icon class="material-symbols-outlined">{{ MAPPING_TYPE['startup'].icon }}</mat-icon>
                 <span>{{ MAPPING_TYPE['startup'].title }}</span>
             </a>
-            <a mat-menu-item [routerLink]="['session/main/view']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
+            <a mat-menu-item [routerLink]="['session/view']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
                 <mat-icon>{{ MAPPING_TYPE['view'].icon }}</mat-icon>
                 <span>{{ MAPPING_TYPE['view'].title }}</span>
             </a>

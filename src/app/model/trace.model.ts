@@ -153,7 +153,7 @@ export interface SessionStage<T> {
     threadName: string;
     status: T
     exception?: ExceptionInfo;
-    idRequest?: number;
+    idRequest?: string;
 }
 
 export interface ExceptionInfo {

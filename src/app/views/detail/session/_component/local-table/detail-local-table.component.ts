@@ -1,8 +1,8 @@
 import {Component, Input, ViewChild} from "@angular/core";
 import {MatTableDataSource} from "@angular/material/table";
-import {LocalRequest,} from "../../../../../model/trace.model";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
+import {LocalRequest} from "../../../../../model/new/trace.model";
 
 @Component({
     selector: 'local-table',

@@ -5,13 +5,12 @@ import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import {DatePipe, Location} from '@angular/common';
 import {ActivatedRoute, Params} from '@angular/router';
-import {BehaviorSubject, finalize, Subject, Subscription, takeUntil} from 'rxjs';
+import {BehaviorSubject, finalize, Subject, takeUntil} from 'rxjs';
 import {extractPeriod, Utils} from 'src/app/shared/util';
 import {TraceService} from 'src/app/service/trace.service';
 import {app, makeDatePeriod,} from 'src/environments/environment';
 import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constants';
 import {FilterService} from 'src/app/service/filter.service';
-import {InstanceRestSession} from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
 import {DateAdapter, MAT_DATE_FORMATS,} from "@angular/material/core";
@@ -20,6 +19,7 @@ import {MY_DATE_FORMATS} from "../../../shared/shared.module";
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
 import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-date-range-selection-strategy";
 import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../model/conf.model";
+import {RestSessionDto} from "../../../model/new/request.model";
 
 
 @Component({
@@ -51,7 +51,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   filterConstants = FilterConstants;
   nameDataList: any[];
   displayedColumns: string[] = ['status', 'app_name', 'method/path', 'query', 'start', 'durée', 'user'];
-  dataSource: MatTableDataSource<InstanceRestSession> = new MatTableDataSource();
+  dataSource: MatTableDataSource<RestSessionDto> = new MatTableDataSource();
   isLoading = true;
   serverNameIsLoading = true;
   serverFilterForm = new FormGroup({
@@ -175,7 +175,7 @@ export class SearchRestView implements OnInit, OnDestroy {
     this._traceService.getRestSessions(params)
       .pipe(takeUntil(this.$destroy))
       .subscribe({
-        next: (d: InstanceRestSession[]) => {
+        next: d => {
           if (d) {
             this.dataSource = new MatTableDataSource(d);
             this.dataSource.paginator = this.paginator;
@@ -305,10 +305,10 @@ export class SearchRestView implements OnInit, OnDestroy {
     return row[columnName as keyof any] as string;
   };
 
-   filterPredicate = (data: InstanceRestSession, filter: string) => {
+   filterPredicate = (data: RestSessionDto, filter: string) => {
     var map: Map<string, any> = new Map(JSON.parse(filter));
     let isMatch = true;
-    let date = new Date(data.start*1000)
+    let date = new Date(data.start * 1000)
     for (let [key, value] of map.entries()) {
       if (key == 'filter') {
         isMatch = isMatch && (value == '' || (data.appName?.toLowerCase().includes(value) ||

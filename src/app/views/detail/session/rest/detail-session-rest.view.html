@@ -103,7 +103,7 @@
 </div>
 
 <mat-menu #menuEndPoint="matMenu" xPosition="after">
-  <a mat-menu-item [disabled]="sessionParent == null" [ngStyle]="sessionParent == null ? {'pointer-events': 'none'}: ''" [routerLink]="sessionParent?.type == 'rest' ? ['/session', 'rest', sessionParent?.id] : ['/session', 'main', sessionParent?.type.toLowerCase(), sessionParent?.id]" [queryParams]="{env: instance?.env}">
+  <a mat-menu-item [disabled]="sessionParent == null" [ngStyle]="sessionParent == null ? {'pointer-events': 'none'}: ''" [routerLink]="sessionParent?.type == 'rest' ? ['/session', 'rest', sessionParent?.id] : ['/session', sessionParent?.type.toLowerCase(), sessionParent?.id]" [queryParams]="{env: instance?.env}">
     <div style="display: flex;">
       <mat-progress-spinner *ngIf="parentLoading"  style="margin-right: 16px" diameter="24" mode="indeterminate"
                             matTooltip="Chargement de l'appel parent">

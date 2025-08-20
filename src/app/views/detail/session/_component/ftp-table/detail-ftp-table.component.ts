@@ -4,6 +4,7 @@ import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
 import {FtpRequest} from "src/app/model/trace.model";
 import {DatePipe} from "@angular/common";
+import {FtpRequestDto} from "../../../../../model/new/request.model";
 
 @Component({
     selector: 'ftp-table',
@@ -13,13 +14,13 @@ import {DatePipe} from "@angular/common";
 export class DetailFtpTableComponent {
     private readonly pipe = new DatePipe('fr-FR');
     displayedColumns: string[] = ['status', 'host', 'start', 'duree'];
-    dataSource: MatTableDataSource<FtpRequest> = new MatTableDataSource();
+    dataSource: MatTableDataSource<FtpRequestDto> = new MatTableDataSource();
     filterTable :string;
 
     @ViewChild('paginator', {static: true}) paginator: MatPaginator;
     @ViewChild('sort', {static: true}) sort: MatSort;
 
-    @Input() set requests(requests: FtpRequest[]) {
+    @Input() set requests(requests: FtpRequestDto[]) {
         if(requests) {
             this.dataSource = new MatTableDataSource(requests);
             this.dataSource.paginator = this.paginator;
@@ -48,7 +49,7 @@ export class DetailFtpTableComponent {
         }
     }
 
-    filterPredicate = (data: FtpRequest, filter: string) => {
+    filterPredicate = (data: FtpRequestDto, filter: string) => {
         let date = new Date(data.start*1000)
         filter = JSON.parse(filter)
         let isMatch = true;

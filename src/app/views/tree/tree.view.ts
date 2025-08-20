@@ -383,8 +383,8 @@ export class TreeView implements OnDestroy {
     }))
   }
 
-  getRequestsIds(treeObj: ServerRestSession | ServerMainSession, f?: (s: ServerRestSession | ServerMainSession) => number[]) {
-    let arr: number[] = [];
+  getRequestsIds(treeObj: ServerRestSession | ServerMainSession, f?: (s: ServerRestSession | ServerMainSession) => string[]) {
+    let arr: string[] = [];
     this.deepApply(treeObj, (s: ServerRestSession | ServerMainSession) => {
       let res = f(s);
       if (res) {

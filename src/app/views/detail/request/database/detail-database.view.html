@@ -11,7 +11,7 @@
             </a>
 
             <div class="right">
-                <button mat-icon-button (click)="navigate($event,'parent')" matTooltip="Détail de l'appel parent">
+                <button mat-icon-button [disabled]="sessionParent == null" [ngStyle]="sessionParent == null ? {'pointer-events': 'none'}: ''" (click)="navigate($event,'parent')" matTooltip="Détail de l'appel parent">
                     <mat-icon>move_up</mat-icon>
                 </button>
             </div>
