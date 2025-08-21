@@ -55,7 +55,7 @@ export class MainSessionService {
             'instance.environement': filters.env,
             'instance.type': 'CLIENT',
             'id': 'rest_request.parent',
-            'rest_request.remote': 'rest_session_join.id',
+            'rest_request.id': 'rest_session_join.id',
             'rest_session_join.instance_env': 'instance_join.id',
             'rest_session_join.start.ge': filters.start.toISOString(),
             'rest_session_join.start.lt': filters.end.toISOString(),
