@@ -5,7 +5,6 @@ import {MatTableDataSource} from "@angular/material/table";
 import {EnvRouter} from "../../../../../service/router.service";
 import {Subject} from "rxjs";
 import {DatePipe} from "@angular/common";
-import {Utils} from "../../../../../shared/util";
 import {RestRequestDto} from "../../../../../model/request.model";
 
 @Component({
@@ -20,8 +19,6 @@ export class DetailRestTableComponent implements OnDestroy {
 
     displayedColumns: string[] = ['status', 'host', 'path', 'start', 'duree','remote'];
     dataSource: MatTableDataSource<RestRequestDto> = new MatTableDataSource();
-    expandedElement: RestRequestDto | null;
-    requestDetail: RestRequestDto;
     filterTable :string;
 
     @ViewChild('paginator', {static: true}) paginator: MatPaginator;
@@ -87,10 +84,6 @@ export class DetailRestTableComponent implements OnDestroy {
         if (columnName == "start") return row['start'] as string;
         if (columnName == "duree") return (row["end"] - row["start"]);
         return row[columnName as keyof any] as string;
-    }
-
-    getSessionUrl() {
-        return Utils.getSessionUrl(this.requestDetail);
     }
 
     navigate(event: MouseEvent, element: any) {
