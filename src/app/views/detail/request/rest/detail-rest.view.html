@@ -20,10 +20,10 @@
         </a>
       </div>
       <div style="display: flex; align-items: center; gap: 0.5em; color: red; font-weight: 500; margin-top: 0.5em;"
-           *ngIf="request.exception?.type || request.exception?.message"
+           *ngIf="request.exception?.type || request.exception?.message || request.bodyContent"
            [matTooltip]="request.exception?.type">
         <mat-icon class="material-symbols-outlined" style="overflow: initial !important; width: 28px; height: 28px;">warning</mat-icon>
-        <div class="ellipsis" >{{ request.exception?.message || request.exception?.type }}</div>
+        <div class="ellipsis" >{{ request.exception?.message || request.exception?.type || request.bodyContent }}</div>
       </div>
     </mat-card-content>
     <mat-card-footer>
@@ -37,7 +37,7 @@
       </div>
       <span class="badge" [ngStyle]="{'background-color': request.status >= 200 && request.status < 300 ? 'green' :
                                                                   request.status >= 300 && request.status < 500 ? 'orange' : 'red'}">
-                                      {{request.status}}
+        {{request.status}}
       </span>
     </mat-card-footer>
   </mat-card>
