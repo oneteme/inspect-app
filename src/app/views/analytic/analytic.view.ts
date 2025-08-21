@@ -111,9 +111,9 @@ export class AnalyticView implements OnDestroy {
 
     onClickSession(event: MouseEvent, session: AnalyticDto) {
         if (event.ctrlKey) {
-            this._router.open(`#/session/main/view/` + session.id, '_blank')
+            this._router.open(`#/session/view/` + session.id, '_blank')
         } else {
-            this._router.navigate(['session', 'main', 'view', session.id]);
+            this._router.navigate(['session', 'view', session.id]);
         }
     }
 
