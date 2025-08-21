@@ -58,8 +58,6 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
                             this.session = {...s};
                         }),
                         switchMap((v)=> {
-                            console.log(this.session
-                            );
                             return merge(
                                 this._traceService.getInstance(this.session.instanceId).pipe(map(d=>(this.instance=d))),
                                 (this.session.requestsMask & 4) > 0 ? defer(()=> {this.session.restRequests = []; return this._traceService.getRestRequests(this.session.id).pipe(map(d=>(this.session.restRequests=d)))}) : of(),

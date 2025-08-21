@@ -53,7 +53,6 @@ const routes: Route[] = [
               path: ':id_request',
               component: DetailRequestView,
               title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-                console.log(route.paramMap.get('type'))
                 return 'Appel d\'API > Detail ' + Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title
               }
             }
