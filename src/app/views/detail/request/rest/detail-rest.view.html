@@ -20,10 +20,10 @@
         </a>
       </div>
       <div style="display: flex; align-items: center; gap: 0.5em; color: red; font-weight: 500; margin-top: 0.5em;"
-           *ngIf="request.exception?.type || request.exception?.message || request.bodyContent"
-           [matTooltip]="request.exception?.type">
+           *ngIf="exception?.type || exception?.message || request.bodyContent"
+           [matTooltip]="exception?.type">
         <mat-icon class="material-symbols-outlined" style="overflow: initial !important; width: 28px; height: 28px;">warning</mat-icon>
-        <div class="ellipsis" >{{ request.exception?.message || request.exception?.type || request.bodyContent }}</div>
+        <div class="ellipsis" >{{ exception?.message || exception?.type || request.bodyContent }}</div>
       </div>
     </mat-card-content>
     <mat-card-footer>
@@ -42,6 +42,12 @@
     </mat-card-footer>
   </mat-card>
 </div>
+
+<app-timeline [options]="options"
+              [groups]="dataGroups"
+              [items]="dataItems" [displayHeader]="false">
+</app-timeline>
+
 <div *ngIf="!isLoading && !request" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">
   <h2>
     Aucun détail disponible ..

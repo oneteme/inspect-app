@@ -6,7 +6,7 @@
             [routerLink]="'/dashboard/database/'+ request.name"
             [queryParams]="{'env': params.env}"
             matTooltip="Statistiques Base de donnée">
-                <mat-icon class="material-symbols-outlined">Database</mat-icon>
+                <mat-icon class="material-symbols-outlined">{{REQUEST_TYPE['jdbc'].icon}}</mat-icon>
                 {{ 'jdbc:' + (request.productName ? request.productName.toLowerCase() : 'N/A') + '://' + (request.host ? request.host : 'N/A') + (request.port == -1 ? '' : ':' + request.port) + '/' + (request.name ? request.name : 'N/A')}}
             </a>
 

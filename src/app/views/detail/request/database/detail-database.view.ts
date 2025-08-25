@@ -9,7 +9,7 @@ import {app} from '../../../../../environments/environment';
 import {EnvRouter} from "../../../../service/router.service";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {getErrorClassName} from '../../../../shared/util';
-import {INFINITY} from "../../../constants";
+import {Constants, INFINITY} from "../../../constants";
 import {DatabaseRequest, DatabaseRequestStage, ExceptionInfo} from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
 
@@ -24,6 +24,8 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     private readonly pipe = new DatePipe('fr-FR');
     private readonly durationPipe = new DurationPipe();
     private readonly $destroy = new Subject<void>();
+
+    REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
 
     params: Partial<{idJdbc: string, env: string}> = {};
 

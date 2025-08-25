@@ -15,11 +15,11 @@ import {
     DirectoryRequest,
     DirectoryRequestStage,
     FtpRequest,
-    FtpRequestStage,
+    FtpRequestStage, HttpRequestStage,
     InstanceEnvironment,
     LocalRequest, Mail,
     MailRequest, MailRequestStage,
-    MainSession,
+    MainSession, RestRequest,
     RestSession
 } from "../model/trace.model";
 
@@ -78,8 +78,12 @@ export class TraceService {
         return this.http.get<RestRequestDto[]>(`${this.server}/session/${idSession}/request/rest`);
     }
 
-    getRestRequest(idRest: string): Observable<RestRequestDto> {
-        return this.http.get<RestRequestDto>(`${this.server}/request/rest/${idRest}`);
+    getRestRequest(idRest: string): Observable<RestRequest> {
+        return this.http.get<RestRequest>(`${this.server}/request/rest/${idRest}`);
+    }
+
+    getRestRequestStages(idRest: string): Observable<HttpRequestStage[]> {
+        return this.http.get<HttpRequestStage[]>(`${this.server}/request/rest/${idRest}/stage`);
     }
 
     getDatabaseRequests(idSession: string): Observable<DatabaseRequestDto[]> {
