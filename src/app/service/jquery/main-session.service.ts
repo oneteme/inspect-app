@@ -55,7 +55,7 @@ export class MainSessionService {
             'instance.environement': filters.env,
             'instance.type': 'CLIENT',
             'id': 'rest_request.parent',
-            'rest_request.remote': 'rest_session_join.id',
+            'rest_request.id': 'rest_session_join.id',
             'rest_session_join.instance_env': 'instance_join.id',
             'rest_session_join.start.ge': filters.start.toISOString(),
             'rest_session_join.start.lt': filters.end.toISOString(),
@@ -191,7 +191,7 @@ export class MainSessionService {
         let args: any = {
             'column': `rest_session_join.count:count,rest_session_join.count_succes:countSucces,rest_session_join.count_error_client:countErrClient,rest_session_join.count_error_server:countErrServer,instance_join.app_name`,
             'id': 'rest_request.parent',
-            'rest_request.remote': 'rest_session_join.id',
+            'rest_request.id': 'rest_session_join.id',
             'rest_request.start.ge': filters.start.toISOString(),
             'rest_request.start.lt': filters.end.toISOString(),
             'rest_session_join.instance_env': 'instance_join.id',

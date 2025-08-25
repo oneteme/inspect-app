@@ -2,31 +2,8 @@
     flex-grow: 1;
 }
 
-tr:has(.description) {
-    /* Vos styles ici */
-    background-color: rgb(206, 206, 206);
-}
-.description{
-    overflow: hidden;
-}
-
 .mat-mdc-row .mat-mdc-cell {
     cursor: pointer;
-}
-
-tr.description-row {
-    height: 0;
-}
-
-.description-row td {
-    border-bottom-width: 0;
-}
-
-
-.request-card {
-    margin: 1em 0;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
 }
 
 .session-info {
@@ -52,52 +29,10 @@ tr.description-row {
     color: #757575;
 }
 
-div.label-chip {
-    display:inline-block;
-    padding:.2em .7em;
-    font-size: 12px;
-    background-color:#696969;
-    color:#fff;
-    border-radius:6px;
-    position:relative
-}
-
-
-mat-card-footer {
-    padding: 0 16px;
-    border: 1px solid rgba(0,0,0,.05);
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-    font-style: italic;
-    font-size: 14px;
-    .right {
-        margin-left: auto;
-        display: flex;
-        align-items: center;
-        gap: 0.5em;
-    }
-}
-
-mat-card-title {
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    height: 48px;
-    .right {
-        margin-left: auto;
-    }
-}
-
 .table-container {
     max-height: calc(100vh - 96px - 56px - 48px - 28px);
     overflow: auto;
 }
-
-mat-card-content {
-    padding: 0 16px 16px;
-}
-
 
 .mat-mdc-row .mat-mdc-cell {
     cursor: pointer;

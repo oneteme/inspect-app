@@ -4,20 +4,13 @@ import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort';
 import {MatTableDataSource} from '@angular/material/table';
 import {ActivatedRoute} from '@angular/router';
-import {
-    BehaviorSubject,
-    combineLatest,
-    finalize,
-    Subject,
-    takeUntil
-} from 'rxjs';
+import {BehaviorSubject, combineLatest, finalize, Subject, takeUntil} from 'rxjs';
 import {DatePipe, Location} from '@angular/common';
-import {extractPeriod, } from 'src/app/shared/util';
+import {extractPeriod,} from 'src/app/shared/util';
 import {TraceService} from 'src/app/service/trace.service';
-import {app, makeDatePeriod } from 'src/environments/environment';
+import {app, makeDatePeriod} from 'src/environments/environment';
 import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constants';
 import {FilterService} from 'src/app/service/filter.service';
-import {InstanceMainSession, } from 'src/app/model/trace.model';
 import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
 import {DateAdapter, MAT_DATE_FORMATS} from "@angular/material/core";
@@ -27,6 +20,7 @@ import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
 import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-date-range-selection-strategy";
 import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../model/conf.model";
 import {shallowEqual} from "../rest/search-rest.view";
+import {MainSessionDto} from "../../../model/request.model";
 
 @Component({
     templateUrl: './search-main.view.html',
@@ -56,7 +50,7 @@ export class SearchMainView implements OnInit, OnDestroy {
     MAPPING_TYPE = Constants.MAPPING_TYPE;
     filterConstants = FilterConstants;
     displayedColumns: string[] = ['status', 'app_name', 'name', 'location', 'start', 'durée', 'user'];
-    dataSource: MatTableDataSource<InstanceMainSession> = new MatTableDataSource();
+    dataSource: MatTableDataSource<MainSessionDto> = new MatTableDataSource();
     serverNameIsLoading = true;
     serverFilterForm = new FormGroup({
         appname: new FormControl([""]),
@@ -171,20 +165,25 @@ export class SearchMainView implements OnInit, OnDestroy {
         this.dataSource.data = [];
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort
-        this._traceService.getMainSessions(params).pipe(takeUntil(this.$destroy)).subscribe((d: InstanceMainSession[]) => {
-            if (d) {
-                this.dataSource = new MatTableDataSource(d);
-                this.dataSource.paginator = this.paginator;
-                this.dataSource.sort = this.sort
-                this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
-                this.dataSource.filterPredicate = this.filterPredicate;
-                this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
-                this.dataSource.paginator.pageIndex = 0;
+        this._traceService.getMainSessions(params)
+          .pipe(takeUntil(this.$destroy))
+          .subscribe({
+            next: d => {
+                if (d) {
+                    this.dataSource = new MatTableDataSource(d);
+                    this.dataSource.paginator = this.paginator;
+                    this.dataSource.sort = this.sort
+                    this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
+                    this.dataSource.filterPredicate = this.filterPredicate;
+                    this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
+                    this.dataSource.paginator.pageIndex = 0;
+                    this.isLoading = false;
+                }
+            },
+            error: err => {
                 this.isLoading = false;
             }
-        }, error => {
-            this.isLoading = false;
-        });
+          });
     }
 
 
@@ -230,9 +229,9 @@ export class SearchMainView implements OnInit, OnDestroy {
 
     selectedRequest(event: MouseEvent, row: any) {
         if (event.ctrlKey) {
-            this._router.open(`#/session/main/${row.type.toLowerCase()}/${row.id}`, '_blank')
+            this._router.open(`#/session/${row.type.toLowerCase()}/${row.id}`, '_blank')
         } else {
-            this._router.navigate(['/session/main', row.type.toLowerCase(), row.id], {
+            this._router.navigate(['/session', row.type.toLowerCase(), row.id], {
                 queryParams: {'env': this.queryParams.env}
             });
         }
@@ -310,10 +309,10 @@ export class SearchMainView implements OnInit, OnDestroy {
         return columnValue;
     };
 
-    filterPredicate = (data: InstanceMainSession, filter: string) => {
+    filterPredicate = (data: MainSessionDto, filter: string) => {
         var map: Map<string, any> = new Map(JSON.parse(filter));
         let isMatch = true;
-        let date = new Date(data.start*1000)
+        let date = new Date(data.start * 1000);
         for (let [key, value] of map.entries()) {
             if (key == 'filter') {
                 isMatch = isMatch && (value == '' || (data.appName?.toLowerCase().includes(value) ||

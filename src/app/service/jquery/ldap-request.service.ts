@@ -1,8 +1,8 @@
-import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
-import {forkJoin, map, Observable} from "rxjs";
-import { LdapMainExceptionsByPeriodAndappname, LdapSessionExceptionsByPeriodAndappname } from "src/app/model/jquery.model";
-import { NamingRequest} from "../../model/trace.model";
+import {Injectable} from "@angular/core";
+import {HttpClient} from "@angular/common/http";
+import {Observable} from "rxjs";
+import {LdapSessionExceptionsByPeriodAndappname} from "src/app/model/jquery.model";
+import {DirectoryRequestDto} from "../../model/request.model";
 
 
 @Injectable({ providedIn: 'root' })
@@ -18,8 +18,8 @@ export class LdapRequestService {
         return this.http.get<T>(url, { params: params });
     }
 
-    getRequests(params: any): Observable<Array<NamingRequest>> {
-        return this.http.get<Array<NamingRequest>>(`${this.server}/request/ldap`, { params: params });
+    getRequests(params: any): Observable<Array<DirectoryRequestDto>> {
+        return this.http.get<Array<DirectoryRequestDto>>(`${this.server}/request/ldap`, { params: params });
     }
 
     getHost(type: string, filters: any): Observable<{ host: string }[]> {

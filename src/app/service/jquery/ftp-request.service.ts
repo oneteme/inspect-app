@@ -2,7 +2,7 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {FtpSessionExceptionsByPeriodAndappname} from "src/app/model/jquery.model";
-import {FtpRequest} from "../../model/trace.model";
+import {FtpRequestDto} from "../../model/request.model";
 
 
 @Injectable({ providedIn: 'root' })
@@ -18,12 +18,8 @@ export class FtpRequestService {
         return this.http.get<T>(url, { params: params });
     }
 
-    getRequests(params: any): Observable<Array<FtpRequest>> {
-        return this.http.get<Array<FtpRequest>>(`${this.server}/request/ftp`, { params: params });
-    }
-
-    getRequestsById(id: string): Observable<FtpRequest> {
-        return this.http.get<FtpRequest>(`${this.server}/request/ftp/${id}`);
+    getRequests(params: any): Observable<Array<FtpRequestDto>> {
+        return this.http.get<Array<FtpRequestDto>>(`${this.server}/request/ftp`, { params: params });
     }
 
     getHost(type: string, filters: any): Observable<{ host: string }[]> {

@@ -1,7 +1,7 @@
 import {Application, IStep, IStepFrom, Period} from "src/app/model/conf.model";
 
 export const app: Application = {
-  host : "http://localhost:9000",
+  host : "http://localhost:9001",
   defaultEnv : "prd",
   gridViewPeriod:  "LAST_60",
   kpiViewPeriod: "LAST_60"

@@ -1,13 +1,12 @@
-import {Component, ElementRef, inject, OnDestroy, OnInit, Signal, signal, ViewChild} from "@angular/core";
-import {combineLatest, finalize, forkJoin, Subject, Subscription, takeUntil} from "rxjs";
+import {Component, inject, OnDestroy, OnInit, signal} from "@angular/core";
+import {combineLatest, finalize, forkJoin, Subject, takeUntil} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {DatePipe, Location} from "@angular/common";
 import {EnvRouter} from "../../service/router.service";
 import {TraceService} from "../../service/trace.service";
-import {InstanceMainSession, InstanceRestSession} from "../../model/trace.model";
 import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
 import {DurationPipe} from "../../shared/pipe/duration.pipe";
-import {sign} from "node:crypto";
+import {MainSession, RestSession} from "../../model/trace.model";
 
 @Component({
     templateUrl: './dump.view.html',
@@ -23,8 +22,8 @@ export class DumpView implements OnInit, OnDestroy {
     private readonly durationPipe = new DurationPipe();
     private readonly $destroy = new Subject<void>();
 
-    restSessions: Array<InstanceRestSession> = [];
-    mainSessions: Array<InstanceMainSession> = [];
+    restSessions: Array<RestSession> = [];
+    mainSessions: Array<MainSession> = [];
     loading = signal(true);
 
     options: TimelineOptions = {

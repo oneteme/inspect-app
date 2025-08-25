@@ -1,37 +1,24 @@
-import {Component, EventEmitter, inject, Input, Output, ViewChild} from "@angular/core";
+import {Component, EventEmitter, inject, Input, OnDestroy, Output, ViewChild} from "@angular/core";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
-import {RestRequest} from "src/app/model/trace.model";
-import {animate, state, style, transition, trigger} from "@angular/animations";
 import {EnvRouter} from "../../../../../service/router.service";
-import {RestRequestService} from "../../../../../service/jquery/rest-request.service";
-import {finalize, Subscription} from "rxjs";
+import {Subject} from "rxjs";
 import {DatePipe} from "@angular/common";
-import {Utils} from "../../../../../shared/util";
+import {RestRequestDto} from "../../../../../model/request.model";
 
 @Component({
     selector: 'rest-table',
     templateUrl: './detail-rest-table.component.html',
-    styleUrls: ['./detail-rest-table.component.scss'],
-    animations: [
-        trigger('detailExpand', [
-            state('collapsed', style({height: '0px', minHeight: '0'})),
-            state('expanded', style({height: '*'})),
-            transition('expanded <=> collapsed', animate('225ms cubic-bezier(0.4, 0.0, 0.2, 1)')),
-        ]),
-    ],
+    styleUrls: ['./detail-rest-table.component.scss']
 })
-export class DetailRestTableComponent {
+export class DetailRestTableComponent implements OnDestroy {
     private readonly _router = inject(EnvRouter);
     private readonly pipe = new DatePipe('fr-FR');
-    private readonly _restRequestService = inject(RestRequestService);
+    private readonly $destroy = new Subject<void>();
+
     displayedColumns: string[] = ['status', 'host', 'path', 'start', 'duree','remote'];
-    dataSource: MatTableDataSource<RestRequest> = new MatTableDataSource();
-    expandedElement: RestRequest | null;
-    requestDetail: RestRequest;
-    isRequestDetailLoading: boolean = false;
-    restRequestDetailSubscription: Subscription;
+    dataSource: MatTableDataSource<RestRequestDto> = new MatTableDataSource();
     filterTable :string;
 
     @ViewChild('paginator', {static: true}) paginator: MatPaginator;
@@ -40,7 +27,7 @@ export class DetailRestTableComponent {
     @Input() useFilter: boolean;
     @Input() isLoading: boolean;
     @Input() pageSize: number;
-    @Input() set requests(requests: RestRequest[]) {
+    @Input() set requests(requests: RestRequestDto[]) {
         if(requests) {
             this.dataSource = new MatTableDataSource(requests);
             this.dataSource.paginator = this.paginator;
@@ -54,28 +41,19 @@ export class DetailRestTableComponent {
         }
     }
     @Output() onClickRow: EventEmitter<{event: MouseEvent, row: any}> = new EventEmitter();
+    @Output() onClickRemote: EventEmitter<{event: MouseEvent, row: any}> = new EventEmitter();
 
-    
+    ngOnDestroy() {
+        this.$destroy.next();
+        this.$destroy.complete();
+    }
+
+    selectedRemote(event: MouseEvent, row: any) {
+        this.onClickRemote.emit({event: event, row: row});
+    }
 
     selectedRequest(event: MouseEvent, row: any) {
         this.onClickRow.emit({event: event, row: row});
-    }
-
-    getRequestDetail(row:any){
-        if(this.restRequestDetailSubscription){
-            this.restRequestDetailSubscription.unsubscribe();
-        }
-        this.expandedElement = this.expandedElement  === row ? null : row
-        if(this.expandedElement){
-            this.requestDetail= null;
-            this.isRequestDetailLoading= true;
-            this.restRequestDetailSubscription = this._restRequestService.getRequestById(row.idRequest)
-                .pipe(finalize(() => this.isRequestDetailLoading = false))
-                .subscribe(data => {
-                    this.requestDetail = data;
-
-                })
-        }
     }
 
     applyFilter(event: Event) {
@@ -86,7 +64,7 @@ export class DetailRestTableComponent {
         }
     }
 
-    filterPredicate = (data: RestRequest, filter: string) => {
+    filterPredicate = (data: RestRequestDto, filter: string) => {
         let date = new Date(data.start*1000)
         filter = JSON.parse(filter)
         let isMatch = true;
@@ -107,11 +85,6 @@ export class DetailRestTableComponent {
         if (columnName == "duree") return (row["end"] - row["start"]);
         return row[columnName as keyof any] as string;
     }
-
-    getSessionUrl() {
-        return Utils.getSessionUrl(this.requestDetail);
-    }
-
 
     navigate(event: MouseEvent, element: any) {
 

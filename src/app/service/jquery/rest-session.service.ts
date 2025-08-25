@@ -210,7 +210,7 @@ export class RestSessionService {
             'column': `count:count,count_succes:countSucces,count_error_client:countErrClient,count_error_server:countErrServer,instance.app_name,instance.type`,
             'instance.id': 'instance_env',
             'id': 'rest_request.parent',
-            'rest_request.remote': 'rest_session_join.id',
+            'rest_request.id': 'rest_session_join.id',
             'rest_request.start.ge': filters.start.toISOString(),
             'rest_request.start.lt': filters.end.toISOString(),
             'rest_session_join.start.ge': filters.start.toISOString(),
@@ -263,7 +263,7 @@ export class RestSessionService {
         let args: any = {
             'column': `rest_session_join.count:count,rest_session_join.count_succes:countSucces,rest_session_join.count_error_client:countErrClient,rest_session_join.count_error_server:countErrServer,instance_join.app_name`,
             'id': 'rest_request.parent',
-            'rest_request.remote': 'rest_session_join.id',
+            'rest_request.id': 'rest_session_join.id',
             'rest_request.start.ge': filters.start.toISOString(),
             'rest_request.start.lt': filters.end.toISOString(),
             'rest_session_join.instance_env': 'instance_join.id',

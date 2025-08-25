@@ -2,21 +2,25 @@ import {HttpClient} from "@angular/common/http";
 import {Injectable} from "@angular/core";
 import {Observable} from "rxjs";
 import {
-    DatabaseRequest,
-    DatabaseRequestStage,
-    ExceptionInfo,
+    DatabaseRequestDto,
+    DirectoryRequestDto,
+    FtpRequestDto,
+    MailRequestDto,
+    MainSessionDto,
+    RestRequestDto,
+    RestSessionDto
+} from "../model/request.model";
+import {
+    DatabaseRequest, DatabaseRequestStage,
+    DirectoryRequest,
+    DirectoryRequestStage,
     FtpRequest,
-    FtpRequestStage,
+    FtpRequestStage, HttpRequestStage,
     InstanceEnvironment,
-    InstanceMainSession,
-    InstanceRestSession,
-    LocalRequest,
-    Mail,
-    MailRequest,
-    MailRequestStage,
-    NamingRequest,
-    NamingRequestStage,
-    RestRequest
+    LocalRequest, Mail,
+    MailRequest, MailRequestStage,
+    MainSession, RestRequest,
+    RestSession
 } from "../model/trace.model";
 
 @Injectable({ providedIn: 'root' })
@@ -27,38 +31,38 @@ export class TraceService {
     constructor(private http: HttpClient) {
     }
 
-    getRestSessions(params: any): Observable<Array<InstanceRestSession>> {
-        return this.http.get<Array<InstanceRestSession>>(`${this.server}/session/rest`, { params: params });
+    getRestSessions(params: any): Observable<Array<RestSessionDto>> {
+        return this.http.get<Array<RestSessionDto>>(`${this.server}/session/rest`, { params: params });
     }
 
-    getRestSessionsForDump(env: string, appName: string, start: Date, end: Date): Observable<Array<InstanceRestSession>> {
+    getRestSessionsForDump(env: string, appName: string, start: Date, end: Date): Observable<Array<RestSession>> {
         let params: any = {
             'env': env,
             'start': start.toISOString(),
             'end': end.toISOString()
         }
-        return this.http.get<Array<InstanceRestSession>>(`${this.server}/session/rest/${appName}/dump`, { params: params });
+        return this.http.get<Array<RestSession>>(`${this.server}/session/rest/${appName}/dump`, { params: params });
     }
 
-    getRestSession(id: string): Observable<InstanceRestSession> {
-        return this.http.get<InstanceRestSession>(`${this.server}/session/rest/${id}`);
+    getRestSession(id: string): Observable<RestSession> {
+        return this.http.get<RestSession>(`${this.server}/session/rest/${id}`);
     }
 
-    getMainSessions(params: any): Observable<Array<InstanceMainSession>> {
-        return this.http.get<Array<InstanceMainSession>>(`${this.server}/session/main`, { params: params });
+    getMainSessions(params: any): Observable<Array<MainSessionDto>> {
+        return this.http.get<Array<MainSessionDto>>(`${this.server}/session/main`, { params: params });
     }
 
-    getMainSessionsForDump(env: string, appName: string, start: Date, end: Date): Observable<Array<InstanceMainSession>> {
+    getMainSessionsForDump(env: string, appName: string, start: Date, end: Date): Observable<Array<MainSession>> {
         let params: any = {
             'env': env,
             'start': start.toISOString(),
             'end': end.toISOString()
         }
-        return this.http.get<Array<InstanceMainSession>>(`${this.server}/session/main/${appName}/dump`, { params: params });
+        return this.http.get<Array<MainSession>>(`${this.server}/session/main/${appName}/dump`, { params: params });
     }
 
-    getMainSession(id: string): Observable<InstanceMainSession> {
-        return this.http.get<InstanceMainSession>(`${this.server}/session/main/${id}`);
+    getMainSession(id: string): Observable<MainSession> {
+        return this.http.get<MainSession>(`${this.server}/session/main/${id}`);
     }
 
     getTree(id: string, type: string) {
@@ -66,64 +70,72 @@ export class TraceService {
             this.http.get(`${this.server}/session/main/${id}/tree`);
     }
 
-    getSessionParent(id: string): Observable<{ id: string, type: string }> {
-        return this.http.get<{ id: string, type: string }>(`${this.server}/session/rest/${id}/parent`)
+    getSessionParent(type: string, id: string): Observable<{ id: string, type: string }> {
+        return this.http.get<{ id: string, type: string }>(`${this.server}/${type}/${id}/parent`);
     }
 
-    getRestRequests(id: string): Observable<Array<RestRequest>> {
-        return this.http.get<Array<RestRequest>>(`${this.server}/session/${id}/request/rest`);
+    getRestRequests(idSession: string): Observable<RestRequestDto[]> {
+        return this.http.get<RestRequestDto[]>(`${this.server}/session/${idSession}/request/rest`);
     }
 
-    getDatabaseRequests(idSession: string): Observable<Array<DatabaseRequest>>;
-    getDatabaseRequests(idSession: string, idDatabase: number): Observable<DatabaseRequest>;
-    getDatabaseRequests<T>(idSession: string, idDatabase?: number): Observable<T> {
-        if(idDatabase)         
-            return this.http.get<T>(`${this.server}/session/${idSession}/request/database/${idDatabase}`);
-        return this.http.get<T>(`${this.server}/session/${idSession}/request/database`);
+    getRestRequest(idRest: string): Observable<RestRequest> {
+        return this.http.get<RestRequest>(`${this.server}/request/rest/${idRest}`);
     }
 
-    getDatabaseRequestStages(idSession: string, idDatabase: number): Observable<Array<DatabaseRequestStage>> {
-        return this.http.get<Array<DatabaseRequestStage>>(`${this.server}/session/${idSession}/request/database/${idDatabase}/stage`);
+    getRestRequestStages(idRest: string): Observable<HttpRequestStage[]> {
+        return this.http.get<HttpRequestStage[]>(`${this.server}/request/rest/${idRest}/stage`);
+    }
+
+    getDatabaseRequests(idSession: string): Observable<DatabaseRequestDto[]> {
+        return this.http.get<DatabaseRequestDto[]>(`${this.server}/session/${idSession}/request/database`);
+    }
+
+    getDatabaseRequest(idDatabase: string): Observable<DatabaseRequest> {
+        return this.http.get<DatabaseRequest>(`${this.server}/request/database/${idDatabase}`);
+    }
+
+    getDatabaseRequestStages(idDatabase: string): Observable<DatabaseRequestStage[]> {
+        return this.http.get<DatabaseRequestStage[]>(`${this.server}/request/database/${idDatabase}/stage`);
     };
 
-    getFtpRequests(idSession: string): Observable<Array<FtpRequest>>;
-    getFtpRequests(idSession: string, idFtp: number): Observable<FtpRequest>;
-    getFtpRequests<T>(idSession: string, idFtp?: number): Observable<T> {
-        if(idFtp)
-            return this.http.get<T>(`${this.server}/session/${idSession}/request/ftp/${idFtp}`);
-        return this.http.get<T>(`${this.server}/session/${idSession}/request/ftp`);
+    getFtpRequests(idSession: string): Observable<FtpRequestDto[]> {
+        return this.http.get<FtpRequestDto[]>(`${this.server}/session/${idSession}/request/ftp`);
     }
 
-    getFtpRequestStages(idSession: string, idFtp: number): Observable<Array<FtpRequestStage>> {
-        return this.http.get<Array<FtpRequestStage>>(`${this.server}/session/${idSession}/request/ftp/${idFtp}/stage`);
-    };
-
-    getSmtpRequests(idSession: string): Observable<Array<MailRequest>>;
-    getSmtpRequests(idSession: string, idSmtp: number): Observable<MailRequest>;
-    getSmtpRequests<T>(idSession: string, idSmtp?: number): Observable<T> {
-        if(idSmtp)
-            return this.http.get<T>(`${this.server}/session/${idSession}/request/smtp/${idSmtp}`);
-        return this.http.get<T>(`${this.server}/session/${idSession}/request/smtp`);
+    getFtpRequest(idFtp: string): Observable<FtpRequest> {
+        return this.http.get<FtpRequest>(`${this.server}/request/ftp/${idFtp}`);
     }
 
-    getSmtpRequestStages(idSession: string, idSmtp: number): Observable<Array<MailRequestStage>> {
-        return this.http.get<Array<MailRequestStage>>(`${this.server}/session/${idSession}/request/smtp/${idSmtp}/stage`);
+    getFtpRequestStages(idFtp: string): Observable<FtpRequestStage[]> {
+        return this.http.get<Array<FtpRequestStage>>(`${this.server}/request/ftp/${idFtp}/stage`);
     };
 
-    getSmtpRequestMails(idSession: string, idSmtp: number): Observable<Array<Mail>> {
-        return this.http.get<Array<Mail>>(`${this.server}/session/${idSession}/request/smtp/${idSmtp}/mail`);
-    };
-
-    getLdapRequests(idSession: string): Observable<Array<NamingRequest>>;
-    getLdapRequests(idSession: string, idLdap: number): Observable<NamingRequest>;
-    getLdapRequests<T>(idSession: string, idLdap?: number): Observable<T> {
-        if(idLdap)
-            return this.http.get<T>(`${this.server}/session/${idSession}/request/ldap/${idLdap}`);
-        return this.http.get<T>(`${this.server}/session/${idSession}/request/ldap`);
+    getSmtpRequests(idSession: string): Observable<MailRequestDto[]> {
+        return this.http.get<MailRequestDto[]>(`${this.server}/session/${idSession}/request/smtp`);
     }
 
-    getLdapRequestStages(idSession: string, idLdap: number): Observable<Array<NamingRequestStage>> {
-        return this.http.get<Array<NamingRequestStage>>(`${this.server}/session/${idSession}/request/ldap/${idLdap}/stage`);
+    getSmtpRequest(idSmtp: string): Observable<MailRequest> {
+        return this.http.get<MailRequest>(`${this.server}/request/smtp/${idSmtp}`);
+    }
+
+    getSmtpRequestStages(idSmtp: string): Observable<MailRequestStage[]> {
+        return this.http.get<MailRequestStage[]>(`${this.server}/request/smtp/${idSmtp}/stage`);
+    };
+
+    getSmtpRequestMails(idSmtp: string): Observable<Mail[]> {
+        return this.http.get<Mail[]>(`${this.server}/request/smtp/${idSmtp}/mail`);
+    };
+
+    getLdapRequests(idSession: string): Observable<DirectoryRequestDto[]> {
+        return this.http.get<DirectoryRequestDto[]>(`${this.server}/session/${idSession}/request/ldap`);
+    }
+
+    getLdapRequest(idLdap: string): Observable<DirectoryRequest> {
+        return this.http.get<DirectoryRequest>(`${this.server}/request/ldap/${idLdap}`);
+    }
+
+    getLdapRequestStages(idLdap: string): Observable<DirectoryRequestStage[]> {
+        return this.http.get<DirectoryRequestStage[]>(`${this.server}/request/ldap/${idLdap}/stage`);
     };
 
     getLocalRequests(id: string): Observable<Array<LocalRequest>> {

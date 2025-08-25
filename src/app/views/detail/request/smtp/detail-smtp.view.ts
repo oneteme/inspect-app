@@ -1,15 +1,16 @@
 import {Component, inject, OnDestroy, OnInit} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
-import {TraceService} from "../../../service/trace.service";
+import {TraceService} from "../../../../service/trace.service";
 import {DataGroup, DataItem, TimelineOptions} from "vis-timeline";
-import {combineLatest, finalize, forkJoin, Subject, takeUntil} from "rxjs";
-import {ExceptionInfo, Mail, MailRequest, MailRequestStage} from "../../../model/trace.model";
+import {catchError, combineLatest, finalize, forkJoin, of, Subject, takeUntil} from "rxjs";
 import {DatePipe} from "@angular/common";
-import {app} from "../../../../environments/environment";
-import {EnvRouter} from "../../../service/router.service";
-import {DurationPipe} from "../../../shared/pipe/duration.pipe";
+import {app} from "../../../../../environments/environment";
+import {EnvRouter} from "../../../../service/router.service";
+import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {MatTableDataSource} from "@angular/material/table";
-import {INFINITY} from "../../constants";
+import {INFINITY} from "../../../constants";
+import {ExceptionInfo, Mail, MailRequest, MailRequestStage} from "../../../../model/trace.model";
+import {RequestType} from "../../../../model/request.model";
 
 @Component({
     templateUrl: './detail-smtp.view.html',
@@ -23,15 +24,19 @@ export class DetailSmtpView implements OnInit, OnDestroy {
     private readonly durationPipe = new DurationPipe();
     private readonly $destroy = new Subject<void>();
 
-    private params: Partial<{idSession: string, idSmtp: number, typeSession: string, typeMain: string, env: string}> = {};
+    private params: Partial<{idSmtp: string, env: string}> = {};
 
     options: TimelineOptions;
     dataItems: DataItem[];
     dataGroups: DataGroup[];
 
     request: MailRequest;
+    stages: MailRequestStage[];
     exception: ExceptionInfo;
     isLoading: boolean;
+
+    sessionParent: { id: string, type: string };
+    parentLoading: boolean = false;
 
     displayedColumns: string[] = ['subject', 'from', 'recipients', 'replyTo'];
     dataSource: MatTableDataSource<Mail> = new MatTableDataSource();
@@ -39,12 +44,10 @@ export class DetailSmtpView implements OnInit, OnDestroy {
     ngOnInit() {
         combineLatest([
             this._activatedRoute.params,
-            this._activatedRoute.data,
             this._activatedRoute.queryParams
         ]).subscribe({
-            next: ([params, data, queryParams]) => {
-                this.params = {idSession: params.id_session, idSmtp: params.id_smtp,
-                    typeSession: data.type, typeMain: params.type_main, env: queryParams.env || app.defaultEnv};
+            next: ([params, queryParams]) => {
+                this.params = {idSmtp: params.id_request, env: queryParams.env || app.defaultEnv};
                 this.getRequest();
             }
         });
@@ -58,14 +61,17 @@ export class DetailSmtpView implements OnInit, OnDestroy {
     getRequest() {
         this.request = null;
         this.isLoading = true;
+        this.parentLoading = true;
+        this.sessionParent = null;
+        this._traceService.getSessionParent(RequestType.SMTP, this.params.idSmtp).pipe(takeUntil(this.$destroy), catchError(() => of(null)),finalize(()=>(this.parentLoading = false))).subscribe(d=> this.sessionParent = d);
         forkJoin({
-            request: this._traceService.getSmtpRequests(this.params.idSession, this.params.idSmtp),
-            stages: this._traceService.getSmtpRequestStages(this.params.idSession, this.params.idSmtp),
-            mails: this._traceService.getSmtpRequestMails(this.params.idSession, this.params.idSmtp)
+            request: this._traceService.getSmtpRequest(this.params.idSmtp),
+            stages: this._traceService.getSmtpRequestStages(this.params.idSmtp),
+            mails: this._traceService.getSmtpRequestMails(this.params.idSmtp)
         }).pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false)).subscribe({
             next: (value: {request: MailRequest, stages: MailRequestStage[], mails: Mail[]}) => {
                 this.request = value.request;
-                this.request.actions = value.stages;
+                this.stages = value.stages;
                 this.request.mails = value.mails;
                 this.exception = value.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
                 this.dataSource = new MatTableDataSource(this.request.mails);
@@ -78,7 +84,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
         let timelineStart = Math.trunc(this.request.start * 1000);
         let timelineEnd = this.request.end ? Math.trunc(this.request.end * 1000) : INFINITY;
 
-        let items = this.request.actions.map((a:MailRequestStage, i:number) => {
+        let items = this.stages.map((a:MailRequestStage, i:number) => {
             let start = Math.trunc(a.start * 1000);
             let end = a.end? Math.trunc(a.end * 1000) : INFINITY;
             return  {
@@ -102,7 +108,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
             type:"background"
         });
 
-        let groups:any[]=this.request.actions.map((a:MailRequestStage, i:number) => ({ id: i, content: a?.name,treeLevel: 2}))
+        let groups:any[] = this.stages.map((a:MailRequestStage, i:number) => ({ id: i, content: a?.name,treeLevel: 2}))
         groups.splice(0,0,{id:'parent', content: this.request.threadName,treeLevel: 1, nestedGroups:groups.map(g=>(g.id))})
         let padding = (Math.ceil((timelineEnd - timelineStart)*0.01));
         this.dataItems = items;
@@ -122,8 +128,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
         let params: any[] = [];
         switch (targetType) {
             case "parent":
-                if(this.params.typeMain) params.push('session', this.params.typeSession, this.params.typeMain, this.params.idSession);
-                else params.push('session', this.params.typeSession, this.params.idSession);
+                params.push('session', this.sessionParent.type.toLowerCase(), this.sessionParent.id);
         }
         if (event.ctrlKey) {
             this._router.open(`#/${params.join('/')}`, '_blank')

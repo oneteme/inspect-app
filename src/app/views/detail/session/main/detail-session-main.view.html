@@ -82,7 +82,7 @@
 </div>
 
 <mat-menu #menuEndPoint="matMenu" xPosition="after">
-  <a [routerLink]="['/session', 'main', session?.type, session?.id, 'tree']" mat-menu-item>
+  <a [routerLink]="['/session', session?.type, session?.id, 'tree']" mat-menu-item>
     <mat-icon class="material-symbols-outlined">lan</mat-icon>
     Arbre d'appels
   </a>

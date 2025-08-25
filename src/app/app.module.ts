@@ -15,10 +15,6 @@ import {DatePipe, DecimalPipe, I18nPluralPipe, registerLocaleData} from '@angula
 import localeFr from '@angular/common/locales/fr';
 import {SearchRestView} from "./views/search/rest/search-rest.view";
 import {DetailSessionRestView} from "./views/detail/session/rest/detail-session-rest.view";
-import {DetailDatabaseView} from "./views/detail/database/detail-database.view";
-import {DetailFtpView} from "./views/detail/ftp/detail-ftp.view";
-import {DetailLdapView} from "./views/detail/ldap/detail-ldap.view";
-import {DetailSmtpView} from "./views/detail/smtp/detail-smtp.view";
 import {SearchMainView} from "./views/search/main/search-main.view";
 import {DetailSessionMainView} from "./views/detail/session/main/detail-session-main.view";
 import {StatisticUserView} from "./views/statistic/user/statistic-user.view";
@@ -38,6 +34,7 @@ import {Interceptor} from "./shared/interceptor/interceptor";
 import {AnalyticView} from "./views/analytic/analytic.view";
 import {SearchRequestView} from "./views/search/request/search-request.view";
 import {Constants} from "./views/constants";
+import {DetailRequestView} from "./views/detail/request/detail-request.view";
 
 
 registerLocaleData(localeFr, 'fr-FR');
@@ -46,8 +43,20 @@ const routes: Route[] = [
       path:'request', children : [
         {
           path:':type',
-          component: SearchRequestView,
-          title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => 'Requêtes '+ Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title,
+          children: [
+            {
+              path: '',
+              component: SearchRequestView,
+              title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => 'Requêtes '+ Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title,
+            },
+            {
+              path: ':id_request',
+              component: DetailRequestView,
+              title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                return 'Appel d\'API > Detail ' + Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title
+              }
+            }
+          ]
         },
         { path: '**', pathMatch: 'full', redirectTo: `/request/rest` }
       ]
@@ -76,36 +85,12 @@ const routes: Route[] = [
                 title: `Appel d'API > Détail`
               },
               {
-                path: 'database/:id_jdbc',
-                data: { type: 'rest' },
-                component: DetailDatabaseView,
-                title: `Appel d'API > Base de donnée`
-              },
-              {
-                path: 'ftp/:id_ftp',
-                data: { type: 'rest' },
-                component: DetailFtpView,
-                title: `Appel d'API > FTP`
-              },
-              {
-                path: 'ldap/:id_ldap',
-                data: { type: 'rest' },
-                component: DetailLdapView,
-                title: `Appel d'API > LDAP`
-              },
-              {
-                path: 'smtp/:id_smtp',
-                data: { type: 'rest' },
-                component: DetailSmtpView,
-                title: `Appel d'API > SMTP`
-
-              },
-              {
                 path: 'tree',
                 data: { type: 'rest' },
                 component: TreeView,
-                title: `Appel d'API > Arbre d'Appels`
-
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                    return `Lancement d'appel Rest > Arbre d'Appels`;
+                }
               },
               { path: '**', pathMatch: 'full', redirectTo: `/session/rest/:id_session` }
             ]
@@ -114,7 +99,7 @@ const routes: Route[] = [
         ]
       },
       {
-        path: 'main/:type_main',
+        path: ':type_main',
         children: [
           {
             path: '',
@@ -136,62 +121,6 @@ const routes: Route[] = [
                 component: DetailSessionMainView,
                 title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
                   let detail = '> Detail';
-                  if (route.paramMap.get('type_main') == 'batch') {
-                    return `Lancement de Batch ${detail}`;
-                  } else if (route.paramMap.get('type_main') == 'startup') {
-                    return `Lancement de Serveur ${detail}`;
-                  }
-                  return `Navigation ${detail}`;
-                }
-              },
-              {
-                path: 'database/:id_jdbc',
-                component: DetailDatabaseView,
-                data: { type: 'main' },
-                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-                  let detail = `> Base de Donnée`;
-                  if (route.paramMap.get('type_main') == 'batch') {
-                    return `Lancement de Batch ${detail}`;
-                  } else if (route.paramMap.get('type_main') == 'startup') {
-                    return `Lancement de Serveur ${detail}`;
-                  }
-                  return `Navigation ${detail}`;
-                }
-              },
-              {
-                path: 'ftp/:id_ftp',
-                data: { type: 'main' },
-                component: DetailFtpView,
-                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-                  let detail = `> FTP`;
-                  if (route.paramMap.get('type_main') == 'batch') {
-                    return `Lancement de Batch ${detail}`;
-                  } else if (route.paramMap.get('type_main') == 'startup') {
-                    return `Lancement de Serveur ${detail}`;
-                  }
-                  return `Navigation ${detail}`;
-                }
-              },
-              {
-                path: 'ldap/:id_ldap',
-                data: { type: 'main' },
-                component: DetailLdapView,
-                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-                  let detail = `> LDAP`;
-                  if (route.paramMap.get('type_main') == 'batch') {
-                    return `Lancement de Batch ${detail}`;
-                  } else if (route.paramMap.get('type_main') == 'startup') {
-                    return `L&ancement de Serveur ${detail}`;
-                  }
-                  return `Navigation ${detail}`;
-                }
-              },
-              {
-                path: 'smtp/:id_smtp',
-                data: { type: 'main' },
-                component: DetailSmtpView,
-                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-                  let detail = `> SMTP`;
                   if (route.paramMap.get('type_main') == 'batch') {
                     return `Lancement de Batch ${detail}`;
                   } else if (route.paramMap.get('type_main') == 'startup') {

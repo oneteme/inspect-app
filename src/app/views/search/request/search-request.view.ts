@@ -52,7 +52,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
   REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
   nameDataList: any[];
   displayedColumns: string[] = ['rangestatus', 'app_name', 'method/path', 'query', 'start', 'durée', 'user'];
-  requests:any[];
+  requests: any[];
   isLoading = true;
   serverNameIsLoading = true;
   requestFilterForm = new FormGroup({
@@ -63,8 +63,6 @@ export class SearchRequestView implements OnInit, OnDestroy {
       end: new FormControl<Date | null>(null, [Validators.required])
     })
   });
-
-  filterTable = new Map<string, any>();
 
   queryParams: Partial<QueryParams> = {};
   params: Partial<Params> = {};
@@ -77,10 +75,10 @@ export class SearchRequestView implements OnInit, OnDestroy {
   } =
       {
         "rest": { service: this._restRequestService, filters:  [{icon: 'warning', label: '5xx',color:'#bb2124', value:'5xx'}, {icon: 'error', label: '4xx',color:'#f9ad4e', value:'4xx'}, {icon: 'done', label: '2xx',color:'#22bb33', value:'2xx'},{icon: 'priority_high', label: '0',color:'gray', value:'0xx'}]},
-        "jdbc": { service: this._databaseRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: false}, {icon: 'done', label: 'OK',color:'#22bb33', value: true}] },
-        "ftp" :  { service: this._ftpRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: false}, {icon: 'done', label: 'OK',color:'#22bb33', value: true}] },
-        "smtp": { service: this._smtpRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: false}, {icon: 'done', label: 'OK',color:'#22bb33', value: true}] },
-        "ldap": { service: this._ldapRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: false}, {icon: 'done', label: 'OK',color:'#22bb33', value: true}] },
+        "jdbc": { service: this._databaseRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: true}, {icon: 'done', label: 'OK',color:'#22bb33', value: false}] },
+        "ftp" :  { service: this._ftpRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: true}, {icon: 'done', label: 'OK',color:'#22bb33', value: false}] },
+        "smtp": { service: this._smtpRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: true}, {icon: 'done', label: 'OK',color:'#22bb33', value: false}] },
+        "ldap": { service: this._ldapRequestService, filters:  [{icon: 'warning', label: 'KO',color:'#bb2124', value: true}, {icon: 'done', label: 'OK',color:'#22bb33', value: false}] },
       }
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -235,7 +233,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
     },{ emitEvent: false })
   }
 
-  selectedRestRequest(event: { event: MouseEvent, row: any }) {
+  selectedRemote(event: { event: MouseEvent, row: any }) {
     event.event.stopPropagation();
     if (event.event.ctrlKey) {
       this._router.open(`#/session/rest/${event.row}`, '_blank')
@@ -244,15 +242,23 @@ export class SearchRequestView implements OnInit, OnDestroy {
     }
   }
 
+  selectedRest(event: { event: MouseEvent, row: any }) {
+    event.event.stopPropagation();
+    if (event.event.ctrlKey) {
+      this._router.open(`#/request/rest/${event.row}`, '_blank')
+    } else {
+      this._router.navigate(['/request/rest', event.row], {
+        queryParams: { env: this.queryParams.env }
+      });
+    }
+  }
 
   selectedSmtp(event: { event: MouseEvent, row: any }) {
     if (event.row) {
-      let segment = 'rest';
-      if(event.row.type) segment = `main/${event.row.type}`;
       if (event.event.ctrlKey) {
-        this._router.open(`#/session/${segment}/${event.row.id}/smtp/${event.row.idRequest}`, '_blank',)
+        this._router.open(`#/request/smtp/${event.row}`, '_blank',)
       } else {
-        this._router.navigate([`/session/${segment}`, event.row.id, 'smtp', event.row.idRequest], {
+        this._router.navigate([`/request/smtp`, event.row], {
           queryParams: { env: this.queryParams.env }
         });
       }
@@ -261,12 +267,10 @@ export class SearchRequestView implements OnInit, OnDestroy {
 
   selectedLdap(event: { event: MouseEvent, row: any }) {
     if (event.row) {
-      let segment = 'rest';
-      if(event.row.type) segment = `main/${event.row.type}`;
       if (event.event.ctrlKey) {
-        this._router.open(`#/session/${segment}/${event.row.id}/ldap/${event.row.idRequest}`, '_blank',)
+        this._router.open(`#/request/ldap/${event.row}`, '_blank',)
       } else {
-        this._router.navigate([`/session/${segment}`, event.row.id, 'ldap', event.row.idRequest], {
+        this._router.navigate([`/request/ldap`, event.row], {
           queryParams: { env: this.queryParams.env }
         });
       }
@@ -275,12 +279,10 @@ export class SearchRequestView implements OnInit, OnDestroy {
 
   selectedFtp(event: { event: MouseEvent, row: any }) {
     if (event.row) {
-      let segment = 'rest';
-      if(event.row.type) segment = `main/${event.row.type}`;
       if (event.event.ctrlKey) {
-        this._router.open(`#/session/${segment}/${event.row.id}/ftp/${event.row.idRequest}`, '_blank',)
+        this._router.open(`#/request/ftp/${event.row}`, '_blank',)
       } else {
-        this._router.navigate([`/session/${segment}`, event.row.id, 'ftp', event.row.idRequest], {
+        this._router.navigate([`/request/ftp`, event.row], {
           queryParams: { env: this.queryParams.env }
         });
       }
@@ -289,13 +291,10 @@ export class SearchRequestView implements OnInit, OnDestroy {
 
   selectedQuery(event: { event: MouseEvent, row: any }) {
     if (event.row) {
-
-      let segment = event.row.sessionType;
-      if(event.row.type) segment = `main/${event.row.type}`;
       if (event.event.ctrlKey) {
-        this._router.open(`#/session/${segment}/${event.row.id}/database/${event.row.idRequest}`, '_blank',)
+        this._router.open(`#/request/jdbc/${event.row}`, '_blank',)
       } else {
-        this._router.navigate([`/session/${segment}`, event.row.id, 'database', event.row.idRequest], {
+        this._router.navigate([`/request/jdbc`, event.row], {
           queryParams: { env: this.queryParams.env }
         });
       }

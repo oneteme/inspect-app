@@ -52,7 +52,9 @@
                 [requests]="requests"
                 [isLoading]="isLoading"
                 [pageSize]="10"
-                (onClickRow)="selectedRestRequest($event)" ></rest-table>
+                (onClickRemote)="selectedRemote($event)"
+                (onClickRow)="selectedRest($event)"
+    ></rest-table>
 </div>
 
 <div  *ngIf="params.type=='ftp'">

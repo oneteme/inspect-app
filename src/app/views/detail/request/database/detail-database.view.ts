@@ -1,16 +1,17 @@
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 
 import {ActivatedRoute} from '@angular/router';
-import {combineLatest, finalize, forkJoin, Subject, takeUntil} from "rxjs";
+import {catchError, combineLatest, finalize, forkJoin, of, Subject, takeUntil} from "rxjs";
 import {DataGroup, DataItem, TimelineOptions} from 'vis-timeline';
 import {DatePipe} from '@angular/common';
-import {TraceService} from 'src/app/service/trace.service';
-import {app} from 'src/environments/environment';
-import {DatabaseRequest, DatabaseRequestStage, ExceptionInfo} from 'src/app/model/trace.model';
-import {EnvRouter} from "../../../service/router.service";
-import {DurationPipe} from "../../../shared/pipe/duration.pipe";
-import {getErrorClassName} from 'src/app/shared/util';
-import {INFINITY} from "../../constants";
+import {TraceService} from '../../../../service/trace.service';
+import {app} from '../../../../../environments/environment';
+import {EnvRouter} from "../../../../service/router.service";
+import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
+import {getErrorClassName} from '../../../../shared/util';
+import {Constants, INFINITY} from "../../../constants";
+import {DatabaseRequest, DatabaseRequestStage, ExceptionInfo} from "../../../../model/trace.model";
+import {RequestType} from "../../../../model/request.model";
 
 @Component({
     templateUrl: './detail-database.view.html',
@@ -24,14 +25,20 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     private readonly durationPipe = new DurationPipe();
     private readonly $destroy = new Subject<void>();
 
-    params: Partial<{idSession: string, idJdbc: number, typeSession: string, typeMain: string, env: string}> = {};
+    REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
+
+    params: Partial<{idJdbc: string, env: string}> = {};
 
     options: TimelineOptions;
     dataItems: DataItem[];
     dataGroups: DataGroup[];
 
     request: DatabaseRequest;
+    stages: DatabaseRequestStage[];
     exception: ExceptionInfo;
+
+    sessionParent: { id: string, type: string };
+    parentLoading: boolean = false;
 
     isLoading: boolean = false;
 
@@ -55,12 +62,10 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     ngOnInit() {
         combineLatest([
             this._activatedRoute.params,
-            this._activatedRoute.data,
             this._activatedRoute.queryParams
         ]).subscribe({
-            next: ([params, data, queryParams]) => {
-                this.params = {idSession: params.id_session, idJdbc: params.id_jdbc,
-                    typeSession: data.type, typeMain: params.type_main, env: queryParams.env || app.defaultEnv};
+            next: ([params, queryParams]) => {
+                this.params = {idJdbc: params.id_request, env: queryParams.env || app.defaultEnv};
                 this.getRequest();
             }
         });
@@ -69,13 +74,16 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     getRequest(){
         this.request = null;
         this.isLoading = true;
+        this.parentLoading = true;
+        this.sessionParent = null;
+        this._traceService.getSessionParent(RequestType.JDBC, this.params.idJdbc).pipe(takeUntil(this.$destroy), catchError(() => of(null)),finalize(()=>(this.parentLoading = false))).subscribe(d=>this.sessionParent = d);
         forkJoin({
-            request: this._traceService.getDatabaseRequests(this.params.idSession, this.params.idJdbc),
-            stages: this._traceService.getDatabaseRequestStages(this.params.idSession, this.params.idJdbc)
+            request: this._traceService.getDatabaseRequest(this.params.idJdbc),
+            stages: this._traceService.getDatabaseRequestStages(this.params.idJdbc)
         }).pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false)).subscribe({
             next: (value: {request: DatabaseRequest, stages: DatabaseRequestStage[]}) => {
                 this.request = value.request;
-                this.request.actions = value.stages;
+                this.stages = value.stages;
                 this.exception = value.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
                 this.createTimeline();
             }
@@ -85,7 +93,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     createTimeline() {
         let timelineEnd = this.request.end ? Math.trunc(this.request.end * 1000) : INFINITY;
         let timelineStart = Math.trunc(this.request.start * 1000);
-        let items = this.request.actions.map((c: DatabaseRequestStage, i: number) => {
+        let items = this.stages.map((c: DatabaseRequestStage, i: number) => {
             let start = Math.trunc(c.start * 1000);
             let end = c.end ? Math.trunc(c.end * 1000) : INFINITY;
             return {
@@ -109,7 +117,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
             type: "background"
         });
 
-        let groups: any[] = this.request.actions.map((g: DatabaseRequestStage,i:number ) => ({ id: `${i}`, content: g?.name + (g.count? ` (${g.count})`:''), title: this.jdbcActionDescription[g?.name], treeLevel: 2 }));
+        let groups: any[] = this.stages.map((g: DatabaseRequestStage,i:number ) => ({ id: `${i}`, content: g?.name + (g.count? ` (${g.count})`:''), title: this.jdbcActionDescription[g?.name], treeLevel: 2 }));
         groups.splice(0, 0, {id: 'parent', content: this.request.threadName, treeLevel: 1, nestedGroups: groups.map(g=> (g.id))})
         let padding = (Math.ceil((timelineEnd - timelineStart) * 0.01))
 
@@ -130,8 +138,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
         let params: any[] = [];
         switch (targetType) {
             case "parent":
-                if(this.params.typeMain) params.push('session', this.params.typeSession, this.params.typeMain, this.params.idSession)
-                else params.push('session', this.params.typeSession, this.params.idSession)
+                params.push('session', this.sessionParent.type.toLowerCase(), this.sessionParent.id);
         }
         if (event.ctrlKey) {
             this._router.open(`#/${params.join('/')}`, '_blank')
