@@ -1,0 +1,116 @@
+.status-indicator {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  position: relative;
+}
+
+.status-indicator.online {
+  background-color: #1fd655;
+  box-shadow: 0 0 8px rgba(31, 214, 85, 0.6);
+}
+
+.status-indicator.offline {
+  background-color: #7f8c8d;
+  box-shadow: 0 0 8px rgba(127, 140, 141, 0.6);
+}
+
+.status-indicator.warning {
+  background-color: #ff9800;
+  box-shadow: 0 0 8px rgba(255, 152, 0, 0.6);
+}
+
+@keyframes pulse-green {
+  0% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(31, 214, 85, 0.7);
+  }
+
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 5px rgba(31, 214, 85, 0);
+  }
+
+  100% {
+    transform: scale(0.95);
+    box-shadow: 0 0 0 0 rgba(31, 214, 85, 0);
+  }
+}
+
+.activity-content {
+  display: flex;
+  height: 300px;
+}
+
+.stats-sidebar {
+  width: 250px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+}
+
+.activity-chart {
+  flex-grow: 1;
+}
+
+.stats-card {
+  background: linear-gradient(145deg, #ffffff, #f0f0f0);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  transition: transform 0.2s;
+}
+
+.stats-card:hover {
+  transform: translateY(-3px);
+}
+
+.stats-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #3f51b5;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.stats-card.report .stats-icon {
+  background: linear-gradient(145deg, #FF9800, #F57C00);
+  box-shadow: 0 4px 6px rgba(255, 152, 0, 0.25);
+}
+
+.stats-card.report .stats-value {
+  color: #FF9800;
+}
+
+.stats-card.unavailable .stats-icon {
+  background: linear-gradient(145deg, #7f8c8d, #576574);
+  box-shadow: 0 4px 6px rgba(127, 140, 141, 0.25);
+}
+
+.stats-card.unavailable .stats-value {
+  color: #7f8c8d;
+}
+
+.stats-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stats-value {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+}
+
+.stats-label {
+  font-size: 12px;
+  color: #666;
+}

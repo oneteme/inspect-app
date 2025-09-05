@@ -230,8 +230,16 @@ mat-form-field.loading {
 
     .title {
       display: flex;
+      flex-direction: column;
       font-weight: 700;
-      align-items: center;
+      justify-content: center;
+
+      .sub {
+        font-size: 12px;
+        font-weight: 400;
+        font-style: italic;
+        color: #6c6c6c;
+      }
     }
 
     .sub-title {

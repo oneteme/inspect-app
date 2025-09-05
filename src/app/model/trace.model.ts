@@ -148,7 +148,7 @@ export interface ExceptionInfo {
 
 export interface StackTraceRow {
   className: string;
-  methodeName: string;
+  methodName: string;
   lineNumber: number;
 }
 
@@ -167,4 +167,34 @@ export interface InstanceEnvironment {
   branch: string;
   hash: string;
   collector: string;
+  resource: MachineResource;
+  configuration: InspectCollectorConfiguration;
+}
+
+export interface InspectCollectorConfiguration {
+  scheduling: SchedulingProperties;
+  tracing: TracingProperties;
+}
+
+export interface MachineResource {
+  minHeap: number;
+  maxHeap: number;
+  minMeta: number;
+  maxMeta: number;
+  diskTotalSpace: number;
+}
+
+export interface SchedulingProperties {
+  interval: number;
+}
+
+export interface TracingProperties {
+  queueCapacity: number;
+}
+
+export interface LogEntry {
+  instant: number;
+  level: string;
+  message: string;
+  stackRows: StackTraceRow[];
 }

@@ -10,5 +10,6 @@ export class HeaderPageComponent {
     @Input() iconOutlined: boolean;
     @Input('ui-title') title: string;
     @Input('ui-subtitle') subTitle: string;
+    @Input() templateTitle: TemplateRef<any>;
     @Input() templateSubTitle: TemplateRef<any>; 
 }

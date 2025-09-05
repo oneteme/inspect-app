@@ -141,4 +141,16 @@ export class InstanceService {
             'main_session.start.lt': filters.end.toISOString()
         }).pipe(map((res: {version: string}[]) => res.map(r => r.version)));
     }
+
+    getInstancesByPeriod(filters: {env: string, start: Date, end: Date}): Observable<{id: string, appName: string, start: number, end: number}[]> {
+        let criteria = `start.le(${filters.end.toISOString()}).and(end.ge(${filters.start.toISOString()}).or(end.isNull))`;
+        let args: any = {
+            'column': 'id,app_name:appName,start,end',
+            'environement': filters.env,
+            'type': 'SERVER',
+            [criteria]: '',
+            'order': 'appName.asc,start.desc'
+        }
+        return this.getInstance(args);
+    }
 }
