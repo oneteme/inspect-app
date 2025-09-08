@@ -40,9 +40,11 @@ export class MainSessionService {
             'join': 'instance',
             'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),
-            [filters.app_name]: '',
             'start.lt': filters.end.toISOString(),
             "order": "date.desc,count.desc"
+        }
+        if(filters.app_name) {
+            args['instance.app_name.in'] = filters.app_name;
         }
         return this.getMainSession(args);
     }

@@ -333,15 +333,27 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getSessionExceptions(filters : {env: string, start:Date, end: Date,groupedBy:string, app_name: string }): Observable<SessionExceptionsByPeriodAndAppname[]> {
+    getSessionExceptions(filters: {env: string, start: Date, end: Date, groupedBy: string, server?: string, apiNames?: string, users?: string, versions?: string }): Observable<SessionExceptionsByPeriodAndAppname[]> {
         let args = {
             "column": `start.${filters.groupedBy}:date,err_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`,
-             'join': 'instance',
-              'instance.environement': filters.env,
-               'start.ge': filters.start.toISOString(), 
-               'start.lt': filters.end.toISOString(),
-                [filters.app_name]: '', 
-                "order": "date.desc,count.desc" 
+            'join': 'instance',
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'instance.environement': filters.env,
+            'instance.type': 'SERVER',
+            "order": "date.desc,count.desc"
+        }
+        if(filters.server) {
+            args['instance.app_name.in'] = filters.server;
+        }
+        if(filters.apiNames) {
+            args['api_name.in'] = filters.apiNames;
+        }
+        if(filters.versions) {
+            args['instance.version.in'] = filters.versions;
+        }
+        if (filters.users) {
+            args['user.in'] = filters.users;
         }
         return this.getRestSession(args);
     }

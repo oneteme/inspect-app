@@ -1,6 +1,6 @@
 import {Component, inject, OnDestroy, OnInit, ViewChild} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
-import {combineLatest, EMPTY, finalize, forkJoin, Subject, switchMap, takeUntil} from "rxjs";
+import {combineLatest, EMPTY, finalize, forkJoin, map, of, Subject, switchMap, takeUntil} from "rxjs";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {TraceService} from "../../service/trace.service";
 import {InstanceEnvironment, StackTraceRow} from "../../model/trace.model";
@@ -222,7 +222,8 @@ export class SupervisionView implements OnInit, OnDestroy {
     ytitle: '',
     series: [
       {data: {x: field('date'), y: field('traceCount')}, name: 'Traitements finalisés'},
-      {data: {x: field('date'), y: field('pending')}, name: 'Traitements en cours'}
+      {data: {x: field('date'), y: field('pending')}, name: 'Traitements en cours'},
+      {data: {x: field('date'), y: field('queueCapacity')}, name: 'Capacité maximale', type: 'area', visible: false}
     ],
     options: {
       chart: {
@@ -268,10 +269,22 @@ export class SupervisionView implements OnInit, OnDestroy {
           }
         }
       },
+      fill: {
+        type: ['solid', 'solid', 'gradient'],
+        gradient: {
+          shade: 'light',
+          type: 'vertical',
+          inverseColors: 'false',
+          shadeIntensity: 0.4,
+          opacityFrom: 0.9,
+          opacityTo: 0.3,
+          stops: [0, 100]
+        }
+      },
       stroke: {
         curve: 'smooth',
-        dashArray: [0,0],
-        width: [1,1]
+        dashArray: [0,0,5],
+        width: [1,1,1]
       },
       dataLabels: {
         enabled: false
@@ -380,7 +393,7 @@ export class SupervisionView implements OnInit, OnDestroy {
     .pipe(switchMap(res => {
       this.instance = res;
       return forkJoin([
-        this.instance.end ? EMPTY : this._instanceTraceService.getLastInstanceTrace({instance: this.params.instance}),
+        this.instance.end ? of(null) : this._instanceTraceService.getLastInstanceTrace({instance: this.params.instance}),
         this._machineUsageService.getResourceMachineByPeriod({instance: this.params.instance, start: this.params.start, end: this.params.end}),
         this._instanceTraceService.getInstanceTraceByPeriod({instance: this.params.instance, start: this.params.start, end: this.params.end}),
         this._traceService.getLogEntryByPeriod(this.params.instance, this.params.start, this.params.end)

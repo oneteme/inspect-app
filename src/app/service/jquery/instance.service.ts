@@ -34,10 +34,11 @@ export class InstanceService {
         return this.getInstance(args);
     }
 
-    getApplications(type: string): Observable<{ appName: string }[]> {
+    getApplications(type: string, env: string): Observable<{ appName: string }[]> {
         let args = {
             'column.distinct': 'app_name:appName',
             'appName.notNull': '',
+            'environement': env,
             'type': type,
             'order': 'app_name.asc'
         }
