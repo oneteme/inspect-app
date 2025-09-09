@@ -222,8 +222,7 @@ export class SupervisionView implements OnInit, OnDestroy {
     ytitle: '',
     series: [
       {data: {x: field('date'), y: field('traceCount')}, name: 'Traitements finalisés'},
-      {data: {x: field('date'), y: field('pending')}, name: 'Traitements en cours'},
-      {data: {x: field('date'), y: field('queueCapacity')}, name: 'Capacité maximale', type: 'area', visible: false}
+      {data: {x: field('date'), y: field('pending')}, name: 'Traitements en cours'}
     ],
     options: {
       chart: {
@@ -269,22 +268,8 @@ export class SupervisionView implements OnInit, OnDestroy {
           }
         }
       },
-      fill: {
-        type: ['solid', 'solid', 'gradient'],
-        gradient: {
-          shade: 'light',
-          type: 'vertical',
-          inverseColors: 'false',
-          shadeIntensity: 0.4,
-          opacityFrom: 0.9,
-          opacityTo: 0.3,
-          stops: [0, 100]
-        }
-      },
       stroke: {
-        curve: 'smooth',
-        dashArray: [0,0,5],
-        width: [1,1,1]
+        curve: 'smooth'
       },
       dataLabels: {
         enabled: false
