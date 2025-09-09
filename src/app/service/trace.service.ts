@@ -17,7 +17,7 @@ import {
     FtpRequest,
     FtpRequestStage, HttpRequestStage,
     InstanceEnvironment,
-    LocalRequest, Mail,
+    LocalRequest, LogEntry, Mail,
     MailRequest, MailRequestStage,
     MainSession, RestRequest,
     RestSession
@@ -144,5 +144,13 @@ export class TraceService {
 
     getInstance(id: string): Observable<InstanceEnvironment> {
         return this.http.get<InstanceEnvironment>(`${this.server}/instance/${id}`);
+    }
+
+    getLogEntryByPeriod(instanceId: string, start: Date, end: Date): Observable<LogEntry[]> {
+        let params: any = {
+            'start.ge': start.toISOString(),
+            'start.lt': end.toISOString()
+        };
+        return this.http.get<LogEntry[]>(`${this.server}/instance/${instanceId}/log/entry`, { params: params });
     }
 }

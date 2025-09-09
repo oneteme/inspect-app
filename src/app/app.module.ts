@@ -35,6 +35,7 @@ import {AnalyticView} from "./views/analytic/analytic.view";
 import {SearchRequestView} from "./views/search/request/search-request.view";
 import {Constants} from "./views/constants";
 import {DetailRequestView} from "./views/detail/request/detail-request.view";
+import {SupervisionView} from "./views/supervision/supervision.view";
 
 
 registerLocaleData(localeFr, 'fr-FR');
@@ -205,6 +206,11 @@ const routes: Route[] = [
     path: 'architecture',
     component: ArchitectureView,
     title: 'Architecture'
+  },
+  {
+    path: 'supervision/:instance',
+    component: SupervisionView,
+    title: 'Supervision'
   },
   { path: '**', pathMatch: 'full', redirectTo: `/home` }
 ];

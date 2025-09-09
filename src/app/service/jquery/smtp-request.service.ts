@@ -36,8 +36,10 @@ export class smtpRequestService {
             'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            [filters.app_name]: '',
             'order': 'date.asc'
+        }
+        if(filters.app_name) {
+            args['instance.app_name.in'] = filters.app_name;
         }
         return this.getsmtp(args);
     }

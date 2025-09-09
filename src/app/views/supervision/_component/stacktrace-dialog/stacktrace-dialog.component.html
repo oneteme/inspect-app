@@ -1,0 +1,13 @@
+<div mat-dialog-content>
+  <mat-form-field appearance="outline" style="width: 50vw;">
+    <mat-label>Stacktrace</mat-label>
+    <textarea matInput readonly
+              cdkTextareaAutosize
+              [cdkAutosizeMinRows]="5"
+              [cdkAutosizeMaxRows]="15"
+              class="stacktrace-textarea"
+              [value]="value"
+              [tabindex]="-1">
+    </textarea>
+  </mat-form-field>
+</div>

@@ -100,7 +100,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                     this.patchServerValue(this.params.serveurs);
                 }
                 this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
-                this.subscriptions.push(this._instanceService.getApplications('SERVER')
+                this.subscriptions.push(this._instanceService.getApplications('SERVER', this.params.env)
                     .pipe(finalize(() => this.serverNameIsLoading = false))
                     .subscribe({
                         next: (appNames: { appName: string }[]) => {
@@ -191,9 +191,9 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
 
     createServerFilter(): any {
         if (this.params.serveurs.length > 0) {
-            return { app_name: `instance.app_name.in(${this.params.serveurs.map(v => `"${v}"`).join(',')})` };
+            return { app_name: `${this.params.serveurs.map(v => `"${v}"`).join(',')}` };
         }
-        return { app_name: '' };
+        return { app_name: null };
     }
 
     openProtocolDialog(exceptions: { observable: any, type: string }) {
@@ -265,7 +265,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
 
             //   Rest-Main Sessions exceptions 
             sessionExceptionsTable: {
-                observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
+                observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, server: app_name })
                     .pipe(map(((result: SessionExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
                         return result.filter(r => r.errorType != null); // rename errorType to errType in backend

@@ -142,7 +142,11 @@ export class RestTabComponent implements OnDestroy {
       start: httpParams.params.period.start,
       end: httpParams.params.period.end,
       groupedBy: groupedBy,
-      app_name: `instance.app_name.eq(${httpParams.server})`
+      server: httpParams.server,
+      apiNames: advancedParams.api_name,
+      versions: advancedParams.api_version,
+      users: advancedParams.api_user
+      //app_name: `instance.app_name.eq(${httpParams.server})`
     }).pipe(
       finalize(() => this.$exceptionsResponse.loading = false),
       map(res => {

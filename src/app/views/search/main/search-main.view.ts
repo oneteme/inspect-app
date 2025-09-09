@@ -95,7 +95,7 @@ export class SearchMainView implements OnInit, OnDestroy {
                 this.patchServerValue(this.queryParams.appname);
                 this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
-                this._instanceService.getApplications(this.type == 'view' ? 'CLIENT' : 'SERVER' )
+                this._instanceService.getApplications(this.type == 'view' ? 'CLIENT' : 'SERVER', this.queryParams.env )
                     .pipe(finalize(()=> this.serverNameIsLoading = false))
                     .subscribe({
                         next: res => {

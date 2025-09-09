@@ -14,17 +14,25 @@ import {Component, Input} from "@angular/core";
             padding: 0.2em 1em;
             font-size: 12px;
         }
+
         .label-chip.blue {
-            background-color: rgba(20,100,220,0.2);
-            color: rgba(20,100,220);
+            background-color: rgba(20, 100, 220, 0.2);
+            color: rgba(20, 100, 220);
         }
+
         .label-chip.orange {
-            background-color: rgba(226,121,0,0.2);
-            color: rgba(226,121,0);
+            background-color: rgba(226, 121, 0, 0.2);
+            color: rgba(226, 121, 0);
         }
+
+        .label-chip.green {
+            background-color: rgba(6, 205, 145, 0.2);
+            color: rgb(69, 143, 32);
+        }
+
         .label-chip.red {
-            background-color: rgba(205,6,6,0.2);
-            color: rgba(205,6,6);
+            background-color: rgba(205, 6, 6, 0.2);
+            color: rgba(205, 6, 6);
         }
     `]
 })

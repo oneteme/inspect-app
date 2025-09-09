@@ -1,7 +1,10 @@
 <div class="title-container">
     <label-icon [icon]="titleIcon" [iconOutlined]="iconOutlined" [size]="48"></label-icon>
     <div class="title">
-        <div *ngIf="title" class="main">{{title}}</div>
+        <div *ngIf="title || templateTitle" class="main">
+          <span *ngIf="title">{{title}}</span>
+          <ng-container *ngIf="templateTitle" [ngTemplateOutlet]="templateTitle"></ng-container>
+        </div>
         <div *ngIf="subTitle || templateSubTitle" class="sub">
             <span *ngIf="subTitle">{{subTitle}}</span>
             <ng-container *ngIf="templateSubTitle" [ngTemplateOutlet]="templateSubTitle"></ng-container>

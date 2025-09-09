@@ -21,6 +21,9 @@ export class EnvRouter {
         return this.router.url;
     }
 
+    get _router(): Router {
+        return this.router;
+    }
 
     navigate(commands: any[], extras?: NavigationExtras): Promise<boolean> {
         if (!extras?.queryParams?.env) {

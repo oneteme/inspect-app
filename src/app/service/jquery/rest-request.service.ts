@@ -38,8 +38,10 @@ export class RestRequestService {
             'instance.type': 'SERVER',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            [filters.app_name]: '',
             'order': 'date.asc'
+        }
+        if(filters.app_name) {
+            args['instance.app_name.in'] = filters.app_name;
         }
         return this.getRestRequest(args);
     }
