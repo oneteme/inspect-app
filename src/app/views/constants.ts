@@ -501,7 +501,8 @@ export class Constants {
     static readonly MAPPING_TYPE: {[key: string]: {title: string, icon: string}} = {
         request: {title: 'Requêtes', icon: 'call_made'},
         rest: {title: 'Appels reçus', icon: 'call_received'},
-        batch: {title: 'Lancement de Batch', icon: 'manufacturing'},
+        batch: {title: 'Exécution de Batch', icon: 'manufacturing'},
+        test: {title: 'Exécution de Test', icon: 'rule'},
         startup: {title: 'Lancement de Serveur', icon: 'restart_alt'},
         view: {title: 'Navigation', icon: 'ads_click'},
         dashboard: {title:'Page d\'Accueil', icon: 'home'},
