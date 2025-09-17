@@ -107,9 +107,11 @@ const routes: Route[] = [
             component: SearchMainView,
             title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
               if (route.paramMap.get('type_main') == 'batch') {
-                return 'Lancement de Batch';
+                return 'Exécution de Batch';
               } else if(route.paramMap.get('type_main') == 'startup') {
                 return 'Lancement de Serveur';
+              } else if (route.paramMap.get('type_main') == 'test') {
+                return 'Exécution de Test';
               }
               return 'Navigation';
             }
@@ -123,9 +125,11 @@ const routes: Route[] = [
                 title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
                   let detail = '> Detail';
                   if (route.paramMap.get('type_main') == 'batch') {
-                    return `Lancement de Batch ${detail}`;
+                    return `Exécution de Batch ${detail}`;
                   } else if (route.paramMap.get('type_main') == 'startup') {
                     return `Lancement de Serveur ${detail}`;
+                  } else if (route.paramMap.get('type_main') == 'test') {
+                    return `Exécution de Test ${detail}`;
                   }
                   return `Navigation ${detail}`;
                 }
@@ -137,9 +141,11 @@ const routes: Route[] = [
                 title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
                   let detail = `> Arbre d'Appels`;
                   if (route.paramMap.get('type_main') == 'batch') {
-                    return `Lancement de Batch ${detail}`;
+                    return `Exécution de Batch ${detail}`;
                   } else if (route.paramMap.get('type_main') == 'startup') {
                     return `Lancement de Serveur ${detail}`;
+                  } else if (route.paramMap.get('type_main') == 'test') {
+                    return `Exécution de Test ${detail}`;
                   }
                   return `Navigation ${detail}`;
                 }
