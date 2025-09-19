@@ -77,11 +77,14 @@ table {
   text-decoration: solid;
 }
 
-.success {
-  border-left: 4px solid green;
+mat-card {
+  &.success {
+    border-left: 4px solid green;
+  }
+  &.fail {
+    border-left: 4px solid red;
+  }
+  &.in-progress {
+    border-left: 4px solid #2196F3;
+  }
 }
-
-.fail {
-  border-left: 4px solid red;
-}
-

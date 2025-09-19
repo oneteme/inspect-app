@@ -1,0 +1,8 @@
+td {
+  &.success {
+    border-left: 4px solid green;
+  }
+  &.fail {
+    border-left: 4px solid red;
+  }
+}

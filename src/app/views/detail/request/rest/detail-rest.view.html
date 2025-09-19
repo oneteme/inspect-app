@@ -1,14 +1,25 @@
 <div *ngIf="!isLoading && request" class="header-card">
   <mat-card style="width: 100vw; min-width: 100vw;"
-            [ngStyle]="{'border-left': request.status >= 200 && request.status < 300 ? '4px solid green' :
-                                    request.status >= 300 && request.status < 500 ? '4px solid orange' : '4px solid red'}">
+            [ngClass]="{'success': request.status >= 200 && request.status < 300,
+                        'warning': request.status >= 300 && request.status < 500,
+                        'fail': request.status >= 500,
+                        'unavailable': request.end && request.status == 0,
+                        'in-progress': !request.end}">
     <mat-card-title>
-      <div  style="display: flex; align-items: center;gap: 0.5em;">
-        <mat-icon class="material-symbols-outlined">{{REQUEST_TYPE['rest'].icon}}</mat-icon>
+      <label-icon [icon]="REQUEST_TYPE['rest'].icon">
+        <div style="display: flex; gap: 0.5em; align-items: center;">
+          {{ request.path || 'N/A' }}
+          <mat-spinner *ngIf="!request.end" [diameter]="18"></mat-spinner>
+        </div>
+      </label-icon>
+      <div style="display: flex; align-items: center;gap: 0.5em;">
+        <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['rest'].icon }}</mat-icon>
         {{ request.path || '' }}
       </div>
       <div class="right">
-        <button mat-icon-button [disabled]="sessionParent == null" [ngStyle]="sessionParent == null ? {'pointer-events': 'none'}: ''" (click)="navigate($event,'parent')" matTooltip="Détail de l'appel parent">
+        <button mat-icon-button [disabled]="sessionParent == null"
+                [ngStyle]="sessionParent == null ? {'pointer-events': 'none'}: ''" (click)="navigate($event,'parent')"
+                matTooltip="Détail de l'appel parent">
           <mat-icon>move_up</mat-icon>
         </button>
       </div>
@@ -16,14 +27,16 @@
     <mat-card-content>
       <div class="ellipsis">
         <a class="url" [href]="getSessionUrl()" target="_blank">
-          [{{ request.method }}] {{ getSessionUrl()}}
+          [{{ request.method }}] {{ getSessionUrl() }}
         </a>
       </div>
       <div style="display: flex; align-items: center; gap: 0.5em; color: red; font-weight: 500; margin-top: 0.5em;"
            *ngIf="exception?.type || exception?.message || request.bodyContent"
            [matTooltip]="exception?.type">
-        <mat-icon class="material-symbols-outlined" style="overflow: initial !important; width: 28px; height: 28px;">warning</mat-icon>
-        <div class="ellipsis" >{{ exception?.message || exception?.type || request.bodyContent }}</div>
+        <mat-icon class="material-symbols-outlined" style="overflow: initial !important; width: 28px; height: 28px;">
+          warning
+        </mat-icon>
+        <div class="ellipsis">{{ exception?.message || exception?.type || request.bodyContent }}</div>
       </div>
     </mat-card-content>
     <mat-card-footer>
@@ -33,11 +46,18 @@
       <div class="right">
         {{ request.inDataSize || 0 }}o
         <mat-icon style="width: 20px; height: 20px; font-size: 20px;">swap_vert</mat-icon>
-        {{ request.outDataSize }}o en <span [matTooltip]="((request.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss': 'fr')" style="font-weight: bold">{{{ start: request.start, end: request.end } | duration}}</span>
+        {{ request.outDataSize }}o en
+        <span [matTooltip]="((request.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss': 'fr')" style="font-weight: bold">
+          {{{start: request.start, end: request.end} | duration }}
+        </span>
       </div>
-      <span class="badge" [ngStyle]="{'background-color': request.status >= 200 && request.status < 300 ? 'green' :
-                                                                  request.status >= 300 && request.status < 500 ? 'orange' : 'red'}">
-        {{request.status}}
+      <span class="badge"
+            [ngClass]="{'success': request.status >= 200 && request.status < 300,
+                        'warning': request.status >= 300 && request.status < 500,
+                        'fail': request.status >= 500,
+                        'unavailable': request.status == 0 && request.end,
+                        'in-progress': !request.end}">
+        {{ request.end ? request.status : 'En cours' }}
       </span>
     </mat-card-footer>
   </mat-card>
@@ -53,6 +73,8 @@
     Aucun détail disponible ..
   </h2>
 </div>
-<div *ngIf="isLoading" style="width: 100%; height: calc(100vh - 50px - 1em); display: flex; flex-direction: row; align-items: center; justify-content: center; font-style: italic; gap: 0.5em">
-  <mat-progress-spinner diameter="30" mode="indeterminate"></mat-progress-spinner> Chargement en cours...
+<div *ngIf="isLoading"
+     style="width: 100%; height: calc(100vh - 50px - 1em); display: flex; flex-direction: row; align-items: center; justify-content: center; font-style: italic; gap: 0.5em">
+  <mat-progress-spinner diameter="30" mode="indeterminate"></mat-progress-spinner>
+  Chargement en cours...
 </div>

@@ -14,3 +14,16 @@
 .mat-mdc-row:hover .mat-mdc-cell {
     background-color: rgb(206, 206, 206);
 }
+
+td {
+    &.success {
+        border-left: 4px solid green;
+    }
+    &.fail {
+        border-left: 4px solid red;
+    }
+    &.in-progress {
+        border-left: 4px solid #2196F3;
+    }
+}
+
