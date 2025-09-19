@@ -13,8 +13,9 @@
         <ng-container matColumnDef="status">
             <th mat-header-cell *matHeaderCellDef style="width:1%">
             </th>
-            <td [ngStyle]="{'border-left': !element.exception ? '4px solid green' :
-                                '4px solid red'}" mat-cell *matCellDef="let element"
+            <td [ngClass]="{'success': element.end && !element.exception,
+                          'fail': element.end && element.exception,
+                          'in-progress': !element.end}" mat-cell *matCellDef="let element"
                 [matTooltip]="(element.exception?.type | exceptionType) + ' ' + (element.exception?.message | truncString: 100)" matTooltipPosition="after">
             </td>
         </ng-container>
@@ -22,7 +23,10 @@
         <ng-container matColumnDef="host">
             <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:70%"> Hôte</th>
             <td mat-cell *matCellDef="let element">
+              <div style="display: flex; gap: 0.5em; align-items: center;">
                 {{element["host"] || 'N/A'}}
+                <mat-spinner *ngIf="!element.end" [diameter]="16"></mat-spinner>
+              </div>
             </td>
         </ng-container>
 

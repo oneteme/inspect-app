@@ -8,7 +8,7 @@ import {app} from "../../../../../environments/environment";
 import {EnvRouter} from "../../../../service/router.service";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {MatTableDataSource} from "@angular/material/table";
-import {INFINITY} from "../../../constants";
+import {Constants, INFINITY} from "../../../constants";
 import {ExceptionInfo, Mail, MailRequest, MailRequestStage} from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
 
@@ -26,6 +26,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
 
     private params: Partial<{idSmtp: string, env: string}> = {};
 
+    REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
     options: TimelineOptions;
     dataItems: DataItem[];
     dataGroups: DataGroup[];
@@ -82,7 +83,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
 
     createTimeline() {
         let timelineStart = Math.trunc(this.request.start * 1000);
-        let timelineEnd = this.request.end ? Math.trunc(this.request.end * 1000) : INFINITY;
+        let timelineEnd = this.request.end ? Math.trunc(this.request.end * 1000) : timelineStart + 3600000;
 
         let items = this.stages.map((a:MailRequestStage, i:number) => {
             let start = Math.trunc(a.start * 1000);

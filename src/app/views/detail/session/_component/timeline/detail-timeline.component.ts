@@ -51,7 +51,7 @@ export class DetailTimelineComponent implements OnChanges {
         if(changes.instance || changes.request){
             if(this.instance && this.request){
                 this.timelineStart = this.request.start * 1000; // -1ms to avoid the first item being out of the range
-                this.timelineEnd = this.request.end * 1000;
+                this.timelineEnd = this.request.end ? this.request.end * 1000 : this.timelineStart + 3600000;
                 let padding = (Math.ceil((this.timelineEnd - this.timelineStart) * 0.01))
                 this.dataArray = [].concat(
                     (this.request.hasOwnProperty('userActions') ? (<MainSessionView>this.request).userActions ?? [] : []).map(r => ({...r, typeTimeline: 'action'})),

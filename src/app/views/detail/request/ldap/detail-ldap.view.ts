@@ -7,7 +7,7 @@ import {DatePipe} from "@angular/common";
 import {app} from "../../../../../environments/environment";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {EnvRouter} from "../../../../service/router.service";
-import {INFINITY} from "../../../constants";
+import {Constants, INFINITY} from "../../../constants";
 import {DirectoryRequest, DirectoryRequestStage, ExceptionInfo} from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
 
@@ -25,6 +25,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
 
     private params: Partial<{idLdap: string, env: string}> = {};
 
+    REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
     options: TimelineOptions;
     dataItems: DataItem[];
     dataGroups: DataGroup[];
@@ -75,7 +76,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
 
     createTimeline() {
         let timelineStart = Math.trunc(this.request.start * 1000);
-        let timelineEnd = this.request.end ? Math.trunc(this.request.end * 1000) : INFINITY;
+        let timelineEnd = this.request.end ? Math.trunc(this.request.end * 1000) : timelineStart + 3600000;
 
         let items = this.stages.map((a: DirectoryRequestStage, i: number) => {
             let start= Math.trunc(a.start * 1000);

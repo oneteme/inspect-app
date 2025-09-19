@@ -42,5 +42,23 @@
     background-color: rgb(206, 206, 206);
 }
 
+td {
+    &.success {
+        border-left: 4px solid green;
+    }
+    &.warning {
+        border-left: 4px solid orange;
+    }
+    &.fail {
+        border-left: 4px solid red;
+    }
+    &.unavailable {
+        border-left: 4px solid gray;
+    }
+    &.in-progress {
+        border-left: 4px solid #2196F3;
+    }
+}
+
 
 

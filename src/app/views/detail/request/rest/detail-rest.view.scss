@@ -43,3 +43,44 @@ mat-card-footer {
   color: blue;
   text-decoration: solid;
 }
+
+.badge {
+  color: white;
+  padding: 2px 10px;
+  text-align: center;
+  border-radius: 12px;
+  font-size: 0.8em;
+  &.success {
+    background-color: green;
+  }
+  &.warning {
+    background-color: orange;
+  }
+  &.error {
+    background-color: red;
+  }
+  &.unavailable {
+    background-color: gray;
+  }
+  &.in-progress {
+    background-color: #2196F3;
+  }
+}
+
+mat-card {
+  &.success {
+    border-left: 4px solid green;
+  }
+  &.warning {
+    border-left: 4px solid orange;
+  }
+  &.fail {
+    border-left: 4px solid red;
+  }
+  &.unavailable {
+    border-left: 4px solid gray;
+  }
+  &.in-progress {
+    border-left: 4px solid #2196F3;
+  }
+}

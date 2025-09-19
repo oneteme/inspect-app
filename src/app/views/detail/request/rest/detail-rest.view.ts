@@ -80,7 +80,7 @@ export class DetailRestView implements OnInit, OnDestroy {
 
   createTimeline() {
     let timelineStart = Math.trunc(this.request.start * 1000);
-    let timelineEnd = this.request.end ? Math.trunc(this.request.end * 1000) : INFINITY;
+    let timelineEnd = this.request.end ? Math.trunc(this.request.end * 1000) : timelineStart + 3600000;
 
     let items = this.stages.map((a: HttpRequestStage, i: number) => {
       let start= Math.trunc(a.start * 1000);

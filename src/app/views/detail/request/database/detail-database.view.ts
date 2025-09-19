@@ -91,8 +91,8 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     }
 
     createTimeline() {
-        let timelineEnd = this.request.end ? Math.trunc(this.request.end * 1000) : INFINITY;
         let timelineStart = Math.trunc(this.request.start * 1000);
+        let timelineEnd = this.request.end ? Math.trunc(this.request.end * 1000) : timelineStart + 3600000;
         let items = this.stages.map((c: DatabaseRequestStage, i: number) => {
             let start = Math.trunc(c.start * 1000);
             let end = c.end ? Math.trunc(c.end * 1000) : INFINITY;
