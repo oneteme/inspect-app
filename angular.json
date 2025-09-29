@@ -40,7 +40,8 @@
             "styles": [
               "node_modules/vis-timeline/styles/vis-timeline-graph2d.min.css",
               "src/styles/theme.scss",
-              "node_modules/@fortawesome/fontawesome-free/css/all.css"
+              "node_modules/@fortawesome/fontawesome-free/css/all.css",
+              "node_modules/@oneteme/jquery-apexcharts/styles/styles.scss"
             ],
             "scripts": [
               "node_modules/vis-timeline/standalone/umd/vis-timeline-graph2d.min.js"
