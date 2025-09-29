@@ -66,8 +66,11 @@
   transition: transform 0.2s;
 }
 
-.stats-card:hover {
-  transform: translateY(-3px);
+.stats-card {
+  &.report:hover {
+    transform: translateY(-3px);
+  }
+
 }
 
 .stats-icon {
