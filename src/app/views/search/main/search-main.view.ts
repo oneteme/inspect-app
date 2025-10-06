@@ -9,7 +9,7 @@ import {DatePipe, Location} from '@angular/common';
 import {extractPeriod,} from 'src/app/shared/util';
 import {TraceService} from 'src/app/service/trace.service';
 import {app, makeDatePeriod} from 'src/environments/environment';
-import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constants';
+import {Constants, FilterConstants, FilterMap, FilterPreset, INFINITY} from '../../constants';
 import {FilterService} from 'src/app/service/filter.service';
 import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
@@ -303,10 +303,9 @@ export class SearchMainView implements OnInit, OnDestroy {
         if (columnName == "name") return row["name"] as string;
         if (columnName == "location") return row['location'] as string;
         if (columnName == "start") return row['start'] as string;
-        if (columnName == "durée") return (row["end"] - row["start"])
+        if (columnName == "durée") return row['end'] ? row["end"] - row["start"] : INFINITY;
 
-        var columnValue = row[columnName as keyof any] as string;
-        return columnValue;
+        return row[columnName as keyof any] as string;
     };
 
     filterPredicate = (data: MainSessionDto, filter: string) => {

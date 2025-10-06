@@ -4,6 +4,7 @@ import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
 import {DatePipe} from "@angular/common";
 import {FtpRequestDto} from "../../../../../model/request.model";
+import {INFINITY} from "../../../../constants";
 
 @Component({
     selector: 'ftp-table',
@@ -64,7 +65,8 @@ export class DetailFtpTableComponent {
     sortingDataAccessor = (row: any, columnName: string) => {
         if (columnName == "host") return row["host"] + ":" + row["port"] as string;
         if (columnName == "start") return row['start'] as string;
-        if (columnName == "duree") return (row["end"] - row["start"]);
+        if (columnName == "duree") return row['end'] ? row["end"] - row["start"] : INFINITY;
+
         return row[columnName as keyof any] as string;
     }
 }

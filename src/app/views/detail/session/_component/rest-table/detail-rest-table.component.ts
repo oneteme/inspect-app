@@ -6,6 +6,7 @@ import {EnvRouter} from "../../../../../service/router.service";
 import {Subject} from "rxjs";
 import {DatePipe} from "@angular/common";
 import {RestRequestDto} from "../../../../../model/request.model";
+import {INFINITY} from "../../../../constants";
 
 @Component({
     selector: 'rest-table',
@@ -82,7 +83,8 @@ export class DetailRestTableComponent implements OnDestroy {
     sortingDataAccessor = (row: any, columnName: string) => {
         if (columnName == "host") return row["host"] + ":" + row["port"] as string;
         if (columnName == "start") return row['start'] as string;
-        if (columnName == "duree") return (row["end"] - row["start"]);
+        if (columnName == "duree") return row['end'] ? row["end"] - row["start"] : INFINITY;
+
         return row[columnName as keyof any] as string;
     }
 
