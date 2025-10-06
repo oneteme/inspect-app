@@ -14,8 +14,8 @@
   </ng-template>
   <ng-template #subtitle>
     <div style="display: flex; gap: 0.5em">
-      <label-chip [ngStyle]="{'cursor': instance?.configuration ? 'pointer' : '', 'pointer-events': instance?.configuration ? '' : 'none'}" [matTooltip]="instance?.collector" (click)="openConfig()">{{instance?.version}}</label-chip>
-      <label-chip color="orange" [matTooltip]="instance?.hash">{{instance?.branch}}</label-chip>
+      <label-chip [ngStyle]="{'cursor': instance?.configuration ? 'pointer' : ''}" [matTooltip]="instance?.collector" (click)="instance?.configuration ? openConfig() : ''">{{instance?.version}}</label-chip>
+      <label-chip color="orange" *ngIf="instance?.branch" [matTooltip]="instance?.hash">{{instance?.branch}}</label-chip>
     </div>
   </ng-template>
   <div style="display: flex; align-items: center; justify-content: space-between; margin-left: auto; gap: 0.5em">
@@ -74,7 +74,7 @@
     <div class="title-container">
       <div class="title">
         Activité
-        <div class="sub" style="display: flex; align-items: center; gap: 0.5em;">
+        <div class="sub" style="display: flex; align-items: center; gap: 0.5em;" *ngIf="instance?.configuration?.scheduling?.interval">
           Toute(s) les {{instance?.configuration?.scheduling?.interval | number}}s
         </div>
       </div>

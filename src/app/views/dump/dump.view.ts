@@ -142,7 +142,7 @@ export class DumpView implements OnInit, OnDestroy {
                 let id = props.item.split('_')[0];
                 let type_session = props.item.split('_')[1];
                 let type_main = props.item.split('_')[2];
-                type_session == 'main' ? this._router.open(`#/session/${type_session}/${type_main}/${id}`, '_blank') : this._router.open(`#/session/${type_session}/${id}`, '_blank');
+                type_session == 'main' ? this._router.open(`#/session/${type_main}/${id}`, '_blank') : this._router.open(`#/session/${type_session}/${id}`, '_blank');
             }
         });
 

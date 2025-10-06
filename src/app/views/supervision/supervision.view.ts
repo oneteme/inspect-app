@@ -401,7 +401,7 @@ export class SupervisionView implements OnInit, OnDestroy {
     }), finalize(() => this.isLoading = false), takeUntil(this.$destroy)).subscribe({
       next: ([last, usage, trace, log]) => {
         this.usageResourceByPeriod = usage.map(r => ({...r, date: new Date(r.date), maxHeap: this.instance.resource.maxHeap, diskTotalSpace: this.instance.resource.diskTotalSpace}));
-        this.instanceTraceByPeriod = trace.map(r => ({...r, date: new Date(r.date), queueCapacity: this.instance.configuration.tracing.queueCapacity}));
+        this.instanceTraceByPeriod = trace.map(r => ({...r, date: new Date(r.date), queueCapacity: this.instance.configuration?.tracing?.queueCapacity}));
         this.logEntryByPeriod = log.map(r => ({...r, date: this._datePipe.transform(r.instant * 1000, 'dd/MM/yyyy HH:mm:ss')}));
         this.dataSource = new MatTableDataSource(this.logEntryByPeriod);
         this.dataSource.paginator = this.paginator;

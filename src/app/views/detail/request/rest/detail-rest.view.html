@@ -12,10 +12,6 @@
           <mat-spinner *ngIf="!request.end" [diameter]="18"></mat-spinner>
         </div>
       </label-icon>
-      <div style="display: flex; align-items: center;gap: 0.5em;">
-        <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['rest'].icon }}</mat-icon>
-        {{ request.path || '' }}
-      </div>
       <div class="right">
         <button mat-icon-button [disabled]="sessionParent == null"
                 [ngStyle]="sessionParent == null ? {'pointer-events': 'none'}: ''" (click)="navigate($event,'parent')"

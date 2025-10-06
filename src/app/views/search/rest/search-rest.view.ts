@@ -9,7 +9,7 @@ import {BehaviorSubject, finalize, Subject, takeUntil} from 'rxjs';
 import {extractPeriod, Utils} from 'src/app/shared/util';
 import {TraceService} from 'src/app/service/trace.service';
 import {app, makeDatePeriod,} from 'src/environments/environment';
-import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constants';
+import {Constants, FilterConstants, FilterMap, FilterPreset, INFINITY} from '../../constants';
 import {FilterService} from 'src/app/service/filter.service';
 import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
@@ -300,7 +300,7 @@ export class SearchRestView implements OnInit, OnDestroy {
     if (columnName == "name/port") return row["host"] + ":" + row["port"] as string;
     if (columnName == "method/path") return row['path'] as string;
     if (columnName == "start") return row['start'] as string;
-    if (columnName == "durée") return (row["end"] - row["start"])
+    if (columnName == "durée") return row['end'] ? row["end"] - row["start"] : INFINITY;
 
     return row[columnName as keyof any] as string;
   };
