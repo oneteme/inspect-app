@@ -2,13 +2,18 @@ import {Component, inject, OnDestroy, OnInit} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {DataGroup, DataItem, TimelineOptions} from "vis-timeline";
-import {catchError, combineLatest, finalize, forkJoin, of, Subject, takeUntil} from "rxjs";
+import {catchError, combineLatest, finalize, forkJoin, of, Subject, switchMap, takeUntil} from "rxjs";
 import {DatePipe} from "@angular/common";
 import {app} from "../../../../../environments/environment";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {EnvRouter} from "../../../../service/router.service";
 import {Constants, INFINITY} from "../../../constants";
-import {DirectoryRequest, DirectoryRequestStage, ExceptionInfo} from "../../../../model/trace.model";
+import {
+    DirectoryRequest,
+    DirectoryRequestStage,
+    ExceptionInfo,
+    InstanceEnvironment
+} from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
 
 @Component({
@@ -33,6 +38,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
     request: DirectoryRequest;
     stages: DirectoryRequestStage[];
     exception: ExceptionInfo;
+    instance: InstanceEnvironment;
     isLoading: boolean;
 
     sessionParent: { id: string, type: string };
@@ -57,18 +63,30 @@ export class DetailLdapView implements OnInit, OnDestroy {
 
     getRequest() {
         this.request = null;
+        this.instance = null;
         this.isLoading = true;
         this.parentLoading = true;
         this.sessionParent = null;
         this._traceService.getSessionParent(RequestType.LDAP, this.params.idLdap).pipe(takeUntil(this.$destroy), catchError(() => of(null)),finalize(()=>(this.parentLoading = false))).subscribe(d=>this.sessionParent = d);
-        forkJoin({
-            request: this._traceService.getLdapRequest(this.params.idLdap),
-            stages: this._traceService.getLdapRequestStages(this.params.idLdap)
-        }).pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false)).subscribe({
-            next: (value: {request: DirectoryRequest, stages: DirectoryRequestStage[]}) => {
-                this.request = value.request;
-                this.stages = value.stages;
-                this.exception = value.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
+        forkJoin([
+            this._traceService.getLdapRequest(this.params.idLdap),
+            this._traceService.getLdapRequestStages(this.params.idLdap)
+        ]).pipe(
+          takeUntil(this.$destroy),
+          switchMap(s => {
+              return forkJoin({
+                  request: of(s[0]),
+                  stages: of(s[1]),
+                  instance: this._traceService.getInstance(s[0].instanceId)
+              })
+          }),
+          finalize(() => this.isLoading = false)
+        ).subscribe({
+            next: (result) => {
+                this.instance = result.instance;
+                this.request = result.request;
+                this.stages = result.stages;
+                this.exception = result.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
                 this.createTimeline();
             }
         });
@@ -131,5 +149,9 @@ export class DetailLdapView implements OnInit, OnDestroy {
                 queryParams: {env: this.params.env}
             });
         }
+    }
+
+    getDate(start: number) {
+        return new Date(start);
     }
 }

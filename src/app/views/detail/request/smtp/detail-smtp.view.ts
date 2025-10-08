@@ -2,14 +2,14 @@ import {Component, inject, OnDestroy, OnInit} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {DataGroup, DataItem, TimelineOptions} from "vis-timeline";
-import {catchError, combineLatest, finalize, forkJoin, of, Subject, takeUntil} from "rxjs";
+import {catchError, combineLatest, finalize, forkJoin, of, Subject, switchMap, takeUntil} from "rxjs";
 import {DatePipe} from "@angular/common";
 import {app} from "../../../../../environments/environment";
 import {EnvRouter} from "../../../../service/router.service";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {MatTableDataSource} from "@angular/material/table";
 import {Constants, INFINITY} from "../../../constants";
-import {ExceptionInfo, Mail, MailRequest, MailRequestStage} from "../../../../model/trace.model";
+import {ExceptionInfo, InstanceEnvironment, Mail, MailRequest, MailRequestStage} from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
 
 @Component({
@@ -34,6 +34,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
     request: MailRequest;
     stages: MailRequestStage[];
     exception: ExceptionInfo;
+    instance: InstanceEnvironment;
     isLoading: boolean;
 
     sessionParent: { id: string, type: string };
@@ -61,20 +62,33 @@ export class DetailSmtpView implements OnInit, OnDestroy {
 
     getRequest() {
         this.request = null;
+        this.instance = null;
         this.isLoading = true;
         this.parentLoading = true;
         this.sessionParent = null;
         this._traceService.getSessionParent(RequestType.SMTP, this.params.idSmtp).pipe(takeUntil(this.$destroy), catchError(() => of(null)),finalize(()=>(this.parentLoading = false))).subscribe(d=> this.sessionParent = d);
-        forkJoin({
-            request: this._traceService.getSmtpRequest(this.params.idSmtp),
-            stages: this._traceService.getSmtpRequestStages(this.params.idSmtp),
-            mails: this._traceService.getSmtpRequestMails(this.params.idSmtp)
-        }).pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false)).subscribe({
-            next: (value: {request: MailRequest, stages: MailRequestStage[], mails: Mail[]}) => {
-                this.request = value.request;
-                this.stages = value.stages;
-                this.request.mails = value.mails;
-                this.exception = value.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
+        forkJoin([
+            this._traceService.getSmtpRequest(this.params.idSmtp),
+            this._traceService.getSmtpRequestStages(this.params.idSmtp),
+            this._traceService.getSmtpRequestMails(this.params.idSmtp)
+        ]).pipe(
+          takeUntil(this.$destroy),
+          switchMap(s => {
+              return forkJoin({
+                  request: of(s[0]),
+                  stages: of(s[1]),
+                  mails: of(s[2]),
+                  instance: this._traceService.getInstance(s[0].instanceId)
+              })
+          }),
+          finalize(() => this.isLoading = false)
+        ).subscribe({
+            next: result => {
+                this.instance = result.instance;
+                this.request = result.request;
+                this.stages = result.stages;
+                this.request.mails = result.mails;
+                this.exception = result.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
                 this.dataSource = new MatTableDataSource(this.request.mails);
                 this.createTimeline();
             }
@@ -138,5 +152,9 @@ export class DetailSmtpView implements OnInit, OnDestroy {
                 queryParams: {env: this.params.env}
             });
         }
+    }
+
+    getDate(start: number) {
+        return new Date(start);
     }
 }

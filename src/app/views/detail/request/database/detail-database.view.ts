@@ -1,7 +1,7 @@
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 
 import {ActivatedRoute} from '@angular/router';
-import {catchError, combineLatest, finalize, forkJoin, of, Subject, takeUntil} from "rxjs";
+import {catchError, combineLatest, finalize, forkJoin, of, Subject, switchMap, takeUntil} from "rxjs";
 import {DataGroup, DataItem, TimelineOptions} from 'vis-timeline';
 import {DatePipe} from '@angular/common';
 import {TraceService} from '../../../../service/trace.service';
@@ -10,7 +10,7 @@ import {EnvRouter} from "../../../../service/router.service";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {getErrorClassName} from '../../../../shared/util';
 import {Constants, INFINITY} from "../../../constants";
-import {DatabaseRequest, DatabaseRequestStage, ExceptionInfo} from "../../../../model/trace.model";
+import {DatabaseRequest, DatabaseRequestStage, ExceptionInfo, InstanceEnvironment} from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
 
 @Component({
@@ -36,6 +36,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     request: DatabaseRequest;
     stages: DatabaseRequestStage[];
     exception: ExceptionInfo;
+    instance: InstanceEnvironment;
 
     sessionParent: { id: string, type: string };
     parentLoading: boolean = false;
@@ -73,18 +74,30 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
 
     getRequest(){
         this.request = null;
+        this.instance = null;
         this.isLoading = true;
         this.parentLoading = true;
         this.sessionParent = null;
         this._traceService.getSessionParent(RequestType.JDBC, this.params.idJdbc).pipe(takeUntil(this.$destroy), catchError(() => of(null)),finalize(()=>(this.parentLoading = false))).subscribe(d=>this.sessionParent = d);
-        forkJoin({
-            request: this._traceService.getDatabaseRequest(this.params.idJdbc),
-            stages: this._traceService.getDatabaseRequestStages(this.params.idJdbc)
-        }).pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false)).subscribe({
-            next: (value: {request: DatabaseRequest, stages: DatabaseRequestStage[]}) => {
-                this.request = value.request;
-                this.stages = value.stages;
-                this.exception = value.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
+        forkJoin([
+            this._traceService.getDatabaseRequest(this.params.idJdbc),
+            this._traceService.getDatabaseRequestStages(this.params.idJdbc)
+        ]).pipe(
+          takeUntil(this.$destroy),
+          switchMap(s => {
+              return forkJoin({
+                  request: of(s[0]),
+                  stages: of(s[1]),
+                  instance: this._traceService.getInstance(s[0].instanceId)
+              })
+          }),
+          finalize(() => this.isLoading = false)
+        ).subscribe({
+            next: result => {
+                this.instance = result.instance;
+                this.request = result.request;
+                this.stages = result.stages;
+                this.exception = result.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
                 this.createTimeline();
             }
         });
@@ -164,6 +177,10 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
             command = Array.from(distinct).join(", ");
         }
         return command;
+    }
+
+    getDate(start: number) {
+        return new Date(start);
     }
 }
 

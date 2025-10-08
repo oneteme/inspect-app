@@ -25,6 +25,7 @@ export interface RestRequest extends AbstractRequest {
   inContentEncoding: string;
   outContentEncoding: string;
   bodyContent: string;
+  linked: boolean;
 }
 
 export interface DatabaseRequest extends AbstractRequest {
