@@ -2,7 +2,7 @@ import {Component, inject, OnDestroy, OnInit} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {EnvRouter} from "../../../../service/router.service";
-import {catchError, combineLatest, finalize, forkJoin, of, Subject, takeUntil} from "rxjs";
+import {catchError, combineLatest, finalize, forkJoin, of, Subject, switchMap, takeUntil} from "rxjs";
 import {app} from "../../../../../environments/environment";
 import {RequestType, RestRequestDto} from "../../../../model/request.model";
 import {getErrorClassName, Utils} from "../../../../shared/util";
@@ -11,7 +11,7 @@ import {
   DatabaseRequestStage,
   DirectoryRequestStage,
   ExceptionInfo,
-  HttpRequestStage, RestRequest
+  HttpRequestStage, InstanceEnvironment, RestRequest
 } from "../../../../model/trace.model";
 import {DataGroup, DataItem, TimelineOptions} from "vis-timeline";
 import {DatePipe} from "@angular/common";
@@ -39,6 +39,7 @@ export class DetailRestView implements OnInit, OnDestroy {
   request: RestRequest;
   stages: HttpRequestStage[];
   exception: ExceptionInfo;
+  instance: InstanceEnvironment;
 
   isLoading: boolean;
 
@@ -64,15 +65,30 @@ export class DetailRestView implements OnInit, OnDestroy {
 
   getRequest() {
     this.request = null;
+    this.instance = null;
     this.isLoading = true;
     this.parentLoading = true;
     this.sessionParent = null;
     this._traceService.getSessionParent(RequestType.REST, this.params.idRest).pipe(takeUntil(this.$destroy), catchError(() => of(null)),finalize(()=>(this.parentLoading = false))).subscribe(d=>this.sessionParent = d);
-    forkJoin([this._traceService.getRestRequest(this.params.idRest), this._traceService.getRestRequestStages(this.params.idRest)]).pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false)).subscribe({
-      next: ([request, stages]) => {
-        this.request = request;
-        this.stages = stages;
-        this.exception = stages.find(s => s.exception?.type || s.exception?.message)?.exception;
+    forkJoin([
+      this._traceService.getRestRequest(this.params.idRest),
+      this._traceService.getRestRequestStages(this.params.idRest)
+    ]).pipe(
+      takeUntil(this.$destroy),
+      switchMap(s => {
+        return forkJoin({
+          request: of(s[0]),
+          stages: of(s[1]),
+          instance: this._traceService.getInstance(s[0].instanceId)
+        })
+      }),
+      finalize(() => this.isLoading = false)
+    ).subscribe({
+      next: (result) => {
+        this.instance = result.instance;
+        this.request = result.request;
+        this.stages = result.stages;
+        this.exception = result.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
         this.createTimeline();
       }
     });
@@ -138,5 +154,9 @@ export class DetailRestView implements OnInit, OnDestroy {
         queryParams: {env: this.params.env}
       });
     }
+  }
+
+  getDate(start: number) {
+    return new Date(start);
   }
 }

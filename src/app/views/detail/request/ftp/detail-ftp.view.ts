@@ -3,13 +3,13 @@ import {DataGroup, DataItem, TimelineOptions} from "vis-timeline";
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {DatePipe} from "@angular/common";
-import {catchError, combineLatest, finalize, forkJoin, map, of, Subject, takeUntil} from "rxjs";
+import {catchError, combineLatest, finalize, forkJoin, map, of, Subject, switchMap, takeUntil} from "rxjs";
 import {app} from "../../../../../environments/environment";
 import {EnvRouter} from "../../../../service/router.service";
 import {getErrorClassName, Utils} from "../../../../shared/util";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {Constants, INFINITY} from "../../../constants";
-import {ExceptionInfo, FtpRequest, FtpRequestStage} from "../../../../model/trace.model";
+import {ExceptionInfo, FtpRequest, FtpRequestStage, InstanceEnvironment} from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
 
 @Component({
@@ -33,6 +33,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
     request: FtpRequest;
     stages: FtpRequestStage[];
     exception: ExceptionInfo;
+    instance: InstanceEnvironment;
     isLoading: boolean;
 
     sessionParent: { id: string, type: string };
@@ -57,19 +58,31 @@ export class DetailFtpView implements OnInit, OnDestroy {
 
     getRequest() {
         this.request = null;
+        this.instance = null;
         this.isLoading = true;
         this.parentLoading = true;
         this.sessionParent = null;
 
         this._traceService.getSessionParent(RequestType.FTP, this.params.idFtp).pipe(takeUntil(this.$destroy), catchError(() => of(null)),finalize(()=>(this.parentLoading = false))).subscribe(d=>this.sessionParent = d);
-        forkJoin({
-            request: this._traceService.getFtpRequest(this.params.idFtp).pipe(map(f => ({...f, duration: Utils.getElapsedTime(f.start, f.end)}))),
-            stages: this._traceService.getFtpRequestStages(this.params.idFtp)
-        }).pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false)).subscribe({
-            next: (value: {request: FtpRequest, stages: FtpRequestStage[]}) => {
-                this.request = value.request;
-                this.stages = value.stages;
-                this.exception = value.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
+        forkJoin([
+            this._traceService.getFtpRequest(this.params.idFtp),
+            this._traceService.getFtpRequestStages(this.params.idFtp)
+        ]).pipe(
+          takeUntil(this.$destroy),
+          switchMap(s => {
+              return forkJoin({
+                  request: of(s[0]),
+                  stages: of(s[1]),
+                  instance: this._traceService.getInstance(s[0].instanceId)
+              })
+          }),
+          finalize(() => this.isLoading = false))
+        .subscribe({
+            next: result => {
+                this.instance = result.instance;
+                this.request = result.request;
+                this.stages = result.stages;
+                this.exception = result.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
                 this.createTimeline();
             }
         });
@@ -132,5 +145,9 @@ export class DetailFtpView implements OnInit, OnDestroy {
                 queryParams: {env: this.params.env}
             });
         }
+    }
+
+    getDate(start: number) {
+        return new Date(start);
     }
 }

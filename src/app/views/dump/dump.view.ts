@@ -7,6 +7,7 @@ import {TraceService} from "../../service/trace.service";
 import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
 import {DurationPipe} from "../../shared/pipe/duration.pipe";
 import {MainSession, RestSession} from "../../model/trace.model";
+import {INFINITY} from "../constants";
 
 @Component({
     templateUrl: './dump.view.html',
@@ -82,17 +83,18 @@ export class DumpView implements OnInit, OnDestroy {
     getDataGroups(): DataGroup[] {
         let restGroups = this.restSessions.map(s => ({id: s.threadName, start: s.start}));
         let mainGroups = this.mainSessions.map(s => ({id: s.threadName, start: s.start}));
-        return [...new Set([restGroups, mainGroups].flat().sort((a, b) => a.start - b.start).map(g => g.id))].map(g => ({id: g, content: g}));
+        return [...new Set([restGroups, mainGroups].flat().sort((a, b) => a.start - b.start).map(g => g.id))].map(g => ({id: g, content: g})).sort((a, b) => a.id.localeCompare(b.id));
     }
 
     getDataItems(): DataItem[] {
         return [this.restSessions.map(s => {
+            let end = s.end ? s.end * 1000 : INFINITY;
             let item: DataItem = {
                 id: `${s.id}_rest`,
                 group: s.threadName,
                 start: s.start * 1000,
-                end: s.end * 1000,
-                title: `<span>${this.pipe.transform(new Date(s.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(s.end * 1000), 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform({start: s.start, end: s.end})})<br><br>
+                end: end,
+                title: `<span>${this.pipe.transform(new Date(s.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(end), 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform({start: s.start, end: end / 1000})})<br><br>
 <span><b>[${s.method}] ${s?.path ? s?.path : ''}<br></br>${s?.query ? '?' + s?.query : ''}</b></span>`,
                 content: `[${s.method}] ${s?.path ? s?.path : ''}`,
                 className: 'rest overflow'
@@ -103,12 +105,13 @@ export class DumpView implements OnInit, OnDestroy {
             }
             return item;
         }), this.mainSessions.map(s => {
+            let end = s.end ? s.end * 1000 : INFINITY;
             let item: DataItem = {
                 id: `${s.id}_main_${s.type.toLowerCase()}`,
                 group: s.threadName,
                 start: s.start * 1000,
-                end: s.end * 1000,
-                title: `<span>${this.pipe.transform(new Date(s.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(s.end * 1000), 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform({start: s.start, end: s.end})})<br>
+                end: end,
+                title: `<span>${this.pipe.transform(new Date(s.start * 1000), 'HH:mm:ss.SSS')} - ${this.pipe.transform(new Date(end), 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform({start: s.start, end: end / 1000})})<br>
 <span><b>[${s.type}] ${s?.name}</b></span>`,
                 content: `[${s.type}] ${s?.name}`,
                 className: 'rest overflow'
