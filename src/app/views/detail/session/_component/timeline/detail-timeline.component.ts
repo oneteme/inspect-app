@@ -103,7 +103,7 @@ export class DetailTimelineComponent implements OnChanges {
         if(o.typeTimeline === "rest"){
             if(o.status >=400 && o.status <500)
                 return  "client-error"
-            if(o.status >=500 || o.status ==0)
+            if(o.end && (o.status >=500 || o.status ==0))
                 return "error"
         } else {
             if(o.exception) {

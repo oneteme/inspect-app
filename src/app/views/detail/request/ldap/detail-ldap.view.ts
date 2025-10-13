@@ -15,6 +15,7 @@ import {
     InstanceEnvironment
 } from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
+import {getErrorClassName} from "../../../../shared/util";
 
 @Component({
     templateUrl: './detail-ldap.view.html',
@@ -105,7 +106,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
                 end: end,
                 type: end <= start ? 'point' : 'range',
                 content: '',
-                className: "ldap",
+                className: `ldap ${getErrorClassName(a)}`,
                 title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end , 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform((end/1000) - (start/1000))})<br>
                         <span>${a?.args ? a.args.join('</br>') : ''}</span>`
             };

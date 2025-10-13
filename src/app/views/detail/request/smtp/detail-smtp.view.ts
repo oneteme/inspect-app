@@ -11,6 +11,7 @@ import {MatTableDataSource} from "@angular/material/table";
 import {Constants, INFINITY} from "../../../constants";
 import {ExceptionInfo, InstanceEnvironment, Mail, MailRequest, MailRequestStage} from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
+import {getErrorClassName} from "../../../../shared/util";
 
 @Component({
     templateUrl: './detail-smtp.view.html',
@@ -108,7 +109,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
                 end: end,
                 type: end <= start ? 'point' : 'range',
                 content: '',
-                className: "smtp",
+                className: `smtp ${getErrorClassName(a)}`,
                 title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end, 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform((end/1000) - (start/1000))})`
             }
         });
