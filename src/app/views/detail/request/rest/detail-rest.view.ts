@@ -4,15 +4,10 @@ import {TraceService} from "../../../../service/trace.service";
 import {EnvRouter} from "../../../../service/router.service";
 import {catchError, combineLatest, finalize, forkJoin, of, Subject, switchMap, takeUntil} from "rxjs";
 import {app} from "../../../../../environments/environment";
-import {RequestType, RestRequestDto} from "../../../../model/request.model";
+import {RequestType} from "../../../../model/request.model";
 import {getErrorClassName, Utils} from "../../../../shared/util";
 import {Constants, INFINITY} from "../../../constants";
-import {
-  DatabaseRequestStage,
-  DirectoryRequestStage,
-  ExceptionInfo,
-  HttpRequestStage, InstanceEnvironment, RestRequest
-} from "../../../../model/trace.model";
+import {ExceptionInfo, HttpRequestStage, InstanceEnvironment, RestRequest} from "../../../../model/trace.model";
 import {DataGroup, DataItem, TimelineOptions} from "vis-timeline";
 import {DatePipe} from "@angular/common";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
@@ -107,7 +102,7 @@ export class DetailRestView implements OnInit, OnDestroy {
         end: end,
         type: end <= start ? 'point' : 'range',
         content: '',
-        className: "rest",
+        className: `rest ${getErrorClassName(a)}`,
         title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end , 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform((end/1000) - (start/1000))})<br>`
       };
     });

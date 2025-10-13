@@ -458,6 +458,7 @@ export class SupervisionView implements OnInit, OnDestroy {
     let start = this.instanceTraceByPeriod[0]?.date;
     let end = this.instanceTraceByPeriod[this.instanceTraceByPeriod.length - 1]?.date;
     if(this.instance.configuration?.scheduling?.interval) this.unavailableStat = (1 - Math.floor(this.instanceTraceByPeriod.length / ((end - start + (30 * 1000)) / (this.instance.configuration.scheduling.interval * 1000)))) * 100;
+    //console.log(this.instanceTraceByPeriod.length, ((end - start) + (30 * 1000)) / (this.instance.configuration.scheduling.interval * 1000), this.instanceTraceByPeriod.length / ((end - start + (30 * 1000)) / (this.instance.configuration.scheduling.interval * 1000)))
     this.traceStat = this.instanceTraceByPeriod.reduce((acc, curr) => {
       return acc + curr.traceCount;
     }, 0)
