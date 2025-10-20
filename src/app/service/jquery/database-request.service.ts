@@ -32,10 +32,7 @@ export class DatabaseRequestService {
     getRepartitionRequestByPeriod(filters: {start: Date, end: Date, groupedBy: string, database: string, env: string}): Observable<RepartitionRequestByPeriod> {
         let args: any = {
             'column': `count:count,count_request_error:countErrorServer,count_slowest:countSlowest,start.${filters.groupedBy}:date,start.year:year`,
-            'parent': 'rest_session.id',
-            'rest_session.start.ge': filters.start.toISOString(),
-            'rest_session.start.lt': filters.end.toISOString(),
-            'rest_session.instance_env': 'instance.id',
+            'join': 'instance',
             'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
@@ -48,10 +45,7 @@ export class DatabaseRequestService {
     getRepartitionTime(filters: {start: Date, end: Date, database: string, env: string}): Observable<{elapsedTimeSlowest: number, elapsedTimeSlow: number, elapsedTimeMedium: number, elapsedTimeFast: number, elapsedTimeFastest: number}[]> {
         let args: any = {
             'column': 'count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest',
-            'parent': 'rest_session.id',
-            'rest_session.start.ge': filters.start.toISOString(),
-            'rest_session.start.lt': filters.end.toISOString(),
-            'rest_session.instance_env': 'instance.id',
+            'join': 'instance',
             'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
@@ -63,10 +57,7 @@ export class DatabaseRequestService {
     getRepartitionTimeByPeriod(filters: {start: Date, end: Date, groupedBy: string, database: string, env: string}): Observable<{elapsedTimeSlowest: number, elapsedTimeSlow: number, elapsedTimeMedium: number, elapsedTimeFast: number, elapsedTimeFastest: number, avg: number, max: number, date: number, year: number}[]> {
         let args: any = {
             'column': `count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max,start.${filters.groupedBy}:date,start.year:year`,
-            'parent': 'rest_session.id',
-            'rest_session.start.ge': filters.start.toISOString(),
-            'rest_session.start.lt': filters.end.toISOString(),
-            'rest_session.instance_env': 'instance.id',
+            'join': 'instance',
             'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),

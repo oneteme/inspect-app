@@ -48,7 +48,7 @@ export class InstanceService {
     getServerStart(filters : {env: string, start:Date, end: Date, app_name: string }): Observable<ServerStartByPeriodAndAppname> {
         return this.getInstance({
             'column': `view1.appName,view1.version,view1.start`,
-            'view': `select(app_name,version,start,rank.over(partition(environement,app_name).order(start.desc)):rk).filter(type.eq(SERVER).and(environement.eq(${filters.env})).and(start.ge(${filters.start.toISOString()})).and(start.lt(${filters.end.toISOString()}))${filters.app_name}):view1`,
+            'view': `select(app_name,version,start,rank.over(partition(environement,app_name).order(start.desc)):rk).filter(type.eq(SERVER).and(environement.eq(${filters.env})).and(start.ge(${filters.start.toISOString()})).and(start.lt(${filters.end.toISOString()}))${filters.app_name ? '.and(instance.app_name.in(' + filters.app_name + '))' : ''}):view1`,
             'view1.rk': '1', 'order': 'view1.start.desc' });
     }
 
