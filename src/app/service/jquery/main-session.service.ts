@@ -22,7 +22,7 @@ export class MainSessionService {
     getInfos(filters: { start: Date, end: Date, user: string, env: string }): Observable<{ name: string, date: number, elapsedtime: number, location: string, appName: string }[]> {
         let args = {
             'column': "name:name,start:date,elapsedtime:elapsedtime,location:location,instance.app_name:appName",
-            'main_session.instance_env': 'instance.id',
+            'instance_env': 'instance.id',
             'user': filters.user,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),

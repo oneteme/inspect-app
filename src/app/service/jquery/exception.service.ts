@@ -20,10 +20,7 @@ export class ExceptionService {
             'database_request.db': filters.database,
             'database_request.start.ge': filters.start.toISOString(),
             'database_request.start.lt': filters.end.toISOString(),
-            'database_request.parent': 'rest_session.id',
-            'rest_session.start.ge': filters.start.toISOString(),
-            'rest_session.start.lt': filters.end.toISOString(),
-            'rest_session.instance_env': 'instance.id',
+            'join': 'instance',
             'instance.environement': filters.env,
             'type': 'JDBC',
             'order': 'count.desc'

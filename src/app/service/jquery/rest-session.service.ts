@@ -181,30 +181,6 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getDependencies(filters: {start: Date, end: Date , ids: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, type: string}[]>;
-    getDependencies(filters: {start: Date, end: Date , ids: string, apiName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, appName: string, type: string}[]> ;
-    getDependencies(filters: {start: Date, end: Date , ids: string, apiName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, appName: string, type: string}[]> {
-        let args: any = {
-            'column': `rest_request.count:count,rest_request.count_succes:countSucces,rest_request.count_error_client:countErrClient,rest_request.count_error_server:countErrServer,${filters.apiName ? 'api_name:name,instance.app_name' : 'instance.app_name:name'},instance.type`,
-            'instance.id': 'instance_env',
-            'id': 'rest_request.parent',
-            'rest_request.remote': 'rest_session_join.id',
-            'rest_session_join.start.ge': filters.start.toISOString(),
-            'rest_session_join.start.lt': filters.end.toISOString(),
-            'rest_session_join.instance_env.in': filters.ids,
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString(),
-            'view': 'rest_session:rest_session_join',
-            'order': 'count.desc',
-            
-        }
-        if(filters.apiName) {
-            args['rest_session_join.api_name'] = `"${filters.apiName}"`;
-            args['rest_session_join.api_name.notNull'] = ``;
-        }
-        return this.getRestSession(args);
-    }
-
     getDependenciesNew(filters: {server: string, env: string, start: Date, end: Date, apiNames: string, users: string, versions: string }): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, appName: string, type: string}[]> {
         let args: any = {
             'column': `count:count,count_succes:countSucces,count_error_client:countErrClient,count_error_server:countErrServer,instance.app_name,instance.type`,
@@ -231,30 +207,6 @@ export class RestSessionService {
         }
         if (filters.users) {
             args['rest_session_join.user.in'] = filters.users;
-        }
-        return this.getRestSession(args);
-    }
-
-    getDependents(filters: {start: Date, end: Date , ids: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, type: string}[]>;
-    getDependents(filters: {start: Date, end: Date , ids: string, apiName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, appName: string, type: string}[]>;
-    getDependents(filters: {start: Date, end: Date , ids: string, apiName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string, appName: string, type: string}[]> {
-        let args: any = {
-            'column': `rest_session_join.count:count,rest_session_join.count_succes:countSucces,rest_session_join.count_error_client:countErrClient,rest_session_join.count_error_server:countErrServer,${filters.apiName ? 'rest_session_join.api_name:name,instance_join.app_name' : 'instance_join.app_name:name'},instance_join.type`,
-            'id': 'rest_request.parent',
-            'rest_request.remote': 'rest_session_join.id',
-            'rest_session_join.instance_env': 'instance_join.id',
-            'rest_session_join.start.ge': filters.start.toISOString(),
-            'rest_session_join.start.lt': filters.end.toISOString(),
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString(),
-            'instance_env.in': filters.ids,
-            'view': 'rest_session:rest_session_join,instance:instance_join',
-            'order': 'count.desc',
-            
-        }
-        if(filters.apiName) {
-            args['api_name'] = `"${filters.apiName}"`;
-            args['api_name.notNull'] = ``;
         }
         return this.getRestSession(args);
     }

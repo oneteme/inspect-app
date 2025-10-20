@@ -300,7 +300,7 @@ export class SupervisionView implements OnInit, OnDestroy {
   instance: Partial<InstanceEnvironment> = {};
   instances: {id: string, appName: string, start: number, end: number}[] = [];
   usageResourceByPeriod: any[] = [];
-  instanceTraceByPeriod: any[] = [];
+  instanceTraceByPeriod: {date: Date, pending: number, attempts: number, traceCount: number, queueCapacity: number}[] = [];
   logEntryByPeriod: any[] = [];
   unavailableStat:  number = 0;
   traceStat:  number = 0;
@@ -454,13 +454,25 @@ export class SupervisionView implements OnInit, OnDestroy {
     this.displayLogEntries = !this.displayLogEntries;
   }
 
-  getStatActivity() {
-    let start = this.instanceTraceByPeriod[0]?.date;
-    let end = this.instanceTraceByPeriod[this.instanceTraceByPeriod.length - 1]?.date;
-    if(this.instance.configuration?.scheduling?.interval) this.unavailableStat = (1 - Math.floor(this.instanceTraceByPeriod.length / ((end - start + (30 * 1000)) / (this.instance.configuration.scheduling.interval * 1000)))) * 100;
+  getStatActivity() { //Revoir l'indisponibilité  en seconde en fonction de la config
+    if(this.instance.configuration?.scheduling?.interval) {
+      this.unavailableStat = Math.trunc(this.instanceTraceByPeriod.reduce((acc, curr, index, array) => {
+        if(index < array.length -1) {
+          let actual = curr.date;
+          let next = array[index + 1].date;
+          let diff = (next.getTime() - actual.getTime());
+          if(diff > this.instance.configuration.scheduling.interval * 1000) {
+            return acc + (diff - (this.instance.configuration.scheduling.interval * 1000)) / (this.instance.configuration.scheduling.interval * 1000);
+          }
+        }
+        return acc;
+      }, 0));
+    }
     //console.log(this.instanceTraceByPeriod.length, ((end - start) + (30 * 1000)) / (this.instance.configuration.scheduling.interval * 1000), this.instanceTraceByPeriod.length / ((end - start + (30 * 1000)) / (this.instance.configuration.scheduling.interval * 1000)))
     this.traceStat = this.instanceTraceByPeriod.reduce((acc, curr) => {
       return acc + curr.traceCount;
     }, 0)
+
+
   }
 }

@@ -255,13 +255,9 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
 
     TAB_REQUESTS = (env: string, start: Date, end: Date, app_name: string) => {
         let groupedBy = periodManagement(start, end);
-        let serverStartAppName = "";
-        if (app_name) {
-            serverStartAppName = `.and(${app_name})`;
-        }
         return {
             // Server start
-            serverStartTable: { observable: this._instanceService.getServerStart({ env: env, start: start, end: end, app_name: serverStartAppName }) },
+            serverStartTable: { observable: this._instanceService.getServerStart({ env: env, start: start, end: end, app_name: app_name }) },
 
             //   Rest-Main Sessions exceptions 
             sessionExceptionsTable: {
