@@ -1,7 +1,7 @@
 import {
   DatabaseRequest,
   DirectoryRequest, ExceptionInfo,
-  FtpRequest, LocalRequest,
+  FtpRequest, LocalRequest, LogEntry,
   MailRequest,
   MainSession,
   RestRequest,
@@ -48,6 +48,7 @@ export interface MainSessionView extends MainSession {
   ldapRequests?: DirectoryRequestDto[];
   localRequests?: LocalRequest[];
   userActions?: UserAction[];
+  logEntries?: LogEntry[];
 }
 
 export interface RestSessionView extends RestSession {
@@ -57,6 +58,7 @@ export interface RestSessionView extends RestSession {
   mailRequests?: MailRequestDto[];
   ldapRequests?: DirectoryRequestDto[];
   localRequests?: LocalRequest[];
+  logEntries?: LogEntry[];
 }
 
 export enum RequestType {

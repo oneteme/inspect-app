@@ -17,20 +17,17 @@ import {DatabaseRequestService} from 'src/app/service/jquery/database-request.se
 import {FtpRequestService} from 'src/app/service/jquery/ftp-request.service';
 import {LdapRequestService} from 'src/app/service/jquery/ldap-request.service';
 import {
-    FtpMainExceptionsByPeriodAndappname,
     FtpSessionExceptionsByPeriodAndappname,
-    JdbcMainExceptionsByPeriodAndappname,
     JdbcSessionExceptionsByPeriodAndappname,
-    LdapMainExceptionsByPeriodAndappname,
     LdapSessionExceptionsByPeriodAndappname,
-    RestMainExceptionsByPeriodAndappname,
+
     RestSessionExceptionsByPeriodAndappname,
     SessionExceptionsByPeriodAndAppname,
-    SmtpMainExceptionsByPeriodAndappname,
     SmtpSessionExceptionsByPeriodAndappname
 } from 'src/app/model/jquery.model';
 import {smtpRequestService} from 'src/app/service/jquery/smtp-request.service';
 import {NumberFormatterPipe} from 'src/app/shared/pipe/number.pipe';
+import {LogService} from "@oneteme/inspect-ng-collector";
 
 @Component({
     templateUrl: './dashboard.component.html',
@@ -329,6 +326,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(s => s.unsubscribe());
+    LogService.info("destroy")
   }
 }
 
