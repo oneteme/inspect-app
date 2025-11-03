@@ -1,0 +1,29 @@
+<header-page titleIcon="monitoring" [iconOutlined]="true" [ui-title]="'Requête'">
+  <form class="filter-container" [formGroup]="filterForm">
+    <mat-form-field class="no-subscript md-3" appearance="outline">
+      <mat-label>Type de requête</mat-label>
+      <mat-select [formControl]="filterForm.controls.type" (selectionChange)="onTypeChange($event.value)">
+        <mat-option *ngFor="let type of REQUEST_MAPPING_TYPE | keyvalue" [value]="type.key">
+          <label-icon [icon]="type.value.icon">{{type.value.title}}</label-icon>
+        </mat-option>
+        <mat-select-trigger>
+          <label-icon [icon]="REQUEST_MAPPING_TYPE[filterForm.controls.type.value]?.icon">{{REQUEST_MAPPING_TYPE[filterForm.controls.type.value]?.title}}</label-icon>
+        </mat-select-trigger>
+      </mat-select>
+    </mat-form-field>
+    <mat-form-field style="width: 240px" class="no-subscript md-3" appearance="outline">
+      <mat-label>Période</mat-label>
+      <mat-date-range-input [formGroup]="filterForm.controls.dateRange" [rangePicker]="picker">
+        <input matStartDate formControlName="start" placeholder="Start date" readonly>
+        <input matEndDate formControlName="end" placeholder="End date" (dateChange)="onChangeEnd($event)" readonly>
+      </mat-date-range-input>
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-date-range-picker #picker></mat-date-range-picker>
+    </mat-form-field>
+    <button mat-button>
+      <mat-icon>tune</mat-icon>
+      Filtre
+    </button>
+  </form>
+</header-page>
+<ng-container #container></ng-container>

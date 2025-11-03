@@ -4,7 +4,7 @@ import {Observable} from "rxjs";
 import {
     JdbcMainExceptionsByPeriodAndappname,
     JdbcSessionExceptionsByPeriodAndappname,
-    RepartitionRequestByPeriod
+    RepartitionRequestByPeriod, RepartitionTimeAndTypeResponseByPeriod
 } from "../../model/jquery.model";
 import {DatabaseRequestDto} from "../../model/request.model";
 
@@ -27,6 +27,19 @@ export class DatabaseRequestService {
 
     getHost(type: string, filters: any): Observable<{ host: string }[]> {
         return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, { params: filters });
+    }
+
+    getRepartitionTimeAndTypeResponseByPeriod(filters: {env: string, start: Date, end: Date, groupedBy: string}): Observable<{countSuccess: number, countError: number, elapsedTimeSlowest: number, elapsedTimeSlow: number, elapsedTimeMedium: number, elapsedTimeFast: number, elapsedTimeFastest: number, avg: number, max: number, date: number, year: number}[]> {
+        let args: any = {
+            'column': `count_request_success:countSuccess,count_request_error:countError,count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max,start.${filters.groupedBy}:date,start.year:year`,
+            'instance_env': 'instance.id',
+            'instance.environement': filters.env,
+            'instance.type': 'SERVER',
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'order': `year.asc,date.asc`
+        }
+        return this.getDatabaseRequest(args);
     }
 
     getRepartitionRequestByPeriod(filters: {start: Date, end: Date, groupedBy: string, database: string, env: string}): Observable<RepartitionRequestByPeriod> {

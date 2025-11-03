@@ -1,0 +1,59 @@
+import {Component, inject, Input} from "@angular/core";
+import {DatePipe, DecimalPipe} from "@angular/common";
+import {DatabaseRequestService} from "../../../../service/jquery/database-request.service";
+import {SmtpRequestService} from "../../../../service/jquery/smtp-request.service";
+import {ChartProvider, field} from "@oneteme/jquery-core";
+import {QueryParams} from "../../../../model/conf.model";
+import {formatters, periodManagement} from "../../../../shared/util";
+import {finalize, map} from "rxjs";
+import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
+
+@Component({
+  templateUrl: './statistic-request-smtp.component.html',
+  styleUrls: ['./statistic-request-smtp.component.scss']
+})
+export class StatisticRequestSmtpComponent {
+  private readonly _datePipe = inject(DatePipe);
+  private readonly _smtpRequestService = inject(SmtpRequestService);
+
+  readonly seriesProvider: SerieProvider<string, number>[] = [
+    {data: {x: field('date'), y: field('countSuccess')}, name: 'OK', color: '#33cc33'},
+    {data: {x: field('date'), y: field('countError')}, name: 'KO', color: '#ff0000'},
+  ];
+
+  $timeAndTypeResponse: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErr: number} } = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErr: 0} };
+
+  @Input() set queryParams(queryParams: QueryParams) {
+    if(queryParams) {
+      let groupedBy = periodManagement(queryParams.period.start, queryParams.period.end);
+      this.getRepartitionTimeAndTypeResponseByPeriod(queryParams, groupedBy);
+    }
+  }
+
+  getRepartitionTimeAndTypeResponseByPeriod(queryParams: QueryParams, groupedBy: string) {
+    this.$timeAndTypeResponse.data = [];
+    this.$timeAndTypeResponse.loading = true;
+    return this._smtpRequestService.getRepartitionTimeAndTypeResponseByPeriod({
+      start: queryParams.period.start,
+      end: queryParams.period.end,
+      groupedBy: groupedBy,
+      env: queryParams.env
+    }).pipe(
+      map(r => {
+        formatters[groupedBy](r, this._datePipe);
+        return r;
+      }), finalize(() => this.$timeAndTypeResponse.loading = false)
+    ).subscribe({
+      next: res => {
+        this.$timeAndTypeResponse.data = res;
+        this.$timeAndTypeResponse.stats = this.calculateStats(res);
+      }
+    });
+  }
+
+  calculateStats(res: any[]) {
+    return res.reduce((acc: {statCount: number, statCountOk: number, statCountErr: number}, o) => {
+      return {statCount: acc.statCount + o['countSuccess'] + o['countError'], statCountOk: acc.statCountOk + o['countSuccess'], statCountErr: acc.statCountErr + o['countError']};
+    }, {statCount: 0, statCountOk: 0, statCountErr: 0});
+  }
+}

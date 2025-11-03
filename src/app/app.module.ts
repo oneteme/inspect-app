@@ -36,6 +36,7 @@ import {SearchRequestView} from "./views/search/request/search-request.view";
 import {Constants} from "./views/constants";
 import {DetailRequestView} from "./views/detail/request/detail-request.view";
 import {SupervisionView} from "./views/supervision/supervision.view";
+import {StatisticRequestView} from "./views/statistic/request/statistic-request.view";
 
 
 registerLocaleData(localeFr, 'fr-FR');
@@ -168,6 +169,10 @@ const routes: Route[] = [
         title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
           return `Dashboard > ${route.paramMap.get('server_name')}`;
         }
+      },
+      {
+        path: 'request/:request_type',
+        component: StatisticRequestView
       },
       {
         path: 'user/:user_name',

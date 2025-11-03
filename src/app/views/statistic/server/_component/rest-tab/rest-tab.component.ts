@@ -2,8 +2,10 @@ import {Component, inject, Input, OnDestroy} from "@angular/core";
 import {finalize, map, Subscription} from "rxjs";
 import {RestSessionService} from "../../../../../service/jquery/rest-session.service";
 import {formatters, groupByField, periodManagement} from "../../../../../shared/util";
-import {DatePipe} from "@angular/common";
+import {DatePipe, DecimalPipe} from "@angular/common";
 import {QueryParams} from "../../../../../model/conf.model";
+import {ChartProvider, field} from "@oneteme/jquery-core";
+import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 
 export interface HttpParams {
   server: string;
@@ -20,7 +22,13 @@ export class RestTabComponent implements OnDestroy {
   private _datePipe = inject(DatePipe);
   private subscriptions: Subscription[] = [];
 
-  $timeAndTypeResponse: { bar: any[], loading: boolean } = { bar: [], loading: true };
+  seriesProvider: SerieProvider<string, number>[] = [
+    {data: {x: field('date'), y: field('countSuccess')}, name: '2xx', color: '#33cc33'},
+    {data: {x: field('date'), y: field('countErrorClient')}, name: '4xx', color: '#ffa31a'},
+    {data: {x: field('date'), y: field('countErrorServer')}, name: '5xx', color: '#ff0000'}
+  ];
+
+  $timeAndTypeResponse: { bar: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number} } = { bar: [], loading: true, stats: {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0} };
   $evolUserResponse: { line: any[], loading: boolean } = { line: [], loading: true };
   $dependenciesResponse: { table: any[], loading: boolean } = {table: [], loading: true};
   $dependentsResponse: { table: any[], loading: boolean } = {table: [], loading: true};
@@ -62,6 +70,7 @@ export class RestTabComponent implements OnDestroy {
     ).subscribe({
       next: res => {
         this.$timeAndTypeResponse.bar = res;
+        this.$timeAndTypeResponse.stats = this.calculateRepartitionStats(res);
       }
     });
   }
@@ -170,5 +179,11 @@ export class RestTabComponent implements OnDestroy {
     this.$dependenciesResponse.table = [];
     this.$dependentsResponse.table = [];
     this.$exceptionsResponse.table = [];
+  }
+
+  calculateRepartitionStats(res: any[]) {
+    return res.reduce((acc: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number}, o) => {
+      return {statCount: acc.statCount + o['countSuccess'] + o['countErrorClient'] + o['countErrorServer'], statCountOk: acc.statCountOk + o['countSuccess'], statCountErrClient: acc.statCountErrClient + o['countErrorClient'], statCountErrorServer: acc.statCountErrorServer + o['countErrorServer']};
+    }, {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0});
   }
 }

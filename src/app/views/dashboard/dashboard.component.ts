@@ -29,7 +29,7 @@ import {
     SmtpMainExceptionsByPeriodAndappname,
     SmtpSessionExceptionsByPeriodAndappname
 } from 'src/app/model/jquery.model';
-import {smtpRequestService} from 'src/app/service/jquery/smtp-request.service';
+import {SmtpRequestService} from 'src/app/service/jquery/smtp-request.service';
 import {NumberFormatterPipe} from 'src/app/shared/pipe/number.pipe';
 
 @Component({
@@ -47,7 +47,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
     private _restService = inject(RestRequestService);
     private _datebaseService = inject(DatabaseRequestService);
     private _ftpService = inject(FtpRequestService);
-    private _smtpService = inject(smtpRequestService)
+    private _smtpService = inject(SmtpRequestService)
     private _ldapService = inject(LdapRequestService);
     private _location: Location = inject(Location);
     private _datePipe = inject(DatePipe);

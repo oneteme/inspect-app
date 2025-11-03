@@ -44,27 +44,17 @@
                     [cdkConnectedOverlayOpen]="isOpen"
                     [cdkConnectedOverlayHasBackdrop]="true"
                     (overlayOutsideClick)="onOverlayOutsideClick()">
-                <div class="overlay-container">
-                    <div class="overlay-header">
-                        <label-icon icon="tune" size="22">Filtre</label-icon>
-                    </div>
-                    <div class="overlay-content">
-                        <ng-container *ngIf="indexTab == 0; then firstTab else secondTab"></ng-container>
-                    </div>
-                    <ng-template #firstTab>
-                        <autocomplete-chip label="Nom d'API" [values]="$apiNameFilter" [selected]="apiNameSelected" (selectedChange)="onApiNameSelectedChange($event)"></autocomplete-chip>
-                        <autocomplete-chip label="Version" [values]="$apiVersionFilter" [selected]="apiVersionSelected" (selectedChange)="onApiVersionSelectedChange($event)"></autocomplete-chip>
-                        <autocomplete-chip label="Utilisateur" [values]="$apiUserFilter" [selected]="apiUserSelected" (selectedChange)="onApiUserSelectedChange($event)"></autocomplete-chip>
-                    </ng-template>
-                    <ng-template #secondTab>
-                        <autocomplete-chip label="Nom de BATCH" [values]="$batchNameFilter" [selected]="batchNameSelected" (selectedChange)="onBatchNameSelectedChange($event)"></autocomplete-chip>
-                        <autocomplete-chip label="Version" [values]="$batchVersionFilter" [selected]="batchVersionSelected" (selectedChange)="onBatchVersionSelectedChange($event)"></autocomplete-chip>
-                        <autocomplete-chip label="Utilisateur" [values]="$batchUserFilter" [selected]="batchUserSelected" (selectedChange)="onBatchUserSelectedChange($event)"></autocomplete-chip>
-                    </ng-template>
-                    <div class="overlay-actions">
-                        <button mat-flat-button color="primary" (click)="onClickFilter()">Filtrer</button>
-                    </div>
-                </div>
+              <overlay-container-filter [templateContent]="indexTab == 0 ? firstTab : secondTab" (onClick)="onClickFilter()" />
+              <ng-template #firstTab>
+                  <autocomplete-chip label="Nom d'API" [values]="$apiNameFilter" [selected]="apiNameSelected" (selectedChange)="onApiNameSelectedChange($event)"></autocomplete-chip>
+                  <autocomplete-chip label="Version" [values]="$apiVersionFilter" [selected]="apiVersionSelected" (selectedChange)="onApiVersionSelectedChange($event)"></autocomplete-chip>
+                  <autocomplete-chip label="Utilisateur" [values]="$apiUserFilter" [selected]="apiUserSelected" (selectedChange)="onApiUserSelectedChange($event)"></autocomplete-chip>
+              </ng-template>
+              <ng-template #secondTab>
+                  <autocomplete-chip label="Nom de BATCH" [values]="$batchNameFilter" [selected]="batchNameSelected" (selectedChange)="onBatchNameSelectedChange($event)"></autocomplete-chip>
+                  <autocomplete-chip label="Version" [values]="$batchVersionFilter" [selected]="batchVersionSelected" (selectedChange)="onBatchVersionSelectedChange($event)"></autocomplete-chip>
+                  <autocomplete-chip label="Utilisateur" [values]="$batchUserFilter" [selected]="batchUserSelected" (selectedChange)="onBatchUserSelectedChange($event)"></autocomplete-chip>
+              </ng-template>
             </ng-template>
         </div>
     </header-page>

@@ -508,12 +508,13 @@ export class Constants {
         dashboard: {title:'Page d\'Accueil', icon: 'home'},
         deploiment: {title:'Versions déployées', icon:'deployed_code'},
     }
+
     static readonly REQUEST_MAPPING_TYPE: {[key: string]: {title: string, icon: string}} = {
         rest: {title: 'HTTP', icon: 'public'},
         jdbc: {title: 'BDD', icon: 'database'},
         ftp: {title: 'FTP', icon: 'smb_share'},
         smtp: {title: 'SMTP', icon: 'outgoing_mail'},
-        ldap: {title: 'LDAP', icon: 'user_attributes'},
+        ldap: {title: 'LDAP', icon: 'user_attributes'}
     }
 
 
