@@ -7,6 +7,7 @@ import {QueryParams} from "../../../../model/conf.model";
 import {formatters, periodManagement} from "../../../../shared/util";
 import {finalize, map} from "rxjs";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
+import {HttpParams} from "../../server/_component/rest-tab/rest-tab.component";
 
 @Component({
   templateUrl: './statistic-request-smtp.component.html',

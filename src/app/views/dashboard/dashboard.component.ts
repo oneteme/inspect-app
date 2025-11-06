@@ -20,7 +20,7 @@ import {
     FtpMainExceptionsByPeriodAndappname,
     FtpSessionExceptionsByPeriodAndappname,
     JdbcMainExceptionsByPeriodAndappname,
-    JdbcSessionExceptionsByPeriodAndappname,
+    JdbcExceptionsByPeriodAndAppname,
     LdapMainExceptionsByPeriodAndappname,
     LdapSessionExceptionsByPeriodAndappname,
     RestMainExceptionsByPeriodAndappname,
@@ -293,8 +293,8 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
             },
 
             databaseRequestExceptionsTable: {
-                observable: this._datebaseService.getJdbcRestSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
-                    .pipe(map(((result: JdbcSessionExceptionsByPeriodAndappname[]) => {
+                observable: this._datebaseService.getJdbcExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, appName: app_name })
+                    .pipe(map(((result: JdbcExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe);
                         this.sparklineTitles.jdbc = this.setTitle('JDBC', [...result]);
                         return this.setChartData(result)

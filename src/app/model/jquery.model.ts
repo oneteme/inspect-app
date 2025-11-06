@@ -14,7 +14,7 @@ export type RestSessionExceptionsByPeriodAndappname = {countok: number,count: nu
 export type FtpMainExceptionsByPeriodAndappname = {countok: number,count: number, date: string, year: string };
 export type FtpSessionExceptionsByPeriodAndappname = {countok: number,count: number, date: string, year: string };
 export type JdbcMainExceptionsByPeriodAndappname = {countok: number,count: number, date: string, year: string };
-export type JdbcSessionExceptionsByPeriodAndappname = {countok: number,count: number, date: string, year: string };
+export type JdbcExceptionsByPeriodAndAppname = {countok: number, count: number, errorType: string, date: string, year: string };
 
 
 

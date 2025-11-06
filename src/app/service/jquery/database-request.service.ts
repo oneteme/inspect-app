@@ -3,8 +3,8 @@ import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {
     JdbcMainExceptionsByPeriodAndappname,
-    JdbcSessionExceptionsByPeriodAndappname,
-    RepartitionRequestByPeriod, RepartitionTimeAndTypeResponseByPeriod
+    JdbcExceptionsByPeriodAndAppname,
+    RepartitionRequestByPeriod, RepartitionTimeAndTypeResponseByPeriod, SessionExceptionsByPeriodAndAppname
 } from "../../model/jquery.model";
 import {DatabaseRequestDto} from "../../model/request.model";
 
@@ -80,7 +80,7 @@ export class DatabaseRequestService {
         return this.getDatabaseRequest(args);
     }
 
-    getJdbcRestSessionExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<JdbcSessionExceptionsByPeriodAndappname[]> {
+    getJdbcExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, appName?: string }): Observable<JdbcExceptionsByPeriodAndAppname[]> {
         let args = {
             'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
             'join': 'exception,instance',
@@ -89,8 +89,8 @@ export class DatabaseRequestService {
             'start.lt': filters.end.toISOString(),
             'order': 'date.asc'
         }
-        if(filters.app_name) {
-            args['instance.app_name.in'] = filters.app_name;
+        if(filters.appName) {
+            args['instance.app_name.in'] = filters.appName;
         }
         return this.getDatabaseRequest(args);
     }
@@ -108,7 +108,4 @@ export class DatabaseRequestService {
               'order': 'date.asc' }
         return this.getDatabaseRequest(args);
     }
-
-
-
 }
