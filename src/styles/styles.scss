@@ -100,6 +100,24 @@ mat-form-field.no-subscript {
     background-color: #FF6F61;
     border-color: #FF6F61;
   }
+
+  &.log-info{
+    color: #2196f3;
+    background-color: #c1e4ff;
+    border-color: #71bcf7;
+  }
+
+  &.log-error{
+    color:  rgb(187, 33, 36);
+    background-color: #eed0d0;
+    border-color: #c35449;
+  }
+
+  &.log-warn{
+    color: rgb(249, 173, 78);
+    background-color: #ffe7cf;
+    border-color: #f5b87a;
+  }
 }
 
 .vis-range.client-error {
