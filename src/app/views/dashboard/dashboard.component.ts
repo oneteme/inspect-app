@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, inject, OnDestroy} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
-import {combineLatest, finalize, forkJoin, map, Observable, Subscription, take} from 'rxjs';
+import {combineLatest, finalize, map, Observable, Subscription, take} from 'rxjs';
 import {DatePipe, DecimalPipe, Location} from '@angular/common';
 import {app, makeDatePeriod} from 'src/environments/environment';
 import {EnvRouter} from "../../service/router.service";
@@ -17,16 +17,11 @@ import {DatabaseRequestService} from 'src/app/service/jquery/database-request.se
 import {FtpRequestService} from 'src/app/service/jquery/ftp-request.service';
 import {LdapRequestService} from 'src/app/service/jquery/ldap-request.service';
 import {
-    FtpMainExceptionsByPeriodAndappname,
     FtpSessionExceptionsByPeriodAndappname,
-    JdbcMainExceptionsByPeriodAndappname,
     JdbcSessionExceptionsByPeriodAndappname,
-    LdapMainExceptionsByPeriodAndappname,
     LdapSessionExceptionsByPeriodAndappname,
-    RestMainExceptionsByPeriodAndappname,
     RestSessionExceptionsByPeriodAndappname,
     SessionExceptionsByPeriodAndAppname,
-    SmtpMainExceptionsByPeriodAndappname,
     SmtpSessionExceptionsByPeriodAndappname
 } from 'src/app/model/jquery.model';
 import {smtpRequestService} from 'src/app/service/jquery/smtp-request.service';
