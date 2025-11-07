@@ -26,7 +26,6 @@ import {
 } from 'src/app/model/jquery.model';
 import {smtpRequestService} from 'src/app/service/jquery/smtp-request.service';
 import {NumberFormatterPipe} from 'src/app/shared/pipe/number.pipe';
-import {LogService} from "@oneteme/inspect-ng-collector";
 
 @Component({
     templateUrl: './dashboard.component.html',
@@ -325,7 +324,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
 
   ngOnDestroy(): void {
     this.subscriptions.forEach(s => s.unsubscribe());
-    LogService.info("destroy")
   }
 }
 
