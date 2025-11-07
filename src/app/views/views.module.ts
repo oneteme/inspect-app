@@ -66,6 +66,7 @@ import {DetailRestView} from "./detail/request/rest/detail-rest.view";
 import {SupervisionView} from "./supervision/supervision.view";
 import {StacktraceDialogComponent} from "./supervision/_component/stacktrace-dialog/stacktrace-dialog.component";
 import {ConfigDialogComponent} from "./supervision/_component/config-dialog/config-dialog.component";
+import {StageDialogComponent} from "./detail/session/rest/stage-dialog/stage-dialog.component";
 
 
 
@@ -128,7 +129,8 @@ import {ConfigDialogComponent} from "./supervision/_component/config-dialog/conf
     ActionTableComponent,
     SearchRequestView,
     StacktraceDialogComponent,
-    ConfigDialogComponent
+    ConfigDialogComponent,
+    StageDialogComponent
   ]
 })
 export class ViewsModule { }

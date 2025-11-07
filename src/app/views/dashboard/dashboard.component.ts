@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, inject, OnDestroy} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
-import {combineLatest, finalize, forkJoin, map, Observable, Subscription, take} from 'rxjs';
+import {combineLatest, finalize, map, Observable, Subscription, take} from 'rxjs';
 import {DatePipe, DecimalPipe, Location} from '@angular/common';
 import {app, makeDatePeriod} from 'src/environments/environment';
 import {EnvRouter} from "../../service/router.service";
@@ -20,7 +20,6 @@ import {
     FtpSessionExceptionsByPeriodAndappname,
     JdbcSessionExceptionsByPeriodAndappname,
     LdapSessionExceptionsByPeriodAndappname,
-
     RestSessionExceptionsByPeriodAndappname,
     SessionExceptionsByPeriodAndAppname,
     SmtpSessionExceptionsByPeriodAndappname

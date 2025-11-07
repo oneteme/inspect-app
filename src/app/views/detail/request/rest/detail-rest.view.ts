@@ -116,7 +116,7 @@ export class DetailRestView implements OnInit, OnDestroy {
       type: "background"
     });
 
-    let groups: any[] = this.stages.map((a:HttpRequestStage, i:number) => ({ id: i, content: a?.name,treeLevel: 2}));
+    let groups: any[] = this.stages.map((a:HttpRequestStage, i:number) => ({ id: i, content: a?.name, treeLevel: 2}));
     groups.splice(0, 0, {id: 'parent', content: this.request.threadName, treeLevel: 1, nestedGroups:groups.map(g=>(g.id))});
     let padding = (Math.ceil((timelineEnd - timelineStart)*0.01));
     this.dataItems = items;

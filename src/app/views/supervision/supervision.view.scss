@@ -37,7 +37,7 @@
   }
 }
 
-.activity-content {
+.activity-container {
   display: flex;
   height: 300px;
 }
@@ -51,7 +51,7 @@
   gap: 16px;
 }
 
-.activity-chart {
+.activity-content {
   flex-grow: 1;
 }
 
@@ -67,6 +67,18 @@
 }
 
 .stats-card {
+  &.trace {
+    cursor: pointer;
+    &:hover {
+      transform: translateY(-3px);
+    }
+  }
+  &.unavailable {
+    cursor: pointer;
+    &:hover {
+        transform: translateY(-3px);
+    }
+  }
   &.report:hover {
     transform: translateY(-3px);
   }

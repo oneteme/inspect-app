@@ -197,5 +197,5 @@ export interface LogEntry {
   instant: number;
   level: string;
   message: string;
-  stackRows: StackTraceRow[];
+  stacktrace: StackTraceRow[];
 }

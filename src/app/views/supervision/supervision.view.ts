@@ -296,6 +296,74 @@ export class SupervisionView implements OnInit, OnDestroy {
       }
     }
   };
+  readonly ATTEMPT_INSTANCE_TRACE_BY_PERIOD_LINE: ChartProvider<string, number> = {
+    height: 300,
+    stacked: false,
+    ytitle: '',
+    series: [
+      {data: {x: field('date'), y: field('attempts')}, name: 'Tentative'}
+    ],
+    options: {
+      chart: {
+        animations: {
+          enabled: false
+        },
+        zoom: {
+          type: 'x',
+          enabled: true,
+          autoScaleYaxis: true
+        },
+        toolbar: {
+          show: true,
+          tools: {
+            download: true,
+            selection: true,
+            zoom: true,
+            zoomin: true,
+            zoomout: true,
+            pan: true,
+            reset: true,
+            customIcons: []
+          },
+          export: {
+            csv: {
+              columnDelimiter: ',',
+              headerCategory: 'category',
+              headerValue: 'value'
+            }
+          },
+          autoSelected: 'zoom'
+        }
+      },
+      xaxis: {
+        labels: {
+          datetimeUTC: false
+        }
+      },
+      yaxis: {
+        labels: {
+          formatter: (value) => {
+            return this._decimalPipe.transform(value);
+          }
+        }
+      },
+      stroke: {
+        curve: 'smooth',
+        width: [1]
+      },
+      dataLabels: {
+        enabled: false
+      },
+      legend: {
+        showForSingleSeries: true
+      },
+      tooltip: {
+        x: {
+          format: 'dd MMM HH:mm:ss'
+        }
+      }
+    }
+  };
 
   instance: Partial<InstanceEnvironment> = {};
   instances: {id: string, appName: string, start: number, end: number}[] = [];
@@ -313,7 +381,7 @@ export class SupervisionView implements OnInit, OnDestroy {
   isLoadingInstances = false;
   isInactiveInstance = false;
   reloadInstances = true;
-  displayLogEntries = false;
+  activityDisplayType: 'TRACE' | 'ATTEMPT' | 'REPORT' = 'TRACE';
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild('sort') sort: MatSort;
@@ -398,7 +466,7 @@ export class SupervisionView implements OnInit, OnDestroy {
         this._instanceTraceService.getInstanceTraceByPeriod({instance: this.params.instance, start: this.params.start, end: this.params.end}),
         this._traceService.getLogEntryByPeriod(this.params.instance, this.params.start, this.params.end)
       ]);
-    }), finalize(() => this.isLoading = false), takeUntil(this.$destroy)).subscribe({
+    }), takeUntil(this.$destroy)).subscribe({
       next: ([last, usage, trace, log]) => {
         this.usageResourceByPeriod = usage.map(r => ({...r, date: new Date(r.date), maxHeap: this.instance.resource.maxHeap, diskTotalSpace: this.instance.resource.diskTotalSpace}));
         this.instanceTraceByPeriod = trace.map(r => ({...r, date: new Date(r.date), queueCapacity: this.instance.configuration?.tracing?.queueCapacity}));
@@ -406,10 +474,11 @@ export class SupervisionView implements OnInit, OnDestroy {
         this.dataSource = new MatTableDataSource(this.logEntryByPeriod);
         this.dataSource.paginator = this.paginator;
         this.dataSource.sort = this.sort;
-        if(last && last[0].date && this.instance.configuration?.scheduling?.interval) {
+        if(last?.length && last[0].date && this.instance.configuration?.scheduling?.interval) {
           this.isInactiveInstance =  (new Date(last[0].date) < new Date(new Date().getTime() - (this.instance.configuration.scheduling.interval + 60) * 1000));
         }
         this.getStatActivity();
+        this.isLoading = false
       }
     });
   }
@@ -450,11 +519,7 @@ export class SupervisionView implements OnInit, OnDestroy {
     });
   }
 
-  openLog() {
-    this.displayLogEntries = !this.displayLogEntries;
-  }
-
-  getStatActivity() { //Revoir l'indisponibilité  en seconde en fonction de la config
+  getStatActivity() {
     if(this.instance.configuration?.scheduling?.interval) {
       this.unavailableStat = Math.trunc(this.instanceTraceByPeriod.reduce((acc, curr, index, array) => {
         if(index < array.length -1) {
@@ -462,17 +527,15 @@ export class SupervisionView implements OnInit, OnDestroy {
           let next = array[index + 1].date;
           let diff = (next.getTime() - actual.getTime());
           if(diff > this.instance.configuration.scheduling.interval * 1000) {
-            return acc + (diff - (this.instance.configuration.scheduling.interval * 1000)) / (this.instance.configuration.scheduling.interval * 1000);
+            let attempts = Math.trunc(diff / (this.instance.configuration.scheduling.interval * 1000)) - 1;
+            return acc + this.instance.configuration.scheduling.interval * attempts;
           }
         }
         return acc;
       }, 0));
     }
-    //console.log(this.instanceTraceByPeriod.length, ((end - start) + (30 * 1000)) / (this.instance.configuration.scheduling.interval * 1000), this.instanceTraceByPeriod.length / ((end - start + (30 * 1000)) / (this.instance.configuration.scheduling.interval * 1000)))
     this.traceStat = this.instanceTraceByPeriod.reduce((acc, curr) => {
       return acc + curr.traceCount;
     }, 0)
-
-
   }
 }

@@ -15,7 +15,7 @@ import {
     DirectoryRequest,
     DirectoryRequestStage,
     FtpRequest,
-    FtpRequestStage, HttpRequestStage,
+    FtpRequestStage, HttpRequestStage, HttpSessionStage,
     InstanceEnvironment,
     LocalRequest, LogEntry, Mail,
     MailRequest, MailRequestStage,
@@ -80,6 +80,10 @@ export class TraceService {
 
     getRestRequest(idRest: string): Observable<RestRequest> {
         return this.http.get<RestRequest>(`${this.server}/request/rest/${idRest}`);
+    }
+
+    getRestSessionStages(idSession: string): Observable<HttpSessionStage[]> {
+        return this.http.get<HttpSessionStage[]>(`${this.server}/session/rest/${idSession}/stage`);
     }
 
     getRestRequestStages(idRest: string): Observable<HttpRequestStage[]> {
