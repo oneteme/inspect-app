@@ -7,7 +7,7 @@ import {app} from "../../../../../environments/environment";
 import {Utils} from "../../../../shared/util";
 import {EnvRouter} from "../../../../service/router.service";
 import {RequestType, RestSessionView} from "../../../../model/request.model";
-import {HttpSessionStage, InstanceEnvironment} from "../../../../model/trace.model";
+import {HttpSessionStage, InstanceEnvironment, StackTraceRow} from "../../../../model/trace.model";
 import {MatDialog} from "@angular/material/dialog";
 import {StageDialogComponent} from "./stage-dialog/stage-dialog.component";
 

@@ -131,54 +131,7 @@
                [data]="instanceTraceByPeriod" [isLoading]="isLoading"></chart>
         <chart *ngSwitchCase="'ATTEMPT'" type="line" [config]="ATTEMPT_INSTANCE_TRACE_BY_PERIOD_LINE"
                [data]="instanceTraceByPeriod" [isLoading]="isLoading"></chart>
-        <div *ngSwitchCase="'REPORT'" style="height: 252px; ">
-          <div style="display: flex; flex-direction: column; justify-content: space-between; height: 100%">
-            <table mat-table [dataSource]="dataSource" #sort="matSort"
-                   matSort matSortActive="date" matSortDirection="desc">
-
-              <ng-container matColumnDef="date">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Date</th>
-                <td mat-cell *matCellDef="let row">
-                  {{ row.date }}
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="level">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Type</th>
-                <td mat-cell *matCellDef="let row">
-                  <span> {{ row.level }}  </span>
-                </td>
-              </ng-container>
-
-              <ng-container matColumnDef="message">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Message</th>
-                <td mat-cell *matCellDef="let row">
-                  <span> {{ row.message }}  </span>
-                </td>
-              </ng-container>
-              <ng-container matColumnDef="action">
-                <th mat-header-cell *matHeaderCellDef></th>
-                <td mat-cell *matCellDef="let row">
-                  <button mat-icon-button color="primary" [disabled]="!row.stacktrace" (click)="open(row)"
-                          matTooltip="Consulter la Stack">
-                    <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
-                  </button>
-                </td>
-              </ng-container>
-
-              <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-            </table>
-            <div [hidden]="dataSource?.data?.length < 4">
-              <mat-paginator [pageSize]="3" [hidePageSize]="true" showFirstLastButtons></mat-paginator>
-            </div>
-          </div>
-          <div [hidden]="dataSource?.data?.length" style="height: 100%">
-            <div class="loading">
-              {{ isLoading ? 'Chargement des données...' : 'Aucune donnée' }}
-            </div>
-          </div>
-        </div>
+        <report-table *ngSwitchCase="'REPORT'" style="height: 252px;" [data]="logEntryByPeriod" (onClick)="open($event)"></report-table>
       </div>
     </div>
   </div>

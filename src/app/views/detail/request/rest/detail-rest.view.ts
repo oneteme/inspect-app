@@ -33,7 +33,7 @@ export class DetailRestView implements OnInit, OnDestroy {
 
   request: RestRequest;
   stages: HttpRequestStage[];
-  exception: ExceptionInfo;
+  exception: Partial<ExceptionInfo>;
   instance: InstanceEnvironment;
 
   isLoading: boolean;
@@ -83,7 +83,7 @@ export class DetailRestView implements OnInit, OnDestroy {
         this.instance = result.instance;
         this.request = result.request;
         this.stages = result.stages;
-        this.exception = result.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
+        this.exception = result.stages.find(s => s.exception?.type || s.exception?.message)?.exception || { message: result.request.bodyContent };
         this.createTimeline();
       }
     });
