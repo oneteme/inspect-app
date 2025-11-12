@@ -153,7 +153,8 @@ export class TraceService {
     getLogEntryByPeriod(instanceId: string, start: Date, end: Date): Observable<LogEntry[]> {
         let params: any = {
             'start.ge': start.toISOString(),
-            'start.lt': end.toISOString()
+            'start.lt': end.toISOString(),
+            'parent.isNull': ''
         };
         return this.http.get<LogEntry[]>(`${this.server}/instance/${instanceId}/log/entry`, { params: params });
     }
