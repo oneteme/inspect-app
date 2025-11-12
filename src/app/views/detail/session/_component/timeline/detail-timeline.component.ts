@@ -9,6 +9,14 @@ import {InstanceEnvironment} from "../../../../../model/trace.model";
 let options: any = {
     clickToUse: true,
     selectable : false,
+    cluster: {
+        clusterCriteria : (firstItem: any, secondItem: any) => {
+            if(firstItem.id.toString().includes("log_") && secondItem.id.toString().includes("log_")){
+                return true;
+            }
+            return false;
+        },
+    },
     tooltip: {
         followMouse: true,
     },
@@ -74,7 +82,6 @@ export class DetailTimelineComponent implements OnChanges {
                     (this.request.databaseRequests ?? []).map(r => ({...r, typeTimeline: 'database'})),
                     (this.request.localRequests ?? []).map(r => ({...r, typeTimeline: 'local'})),
                     (this.request.logEntries ?? []).map(r => ({...r, typeTimeline: 'log'})))
-
                 this.dataArray.splice(0, 0, { ...this.request, typeTimeline: 'stage' });
                 this.sortInnerArrayByDate(this.dataArray);
                 if (this.request['type'] != null && this.request['type'] === "VIEW") {
@@ -130,8 +137,9 @@ export class DetailTimelineComponent implements OnChanges {
     getDataForRange(arr: any[], start: number, end: number){
         return arr.filter(c=>(c.start>=start && c.end <=end)
             || (c.start <start && c.end >= start  && c.end <=end)
-            || (c.start>= start && c.start <= end &&c.end > end )
-            || (c.start< start && c.end > end))
+            || (c.start>= start && c.start <= end && c.end > end)
+            || (c.start< start && c.end > end)
+            || (c.instant>= start && c.instant <= end))
     }
 
     dataSetup(dataArray:any[], isWebapp: boolean): DataItem[] {
@@ -173,8 +181,8 @@ export class DetailTimelineComponent implements OnChanges {
         const el = document.createElement('span');
         el.innerHTML = `<span class="material-icons ${le.level.toLowerCase()}" >${le.level.toLowerCase()}</span>`
         return {
-            id: id,
-            group: 0,
+            id: `log_${id}`,
+            group:  this.isWebApp ? 0 : this.dataArray[0].threadName,
             content: el as unknown as any,
             start: le.instant * 1000,
             title: `${this.pipe.transform(new Date(le.instant * 1000), 'HH:mm:ss.SSS')}</span><br><h4>${le.message || ''}</h4>`,
