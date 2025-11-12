@@ -248,3 +248,9 @@ export function countByFields<T>(arr: any[], combiner: (args: any[], o: string)=
         return acc;
     }, {});
 }
+
+export function showifnotnull(value: any,fn: (value:any)=>any) {
+    if(value)
+        return fn(value);
+    return "";
+}

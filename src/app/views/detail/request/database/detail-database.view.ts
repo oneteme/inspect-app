@@ -8,7 +8,7 @@ import {TraceService} from '../../../../service/trace.service';
 import {app} from '../../../../../environments/environment';
 import {EnvRouter} from "../../../../service/router.service";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
-import {getErrorClassName} from '../../../../shared/util';
+import {getErrorClassName, showifnotnull} from '../../../../shared/util';
 import {Constants, INFINITY} from "../../../constants";
 import {DatabaseRequest, DatabaseRequestStage, ExceptionInfo, InstanceEnvironment} from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
@@ -114,10 +114,22 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
                 start: start,
                 end: end,
                 type: end <= start ? 'point' : 'range',
-                content: c.commands? `${this.getCommmand(c.commands)}` : "",
+               // content: c.commands? `${this.getCommmand(c.commands)}` : "",
+                content: `<div class="content">
+                            <div style="font-weight: 600;text-transform: uppercase;font-size: 0.75rem;">
+                                ${showifnotnull(c.command, ()=> c.command)}
+                            </div>
+                            <div style="color: #7f8c8d;font-style: italic;font-size: 0.75rem;">
+                                ${showifnotnull(c.arg, ()=> `[${c.arg}]`)}
+                            </div>
+                            <div  style="background-color: #ecf0f1;color: #2c3e50;padding: 0.125rem 0.375rem; border-radius: 12px; font-weight: 500; font-size: 0.75rem; min-width: 1.5rem; text-align: center;">
+                                ${showifnotnull(c.count, ()=> c.count)}
+                            </div>
+                        </div>
+                          `,
                 className: `database overflow ${getErrorClassName(c)}` ,
                 title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end, 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform((end / 1000) - (start / 1000))})<br>
-                        <span>${c.count ? 'count: ' + c.count : ''}</span>`
+                        <span>${showifnotnull(c.command, ()=> c.command)}${showifnotnull(c.arg, ()=> `[${c.arg}]`)} => ${showifnotnull(c.count, ()=> c.count)}</span>`
             }
         })
         items.splice(0, 0, {
@@ -130,8 +142,8 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
             type: "background"
         });
 
-        let groups: any[] = this.stages.map((g: DatabaseRequestStage,i:number ) => ({ id: `${i}`, content: g?.name + (g.count? ` (${g.count})`:''), title: this.jdbcActionDescription[g?.name], treeLevel: 2 }));
-        groups.splice(0, 0, {id: 'parent', content: this.request.threadName, treeLevel: 1, nestedGroups: groups.map(g=> (g.id))})
+        let groups: any[] = this.stages.map((g: DatabaseRequestStage,i:number ) => ({ id: `${i}`, content: g?.name, title: this.jdbcActionDescription[g?.name], treeLevel: 2 }));
+        groups.splice(0, 0, {id: 'parent', content: this.request.command, treeLevel: 1, nestedGroups: groups.map(g=> (g.id))})
         let padding = (Math.ceil((timelineEnd - timelineStart) * 0.01))
 
         this.dataGroups = groups;
