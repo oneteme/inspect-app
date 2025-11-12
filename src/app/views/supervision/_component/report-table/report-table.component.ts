@@ -23,7 +23,6 @@ export class ReportTableComponent {
       }));
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
-      console.log(this.dataSource);
     } else {
       this.dataSource = new MatTableDataSource([]);
     }
