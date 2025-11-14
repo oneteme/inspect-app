@@ -46,7 +46,7 @@ export class DeploimentComponent implements OnDestroy  {
 
     getLastServerStart(){
         this.lastServerStart.isLoading =true;
-
+        this.today = new Date();
         this.subscriptions.push(this._instanceService.getlastServerStart({ env: this.params.env})
         .pipe(finalize(()=>(this.lastServerStart.isLoading =false)))
         .subscribe({
@@ -80,6 +80,8 @@ export class DeploimentComponent implements OnDestroy  {
     ngOnDestroy(): void {
         this.subscriptions.forEach(s => s.unsubscribe());
     }
+
+    protected readonly Date = Date;
 }
 
 const sortingDataAccessor = (row: any, columnName: string) => {
