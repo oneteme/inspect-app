@@ -21,7 +21,7 @@
             </mat-card-title>
             <mat-card-content>
                 <div class="ellipsis" style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
-                    <span class="badge"
+                    <span class="badge status-badge"
                           [ngClass]="{'success': session.status >= 200 && session.status < 300,
                                       'warning': session.status >= 300 && session.status < 500,
                                       'fail': session.status >= 500,
@@ -71,7 +71,6 @@
             <mat-card-title>
               <label-icon icon="widgets">
                 {{instance.name}}
-                <span style="font-size: 12px; font-style: italic; font-weight: normal; margin-left: 0.5em" [matTooltip]="instance.collector">{{instance.version}}</span>
               </label-icon>
               <div class="right">
                 <button mat-icon-button [matMenuTriggerFor]="menuServer">
@@ -79,15 +78,35 @@
                 </button>
               </div>
             </mat-card-title>
-            <mat-card-content style="margin-left: 1em;">
-              <label-icon [icon]="'data_table'">
-                <div style="font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 4px;">
-                  {{instance.os}}
+            <mat-card-content>
+              <!-- Environnement et Version -->
+              <div style="display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap;">
+                <span class="info-badge env-badge">
+                  <mat-icon class="material-symbols-outlined" style="font-size: 16px; width: 16px; height: 16px;">cloud</mat-icon>
+                  {{instance.env}}
+                </span>
+                <span class="info-badge version-badge" [matTooltip]="instance.collector">
+                  <mat-icon class="material-symbols-outlined" style="font-size: 16px; width: 16px; height: 16px;">tag</mat-icon>
+                  {{instance.version}}
+                </span>
+                <span *ngIf="instance.branch" class="info-badge branch-badge" [matTooltip]="instance.hash">
+                  <mat-icon class="material-symbols-outlined" style="font-size: 16px; width: 16px; height: 16px;">fork_right</mat-icon>
+                  {{instance.branch}}
+                </span>
+              </div>
+
+              <!-- Système d'exploitation -->
+              <div style="display: flex; align-items: start; gap: 12px; padding: 12px; background: rgba(0, 0, 0, 0.02); border-radius: 8px; border-left: 3px solid #3b82f6;">
+                <mat-icon class="material-symbols-outlined" style="font-size: 24px; width: 24px; height: 24px; color: #3b82f6;">computer</mat-icon>
+                <div style="flex: 1;">
+                  <div style="font-weight: 600; font-size: 14px; color: #1e293b; margin-bottom: 4px;">
+                    {{instance.os}}
+                  </div>
+                  <div style="font-size: 12px; color: #64748b; line-height: 1.5;">
+                    {{instance.re}}
+                  </div>
                 </div>
-                <div style="font-style: italic; font-size: 12px; color: #6b7280;">
-                  {{instance.re}}
-                </div>
-              </label-icon>
+              </div>
             </mat-card-content>
             <mat-card-footer>
               <label-icon icon="person" [iconOutlined]="true" [size]="20">

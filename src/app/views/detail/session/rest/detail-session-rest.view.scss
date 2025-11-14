@@ -168,6 +168,45 @@ mat-card-footer {
   }
 }
 
+// Badge de statut - Design original
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+  white-space: nowrap;
+  color: white;
+  font-variant-numeric: tabular-nums;
+
+  &.success {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  }
+
+  &.warning {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  }
+
+  &.fail {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+  }
+
+  &.unavailable {
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+  }
+
+  &.in-progress {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+}
+
 // Badge au niveau du contenu (à côté de GET/POST)
 mat-card-content .badge {
   font-size: 12px;
@@ -181,12 +220,22 @@ mat-card-content .badge {
   }
 }
 
+// Animations
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
   }
   50% {
     opacity: 0.85;
+  }
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
   }
 }
 
@@ -198,6 +247,58 @@ mat-card-content .badge {
   50% {
     opacity: 0.95;
     box-shadow: 0 4px 10px rgba(59, 130, 246, 0.5);
+  }
+}
+
+// ===========================
+// Badges d'Information (Environnement, Version, Branche)
+// ===========================
+.info-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  cursor: default;
+
+  mat-icon {
+    flex-shrink: 0;
+  }
+
+  &.env-badge {
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    color: #1e40af;
+    border: 1px solid #93c5fd;
+
+    &:hover {
+      background: linear-gradient(135deg, #bfdbfe 0%, #93c5fd 100%);
+      box-shadow: 0 2px 6px rgba(59, 130, 246, 0.2);
+    }
+  }
+
+  &.version-badge {
+    background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+    color: #065f46;
+    border: 1px solid #6ee7b7;
+
+    &:hover {
+      background: linear-gradient(135deg, #a7f3d0 0%, #6ee7b7 100%);
+      box-shadow: 0 2px 6px rgba(16, 185, 129, 0.2);
+    }
+  }
+
+  &.branch-badge {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    color: #92400e;
+    border: 1px solid #fcd34d;
+
+    &:hover {
+      background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
+      box-shadow: 0 2px 6px rgba(245, 158, 11, 0.2);
+    }
   }
 }
 
