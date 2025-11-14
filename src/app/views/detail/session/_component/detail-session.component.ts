@@ -1,19 +1,189 @@
-import {Component, inject, Input} from "@angular/core";
+import {Component, inject, Input, OnChanges, SimpleChanges} from "@angular/core";
 import {EnvRouter} from "../../../../service/router.service";
 import {MainSessionView, RestSessionView} from "../../../../model/request.model";
 import {InstanceEnvironment} from "../../../../model/trace.model";
+
+interface TabData {
+    label: string;
+    icon: string;
+    count: number;
+    visible: boolean;
+    type: string;
+    hasError: boolean;
+    errorCount: number;
+}
+
 
 @Component({
     selector: 'detail-session',
     templateUrl: './detail-session.component.html',
     styleUrls: ['./detail-session.component.scss']
 })
-export class DetailSessionComponent {
+export class DetailSessionComponent implements OnChanges {
     private readonly _router: EnvRouter = inject(EnvRouter);
 
     @Input() session: MainSessionView | RestSessionView;
     @Input() completedSession: MainSessionView | RestSessionView;
     @Input() instance: InstanceEnvironment;
+
+    tabs: TabData[] = [];
+    selectedTabIndex: number = 0;
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes['completedSession'] && this.session) {
+            this.initTabs();
+        }
+    }
+
+    initTabs() {
+        this.tabs = [
+            {
+                label: 'API',
+                icon: 'call_made',
+                count: this.session.restRequests?.length || 0,
+                visible: !!this.session.restRequests?.length,
+                type: 'rest',
+                hasError: this.hasRestErrors(),
+                errorCount: this.getRestErrorCount()
+            },
+            {
+                label: 'LOCAL',
+                icon: 'memory',
+                count: this.session.localRequests?.length || 0,
+                visible: !!this.session.localRequests?.length,
+                type: 'local',
+                hasError: this.hasLocalErrors(),
+                errorCount: this.getLocalErrorCount()
+            },
+            {
+                label: 'FTP',
+                icon: 'smb_share',
+                count: this.session.ftpRequests?.length || 0,
+                visible: !!this.session.ftpRequests?.length,
+                type: 'ftp',
+                hasError: this.hasFtpErrors(),
+                errorCount: this.getFtpErrorCount()
+            },
+            {
+                label: 'SMTP',
+                icon: 'outgoing_mail',
+                count: this.session.mailRequests?.length || 0,
+                visible: !!this.session.mailRequests?.length,
+                type: 'smtp',
+                hasError: this.hasSmtpErrors(),
+                errorCount: this.getSmtpErrorCount()
+            },
+            {
+                label: 'LDAP',
+                icon: 'user_attributes',
+                count: this.session.ldapRequests?.length || 0,
+                visible: !!this.session.ldapRequests?.length,
+                type: 'ldap',
+                hasError: this.hasLdapErrors(),
+                errorCount: this.getLdapErrorCount()
+            },
+            {
+                label: 'BDD',
+                icon: 'database',
+                count: this.session.databaseRequests?.length || 0,
+                visible: this.session.databaseRequests?.length > 0,
+                type: 'database',
+                hasError: this.hasDatabaseErrors(),
+                errorCount: this.getDatabaseErrorCount()
+            },
+            {
+                label: 'Actions',
+                icon: 'web_traffic',
+                count: this.session['userActions']?.length || 0,
+                visible: !!this.session['userActions']?.length,
+                type: 'action',
+                hasError: false,
+                errorCount: 0
+            },
+            {
+                label: 'Chronologie',
+                icon: 'view_timeline',
+                count: 0,
+                visible: true,
+                type: 'timeline',
+                hasError: false,
+                errorCount: 0
+            }
+        ];
+
+        // Sélectionner le premier onglet visible
+        const firstVisibleIndex = this.tabs.findIndex(tab => tab.visible);
+        if (firstVisibleIndex !== -1) {
+            this.selectedTabIndex = firstVisibleIndex;
+        }
+    }
+
+    // Méthodes pour calculer les erreurs
+    private hasRestErrors(): boolean {
+        return this.session.restRequests?.some(req => req.status && req.status >= 400) || false;
+    }
+
+    private getRestErrorCount(): number {
+        return this.session.restRequests?.filter(req => req.status && req.status >= 400).length || 0;
+    }
+
+    private hasLocalErrors(): boolean {
+        return this.session.localRequests?.some(req => req.exception) || false;
+    }
+
+    private getLocalErrorCount(): number {
+        return this.session.localRequests?.filter(req => req.exception).length || 0;
+    }
+
+    private hasFtpErrors(): boolean {
+        return this.session.ftpRequests?.some(req => req.failed) || false;
+    }
+
+    private getFtpErrorCount(): number {
+        return this.session.ftpRequests?.filter(req => req.failed).length || 0;
+    }
+
+    private hasSmtpErrors(): boolean {
+        return this.session.mailRequests?.some(req => req.failed) || false;
+    }
+
+    private getSmtpErrorCount(): number {
+        return this.session.mailRequests?.filter(req => req.failed).length || 0;
+    }
+
+    private hasLdapErrors(): boolean {
+        return this.session.ldapRequests?.some(req => req.failed) || false;
+    }
+
+    private getLdapErrorCount(): number {
+        return this.session.ldapRequests?.filter(req => req.failed).length || 0;
+    }
+
+    private hasDatabaseErrors(): boolean {
+        return this.session.databaseRequests?.some(req => req.failed) || false;
+    }
+
+    private getDatabaseErrorCount(): number {
+        return this.session.databaseRequests?.filter(req => req.failed).length || 0;
+    }
+
+    get hasDataTabs(): boolean {
+        // Vérifie s'il y a au moins un onglet avec des données (pas Timeline)
+        if (!this.tabs || this.tabs.length === 0) {
+            return false;
+        }
+        return this.tabs.some(t => t.visible);
+    }
+
+    get showNoDataMessage(): boolean {
+        // Afficher le message seulement si aucun onglet avec données n'est visible
+        return !this.hasDataTabs;
+    }
+
+    get showTabsNavigation(): boolean {
+        // Afficher la navigation si au moins un onglet avec données est visible
+        return this.hasDataTabs;
+    }
 
     selectedRemote(event: { event: MouseEvent, row: any }) {
         if (event.row) {

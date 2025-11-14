@@ -15,9 +15,14 @@ import {Component, Input} from "@angular/core";
         :host {
             display: flex; 
             align-items: center;
+            gap: 0.5em;
         }
         mat-icon {
-            margin-right: 0.5em;
+            flex-shrink: 0;
+            transition: transform 0.2s ease;
+        }
+        div {
+            line-height: 1.5;
         }
     `]
 })

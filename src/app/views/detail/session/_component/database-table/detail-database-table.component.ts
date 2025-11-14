@@ -70,4 +70,14 @@ export class DetailDatabaseTableComponent {
         if (columnName == "duree") return row['end'] ? row["end"] - row["start"] : INFINITY;
         return row[columnName as keyof any] as string;
     }
+
+    getCommandClass(command: string): string {
+        if (!command) return 'other';
+        const cmd = command.toLowerCase();
+        if (cmd.includes('select')) return 'select';
+        if (cmd.includes('insert')) return 'insert';
+        if (cmd.includes('update')) return 'update';
+        if (cmd.includes('delete')) return 'delete';
+        return 'other';
+    }
 }

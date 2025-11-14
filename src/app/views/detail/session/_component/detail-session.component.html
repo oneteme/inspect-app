@@ -1,59 +1,131 @@
-<div [hidden]="!session.restRequests?.length" style="margin-bottom: 2em;">
-    <header-section icon="call_made" [iconOutlined]="false">
-        <div  [matBadgeHidden]="session.restRequests?.length==0" [matBadge]="session.restRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.restRequests?.length | numberFormat).length > 2">API</div>
-    </header-section>
-    <rest-table  [requests]="session.restRequests"
-                 (onClickRemote)="selectedRemote($event)"
-                 (onClickRow)="selectedRest($event)"></rest-table>
-</div>
-<div [hidden]="!session.localRequests?.length"  style="margin-bottom: 2em;">
-    <header-section icon="memory" [iconOutlined]="false">
-        <div [matBadgeHidden]="session.localRequests?.length==0" [matBadge]="session.localRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.localRequests?.length | numberFormat).length > 2">LOCAL</div>
-    </header-section>
-    <local-table [requests]="session.localRequests"></local-table>
-</div>
-<div [hidden]="!session.ftpRequests?.length"  style="margin-bottom: 2em;">
-    <header-section icon="smb_share">
-        <div [matBadgeHidden]="session.ftpRequests?.length==0" [matBadge]="session.ftpRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.ftpRequests?.length | numberFormat).length > 2">FTP</div>
-    </header-section>
-    <ftp-table [requests]="session.ftpRequests" 
-               (onClickRow)="selectedFtp($event)">
-    </ftp-table>
-</div>
-<div [hidden]="!session.mailRequests?.length"  style="margin-bottom: 2em;">
-    <header-section icon="outgoing_mail">
-        <div [matBadgeHidden]="session.mailRequests?.length==0" [matBadge]="session.mailRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.mailRequests?.length | numberFormat).length > 2">SMTP</div>
-    </header-section>
-    <smtp-table [requests]="session.mailRequests" 
-                (onClickRow)="selectedSmtp($event)">
-    </smtp-table>
+<div class="tabs-container">
+  <!-- Message si aucune donnée -->
+  <div *ngIf="showNoDataMessage" class="no-data-message">
+    <mat-icon class="material-symbols-outlined">info</mat-icon>
+    <h3>Aucune requête détectée</h3>
+    <p>Cette session ne contient aucune requête sortante (API, BDD, FTP, etc.)</p>
+  </div>
+
+  <!-- Navigation verticale des onglets -->
+  <div class="vertical-tabs" *ngIf="showTabsNavigation">
+    <div *ngFor="let tab of tabs; let i = index"
+         class="tab-button"
+         [class.active]="selectedTabIndex === i"
+         [class.hidden]="!tab.visible"
+         (click)="selectedTabIndex = i">
+      <mat-icon class="material-symbols-outlined">{{ tab.icon }}</mat-icon>
+      <span class="tab-label">{{ tab.label }}</span>
+      <div style="display: flex; align-items: center; gap: 4px;">
+        <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
+        <mat-icon *ngIf="tab.hasError && tab.errorCount > 0"
+                  class="error-indicator material-symbols-outlined"
+                  [matTooltip]="tab.errorCount + ' erreur(s)'"
+                  matTooltipPosition="right">
+          error
+        </mat-icon>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenu des onglets -->
+  <div class="tab-content" *ngIf="showTabsNavigation">
+    <!-- API -->
+    <div *ngIf="tabs[selectedTabIndex]?.type === 'rest'" class="tab-panel">
+      <div class="panel-header">
+        <h3>
+          <mat-icon class="material-symbols-outlined">call_made</mat-icon>
+          API
+        </h3>
+        <span class="panel-count">{{ session.restRequests?.length || 0 }} requête(s)</span>
+      </div>
+      <rest-table [requests]="session.restRequests"
+                  (onClickRemote)="selectedRemote($event)"
+                  (onClickRow)="selectedRest($event)">
+      </rest-table>
+    </div>
+
+    <!-- LOCAL -->
+    <div *ngIf="tabs[selectedTabIndex]?.type === 'local'" class="tab-panel">
+      <div class="panel-header">
+        <h3>
+          <mat-icon class="material-symbols-outlined">memory</mat-icon>
+          LOCAL
+        </h3>
+        <span class="panel-count">{{ session.localRequests?.length || 0 }} requête(s)</span>
+      </div>
+      <local-table [requests]="session.localRequests"></local-table>
+    </div>
+
+    <!-- FTP -->
+    <div *ngIf="tabs[selectedTabIndex]?.type === 'ftp'" class="tab-panel">
+      <div class="panel-header">
+        <h3>
+          <mat-icon class="material-symbols-outlined">smb_share</mat-icon>
+          FTP
+        </h3>
+        <span class="panel-count">{{ session.ftpRequests?.length || 0 }} requête(s)</span>
+      </div>
+      <ftp-table [requests]="session.ftpRequests"
+                 (onClickRow)="selectedFtp($event)">
+      </ftp-table>
+    </div>
+
+    <!-- SMTP -->
+    <div *ngIf="tabs[selectedTabIndex]?.type === 'smtp'" class="tab-panel">
+      <div class="panel-header">
+        <h3>
+          <mat-icon class="material-symbols-outlined">outgoing_mail</mat-icon>
+          SMTP
+        </h3>
+        <span class="panel-count">{{ session.mailRequests?.length || 0 }} requête(s)</span>
+      </div>
+      <smtp-table [requests]="session.mailRequests"
+                  (onClickRow)="selectedSmtp($event)">
+      </smtp-table>
+    </div>
+
+    <!-- LDAP -->
+    <div *ngIf="tabs[selectedTabIndex]?.type === 'ldap'" class="tab-panel">
+      <div class="panel-header">
+        <h3>
+          <mat-icon class="material-symbols-outlined">user_attributes</mat-icon>
+          LDAP
+        </h3>
+        <span class="panel-count">{{ session.ldapRequests?.length || 0 }} requête(s)</span>
+      </div>
+      <ldap-table [requests]="session.ldapRequests"
+                  (onClickRow)="selectedLdap($event)">
+      </ldap-table>
+    </div>
+
+    <!-- BDD -->
+    <div *ngIf="tabs[selectedTabIndex]?.type === 'database'" class="tab-panel">
+      <database-table [requests]="session.databaseRequests"
+                      (onClickRow)="selectedQuery($event)">
+      </database-table>
+    </div>
+
+    <!-- Actions -->
+    <div *ngIf="tabs[selectedTabIndex]?.type === 'action'" class="tab-panel">
+      <div class="panel-header">
+        <h3>
+          <mat-icon class="material-symbols-outlined">web_traffic</mat-icon>
+          Actions
+        </h3>
+        <span class="panel-count">{{ session['userActions']?.length || 0 }} action(s)</span>
+      </div>
+      <action-table [requests]="session['userActions']">
+      </action-table>
+    </div>
+
+    <!-- Timeline -->
+    <div *ngIf="tabs[selectedTabIndex]?.type === 'timeline'" class="tab-panel">
+      <detail-timeline [request]="completedSession"
+                       [instance]="instance">
+      </detail-timeline>
+    </div>
+  </div>
 </div>
 
-<div [hidden]="!session.ldapRequests?.length" style="margin-bottom: 2em;">
-    <header-section icon="user_attributes">
-        <div [matBadgeHidden]="session.ldapRequests?.length==0" [matBadge]="session.ldapRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.ldapRequests?.length | numberFormat).length > 2">LDAP</div>
-    </header-section>
-    <ldap-table [requests]="session.ldapRequests"
-                (onClickRow)="selectedLdap($event)">
-    </ldap-table>
-</div>
-<div [hidden]="!session.databaseRequests?.length" style="margin-bottom: 2em;">
-    <header-section icon="database">
-        <div [matBadgeHidden]="session.databaseRequests?.length==0" [matBadge]="(session.databaseRequests?.length | numberFormat:0:'≈')" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.databaseRequests?.length | numberFormat).length > 2">BDD</div>
-    </header-section>
-    <database-table [requests]="session.databaseRequests" 
-                    (onClickRow)="selectedQuery($event)">
-    </database-table>
-</div>
 
-<div [hidden]="!session['userActions']?.length" style="margin-bottom: 2em;">
-  <header-section icon="web_traffic">
-    <div [matBadgeHidden]="session['userActions']?.length==0" [matBadge]="(session['userActions']?.length | numberFormat:0:'≈')" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session['userActions']?.length | numberFormat).length > 2">Action</div>
-  </header-section>
-  <action-table [requests]="session['userActions']">
-  </action-table>
-</div>
 
-<detail-timeline [request]="completedSession"
-                 [instance]="instance">
-</detail-timeline>

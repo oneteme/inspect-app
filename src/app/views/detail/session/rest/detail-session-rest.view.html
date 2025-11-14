@@ -20,9 +20,18 @@
               </div>
             </mat-card-title>
             <mat-card-content>
-                <div class="ellipsis">
-                    <a class="url" [href]="getSessionUrl()" target="_blank">
-                        [{{ session.method }}] {{ getSessionUrl() }}
+                <div class="ellipsis" style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px;">
+                    <span class="badge"
+                          [ngClass]="{'success': session.status >= 200 && session.status < 300,
+                                      'warning': session.status >= 300 && session.status < 500,
+                                      'fail': session.status >= 500,
+                                      'unavailable': session.status == 0 && session.end,
+                                      'in-progress': !session.end}">
+                      {{session.end ? session.status : 'En cours'}}
+                    </span>
+                    <a class="url" [href]="getSessionUrl()" target="_blank" style="flex: 1; display: flex; align-items: center;">
+                        <strong style="background: rgba(59, 130, 246, 0.1); padding: 2px 8px; border-radius: 4px; margin-right: 8px; color: #2563eb;">{{ session.method }}</strong>
+                        <span>{{ getSessionUrl() }}</span>
                     </a>
                 </div>
 
@@ -46,16 +55,13 @@
                 </label-icon>
               </div>
               <div class="right">
-                  {{ session.inDataSize || 0 }}o
-                  <mat-icon style="width: 20px; height: 20px; font-size: 20px;">swap_vert</mat-icon>
-                  {{ session.outDataSize }}o en <span [matTooltip]="((session.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')" style="font-weight: bold">{{{ start: session.start, end: session.end } | duration}}</span>
-                  <span class="badge"
-                        [ngClass]="{'success': session.status >= 200 && session.status < 300,
-                                    'warning': session.status >= 300 && session.status < 500,
-                                    'fail': session.status >= 500,
-                                    'unavailable': session.status == 0 && session.end,
-                                    'in-progress': !session.end}">
-                    {{session.end ? session.status : 'En cours'}}
+                  <span style="display: flex; align-items: center; gap: 0.5em; background: rgba(0, 0, 0, 0.03); padding: 6px 12px; border-radius: 8px;">
+                    <span style="color: #10b981;">{{ session.inDataSize || 0 }}o</span>
+                    <mat-icon style="width: 20px; height: 20px; font-size: 20px; color: #6b7280;">swap_vert</mat-icon>
+                    <span style="color: #3b82f6;">{{ session.outDataSize }}o</span>
+                  </span>
+                  <span style="display: flex; align-items: center; gap: 0.5em;">
+                    en <span [matTooltip]="((session.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')" style="font-weight: 700; color: #374151;">{{{ start: session.start, end: session.end } | duration}}</span>
                   </span>
               </div>
 
@@ -75,10 +81,10 @@
             </mat-card-title>
             <mat-card-content style="margin-left: 1em;">
               <label-icon [icon]="'data_table'">
-                <div style="font-weight: 500; font-size: 14px;">
+                <div style="font-weight: 600; font-size: 14px; color: #374151; margin-bottom: 4px;">
                   {{instance.os}}
                 </div>
-                <div style="font-style: italic; font-size: 12px;">
+                <div style="font-style: italic; font-size: 12px; color: #6b7280;">
                   {{instance.re}}
                 </div>
               </label-icon>
@@ -89,7 +95,7 @@
                 le {{ (instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
               </label-icon>
               <div *ngIf="instance.end" class="right" [matTooltip]="((instance.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')">
-                en <span style="font-weight: bold">{{((instance.end - instance.instant) | duration)}}</span>
+                en <span style="font-weight: 700; color: #374151;">{{((instance.end - instance.instant) | duration)}}</span>
               </div>
             </mat-card-footer>
         </mat-card>
@@ -108,7 +114,7 @@
 </div>
 
 <mat-menu #menuEndPoint="matMenu" xPosition="after">
-  <a mat-menu-item [disabled]="sessionParent == null" [ngStyle]="sessionParent == null ? {'pointer-events': 'none'}: ''" [routerLink]="sessionParent?.type == 'rest' ? ['/session', 'rest', sessionParent?.id] : ['/session', sessionParent?.type.toLowerCase(), sessionParent?.id]" [queryParams]="{env: instance?.env}">
+  <a mat-menu-item [disabled]="sessionParent == null" [routerLink]="sessionParent?.type == 'rest' ? ['/session', 'rest', sessionParent?.id] : ['/session', sessionParent?.type.toLowerCase(), sessionParent?.id]" [queryParams]="{env: instance?.env}">
     <div style="display: flex;">
       <mat-progress-spinner *ngIf="parentLoading"  style="margin-right: 16px" diameter="24" mode="indeterminate"
                             matTooltip="Chargement de l'appel parent">

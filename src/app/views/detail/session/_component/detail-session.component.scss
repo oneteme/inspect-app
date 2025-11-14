@@ -1,0 +1,381 @@
+// ===========================
+// Container Principal
+// ===========================
+:host {
+  display: block;
+}
+
+
+.tabs-container {
+  display: flex;
+  gap: 12px;
+  min-height: 400px;
+  margin-top: 1.5em;
+}
+
+.no-data-message {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 3em;
+  background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+  border-radius: 12px;
+  color: #6b7280;
+
+  mat-icon {
+    font-size: 64px;
+    width: 64px;
+    height: 64px;
+    color: #9ca3af;
+    margin-bottom: 1em;
+  }
+
+  h3 {
+    font-size: 20px;
+    font-weight: 600;
+    color: #374151;
+    margin: 0 0 0.5em 0;
+  }
+
+  p {
+    font-size: 14px;
+    margin: 0;
+    max-width: 400px;
+  }
+}
+
+// ===========================
+// Navigation Verticale "Minimal Lines"
+// ===========================
+.vertical-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  min-width: 200px;
+  max-width: 200px;
+  background: transparent;
+  padding: 0;
+  height: fit-content;
+  position: sticky;
+  top: 1em;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 20px;
+  border-radius: 0;
+  cursor: pointer;
+  transition: all 0.25s ease;
+  background: transparent;
+  color: #64748b;
+  font-weight: 500;
+  font-size: 13px;
+  position: relative;
+  border-left: 4px solid transparent;
+  margin-bottom: 2px;
+
+  &:hover:not(.active) {
+    background: rgba(0, 0, 0, 0.02);
+    color: #334155;
+    border-left-color: #e2e8f0;
+    padding-left: 18px;
+  }
+
+  &.active {
+    background: rgba(59, 130, 246, 0.05);
+    color: #3b82f6;
+    border-left-color: #3b82f6;
+    padding-left: 16px;
+
+    mat-icon {
+      color: #3b82f6;
+    }
+
+    .tab-count {
+      background: #3b82f6;
+      color: white;
+      border: none;
+    }
+
+    // Garder l'icône d'erreur rouge même sur l'onglet actif
+    .error-indicator {
+      color: #ef4444 !important;
+    }
+  }
+
+  &.hidden {
+    display: none;
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    transition: all 0.25s ease;
+    color: inherit;
+  }
+
+  .tab-label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .tab-count {
+    background: #e2e8f0;
+    color: #64748b;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 22px;
+    text-align: center;
+    transition: all 0.25s ease;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .error-indicator {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: #ef4444;
+    animation: pulse-error 2s infinite;
+    flex-shrink: 0;
+  }
+}
+
+@keyframes pulse-error {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+// ===========================
+// Contenu des Onglets - Moderne et Compact
+// ===========================
+.tab-content {
+  flex: 1;
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 0;
+  border: 1px solid #e2e8f0;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  min-height: 400px;
+  overflow: hidden;
+  animation: fadeInContent 0.3s ease-in;
+}
+
+.tab-panel {
+  animation: fadeIn 0.25s ease-in;
+  height: 100%;
+
+  // Padding pour les composants tableaux
+  > rest-table,
+  > local-table,
+  > ftp-table,
+  > smtp-table,
+  > ldap-table,
+  > database-table,
+  > action-table,
+  > detail-timeline {
+    display: block;
+    padding: 16px;
+  }
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background: #fafbfc;
+  border-bottom: 1px solid #e2e8f0;
+
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+    color: #1e293b;
+    letter-spacing: -0.01em;
+
+    mat-icon {
+      color: #3b82f6;
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+
+  .panel-count {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid #e2e8f0;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInContent {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// ===========================
+// Amélioration des tableaux
+// ===========================
+::ng-deep {
+  .mat-mdc-table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+
+    .mat-mdc-header-row {
+      background: rgba(0, 0, 0, 0.02);
+
+      .mat-mdc-header-cell {
+        font-weight: 600;
+        color: #374151;
+        font-size: 13px;
+        letter-spacing: 0.02em;
+      }
+    }
+
+    .mat-mdc-row {
+      transition: all 0.2s ease;
+
+      &:hover {
+        background: rgba(59, 130, 246, 0.04);
+      }
+    }
+  }
+}
+
+// ===========================
+// Responsive Design
+// ===========================
+@media (max-width: 1024px) {
+  .tabs-container {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .vertical-tabs {
+    flex-direction: row;
+    max-width: 100%;
+    min-width: 100%;
+    overflow-x: auto;
+    padding: 0;
+    position: static;
+    gap: 0;
+
+    &::-webkit-scrollbar {
+      height: 3px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(0, 0, 0, 0.15);
+      border-radius: 2px;
+
+      &:hover {
+        background: rgba(0, 0, 0, 0.25);
+      }
+    }
+  }
+
+  .tab-button {
+    min-width: max-content;
+    border-left: none;
+    border-bottom: 4px solid transparent;
+    margin-bottom: 0;
+    margin-right: 2px;
+    padding: 12px 20px;
+
+    &.active {
+      border-left: none;
+      border-bottom-color: #3b82f6;
+      padding-left: 20px;
+      padding-bottom: 8px;
+    }
+
+    &:hover:not(.active) {
+      border-left: none;
+      border-bottom-color: #e2e8f0;
+      padding-left: 20px;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .tab-button {
+    padding: 10px 16px;
+    gap: 10px;
+    font-size: 12px;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    .tab-count {
+      font-size: 9px;
+      padding: 2px 6px;
+    }
+  }
+
+  .panel-header {
+    padding: 10px 12px;
+
+    h3 {
+      font-size: 14px;
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    .panel-count {
+      font-size: 10px;
+      padding: 3px 8px;
+    }
+  }
+}

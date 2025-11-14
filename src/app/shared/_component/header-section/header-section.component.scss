@@ -4,16 +4,22 @@
   justify-content: center;
   align-items: center;
   align-content: center;
-  margin-bottom: 0.5em;
-  font-weight: 500;
+  margin-bottom: 1em;
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.02em;
+  color: #374151;
 }
 
 mat-divider {
   flex: 1 1 0;
+  border-top-color: rgba(0, 0, 0, 0.08);
+
   &.left {
     margin-right: 1em;
   }
+
   &.right {
-      margin-left: 1em;
+    margin-left: 1em;
   }
 }
