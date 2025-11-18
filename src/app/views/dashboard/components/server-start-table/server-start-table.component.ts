@@ -18,6 +18,7 @@ export class ServerStartTableComponent {
 
   @Input() set data(objects: any[]) {
     if (objects?.length) {
+      this.today = new Date(); // refresh date
       this.dataSource = new MatTableDataSource(objects);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sortData = (data: { appName: string, version: string, start:number }[], sort: MatSort) => {

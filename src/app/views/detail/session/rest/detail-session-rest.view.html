@@ -1,6 +1,6 @@
 <div *ngIf="session && instance ">
     <div class="header-card">
-        <mat-card style="width: 50vw; min-width: 50vw;"
+        <mat-card style="width: 60vw; min-width: 60vw;"
                   [ngClass]="{'success': session.status >= 200 && session.status < 300,
                               'warning': session.status >= 300 && session.status < 500,
                               'fail': session.status >= 500,
@@ -26,12 +26,7 @@
                     </a>
                 </div>
 
-                <div style="display: flex; align-items: center; gap: 0.5em; color: red; font-weight: 500; margin-top: 0.5em;"
-                     *ngIf="session.exception?.type || session.exception?.message"
-                     [matTooltip]="session.exception?.type">
-                    <mat-icon class="material-symbols-outlined" style="overflow: initial !important; width: 28px; height: 28px;">warning</mat-icon>
-                    <div class="ellipsis" >{{ session.exception?.message || session.exception?.type }}</div>
-                </div>
+              <exception-display [exception]="session.exception"></exception-display>
             </mat-card-content>
             <mat-card-footer>
               <label-icon icon="person" [iconOutlined]="true" [size]="20">
@@ -66,7 +61,7 @@
 
             </mat-card-footer>
         </mat-card>
-        <mat-card style="width: 50vw;">
+        <mat-card style="width: 40vw">
             <mat-card-title>
               <label-icon icon="widgets">
                 {{instance.name}}

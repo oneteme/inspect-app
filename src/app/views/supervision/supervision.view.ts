@@ -374,17 +374,11 @@ export class SupervisionView implements OnInit, OnDestroy {
   traceStat:  number = 0;
   params: Partial<{instance: string, env: string, start: Date, end: Date}> = {};
 
-  displayedColumns: string[] = ['date', 'level', 'message', 'action'];
-  dataSource: MatTableDataSource<{ date: string, level: string, message: string, stacktrace: StackTraceRow[] }> = new MatTableDataSource([]);
-
   isLoading = false;
   isLoadingInstances = false;
   isInactiveInstance = false;
   reloadInstances = true;
   activityDisplayType: 'TRACE' | 'ATTEMPT' | 'REPORT' = 'TRACE';
-
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild('sort') sort: MatSort;
 
   ngOnInit() {
     this.onRouteChange();
@@ -456,7 +450,6 @@ export class SupervisionView implements OnInit, OnDestroy {
     this.logEntryByPeriod = [];
     this.unavailableStat = 0;
     this.traceStat = 0;
-    this.dataSource = new MatTableDataSource([]);
     this._traceService.getInstance(this.params.instance)
     .pipe(switchMap(res => {
       this.instance = res;
@@ -471,9 +464,6 @@ export class SupervisionView implements OnInit, OnDestroy {
         this.usageResourceByPeriod = usage.map(r => ({...r, date: new Date(r.date), maxHeap: this.instance.resource.maxHeap, diskTotalSpace: this.instance.resource.diskTotalSpace}));
         this.instanceTraceByPeriod = trace.map(r => ({...r, date: new Date(r.date), queueCapacity: this.instance.configuration?.tracing?.queueCapacity}));
         this.logEntryByPeriod = log.map(r => ({...r, date: this._datePipe.transform(r.instant * 1000, 'dd/MM/yyyy HH:mm:ss')}));
-        this.dataSource = new MatTableDataSource(this.logEntryByPeriod);
-        this.dataSource.paginator = this.paginator;
-        this.dataSource.sort = this.sort;
         if(last?.length && last[0].date && this.instance.configuration?.scheduling?.interval) {
           this.isInactiveInstance =  (new Date(last[0].date) < new Date(new Date().getTime() - (this.instance.configuration.scheduling.interval + 60) * 1000));
         }
@@ -483,7 +473,7 @@ export class SupervisionView implements OnInit, OnDestroy {
     });
   }
 
-  open(row: { date: string, level: string, message: string, stacktrace: StackTraceRow[] }) {
+  open(row: any) {
     this._dialog.open(StacktraceDialogComponent, {
       data: row
     });
@@ -520,9 +510,11 @@ export class SupervisionView implements OnInit, OnDestroy {
   }
 
   getStatActivity() {
-    if(this.instance.configuration?.scheduling?.interval) {
+    this.unavailableStat = this.getUnavailableStat();
+    this.traceStat = this.getCountStat();
+    /*if(this.instance.configuration?.scheduling?.interval) {
       this.unavailableStat = Math.trunc(this.instanceTraceByPeriod.reduce((acc, curr, index, array) => {
-        if(index < array.length -1) {
+        if(index < array.length - 1) {
           let actual = curr.date;
           let next = array[index + 1].date;
           let diff = (next.getTime() - actual.getTime());
@@ -533,9 +525,52 @@ export class SupervisionView implements OnInit, OnDestroy {
         }
         return acc;
       }, 0));
+    }*/
+
+  }
+
+  getUnavailableStat(): number {
+    const intervalMs = this.instance.configuration?.scheduling?.interval ? this.instance.configuration.scheduling.interval * 1000 : null;
+    if (!intervalMs) return;
+
+    const traces = this.instanceTraceByPeriod;
+    const startDate = this.instance.instant ? new Date(this.instance.instant * 1000) : null;
+    const endDate = this.instance.end ? new Date(this.instance.end * 1000) : null;
+
+    let unavailable = 0;
+
+    // Avant la première trace
+    if (startDate && traces.length) {
+      const diff = traces[0].date.getTime() - startDate.getTime();
+      if (diff > intervalMs) {
+        let attempts = Math.trunc(diff / intervalMs) - 1;
+        unavailable += (intervalMs / 1000) * attempts;
+      }
     }
-    this.traceStat = this.instanceTraceByPeriod.reduce((acc, curr) => {
+
+    // Entre chaque trace
+    for (let i = 0; i < traces.length - 1; i++) {
+      const diff = traces[i + 1].date.getTime() - traces[i].date.getTime();
+      if (diff > intervalMs) {
+        let attempts = Math.trunc(diff / intervalMs) - 1;
+        unavailable += (intervalMs / 1000) * attempts;
+      }
+    }
+
+    // Après la dernière trace
+    if (endDate && traces.length) {
+      const diff = endDate.getTime() - traces[traces.length - 1].date.getTime();
+      if (diff > intervalMs) {
+        let attempts = Math.trunc(diff / intervalMs) - 1;
+        unavailable += (intervalMs / 1000) * attempts;
+      }
+    }
+    return Math.trunc(unavailable);
+  }
+
+  getCountStat(): number {
+    return this.instanceTraceByPeriod.reduce((acc, curr) => {
       return acc + curr.traceCount;
-    }, 0)
+    }, 0);
   }
 }

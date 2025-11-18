@@ -11,11 +11,11 @@ let options: any = {
     selectable : false,
     cluster: {
         clusterCriteria : (firstItem: any, secondItem: any) => {
-          if(firstItem.id.toString().includes("log_") && secondItem.id.toString().includes("log_")){
-              return true;
-          }
-          return false;
-        }
+            if(firstItem.id.toString().includes("log_") && secondItem.id.toString().includes("log_")){
+                return true;
+            }
+            return false;
+        },
     },
     tooltip: {
         followMouse: true,

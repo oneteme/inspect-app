@@ -1,5 +1,5 @@
 <div *ngIf="!isLoading && request && instance" class="header-card">
-  <mat-card style="width: 50vw; min-width: 50vw;"
+  <mat-card style="width: 60vw; min-width: 60vw;"
             [ngClass]="{'success': request.end && !request.failed,
                           'fail': request.end && request.failed,
                           'in-progress': !request.end}">
@@ -22,12 +22,7 @@
     </mat-card-title>
 
     <mat-card-content>
-      <div style="display: flex; align-items: center; gap: .5em; color: red; font-weight: 500; margin-top: 0.5em;"
-           *ngIf="exception"
-           [matTooltip]="exception.type">
-        <mat-icon style="width: 28px" class="material-symbols-outlined">warning</mat-icon>
-        <div class="ellipsis">{{exception.message}}</div>
-      </div>
+      <exception-display [exception]="exception"></exception-display>
     </mat-card-content>
     <mat-card-footer>
       <mat-icon class="material-symbols-outlined" style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
@@ -40,7 +35,7 @@
       </div>
     </mat-card-footer>
   </mat-card>
-  <mat-card style="width: 50vw;">
+  <mat-card style="width: 40vw;">
     <mat-card-title>
       <label-icon icon="widgets">
         {{instance.name}}
