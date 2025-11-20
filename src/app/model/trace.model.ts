@@ -74,6 +74,7 @@ export interface LocalRequest extends AbstractRequest {
 
 export interface DatabaseRequestStage extends AbstractStage {
   count: number[];
+  args: string[];
 }
 
 export interface DirectoryRequestStage extends AbstractStage {

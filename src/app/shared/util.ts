@@ -254,3 +254,7 @@ export function showifnotnull(value: any,fn: (value:any)=>any) {
         return fn(value);
     return "";
 }
+
+export function getDataForRange(items: any[], start: number, end: number) {
+    return items.filter(c=> (c.end>= start && c.start <=end))
+}
