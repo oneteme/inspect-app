@@ -5,7 +5,7 @@
       <div class="status-indicator"
            [class.online]="!instance?.end && !isInactiveInstance"
            [class.offline]="instance?.end"
-           [class.warning]="!instance?.end && isInactiveInstance"
+           [class.pending]="!instance?.end && isInactiveInstance"
            [matTooltip]="instance?.end ? 'Du ' + ((instance?.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr') + ' au ' + ((instance?.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr') : 'Depuis le ' + ((instance?.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')">
       </div>
     </div>

@@ -454,7 +454,7 @@ export class SupervisionView implements OnInit, OnDestroy {
     .pipe(switchMap(res => {
       this.instance = res;
       return forkJoin([
-        this.instance.end ? of(null) : this._instanceTraceService.getLastInstanceTrace({instance: this.params.instance}),
+        this.instance.end ? of(null) : this._instanceTraceService.getLastInstanceTrace({instance: [this.params.instance]}),
         this._machineUsageService.getResourceMachineByPeriod({instance: this.params.instance, start: this.params.start, end: this.params.end}),
         this._instanceTraceService.getInstanceTraceByPeriod({instance: this.params.instance, start: this.params.start, end: this.params.end}),
         this._traceService.getLogEntryByPeriod(this.params.instance, this.params.start, this.params.end)
@@ -512,65 +512,70 @@ export class SupervisionView implements OnInit, OnDestroy {
   getStatActivity() {
     this.unavailableStat = this.getUnavailableStat();
     this.traceStat = this.getCountStat();
-    /*if(this.instance.configuration?.scheduling?.interval) {
-      this.unavailableStat = Math.trunc(this.instanceTraceByPeriod.reduce((acc, curr, index, array) => {
-        if(index < array.length - 1) {
-          let actual = curr.date;
-          let next = array[index + 1].date;
-          let diff = (next.getTime() - actual.getTime());
-          if(diff > this.instance.configuration.scheduling.interval * 1000) {
-            let attempts = Math.trunc(diff / (this.instance.configuration.scheduling.interval * 1000)) - 1;
-            return acc + this.instance.configuration.scheduling.interval * attempts;
-          }
-        }
-        return acc;
-      }, 0));
-    }*/
-
   }
 
   getUnavailableStat(): number {
-    const intervalMs = this.instance.configuration?.scheduling?.interval ? this.instance.configuration.scheduling.interval * 1000 : null;
+    const intervalMs = this.instance.configuration?.scheduling.interval ? this.instance.configuration.scheduling.interval * 1000 : null;
     if (!intervalMs) return;
 
+    const maxStart = this.getMaxDate(new Date(this.instance.instant * 1000), this.formGroup.controls.range.controls.start.value);
+    const minEnd = this.getMinDate(this.instance.end ? new Date(this.instance.end * 1000) : new Date(), this.formGroup.controls.range.controls.end.value);
     const traces = this.instanceTraceByPeriod;
-    const startDate = this.instance.instant ? new Date(this.instance.instant * 1000) : null;
-    const endDate = this.instance.end ? new Date(this.instance.end * 1000) : null;
 
     let unavailable = 0;
 
-    // Avant la première trace
-    if (startDate && traces.length) {
-      const diff = traces[0].date.getTime() - startDate.getTime();
+    if (traces.length) {
+      const diff = traces[0].date.getTime() - maxStart.getTime();
       if (diff > intervalMs) {
         let attempts = Math.trunc(diff / intervalMs) - 1;
         unavailable += (intervalMs / 1000) * attempts;
       }
     }
 
-    // Entre chaque trace
+    let attempts = 0;
     for (let i = 0; i < traces.length - 1; i++) {
-      const diff = traces[i + 1].date.getTime() - traces[i].date.getTime();
+      if(traces[i].attempts > 1) {
+        attempts = traces[i].attempts;
+      } else {
+        unavailable += (intervalMs / 1000) * attempts;
+        attempts = 0;
+        if(i > 0) {
+          let diff = traces[i].date.getTime() - traces[i - 1].date.getTime();
+          if(diff > intervalMs) {
+            attempts = Math.trunc(diff / intervalMs) - 1;
+          }
+        }
+      }
+    }
+
+    if (traces.length) {
+      const diff = minEnd.getTime() - traces[traces.length - 1].date.getTime();
       if (diff > intervalMs) {
         let attempts = Math.trunc(diff / intervalMs) - 1;
         unavailable += (intervalMs / 1000) * attempts;
       }
     }
 
-    // Après la dernière trace
-    if (endDate && traces.length) {
-      const diff = endDate.getTime() - traces[traces.length - 1].date.getTime();
-      if (diff > intervalMs) {
-        let attempts = Math.trunc(diff / intervalMs) - 1;
-        unavailable += (intervalMs / 1000) * attempts;
-      }
-    }
-    return Math.trunc(unavailable);
+    return unavailable;
   }
 
   getCountStat(): number {
     return this.instanceTraceByPeriod.reduce((acc, curr) => {
       return acc + curr.traceCount;
     }, 0);
+  }
+
+  /**
+   * Retourne la date maximale entre deux dates
+   * @param date1 Première date
+   * @param date2 Deuxième date
+   * @returns La date la plus récente
+   */
+  getMaxDate(date1: Date, date2: Date): Date {
+    return date1.getTime() > date2.getTime() ? date1 : date2;
+  }
+
+  getMinDate(date1: Date, date2: Date): Date {
+    return date1.getTime() < date2.getTime() ? date1 : date2;
   }
 }
