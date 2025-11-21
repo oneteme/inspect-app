@@ -2,7 +2,7 @@
 // En-tête de Page Moderne
 // ===========================
 .header-container {
-  padding: 24px 32px;
+  padding: 14px 32px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -199,7 +199,7 @@
 
   .table-wrapper {
     overflow: auto;
-    max-height: calc(100vh - 48px - 14px - 56px - 112px);
+    max-height: calc(100vh - 48px - 14px - 56px - 92px);
   }
 
   .modern-mat-table {
