@@ -24,7 +24,7 @@
         <ng-container matColumnDef="version">
           <th mat-header-cell *matHeaderCellDef mat-sort-header> Version</th>
           <td mat-cell *matCellDef="let row">
-            <div *ngIf="row.version" class="label-chip" [style.background-color]="versionColor[row.version]"
+            <div [ngStyle]="{'cursor': row.configuration ? 'pointer' : 'none', 'pointer-events': row.configuration ? 'initial' : 'none'}" (click)="openConfig(row.configuration)" *ngIf="row.version" class="label-chip" [style.background-color]="versionColor[row.version]"
                  [matTooltip]="row.collector">
               <span>{{ row.version }} </span>
             </div>
@@ -43,7 +43,7 @@
         <ng-container matColumnDef="restart">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Redémarrage</th>
           <td mat-cell *matCellDef="let row">
-            <span [ngStyle]="{'cursor': row.configuration ? 'pointer' : 'none', 'pointer-events': row.configuration ? 'initial' : 'none'}" (click)="openConfig(row.configuration)">{{row.restart}}</span>
+            {{row.restart}}
           </td>
         </ng-container>
 
