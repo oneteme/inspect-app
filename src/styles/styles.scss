@@ -75,32 +75,26 @@ mat-form-field.no-subscript {
 .vis-item {
 
   &.rest {
-    color: white !important;
     background-color: #3F51B5;
     border-color: #3F51B5;
   }
   &.ftp {
-    color: white !important;
     background-color: #2196F3;
     border-color: #2196F3;
   }
   &.ldap {
-    color: white !important;
     background-color: #00BCD4;
     border-color: #00BCD4;
   }
   &.smtp {
-    color: white !important;
     background-color: #9C27B0;
     border-color: #9C27B0;
   }
   &.database {
-    color: white !important;
     background-color: #a5673f;
     border-color: #a5673f;
   }
   &.local {
-    color: white !important;
     background-color: #3b3b38;
     border-color: #3b3b38;
   }

@@ -23,9 +23,16 @@
         </ng-container>
 
         <ng-container matColumnDef="host">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:70%"> Hôte</th>
+            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:50%"> Hôte</th>
             <td mat-cell *matCellDef="let element">
               {{element["host"] || 'N/A'}}
+            </td>
+        </ng-container>
+
+        <ng-container matColumnDef="command">
+            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:20%"> Commande </th>
+            <td mat-cell *matCellDef="let element">
+                <span style="font-weight: bold;">{{element.command | typeColumnFormat}}</span>
             </td>
         </ng-container>
 
