@@ -63,11 +63,6 @@ export class DeploimentComponent implements OnDestroy {
       this._instanceService.getLastServerStart({env: this.params.env})
       .pipe(
         switchMap((lastServerStarts: LastServerStart[]) => {
-          this.versionColor = this.groupBy(lastServerStarts, (v: any) => v.version)
-          this.lastServerStart.data = new MatTableDataSource(lastServerStarts);
-          this.lastServerStart.data.paginator = this.lastServerStartTablePaginator;
-          this.lastServerStart.data.sort = this.lastServerStartTableSort;
-          this.lastServerStart.data.sortingDataAccessor = sortingDataAccessor;
           return forkJoin({
             lastTrace: this._instanceTraceService.getLastInstanceTrace({instance: lastServerStarts.map(last => last.id)}),
             lastServer: of(lastServerStarts)
@@ -88,6 +83,11 @@ export class DeploimentComponent implements OnDestroy {
             }
             return acc;
           }, {});
+          this.versionColor = this.groupBy(value.lastServer, (v: any) => v.version)
+          this.lastServerStart.data = new MatTableDataSource(value.lastServer);
+          this.lastServerStart.data.paginator = this.lastServerStartTablePaginator;
+          this.lastServerStart.data.sort = this.lastServerStartTableSort;
+          this.lastServerStart.data.sortingDataAccessor = sortingDataAccessor;
         }
       })
     );
