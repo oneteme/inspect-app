@@ -24,12 +24,11 @@ export class InstanceTraceService {
     return this.getInstanceTrace(args);
   }
 
-  getLastInstanceTrace(filters: {instance: string}): Observable<{date: number}[]> {
+  getLastInstanceTrace(filters: {instance: string[]}): Observable<{id: string, date: number}[]> {
     let args: any = {
-      'column': 'start:date',
-      'instance_env.varchar': `"${filters.instance}"`,
-      'limit': '1',
-      'order': 'date.desc'
+      'column': 'instance_env:id,start:date',
+      'instance_env.varchar.in': filters.instance.map(i => `"${i}"`).join(','),
+      'rank.over(partition(instance_env).order(start.desc))': '1'
     }
     return this.getInstanceTrace(args);
   }
