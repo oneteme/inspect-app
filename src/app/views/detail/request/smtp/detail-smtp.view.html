@@ -68,7 +68,8 @@
 <app-timeline
         [options]="options"
         [groups]="dataGroups"
-        [items]="dataItems" [displayHeader]="false">
+        [items]="dataItems" [displayHeader]="false"
+        (onTimelineCreated)="onTimelineCreate($event)">
 </app-timeline>
 
 <div *ngIf="!isLoading && request && request.mails?.length" style="margin-bottom: 2em; margin-top: 1em">

@@ -67,7 +67,8 @@
 
 <app-timeline [options]="options"
               [groups]="dataGroups"
-              [items]="dataItems" [displayHeader]="false">
+              [items]="dataItems" [displayHeader]="false"
+              (onTimelineCreated)="onTimelineCreate($event)">
 </app-timeline>
 
 <div *ngIf="!isLoading && !request && !instance" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">

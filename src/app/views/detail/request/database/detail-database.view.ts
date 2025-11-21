@@ -2,13 +2,13 @@ import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 
 import {ActivatedRoute} from '@angular/router';
 import {catchError, combineLatest, finalize, forkJoin, of, Subject, switchMap, takeUntil} from "rxjs";
-import {DataGroup, DataItem, TimelineOptions} from 'vis-timeline';
+import {DataGroup, DataItem, Timeline, TimelineOptions} from 'vis-timeline';
 import {DatePipe} from '@angular/common';
 import {TraceService} from '../../../../service/trace.service';
 import {app} from '../../../../../environments/environment';
 import {EnvRouter} from "../../../../service/router.service";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
-import {getErrorClassName} from '../../../../shared/util';
+import {getErrorClassName, showifnotnull, getDataForRange} from '../../../../shared/util';
 import {Constants, INFINITY} from "../../../constants";
 import {DatabaseRequest, DatabaseRequestStage, ExceptionInfo, InstanceEnvironment} from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
@@ -32,7 +32,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     options: TimelineOptions;
     dataItems: DataItem[];
     dataGroups: DataGroup[];
-
+    dataArray: any[] = [];
     request: DatabaseRequest;
     stages: DatabaseRequestStage[];
     exception: ExceptionInfo;
@@ -42,6 +42,8 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     parentLoading: boolean = false;
 
     isLoading: boolean = false;
+    timelineStart: number
+    timelineEnd: number
 
     jdbcActionDescription: { [key: string]: string } =
         {
@@ -104,41 +106,52 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     }
 
     createTimeline() {
-        let timelineStart = Math.trunc(this.request.start * 1000);
-        let timelineEnd = this.request.end ? Math.trunc(this.request.end * 1000) : timelineStart + 3600000;
-        let items = this.stages.map((c: DatabaseRequestStage, i: number) => {
-            let start = Math.trunc(c.start * 1000);
-            let end = c.end ? Math.trunc(c.end * 1000) : INFINITY;
+        this.timelineStart = Math.trunc(this.request.start* 1000);
+        this.timelineEnd = this.request.end ? Math.trunc(this.request.end* 1000) : this.timelineStart + 3600000;
+        this.dataArray = this.stages.map((c: DatabaseRequestStage, i: number) => {
+            let start = Math.trunc(c.start* 1000);
+            let end = c.end ? Math.trunc(c.end* 1000) : INFINITY;
             return {
                 group: `${i}`,
                 start: start,
                 end: end,
                 type: end <= start ? 'point' : 'range',
-                content: c.commands? `${this.getCommmand(c.commands)}` : "",
+                content: `<div class="content" style="display: flex; align-items: center; gap: 0.5rem; flex-direction: row;">
+                                <span class="command" style="color: #1565c0; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">${showifnotnull(c.command, ()=> c.command)}</span>
+                                <span class="arg" style="color: #7f8c8d; font-style: italic; font-size: 0.7rem;">${showifnotnull(c.args, ()=> `(${c.args.join(', ')})`)}</span>
+                                <span class="count" style="color: #2c3e50; font-weight: 500; font-size: 0.7rem;">${showifnotnull(c.count, ()=> `×${c.count}`)}</span>
+                          </div>`,
                 className: `database overflow ${getErrorClassName(c)}` ,
-                title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end, 'HH:mm:ss.SSS')}</span>  (${this.durationPipe.transform((end / 1000) - (start / 1000))})<br>
-                        <span>${c.count ? 'count: ' + c.count : ''}</span>`
+                title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end, 'HH:mm:ss.SSS')}</span>  (⏱ ${this.durationPipe.transform((end / 1000) - (start / 1000))})<br>
+                        <span>${showifnotnull(c.command, ()=> c.command)}${showifnotnull(c.args, ()=> `(${c.args.join(', ')})`)} ${showifnotnull(c.count, ()=> `×${c.count}` )}</span>`
             }
         })
-        items.splice(0, 0, {
+        this.dataArray.splice(0, 0, {
             title: '',
             group: 'parent',
-            start: timelineStart,
-            end: timelineEnd,
+            start: this.timelineStart,
+            end: this.timelineEnd,
             content: (this.request.schema || this.request.name || 'N/A'),
             className: "overflow",
             type: "background"
         });
-
-        let groups: any[] = this.stages.map((g: DatabaseRequestStage,i:number ) => ({ id: `${i}`, content: g?.name + (g.count? ` (${g.count})`:''), title: this.jdbcActionDescription[g?.name], treeLevel: 2 }));
-        groups.splice(0, 0, {id: 'parent', content: this.request.threadName, treeLevel: 1, nestedGroups: groups.map(g=> (g.id))})
-        let padding = (Math.ceil((timelineEnd - timelineStart) * 0.01))
-
+        let padding = (Math.ceil((this.timelineEnd - this.timelineStart) * 0.01))
+        let groups: any[]
+        if( this.dataArray.length > 50){
+            this.timelineStart =  this.dataArray[0].start
+            this.timelineEnd =  this.dataArray[50].start
+            this.dataItems = getDataForRange( this.dataArray, this.timelineStart , this.timelineEnd);
+            groups= getDataForRange(this.stages, this.timelineStart , this.timelineEnd).map((g: DatabaseRequestStage,i:number ) => ({ id: `${i}`, content: g?.name, title: this.jdbcActionDescription[g?.name], treeLevel: 2 }));
+        }else{
+            this.dataItems =   this.dataArray;
+            groups =this.stages.map((g: DatabaseRequestStage,i:number ) => ({ id: `${i}`, content: g?.name, title: this.jdbcActionDescription[g?.name], treeLevel: 2 }));
+        }
+        groups.splice(0, 0, {id: 'parent', content: this.request.command, treeLevel: 1, nestedGroups: groups.map(g=> (g.id))})
         this.dataGroups = groups;
-        this.dataItems = items;
+
         this.options =  {
-            start: timelineStart - padding,
-            end: timelineEnd + padding,
+            start: this.timelineStart - padding,
+            end: this.timelineEnd + padding,
             selectable : false,
             clickToUse: true,
             tooltip: {
@@ -167,20 +180,18 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
         this.$destroy.complete();
     }
 
-    getCommmand(commands?: string[]): string{
-        let command ="";
-        if(commands){
-            let distinct = new Set();
-            commands.forEach(c => {
-                distinct.add(c);
-            })
-            command = Array.from(distinct).join(", ");
-        }
-        return command;
-    }
-
     getDate(start: number) {
         return new Date(start);
+    }
+
+    onTimelineCreate(timeline: Timeline) {
+        timeline.on('rangechanged', (props)=>{
+            let d = getDataForRange( this.dataArray, props.start.getTime(), props.end.getTime());
+            let groups:any[]= getDataForRange(this.stages.map(s=>({...s, start:Math.trunc(s.start*1000), end: s.end ? Math.trunc(s.end*1000 ) : INFINITY })), props.start.getTime() , props.end.getTime()).map((g: DatabaseRequestStage,i:number ) => ({start: g.start,  id: `${d[i+1].group}`, content: g?.name, title: this.jdbcActionDescription[g?.name], treeLevel: 2 }));
+            groups.splice(0, 0, {id: 'parent', content: this.request.command, treeLevel: 1, nestedGroups: groups.map(g=> (g.id))})
+            timeline.setGroups(groups);
+            timeline.setItems(d);
+        });
     }
 }
 
