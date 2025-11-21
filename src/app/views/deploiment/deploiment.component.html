@@ -149,7 +149,7 @@
             </div>
           </th>
           <td mat-cell *matCellDef="let row">
-            <div class="branch-info" *ngIf="row.branch" [matTooltip]="'Hash: ' + row.hash">
+            <div class="branch-info" *ngIf="row.branch" [matTooltip]="row.hash">
               <mat-icon class="material-symbols-outlined">code_blocks</mat-icon>
               {{ row.branch }}
             </div>
