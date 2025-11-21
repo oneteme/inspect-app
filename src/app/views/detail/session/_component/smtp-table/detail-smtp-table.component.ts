@@ -13,7 +13,7 @@ import {INFINITY} from "../../../../constants";
 })
 export class DetailSmtpTableComponent  {
     private readonly pipe = new DatePipe('fr-FR');
-    displayedColumns: string[] = ['status', 'host', 'start', 'duree'];
+    displayedColumns: string[] = ['status', 'host', 'command', 'start', 'duree'];
     dataSource: MatTableDataSource<MailRequestDto> = new MatTableDataSource();
     filterTable :string;
 
