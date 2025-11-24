@@ -43,7 +43,7 @@ export class DeploimentComponent implements OnDestroy {
   offlineServerStat: number = 0;
   activityStatus: {[key: string]: {css: string, lastTrace: number, tooltip: string}} = {};
 
-  @ViewChild('lastServerStartTablePaginator') lastServerStartTablePaginator: MatPaginator;
+  @ViewChild('lastServerStartTablePaginator', {static: true}) lastServerStartTablePaginator: MatPaginator;
   @ViewChild('lastServerStartTableSort') lastServerStartTableSort: MatSort;
 
   constructor() {

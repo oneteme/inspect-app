@@ -500,9 +500,9 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  padding: 40px 20px;
   text-align: center;
   gap: 12px;
+  height: calc(100vh - 48px - 14px - 56px - 57px - 92px);
 
   mat-icon {
     font-size: 48px;
