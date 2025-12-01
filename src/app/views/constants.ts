@@ -740,7 +740,7 @@ export class FilterConstants {
             //{ key: 'status', label: 'Status', type: 'select', row: 3, col: 1, endpoint: "session/rest", query: { 'column.distinct': 'status:status', 'order': 'status.asc' }, op: Operation.eq },
             { key: 'method', label: 'Method', type: 'select', width: 20, row: 1, col: 1, endpoint: "session/rest",  query: { 'column.distinct': 'method:method', 'order': 'method.asc' }, op: Operation.eq },
             { key: 'path', label: 'Path', type: 'input', row: 1, col: 2, op: Operation.like },
-            { key: 'apiName', label: 'Nom API', type: 'select', row: 3, col: 2, endpoint: "session/rest", query: { 'column.distinct': 'api_name', 'api_name.notNull': '', 'order': 'api_name.asc' }, op: Operation.eq  },
+            { key: 'apiname', label: 'Nom API', type: 'select', row: 3, col: 2, endpoint: "session/rest", query: { 'column.distinct': 'api_name:apiname', 'api_name.notNull': '', 'order': 'api_name.asc' }, op: Operation.eq  },
             { key: 'user', label: 'Utilisateur', type: 'select', row: 3, col: 3, endpoint: "session/rest", query: { 'column.distinct': 'user', 'user.notNull': '', 'order': 'user.asc' }, op: Operation.eq  }
             // new Filter("err_type", "Exception", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
             // new Filter("address", "adresse", 'input', 50),
