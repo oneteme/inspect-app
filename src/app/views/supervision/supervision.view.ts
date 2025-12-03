@@ -62,9 +62,10 @@ export class SupervisionView implements OnInit, OnDestroy {
     stacked: false,
     ytitle: '',
     series: [
-      {data: {x: field('date'), y: field('usedHeap')}, name: 'Utilisée'},
-      {data: {x: field('date'), y: field('commitedHeap')}, name: 'Allouée'},
-      {data: {x: field('date'), y: field('maxHeap')}, name: 'Maximum', type: 'area'}
+      {data: {x: field('date'), y: field('maxHeap')}, name: 'Maximum', type: 'area', color: '#feb019'},
+      {data: {x: field('date'), y: field('commitedHeap')}, name: 'Allouée', color: '#00e396'},
+      {data: {x: field('date'), y: field('usedHeap')}, name: 'Utilisée', color: '#008ffb'}
+
     ],
     options: {
       chart: {
@@ -111,7 +112,7 @@ export class SupervisionView implements OnInit, OnDestroy {
         }
       },
       fill: {
-        type: ['solid', 'solid', 'gradient'],
+        type: ['gradient', 'solid', 'solid'],
         gradient: {
           shade: 'light',
           type: 'vertical',
@@ -124,7 +125,7 @@ export class SupervisionView implements OnInit, OnDestroy {
       },
       stroke: {
         curve: 'smooth',
-        dashArray: [0,0,5],
+        dashArray: [5,0,0],
         width: [1,1,1]
       },
       dataLabels: {
@@ -142,8 +143,8 @@ export class SupervisionView implements OnInit, OnDestroy {
     stacked: false,
     ytitle: '',
     series: [
-      {data: {x: field('date'), y: field('usedDiskSpace')}, name: 'Utilisée'},
-      {data: {x: field('date'), y: field('diskTotalSpace')}, name: 'Maximum', type: 'area', color: '#FEB019'}
+      {data: {x: field('date'), y: field('diskTotalSpace')}, name: 'Maximum', type: 'area', color: '#FEB019'},
+      {data: {x: field('date'), y: field('usedDiskSpace')}, name: 'Utilisée', color: '#008ffb'}
     ],
     options: {
       chart: {
@@ -190,7 +191,7 @@ export class SupervisionView implements OnInit, OnDestroy {
         }
       },
       fill: {
-        type: ['solid', 'gradient'],
+        type: ['gradient','solid'],
         gradient: {
           shade: 'light',
           type: 'vertical',
@@ -203,7 +204,7 @@ export class SupervisionView implements OnInit, OnDestroy {
       },
       stroke: {
         curve: 'smooth',
-        dashArray: [0,5],
+        dashArray: [5,0],
         width: [1,1]
       },
       dataLabels: {
