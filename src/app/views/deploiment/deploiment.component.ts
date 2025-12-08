@@ -67,7 +67,7 @@ export class DeploimentComponent implements OnDestroy {
       .pipe(
         switchMap((lastServers: LastServerStart[]) => {
           return forkJoin({
-            lastTraces: this._instanceTraceService.getLastInstanceTrace({instance: lastServers.map(last => last.id)}),
+            lastTraces: lastServers.length ? this._instanceTraceService.getLastInstanceTrace({instance: lastServers.map(last => last.id)}) : of([]),
             lastServers: of(lastServers)
           });
         }),

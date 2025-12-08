@@ -192,21 +192,20 @@
 // ===========================
 // Tableau
 // ===========================
-.modern-table-container {
+.table-container {
   background: white;
   border-radius: 12px;
   overflow: hidden;
 
   .table-wrapper {
     overflow: auto;
-    max-height: calc(100vh - 48px - 14px - 56px - 92px);
-  }
+    max-height: calc(100vh - 48px - 14px - 56px - 96px);
 
-  .modern-mat-table {
-    width: 100%;
+    table {
+      width: 100%;
 
-    // En-têtes stylisés
-    .mat-mdc-header-row {
+      // En-têtes stylisés
+      .mat-mdc-header-row {
       background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
       border-bottom: 2px solid #e2e8f0;
 
@@ -232,18 +231,12 @@
         }
       }
     }
-
-    // Lignes avec hover
-    .mat-mdc-row {
-      border-bottom: 1px solid #f1f5f9;
-      transition: all 0.2s ease;
-
-      .mat-mdc-cell {
-        padding: 16px 24px;
-        font-size: 14px;
-        color: #334155;
-      }
     }
+  }
+
+  mat-paginator {
+    border-top: 1px solid #e2e8f0;
+    background: #fafafa;
   }
 }
 
@@ -419,24 +412,18 @@
   gap: 6px;
   padding: 6px 12px;
   border-radius: 8px;
-  font-size: 13px; // taille d'origine
+  font-size: 12px;
   font-weight: 600;
-  background: #f1f5f9; // fond neutre
-  color: #64748b; // texte gris
-  border: none; // pas de bordure apparente avant
+  background: #f1f5f9;
+  color: #64748b;
+  border: none;
   box-shadow: 0 1px 2px rgba(0,0,0,0.04);
-  transition: background .15s ease, color .15s ease;
 
   mat-icon {
     font-size: 16px;
     width: 16px;
     height: 16px;
-    color: #94a3b8; // icône gris clair
-    transition: color .15s ease;
-  }
-
-  &:hover {
-    background: #e2e8f0;
+    color: #94a3b8;
   }
 
   &.has-restarts {
@@ -446,54 +433,36 @@
     mat-icon {
       color: #f59e0b; // icône orange
     }
-
-    &:hover {
-      background: rgba(245, 158, 11, 0.18);
-    }
   }
 }
 
-// Info Branche
 .branch-info {
-  // Ancien style restauré (dégradé + arrondi) avec nouvelle palette violette
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 6px 12px;
-  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%); // violet très clair
-  border: 1px solid #ddd6fe; // bord doux
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+  border: 1px solid #ddd6fe;
   border-radius: 8px;
   font-size: 12px;
   font-weight: 600;
-  color: #5b21b6; // texte violet soutenu
+  color: #5b21b6;
   line-height: 1;
   max-width: 240px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
   box-shadow: 0 2px 4px rgba(91, 33, 182, 0.08);
-  transition: box-shadow .2s ease, transform .2s ease;
 
   mat-icon {
     font-size: 16px;
     width: 16px;
     height: 16px;
-    color: #7c3aed; // icône un ton plus saturé
+    color: #7c3aed;
     flex-shrink: 0;
   }
-
-  &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(91, 33, 182, 0.18);
-  }
 }
 
-.no-data {
-  color: #cbd5e1;
-  font-style: italic;
-}
-
-// États vides et chargement (compact)
 .empty-state-inline,
 .loading-state-inline {
   display: flex;
@@ -502,7 +471,7 @@
   justify-content: center;
   text-align: center;
   gap: 12px;
-  height: calc(100vh - 48px - 14px - 56px - 57px - 92px);
+  height: calc(100vh - 48px - 14px - 56px - 57px - 96px);
 
   mat-icon {
     font-size: 48px;
@@ -518,13 +487,7 @@
   }
 }
 
-// Pagination moderne (compact)
-.modern-paginator {
-  border-top: 1px solid #e2e8f0;
-  background: #fafafa;
-  height: 48px;
-  min-height: 48px;
-}
+
 
 // ===========================
 // Responsive
@@ -604,7 +567,7 @@
     }
   }
 
-  .modern-table-container {
+  .table-container {
     .modern-mat-table {
       .mat-mdc-header-cell,
       .mat-mdc-cell {

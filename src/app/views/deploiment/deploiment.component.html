@@ -16,7 +16,7 @@
       </div>
       <div class="stat-details">
         <div class="stat-value">{{ onlineServerStat }}</div>
-        <div class="stat-label">Online</div>
+        <div class="stat-label">En ligne</div>
       </div>
     </div>
 
@@ -54,14 +54,11 @@
   </div>
 </div>
 
-<!-- Tableau Material moderne -->
-<div class="modern-table-container">
-  <div class="mat-elevation-z3">
+<div class="table-container">
     <div class="table-wrapper">
       <table mat-table [dataSource]="lastServerStart.data || []" #lastServerStartTableSort="matSort" matSort
-             matSortActive="duree" matSortDirection="desc" class="modern-mat-table">
+             matSortActive="duree" matSortDirection="desc">
 
-        <!-- Colonne Serveur avec Status -->
         <ng-container matColumnDef="appName">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>
             <div class="header-cell-content">
@@ -85,7 +82,6 @@
           </td>
         </ng-container>
 
-        <!-- Colonne Version -->
         <ng-container matColumnDef="version">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>
             <div class="header-cell-content">
@@ -149,16 +145,15 @@
             </div>
           </th>
           <td mat-cell *matCellDef="let row">
-            <div class="branch-info" *ngIf="row.branch" [matTooltip]="row.hash">
+            <div class="branch-info" *ngIf="row.branch">
               <mat-icon class="material-symbols-outlined">code_blocks</mat-icon>
-              {{ row.branch }}
+              {{ row.branch }} / {{ row.hash | slice:0:7 }}
             </div>
-            <span class="no-data" *ngIf="!row.branch">-</span>
           </td>
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="serverStartDisplayedColumns;sticky: true"></tr>
-        <tr mat-row *matRowDef="let row; columns: serverStartDisplayedColumns;" class="table-row-hover"></tr>
+        <tr mat-row *matRowDef="let row; columns: serverStartDisplayedColumns;"></tr>
 
         <!-- État vide -->
         <tr class="mat-row" *matNoDataRow>
@@ -176,13 +171,10 @@
       </table>
     </div>
 
-    <!-- Pagination -->
     <mat-paginator #lastServerStartTablePaginator
                    [pageSize]="10"
                    [hidePageSize]="true"
-                   [showFirstLastButtons]="true"
-                   class="modern-paginator">
+                   [showFirstLastButtons]="true">
     </mat-paginator>
-  </div>
 </div>
 
