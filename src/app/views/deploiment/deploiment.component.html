@@ -1,83 +1,180 @@
-<header-page [titleIcon]="MAPPING_TYPE['deploiment'].icon" [ui-title]="MAPPING_TYPE['deploiment'].title"
-             [iconOutlined]="true">
+<!-- En-tête moderne avec statistiques -->
+<div class="header-container">
+  <div class="title-container">
+    <mat-icon class="material-symbols-outlined title-icon">{{ MAPPING_TYPE['deploiment'].icon }}</mat-icon>
+    <div class="title-content">
+      <h1 class="title-label">{{ MAPPING_TYPE['deploiment'].title }}</h1>
+      <div class="subtitle-label">Gestion et supervision des déploiements</div>
+    </div>
+  </div>
 
-</header-page>
+  <!-- Statistiques des serveurs -->
+  <div class="stats-container">
+    <div class="stat-item stat-online">
+      <div class="stat-icon-wrapper">
+        <mat-icon class="material-symbols-outlined">check_circle</mat-icon>
+      </div>
+      <div class="stat-details">
+        <div class="stat-value">{{ onlineServerStat }}</div>
+        <div class="stat-label">En ligne</div>
+      </div>
+    </div>
 
+    <div class="stat-item stat-pending">
+      <div class="stat-icon-wrapper">
+        <mat-icon class="material-symbols-outlined">schedule</mat-icon>
+      </div>
+      <div class="stat-details">
+        <div class="stat-value">{{ pendingServerStat }}</div>
+        <div class="stat-label">Pending</div>
+      </div>
+    </div>
 
-<div style="width: 100%">
-  <div class="mat-elevation-z5">
-    <div class="table-container">
-      <table mat-table [dataSource]="lastServerStart.data ||[]" #lastServerStartTableSort="matSort" matSort>
+    <div class="stat-item stat-offline">
+      <div class="stat-icon-wrapper">
+        <mat-icon class="material-symbols-outlined">cancel</mat-icon>
+      </div>
+      <div class="stat-details">
+        <div class="stat-value">{{ offlineServerStat }}</div>
+        <div class="stat-label">Offline</div>
+      </div>
+    </div>
+
+    <div class="stat-divider"></div>
+
+    <div class="stat-item stat-total">
+      <div class="stat-icon-wrapper">
+        <mat-icon class="material-symbols-outlined">dns</mat-icon>
+      </div>
+      <div class="stat-details">
+        <div class="stat-value">{{ (lastServerStart.data?.data || []).length }}</div>
+        <div class="stat-label">Total</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="table-container">
+    <div class="table-wrapper">
+      <table mat-table [dataSource]="lastServerStart.data || []" #lastServerStartTableSort="matSort" matSort
+             matSortActive="duree" matSortDirection="desc">
 
         <ng-container matColumnDef="appName">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Serveur</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <div class="header-cell-content">
+              <mat-icon class="material-symbols-outlined">dns</mat-icon>
+              Serveur
+            </div>
+          </th>
           <td mat-cell *matCellDef="let row">
-            <div style="display: flex; align-items: center; gap: 1.5em;">
-              {{ row.appName || 'N/A' }}
-              <a class="status-indicator" [routerLink]="['/supervision', row.id]" [queryParams]="{env: params.env, start: toDate(activityStatus[row.id].lastTrace - 1000 * 60 * 60 * 12).toISOString(), end: toDate(activityStatus[row.id].lastTrace + 1000 * 60 * 60 * 12).toISOString()}" [matTooltip]="activityStatus[row.id].tooltip" [ngClass]="activityStatus[row.id].css">
-
+            <div class="server-cell-content">
+              <div class="server-info">
+                <div class="server-name">{{ row.appName || 'N/A' }}</div>
+              </div>
+              <a class="status-indicator-modern"
+                 [routerLink]="['/supervision', row.id]"
+                 [queryParams]="{env: params.env, start: toDate(activityStatus[row.id].lastTrace - 1000 * 60 * 60 * 12).toISOString(), end: toDate(activityStatus[row.id].lastTrace + 1000 * 60 * 60 * 12).toISOString()}"
+                 [matTooltip]="activityStatus[row.id].tooltip"
+                 [ngClass]="activityStatus[row.id].css">
+                <div class="status-dot"></div>
               </a>
             </div>
           </td>
         </ng-container>
 
         <ng-container matColumnDef="version">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Version</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <div class="header-cell-content">
+              <mat-icon class="material-symbols-outlined">label</mat-icon>
+              Version
+            </div>
+          </th>
           <td mat-cell *matCellDef="let row">
-            <div [ngStyle]="{'cursor': row.configuration ? 'pointer' : 'none', 'pointer-events': row.configuration ? 'initial' : 'none'}" (click)="openConfig(row.configuration)" *ngIf="row.version" class="label-chip" [style.background-color]="versionColor[row.version]"
+            <div class="version-badge-modern"
+                 *ngIf="row.version"
+                 [ngStyle]="{'cursor': row.configuration ? 'pointer' : 'default'}"
+                 (click)="row.configuration ? openConfig(row.configuration) : null"
+                 [style.background-color]="versionColor[row.version]"
                  [matTooltip]="row.collector">
-              <span>{{ row.version }} </span>
+              <mat-icon class="material-symbols-outlined" *ngIf="row.configuration">settings</mat-icon>
+              {{ row.version }}
             </div>
           </td>
         </ng-container>
 
+        <!-- Colonne Uptime -->
         <ng-container matColumnDef="duree">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Depuis</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <div class="header-cell-content">
+              <mat-icon class="material-symbols-outlined">schedule</mat-icon>
+              Depuis
+            </div>
+          </th>
           <td mat-cell *matCellDef="let row">
-            <a style="text-decoration: none; color: black;" [routerLink]="['/session/startup']" [queryParams]="{env: params.env, start: toDate(row.start - 1000 * 60 * 60 * 24).toISOString(), end: toDate(row.start + 1000 * 60 * 60 * 24).toISOString(), server: row.appName}" [matTooltip]="row.start | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr'">
-              {{(today.getTime() - row.start) / 1000 | duration}}
+            <a class="uptime-link"
+               [routerLink]="['/session/startup']"
+               [queryParams]="{env: params.env, start: toDate(row.start - 1000 * 60 * 60 * 24).toISOString(), end: toDate(row.start + 1000 * 60 * 60 * 24).toISOString(), server: row.appName}"
+               [matTooltip]="'Démarré le ' + (row.start | date:'dd/MM/yyyy à HH:mm:ss':'fr')">
+              <span class="uptime-duration">{{ (today.getTime() - row.start) / 1000 | duration }}</span>
             </a>
           </td>
         </ng-container>
 
+        <!-- Colonne Redémarrages -->
         <ng-container matColumnDef="restart">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header>Redémarrage</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <div class="header-cell-content">
+              <mat-icon class="material-symbols-outlined">restart_alt</mat-icon>
+              Redémarrages
+            </div>
+          </th>
           <td mat-cell *matCellDef="let row">
-            {{row.restart}}
+            <div class="restart-badge" [class.has-restarts]="row.restart > 0">
+              <mat-icon class="material-symbols-outlined">{{ row.restart > 0 ? 'warning' : 'check_circle' }}</mat-icon>
+              {{ row.restart }}
+            </div>
           </td>
         </ng-container>
 
+        <!-- Colonne Branche -->
         <ng-container matColumnDef="branch">
-          <th mat-header-cell *matHeaderCellDef mat-sort-header> Branche</th>
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>
+            <div class="header-cell-content">
+              <mat-icon class="material-symbols-outlined">fork_right</mat-icon>
+              Branche
+            </div>
+          </th>
           <td mat-cell *matCellDef="let row">
-            <div>
-              <span [matTooltip]="row.hash">{{ row.branch }}</span>
+            <div class="branch-info" *ngIf="row.branch">
+              <mat-icon class="material-symbols-outlined">code_blocks</mat-icon>
+              {{ row.branch }} / {{ row.hash | slice:0:7 }}
             </div>
           </td>
         </ng-container>
 
-        <tr mat-header-row *matHeaderRowDef="serverStartDisplayedColumns;"></tr>
+        <tr mat-header-row *matHeaderRowDef="serverStartDisplayedColumns;sticky: true"></tr>
         <tr mat-row *matRowDef="let row; columns: serverStartDisplayedColumns;"></tr>
+
+        <!-- État vide -->
         <tr class="mat-row" *matNoDataRow>
-          <td class="mat-cell" colspan="7">
-            <div *ngIf="!lastServerStart.isLoading" class="empty-row" style="align-items: center;">
-            <span class="material-symbols-outlined">
-              info
-            </span>
-              <span style="font-style: italic;">Aucun résultat</span>
+          <td class="mat-cell" [attr.colspan]="serverStartDisplayedColumns.length">
+            <div *ngIf="!lastServerStart.isLoading" class="empty-state-inline">
+              <mat-icon class="material-symbols-outlined">cloud_off</mat-icon>
+              <span>Aucun serveur actif dans l'environnement <strong>{{ params.env }}</strong></span>
             </div>
-            <div *ngIf="lastServerStart.isLoading && !lastServerStart.data" class="loading-row">
-            <span style="display: flex; flex-direction: column; font-style: italic;">
-              Chargement en cours...
-              <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-            </span>
+            <div *ngIf="lastServerStart.isLoading" class="loading-state-inline">
+              <mat-spinner diameter="40"></mat-spinner>
+              <span>Chargement des serveurs...</span>
             </div>
           </td>
         </tr>
       </table>
     </div>
-    <mat-paginator #lastServerStartTablePaginator [pageSize]="10"
-                   [hidePageSize]="true" [showFirstLastButtons]="true"></mat-paginator>
-  </div>
+
+    <mat-paginator #lastServerStartTablePaginator
+                   [pageSize]="10"
+                   [hidePageSize]="true"
+                   [showFirstLastButtons]="true">
+    </mat-paginator>
 </div>
 

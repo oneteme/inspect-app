@@ -61,7 +61,7 @@ export class InstanceService {
   getLastServerStart(filters: { env: string }): Observable<LastServerStart[]> {
     return this.getInstance<any>({
       'column': `view1.id,view1.appName,view1.version,view1.branch,view1.hash,view1.start,view1.end,view1.collector,view1.configuration,view1.restart`,
-      'view': `select(id,app_name,version,branch,hash,start,end,collector,configuration,rank.over(partition(environement,app_name).order(start.desc)):rk,count.over(partition(environement,app_name,version)):restart).filter(type.eq(SERVER).and(environement.eq(${filters.env}))):view1`,
+      'view': `select(id,app_name,version,branch,hash,start,end,collector,configuration,rank.over(partition(environement,app_name).order(end.coalesce(9999-12-31T00:00:00.000Z).desc,start.desc)):rk,count.over(partition(environement,app_name,version)):restart).filter(type.eq(SERVER).and(environement.eq(${filters.env}))):view1`,
       'view1.rk': '1', 'order': 'view1.start.desc'
     }).pipe(map(res => { return res.map(r => ({...r, configuration: r.configuration?.value ? JSON.parse(r.configuration?.value) : null})) }));
   }
