@@ -35,21 +35,36 @@
       <mat-label>Serveur</mat-label>
       <mat-select [formControl]="formGroup.controls.server">
         <mat-select-trigger>
-          {{ formGroup.controls.server?.value?.appName || '' }}
+          {{ formGroup.controls.server?.value || '' }}
         </mat-select-trigger>
-        <mat-option *ngFor="let instance of instances" [value]="instance">
+        <mat-option *ngFor="let serverName of servers" [value]="serverName">
           <div style="display: flex; flex-direction: column;">
-            {{ instance.appName }}
-            <span style="display: flex; align-items: center; font-size: 8px; font-style: italic">
-                <mat-icon style="font-size: 12px; width: 12px; height: 12px; margin-right: 8px;"
-                          class="material-symbols-outlined">date_range</mat-icon>
-              {{ instance.end ? 'Du ' + (instance.start | date: 'dd/MM/yyyy HH:mm': 'fr') + ' au ' + (instance.end | date: 'dd/MM/yyyy HH:mm': 'fr') : 'Depuis le ' + (instance.start | date: 'dd/MM/yyyy HH:mm': 'fr') }}
-              </span>
+            {{ serverName }}
           </div>
         </mat-option>
       </mat-select>
       <mat-spinner *ngIf="isLoadingInstances" [diameter]="18"></mat-spinner>
     </mat-form-field>
+      <mat-form-field style="width: 350px" class="no-subscript md-3" [class.loading]="isLoadingInstances"
+                      appearance="outline">
+          <mat-label>Instance</mat-label>
+          <mat-select [formControl]="formGroup.controls.instance">
+              <mat-select-trigger>
+                  {{ formGroup.controls.instance?.value?.id || '' }}
+              </mat-select-trigger>
+              <mat-option *ngFor="let instance of filtredInstances" [value]="instance">
+                  <div style="display: flex; flex-direction: column;">
+                      {{ instance.id }}
+                      <span style="display: flex; align-items: center; font-size: 8px; font-style: italic">
+                <mat-icon style="font-size: 12px; width: 12px; height: 12px; margin-right: 8px;"
+                          class="material-symbols-outlined">date_range</mat-icon>
+                          {{ instance.end ? 'Du ' + (instance.start | date: 'dd/MM/yyyy HH:mm': 'fr') + ' au ' + (instance.end | date: 'dd/MM/yyyy HH:mm': 'fr') : 'Depuis le ' + (instance.start | date: 'dd/MM/yyyy HH:mm': 'fr') }}
+              </span>
+                  </div>
+              </mat-option>
+          </mat-select>
+          <mat-spinner *ngIf="isLoadingInstances" [diameter]="18"></mat-spinner>
+      </mat-form-field>
     <button mat-mini-fab color="primary" (click)="search()">
       <mat-icon matSuffix>search</mat-icon>
     </button>

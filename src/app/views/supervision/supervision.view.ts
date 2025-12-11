@@ -54,7 +54,8 @@ export class SupervisionView implements OnInit, OnDestroy {
       start: new FormControl<Date | null>(null, [Validators.required]),
       end: new FormControl<Date | null>(null, [Validators.required]),
     }),
-    server: new FormControl< {id: string, appName: string, start: number, end: number} | null>(null, [Validators.required])
+    instance: new FormControl< {id: string, appName: string, start: number, end: number} | null>(null, [Validators.required]),
+    server: new FormControl< string | null>(null, [])
   });
 
   readonly USAGE_RESOURCE_BY_PERIOD_LINE: ChartProvider<string, number> = {
@@ -366,6 +367,7 @@ export class SupervisionView implements OnInit, OnDestroy {
     }
   };
 
+  servers: string[] = [];
   instance: Partial<InstanceEnvironment> = {};
   instances: {id: string, appName: string, start: number, end: number}[] = [];
   usageResourceByPeriod: any[] = [];
@@ -405,7 +407,6 @@ export class SupervisionView implements OnInit, OnDestroy {
         if(this.reloadInstances) {
           this.getInstances(this.params.start, this.params.end);
         }
-        this.getInstance();
       }
     });
   }
@@ -431,13 +432,22 @@ export class SupervisionView implements OnInit, OnDestroy {
   }
 
   getInstances(start: Date, end: Date) {
+    this.reset();
+    this.instances = [];
+    this.servers = [];
     this.isLoadingInstances = true;
     this._instanceService.getInstancesByPeriod({env: this.params.env, start: start, end: end})
     .pipe(finalize(() => this.isLoadingInstances = false))
     .subscribe({
         next: res => {
-          this.instances = res;
-          this.patchServerValue(this.instances.find(i => i.id == this.params.instance))
+          if(res.length){
+            this.instances = res;
+            this.servers = [...new Set(this.instances.map(i => i.appName))];
+            let s = this.instances.find(i => i.id == this.params.instance);
+            this.patchInstanceValue(s)
+            this.patchServerValue(s.appName)
+            this.getInstance();
+          }
         }
       });
   }
@@ -482,8 +492,8 @@ export class SupervisionView implements OnInit, OnDestroy {
 
   search() {
     if (this.formGroup.valid) {
-      this.reloadInstances = false;
-      this._router.navigate(['supervision', this.formGroup.controls.server.value.id], {
+      //this.reloadInstances = false; // why
+      this._router.navigate(['supervision', this.formGroup.controls.instance.value.id], {
         queryParams: { start: this.formGroup.controls.range.controls.start.getRawValue().toISOString(), end: this.formGroup.controls.range.controls.end.getRawValue().toISOString(), env: this.params.env, _reload: new Date().getTime() },
       });
     }
@@ -498,9 +508,15 @@ export class SupervisionView implements OnInit, OnDestroy {
     }, { emitEvent: false });
   }
 
-  patchServerValue(instance: {id: string, appName: string, start: number, end: number}) {
+  patchInstanceValue(instance: {id: string, appName: string, start: number, end: number}) {
     this.formGroup.patchValue({
-      server: instance
+      instance: instance
+    }, { emitEvent: false });
+  }
+
+  patchServerValue(server: string) {
+    this.formGroup.patchValue({
+      server: server
     }, { emitEvent: false });
   }
 
@@ -556,7 +572,6 @@ export class SupervisionView implements OnInit, OnDestroy {
         unavailable += (intervalMs / 1000) * attempts;
       }
     }
-
     return unavailable;
   }
 
@@ -579,4 +594,18 @@ export class SupervisionView implements OnInit, OnDestroy {
   getMinDate(date1: Date, date2: Date): Date {
     return date1.getTime() < date2.getTime() ? date1 : date2;
   }
+
+  get filtredInstances(){
+    return this.instances.filter(s => s.appName == this.formGroup.controls.server?.value);
+  }
+
+  reset(){
+    this.instance = null;
+    this.usageResourceByPeriod = [];
+    this.instanceTraceByPeriod = [];
+    this.logEntryByPeriod = [];
+    this.unavailableStat = 0;
+    this.traceStat = 0;
+  }
+
 }
