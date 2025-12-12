@@ -70,6 +70,8 @@ export class SupervisionView implements OnInit, OnDestroy {
     ],
     options: {
       chart: {
+        id: 'line-1',
+        group: 'group',
         animations: {
           enabled: false
         },
@@ -149,6 +151,8 @@ export class SupervisionView implements OnInit, OnDestroy {
     ],
     options: {
       chart: {
+        id: 'line-2',
+        group: 'group',
         animations: {
           enabled: false
         },
@@ -229,6 +233,8 @@ export class SupervisionView implements OnInit, OnDestroy {
     ],
     options: {
       chart: {
+        id: 'line-3',
+        group: 'group',
         animations: {
           enabled: false
         },
@@ -307,6 +313,8 @@ export class SupervisionView implements OnInit, OnDestroy {
     ],
     options: {
       chart: {
+        id: 'line-4',
+        group: 'group',
         animations: {
           enabled: false
         },
