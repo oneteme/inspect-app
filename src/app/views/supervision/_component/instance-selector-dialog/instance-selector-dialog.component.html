@@ -1,0 +1,32 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>Sélectionner une instance</h2>
+  <mat-dialog-content>
+    <div style="display: flex; flex-direction: column; gap: 1em; min-width: 400px;">
+      <mat-form-field style="width: 100%" class="no-subscript" [class.loading]="data.isLoadingInstances"
+                      appearance="outline">
+        <mat-label>Instance</mat-label>
+        <mat-select [(ngModel)]="selectedInstance">
+          <mat-select-trigger>
+            {{ selectedInstance?.id || '' }}
+          </mat-select-trigger>
+          <mat-option *ngFor="let instance of filteredInstances" [value]="instance">
+            <div style="display: flex; flex-direction: column;">
+              {{ instance.id }}
+              <span style="display: flex; align-items: center; font-size: 8px; font-style: italic">
+                <mat-icon style="font-size: 12px; width: 12px; height: 12px; margin-right: 8px;"
+                          class="material-symbols-outlined">date_range</mat-icon>
+                {{ instance.end ? 'Du ' + (instance.start | date: 'dd/MM/yyyy HH:mm': 'fr') + ' au ' + (instance.end | date: 'dd/MM/yyyy HH:mm': 'fr') : 'Depuis le ' + (instance.start | date: 'dd/MM/yyyy HH:mm': 'fr') }}
+              </span>
+            </div>
+          </mat-option>
+        </mat-select>
+        <mat-spinner *ngIf="data.isLoadingInstances" [diameter]="18"></mat-spinner>
+      </mat-form-field>
+    </div>
+  </mat-dialog-content>
+  <mat-dialog-actions align="end">
+    <button mat-button (click)="cancel()">Annuler</button>
+    <button mat-raised-button color="primary" [disabled]="!selectedInstance" (click)="confirm()">Confirmer</button>
+  </mat-dialog-actions>
+</div>
+

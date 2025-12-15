@@ -68,6 +68,7 @@ import {StacktraceDialogComponent} from "./supervision/_component/stacktrace-dia
 import {ConfigDialogComponent} from "./supervision/_component/config-dialog/config-dialog.component";
 import {StageDialogComponent} from "./detail/session/rest/stage-dialog/stage-dialog.component";
 import {ReportTableComponent} from "./supervision/_component/report-table/report-table.component";
+import {InstanceSelectorDialogComponent} from "./supervision/_component/instance-selector-dialog/instance-selector-dialog.component";
 
 
 
@@ -132,7 +133,8 @@ import {ReportTableComponent} from "./supervision/_component/report-table/report
     StacktraceDialogComponent,
     ConfigDialogComponent,
     StageDialogComponent,
-    ReportTableComponent
+    ReportTableComponent,
+    InstanceSelectorDialogComponent
   ]
 })
 export class ViewsModule { }

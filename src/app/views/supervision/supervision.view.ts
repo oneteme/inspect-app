@@ -10,7 +10,7 @@ import {InstanceTraceService} from "../../service/jquery/instance-trace.service"
 import {MatTableDataSource} from "@angular/material/table";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
-import {DatePipe, DecimalPipe} from "@angular/common";
+import {DatePipe, DecimalPipe, Location} from "@angular/common";
 import {MatDialog} from "@angular/material/dialog";
 import {StacktraceDialogComponent} from "./_component/stacktrace-dialog/stacktrace-dialog.component";
 import {DateAdapter, MAT_DATE_FORMATS} from "@angular/material/core";
@@ -21,6 +21,7 @@ import {CustomDateRangeSelectionStrategy} from "../../shared/material/custom-dat
 import {EnvRouter} from "../../service/router.service";
 import {ConfigDialogComponent} from "./_component/config-dialog/config-dialog.component";
 import {InstanceService} from "../../service/jquery/instance.service";
+import {InstanceSelectorDialogComponent} from "./_component/instance-selector-dialog/instance-selector-dialog.component";
 
 @Component({
   templateUrl: './supervision.view.html',
@@ -45,6 +46,7 @@ export class SupervisionView implements OnInit, OnDestroy {
   private readonly _instanceTraceService = inject(InstanceTraceService);
   private readonly _instanceService = inject(InstanceService);
   private readonly _dialog = inject(MatDialog);
+  private readonly _location: Location = inject(Location);
   private _decimalPipe: DecimalPipe = inject(DecimalPipe);
   private readonly _datePipe = inject(DatePipe);
   private readonly $destroy = new Subject<void>();
@@ -383,7 +385,7 @@ export class SupervisionView implements OnInit, OnDestroy {
   logEntryByPeriod: any[] = [];
   unavailableStat:  number = 0;
   traceStat:  number = 0;
-  params: Partial<{instance: string, env: string, start: Date, end: Date}> = {};
+  params: Partial<{instance: string, env: string, start: Date, end: Date, app_name?: string}> = {};
 
   isLoading = false;
   isLoadingInstances = false;
@@ -406,14 +408,22 @@ export class SupervisionView implements OnInit, OnDestroy {
       this._activatedRoute.queryParams
     ]).subscribe({
       next: ([params, queryParams]) => {
-        this.reloadInstances = this.reloadInstances || this.params.env != queryParams.env;
+        console.log(this.params.env,queryParams.env)
+        this.reloadInstances = !!(this.params.env && queryParams.env && this.params.env !== queryParams.env);
         this.params.instance = params.instance;
         this.params.env = queryParams.env;
         this.params.start = new Date(queryParams.start);
         this.params.end = new Date(queryParams.end);
+        this.params.app_name = queryParams.app_name;
         this.patchDateValue(this.params.start, this.params.end);
-        if(this.reloadInstances) {
-          this.getInstances(this.params.start, this.params.end);
+        let instance = {...this.instance}
+        console.log(this.reloadInstances);
+        if(!this.reloadInstances){
+          this.getInstance();
+        }else {
+          this.instance = null;
+          this.reset();
+          console.log(this.params.app_name)
         }
       }
     });
@@ -439,12 +449,12 @@ export class SupervisionView implements OnInit, OnDestroy {
     }
   }
 
-  getInstances(start: Date, end: Date) {
-    this.reset();
+  getInstances(start: Date, end: Date,) {
     this.instances = [];
     this.servers = [];
     this.isLoadingInstances = true;
-    this._instanceService.getInstancesByPeriod({env: this.params.env, start: start, end: end})
+    let observ = this.instance.type == "SERVER" ? this._instanceService.getInstancesByPeriod({env: this.params.env, start: start, end: end}) : this._instanceService.getInstanceByPeriodAndAddress({env: this.params.env, start: start, end: end, address: this.instance.address});
+    observ
     .pipe(finalize(() => this.isLoadingInstances = false))
     .subscribe({
         next: res => {
@@ -452,9 +462,10 @@ export class SupervisionView implements OnInit, OnDestroy {
             this.instances = res;
             this.servers = [...new Set(this.instances.map(i => i.appName))];
             let s = this.instances.find(i => i.id == this.params.instance);
-            this.patchInstanceValue(s)
-            this.patchServerValue(s.appName)
-            this.getInstance();
+            if(s) {
+              this.patchInstanceValue(s)
+              this.patchServerValue(s.appName)
+            }
           }
         }
       });
@@ -464,14 +475,15 @@ export class SupervisionView implements OnInit, OnDestroy {
     this.$destroy.next()
     this.isLoading = true;
     this.instance = null;
-    this.usageResourceByPeriod = [];
-    this.instanceTraceByPeriod = [];
+    this.usageResourceByPeriod = [{date: new Date(), commitedHeap: null, usedHeap: null, maxHeap: null, diskTotalSpace: null, usedDiskSpace: null}];
+    this.instanceTraceByPeriod = [{date: new Date(), pending: null, attempts: null, traceCount: null, queueCapacity: null}];
     this.logEntryByPeriod = [];
     this.unavailableStat = 0;
     this.traceStat = 0;
     this._traceService.getInstance(this.params.instance)
     .pipe(switchMap(res => {
       this.instance = res;
+      this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}&app_name=${this.instance.name}&_reload=${new Date().getTime()}`);
       return forkJoin([
         this.instance.end ? of(null) : this._instanceTraceService.getLastInstanceTrace({instance: [this.params.instance]}),
         this._machineUsageService.getResourceMachineByPeriod({instance: this.params.instance, start: this.params.start, end: this.params.end}),
@@ -480,8 +492,13 @@ export class SupervisionView implements OnInit, OnDestroy {
       ]);
     }), takeUntil(this.$destroy)).subscribe({
       next: ([last, usage, trace, log]) => {
-        this.usageResourceByPeriod = usage.map(r => ({...r, date: new Date(r.date), maxHeap: this.instance.resource.maxHeap, diskTotalSpace: this.instance.resource.diskTotalSpace}));
-        this.instanceTraceByPeriod = trace.map(r => ({...r, date: new Date(r.date), queueCapacity: this.instance.configuration?.tracing?.queueCapacity}));
+        this.getInstances(this.params.start, this.params.end);
+        this.usageResourceByPeriod = usage?.length
+          ? usage.map(r => ({...r, date: new Date(r.date), maxHeap: this.instance.resource.maxHeap, diskTotalSpace: this.instance.resource.diskTotalSpace}))
+          : [{date: new Date(), commitedHeap: null, usedHeap: null, maxHeap: this.instance.resource?.maxHeap, diskTotalSpace: this.instance.resource?.diskTotalSpace, usedDiskSpace: null}];
+        this.instanceTraceByPeriod = trace?.length
+          ? trace.map(r => ({...r, date: new Date(r.date), queueCapacity: this.instance.configuration?.tracing?.queueCapacity}))
+          : [{date: new Date(), pending: null, attempts: null, traceCount: null, queueCapacity: this.instance.configuration?.tracing?.queueCapacity}];
         this.logEntryByPeriod = log.map(r => ({...r, date: this._datePipe.transform(r.instant * 1000, 'dd/MM/yyyy HH:mm:ss')}));
         if(last?.length && last[0].date && this.instance.configuration?.scheduling?.interval) {
           this.isInactiveInstance =  (new Date(last[0].date) < new Date(new Date().getTime() - (this.instance.configuration.scheduling.interval + 60) * 1000));
@@ -534,6 +551,26 @@ export class SupervisionView implements OnInit, OnDestroy {
     });
   }
 
+  openInstanceSelector() {
+    const dialogRef = this._dialog.open(InstanceSelectorDialogComponent, {
+      width: '500px',
+      data: {
+        servers: this.servers,
+        instances: this.instances,
+        selectedServer: this.formGroup.controls.server.value,
+        selectedInstance: this.formGroup.controls.instance.value,
+        isLoadingInstances: this.isLoadingInstances
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.patchServerValue(result.server);
+        this.patchInstanceValue(result.instance);
+      }
+    });
+  }
+
   getStatActivity() {
     this.unavailableStat = this.getUnavailableStat();
     this.traceStat = this.getCountStat();
@@ -545,7 +582,7 @@ export class SupervisionView implements OnInit, OnDestroy {
 
     const maxStart = this.getMaxDate(new Date(this.instance.instant * 1000), this.formGroup.controls.range.controls.start.value);
     const minEnd = this.getMinDate(this.instance.end ? new Date(this.instance.end * 1000) : new Date(), this.formGroup.controls.range.controls.end.value);
-    const traces = this.instanceTraceByPeriod;
+    const traces = this.instanceTraceByPeriod.filter(t => t.traceCount !== null && t.traceCount !== undefined);
 
     let unavailable = 0;
 
@@ -585,7 +622,7 @@ export class SupervisionView implements OnInit, OnDestroy {
 
   getCountStat(): number {
     return this.instanceTraceByPeriod.reduce((acc, curr) => {
-      return acc + curr.traceCount;
+      return acc + (curr.traceCount || 0);
     }, 0);
   }
 
@@ -608,9 +645,10 @@ export class SupervisionView implements OnInit, OnDestroy {
   }
 
   reset(){
-    this.instance = null;
-    this.usageResourceByPeriod = [];
-    this.instanceTraceByPeriod = [];
+    console.log('reset')
+    //this.instance = null;
+    this.usageResourceByPeriod = [{date: new Date(), commitedHeap: null, usedHeap: null, maxHeap: null, diskTotalSpace: null, usedDiskSpace: null}];
+    this.instanceTraceByPeriod = [{date: new Date(), pending: null, attempts: null, traceCount: null, queueCapacity: null}];
     this.logEntryByPeriod = [];
     this.unavailableStat = 0;
     this.traceStat = 0;
