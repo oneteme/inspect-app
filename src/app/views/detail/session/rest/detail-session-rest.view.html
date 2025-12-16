@@ -1,4 +1,5 @@
 <div *ngIf="session && instance ">
+    {{ instance?.type +' '+ instance?.id }}
     <div class="header-card">
         <mat-card style="width: 60vw; min-width: 60vw;"
                   [ngClass]="{'success': session.status >= 200 && session.status < 300,
@@ -136,5 +137,5 @@
 <mat-menu #menuServer="matMenu">
   <a mat-menu-item [routerLink]="['/session', instance?.name, 'dump']" [queryParams]="{env: instance?.env, date: getDate(session?.start * 1000).toISOString()}"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
   <a mat-menu-item [routerLink]="['/dashboard', 'server', instance?.name]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur</a>
-  <a mat-menu-item [routerLink]="['/supervision', instance?.id]" [queryParams]="{start: getDate((session?.start * 1000) - 43200000).toISOString(), end: getDate((session?.start * 1000) + 43200000).toISOString(), env: instance?.env}"><mat-icon class="material-symbols-outlined">browse_activity</mat-icon>Supervision</a>
+  <a mat-menu-item [routerLink]="['/supervision', instance?.type, instance?.id]" [queryParams]="{start: getDate((session?.start * 1000) - 43200000).toISOString(), end: getDate((session?.start * 1000) + 43200000).toISOString(), env: instance?.env}"><mat-icon class="material-symbols-outlined">browse_activity</mat-icon>Supervision</a>
 </mat-menu>

@@ -69,6 +69,8 @@ import {ConfigDialogComponent} from "./supervision/_component/config-dialog/conf
 import {StageDialogComponent} from "./detail/session/rest/stage-dialog/stage-dialog.component";
 import {ReportTableComponent} from "./supervision/_component/report-table/report-table.component";
 import {InstanceSelectorDialogComponent} from "./supervision/_component/instance-selector-dialog/instance-selector-dialog.component";
+import {ServerSupervisionView} from "./supervision/_component/server/server-supervision.view";
+import {ClientSupervisionView} from "./supervision/_component/client/client-supervision.view";
 
 
 
@@ -134,7 +136,9 @@ import {InstanceSelectorDialogComponent} from "./supervision/_component/instance
     ConfigDialogComponent,
     StageDialogComponent,
     ReportTableComponent,
-    InstanceSelectorDialogComponent
+    InstanceSelectorDialogComponent,
+    ServerSupervisionView,
+    ClientSupervisionView
   ]
 })
 export class ViewsModule { }
