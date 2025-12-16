@@ -39,10 +39,14 @@ body {
   white-space: nowrap;
 }
 
-.ellipsis:hover {
-  text-overflow: clip;
-  white-space:  pre-line;
-  word-break: break-all;
+.hidden {
+  display: none !important;
+}
+
+.mat-mdc-tooltip .mdc-tooltip__surface {
+  max-width: 400px;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 mat-form-field.no-subscript {
@@ -134,10 +138,6 @@ mat-form-field.no-subscript {
 
 .vis-custom-time { // makes markers not draggable
   pointer-events: none;
-}
-
-.error {
-  color: #bb2124 !important;
 }
 
 .badge {

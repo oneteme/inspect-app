@@ -1,75 +1,106 @@
-<div *ngIf="!isLoading && request && instance" class="header-card">
-  <mat-card style="width: 60vw; min-width: 60vw;"
-            [ngClass]="{'success': request.end && !request.failed,
+<div *ngIf="!isLoading && request && instance" >
+  <div class="header-card">
+    <mat-card style="width: 60vw; min-width: 60vw;"
+              [ngClass]="{'success': request.end && !request.failed,
                           'fail': request.end && request.failed,
                           'in-progress': !request.end}">
-    <mat-card-title>
-      <label-icon [icon]="REQUEST_TYPE['ldap'].icon">
-        <div style="display: flex; gap: 0.5em; align-items: center;">
-          {{ request.protocol + '://' + (request.host ? request.host : 'N/A') + (request.port == -1 ? '' : ':' + request.port)}}
-          <mat-spinner *ngIf="!request.end" [diameter]="18"></mat-spinner>
-        </div>
-      </label-icon>
+      <mat-card-title>
+        <label-icon [icon]="REQUEST_TYPE['ldap'].icon">
+          <div style="display: flex; gap: 0.5em; align-items: center;">
+            {{ request.protocol + '://' + (request.host ? request.host : 'N/A') + (request.port == -1 ? '' : ':' + request.port)}}
+            <mat-spinner *ngIf="!request.end" [diameter]="18"></mat-spinner>
+          </div>
+        </label-icon>
 
-      <div class="right">
-        <button mat-icon-button [disabled]="sessionParent == null"
-                [ngStyle]="sessionParent == null ? {'pointer-events': 'none'}: ''" (click)="navigate($event,'parent')"
-                matTooltip="Détail de l'appel parent">
-          <mat-icon>move_up</mat-icon>
-        </button>
-      </div>
-    </mat-card-title>
-    <mat-card-content>
-      <exception-display [exception]="exception"></exception-display>
-    </mat-card-content>
-    <mat-card-footer>
-      <mat-icon class="material-symbols-outlined" style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
-      <div style="display: flex; align-items: center; gap: 0.5em">
-        {{request.user || "N/A"}} le {{( request.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
-        en <span style="font-weight: bold">{{{ start: request.start, end: request.end } | duration}}</span>
-      </div>
-    </mat-card-footer>
-  </mat-card>
-  <mat-card style="width: 40vw;">
-    <mat-card-title>
-      <label-icon icon="widgets">
-        {{instance.name}}
-        <span style="font-size: 12px; font-style: italic; font-weight: normal; margin-left: 0.5em" [matTooltip]="instance.collector">{{instance.version}}</span>
-      </label-icon>
-      <div class="right">
-        <button mat-icon-button [matMenuTriggerFor]="menuServer">
-          <mat-icon>more_vert</mat-icon>
-        </button>
-      </div>
-    </mat-card-title>
-    <mat-card-content style="margin-left: 1em;">
-      <label-icon [icon]="'data_table'">
-        <div style="font-weight: 500; font-size: 14px;">
-          {{instance.os}}
+        <div class="right">
+          <button mat-icon-button [disabled]="sessionParent == null"
+                  [ngStyle]="sessionParent == null ? {'pointer-events': 'none'}: ''" (click)="navigate($event,'parent')"
+                  matTooltip="Détail de l'appel parent">
+            <mat-icon>move_up</mat-icon>
+          </button>
         </div>
-        <div style="font-style: italic; font-size: 12px;">
-          {{instance.re}}
+      </mat-card-title>
+      <mat-card-content>
+        <exception-display [exception]="exception"></exception-display>
+      </mat-card-content>
+      <mat-card-footer>
+        <mat-icon class="material-symbols-outlined" style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
+        <div style="display: flex; align-items: center; gap: 0.5em">
+          {{request.user || "N/A"}} le {{( request.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
+          en <span style="font-weight: bold">{{{ start: request.start, end: request.end } | duration}}</span>
         </div>
-      </label-icon>
-    </mat-card-content>
-    <mat-card-footer>
-      <label-icon icon="person" [iconOutlined]="true" [size]="20">
-        {{instance.user || "N/A"}}
-        le {{ (instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
-      </label-icon>
-      <div *ngIf="instance.end" class="right" [matTooltip]="((instance.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')">
-        en <span style="font-weight: bold">{{((instance.end - instance.instant) | duration)}}</span>
+      </mat-card-footer>
+    </mat-card>
+    <mat-card style="width: 40vw;">
+      <mat-card-title>
+        <label-icon icon="widgets">
+          {{instance.name}}
+          <span style="font-size: 12px; font-style: italic; font-weight: normal; margin-left: 0.5em" [matTooltip]="instance.collector">{{instance.version}}</span>
+        </label-icon>
+        <div class="right">
+          <button mat-icon-button [matMenuTriggerFor]="menuServer">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </div>
+      </mat-card-title>
+      <mat-card-content style="margin-left: 1em;">
+        <label-icon [icon]="'data_table'">
+          <div style="font-weight: 500; font-size: 14px;">
+            {{instance.os}}
+          </div>
+          <div style="font-style: italic; font-size: 12px;">
+            {{instance.re}}
+          </div>
+        </label-icon>
+      </mat-card-content>
+      <mat-card-footer>
+        <label-icon icon="person" [iconOutlined]="true" [size]="20">
+          {{instance.user || "N/A"}}
+          le {{ (instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
+        </label-icon>
+        <div *ngIf="instance.end" class="right" [matTooltip]="((instance.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')">
+          en <span style="font-weight: bold">{{((instance.end - instance.instant) | duration)}}</span>
+        </div>
+      </mat-card-footer>
+    </mat-card>
+  </div>
+  <div class="tabs-container">
+    <!-- Navigation verticale des onglets -->
+    <div class="vertical-tabs">
+      <div *ngFor="let tab of tabs; let i = index"
+           class="tab-button"
+           [class.active]="selectedTabIndex === i"
+           [class.hidden]="!tab.visible"
+           (click)="selectedTabIndex = i">
+        <mat-icon class="material-symbols-outlined">{{ tab.icon }}</mat-icon>
+        <span class="tab-label">{{ tab.label }}</span>
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
+          <mat-icon *ngIf="tab.hasError && tab.errorCount > 0"
+                    class="error-indicator material-symbols-outlined"
+                    [matTooltip]="tab.errorCount + ' erreur(s)'"
+                    matTooltipPosition="right">
+            error
+          </mat-icon>
+        </div>
       </div>
-    </mat-card-footer>
-  </mat-card>
+    </div>
+    <div class="tab-content">
+      <div *ngIf="tabs[selectedTabIndex]?.type === 'stage'" class="tab-panel">
+        <request-stage-table [requests]="stages">
+        </request-stage-table>
+      </div>
+      <div *ngIf="tabs[selectedTabIndex]?.type === 'timeline'" class="tab-panel">
+        <app-timeline [options]="options"
+                      [groups]="dataGroups"
+                      [items]="dataItems"
+                      [displayHeader]="false"
+                      (onTimelineCreated)="onTimelineCreate($event)">
+        </app-timeline>
+      </div>
+    </div>
+  </div>
 </div>
-
-
-<app-timeline [options]="options"
-              [groups]="dataGroups"
-              [items]="dataItems" [displayHeader]="false"
-              (onTimelineCreated)="onTimelineCreate($event)">
-</app-timeline>
 
 <div *ngIf="!isLoading && !request && !instance" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">
   <h2>

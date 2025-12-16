@@ -50,7 +50,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   MAPPING_TYPE = Constants.MAPPING_TYPE;
   filterConstants = FilterConstants;
   nameDataList: any[];
-  displayedColumns: string[] = ['status', 'app_name', 'method/path', 'query', 'start', 'durée', 'user'];
+  displayedColumns: string[] = ['app_name', 'method/path', 'start', 'durée', 'user'];
   dataSource: MatTableDataSource<RestSessionDto> = new MatTableDataSource();
   isLoading = true;
   serverNameIsLoading = true;

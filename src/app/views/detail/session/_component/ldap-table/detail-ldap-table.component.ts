@@ -13,7 +13,7 @@ import {INFINITY} from "../../../../constants";
 })
 export class DetailLdapTableComponent {
     private readonly pipe = new DatePipe('fr-FR');
-    displayedColumns: string[] = ['status', 'host', 'command', 'start', 'duree'];
+    displayedColumns: string[] = ['host', 'command', 'start', 'duree'];
     dataSource: MatTableDataSource<DirectoryRequestDto> = new MatTableDataSource();
     filterTable :string;
     @ViewChild('paginator', {static: true}) paginator: MatPaginator;

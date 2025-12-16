@@ -1,5 +1,12 @@
-<header-page [iconOutlined]="true"  [titleIcon]="REQUEST_TYPE[params.type].icon" [ui-title]="'Requêtes '+REQUEST_TYPE[params.type].title">
-  <form [formGroup]="requestFilterForm" class="header-filter md-3">
+<div class="header-container">
+  <div class="title-container">
+    <mat-icon class="material-symbols-outlined title-icon">{{ REQUEST_TYPE[params.type].icon }}</mat-icon>
+    <div class="title-content">
+      <h1 class="title-label">{{ REQUEST_TYPE[params.type].title }}</h1>
+      <div class="subtitle-label">{{ REQUEST_TYPE[params.type].subtitle }}</div>
+    </div>
+  </div>
+  <div class="filter-container md-3">
     <mat-form-field style="width: 315px" class="no-subscript" appearance="outline" >
       <mat-label>Période</mat-label>
       <mat-date-range-input [formGroup]="requestFilterForm.controls.dateRangePicker" [rangePicker]="picker">
@@ -19,32 +26,32 @@
       <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>
     </mat-form-field>
 
-    <mat-form-field style="width: 280px" class="no-subscript" appearance="outline">
-        <mat-label>Status</mat-label>
-        <mat-select [formControl]="requestFilterForm.controls.rangestatus" multiple (selectionChange)="onChangeStatus($event)">
-            <mat-select-trigger style="display: flex; gap: 0.5em;">
-                    <div style="display: flex; gap: 0.5em; flex: 1;" *ngFor="let s of requestFilterForm.controls.rangestatus.value">
-                        <mat-icon [style.color]="s.color" >
-                            {{s.icon}}
-                        </mat-icon>
-                       {{s.label}}
-                    </div>
-            </mat-select-trigger>
-            <mat-option *ngFor="let s of seviceType[params.type].filters" [value]="s">
-                <div style="display: flex; align-content: center">
-                    <mat-icon [style.color]="s.color">
-                        {{s.icon}}
-                    </mat-icon>
-                    {{s.label}}
-                </div>
-            </mat-option>
-        </mat-select>
+    <mat-form-field style="width: 200px" class="no-subscript" appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select [formControl]="requestFilterForm.controls.rangestatus" multiple (selectionChange)="onChangeStatus($event)">
+        <mat-select-trigger style="display: flex; gap: 0.5em;">
+          <div style="display: flex; gap: 0.5em; flex: 1;" *ngFor="let s of requestFilterForm.controls.rangestatus.value">
+            <mat-icon [style.color]="s.color" >
+              {{s.icon}}
+            </mat-icon>
+            {{s.label}}
+          </div>
+        </mat-select-trigger>
+        <mat-option *ngFor="let s of seviceType[params.type].filters" [value]="s">
+          <div style="display: flex; align-content: center">
+            <mat-icon [style.color]="s.color">
+              {{s.icon}}
+            </mat-icon>
+            {{s.label}}
+          </div>
+        </mat-option>
+      </mat-select>
     </mat-form-field>
     <button mat-mini-fab color="primary"  (click)="search()">
       <mat-icon matSuffix>search</mat-icon>
     </button>
-  </form>
-</header-page>
+  </div>
+</div>
 
 <div  *ngIf="params.type=='rest'">
     <rest-table

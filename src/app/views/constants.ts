@@ -498,22 +498,22 @@ export class Constants {
         }
     };
 
-    static readonly MAPPING_TYPE: {[key: string]: {title: string, icon: string}} = {
+    static readonly MAPPING_TYPE: {[key: string]: Partial<{title: string, subtitle: string, icon: string}>} = {
         request: {title: 'Requêtes', icon: 'call_made'},
-        rest: {title: 'Appels reçus', icon: 'call_received'},
-        batch: {title: 'Exécution de Batch', icon: 'manufacturing'},
-        test: {title: 'Exécution de Test', icon: 'rule'},
-        startup: {title: 'Lancement de Serveur', icon: 'restart_alt'},
-        view: {title: 'Navigation', icon: 'ads_click'},
+        rest: {title: 'Appels reçus', subtitle: 'Gestion et supervision des sessions', icon: 'call_received'},
+        batch: {title: 'Exécution de Batch', subtitle: 'Gestion et supervision des sessions', icon: 'manufacturing'},
+        test: {title: 'Exécution de Test', subtitle: 'Gestion et supervision des sessions', icon: 'rule'},
+        startup: {title: 'Lancement de Serveur', subtitle: 'Gestion et supervision des sessions', icon: 'restart_alt'},
+        view: {title: 'Navigation', subtitle: 'Gestion et supervision des sessions', icon: 'ads_click'},
         dashboard: {title:'Page d\'Accueil', icon: 'home'},
-        deploiment: {title:'Versions déployées', icon:'deployed_code'},
+        deploiment: {title:'Versions déployées', subtitle: 'Gestion et supervision des deploiements', icon:'deployed_code'},
     }
-    static readonly REQUEST_MAPPING_TYPE: {[key: string]: {title: string, icon: string}} = {
-        rest: {title: 'HTTP', icon: 'public'},
-        jdbc: {title: 'BDD', icon: 'database'},
-        ftp: {title: 'FTP', icon: 'smb_share'},
-        smtp: {title: 'SMTP', icon: 'outgoing_mail'},
-        ldap: {title: 'LDAP', icon: 'user_attributes'},
+    static readonly REQUEST_MAPPING_TYPE: {[key: string]: Partial<{title: string, subtitle: string, icon: string}>} = {
+        rest: {title: 'HTTP', subtitle: 'Gestion et supervision des requêtes', icon: 'public'},
+        jdbc: {title: 'BDD', subtitle: 'Gestion et supervision des requêtes', icon: 'database'},
+        ftp: {title: 'FTP', subtitle: 'Gestion et supervision des requêtes', icon: 'smb_share'},
+        smtp: {title: 'SMTP', subtitle: 'Gestion et supervision des requêtes', icon: 'outgoing_mail'},
+        ldap: {title: 'LDAP', subtitle: 'Gestion et supervision des requêtes', icon: 'user_attributes'},
     }
 
 

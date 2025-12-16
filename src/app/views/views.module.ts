@@ -66,8 +66,10 @@ import {DetailRestView} from "./detail/request/rest/detail-rest.view";
 import {SupervisionView} from "./supervision/supervision.view";
 import {StacktraceDialogComponent} from "./supervision/_component/stacktrace-dialog/stacktrace-dialog.component";
 import {ConfigDialogComponent} from "./supervision/_component/config-dialog/config-dialog.component";
-import {StageDialogComponent} from "./detail/session/rest/stage-dialog/stage-dialog.component";
 import {ReportTableComponent} from "./supervision/_component/report-table/report-table.component";
+import {DetailStageTableComponent} from "./detail/session/_component/stage-table/detail-stage-table.component";
+import {RequestStageTableComponent} from "./detail/request/_component/stage-table/request-stage-table.component";
+import {RequestMailTableComponent} from "./detail/request/_component/mail-table/request-mail-table.component";
 
 
 
@@ -131,8 +133,10 @@ import {ReportTableComponent} from "./supervision/_component/report-table/report
     SearchRequestView,
     StacktraceDialogComponent,
     ConfigDialogComponent,
-    StageDialogComponent,
-    ReportTableComponent
+    ReportTableComponent,
+    DetailStageTableComponent,
+    RequestStageTableComponent,
+    RequestMailTableComponent
   ]
 })
 export class ViewsModule { }

@@ -115,7 +115,10 @@ export class DeploimentComponent implements OnDestroy {
     });
   }
 
-  toDate(value: number) {
+  toDate(value?: number) {
+    if(!value) {
+      return new Date();
+    }
     return new Date(value);
   }
 
@@ -148,6 +151,14 @@ export class DeploimentComponent implements OnDestroy {
       }
       return acc;
     }, {});
+  }
+
+  navigateOnSinceClick(event: MouseEvent, row: any) {
+    this._router.navigateOnClick(event, ['/session/startup', row.id], { queryParams: {env: this.params.env} });
+  }
+
+  navigateOnRestartClick(event: MouseEvent, row: any) {
+    this._router.navigateOnClick(event, ['/session/startup'], { queryParams: {env: this.params.env, start: new Date(row.minStart).toISOString(), end: new Date().toISOString(), server: row.appName} });
   }
 }
 

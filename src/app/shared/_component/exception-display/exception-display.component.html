@@ -1,30 +1,20 @@
 <div class="container" *ngIf="_exception?.type || _exception?.message">
-
   <div class="content">
-    <mat-icon class="material-symbols-outlined">
-      error
-    </mat-icon>
+    <mat-icon class="material-symbols-outlined">error</mat-icon>
 
     <div class="exception">
       <div class="type" *ngIf="_exception.type">
         {{ _exception.type }}
       </div>
-
-      <div class="message" *ngIf="_exception.message">
+      <div class="message ellipsis" *ngIf="_exception.message">
         {{ _exception.message }}
       </div>
+    </div>
 
-      <div class="stacktrace" *ngIf="_stacktrace">
-        <button mat-stroked-button
-                (click)="_showStacktrace = !_showStacktrace">
-          <mat-icon>
-            {{ _showStacktrace ? 'expand_less' : 'expand_more' }}
-          </mat-icon>
-          {{ _showStacktrace ? 'Masquer' : 'Voir' }} la stacktrace
-        </button>
-
-        <pre *ngIf="_showStacktrace">{{ _stacktrace }}</pre>
-      </div>
+    <div class="actions" *ngIf="_stacktrace">
+      <button mat-icon-button (click)="showStacktrace()" matTooltip="Voir la stacktrace">
+        <mat-icon>visibility</mat-icon>
+      </button>
     </div>
   </div>
 </div>

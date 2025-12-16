@@ -18,11 +18,11 @@
                 </div>
             </mat-card-title>
             <mat-card-content>
-              <span *ngIf="session.location">
+              <div class="ellipsis" [matTooltip]="session.location" *ngIf="session.location">
                   <a class="url" [href]="session.location" target="_blank">
                       {{ session.location }}
                   </a>
-              </span>
+              </div>
               <exception-display [exception]="session.exception"></exception-display>
             </mat-card-content>
             <mat-card-footer>

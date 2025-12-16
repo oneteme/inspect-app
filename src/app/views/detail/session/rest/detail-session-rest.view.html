@@ -20,7 +20,7 @@
               </div>
             </mat-card-title>
             <mat-card-content>
-                <div class="ellipsis">
+                <div class="ellipsis" [matTooltip]="getSessionUrl()">
                     <a class="url" [href]="getSessionUrl()" target="_blank">
                         [{{ session.method }}] {{ getSessionUrl() }}
                     </a>
@@ -108,7 +108,7 @@
 </div>
 
 <mat-menu #menuEndPoint="matMenu" xPosition="after">
-  <a mat-menu-item [disabled]="sessionParent == null" [ngStyle]="sessionParent == null ? {'pointer-events': 'none'}: ''" [routerLink]="sessionParent?.type == 'rest' ? ['/session', 'rest', sessionParent?.id] : ['/session', sessionParent?.type.toLowerCase(), sessionParent?.id]" [queryParams]="{env: instance?.env}">
+  <a mat-menu-item [disabled]="sessionParent == null" [ngStyle]="{'pointer-events': sessionParent == null ? 'none' : ''}" [routerLink]="sessionParent?.type == 'rest' ? ['/session', 'rest', sessionParent?.id] : ['/session', sessionParent?.type.toLowerCase(), sessionParent?.id]" [queryParams]="{env: instance?.env}">
     <div style="display: flex;">
       <mat-progress-spinner *ngIf="parentLoading"  style="margin-right: 16px" diameter="24" mode="indeterminate"
                             matTooltip="Chargement de l'appel parent">
@@ -120,10 +120,6 @@
   <a mat-menu-item [routerLink]="['/session', 'rest', session?.id, 'tree']">
     <mat-icon class="material-symbols-outlined">lan</mat-icon>
     Arbre d'appels
-  </a>
-  <a mat-menu-item (click)="openStages()">
-    <mat-icon class="material-symbols-outlined">view_timeline</mat-icon>
-    Chronologie des stages
   </a>
   <button mat-menu-item [matMenuTriggerFor]="menuStatistic"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI</button>
 </mat-menu>
