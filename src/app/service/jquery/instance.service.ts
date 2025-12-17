@@ -109,7 +109,6 @@ export class InstanceService {
     return this.getInstance(args);
   }
 
-  // new
   getLastServerInfo(filters: { env: string, appName: string }): Observable<{
     appName: string,
     version: string,
@@ -173,6 +172,24 @@ export class InstanceService {
       'column': 'id,app_name:appName,start,end',
       'environement': filters.env,
       'type': 'SERVER',
+      [criteria]: '',
+      'order': 'appName.asc,start.desc'
+    }
+    return this.getInstance(args);
+  }
+
+  getClientInstanceByPeriodAndAddress(filters: { env: string, start: Date, end: Date}): Observable<{
+    id: string,
+    appName: string,
+    address: string,
+    start: number,
+    end: number
+  }[]> {
+    let criteria = `start.le(${filters.end.toISOString()}).and(end.ge(${filters.start.toISOString()}).or(end.isNull))`;
+    let args: any = {
+      'column': 'id,app_name:appName,address,start,end',
+      'environement': filters.env,
+      'type': 'CLIENT',
       [criteria]: '',
       'order': 'appName.asc,start.desc'
     }

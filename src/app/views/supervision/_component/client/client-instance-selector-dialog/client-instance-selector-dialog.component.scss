@@ -1,0 +1,18 @@
+.dialog-container {
+  padding: 0;
+}
+
+h2[mat-dialog-title] {
+  margin: 0;
+  padding: 24px 24px 0;
+}
+
+mat-dialog-content {
+  padding: 20px 24px;
+}
+
+mat-dialog-actions {
+  padding: 8px 24px 24px;
+  margin: 0;
+}
+

@@ -63,11 +63,16 @@ import {DetailTimelineComponent} from "./detail/session/_component/timeline/deta
 import {ActionTableComponent} from "./detail/session/_component/action-table/action-table.component";
 import {DetailRequestView} from "./detail/request/detail-request.view";
 import {DetailRestView} from "./detail/request/rest/detail-rest.view";
-import {SupervisionView} from "./supervision/supervision.view";
 import {StacktraceDialogComponent} from "./supervision/_component/stacktrace-dialog/stacktrace-dialog.component";
 import {ConfigDialogComponent} from "./supervision/_component/config-dialog/config-dialog.component";
 import {StageDialogComponent} from "./detail/session/rest/stage-dialog/stage-dialog.component";
 import {ReportTableComponent} from "./supervision/_component/report-table/report-table.component";
+import {ServerInstanceSelectorDialogComponent} from "./supervision/_component/server/server-instance-selector-dialog/server-instance-selector-dialog.component";
+import {ServerSupervisionView} from "./supervision/_component/server/server-supervision.view";
+import {ClientSupervisionView} from "./supervision/_component/client/client-supervision.view";
+import {
+  ClientInstanceSelectorDialogComponent
+} from "./supervision/_component/client/client-instance-selector-dialog/client-instance-selector-dialog.component";
 
 
 
@@ -112,7 +117,6 @@ import {ReportTableComponent} from "./supervision/_component/report-table/report
     ArchitectureView,
     TreeView,
     DumpView,
-    SupervisionView,
     StatisticServerView,
     RestTabComponent,
     BatchTabComponent,
@@ -132,7 +136,11 @@ import {ReportTableComponent} from "./supervision/_component/report-table/report
     StacktraceDialogComponent,
     ConfigDialogComponent,
     StageDialogComponent,
-    ReportTableComponent
+    ReportTableComponent,
+    ServerInstanceSelectorDialogComponent,
+    ClientInstanceSelectorDialogComponent,
+    ServerSupervisionView,
+    ClientSupervisionView
   ]
 })
 export class ViewsModule { }

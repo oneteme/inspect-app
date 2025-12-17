@@ -19,7 +19,7 @@ export class ReportTableComponent {
   @Input() set data(objects: any[]) {
     if (objects?.length) {
       this.dataSource = new MatTableDataSource(objects.map(r => {
-        return { date: r.date, level: r.level, message: r.message, stacktrace: r.stacktrace };
+        return { date: r.date, level: r.level, message: r.message, stacktrace: r.stackRows };
       }));
       this.dataSource.paginator = this.paginator;
       this.dataSource.sort = this.sort;
