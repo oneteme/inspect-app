@@ -72,7 +72,7 @@
                 <div class="server-name">{{ row.appName || 'N/A' }}</div>
               </div>
               <a class="status-indicator-modern"
-                 [routerLink]="['/supervision', row.id]"
+                 [routerLink]="['/supervision',row.type.toLowerCase(), row.id]"
                  [queryParams]="{env: params.env, start: toDate(activityStatus[row.id].lastTrace - 1000 * 60 * 60 * 12).toISOString(), end: toDate(activityStatus[row.id].lastTrace + 1000 * 60 * 60 * 12).toISOString()}"
                  [matTooltip]="activityStatus[row.id].tooltip"
                  [ngClass]="activityStatus[row.id].css">
