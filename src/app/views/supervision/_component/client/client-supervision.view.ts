@@ -1,6 +1,6 @@
 import {Component, inject, OnDestroy, OnInit} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
-import {combineLatest, finalize, forkJoin, of, Subject, switchMap, takeUntil} from "rxjs";
+import {combineLatest, EMPTY, finalize, forkJoin, of, Subject, switchMap, takeUntil} from "rxjs";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {TraceService} from "../../../../service/trace.service";
 import {InstanceEnvironment} from "../../../../model/trace.model";
@@ -18,7 +18,10 @@ import {CustomDateRangeSelectionStrategy} from "../../../../shared/material/cust
 import {EnvRouter} from "../../../../service/router.service";
 import {ConfigDialogComponent} from "../config-dialog/config-dialog.component";
 import {InstanceService} from "../../../../service/jquery/instance.service";
-import {InstanceSelectorDialogComponent} from "../instance-selector-dialog/instance-selector-dialog.component";
+import {MatSnackBar} from "@angular/material/snack-bar";
+import {
+  ClientInstanceSelectorDialogComponent
+} from "./client-instance-selector-dialog/client-instance-selector-dialog.component";
 
 @Component({
   templateUrl: './client-supervision.view.html',
@@ -46,7 +49,9 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   private readonly _location: Location = inject(Location);
   private readonly _decimalPipe: DecimalPipe = inject(DecimalPipe);
   private readonly _datePipe = inject(DatePipe);
+  private readonly _snackBar = inject(MatSnackBar);
   private readonly $destroy = new Subject<void>();
+
 
   readonly formGroup = new FormGroup({
     range: new FormGroup({
@@ -54,7 +59,9 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
       end: new FormControl<Date | null>(null, [Validators.required]),
     }),
     instance: new FormControl< {id: string, appName: string, start: number, end: number} | null>(null, [Validators.required]),
+    address: new FormControl< string | null>(null, []),
     server: new FormControl< string | null>(null, [])
+
   });
 
   readonly USAGE_RESOURCE_BY_PERIOD_LINE: ChartProvider<string, number> = {
@@ -376,7 +383,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
 
   servers: string[] = [];
   instance: Partial<InstanceEnvironment> = {};
-  instances: {id: string, appName: string, start: number, end: number}[] = [];
+  instances: {id: string, appName: string, address:string,  start: number, end: number}[] = [];
   usageResourceByPeriod: any[] = [];
   instanceTraceByPeriod: {date: Date, pending: number, attempts: number, traceCount: number, queueCapacity: number}[] = [];
   logEntryByPeriod: any[] = [];
@@ -405,7 +412,6 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
       this._activatedRoute.queryParams
     ]).subscribe({
       next: ([params, queryParams]) => {
-        console.log(this.params.env,queryParams.env)
         this.reloadInstances = !!(this.params.env && queryParams.env && this.params.env !== queryParams.env);
         this.params.instance = params.instance;
         this.params.env = queryParams.env;
@@ -413,14 +419,16 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
         this.params.end = new Date(queryParams.end);
         this.params.app_name = queryParams.app_name;
         this.patchDateValue(this.params.start, this.params.end);
-        console.log(this.reloadInstances);
-        if(!this.reloadInstances){
-          this.getInstance();
-        }else {
-          this.instance = null;
-          this.reset();
-          console.log(this.params.app_name)
+        if(this.reloadInstances){
+          // Réinitialiser les valeurs du formulaire quand l'environnement change
+          this.formGroup.patchValue({
+            instance: null,
+            server: null,
+            address: null
+          }, { emitEvent: false });
         }
+        this.getInstances(this.params.start, this.params.end);
+        this.getInstance();
       }
     });
   }
@@ -449,7 +457,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
     this.instances = [];
     this.servers = [];
     this.isLoadingInstances = true;
-    this._instanceService.getInstanceByPeriodAndAddress({env: this.params.env, start: start, end: end, address: this.instance.address})
+    this._instanceService.getClientInstanceByPeriodAndAddress({env: this.params.env, start: start, end: end})
     .pipe(finalize(() => this.isLoadingInstances = false))
     .subscribe({
         next: res => {
@@ -460,6 +468,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
             if(s) {
               this.patchInstanceValue(s)
               this.patchServerValue(s.appName)
+              this.patchAddressValue(s.address)
             }
           }
         }
@@ -470,13 +479,22 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
     this.$destroy.next()
     this.isLoading = true;
     this.instance = null;
-    this.usageResourceByPeriod = [{date: new Date(), commitedHeap: null, usedHeap: null, maxHeap: null, diskTotalSpace: null, usedDiskSpace: null}];
-    this.instanceTraceByPeriod = [{date: new Date(), pending: null, attempts: null, traceCount: null, queueCapacity: null}];
+    this.usageResourceByPeriod = [];
+    this.instanceTraceByPeriod = [];
     this.logEntryByPeriod = [];
     this.unavailableStat = 0;
     this.traceStat = 0;
     this._traceService.getInstance(this.params.instance)
     .pipe(switchMap(res => {
+      if(res?.env !== this.params.env) {
+        this._snackBar.open(`L'identifiant de cette instance ne correspond pas à l'environnement ${this.params.env}`, "Fermer",
+            {
+              horizontalPosition: "center",
+              verticalPosition: "top",
+              duration: 5000
+            });
+        return EMPTY;
+      }
       this.instance = res;
       this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}&app_name=${this.instance.name}&_reload=${new Date().getTime()}`);
       return forkJoin([
@@ -485,21 +503,15 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
         this._instanceTraceService.getInstanceTraceByPeriod({instance: this.params.instance, start: this.params.start, end: this.params.end}),
         this._traceService.getLogEntryByPeriod(this.params.instance, this.params.start, this.params.end)
       ]);
-    }), takeUntil(this.$destroy)).subscribe({
+    }),finalize(()=>(this.isLoading=false)), takeUntil(this.$destroy)).subscribe({
       next: ([last, usage, trace, log]) => {
-        this.getInstances(this.params.start, this.params.end);
-        this.usageResourceByPeriod = usage?.length
-          ? usage.map(r => ({...r, date: new Date(r.date), maxHeap: this.instance.resource.maxHeap, diskTotalSpace: this.instance.resource.diskTotalSpace}))
-          : [{date: new Date(), commitedHeap: null, usedHeap: null, maxHeap: this.instance.resource?.maxHeap, diskTotalSpace: this.instance.resource?.diskTotalSpace, usedDiskSpace: null}];
-        this.instanceTraceByPeriod = trace?.length
-          ? trace.map(r => ({...r, date: new Date(r.date), queueCapacity: this.instance.configuration?.tracing?.queueCapacity}))
-          : [{date: new Date(), pending: null, attempts: null, traceCount: null, queueCapacity: this.instance.configuration?.tracing?.queueCapacity}];
+        this.usageResourceByPeriod = usage?.length ? usage.map(r => ({...r, date: new Date(r.date), maxHeap: this.instance.resource.maxHeap, diskTotalSpace: this.instance.resource.diskTotalSpace})) : [];
+        this.instanceTraceByPeriod = trace?.length ? trace.map(r => ({...r, date: new Date(r.date), queueCapacity: this.instance.configuration?.tracing?.queueCapacity})) : [];
         this.logEntryByPeriod = log.map(r => ({...r, date: this._datePipe.transform(r.instant * 1000, 'dd/MM/yyyy HH:mm:ss')}));
         if(last?.length && last[0].date && this.instance.configuration?.scheduling?.interval) {
           this.isInactiveInstance =  (new Date(last[0].date) < new Date(new Date().getTime() - (this.instance.configuration.scheduling.interval + 60) * 1000));
         }
         this.getStatActivity();
-        this.isLoading = false
       }
     });
   }
@@ -512,8 +524,8 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
 
   search() {
     if (this.formGroup.valid) {
-      //this.reloadInstances = false; // why
-      this._router.navigate(['supervision', this.formGroup.controls.instance.value.id], {
+      this.reloadInstances = false;
+      this._router.navigate(['supervision', 'client', this.formGroup.controls.instance.value.id], {
         queryParams: { start: this.formGroup.controls.range.controls.start.getRawValue().toISOString(), end: this.formGroup.controls.range.controls.end.getRawValue().toISOString(), env: this.params.env, _reload: new Date().getTime() },
       });
     }
@@ -525,6 +537,12 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
         start: start,
         end: end
       }
+    }, { emitEvent: false });
+  }
+
+  patchAddressValue(address: string) {
+    this.formGroup.patchValue({
+      address: address
     }, { emitEvent: false });
   }
 
@@ -547,13 +565,14 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   }
 
   openInstanceSelector() {
-    const dialogRef = this._dialog.open(InstanceSelectorDialogComponent, {
+    const dialogRef = this._dialog.open(ClientInstanceSelectorDialogComponent, {
       width: '500px',
       data: {
         servers: this.servers,
         instances: this.instances,
         selectedServer: this.formGroup.controls.server.value,
         selectedInstance: this.formGroup.controls.instance.value,
+        selectedAddress: this.formGroup.controls.address.value,
         isLoadingInstances: this.isLoadingInstances
       }
     });
@@ -562,6 +581,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
       if (result) {
         this.patchServerValue(result.server);
         this.patchInstanceValue(result.instance);
+        this.patchAddressValue(result.address);
       }
     });
   }
@@ -637,16 +657,6 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
 
   get filtredInstances(){
     return this.instances.filter(s => s.appName == this.formGroup.controls.server?.value);
-  }
-
-  reset(){
-    console.log('reset')
-    //this.instance = null;
-    this.usageResourceByPeriod = [{date: new Date(), commitedHeap: null, usedHeap: null, maxHeap: null, diskTotalSpace: null, usedDiskSpace: null}];
-    this.instanceTraceByPeriod = [{date: new Date(), pending: null, attempts: null, traceCount: null, queueCapacity: null}];
-    this.logEntryByPeriod = [];
-    this.unavailableStat = 0;
-    this.traceStat = 0;
   }
 
 }

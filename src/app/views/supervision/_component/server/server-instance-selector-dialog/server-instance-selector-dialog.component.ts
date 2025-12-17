@@ -10,11 +10,11 @@ export interface InstanceSelectorDialogData {
 
 @Component({
   selector: 'instance-selector-dialog',
-  templateUrl: './instance-selector-dialog.component.html',
-  styleUrls: ['./instance-selector-dialog.component.scss']
+  templateUrl: './server-instance-selector-dialog.component.html',
+  styleUrls: ['./server-instance-selector-dialog.component.scss']
 })
-export class InstanceSelectorDialogComponent {
-  private readonly dialogRef = inject(MatDialogRef<InstanceSelectorDialogComponent>);
+export class ServerInstanceSelectorDialogComponent {
+  private readonly dialogRef = inject(MatDialogRef<ServerInstanceSelectorDialogComponent>);
 
   selectedServer: string | null;
   selectedInstance: {id: string, appName: string, start: number, end: number} | null;

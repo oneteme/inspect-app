@@ -1,11 +1,26 @@
 <div class="dialog-container">
-  <h2 mat-dialog-title>Sélectionner une instance</h2>
+  <h2 mat-dialog-title>Sélectionner un utilisateur et une instance</h2>
   <mat-dialog-content>
-    <div style="display: flex; flex-direction: column; gap: 1em; min-width: 400px;">
+    <div style="display: flex; flex-direction: column; gap: 1em; min-width: 400px; margin-top: 5px;">
+        <mat-form-field style="width: 100%" class="no-subscript" [class.loading]="data.isLoadingInstances"
+                        appearance="outline">
+            <mat-label>Utilsateur</mat-label>
+            <mat-select [(ngModel)]="selectedAddress" (selectionChange)="onAddressChange()">
+                <mat-select-trigger>
+                    {{ selectedAddress || '' }}
+                </mat-select-trigger>
+                <mat-option *ngFor="let address of addressList" [value]="address">
+                    <div style="display: flex; flex-direction: column;">
+                        {{ address }}
+                    </div>
+                </mat-option>
+            </mat-select>
+            <mat-spinner *ngIf="data.isLoadingInstances" [diameter]="18"></mat-spinner>
+        </mat-form-field>
       <mat-form-field style="width: 100%" class="no-subscript" [class.loading]="data.isLoadingInstances"
                       appearance="outline">
         <mat-label>Instance</mat-label>
-        <mat-select [(ngModel)]="selectedInstance">
+        <mat-select [(ngModel)]="selectedInstance" [disabled]="!selectedAddress">
           <mat-select-trigger>
             {{ selectedInstance?.id || '' }}
           </mat-select-trigger>

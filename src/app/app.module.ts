@@ -35,7 +35,6 @@ import {AnalyticView} from "./views/analytic/analytic.view";
 import {SearchRequestView} from "./views/search/request/search-request.view";
 import {Constants} from "./views/constants";
 import {DetailRequestView} from "./views/detail/request/detail-request.view";
-import {SupervisionView} from "./views/supervision/supervision.view";
 import {ServerSupervisionView} from "./views/supervision/_component/server/server-supervision.view";
 import {ClientSupervisionView} from "./views/supervision/_component/client/client-supervision.view";
 
@@ -216,12 +215,12 @@ const routes: Route[] = [
     title: 'Architecture'
   },
   {
-    path: 'supervision/SERVER/:instance',
+    path: 'supervision/server/:instance',
     component: ServerSupervisionView,
     title: 'Server Supervision'
   },
   {
-    path: 'supervision/CLIENT/:instance',
+    path: 'supervision/client/:instance',
     component: ClientSupervisionView,
     title: 'Client Supervision'
   },
