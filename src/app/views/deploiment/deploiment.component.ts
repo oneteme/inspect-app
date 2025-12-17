@@ -71,7 +71,6 @@ export class DeploimentComponent implements OnDestroy {
         finalize(() => (this.lastServerStart.isLoading = false)))
       .subscribe({
         next: (value: {lastTraces: {id: string, date: number}[], lastServers: LastServerStart[]}) => {
-
           this.versionColor = this.groupBy(value.lastServers, (v: any) => v.version)
           this.lastServerStart.data = new MatTableDataSource(value.lastServers.map(ls => ({...ls, lastTrace: value.lastTraces.find(lt => lt.id === ls.id).date})));
           this.lastServerStart.data.paginator = this.lastServerStartTablePaginator;
@@ -106,27 +105,26 @@ export class DeploimentComponent implements OnDestroy {
     this.subscriptions.forEach(s => s.unsubscribe());
   }
 
-  toDate(value?: number) {
-    if(!value) {
-      return new Date();
-    }
-    return new Date(value);
-  }
-
   // Méthodes pour calculer les statistiques de serveurs
   getOnlineServers(): number {
     const servers = this.lastServerStart.data?.data || [];
-    return servers.filter(server => this.activityStatus[server.id]?.css === 'online').length;
+    return servers.filter(server => {
+      return !server.end && server['lastTrace'] && server['lastTrace'] >= new Date().getTime() - (server.configuration?.scheduling.interval + 60 || 60 * 60) * 1000;
+    }).length;
   }
 
   getPendingServers(): number {
     const servers = this.lastServerStart.data?.data || [];
-    return servers.filter(server => this.activityStatus[server.id]?.css === 'pending').length;
+    return servers.filter(server => {
+      return !server.end && server['lastTrace'] && server['lastTrace'] < new Date().getTime() - (server.configuration?.scheduling.interval + 60 || 60 * 60) * 1000;
+    }).length;
   }
 
   getOfflineServers(): number {
     const servers = this.lastServerStart.data?.data || [];
-    return servers.filter(server => this.activityStatus[server.id]?.css === 'offline').length;
+    return servers.filter(server => {
+      return server.end || !server['lastTrace'];
+    }).length;
   }
 
   navigateOnSinceClick(event: MouseEvent, row: any) {

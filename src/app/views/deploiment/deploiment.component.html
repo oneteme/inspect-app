@@ -69,7 +69,7 @@
           <td mat-cell *matCellDef="let row">
             <div class="server-cell-content">
               <div class="server-name">{{ row.appName || 'N/A' }}</div>
-              <app-status-indicator [params]="{id: row.id, end: row.end, env: params.env, configuration: row.configuration, lastTrace: row.lastTrace}"></app-status-indicator>
+              <app-status-indicator [params]="{id: row.id, type: row.type, end: row.end, env: params.env, configuration: row.configuration, lastTrace: row.lastTrace}"></app-status-indicator>
             </div>
           </td>
         </ng-container>
