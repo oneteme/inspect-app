@@ -90,5 +90,5 @@
 <mat-menu #menuServer="matMenu">
   <a mat-menu-item [routerLink]="['/session', instance?.name, 'dump']" [queryParams]="{env: instance?.env, date: getDate(request?.start * 1000).toISOString()}"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
   <a mat-menu-item [routerLink]="['/dashboard', 'server', instance?.name]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur</a>
-  <a mat-menu-item [routerLink]="['/supervision', instance?.id]" [queryParams]="{start: getDate((request?.start * 1000) - 43200000).toISOString(), end: getDate((request?.start * 1000) + 43200000).toISOString(), env: instance?.env}"><mat-icon class="material-symbols-outlined">browse_activity</mat-icon>Supervision</a>
+  <a mat-menu-item [routerLink]="['/supervision',instance?.type.toLowerCase(), instance?.id]" [queryParams]="{start: getDate((request?.start * 1000) - 43200000).toISOString(), end: getDate((request?.start * 1000) + 43200000).toISOString(), env: instance?.env}"><mat-icon class="material-symbols-outlined">browse_activity</mat-icon>Supervision</a>
 </mat-menu>

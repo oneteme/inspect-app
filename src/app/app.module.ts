@@ -224,7 +224,7 @@ const routes: Route[] = [
     component: ClientSupervisionView,
     title: 'Client Supervision'
   },
-  //{ path: '**', pathMatch: 'full', redirectTo: `/home` }
+  { path: '**', pathMatch: 'full', redirectTo: `/home` }
 ];
 
 @NgModule({
