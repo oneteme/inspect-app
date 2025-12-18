@@ -1,7 +1,7 @@
 import {
   DatabaseRequest,
   DirectoryRequest, ExceptionInfo,
-  FtpRequest, LocalRequest, LogEntry,
+  FtpRequest, HttpSessionStage, LocalRequest, LogEntry,
   MailRequest,
   MainSession,
   RestRequest,
@@ -58,6 +58,7 @@ export interface RestSessionView extends RestSession {
   mailRequests?: MailRequestDto[];
   ldapRequests?: DirectoryRequestDto[];
   localRequests?: LocalRequest[];
+  httpSessionStages?: HttpSessionStage[];
   logEntries?: LogEntry[];
 }
 

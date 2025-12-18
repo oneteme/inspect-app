@@ -7,9 +7,8 @@ import {app} from "../../../../../environments/environment";
 import {Utils} from "../../../../shared/util";
 import {EnvRouter} from "../../../../service/router.service";
 import {RequestType, RestSessionView} from "../../../../model/request.model";
-import {HttpSessionStage, InstanceEnvironment, StackTraceRow} from "../../../../model/trace.model";
+import {HttpSessionStage, InstanceEnvironment} from "../../../../model/trace.model";
 import {MatDialog} from "@angular/material/dialog";
-import {StageDialogComponent} from "./stage-dialog/stage-dialog.component";
 
 @Component({
     templateUrl: './detail-session-rest.view.html',
@@ -64,7 +63,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
                         switchMap((v)=> {
                             return merge(
                                 this._traceService.getInstance(this.session.instanceId).pipe(map(d=>(this.instance=d))),
-                                this._traceService.getRestSessionStages(this.session.id).pipe(map(d=>(this.stages=d))),
+                                this._traceService.getRestSessionStages(this.session.id).pipe(map(d=>(this.session.httpSessionStages=d))),
                                 (this.session.requestsMask & 4) > 0 ? defer(()=> {this.session.restRequests = []; return this._traceService.getRestRequests(this.session.id).pipe(map(d=>(this.session.restRequests=d)))}) : of(),
                                 (this.session.requestsMask & 2) > 0 ? defer(()=> {this.session.databaseRequests = []; return this._traceService.getDatabaseRequests(this.session.id).pipe(map(d=>(this.session.databaseRequests=d)))}) : of(),
                                 (this.session.requestsMask & 1) > 0 ? defer(()=> {this.session.localRequests = []; return this._traceService.getLocalRequests(this.session.id).pipe(map(d=>(this.session.localRequests=d)))}) : of(),
@@ -91,11 +90,5 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.$destroy.next();
         this.$destroy.complete();
-    }
-
-    openStages() {
-        this._dialog.open(StageDialogComponent, {
-           data: {session: this.session, stages: this.stages}
-        });
     }
 }

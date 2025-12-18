@@ -16,6 +16,7 @@ import {
 } from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
 import {getDataForRange, getErrorClassName, showifnotnull} from "../../../../shared/util";
+import {TabData} from "../../session/_component/detail-session.component";
 
 @Component({
     templateUrl: './detail-ldap.view.html',
@@ -41,7 +42,8 @@ export class DetailLdapView implements OnInit, OnDestroy {
     exception: ExceptionInfo;
     instance: InstanceEnvironment;
     isLoading: boolean;
-
+  tabs: TabData[] = [];
+  selectedTabIndex: number = 0;
     sessionParent: { id: string, type: string };
     parentLoading: boolean = false;
     timelineStart: number
@@ -54,10 +56,34 @@ export class DetailLdapView implements OnInit, OnDestroy {
         ]).subscribe({
             next: ([params, queryParams]) => {
                 this.params = {idLdap: params.id_request, env: queryParams.env || app.defaultEnv};
+                this.initTabs();
                 this.getRequest();
             }
         });
     }
+
+  initTabs() {
+    this.tabs = [
+      {
+        label: 'Stages',
+        icon: 'view_object_track',
+        count: 0,
+        visible: true,
+        type: 'stage',
+        hasError: false,
+        errorCount: 0
+      },
+      {
+        label: 'Chronologie',
+        icon: 'view_timeline',
+        count: 0,
+        visible: true,
+        type: 'timeline',
+        hasError: false,
+        errorCount: 0
+      }
+    ]
+  }
 
     ngOnDestroy() {
         this.$destroy.next();

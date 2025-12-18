@@ -27,8 +27,6 @@ export class DeploimentComponent implements OnDestroy {
   private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   private readonly _instanceService = inject(InstanceService);
   private readonly _instanceTraceService = inject(InstanceTraceService);
-  private readonly _dialog = inject(MatDialog);
-  private readonly _datePipe = inject(DatePipe);
 
   today: Date = new Date();
   MAPPING_TYPE = Constants.MAPPING_TYPE;
@@ -41,8 +39,7 @@ export class DeploimentComponent implements OnDestroy {
   onlineServerStat: number = 0;
   pendingServerStat: number = 0;
   offlineServerStat: number = 0;
-  activityStatus: {[key: string]: {css: string, lastTrace: number, tooltip: string}} = {};
-
+  activityStatus: {[key: string]: {css: 'online' | 'pending' | 'offline', lastTrace: number, tooltip: string}} = {};
   @ViewChild('lastServerStartTablePaginator', {static: true}) lastServerStartTablePaginator: MatPaginator;
   @ViewChild('lastServerStartTableSort') lastServerStartTableSort: MatSort;
 
@@ -75,11 +72,10 @@ export class DeploimentComponent implements OnDestroy {
       .subscribe({
         next: (value: {lastTraces: {id: string, date: number}[], lastServers: LastServerStart[]}) => {
           this.versionColor = this.groupBy(value.lastServers, (v: any) => v.version)
-          this.lastServerStart.data = new MatTableDataSource(value.lastServers);
+          this.lastServerStart.data = new MatTableDataSource(value.lastServers.map(ls => ({...ls, lastTrace: value.lastTraces.find(lt => lt.id === ls.id).date})));
           this.lastServerStart.data.paginator = this.lastServerStartTablePaginator;
           this.lastServerStart.data.sort = this.lastServerStartTableSort;
           this.lastServerStart.data.sortingDataAccessor = sortingDataAccessor;
-          this.activityStatus = this.getActivityStatus(value.lastTraces, value.lastServers);
           this.onlineServerStat = this.getOnlineServers();
           this.pendingServerStat = this.getPendingServers();
           this.offlineServerStat = this.getOfflineServers();
@@ -109,45 +105,34 @@ export class DeploimentComponent implements OnDestroy {
     this.subscriptions.forEach(s => s.unsubscribe());
   }
 
-  openConfig(config: InspectCollectorConfiguration) {
-    this._dialog.open(ConfigDialogComponent, {
-      data: config
-    });
-  }
-
-  toDate(value: number) {
-    return new Date(value);
-  }
-
   // Méthodes pour calculer les statistiques de serveurs
   getOnlineServers(): number {
     const servers = this.lastServerStart.data?.data || [];
-    return servers.filter(server => this.activityStatus[server.id]?.css === 'online').length;
+    return servers.filter(server => {
+      return !server.end && server['lastTrace'] && server['lastTrace'] >= new Date().getTime() - (server.configuration?.scheduling.interval + 60 || 60 * 60) * 1000;
+    }).length;
   }
 
   getPendingServers(): number {
     const servers = this.lastServerStart.data?.data || [];
-    return servers.filter(server => this.activityStatus[server.id]?.css === 'pending').length;
+    return servers.filter(server => {
+      return !server.end && server['lastTrace'] && server['lastTrace'] < new Date().getTime() - (server.configuration?.scheduling.interval + 60 || 60 * 60) * 1000;
+    }).length;
   }
 
   getOfflineServers(): number {
     const servers = this.lastServerStart.data?.data || [];
-    return servers.filter(server => this.activityStatus[server.id]?.css === 'offline').length;
+    return servers.filter(server => {
+      return server.end || !server['lastTrace'];
+    }).length;
   }
 
-  getActivityStatus(lastTraces: {id: string, date: number}[], lastServers: LastServerStart[]) {
-    return lastServers.reduce((acc: {[key: string]: {css: string, lastTrace: number, tooltip: string}}, curr) => {
-      let lastTrace = lastTraces.find(lt => lt.id === curr.id);
-      let interval = (curr.configuration?.scheduling.interval + 60 || 60 * 60) * 1000;
-      if(curr.end || !lastTrace ) {
-        acc[curr.id] = {css: 'offline', lastTrace: curr.end || curr.start, tooltip: curr.end ? `Serveur arrêté le ${this._datePipe.transform(this.toDate(curr.end), 'dd/MM/yyyy à HH:mm:ss.SSS', 'fr')}` : 'Aucune trace remontée'};
-      } else if(lastTrace.date < new Date().getTime() - interval){
-        acc[curr.id] = {css: 'pending', lastTrace: lastTrace.date, tooltip: `Dernière trace remontée le ${this._datePipe.transform(this.toDate(lastTrace.date), 'dd/MM/yyyy à HH:mm:ss.SSS', 'fr')}`};
-      } else {
-        acc[curr.id] = {css: 'online', lastTrace: lastTrace.date, tooltip: `Dernière trace remontée le ${this._datePipe.transform(this.toDate(lastTrace.date), 'dd/MM/yyyy à HH:mm:ss.SSS', 'fr')}`};
-      }
-      return acc;
-    }, {});
+  navigateOnSinceClick(event: MouseEvent, row: any) {
+    this._router.navigateOnClick(event, ['/session/startup', row.id], { queryParams: {env: this.params.env} });
+  }
+
+  navigateOnRestartClick(event: MouseEvent, row: any) {
+    this._router.navigateOnClick(event, ['/session/startup'], { queryParams: {env: this.params.env, start: new Date(row.minStart).toISOString(), end: new Date().toISOString(), server: row.appName} });
   }
 }
 

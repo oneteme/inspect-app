@@ -1,5 +1,7 @@
 import {Component, Input} from "@angular/core";
 import {ExceptionInfo, StackTraceRow} from "../../../model/trace.model";
+import { MatDialog } from '@angular/material/dialog';
+import { StacktraceDialogComponent } from './stacktrace-dialog/stacktrace-dialog.component';
 
 @Component({
   selector: 'exception-display',
@@ -9,13 +11,21 @@ import {ExceptionInfo, StackTraceRow} from "../../../model/trace.model";
 export class ExceptionDisplayComponent {
   _exception: ExceptionInfo = null;
   _stacktrace: string = null;
-  _showStacktrace: boolean = false;
+
+  constructor(private dialog: MatDialog) {}
 
   @Input() set exception(value: ExceptionInfo) {
     if(value) {
       this._exception = value;
       this._stacktrace = this.stacktraceFormatter(value);
     }
+  }
+
+  showStacktrace() {
+    this.dialog.open(StacktraceDialogComponent, {
+      width: '80vw',
+      data: { stacktrace: this._stacktrace }
+    });
   }
 
   stacktraceFormatter(exception: ExceptionInfo) {

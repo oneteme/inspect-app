@@ -33,41 +33,13 @@
         color: #d32f2f;
         font-size: 12px;
         line-height: 1.5;
-        word-break: break-word;
-        max-height: 100px;
-        overflow-y: auto;
       }
+    }
 
-      .stacktrace {
-        margin-top: 0.75em;
+    .actions {
 
-        button {
-          font-size: 11px;
-          height: 28px;
-          line-height: 28px;
-          color: #d32f2f;
-          border-color: #ef9a9a;
-
-          mat-icon {
-            font-size: 16px;
-            width: 16px;
-            height: 16px;
-            margin-right: 4px;
-          }
-        }
-
-        pre {
-          margin: 0.5em 0 0 0;
-          padding: 0.75em;
-          background: #fff;
-          border: 1px solid #ffcdd2;
-          border-radius: 4px;
-          font-size: 11px;
-          max-height: 300px;
-          overflow: auto;
-          color: #424242;
-          line-height: 1.4;
-        }
+      button {
+        color: #d32f2f;
       }
     }
   }

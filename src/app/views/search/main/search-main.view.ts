@@ -49,7 +49,7 @@ export class SearchMainView implements OnInit, OnDestroy {
 
     MAPPING_TYPE = Constants.MAPPING_TYPE;
     filterConstants = FilterConstants;
-    displayedColumns: string[] = ['status', 'app_name', 'name', 'location', 'start', 'durée', 'user'];
+    displayedColumns: string[] = ['app_name', 'name', 'location', 'start', 'durée', 'user'];
     dataSource: MatTableDataSource<MainSessionDto> = new MatTableDataSource();
     serverNameIsLoading = true;
     serverFilterForm = new FormGroup({

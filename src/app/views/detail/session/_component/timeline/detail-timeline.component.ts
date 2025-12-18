@@ -62,8 +62,6 @@ export class DetailTimelineComponent implements OnChanges {
     timelineStart: number;
     timelineEnd: number;
 
-    @ViewChild('timeline', {static: true}) timelineElement: ElementRef;
-
     @Input() instance: InstanceEnvironment;
     @Input() request: MainSessionView | RestSessionView;
 
@@ -140,10 +138,6 @@ export class DetailTimelineComponent implements OnChanges {
             || (c.start>= start && c.start <= end && c.end > end)
             || (c.start< start && c.end > end)
             || (c.instant>= start && c.instant <= end))
-    }
-
-    dataSetup(dataArray:any[], isWebapp: boolean): DataItem[] {
-        return
     }
 
     mapother(c:any, id:number) : DataItem{
