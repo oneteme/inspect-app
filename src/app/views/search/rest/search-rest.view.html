@@ -1,5 +1,12 @@
-<header-page [titleIcon]="MAPPING_TYPE['rest'].icon" [ui-title]="MAPPING_TYPE['rest'].title">
-  <form [formGroup]="serverFilterForm" class="header-filter md-3">
+<div class="header-container">
+  <div class="title-container">
+    <mat-icon class="material-symbols-outlined title-icon">{{ MAPPING_TYPE['rest'].icon }}</mat-icon>
+    <div class="title-content">
+      <h1 class="title-label">{{ MAPPING_TYPE['rest'].title }}</h1>
+      <div class="subtitle-label">{{ MAPPING_TYPE['rest'].subtitle }}</div>
+    </div>
+  </div>
+  <div class="filter-container md-3" [formGroup]="serverFilterForm">
     <advanced-filter-recap [filters]="advancedParams" (filterRemoved)="handleRemovedFilter($event)" (focusField)="focusField($event)"></advanced-filter-recap>
     <mat-form-field style="width: 315px" class="no-subscript" appearance="outline" >
       <mat-label>Période</mat-label>
@@ -13,33 +20,36 @@
     <mat-form-field class="no-subscript" [class.loading]="serverNameIsLoading" appearance="outline">
       <mat-label>Serveur</mat-label>
       <mat-select [formControl]="serverFilterForm.controls.appname" multiple (selectionChange)="onChangeServer($event)">
-        
+
         <span *ngIf="serverNameIsLoading && queryParams.appname && queryParams.appname[0]!=''"><mat-option *ngFor="let s of queryParams.appname" [value]="s">{{s}}</mat-option></span>
         <mat-option *ngFor="let d of nameDataList" [value]="d">{{d}}</mat-option>
       </mat-select>
       <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>
     </mat-form-field>
-    <mat-form-field style="width: 250px" class="no-subscript" appearance="outline">
-          <mat-label>Status</mat-label>
-          <mat-select [formControl]="serverFilterForm.controls.rangestatus" multiple (selectionChange)="onChangeStatus($event)">
-              <mat-select-trigger style="display: flex; gap: 0.5em;">
-                  <div style="display: flex; flex: 1; gap: 0.5em;" *ngFor="let s of serverFilterForm.controls.rangestatus.value">
-                      <mat-icon [style.color]="s.color" >
-                          {{s.icon}}
-                      </mat-icon>
-                      {{s.label}}
-                  </div>
-              </mat-select-trigger>
-              <mat-option *ngFor="let s of  filters" [value]="s">
-                  <div style="display: flex; align-content: center">
-                      <mat-icon [style.color]="s.color">
-                          {{s.icon}}
-                      </mat-icon>
-                      {{s.label}}
-                  </div>
-              </mat-option>
-          </mat-select>
-      </mat-form-field>
+    <mat-form-field style="width: 200px" class="no-subscript" appearance="outline">
+      <mat-label>Status</mat-label>
+      <mat-select [formControl]="serverFilterForm.controls.rangestatus" multiple (selectionChange)="onChangeStatus($event)">
+        <mat-select-trigger>
+          <div style="display: flex; gap: 0.5em; align-items: center">
+            <mat-icon [style.color]="serverFilterForm.controls.rangestatus.value?.[0]?.color" >
+              {{serverFilterForm.controls.rangestatus.value?.[0]?.icon}}
+            </mat-icon>
+            {{serverFilterForm.controls.rangestatus.value?.[0]?.label || ''}}
+            <span *ngIf="(serverFilterForm.controls.rangestatus.value?.length || 0) > 1" class="additional-selection">
+            (+{{(serverFilterForm.controls.rangestatus.value?.length || 0) - 1}} {{serverFilterForm.controls.rangestatus.value.length === 2 ? 'autre' : 'autres'}})
+            </span>
+          </div>
+        </mat-select-trigger>
+        <mat-option *ngFor="let s of  filters" [value]="s">
+          <div style="display: flex; align-content: center">
+            <mat-icon [style.color]="s.color">
+              {{s.icon}}
+            </mat-icon>
+            {{s.label}}
+          </div>
+        </mat-option>
+      </mat-select>
+    </mat-form-field>
     <button mat-mini-fab color="primary"  (click)="search()">
       <mat-icon matSuffix>search</mat-icon>
     </button>
@@ -51,98 +61,103 @@
                              (handlePresetSelection)="handlePresetSelection($event)"
                              (handlePresetSelectionReset)="handlePresetSelectionReset()"
                              (handleFilterReset)="handleFilterReset()"></advanced-filter-trigger>
-  </form>
-</header-page>
-<div style="display: flex; justify-content: space-between; margin-bottom: 0.5em;">
-  <mat-form-field  appearance="outline" class="searchwidth md-3 no-subscript">
-    <input [disabled]="isLoading" [(ngModel)]="filterValue" matInput #input (keyup)="applyFilter($event)" placeholder="Filtrer..." autocomplete="off">
-    <mat-icon matSuffix>search</mat-icon>
-  </mat-form-field>
+  </div>
 </div>
 
+<mat-form-field  appearance="outline" class="searchwidth md-3 no-subscript">
+  <input [disabled]="isLoading" [(ngModel)]="filterValue"  matInput #input (keyup)="applyFilter($event)" placeholder="Filtrer..." autocomplete="off">
+  <mat-icon matSuffix>search</mat-icon>
+</mat-form-field>
 
-<div class="mat-elevation-z5">
-  <!-- <div *ngIf="isLoading" class="example-loading-shade">
-    <mat-spinner></mat-spinner>
-  </div> -->
-  <div class="example-table-container">
-    <table class="fullwidth" mat-table [dataSource]="dataSource" matSort matSortActive="start" matSortDirection="desc">
-
-        <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:1%">
-            </th>
-            <td [ngClass]="{'success': row.status >= 200 && row.status < 300,
-                              'warning': row.status >= 300 && row.status < 500,
-                              'fail': row.status >= 500,
-                              'in-progress': !row.end}"
-                mat-cell *matCellDef="let row"
-                [matTooltip]="(row.exception?.type | exceptionType) + ' ' + (row.exception?.message | truncString: 100)" matTooltipPosition="after">
-            </td>
-        </ng-container>
-
+<div class="table-container">
+  <div class="table-wrapper">
+    <table mat-table [dataSource]="dataSource" matSort matSortActive="start" matSortDirection="desc">
       <ng-container matColumnDef="app_name">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:20%"> Serveur </th>
-        <td mat-cell *matCellDef="let row">
-            {{row["appName"] || 'N/A'}}
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          <div class="header-cell-content">
+            <mat-icon class="material-symbols-outlined">dns</mat-icon>
+            Serveur
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let element"
+            [ngClass]="{'success': element.status >= 200 && element.status < 300,
+                        'warning': element.status >= 300 && element.status < 500,
+                        'fail': element.status >= 500,
+                        'in-progress': !element.end}"
+            [matTooltip]="(element.exception?.type | exceptionType) + ' ' + element.exception?.message">
+          {{element["appName"] || 'N/A'}}
         </td>
       </ng-container>
 
       <ng-container matColumnDef="method/path">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:20%"> API </th>
-        <td mat-cell *matCellDef="let row" class="ellipsis">
-          <span [ngStyle]="{'color': row.protocol=='https' ? 'green':'gray'}">[{{row.method}}] </span><br>
-          {{row.path}}
-        </td>
-
-      </ng-container>
-
-      <ng-container matColumnDef="query">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:20%"> Paramètres </th>
-        <td mat-cell *matCellDef="let row" class="ellipsis">
-          {{row.query}}
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          <div class="header-cell-content">
+            <mat-icon class="material-symbols-outlined">api</mat-icon>
+            API
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let element" [matTooltip]="element.query" matTooltipClass="tooltip-class">
+          <span style="font-weight: bold;"
+                [ngStyle]="{'color': element.protocol=='https' ? 'green':'gray'}">{{ element.method | typeColumnFormat }} </span>
+          <br>
+          {{ element['path'] }}
         </td>
       </ng-container>
 
       <ng-container matColumnDef="start">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:10%">Début</th>
-        <td mat-cell *matCellDef="let row">
-          {{ row.start*1000 | date:'dd/MM/yyyy' }}
+        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:15%">
+          <div class="header-cell-content">
+            <mat-icon class="material-symbols-outlined">schedule</mat-icon>
+            Début
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let element">
+          {{ (element.start*1000 |date:'dd/MM/yyyy')}}
           <br>
-          {{ row.start*1000 | date:'HH:mm:ss.SSS' }}
+          {{ (element.start*1000 |date:'HH:mm:ss.SSS')}}
         </td>
       </ng-container>
 
-
       <ng-container matColumnDef="durée">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:10%">Durée</th>
-        <td mat-cell *matCellDef="let row">
-          <mat-spinner *ngIf="!row.end" [diameter]="16"></mat-spinner>
-          <div *ngIf="row.end" [matTooltip]="row.end * 1000 | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr'">{{ { start: row.start, end: row.end } | duration }}</div>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:15%">
+          <div class="header-cell-content">
+            <mat-icon class="material-symbols-outlined">timer</mat-icon>
+            Durée
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let element">
+          <div *ngIf="!element.end" style="display: flex; align-items: center; gap: 6px;">
+            <mat-spinner [diameter]="14"></mat-spinner>
+            <span class="cell-secondary">En cours...</span>
+          </div>
+          <div *ngIf="element.end" class="cell-primary" [matTooltip]="element.end * 1000 | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr'">
+            {{ { start: element.start, end: element.end } | duration }}
+          </div>
         </td>
       </ng-container>
 
       <ng-container matColumnDef="user">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:10%"> Client </th>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:15%">
+          <div class="header-cell-content">
+            <mat-icon class="material-symbols-outlined">person</mat-icon>
+            Utilisateur
+          </div>
+        </th>
         <td mat-cell *matCellDef="let row"> {{row.user || 'N/A'}} </td>
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns;sticky: true"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectedRequest($event,row.id)"></tr>
       <tr class="mat-row" *matNoDataRow>
-        <td class="mat-cell" colspan="7">
-          <div *ngIf="!isLoading"  class="empty-row" style="align-items: center;">
-            <span class="material-symbols-outlined" >
-              info
-            </span>
-            <span style="font-style: italic;">Aucun résultat</span>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+          <div *ngIf="!isLoading" class="empty-state-inline">
+            <mat-icon class="material-symbols-outlined">cloud_off</mat-icon>
+            <span>Aucun résultat pour cette recherche</span>
           </div>
-          <div *ngIf="isLoading" class="loading-row">
-              <span style="display: flex; flex-direction: column; font-style: italic;">
-                Chargement en cours...
-                <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-              </span>
+          <div *ngIf="isLoading" class="loading-state-inline">
+            <mat-spinner diameter="40"></mat-spinner>
+            <span>Chargement des requêtes...</span>
           </div>
-          
         </td>
       </tr>
     </table>

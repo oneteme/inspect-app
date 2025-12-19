@@ -16,6 +16,10 @@ import {TimelineComponent} from "./_component/timeline/timeline.component";
 import {HeaderSectionComponent} from "./_component/header-section/header-section.component";
 import {TypeColumnFormatPipe} from "./pipe/type-column-format";
 import {ExceptionDisplayComponent} from "./_component/exception-display/exception-display.component";
+import { StacktraceDialogComponent } from './_component/exception-display/stacktrace-dialog/stacktrace-dialog.component';
+import {VersionBadgeComponent} from "./_component/version-badge/version-badge.component";
+import {StatusIndicatorComponent} from "./_component/status-indicator/status-indicator.component";
+import {ServerCardComponent} from "./_component/server-card/server-card.component";
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -53,7 +57,11 @@ export const MY_DATE_FORMATS = {
     TypeColumnFormatPipe,
     TimelineComponent,
     HeaderSectionComponent,
-    ExceptionDisplayComponent
+    ExceptionDisplayComponent,
+    StacktraceDialogComponent,
+    VersionBadgeComponent,
+    StatusIndicatorComponent,
+    ServerCardComponent
   ],
   exports: [
     MaterialModule,
@@ -69,7 +77,10 @@ export const MY_DATE_FORMATS = {
     TypeColumnFormatPipe,
     TimelineComponent,
     HeaderSectionComponent,
-    ExceptionDisplayComponent
+    ExceptionDisplayComponent,
+    VersionBadgeComponent,
+    StatusIndicatorComponent,
+    ServerCardComponent
   ]
 })
 export class SharedModule { }

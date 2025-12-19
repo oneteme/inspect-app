@@ -1,13 +1,9 @@
 <header-page [templateTitle]="title" [iconOutlined]="true" titleIcon="browse_activity" [templateSubTitle]="subtitle">
   <ng-template #title>
-    <div style="display: flex; align-items: baseline; gap: 0.5em">
+    <div style="display: flex; align-items: baseline; gap: 1.5em">
       {{ instance?.name || 'Aucune instance sélectionnée' }}
-      <div class="status-indicator" *ngIf="instance"
-           [class.online]="!instance?.end && !isInactiveInstance"
-           [class.offline]="instance?.end"
-           [class.pending]="!instance?.end && isInactiveInstance"
-           [matTooltip]="instance?.end ? 'Du ' + ((instance?.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr') + ' au ' + ((instance?.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr') : 'Depuis le ' + ((instance?.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')">
-      </div>
+      <app-status-indicator *ngIf="!isLoading"
+                            [params]="{id: instance.id, end: instance.end, configuration: instance.configuration, lastTrace: lastTrace}"></app-status-indicator>
     </div>
 
   </ng-template>

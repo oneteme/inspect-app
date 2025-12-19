@@ -1,0 +1,71 @@
+<div class="table-container">
+  <div class="table-wrapper">
+    <table mat-table [dataSource]="dataSource" #sort="matSort" matSort
+           matSortActive="subject">
+      <ng-container matColumnDef="subject">
+        <th mat-header-cell *matHeaderCellDef>
+          <div class="header-cell-content">
+            <mat-icon class="material-symbols-outlined">subject</mat-icon>
+            Objet
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let element">
+          {{ element.subject }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="from">
+        <th mat-header-cell *matHeaderCellDef>
+          <div class="header-cell-content">
+            <mat-icon class="material-symbols-outlined">person</mat-icon>
+            De
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let element">
+          <div style="display: flex; flex-direction: column">
+            <span *ngFor="let f of element.from">
+                {{ f }}
+            </span>
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="recipients">
+        <th mat-header-cell *matHeaderCellDef>
+          <div class="header-cell-content">
+            <mat-icon class="material-symbols-outlined">group</mat-icon>
+            A
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let element">
+          <div style="display: flex; flex-direction: column">
+            <span *ngFor="let f of element.recipients">
+                {{ f }}
+            </span>
+          </div>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="replyTo">
+        <th mat-header-cell *matHeaderCellDef>
+          <div class="header-cell-content">
+            <mat-icon class="material-symbols-outlined">reply</mat-icon>
+            Cc
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let element">
+          <div style="display: flex; flex-direction: column">
+            <span *ngFor="let f of element.replyTo" [matTooltip]="f" class="ellipsis">
+                {{ f }}
+            </span>
+          </div>
+        </td>
+      </ng-container>
+
+      <tr mat-header-row *matHeaderRowDef="displayedColumns;sticky: true"></tr>
+      <tr mat-row *matRowDef="let row;columns: displayedColumns;"></tr>
+    </table>
+  </div>
+  <mat-paginator #paginator [pageSize]="3" [hidePageSize]="true"
+                 showFirstLastButtons></mat-paginator>
+</div>

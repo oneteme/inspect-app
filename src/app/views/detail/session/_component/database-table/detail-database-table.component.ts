@@ -13,7 +13,7 @@ import {DatabaseRequestDto} from "../../../../../model/request.model";
 })
 export class DetailDatabaseTableComponent {
     private readonly pipe = new DatePipe('fr-FR');
-    displayedColumns: string[] = ['status', 'host', 'schema', 'start', 'duree',];
+    displayedColumns: string[] = ['host', 'schema', 'start', 'duree',];
     dataSource: MatTableDataSource<DatabaseRequestDto> = new MatTableDataSource();
     filterTable =new Map<string, any>();
     @Input() filterValue: string = '';

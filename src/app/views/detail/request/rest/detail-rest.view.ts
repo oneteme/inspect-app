@@ -11,6 +11,7 @@ import {ExceptionInfo, HttpRequestStage, InstanceEnvironment, RestRequest} from 
 import {DataGroup, DataItem, TimelineOptions} from "vis-timeline";
 import {DatePipe} from "@angular/common";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
+import {TabData} from "../../session/_component/detail-session.component";
 
 @Component({
   templateUrl: './detail-rest.view.html',
@@ -26,7 +27,8 @@ export class DetailRestView implements OnInit, OnDestroy {
 
   private params: Partial<{idRest: string, env: string}> = {};
   REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
-
+  tabs: TabData[] = [];
+  selectedTabIndex: number = 0;
   options: TimelineOptions;
   dataItems: DataItem[];
   dataGroups: DataGroup[];
@@ -48,9 +50,33 @@ export class DetailRestView implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([params, queryParams]) => {
         this.params = {idRest: params.id_request, env: queryParams.env || app.defaultEnv};
+        this.initTabs();
         this.getRequest();
       }
     });
+  }
+
+  initTabs() {
+    this.tabs = [
+      {
+        label: 'Stages',
+        icon: 'view_object_track',
+        count: 0,
+        visible: true,
+        type: 'stage',
+        hasError: false,
+        errorCount: 0
+      },
+      {
+        label: 'Chronologie',
+        icon: 'view_timeline',
+        count: 0,
+        visible: true,
+        type: 'timeline',
+        hasError: false,
+        errorCount: 0
+      }
+    ]
   }
 
   ngOnDestroy() {
@@ -134,6 +160,11 @@ export class DetailRestView implements OnInit, OnDestroy {
 
   getSessionUrl() {
     return Utils.getSessionUrl(this.request);
+  }
+
+  navigateOnStatusIndicator(event: MouseEvent) {
+    var date = new Date(this.request.start * 1000);
+    this._router.navigateOnClick(event, ['/supervision', this.instance.type.toLowerCase(), this.instance.id], { queryParams: {start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString(), env: this.instance?.env} });
   }
 
   navigate(event: MouseEvent, targetType: string, extraParam?: string) {

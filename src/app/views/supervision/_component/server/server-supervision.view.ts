@@ -382,13 +382,13 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   usageResourceByPeriod: any[] = [];
   instanceTraceByPeriod: {date: Date, pending: number, attempts: number, traceCount: number, queueCapacity: number}[] = [];
   logEntryByPeriod: any[] = [];
+  lastTrace: number;
   unavailableStat:  number = 0;
   traceStat:  number = 0;
   params: Partial<{instance: string, env: string, start: Date, end: Date}> = {};
 
   isLoading = false;
   isLoadingInstances = false;
-  isInactiveInstance = false;
   reloadInstances = true;
   activityDisplayType: 'TRACE' | 'ATTEMPT' | 'REPORT' = 'TRACE';
 
@@ -473,6 +473,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     this.usageResourceByPeriod = [];
     this.instanceTraceByPeriod = [];
     this.logEntryByPeriod = [];
+    this.lastTrace = null;
     this.unavailableStat = 0;
     this.traceStat = 0;
     this._traceService.getInstance(this.params.instance)
@@ -498,9 +499,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
         this.usageResourceByPeriod = usage?.length ? usage.map(r => ({...r, date: new Date(r.date), maxHeap: this.instance.resource.maxHeap, diskTotalSpace: this.instance.resource.diskTotalSpace})) : [];
         this.instanceTraceByPeriod = trace?.length ? trace.map(r => ({...r, date: new Date(r.date), queueCapacity: this.instance.configuration?.tracing?.queueCapacity})) : [];
         this.logEntryByPeriod = log.map(r => ({...r, date: this._datePipe.transform(r.instant * 1000, 'dd/MM/yyyy HH:mm:ss')}));
-        if(last?.length && last[0].date && this.instance.configuration?.scheduling?.interval) {
-          this.isInactiveInstance =  (new Date(last[0].date) < new Date(new Date().getTime() - (this.instance.configuration.scheduling.interval + 60) * 1000));
-        }
+        this.lastTrace = last[0]?.date;
         this.getStatActivity();
       }
     });

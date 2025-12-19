@@ -4,7 +4,6 @@ import {InspectCollectorConfiguration, MachineResource, StackTraceRow} from "../
 import {json} from "node:stream/consumers";
 
 @Component({
-  selector: 'stacktrace-dialog',
   styleUrls: ['./config-dialog.component.scss'],
   templateUrl: 'config-dialog.component.html',
 })

@@ -65,8 +65,10 @@ import {DetailRequestView} from "./detail/request/detail-request.view";
 import {DetailRestView} from "./detail/request/rest/detail-rest.view";
 import {StacktraceDialogComponent} from "./supervision/_component/stacktrace-dialog/stacktrace-dialog.component";
 import {ConfigDialogComponent} from "./supervision/_component/config-dialog/config-dialog.component";
-import {StageDialogComponent} from "./detail/session/rest/stage-dialog/stage-dialog.component";
 import {ReportTableComponent} from "./supervision/_component/report-table/report-table.component";
+import {DetailStageTableComponent} from "./detail/session/_component/stage-table/detail-stage-table.component";
+import {RequestStageTableComponent} from "./detail/request/_component/stage-table/request-stage-table.component";
+import {RequestMailTableComponent} from "./detail/request/_component/mail-table/request-mail-table.component";
 import {ServerInstanceSelectorDialogComponent} from "./supervision/_component/server/server-instance-selector-dialog/server-instance-selector-dialog.component";
 import {ServerSupervisionView} from "./supervision/_component/server/server-supervision.view";
 import {ClientSupervisionView} from "./supervision/_component/client/client-supervision.view";
@@ -135,7 +137,10 @@ import {
     SearchRequestView,
     StacktraceDialogComponent,
     ConfigDialogComponent,
-    StageDialogComponent,
+    ReportTableComponent,
+    DetailStageTableComponent,
+    RequestStageTableComponent,
+    RequestMailTableComponent,
     ReportTableComponent,
     ServerInstanceSelectorDialogComponent,
     ClientInstanceSelectorDialogComponent,
