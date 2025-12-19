@@ -1,4 +1,4 @@
-import {Component, inject, Input, ViewChild} from "@angular/core";
+import {Component, EventEmitter, inject, Input, Output, ViewChild} from "@angular/core";
 import {MatTableDataSource} from "@angular/material/table";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
@@ -35,9 +35,15 @@ export class ExceptionsTableComponent {
   }
 
   @Input() isLoading: boolean;
+  @Output() onRowSelected = new EventEmitter<any>();
 
   removePackage(errorType: string) {
     const index = errorType.lastIndexOf('.') + 1;
     return errorType?.substring(index);
   }
+
+  selectedRow(event: MouseEvent, row: any) {
+    this.onRowSelected.emit(row);
+  }
+
 }

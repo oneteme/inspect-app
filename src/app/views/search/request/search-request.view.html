@@ -52,6 +52,7 @@
                 [requests]="requests"
                 [isLoading]="isLoading"
                 [pageSize]="10"
+                [filterValue]="queryParams?.optional?.q"
                 (onClickRemote)="selectedRemote($event)"
                 (onClickRow)="selectedRest($event)"
     ></rest-table>
@@ -61,6 +62,7 @@
     <ftp-table [useFilter]="true"
                [requests]="requests"
                [isLoading]="isLoading"
+               [filterValue]="queryParams?.optional?.q"
                [pageSize]="10"
                (onClickRow)="selectedFtp($event)"></ftp-table>
 </div>
@@ -69,6 +71,7 @@
     <smtp-table [useFilter]="true"
                 [requests]="requests"
                 [isLoading]="isLoading"
+                [filterValue]="queryParams?.optional?.q"
                 [pageSize]="10"
                 (onClickRow)="selectedSmtp($event)" >
     </smtp-table>
@@ -78,6 +81,7 @@
     <ldap-table [useFilter]="true"
                 [requests]="requests"
                 [isLoading]="isLoading"
+                [filterValue]="queryParams?.optional?.q"
                 [pageSize]="10"
                 (onClickRow)="selectedLdap($event)">
     </ldap-table>
@@ -87,6 +91,7 @@
     <database-table [useFilter]="true"
                     [requests]="requests"
                     [isLoading]="isLoading"
+                    [filterValue]="queryParams?.optional?.q"
                     [pageSize]="10"
                     (onClickRow)="selectedQuery($event)" >
     </database-table>

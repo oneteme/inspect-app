@@ -15,7 +15,8 @@ export class DetailLdapTableComponent {
     private readonly pipe = new DatePipe('fr-FR');
     displayedColumns: string[] = ['status', 'host', 'command', 'start', 'duree'];
     dataSource: MatTableDataSource<DirectoryRequestDto> = new MatTableDataSource();
-    filterTable :string;
+    filterTable =new Map<string, any>();
+    @Input() filterValue: string = '';
     @ViewChild('paginator', {static: true}) paginator: MatPaginator;
     @ViewChild('sort', {static: true}) sort: MatSort;
 
@@ -26,7 +27,11 @@ export class DetailLdapTableComponent {
             this.dataSource.sort = this.sort;
             this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
             this.dataSource.filterPredicate = this.useFilter && this.filterPredicate;
-            this.dataSource.filter = JSON.stringify(this.filterTable)
+            if (this.filterValue) {
+                this.filterTable.set('filter', this.filterValue.trim().toLowerCase());
+            }
+            this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
+            this.dataSource.paginator.pageIndex = 0;
         }else{
             this.dataSource = new MatTableDataSource();
         }
@@ -43,25 +48,32 @@ export class DetailLdapTableComponent {
     }
 
     applyFilter(event: Event) {
-        this.filterTable = (event.target as HTMLInputElement).value.trim().toLowerCase();
-        this.dataSource.filter = JSON.stringify(this.filterTable);
+        const filterValue = (event.target as HTMLInputElement).value;
+        this.filterTable.set('filter', filterValue.trim().toLowerCase());
+        this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
         if (this.dataSource.paginator) {
             this.dataSource.paginator.firstPage();
         }
     }
 
     filterPredicate = (data: DirectoryRequestDto, filter: string) => {
+        var map: Map<string, any> = new Map(JSON.parse(filter));
         let date = new Date(data.start*1000)
-        filter = JSON.parse(filter)
         let isMatch = true;
-        return  isMatch && (filter == '' ||
-            (data.host?.toLowerCase().includes(filter) ||
-            this.pipe.transform(date,"dd/MM/yyyy").toLowerCase().includes(filter) ||
-            this.pipe.transform(date,"HH:mm:ss.SSS").toLowerCase().includes(filter) ||
-            data.exception?.message?.toString().toLowerCase().includes(filter) ||
-            data.exception?.type?.toString().toLowerCase().includes(filter)
-            ));
-    };
+        for (let [key, value] of map.entries()) {
+            if (key == 'filter') {
+                isMatch = isMatch && (filter == '' ||
+                    (data.host?.toLowerCase().includes(value) ||
+                        this.pipe.transform(date, "dd/MM/yyyy").toLowerCase().includes(value) ||
+                        this.pipe.transform(date, "HH:mm:ss.SSS").toLowerCase().includes(value) ||
+                        data.exception?.message?.toString().toLowerCase().includes(value) ||
+                        data.exception?.type?.toString().toLowerCase().includes(value) ||
+                        data.command?.toLowerCase().includes(value)
+                    ));
+            }
+        }
+        return isMatch;
+    }
 
     sortingDataAccessor = (row: any, columnName: string) => {
         if (columnName == "host") return row["host"] + ":" + row["port"] as string;
