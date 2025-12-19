@@ -17,17 +17,12 @@
                         <mat-icon class="material-symbols-outlined">code_blocks</mat-icon>
                         {{ instance.branch }} / {{ instance.hash | slice:0:7 }}
                     </div>
-                    <div class="version-badge-modern"
-                         *ngIf="instance.version"
-                         [ngStyle]="{'cursor': instance.configuration ? 'pointer' : 'default'}"
-                         (click)="instance.configuration ? openConfig(instance.configuration) : null"
-                         [style.background-color]="'#22577a'"
-                         [matTooltip]="instance.collector">
-                        <mat-icon class="material-symbols-outlined" *ngIf="instance.configuration">settings</mat-icon>
-                        {{ instance.version }}
-                    </div>
-
+                    <app-version-badge [backgroundColor]="'#22577a'"
+                                       [configuration]="instance.configuration"
+                                       [collector]="instance.collector"
+                                       [version]="instance.version" />
                 </div>
+
             </div>
         </mat-card-content>
         <mat-card-footer>
@@ -75,7 +70,35 @@
 
 
 
-<app-timeline [options]="options"
-              [groups]="dataGroups"
-              [items]="dataItems" [displayHeader]="true">
-</app-timeline>
+<div class="tabs-container">
+    <!-- Navigation verticale des onglets -->
+    <div class="vertical-tabs">
+        <div *ngFor="let tab of tabs; let i = index"
+             class="tab-button"
+             [class.active]="selectedTabIndex === i"
+             [class.hidden]="!tab.visible"
+             (click)="selectedTabIndex = i">
+            <mat-icon class="material-symbols-outlined">{{ tab.icon }}</mat-icon>
+            <span class="tab-label">{{ tab.label }}</span>
+            <div style="display: flex; align-items: center; gap: 4px;">
+                <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
+                <mat-icon *ngIf="tab.hasError && tab.errorCount > 0"
+                          class="error-indicator material-symbols-outlined"
+                          [matTooltip]="tab.errorCount + ' erreur(s)'"
+                          matTooltipPosition="right">
+                    error
+                </mat-icon>
+            </div>
+        </div>
+    </div>
+    <div class="tab-content">
+
+        <div *ngIf="tabs[selectedTabIndex]?.type === 'timeline'" class="tab-panel">
+            <app-timeline [options]="options"
+                          [groups]="dataGroups"
+                          [items]="dataItems"
+                          [displayHeader]="false">
+            </app-timeline>
+        </div>
+    </div>
+</div>

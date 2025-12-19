@@ -2,9 +2,9 @@ import {Component, inject, OnInit} from '@angular/core';
 import {catchError, combineLatest, finalize, forkJoin, map, of, Subject, switchMap, takeUntil} from "rxjs";
 import {app} from "../../../../environments/environment";
 import {ActivatedRoute} from "@angular/router";
-import {DataGroup, DataItem, TimelineOptions} from "vis-timeline";
+import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
 import {
-  DatabaseRequestStage,
+  DatabaseRequestStage, FtpRequestStage,
   HttpRequestStage,
   InspectCollectorConfiguration,
   InstanceEnvironment, MachineResource
@@ -17,6 +17,7 @@ import {INFINITY} from "../../constants";
 import {getDataForRange, getErrorClassName, showifnotnull} from "../../../shared/util";
 import {ConfigDialogComponent} from "../../supervision/_component/config-dialog/config-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
+import {TabData} from "../session/_component/detail-session.component";
 
 @Component({
   selector: 'app-instance',
@@ -28,12 +29,13 @@ export class InstanceComponent implements OnInit {
   private _instanceService = inject(InstanceService);
   private readonly _dialog = inject(MatDialog);
 
-  private params: Partial<{id: string, env: string}> = {};
+  params: Partial<{id: string, env: string}> = {};
   private readonly $destroy = new Subject<void>();
   private readonly pipe = new DatePipe('fr-FR');
   private readonly durationPipe = new DurationPipe();
   options: TimelineOptions;
   dataItems: DataItem[];
+  tabs: TabData[] = [];
   dataGroups: DataGroup[];
   instance: InstanceEnvironment;
   configuration: string;
@@ -42,6 +44,7 @@ export class InstanceComponent implements OnInit {
   allInstance : any[];
   timelineStart: number
   timelineEnd: number
+  selectedTabIndex: number = 0;
 
   ngOnDestroy() {
     this.$destroy.next();
@@ -56,6 +59,7 @@ export class InstanceComponent implements OnInit {
         this.params.id = params.id_instance;
         this.params.env = queryParams.env;
         this.getRequest();
+        this.initTabs();
       }
     });
   }
@@ -102,11 +106,25 @@ export class InstanceComponent implements OnInit {
       data: config
     });
   }
-
+  initTabs() {
+    this.tabs = [
+      {
+        label: 'Chronologie',
+        icon: 'view_timeline',
+        count: 0,
+        visible: true,
+        type: 'timeline',
+        hasError: false,
+        errorCount: 0
+      }
+    ]
+  }
   createTimeline() {
     console.log(this.allInstance)
-    this.timelineStart = Math.trunc(this.allInstance.length > 1 ? this.allInstance[0].end : this.allInstance[0].start );
+    this.timelineStart = Math.trunc(this.allInstance[0].start );
     this.timelineEnd =  Math.trunc(this.allInstance.at(-1).start);
+  console.log(this.timelineStart);
+    console.log(this.timelineEnd);
 
     const groups = [...new Set(this.allInstance.map(a => this.instance.type === 'CLIENT' ? a?.address : a?.version))]
         .filter(v => v != null)
@@ -151,4 +169,5 @@ export class InstanceComponent implements OnInit {
       }
     };
   }
+
 }
