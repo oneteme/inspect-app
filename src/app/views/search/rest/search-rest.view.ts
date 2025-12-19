@@ -64,7 +64,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   });
 
   filterTable = new Map<string, any>();
-  filters: {icon: string, label: string,color: string, value: any} [] =[{icon: 'warning', label: '5xx',color:'#bb2124', value:'5xx'}, {icon: 'error', label: '4xx',color:'#f9ad4e', value:'4xx'}, {icon: 'done', label: '2xx',color:'#22bb33', value:'2xx'}, {icon: 'pending', label: 'En cours',color:'#2196F3', value:'0'}]
+  filters: {icon: string, label: string, color: string, value: any} [] = [{icon: 'warning', label: '5xx', color:'#bb2124', value:'5xx'}, {icon: 'error', label: '4xx', color:'#f9ad4e', value:'4xx'}, {icon: 'done', label: '2xx', color:'#22bb33', value:'2xx'}, {icon: 'pending', label: 'En cours', color:'#2196F3', value:'lazy'}]
   advancedParams: Partial<{ [key: string]: any }> ={}
   queryParams: Partial<QueryParams> = {};
   focusFieldName: any;
@@ -160,7 +160,8 @@ export class SearchRestView implements OnInit, OnDestroy {
     let params = {
       'env': this.queryParams.env,
       'appname': this.queryParams.appname,
-      'rangestatus': this.queryParams.rangestatus,
+      'rangestatus': this.queryParams.rangestatus.filter(r => r != 'lazy'),
+      'lazy': !!this.queryParams.rangestatus.find(r => r == 'lazy'),
       'start': this.queryParams.period.start.toISOString(),
       'end': this.queryParams.period.end.toISOString()
     };
