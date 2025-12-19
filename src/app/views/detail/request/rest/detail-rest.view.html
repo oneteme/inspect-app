@@ -1,8 +1,8 @@
 <div *ngIf="!isLoading && request && instance">
   <div class="header-card">
     <mat-card style="width: 60vw; min-width: 60vw;"
-              [ngClass]="{'success': request.status >= 200 && request.status < 300,
-                        'warning': request.status >= 300 && request.status < 500,
+              [ngClass]="{'success': request.status >= 200 && request.status < 400,
+                        'warning': request.status >= 400 && request.status < 500,
                         'fail': request.status >= 500,
                         'unavailable': request.end && request.status == 0,
                         'in-progress': !request.end}">
@@ -42,8 +42,8 @@
         </span>
         </div>
         <span class="badge"
-              [ngClass]="{'success': request.status >= 200 && request.status < 300,
-                        'warning': request.status >= 300 && request.status < 500,
+              [ngClass]="{'success': request.status >= 200 && request.status < 400,
+                        'warning': request.status >= 400 && request.status < 500,
                         'fail': request.status >= 500,
                         'unavailable': request.status == 0 && request.end,
                         'in-progress': !request.end}">

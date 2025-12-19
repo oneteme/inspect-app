@@ -1,8 +1,8 @@
 <div *ngIf="session && instance ">
     <div class="header-card">
       <mat-card style="width: 60vw; min-width: 60vw;"
-                  [ngClass]="{'success': session.status >= 200 && session.status < 300,
-                              'warning': session.status >= 300 && session.status < 500,
+                  [ngClass]="{'success': session.status >= 200 && session.status < 400,
+                              'warning': session.status >= 400 && session.status < 500,
                               'fail': session.status >= 500,
                               'unavailable': session.status == 0 && session.end,
                               'in-progress': !session.end}">
@@ -50,8 +50,8 @@
                   <mat-icon style="width: 20px; height: 20px; font-size: 20px;">swap_vert</mat-icon>
                   {{ session.outDataSize }}o en <span [matTooltip]="((session.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')" style="font-weight: bold">{{{ start: session.start, end: session.end } | duration}}</span>
                   <span class="badge"
-                        [ngClass]="{'success': session.status >= 200 && session.status < 300,
-                                    'warning': session.status >= 300 && session.status < 500,
+                        [ngClass]="{'success': session.status >= 200 && session.status < 400,
+                                    'warning': session.status >= 400 && session.status < 500,
                                     'fail': session.status >= 500,
                                     'unavailable': session.status == 0 && session.end,
                                     'in-progress': !session.end}">

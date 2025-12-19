@@ -373,25 +373,3 @@ loading.hidden {
 .mat-mdc-form-field-icon-prefix>.mat-icon, .mat-mdc-form-field-icon-suffix>.mat-icon {
   padding: 0 12px 0 0 !important;
 }
-
-.status-indicator {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  position: relative;
-}
-
-.status-indicator.online {
-  background-color: #1fd655;
-  box-shadow: 0 0 8px rgba(31, 214, 85, 0.6);
-}
-
-.status-indicator.offline {
-  background-color: #7f8c8d;
-  box-shadow: 0 0 8px rgba(127, 140, 141, 0.6);
-}
-
-.status-indicator.pending {
-  background-color: #ff9800;
-  box-shadow: 0 0 8px rgba(255, 152, 0, 0.6);
-}
