@@ -127,6 +127,11 @@ export class DeploimentComponent implements OnDestroy {
     }).length;
   }
 
+  navigateOnStatusIndicator(event: MouseEvent, row: any) {
+    var date = new Date(row.lastTrace);
+    this._router.navigateOnClick(event, ['/supervision', row.type.toLowerCase(), row.id], { queryParams: {env: row.env, start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString()} });
+  }
+
   navigateOnSinceClick(event: MouseEvent, row: any) {
     this._router.navigateOnClick(event, ['/session/startup', row.id], { queryParams: {env: this.params.env} });
   }

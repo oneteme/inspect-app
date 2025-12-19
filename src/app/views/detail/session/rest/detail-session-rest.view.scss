@@ -9,54 +9,13 @@ a {
   text-decoration: none;
 }
 
-mat-card-title {
-  display: flex;
-  align-items: center;
-  padding: 0 16px;
-  height: 48px;
-  .right {
-    margin-left: auto;
-  }
-}
-
-mat-card-content {
-  height: 100%; padding: 0 16px 16px;
-}
-
-mat-card-footer {
-  padding: 0 16px;
-  border: 1px solid rgba(0,0,0,.05);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.5em;
-  font-style: italic;
-  font-size: 14px;
-  .right {
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-  }
-}
-
 .icon-disabled {
   filter: grayscale(1) opacity(0.5);
   pointer-events: none;
 }
 
-table {
-  table-layout: auto;
-}
 .dbfailed {
   background-color: red !important;
-}
-
-.mat-mdc-row .mat-mdc-cell {
-  cursor: pointer;
-}
-
-.mat-mdc-row:hover .mat-mdc-cell {
-  background-color: rgb(206, 206, 206);
 }
 
 .url {

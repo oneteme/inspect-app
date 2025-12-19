@@ -8,7 +8,7 @@ export interface Application {
 export class QueryParams {
     private _optional: {[key: string]: any} = {};
 
-    constructor(public _period: Period, public _env: string, public _appname?: string[], public _hosts?: string[], public _rangestatus?: string[]|boolean[]) {
+    constructor(public _period: Period, public _env: string, public _appname?: string[], public _hosts?: string[], public _rangestatus?: string[]) {
     }
 
     set period(period: Period) {
@@ -39,11 +39,11 @@ export class QueryParams {
         return this._hosts;
     }
 
-    set rangestatus(rangestatus: string[] | boolean[]) {
+    set rangestatus(rangestatus: string[]) {
         this._rangestatus = rangestatus;
     }
 
-    get rangestatus(): string[] | boolean[] {
+    get rangestatus(): string[] {
         return this._rangestatus;
     }
 

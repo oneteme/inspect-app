@@ -62,7 +62,7 @@ export class SearchMainView implements OnInit, OnDestroy {
     });
     nameDataList: any[];
     isLoading = false;
-    filters: {icon: string, label: string,color: string, value: any} [] = [{icon: 'warning', label: 'KO',color:'#bb2124', value: false}, {icon: 'done', label: 'OK',color:'#22bb33', value: true}]
+    filters: {icon: string, label: string,color: string, value: any} [] = [{icon: 'warning', label: 'KO',color:'#bb2124', value: 'Ko'}, {icon: 'done', label: 'OK',color:'#22bb33', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'#2196F3', value:'lazy'}];
     advancedParams: Partial<{ [key: string]: any }>
     focusFieldName: any
     filterTable = new Map<string, any>();
@@ -152,10 +152,14 @@ export class SearchMainView implements OnInit, OnDestroy {
             'appname': this.queryParams.appname,
             'env': this.queryParams.env,
             'launchmode': this.type.toUpperCase(),
-            'rangestatus': this.queryParams.rangestatus,
+            'failed': this.queryParams.rangestatus.filter(r => r != 'lazy').map(r => {
+              if(r == 'Ok') return true;
+              if(r == 'Ko') return false;
+              return r;
+            }),
+            'lazy': !!this.queryParams.rangestatus.find(r => r == 'lazy'),
             'start': this.queryParams.period.start.toISOString(),
-            'end': this.queryParams.period.end.toISOString(),
-            'lazy': false
+            'end': this.queryParams.period.end.toISOString()
         };
         if (this.advancedParams) {
             Object.assign(params, this.advancedParams);

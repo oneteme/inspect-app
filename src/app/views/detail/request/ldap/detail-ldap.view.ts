@@ -42,8 +42,8 @@ export class DetailLdapView implements OnInit, OnDestroy {
     exception: ExceptionInfo;
     instance: InstanceEnvironment;
     isLoading: boolean;
-  tabs: TabData[] = [];
-  selectedTabIndex: number = 0;
+    tabs: TabData[] = [];
+    selectedTabIndex: number = 0;
     sessionParent: { id: string, type: string };
     parentLoading: boolean = false;
     timelineStart: number
@@ -175,6 +175,11 @@ export class DetailLdapView implements OnInit, OnDestroy {
                 followMouse: true
             }
         };
+    }
+
+    navigateOnStatusIndicator(event: MouseEvent) {
+      var date = new Date(this.request.start * 1000);
+      this._router.navigateOnClick(event, ['/supervision', this.instance.type.toLowerCase(), this.instance.id], { queryParams: {start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString(), env: this.instance?.env} });
     }
 
     navigate(event: MouseEvent, targetType: string, extraParam?: string) {
