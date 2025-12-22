@@ -1,5 +1,5 @@
 <mat-form-field *ngIf="useFilter" appearance="outline" class="searchwidth md-3 no-subscript">
-    <input [disabled]="isLoading"  matInput #input (keyup)="applyFilter($event)" placeholder="Filtrer..." autocomplete="off">
+    <input [disabled]="isLoading" [(ngModel)]="filterValue"  matInput #input (keyup)="applyFilter($event)" placeholder="Filtrer..." autocomplete="off">
     <mat-icon matSuffix>search</mat-icon>
 </mat-form-field>
 

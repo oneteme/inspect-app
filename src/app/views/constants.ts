@@ -524,7 +524,7 @@ export class Constants {
         height: 100,
         continue: true,
         series: [
-            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions REST', color: "#ff0000" },
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions REST', color: "#ff0000" },
         ],
         options: {
             chart: {
@@ -561,7 +561,7 @@ export class Constants {
         height: 100,
         continue: true,
         series: [
-            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions JDBC', color: "#ff0000" }
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions JDBC', color: "#ff0000" }
         ],
         options: {
             chart: {
@@ -598,7 +598,7 @@ export class Constants {
         height: 100,
         continue: true,
         series: [
-            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions FTP', color: "#ff0000"}
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions FTP', color: "#ff0000"}
         ],
         options: {
             chart: {
@@ -633,7 +633,7 @@ export class Constants {
         height: 100,
         continue: true,
         series: [
-            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions SMTP', color: "#ff0000" }
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions SMTP', color: "#ff0000" }
         ],
         options: {
             chart: {
@@ -668,7 +668,7 @@ export class Constants {
         height: 100,
         continue: true,
         series: [
-            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions LDAP', color: "#ff0000" }
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions LDAP', color: "#ff0000" }
         ],
         options: {
             chart: {

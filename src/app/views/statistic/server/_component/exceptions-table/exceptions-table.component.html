@@ -25,7 +25,7 @@
         </ng-container>
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+        <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectedRow($event, row)"></tr>
     </table>
     <div [hidden]="dataSource?.data.length < 4">
         <mat-paginator [pageSize]="3" [hidePageSize]="true" showFirstLastButtons></mat-paginator>

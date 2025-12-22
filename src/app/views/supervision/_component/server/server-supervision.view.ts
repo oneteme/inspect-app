@@ -410,6 +410,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
         this.reloadInstances = !!(this.params.env && queryParams.env && this.params.env !== queryParams.env);
         this.params.instance = params.instance;
         this.params.env = queryParams.env;
+        console.log(params.env)
         this.params.start = new Date(queryParams.start);
         this.params.end = new Date(queryParams.end);
         this.patchDateValue(this.params.start, this.params.end);
