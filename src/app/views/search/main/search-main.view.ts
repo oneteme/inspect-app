@@ -66,6 +66,7 @@ export class SearchMainView implements OnInit, OnDestroy {
     advancedParams: Partial<{ [key: string]: any }>
     focusFieldName: any
     filterTable = new Map<string, any>();
+    filterValue: string = '';
     filter: string = '';
 
     queryParams: Partial<QueryParams> = {};
@@ -90,6 +91,9 @@ export class SearchMainView implements OnInit, OnDestroy {
                         period = new IStep(queryParams.step);
                     }
                     this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.env || app.defaultEnv, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server],null, !queryParams.rangestatus ? []: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] );
+                }
+                if(queryParams.q){
+                    this.queryParams.optional = { 'q': queryParams.q }
                 }
                 this.patchStatusValue(this.queryParams.rangestatus)
                 this.patchServerValue(this.queryParams.appname);
@@ -161,6 +165,7 @@ export class SearchMainView implements OnInit, OnDestroy {
             'start': this.queryParams.period.start.toISOString(),
             'end': this.queryParams.period.end.toISOString()
         };
+        console.log(this.queryParams)
         if (this.advancedParams) {
             Object.assign(params, this.advancedParams);
         }
@@ -179,6 +184,10 @@ export class SearchMainView implements OnInit, OnDestroy {
                     this.dataSource.sort = this.sort
                     this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
                     this.dataSource.filterPredicate = this.filterPredicate;
+                    if (this.queryParams.optional?.['q']) {
+                        this.filterValue = this.queryParams.optional['q'];
+                        this.filterTable.set('filter', this.filterValue.trim().toLowerCase());
+                    }
                     this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
                     this.dataSource.paginator.pageIndex = 0;
                     this.isLoading = false;
