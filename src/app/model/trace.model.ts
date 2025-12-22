@@ -123,7 +123,7 @@ export interface AbstractRequest {
   start: number;
   end: number;
   threadName: string;
-
+  command: string;
   sessionId: string;
   instanceId: string;
   id: string;

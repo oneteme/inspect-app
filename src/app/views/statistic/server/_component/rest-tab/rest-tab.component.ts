@@ -1,9 +1,10 @@
 import {Component, inject, Input, OnDestroy} from "@angular/core";
 import {finalize, map, Subscription} from "rxjs";
 import {RestSessionService} from "../../../../../service/jquery/rest-session.service";
-import {formatters, groupByField, periodManagement} from "../../../../../shared/util";
+import {formatters, groupByField, periodManagement, recreateDate} from "../../../../../shared/util";
 import {DatePipe} from "@angular/common";
 import {QueryParams} from "../../../../../model/conf.model";
+import {EnvRouter} from "../../../../../service/router.service";
 
 export interface HttpParams {
   server: string;
@@ -18,6 +19,7 @@ export interface HttpParams {
 export class RestTabComponent implements OnDestroy {
   private _restSessionService = inject(RestSessionService);
   private _datePipe = inject(DatePipe);
+  private _router: EnvRouter = inject(EnvRouter);
   private subscriptions: Subscription[] = [];
 
   $timeAndTypeResponse: { bar: any[], loading: boolean } = { bar: [], loading: true };
@@ -25,20 +27,23 @@ export class RestTabComponent implements OnDestroy {
   $dependenciesResponse: { table: any[], loading: boolean } = {table: [], loading: true};
   $dependentsResponse: { table: any[], loading: boolean } = {table: [], loading: true};
   $exceptionsResponse: { table: any[], loading: boolean } = {table: [], loading: true};
+  groupedBy: string;
+  private _httpParams: HttpParams;
 
   @Input() set httpParams(httpParams: HttpParams) {
+    this._httpParams = httpParams;
     if(httpParams && httpParams.params?.optional?.tab == '0') {
-      let groupedBy = periodManagement(httpParams.params.period.start, httpParams.params.period.end);
+      this.groupedBy = periodManagement(httpParams.params.period.start, httpParams.params.period.end);
       let advancedParams = {};
       Object.entries(httpParams.params.optional).forEach(([key, value]) => {
         if(value && Array.isArray(value)) advancedParams[`${key}`] = (<Array<string>>value).map(v => `"${v}"`).join(',');
       });
       this.subscriptions.forEach(s => s.unsubscribe());
-      this.subscriptions.push(this.getTimeAndTypeResponse(httpParams, groupedBy, advancedParams));
-      this.subscriptions.push(this.getUsersByPeriod(httpParams, groupedBy, advancedParams));
+      this.subscriptions.push(this.getTimeAndTypeResponse(httpParams, this.groupedBy, advancedParams));
+      this.subscriptions.push(this.getUsersByPeriod(httpParams, this.groupedBy, advancedParams));
       this.subscriptions.push(this.getDependencies(httpParams, advancedParams));
       this.subscriptions.push(this.getDependents(httpParams, advancedParams));
-      this.subscriptions.push(this.getExceptions(httpParams, advancedParams, groupedBy));
+      this.subscriptions.push(this.getExceptions(httpParams, advancedParams, this.groupedBy));
     }
   }
 
@@ -170,5 +175,20 @@ export class RestTabComponent implements OnDestroy {
     this.$dependenciesResponse.table = [];
     this.$dependentsResponse.table = [];
     this.$exceptionsResponse.table = [];
+  }
+
+  onSessionExceptionRowSelected(row:any) {
+    const result = recreateDate(this.groupedBy, row, this._httpParams.params.period.start);
+    if(result){
+      this._router.navigate(['/session/rest'], {
+        queryParams: {
+          'env': this._httpParams.params.env,
+          'start': result.start.toISOString(),
+          'end': result.end.toISOString(),
+          'q' : row.errorType,
+          'rangestatus': ['5xx','4XX']
+        }
+      });
+    }
   }
 }

@@ -109,12 +109,12 @@
   <div style="display: flex; justify-content: space-between; height: 100%">
     <div style="display: flex; flex-direction: column; width: 100%;">
       <div class="title-container"><div class="sub-title">Serveur</div></div>
-      <exceptions-table-new [data]="tabRequests.sessionExceptionsTable?.data" [isLoading]="tabRequests.sessionExceptionsTable?.isLoading"></exceptions-table-new>
+      <exceptions-table-new [data]="tabRequests.sessionExceptionsTable?.data" [isLoading]="tabRequests.sessionExceptionsTable?.isLoading" (onRowSelected)="onSessionExceptionRowSelected($event)"></exceptions-table-new>
     </div>
     <mat-divider style="margin: 5em" [vertical]="true"></mat-divider>
     <div style="display: flex; flex-direction: column; width: 100%">
       <div class="title-container"><div class="sub-title">Batch</div></div>
-      <exceptions-table-new [data]="tabRequests.batchExceptionTable?.data" [isLoading]="tabRequests.batchExceptionTable?.isLoading"></exceptions-table-new>
+      <exceptions-table-new [data]="tabRequests.batchExceptionTable?.data" [isLoading]="tabRequests.batchExceptionTable?.isLoading" (onRowSelected)="onBatchExceptionRowSelected($event)"></exceptions-table-new>
     </div>
   </div>
 </div>
