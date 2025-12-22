@@ -34,9 +34,9 @@
           le {{ (request.start * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
         </div>
         <div class="right">
-          {{ request.inDataSize || 0 }}o
+          {{ request.outDataSize }}o
           <mat-icon style="width: 20px; height: 20px; font-size: 20px;">swap_vert</mat-icon>
-          {{ request.outDataSize }}o en
+          {{ request.inDataSize }}o en
           <span [matTooltip]="((request.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss': 'fr')" style="font-weight: bold">
           {{{start: request.start, end: request.end} | duration }}
         </span>
@@ -66,15 +66,7 @@
            (click)="selectedTabIndex = i">
         <mat-icon class="material-symbols-outlined">{{ tab.icon }}</mat-icon>
         <span class="tab-label">{{ tab.label }}</span>
-        <div style="display: flex; align-items: center; gap: 4px;">
-          <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
-          <mat-icon *ngIf="tab.hasError && tab.errorCount > 0"
-                    class="error-indicator material-symbols-outlined"
-                    [matTooltip]="tab.errorCount + ' erreur(s)'"
-                    matTooltipPosition="right">
-            error
-          </mat-icon>
-        </div>
+        <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
       </div>
     </div>
     <div class="tab-content">
