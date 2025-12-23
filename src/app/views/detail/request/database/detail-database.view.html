@@ -5,17 +5,21 @@
                           'fail': request.end && request.failed,
                           'in-progress': !request.end}">
       <mat-card-title>
-        <label-icon [icon]="REQUEST_TYPE['jdbc'].icon">
-          <div style="display: flex; gap: 0.5em; align-items: center;">
+        <div style="display: flex; gap: 0.5em; align-items: center; width: 85%">
+          <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['jdbc'].icon }}</mat-icon>
+          <div class="ellipsis"
+               [matTooltip]="'jdbc:' + (request.productName ? request.productName.toLowerCase() : 'N/A') + '://' + (request.host ?
+                            request.host : 'N/A') + (request.port == -1 ? '' : ':' + request.port) + '/' + (request.name ? request.name :
+                            'N/A')">
             {{ 'jdbc:' + (request.productName ? request.productName.toLowerCase() : 'N/A') + '://' + (request.host ?
               request.host : 'N/A') + (request.port == -1 ? '' : ':' + request.port) + '/' + (request.name ? request.name :
               'N/A')}}
-            <mat-spinner *ngIf="!request.end" [diameter]="18"></mat-spinner>
           </div>
-        </label-icon>
+          <mat-spinner *ngIf="!request.end" [diameter]="18"></mat-spinner>
+        </div>
         <div class="right">
           <button mat-icon-button [disabled]="sessionParent == null"
-                  [ngStyle]="sessionParent == null ? {'pointer-events': 'none'}: ''" (click)="navigate($event,'parent')"
+                  [ngStyle]="{'pointer-events': sessionParent == null ? 'none' : ''}" (click)="navigate($event,'parent')"
                   matTooltip="Détail de l'appel parent">
             <mat-icon>move_up</mat-icon>
           </button>
@@ -27,13 +31,7 @@
       </mat-card-content>
       <mat-card-footer>
         <mat-icon class="material-symbols-outlined" style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
-        <div style="display: flex; align-items: center; gap: 0.5em">
-          {{request.user || "N/A"}} le {{( request.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }} en <span
-                style="font-weight: bold">{{{ start: request.start, end: request.end } | duration}}</span>
-        </div>
-        <div class="right">
-          {{ request.productName || "N/A"}} v.{{ request.productVersion || "N/A"}}
-        </div>
+        {{request.user || "N/A"}} le {{( request.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }} en <b>{{{ start: request.start, end: request.end } | duration}}</b>
       </mat-card-footer>
     </mat-card>
     <app-server-card style="width: 40vw"
@@ -51,15 +49,7 @@
            (click)="selectedTabIndex = i">
         <mat-icon class="material-symbols-outlined">{{ tab.icon }}</mat-icon>
         <span class="tab-label">{{ tab.label }}</span>
-        <div style="display: flex; align-items: center; gap: 4px;">
-          <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
-          <mat-icon *ngIf="tab.hasError && tab.errorCount > 0"
-                    class="error-indicator material-symbols-outlined"
-                    [matTooltip]="tab.errorCount + ' erreur(s)'"
-                    matTooltipPosition="right">
-            error
-          </mat-icon>
-        </div>
+        <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
       </div>
     </div>
 

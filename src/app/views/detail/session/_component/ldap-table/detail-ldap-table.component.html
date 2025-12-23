@@ -19,7 +19,7 @@
             [ngClass]="{'success': element.end && !element.failed,
                         'fail': element.end && element.failed,
                         'in-progress': !element.end}"
-            [matTooltip]="(element.exception?.type | exceptionType) + ' ' + element.exception?.message">
+            [matTooltip]="element.exception ? (element.exception?.type | exceptionType) + ' ' + element.exception?.message : null">
           {{ element['host'] || 'N/A' }}
         </td>
       </ng-container>

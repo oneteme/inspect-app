@@ -1,6 +1,6 @@
 <header-page [templateTitle]="title" [iconOutlined]="true" titleIcon="browse_activity" [templateSubTitle]="subtitle">
   <ng-template #title>
-    <div style="display: flex; align-items: baseline; gap: 1.5em">
+    <div style="display: flex; align-items: center; gap: 1.5em">
       {{ instance?.name || 'Aucune instance sélectionnée' }}
       <app-status-indicator *ngIf="!isLoading && instance"
                             [params]="{id: instance.id, end: instance.end, configuration: instance.configuration, lastTrace: lastTrace}"></app-status-indicator>

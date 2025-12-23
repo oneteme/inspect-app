@@ -7,12 +7,14 @@
                               'unavailable': session.status == 0 && session.end,
                               'in-progress': !session.end}">
             <mat-card-title>
-              <label-icon icon="call_received">
-                <div style="display: flex; gap: 0.5em; align-items: center;">
+              <div style="display: flex; gap: 0.5em; align-items: center; width: 85%">
+                <mat-icon class="material-symbols-outlined">call_received</mat-icon>
+                <div class="ellipsis" [matTooltip]="session.name">
                   {{ session.name || 'N/A' }}
-                  <mat-spinner *ngIf="!session.end" [diameter]="18"></mat-spinner>
                 </div>
-              </label-icon>
+                <mat-spinner *ngIf="!session.end" [diameter]="18"></mat-spinner>
+              </div>
+
               <div class="right">
                 <button mat-icon-button [matMenuTriggerFor]="menuEndPoint">
                   <mat-icon>more_vert</mat-icon>

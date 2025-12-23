@@ -5,17 +5,18 @@
                               'fail': session.end && (session.exception?.type || session.exception?.message),
                               'in-progress': !session.end}">
             <mat-card-title>
-                <label-icon [icon]="MAPPING_TYPE[type]?.icon">
-                  <div style="display: flex; gap: 0.5em; align-items: center;">
-                    {{ session.name || 'N/A' }}
-                    <mat-spinner *ngIf="!session.end" [diameter]="18"></mat-spinner>
-                  </div>
-                </label-icon>
-                <div class="right">
-                  <button mat-icon-button [matMenuTriggerFor]="menuEndPoint">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
+              <div style="display: flex; gap: 0.5em; align-items: center; width: 85%">
+                <mat-icon class="material-symbols-outlined">{{MAPPING_TYPE[type]?.icon}}</mat-icon>
+                <div class="ellipsis" [matTooltip]="session.name">
+                  {{ session.name || 'N/A' }}
                 </div>
+                <mat-spinner *ngIf="!session.end" [diameter]="18"></mat-spinner>
+              </div>
+              <div class="right">
+                <button mat-icon-button [matMenuTriggerFor]="menuEndPoint">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+              </div>
             </mat-card-title>
             <mat-card-content>
               <div class="ellipsis" [matTooltip]="session.location" *ngIf="session.location">
