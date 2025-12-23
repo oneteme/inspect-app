@@ -43,15 +43,16 @@ export class DetailTimelineComponent implements OnChanges {
     maptype : {
         [key: string]: (c:any,i:number)=> DataItem
     } = {
-        'stage'    : (c:any,i:number) => this.mapother(c,i),
-        'action'   : (c:any,i:number) => this.mapother(c,i),
-        'rest'     : (c:any,i:number) => this.mapother(c,i),
-        'ftp'      : (c:any,i:number) => this.mapother(c,i),
-        'smtp'     : (c:any,i:number) => this.mapother(c,i),
-        'ldap'     : (c:any,i:number) => this.mapother(c,i),
-        'database' : (c:any,i:number) => this.mapother(c,i),
-        'local'    : (c:any,i:number) => this.mapother(c,i),
-        'log'      : (c:any,i:number) => this.mapLog(c,i)
+        'session-stage': (c:any,i:number) => this.mapSessionStage(c,i),
+        'stage'        : (c:any,i:number) => this.mapother(c,i),
+        'action'       : (c:any,i:number) => this.mapother(c,i),
+        'rest'         : (c:any,i:number) => this.mapother(c,i),
+        'ftp'          : (c:any,i:number) => this.mapother(c,i),
+        'smtp'         : (c:any,i:number) => this.mapother(c,i),
+        'ldap'         : (c:any,i:number) => this.mapother(c,i),
+        'database'     : (c:any,i:number) => this.mapother(c,i),
+        'local'        : (c:any,i:number) => this.mapother(c,i),
+        'log'          : (c:any,i:number) => this.mapLog(c,i)
     }
     options: TimelineOptions;
     dataItems: DataItem[];
@@ -79,14 +80,14 @@ export class DetailTimelineComponent implements OnChanges {
                     (this.request.ldapRequests ?? []).map(r => ({...r, typeTimeline: 'ldap'})),
                     (this.request.databaseRequests ?? []).map(r => ({...r, typeTimeline: 'database'})),
                     (this.request.localRequests ?? []).map(r => ({...r, typeTimeline: 'local'})),
-                    (this.request.logEntries ?? []).map(r => ({...r, typeTimeline: 'log'})))
-                this.dataArray.splice(0, 0, { ...this.request, typeTimeline: 'stage' });
+                    (this.request.logEntries ?? []).map(r => ({...r, typeTimeline: 'log'})),
+                    (this.request.httpSessionStages ?? []).map(r => ({...r, typeTimeline: 'session-stage'})));
                 this.sortInnerArrayByDate(this.dataArray);
                 if (this.request['type'] != null && this.request['type'] === "VIEW") {
                     this.dataGroups = [{ id: 0, content: this.instance.re }];
                     this.isWebApp = true;
                 } else {
-                    this.dataGroups = [...new Set(this.dataArray.map(c => c.threadName))].map((c: any) => ({ id: c, content: c }))
+                    this.dataGroups = [...new Set(this.dataArray.filter(c => c.threadName).map(c => c.threadName))].map((c: any) => ({ id: c, content: c }))
                 }
                 if(this.dataArray.length > 50 ){
                     this.timelineEnd = this.dataArray[51].start * 1000;
@@ -182,6 +183,18 @@ export class DetailTimelineComponent implements OnChanges {
             title: `${this.pipe.transform(new Date(le.instant * 1000), 'HH:mm:ss.SSS')}</span><br><h4>${le.message || ''}</h4>`,
             className: `log-${le.level.toLowerCase()}`,
         }
+    }
+
+    mapSessionStage(le: any, id: number): DataItem {
+        return {
+          id: 'stage_' + id,
+          content: "",
+          start: le.start * 1000,
+          end: le.end * 1000,
+          title: `${this.pipe.transform(new Date(le.start * 1000), 'HH:mm:ss.SSS')}</span><br><h4>${le.name || ''}</h4>`,
+          className: `stage-${le.name.toLowerCase() ==="process"? "process":"other-process"}`,//
+          type: "background"
+      }
     }
 
 

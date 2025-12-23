@@ -104,7 +104,7 @@ export class DetailSessionComponent implements OnChanges {
         label: 'Stages',
         icon: 'view_object_track',
         count: 0,
-        visible: this.session['httpSessionStages']?.length,
+        visible: !!this.session['httpSessionStages']?.length,
         type: 'stage',
         hasError: false,
         errorCount: 0
