@@ -73,7 +73,10 @@
       <stage-table [requests]="session['httpSessionStages']">
       </stage-table>
     </div>
-
+    <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'log'" class="tab-panel">
+      <log-table [requests]="session.logEntries">
+      </log-table>
+    </div>
     <!-- Timeline -->
     <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'timeline'" class="tab-panel">
       <detail-timeline [request]="completedSession"

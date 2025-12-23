@@ -5,12 +5,14 @@
                           'fail': request.end && request.failed,
                           'in-progress': !request.end}">
       <mat-card-title>
-        <label-icon [icon]="REQUEST_TYPE['smtp'].icon">
-          <div style="display: flex; gap: 0.5em; align-items: center;">
+        <div style="display: flex; gap: 0.5em; align-items: center; width: 85%">
+          <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['smtp'].icon }}</mat-icon>
+          <div class="ellipsis"
+               [matTooltip]="'smtp://' + (request.host ? request.host : 'N/A') + (request.port == -1 ? '' : ':' + request.port)">
             {{ 'smtp://' + (request.host ? request.host : 'N/A') + (request.port == -1 ? '' : ':' + request.port)}}
-            <mat-spinner *ngIf="!request.end" [diameter]="18"></mat-spinner>
           </div>
-        </label-icon>
+          <mat-spinner *ngIf="!request.end" [diameter]="18"></mat-spinner>
+        </div>
 
         <div class="right">
           <button mat-icon-button [disabled]="sessionParent == null"
@@ -25,10 +27,8 @@
       </mat-card-content>
       <mat-card-footer>
         <mat-icon class="material-symbols-outlined" style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
-        <div style="display: flex; align-items: center; gap: 0.5em">
-          {{request.user || "N/A"}} le {{( request.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
-          en <span style="font-weight: bold">{{{ start: request.start, end: request.end } | duration}}</span>
-        </div>
+        {{request.user || "N/A"}} le {{( request.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
+        en <b>{{{ start: request.start, end: request.end } | duration}}</b>
       </mat-card-footer>
     </mat-card>
     <app-server-card style="width: 40vw"

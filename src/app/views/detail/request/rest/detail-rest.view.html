@@ -7,15 +7,16 @@
                         'unavailable': request.end && request.status == 0,
                         'in-progress': !request.end}">
       <mat-card-title>
-        <label-icon [icon]="REQUEST_TYPE['rest'].icon">
-          <div style="display: flex; gap: 0.5em; align-items: center;">
+        <div style="display: flex; gap: 0.5em; align-items: center; width: 85%">
+          <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['rest'].icon }}</mat-icon>
+          <div class="ellipsis" [matTooltip]="request.path">
             {{ request.path || 'N/A' }}
-            <mat-spinner *ngIf="!request.end" [diameter]="18"></mat-spinner>
           </div>
-        </label-icon>
+          <mat-spinner *ngIf="!request.end" [diameter]="18"></mat-spinner>
+        </div>
         <div class="right">
           <button mat-icon-button [disabled]="sessionParent == null"
-                  [ngStyle]="sessionParent == null ? {'pointer-events': 'none'}: ''" (click)="navigate($event,'parent')"
+                  [ngStyle]="{'pointer-events': sessionParent == null ? 'none' : ''}" (click)="navigate($event,'parent')"
                   matTooltip="Détail de l'appel parent">
             <mat-icon>move_up</mat-icon>
           </button>

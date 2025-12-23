@@ -31,13 +31,7 @@
       </mat-card-content>
       <mat-card-footer>
         <mat-icon class="material-symbols-outlined" style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
-        <div style="display: flex; align-items: center; gap: 0.5em">
-          {{request.user || "N/A"}} le {{( request.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }} en <span
-                style="font-weight: bold">{{{ start: request.start, end: request.end } | duration}}</span>
-        </div>
-        <div class="right">
-          {{ request.productName || "N/A"}} v.{{ request.productVersion || "N/A"}}
-        </div>
+        {{request.user || "N/A"}} le {{( request.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }} en <b>{{{ start: request.start, end: request.end } | duration}}</b>
       </mat-card-footer>
     </mat-card>
     <app-server-card style="width: 40vw"

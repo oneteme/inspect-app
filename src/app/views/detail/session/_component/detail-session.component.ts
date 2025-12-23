@@ -92,6 +92,15 @@ export class DetailSessionComponent implements OnChanges {
         errorCount: this.getLocalErrorCount()
       },
       {
+        label: 'Stages',
+        icon: 'view_object_track',
+        count: 0,
+        visible: this.session['httpSessionStages']?.length,
+        type: 'stage',
+        hasError: false,
+        errorCount: 0
+      },
+      {
         label: 'Actions',
         icon: 'web_traffic',
         count: this.session['userActions']?.length || 0,
@@ -101,11 +110,11 @@ export class DetailSessionComponent implements OnChanges {
         errorCount: 0
       },
       {
-        label: 'Stages',
-        icon: 'view_object_track',
-        count: 0,
-        visible: this.session['httpSessionStages']?.length,
-        type: 'stage',
+        label: 'Report',
+        icon: 'chat_info',
+        count: this.session.logEntries?.length || 0,
+        visible: this.session.logEntries?.length,
+        type: 'log',
         hasError: false,
         errorCount: 0
       },
