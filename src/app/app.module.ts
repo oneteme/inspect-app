@@ -35,6 +35,7 @@ import {AnalyticView} from "./views/analytic/analytic.view";
 import {SearchRequestView} from "./views/search/request/search-request.view";
 import {Constants} from "./views/constants";
 import {DetailRequestView} from "./views/detail/request/detail-request.view";
+import { InstanceComponent } from './views/detail/instance/instance.component';
 import {ServerSupervisionView} from "./views/supervision/_component/server/server-supervision.view";
 import {ClientSupervisionView} from "./views/supervision/_component/client/client-supervision.view";
 
@@ -189,6 +190,13 @@ const routes: Route[] = [
         component: StatisticClientView,
         title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
           return `Dashboard > ${route.paramMap.get('client_name')}`;
+        }
+      },
+      {
+        path: 'instance/:id_instance',
+        component: InstanceComponent,
+        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+          return `Dashboard > ${route.paramMap.get('id_instance')}`;
         }
       },
       { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }

@@ -1,0 +1,81 @@
+
+
+<div class="header-card">
+    <mat-card style="width: 60vw; min-width: 60vw;">
+        <mat-card-title>
+            <label-icon icon="call_received">
+                <div style="display: flex; gap: 0.5em; align-items: center;">
+                    {{ instance.id || 'N/A' }} / {{instance.address}}
+                </div>
+            </label-icon>
+        </mat-card-title>
+        <mat-card-content>
+
+            <div style="display: flex; gap: 0.5em">
+                <div>
+                    <div class="branch-info" *ngIf="instance.branch">
+                        <mat-icon class="material-symbols-outlined">code_blocks</mat-icon>
+                        {{ instance.branch }} / {{ instance.hash | slice:0:7 }}
+                    </div>
+                    <div class="version-badge-modern"
+                         *ngIf="instance.version"
+                         [ngStyle]="{'cursor': instance.configuration ? 'pointer' : 'default'}"
+                         (click)="instance.configuration ? openConfig(instance.configuration) : null"
+                         [style.background-color]="'#22577a'"
+                         [matTooltip]="instance.collector">
+                        <mat-icon class="material-symbols-outlined" *ngIf="instance.configuration">settings</mat-icon>
+                        {{ instance.version }}
+                    </div>
+
+                </div>
+            </div>
+        </mat-card-content>
+        <mat-card-footer>
+            <label-icon icon="person" [iconOutlined]="true" [size]="20">
+                <div style="display: flex; align-items: center; gap: 0.5em">
+                    {{ instance.user || "N/A" }}
+                    le {{ (instance.instant) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
+                </div>
+            </label-icon>
+
+
+        </mat-card-footer>
+    </mat-card>
+    <mat-card style="width: 40vw">
+        <mat-card-title>
+            <label-icon icon="widgets">
+                {{instance.name}}
+
+                <span style="font-size: 12px; font-style: italic; font-weight: normal; margin-left: 0.5em" [matTooltip]="instance.collector">{{instance.version}}</span>
+            </label-icon>
+
+        </mat-card-title>
+        <mat-card-content style="margin-left: 1em;">
+            <label-icon [icon]="instance.type==='CLIENT' ? 'devices' : 'data_table'">
+                <div style="font-weight: 500; font-size: 14px;">
+                    {{instance.os}}
+                </div>
+                <div style="font-style: italic; font-size: 12px;">
+                    {{instance.re}}
+                </div>
+            </label-icon>
+        </mat-card-content>
+        <mat-card-footer>
+            <label-icon icon="person" [iconOutlined]="true" [size]="20">
+                {{instance.user || "N/A"}}
+                le {{ (instance.instant) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
+            </label-icon>
+            <div *ngIf="instance.end" class="right" [matTooltip]="((instance.end) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')">
+                en <span style="font-weight: bold">{{((instance.end - instance.instant) | duration)}}</span>
+            </div>
+        </mat-card-footer>
+    </mat-card>
+</div>
+
+
+
+
+<app-timeline [options]="options"
+              [groups]="dataGroups"
+              [items]="dataItems" [displayHeader]="true">
+</app-timeline>
