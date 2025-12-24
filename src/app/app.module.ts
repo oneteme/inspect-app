@@ -192,16 +192,22 @@ const routes: Route[] = [
           return `Dashboard > ${route.paramMap.get('client_name')}`;
         }
       },
-      {
-        path: 'instance/:id_instance',
-        component: InstanceComponent,
-        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          return `Dashboard > ${route.paramMap.get('id_instance')}`;
-        }
-      },
       { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
     ]
   },
+  {
+    path: 'instance',
+  children:[
+    {
+      path: 'detail/:id_instance',
+      component: InstanceComponent,
+      title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+        return `instance > ${route.paramMap.get('id_instance')}`;
+      }
+    },
+  ]
+  },
+
   {
     path: 'analytic/:user',
     component: AnalyticView,

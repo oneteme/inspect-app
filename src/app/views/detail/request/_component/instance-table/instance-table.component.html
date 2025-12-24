@@ -9,9 +9,7 @@
                         Version
                     </div>
                 </th>
-                <td mat-cell *matCellDef="let element"
-                    [ngClass]="{'success': element.end && !element.exception,
-                        'fail': element.end && element.exception}">
+                <td mat-cell *matCellDef="let element" class="success">
                     <span style="font-weight: bold;">{{ element['version'] || 'N/A' }}</span>
 
                 </td>
