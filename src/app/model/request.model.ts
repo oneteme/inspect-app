@@ -49,6 +49,7 @@ export interface MainSessionView extends MainSession {
   localRequests?: LocalRequest[];
   userActions?: UserAction[];
   logEntries?: LogEntry[];
+  httpSessionStages?: HttpSessionStage[];
 }
 
 export interface RestSessionView extends RestSession {

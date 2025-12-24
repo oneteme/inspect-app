@@ -77,7 +77,8 @@ mat-form-field.no-subscript {
 
 
 .vis-item {
-
+  color: white !important;
+  
   &.instance {
     background-color: #4FB7B3;
     border-color: #4FB7B3;
@@ -132,6 +133,15 @@ mat-form-field.no-subscript {
     color: rgb(249, 173, 78);
     background-color: #ffe7cf;
     border-color: #f5b87a;
+  }
+
+  &.stage-process{
+    background-color: rgba(217, 221, 250, 0.50) !important;
+    border: 1px solid rgb(217, 221, 250) !important;
+  }
+  &.stage-other-process{
+    background-color: rgba(217, 221, 250, 0.20) !important;
+    border: 1px solid rgb(217, 221, 250) !important;
   }
 }
 

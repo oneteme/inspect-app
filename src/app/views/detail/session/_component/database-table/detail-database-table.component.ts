@@ -26,11 +26,13 @@ export class DetailDatabaseTableComponent {
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
             this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
-            this.dataSource.filterPredicate = this.useFilter && this.filterPredicate;
-            if (this.filterValue) {
-                this.filterTable.set('filter', this.filterValue.trim().toLowerCase());
+            if(this.useFilter){
+                this.dataSource.filterPredicate = this.filterPredicate;
+                if(this.filterValue){
+                    this.filterTable.set('filter', this.filterValue.trim().toLowerCase());
+                    this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
+                }
             }
-            this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
             this.dataSource.paginator.pageIndex = 0;
         }else{
             this.dataSource = new MatTableDataSource();
