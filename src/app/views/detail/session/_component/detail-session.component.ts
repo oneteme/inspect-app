@@ -95,7 +95,7 @@ export class DetailSessionComponent implements OnChanges {
         label: 'Stages',
         icon: 'view_object_track',
         count: 0,
-        visible: this.session['httpSessionStages']?.length,
+        visible: !!this.session['httpSessionStages']?.length,
         type: 'stage',
         hasError: false,
         errorCount: 0
@@ -113,7 +113,7 @@ export class DetailSessionComponent implements OnChanges {
         label: 'Report',
         icon: 'chat_info',
         count: this.session.logEntries?.length || 0,
-        visible: this.session.logEntries?.length,
+        visible: !!this.session.logEntries?.length,
         type: 'log',
         hasError: false,
         errorCount: 0
