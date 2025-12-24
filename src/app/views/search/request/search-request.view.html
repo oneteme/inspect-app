@@ -1,11 +1,4 @@
-<div class="header-container">
-  <div class="title-container">
-    <mat-icon class="material-symbols-outlined title-icon">{{ REQUEST_TYPE[params.type].icon }}</mat-icon>
-    <div class="title-content">
-      <h1 class="title-label">{{ REQUEST_TYPE[params.type].title }}</h1>
-      <div class="subtitle-label">{{ REQUEST_TYPE[params.type].subtitle }}</div>
-    </div>
-  </div>
+<header-page [titleIcon]="REQUEST_TYPE[params.type].icon" [ui-title]="REQUEST_TYPE[params.type].title" [ui-subtitle]="REQUEST_TYPE[params.type].subtitle">
   <div class="filter-container md-3">
     <mat-form-field style="width: 315px" class="no-subscript" appearance="outline" >
       <mat-label>Période</mat-label>
@@ -54,7 +47,7 @@
       <mat-icon matSuffix>search</mat-icon>
     </button>
   </div>
-</div>
+</header-page>
 
 <div *ngIf="params.type=='rest'">
     <rest-table

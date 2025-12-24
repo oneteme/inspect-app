@@ -1,14 +1,4 @@
-<!-- En-tête moderne avec statistiques -->
-<div class="header-container">
-  <div class="title-container">
-    <mat-icon class="material-symbols-outlined title-icon">{{ MAPPING_TYPE['deploiment'].icon }}</mat-icon>
-    <div class="title-content">
-      <h1 class="title-label">{{ MAPPING_TYPE['deploiment'].title }}</h1>
-      <div class="subtitle-label">{{ MAPPING_TYPE['deploiment'].subtitle }}</div>
-    </div>
-  </div>
-
-  <!-- Statistiques des serveurs -->
+<header-page [iconOutlined]="true" [titleIcon]="MAPPING_TYPE['deploiment'].icon" [ui-title]="MAPPING_TYPE['deploiment'].title" [ui-subtitle]="MAPPING_TYPE['deploiment'].subtitle">
   <div class="stats-container">
     <div class="stat-item stat-online">
       <div class="stat-icon-wrapper">
@@ -52,7 +42,7 @@
       </div>
     </div>
   </div>
-</div>
+</header-page>
 
 <div class="table-container">
     <div class="table-wrapper">

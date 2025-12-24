@@ -1,7 +1,7 @@
 import {Component, Input} from "@angular/core";
-import {ExceptionInfo, StackTraceRow} from "../../../model/trace.model";
-import { MatDialog } from '@angular/material/dialog';
-import { StacktraceDialogComponent } from './stacktrace-dialog/stacktrace-dialog.component';
+import {ExceptionInfo} from "../../../model/trace.model";
+import {MatDialog} from '@angular/material/dialog';
+import {StacktraceDialogComponent} from './stacktrace-dialog/stacktrace-dialog.component';
 
 @Component({
   selector: 'exception-display',
@@ -10,31 +10,19 @@ import { StacktraceDialogComponent } from './stacktrace-dialog/stacktrace-dialog
 })
 export class ExceptionDisplayComponent {
   _exception: ExceptionInfo = null;
-  _stacktrace: string = null;
 
   constructor(private dialog: MatDialog) {}
 
   @Input() set exception(value: ExceptionInfo) {
     if(value) {
       this._exception = value;
-      this._stacktrace = this.stacktraceFormatter(value);
     }
   }
 
   showStacktrace() {
     this.dialog.open(StacktraceDialogComponent, {
       width: '80vw',
-      data: { stacktrace: this._stacktrace }
+      data: { message: this._exception.message, stackTraceRows: this._exception.stackTraceRows }
     });
-  }
-
-  stacktraceFormatter(exception: ExceptionInfo) {
-    return exception?.stackTraceRows && exception?.message ? `${exception.message} \n  at ${exception.stackTraceRows.map(d => `${d.className}.${d.methodName}(${this.getFileName(d)}:${d.lineNumber})`).join('\n  at ')}` : null;
-  }
-
-  getFileName(row: StackTraceRow): string {
-    let bg = row.className.lastIndexOf('.') + 1;
-    let to = row.className.indexOf('$');
-    return row.className.substring(bg, to > -1 ? to : row.className.length) + ".java";
   }
 }

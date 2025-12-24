@@ -1,11 +1,4 @@
-<div class="header-container">
-  <div class="title-container">
-    <mat-icon class="material-symbols-outlined title-icon">{{ MAPPING_TYPE['rest'].icon }}</mat-icon>
-    <div class="title-content">
-      <h1 class="title-label">{{ MAPPING_TYPE['rest'].title }}</h1>
-      <div class="subtitle-label">{{ MAPPING_TYPE['rest'].subtitle }}</div>
-    </div>
-  </div>
+<header-page [titleIcon]="MAPPING_TYPE['rest'].icon" [ui-title]="MAPPING_TYPE['rest'].title" [ui-subtitle]="MAPPING_TYPE['rest'].subtitle">
   <div class="filter-container md-3" [formGroup]="serverFilterForm">
     <advanced-filter-recap [filters]="advancedParams" (filterRemoved)="handleRemovedFilter($event)" (focusField)="focusField($event)"></advanced-filter-recap>
     <mat-form-field style="width: 315px" class="no-subscript" appearance="outline" >
@@ -62,7 +55,7 @@
                              (handlePresetSelectionReset)="handlePresetSelectionReset()"
                              (handleFilterReset)="handleFilterReset()"></advanced-filter-trigger>
   </div>
-</div>
+</header-page>
 
 <mat-form-field  appearance="outline" class="searchwidth md-3 no-subscript">
   <input [disabled]="isLoading" [(ngModel)]="filterValue"  matInput #input (keyup)="applyFilter($event)" placeholder="Filtrer..." autocomplete="off">

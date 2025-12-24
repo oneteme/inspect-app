@@ -11,7 +11,7 @@
       </div>
     </div>
 
-    <div class="actions" *ngIf="_stacktrace">
+    <div class="actions" *ngIf="_exception.stackTraceRows">
       <button mat-icon-button (click)="showStacktrace()" matTooltip="Voir la stacktrace">
         <mat-icon>visibility</mat-icon>
       </button>

@@ -9,7 +9,6 @@ import {ChartProvider, field} from "@oneteme/jquery-core";
 import {InstanceTraceService} from "../../../../service/jquery/instance-trace.service";
 import {DatePipe, DecimalPipe, Location} from "@angular/common";
 import {MatDialog} from "@angular/material/dialog";
-import {StacktraceDialogComponent} from "../stacktrace-dialog/stacktrace-dialog.component";
 import {DateAdapter, MAT_DATE_FORMATS} from "@angular/material/core";
 import {CustomDateAdapter} from "../../../../shared/material/custom-date-adapter";
 import {MY_DATE_FORMATS} from "../../../../shared/shared.module";
@@ -22,6 +21,9 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 import {
   ClientInstanceSelectorDialogComponent
 } from "./client-instance-selector-dialog/client-instance-selector-dialog.component";
+import {
+  StacktraceDialogComponent
+} from "../../../../shared/_component/exception-display/stacktrace-dialog/stacktrace-dialog.component";
 
 @Component({
   templateUrl: './client-supervision.view.html',
@@ -517,7 +519,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
 
   open(row: any) {
     this._dialog.open(StacktraceDialogComponent, {
-      data: row
+      data: { message: row.message, stackTraceRows: row.stacktrace }
     });
   }
 
