@@ -108,11 +108,6 @@ export class InstanceComponent implements OnInit {
     })
   }
 
-  openConfig(config: InspectCollectorConfiguration |MachineResource) {
-    this._dialog.open(ConfigDialogComponent, {
-      data: config
-    });
-  }
   initTabs() {
     this.tabs = [
       {
@@ -152,11 +147,8 @@ export class InstanceComponent implements OnInit {
     this._router.navigateOnClick(event, ['/supervision', this.instance.type.toLowerCase(), this.instance.id], { queryParams: {start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString(), env: this.params.env} });
   }
   createTimeline() {
-    console.log(this.allInstance)
     this.timelineStart = Math.trunc(this.allInstance[0].start );
     this.timelineEnd =  Math.trunc(this.allInstance.at(-1).start);
-  console.log(this.timelineStart);
-    console.log(this.timelineEnd);
 
     const groups = [...new Set(this.allInstance.map(a =>  a?.version))]
         .filter(v => v != null)
@@ -182,13 +174,10 @@ export class InstanceComponent implements OnInit {
         title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end , 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform((end/1000) - (start/1000))})<br>`
       };
     });
-    console.log(items);
 
 
 
     let padding = (Math.ceil((this.timelineEnd - this.timelineStart)*0.1));
-    console.log(items);
-    console.log(groups);
     this.dataItems = items;
     this.dataGroups = groups;
      this.options = {
