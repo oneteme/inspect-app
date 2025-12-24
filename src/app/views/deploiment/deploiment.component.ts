@@ -8,13 +8,8 @@ import {MatSort} from '@angular/material/sort';
 import {InstanceService} from 'src/app/service/jquery/instance.service';
 import {LastServerStart} from 'src/app/model/jquery.model';
 import {MatTableDataSource} from '@angular/material/table';
-import {MatDialog} from "@angular/material/dialog";
-import {StacktraceDialogComponent} from "../supervision/_component/stacktrace-dialog/stacktrace-dialog.component";
-import {ConfigDialogComponent} from "../supervision/_component/config-dialog/config-dialog.component";
-import {InspectCollectorConfiguration} from "../../model/trace.model";
 import {InstanceTraceService} from "../../service/jquery/instance-trace.service";
 import {EnvRouter} from "../../service/router.service";
-import {DatePipe} from "@angular/common";
 
 @Component({
   templateUrl: './deploiment.component.html',
@@ -39,7 +34,6 @@ export class DeploimentComponent implements OnDestroy {
   onlineServerStat: number = 0;
   pendingServerStat: number = 0;
   offlineServerStat: number = 0;
-  activityStatus: {[key: string]: {css: 'online' | 'pending' | 'offline', lastTrace: number, tooltip: string}} = {};
   @ViewChild('lastServerStartTablePaginator', {static: true}) lastServerStartTablePaginator: MatPaginator;
   @ViewChild('lastServerStartTableSort') lastServerStartTableSort: MatSort;
 
@@ -72,7 +66,7 @@ export class DeploimentComponent implements OnDestroy {
       .subscribe({
         next: (value: {lastTraces: {id: string, date: number}[], lastServers: LastServerStart[]}) => {
           this.versionColor = this.groupBy(value.lastServers, (v: any) => v.version)
-          this.lastServerStart.data = new MatTableDataSource(value.lastServers.map(ls => ({...ls, lastTrace: value.lastTraces.find(lt => lt.id === ls.id).date})));
+          this.lastServerStart.data = new MatTableDataSource(value.lastServers.map(ls => ({...ls, lastTrace: value.lastTraces.find(lt => lt.id === ls.id)?.date})));
           this.lastServerStart.data.paginator = this.lastServerStartTablePaginator;
           this.lastServerStart.data.sort = this.lastServerStartTableSort;
           this.lastServerStart.data.sortingDataAccessor = sortingDataAccessor;

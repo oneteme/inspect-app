@@ -1,5 +1,6 @@
-import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import {Component, Inject} from '@angular/core';
+import {MAT_DIALOG_DATA} from '@angular/material/dialog';
+import {StackTraceRow} from "../../../../model/trace.model";
 
 @Component({
   selector: 'app-stacktrace-dialog',
@@ -9,7 +10,7 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
       Stacktrace
     </h1>
     <div mat-dialog-content>
-      <pre><code>{{ data.stacktrace }}</code></pre>
+      <pre><code>{{ _stacktrace }}</code></pre>
     </div>
   `,
   styles: [`
@@ -42,9 +43,22 @@ import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
   `]
 })
 export class StacktraceDialogComponent {
+  _stacktrace: string = null;
+
   constructor(
-    public dialogRef: MatDialogRef<StacktraceDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: { stacktrace: string }
-  ) {}
+    @Inject(MAT_DIALOG_DATA) public data: { message: string, stackTraceRows: StackTraceRow[] }
+  ) {
+    this._stacktrace = this.stacktraceFormatter(data.message, data.stackTraceRows);
+  }
+
+  stacktraceFormatter(message: string, stackTraceRows: StackTraceRow[]) {
+    return stackTraceRows && message ? `${message} \n  at ${stackTraceRows.map(d => `${d.className}.${d.methodName}(${this.getFileName(d)}:${d.lineNumber})`).join('\n  at ')}` : null;
+  }
+
+  getFileName(row: StackTraceRow): string {
+    let bg = row.className.lastIndexOf('.') + 1;
+    let to = row.className.indexOf('$');
+    return row.className.substring(bg, to > -1 ? to : row.className.length) + ".java";
+  }
 }
 
