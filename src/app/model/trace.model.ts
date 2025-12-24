@@ -171,6 +171,7 @@ export interface InstanceEnvironment {
   collector: string;
   resource: MachineResource;
   configuration: InspectCollectorConfiguration;
+  properties:any;
 }
 
 export interface InspectCollectorConfiguration {

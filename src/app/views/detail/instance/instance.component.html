@@ -1,0 +1,112 @@
+
+
+<div class="header-card">
+    <mat-card style="width: 60vw; min-width: 60vw;">
+        <mat-card-title>
+            <label-icon icon="call_received">
+                <div style="display: flex; gap: 0.5em; align-items: center;">
+                    {{ instance.id || 'N/A' }} / {{instance.address}}
+                </div>
+            </label-icon>
+        </mat-card-title>
+        <mat-card-content>
+
+            <div style="display: flex; gap: 0.5em">
+                <div>
+                    <div class="branch-info" *ngIf="instance.branch">
+                        <mat-icon class="material-symbols-outlined">code_blocks</mat-icon>
+                        {{ instance.branch }} / {{ instance.hash | slice:0:7 }}
+                    </div>
+                    <app-version-badge [backgroundColor]="'#22577a'"
+                                       [configuration]="instance.configuration"
+                                       [collector]="instance.collector"
+                                       [version]="instance.version" />
+                </div>
+
+            </div>
+        </mat-card-content>
+        <mat-card-footer>
+            <label-icon icon="person" [iconOutlined]="true" [size]="20">
+                <div style="display: flex; align-items: center; gap: 0.5em">
+                    {{ instance.user || "N/A" }}
+                    le {{ (instance.instant) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
+                </div>
+            </label-icon>
+
+
+        </mat-card-footer>
+    </mat-card>
+    <app-server-card style="width: 40vw"
+                     (onClick)="navigateOnStatusIndicator($event)"
+                     [menu]="menuServer"
+                     [instance]="instance"></app-server-card>
+</div>
+
+
+
+
+<div class="tabs-container">
+    <!-- Navigation verticale des onglets -->
+    <div class="vertical-tabs">
+        <div *ngFor="let tab of tabs; let i = index"
+             class="tab-button"
+             [class.active]="selectedTabIndex === i"
+             [class.hidden]="!tab.visible"
+             (click)="selectedTabIndex = i">
+            <mat-icon class="material-symbols-outlined">{{ tab.icon }}</mat-icon>
+            <span class="tab-label">{{ tab.label }}</span>
+            <div style="display: flex; align-items: center; gap: 4px;">
+                <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
+                <mat-icon *ngIf="tab.hasError && tab.errorCount > 0"
+                          class="error-indicator material-symbols-outlined"
+                          [matTooltip]="tab.errorCount + ' erreur(s)'"
+                          matTooltipPosition="right">
+                    error
+                </mat-icon>
+            </div>
+        </div>
+    </div>
+    <div class="tab-content">
+        <div *ngIf="tabs[selectedTabIndex]?.type === 'instances'" class="tab-panel">
+            <app-instance-table [requests]="allInstance">
+            </app-instance-table>
+        </div>
+        <div *ngIf="tabs[selectedTabIndex]?.type === 'timeline'" class="tab-panel">
+            <app-timeline [options]="options"
+                          [groups]="dataGroups"
+                          [items]="dataItems"
+                          [displayHeader]="false">
+            </app-timeline>
+        </div>
+        <div *ngIf="tabs[selectedTabIndex]?.type === 'properties'"class="tab-panel">
+            <div class="table-container">
+                <div class="table-wrapper">
+            <table mat-table [dataSource]="dataSource" class="mat-elevation-z8">
+
+                <ng-container matColumnDef="resource">
+                    <th mat-header-cell *matHeaderCellDef> resource </th>
+                    <td mat-cell *matCellDef="let row">
+                        <pre>{{ row.resource | json }}</pre>
+                    </td>
+                </ng-container>
+
+                <ng-container matColumnDef="additional-properties">
+                    <th mat-header-cell *matHeaderCellDef> additional properties </th>
+                    <td mat-cell *matCellDef="let row">
+                        <pre>{{ row.properties | json }}</pre>
+                    </td>
+                </ng-container>
+
+                <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+                <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+
+            </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<mat-menu #menuServer="matMenu">
+    <a mat-menu-item [routerLink]="['/session', instance?.name, 'dump']" [queryParams]="{env: instance?.env, date: getDate(instance?.instant * 1000).toISOString()}"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
+    <a mat-menu-item [routerLink]="['/dashboard', 'server', instance?.name]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur</a>
+</mat-menu>

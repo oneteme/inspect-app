@@ -78,6 +78,16 @@ mat-form-field.no-subscript {
 
 .vis-item {
   color: white !important;
+  
+  &.instance {
+    background-color: #4FB7B3;
+    border-color: #4FB7B3;
+
+  }
+  &.instance-active {
+    background-color: #A8FBD3 !important;
+    border-color: #A8FBD3 !important;
+  }
   &.rest {
     background-color: #3F51B5;
     border-color: #3F51B5;

@@ -75,6 +75,8 @@ import {ClientSupervisionView} from "./supervision/_component/client/client-supe
 import {
   ClientInstanceSelectorDialogComponent
 } from "./supervision/_component/client/client-instance-selector-dialog/client-instance-selector-dialog.component";
+import { InstanceComponent } from './detail/instance/instance.component';
+import { InstanceTableComponent } from './detail/request/_component/instance-table/instance-table.component';
 import {DetailLogTableComponent} from "./detail/session/_component/log-table/detail-log-table.component";
 
 
@@ -147,7 +149,9 @@ import {DetailLogTableComponent} from "./detail/session/_component/log-table/det
     ClientInstanceSelectorDialogComponent,
     ServerSupervisionView,
     ClientSupervisionView,
-    DetailLogTableComponent
+    DetailLogTableComponent,
+    InstanceComponent,
+    InstanceTableComponent
   ]
 })
 export class ViewsModule { }
