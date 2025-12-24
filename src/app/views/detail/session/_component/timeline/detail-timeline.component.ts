@@ -191,7 +191,6 @@ export class DetailTimelineComponent implements OnChanges {
           content: "",
           start: le.start * 1000,
           end: le.end * 1000,
-          title: `${this.pipe.transform(new Date(le.start * 1000), 'HH:mm:ss.SSS')}</span><br><h4>${le.name || ''}</h4>`,
           className: `stage-${le.name.toLowerCase() ==="process"? "process":"other-process"}`,//
           type: "background"
       }
