@@ -84,7 +84,7 @@
                         'warning': element.status >= 300 && element.status < 500,
                         'fail': element.status >= 500,
                         'in-progress': !element.end}"
-            [matTooltip]="(element.exception?.type | exceptionType) + ' ' + element.exception?.message">
+            [matTooltip]="element.exception ? (element.exception?.type | exceptionType) + ' ' + element.exception?.message : null">
           {{element["appName"] || 'N/A'}}
         </td>
       </ng-container>

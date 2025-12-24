@@ -7,9 +7,8 @@
          [class.hidden]="!tab.visible"
          (click)="selectedTabIndex = i">
       <mat-icon class="material-symbols-outlined">{{ tab.icon }}</mat-icon>
-      <span class="tab-label">{{ tab.label }}</span>
-      <div style="display: flex; align-items: center; gap: 4px;">
-        <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
+      <div class="tab-label-container">
+        <span class="tab-label">{{ tab.label }}</span>
         <mat-icon *ngIf="tab.hasError && tab.errorCount > 0"
                   class="error-indicator material-symbols-outlined"
                   [matTooltip]="tab.errorCount + ' erreur(s)'"
@@ -17,6 +16,7 @@
           error
         </mat-icon>
       </div>
+      <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
     </div>
   </div>
 
@@ -73,7 +73,10 @@
       <stage-table [requests]="session['httpSessionStages']">
       </stage-table>
     </div>
-
+    <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'log'" class="tab-panel">
+      <log-table [requests]="session.logEntries">
+      </log-table>
+    </div>
     <!-- Timeline -->
     <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'timeline'" class="tab-panel">
       <detail-timeline [request]="completedSession"

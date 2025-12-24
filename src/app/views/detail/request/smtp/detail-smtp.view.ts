@@ -68,7 +68,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
       {
         label: 'Stages',
         icon: 'view_object_track',
-        count: 0,
+        count: this.stages.length || 0 ,
         visible: true,
         type: 'stage',
         hasError: false,

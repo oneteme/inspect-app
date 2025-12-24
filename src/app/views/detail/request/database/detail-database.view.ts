@@ -73,7 +73,6 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([params, queryParams]) => {
         this.params = {idJdbc: params.id_request, env: queryParams.env || app.defaultEnv};
-        this.initTabs();
         this.getRequest();
       }
     });
@@ -84,7 +83,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
       {
         label: 'Stages',
         icon: 'view_object_track',
-        count: 0,
+        count: this.stages.length || 0,
         visible: true,
         type: 'stage',
         hasError: false,
@@ -128,6 +127,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
         this.request = result.request;
         this.stages = result.stages;
         this.exception = result.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
+        this.initTabs();
         this.createTimeline();
       }
     });
