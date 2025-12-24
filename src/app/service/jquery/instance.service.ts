@@ -126,21 +126,24 @@ export class InstanceService {
   //new
   getInstanceInfo(filters: { env: string, id: string }): Observable<InstanceEnvironment> {
     return this.getInstance<any>({
-      'column': `id,app_name:name,version,collector,start:instant,os,re,address,user,branch,configuration,type,end,resource,hash`,
+      'column': `id,app_name:name,version,collector,start:instant,os,re,address,user,branch,configuration,type,end,resource,hash,additional_properties:properties`,
       'id.varchar': `"${filters.id}"`
-    }).pipe(map(res => { return res.map(r => ({...r, configuration: r.configuration?.value ? JSON.parse(r.configuration?.value) : null, resource: r.resource?.value ? JSON.parse(r.resource?.value) : null}))[0] }));
+    }).pipe(map(res => { return res.map(r => ({...r, configuration: r.configuration?.value ? JSON.parse(r.configuration?.value) : null, resource: r.resource?.value ? JSON.parse(r.resource?.value) : null,properties: r.properties?.value ? JSON.parse(r.properties?.value) : null}))[0] }));
   }
 
   //new
   getInstancesPeriodsByAppName(filters: { env: string,appName: string, address: string | undefined}): Observable<{
     id: string,
     version: string,
+    hash: string,
+    branch: string,
     address:string,
     start: number,
-    end: number
+    end: number,
+    re:string,
   }[]> {
     let args: any = {
-      'column': 'id,start,end.coalesce(2040-12-31T00:00:00.000Z):end,version,address',
+      'column': 'id,start,end.coalesce(2040-12-31T00:00:00.000Z):end,version,address,branch,hash,re',
       'environement': filters.env,
       'app_name': `"${filters.appName}"`,
       'order': 'start.asc'

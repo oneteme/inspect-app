@@ -4,6 +4,7 @@ import {app} from "../../../../environments/environment";
 import {ActivatedRoute} from "@angular/router";
 import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
 import {
+  AbstractStage,
   DatabaseRequestStage, FtpRequestStage,
   HttpRequestStage,
   InspectCollectorConfiguration,
@@ -18,6 +19,8 @@ import {getDataForRange, getErrorClassName, showifnotnull} from "../../../shared
 import {ConfigDialogComponent} from "../../supervision/_component/config-dialog/config-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
 import {TabData} from "../session/_component/detail-session.component";
+import {EnvRouter} from "../../../service/router.service";
+import {MatTableDataSource} from "@angular/material/table";
 
 @Component({
   selector: 'app-instance',
@@ -28,6 +31,7 @@ export class InstanceComponent implements OnInit {
   private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   private _instanceService = inject(InstanceService);
   private readonly _dialog = inject(MatDialog);
+  private readonly _router: EnvRouter = inject(EnvRouter);
 
   params: Partial<{id: string, env: string}> = {};
   private readonly $destroy = new Subject<void>();
@@ -37,6 +41,7 @@ export class InstanceComponent implements OnInit {
   dataItems: DataItem[];
   tabs: TabData[] = [];
   dataGroups: DataGroup[];
+  dataSource: MatTableDataSource<InstanceEnvironment> = new MatTableDataSource();
   instance: InstanceEnvironment;
   configuration: string;
   resource: string;
@@ -45,6 +50,7 @@ export class InstanceComponent implements OnInit {
   timelineStart: number
   timelineEnd: number
   selectedTabIndex: number = 0;
+  displayedColumns: string[] = ['resource', 'additional-properties'];
 
   ngOnDestroy() {
     this.$destroy.next();
@@ -73,6 +79,7 @@ export class InstanceComponent implements OnInit {
     }).pipe(takeUntil(this.$destroy),
         switchMap(instance => {
           this.instance = instance;
+          this.dataSource = new MatTableDataSource([instance]);
           return this._instanceService.getInstancesPeriodsByAppName({
             env: this.params.env,
             appName: this.instance.name,
@@ -109,6 +116,15 @@ export class InstanceComponent implements OnInit {
   initTabs() {
     this.tabs = [
       {
+        label: 'Instances',
+        icon: 'view_object_track',
+        count: 0,
+        visible: true,
+        type: 'instances',
+        hasError: false,
+        errorCount: 0
+      },
+      {
         label: 'Chronologie',
         icon: 'view_timeline',
         count: 0,
@@ -116,8 +132,24 @@ export class InstanceComponent implements OnInit {
         type: 'timeline',
         hasError: false,
         errorCount: 0
+      },
+      {
+        label: 'Properties',
+        icon: 'settings',
+        count: 0,
+        visible: true,
+        type: 'properties',
+        hasError: false,
+        errorCount: 0
       }
     ]
+  }
+  getDate(start: number) {
+    return new Date(start);
+  }
+  navigateOnStatusIndicator(event: MouseEvent) {
+    var date = new Date(this.instance.instant * 1000);
+    this._router.navigateOnClick(event, ['/supervision', this.instance.type.toLowerCase(), this.instance.id], { queryParams: {start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString(), env: this.params.env} });
   }
   createTimeline() {
     console.log(this.allInstance)
@@ -126,7 +158,7 @@ export class InstanceComponent implements OnInit {
   console.log(this.timelineStart);
     console.log(this.timelineEnd);
 
-    const groups = [...new Set(this.allInstance.map(a => this.instance.type === 'CLIENT' ? a?.address : a?.version))]
+    const groups = [...new Set(this.allInstance.map(a =>  a?.version))]
         .filter(v => v != null)
         .map((version, i) => ({
           id: i,
@@ -141,11 +173,11 @@ export class InstanceComponent implements OnInit {
       let start= Math.trunc(a.start);
       let end = a.end? Math.trunc(a.end) : INFINITY;
       return {
-        group: `${this.instance.type === 'CLIENT' ? groupByContent.get(a.address):groupByContent.get(a.version)}`,
+        group: `${groupByContent.get(a.version)}`,
         start: start,
         end: end,
         type: end <= start ? 'point' : 'range',
-        content: this.instance.type === 'CLIENT' ? a.address:a.version,
+        content:  this.instance.type === 'CLIENT' ? a.re:a.branch + ' / ' + a.hash,
         className: `${this.instance.id === a.id ? 'instance-active' : 'instance'}`,
         title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end , 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform((end/1000) - (start/1000))})<br>`
       };

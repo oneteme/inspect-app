@@ -1,0 +1,70 @@
+<div class="table-container">
+    <div class="table-wrapper">
+        <table mat-table [dataSource]="dataSource" #sort="matSort" matSort
+               matSortActive="start" matSortDirection="asc">
+            <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header style="width: 15%">
+                    <div class="header-cell-content">
+                        <mat-icon class="material-symbols-outlined">label</mat-icon>
+                        Version
+                    </div>
+                </th>
+                <td mat-cell *matCellDef="let element"
+                    [ngClass]="{'success': element.end && !element.exception,
+                        'fail': element.end && element.exception}">
+                    <span style="font-weight: bold;">{{ element['version'] || 'N/A' }}</span>
+
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="args">
+                <th mat-header-cell *matHeaderCellDef>
+                    <div class="header-cell-content">
+                        <mat-icon class="material-symbols-outlined">list_alt</mat-icon>
+                        Branches
+                    </div>
+                </th>
+                <td mat-cell *matCellDef="let element">
+                    <span [matTooltip]="element['args']">{{ element['branch']  }} / {{ element['hash']  }}</span>
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="start">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header style="width: 15%">
+                    <div class="header-cell-content">
+                        <mat-icon class="material-symbols-outlined">schedule</mat-icon>
+                        Début
+                    </div>
+                </th>
+                <td mat-cell *matCellDef="let element">
+                    {{ (element.start | date:'dd/MM/yyyy')}}
+                    <br>
+                    {{ (element.start | date:'HH:mm:ss.SSS')}}
+                </td>
+            </ng-container>
+
+            <ng-container matColumnDef="duree">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header style="width: 15%">
+                    <div class="header-cell-content">
+                        <mat-icon class="material-symbols-outlined">timer</mat-icon>
+                        Durée
+                    </div>
+                </th>
+                <td mat-cell *matCellDef="let element">
+                    <div *ngIf="!element.end" style="display: flex; align-items: center; gap: 6px;">
+                        <mat-spinner [diameter]="14"></mat-spinner>
+                        <span class="cell-secondary">En cours...</span>
+                    </div>
+                    <div *ngIf="element.end" class="cell-primary" [matTooltip]="element.end | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr'">
+                        {{ { start: element.start / 1000, end: element.end/ 1000 } | duration }}
+                    </div>
+                </td>
+            </ng-container>
+
+            <tr mat-header-row *matHeaderRowDef="displayedColumns;sticky: true"></tr>
+            <tr mat-row *matRowDef="let row;columns: displayedColumns;"></tr>
+        </table>
+    </div>
+    <mat-paginator #paginator [pageSize]="3" [hidePageSize]="true"
+                   showFirstLastButtons></mat-paginator>
+</div>
