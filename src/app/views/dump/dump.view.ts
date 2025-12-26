@@ -88,7 +88,8 @@ export class DumpView implements OnInit, OnDestroy {
 
     getDataItems(): DataItem[] {
         return [this.restSessions.map(s => {
-            let end = s.end ? s.end * 1000 : INFINITY;
+            const isInProgress = !s.end;
+            let end = s.end ? s.end * 1000 :  new Date(new Date().setHours(23, 59, 59, 999)).getTime();
             let item: DataItem = {
                 id: `${s.id}_rest`,
                 group: s.threadName,
@@ -100,12 +101,16 @@ export class DumpView implements OnInit, OnDestroy {
                 className: 'rest overflow'
             };
             item.type = item.end > item.start ? 'range': 'point';
+            if (isInProgress) {
+                item.className += ' in-progress';
+            }
             if (s.exception?.message || s.exception?.type) {
                 item.className += ' error';
             }
             return item;
         }), this.mainSessions.map(s => {
-            let end = s.end ? s.end * 1000 : INFINITY;
+            const isInProgress = !s.end;
+            let end = s.end ? s.end * 1000 :   new Date(new Date().setHours(23, 59, 59, 999)).getTime();
             let item: DataItem = {
                 id: `${s.id}_main_${s.type.toLowerCase()}`,
                 group: s.threadName,
@@ -117,6 +122,9 @@ export class DumpView implements OnInit, OnDestroy {
                 className: 'rest overflow'
             };
             item.type = item.end > item.start ? 'range': 'point';
+            if (isInProgress) {
+                item.className += ' in-progress';
+            }
             if (s.exception?.message || s.exception?.type) {
                 item.className += ' error';
             }
