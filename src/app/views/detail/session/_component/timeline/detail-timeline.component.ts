@@ -2,7 +2,7 @@ import {DatePipe} from "@angular/common";
 import {Component, ElementRef, Input, OnChanges, SimpleChanges, ViewChild} from "@angular/core";
 import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
 import {DurationPipe} from "../../../../../shared/pipe/duration.pipe";
-import {ANALYTIC_MAPPING, INFINITY} from "../../../../constants";
+import {ANALYTIC_MAPPING} from "../../../../constants";
 import {MainSessionView, RestSessionView} from "../../../../../model/request.model";
 import {InstanceEnvironment} from "../../../../../model/trace.model";
 
@@ -142,8 +142,9 @@ export class DetailTimelineComponent implements OnChanges {
     }
 
     mapother(c:any, id:number) : DataItem{
+        const isInProgress = !c.end && c.typeTimeline != 'action';
         let end = c.typeTimeline == 'action' ? c.start * 1000 :
-            c.end ? c.end * 1000 : INFINITY;
+            c.end ? c.end * 1000 :  new Date(new Date().setHours(23, 59, 59, 999)).getTime();
         let o = {
             id: id,
             group: this.isWebApp ? 0 : c.threadName,
@@ -156,13 +157,16 @@ export class DetailTimelineComponent implements OnChanges {
                 c.typeTimeline == 'log' ?
                     `${this.pipe.transform(new Date(c.instant * 1000), 'HH:mm:ss.SSS')}</span><br>
                       <h4>${c['message'] || ''}</h4>` :
-                    `${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${c.end ? this.pipe.transform(new Date(end), 'HH:mm:ss.SSS'):"?"}</span> ${c.end ? `(${this.durationPipe.transform({start: c.start, end: end / 1000})})`:""}<br>
+                    `${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${c.end ? this.pipe.transform(new Date(end), 'HH:mm:ss.SSS'):"En cours..."}</span> ${c.end ? `(${this.durationPipe.transform({start: c.start, end: end / 1000})})`:""}<br>
                      <h4>${c['path'] || ''}</h4>`,
             className: c.typeTimeline != 'stage' ? c.typeTimeline : "",
             type: ''
         }
         o.type = c.typeTimeline == 'stage' ? 'background' : o.end == o.start ? 'point' : 'range';
-        if (o.end > this.timelineEnd && o.end != INFINITY) {
+        if (isInProgress) {
+            o.className += ' in-progress';
+        }
+        if (o.end > this.timelineEnd) {
             this.timelineEnd = o.end;
         }
         if(o.type == 'range'){
