@@ -172,6 +172,10 @@ export class DetailRestView implements OnInit, OnDestroy {
     switch (targetType) {
       case "parent":
         params.push('session', this.sessionParent.type.toLowerCase(), this.sessionParent.id);
+        break;
+      case "remote":
+        params.push('session', 'rest', this.request.id);
+        break;
     }
     if (event.ctrlKey) {
       this._router.open(`#/${params.join('/')}`, '_blank')

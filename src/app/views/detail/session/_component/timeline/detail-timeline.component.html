@@ -3,7 +3,8 @@
                   [groups]="dataGroups"
                   [items]="dataItems"
                   [displayHeader]="false"
-                  (onTimelineCreated)="onTimelineCreate($event)">
+                  (onTimelineCreated)="onTimelineCreate($event)"
+                  (onitemCLicked)="onitemCLicked($event)">
   <div class="legend">
     <div *ngIf="request.restRequests?.length" class="item"><div class="dot api"></div><b>API</b></div>
     <div *ngIf="request.ftpRequests?.length" class="item"><div class="dot ftp"></div><b>FTP</b></div>

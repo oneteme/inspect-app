@@ -160,7 +160,6 @@ export class InstanceComponent implements OnInit {
     const groupByContent = new Map<string, number>(
         groups.map(g => [g.content, g.id])
     );
-    console.log(this.instance.id === this.allInstance.at(-1).id);
     let items = this.allInstance.map((a: any, i: number) => {
       let start= Math.trunc(a.start);
       let end = a.end? Math.trunc(a.end) : INFINITY;

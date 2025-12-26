@@ -15,6 +15,10 @@
           <mat-spinner *ngIf="!request.end" [diameter]="18"></mat-spinner>
         </div>
         <div class="right">
+          <button matTooltip="Détail de la session"  mat-icon-button color="primary"
+                  (click)="navigate($event, 'remote')">
+              <mat-icon class="material-symbols-outlined">link</mat-icon>
+          </button>
           <button mat-icon-button [disabled]="sessionParent == null"
                   [ngStyle]="{'pointer-events': sessionParent == null ? 'none' : ''}" (click)="navigate($event,'parent')"
                   matTooltip="Détail de l'appel parent">

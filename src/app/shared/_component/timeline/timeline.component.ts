@@ -25,7 +25,7 @@ export class TimelineComponent implements OnChanges, OnDestroy {
     @Input() items: DataItem[];
     @Input() displayHeader: boolean = true;
     @Output() onTimelineCreated = new EventEmitter<Timeline>();
-
+    @Output() onitemCLicked = new EventEmitter<any>();
     ngOnChanges(changes: SimpleChanges) {
         if(changes.items || changes.groups || changes.options) {
             if(this.items && this.groups && this.options) {
@@ -42,6 +42,9 @@ export class TimelineComponent implements OnChanges, OnDestroy {
     create() {
         this.timeline = new Timeline(this.timelineElement.nativeElement, this.items, this.groups, this.options);
         this.onTimelineCreated.emit(this.timeline);
+        this.timeline.on('doubleClick', (prop) => {
+            this.onitemCLicked.emit(prop)
+        })
     }
 
     destroy() {
