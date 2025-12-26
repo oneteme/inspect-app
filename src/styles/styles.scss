@@ -392,3 +392,14 @@ loading.hidden {
 .mat-mdc-form-field-icon-prefix>.mat-icon, .mat-mdc-form-field-icon-suffix>.mat-icon {
   padding: 0 12px 0 0 !important;
 }
+
+
+.vis-item.vis-range.in-progress {
+  background-image: repeating-linear-gradient(
+                  -45deg,
+                  transparent,
+                  transparent 5px,
+                  rgba(255, 255, 255, 0.1) 5px,
+                  rgba(255, 255, 255, 0.1) 10px
+  ) !important;
+}
