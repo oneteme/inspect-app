@@ -2,7 +2,7 @@ import {DatePipe} from "@angular/common";
 import {Component, ElementRef, Input, OnChanges, SimpleChanges, ViewChild} from "@angular/core";
 import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
 import {DurationPipe} from "../../../../../shared/pipe/duration.pipe";
-import {ANALYTIC_MAPPING, INFINITY} from "../../../../constants";
+import {ANALYTIC_MAPPING} from "../../../../constants";
 import {MainSessionView, RestSessionView} from "../../../../../model/request.model";
 import {InstanceEnvironment} from "../../../../../model/trace.model";
 
@@ -43,15 +43,16 @@ export class DetailTimelineComponent implements OnChanges {
     maptype : {
         [key: string]: (c:any,i:number)=> DataItem
     } = {
-        'stage'    : (c:any,i:number) => this.mapother(c,i),
-        'action'   : (c:any,i:number) => this.mapother(c,i),
-        'rest'     : (c:any,i:number) => this.mapother(c,i),
-        'ftp'      : (c:any,i:number) => this.mapother(c,i),
-        'smtp'     : (c:any,i:number) => this.mapother(c,i),
-        'ldap'     : (c:any,i:number) => this.mapother(c,i),
-        'database' : (c:any,i:number) => this.mapother(c,i),
-        'local'    : (c:any,i:number) => this.mapother(c,i),
-        'log'      : (c:any,i:number) => this.mapLog(c,i)
+        'session-stage': (c:any,i:number) => this.mapSessionStage(c,i),
+        'stage'        : (c:any,i:number) => this.mapother(c,i),
+        'action'       : (c:any,i:number) => this.mapother(c,i),
+        'rest'         : (c:any,i:number) => this.mapother(c,i),
+        'ftp'          : (c:any,i:number) => this.mapother(c,i),
+        'smtp'         : (c:any,i:number) => this.mapother(c,i),
+        'ldap'         : (c:any,i:number) => this.mapother(c,i),
+        'database'     : (c:any,i:number) => this.mapother(c,i),
+        'local'        : (c:any,i:number) => this.mapother(c,i),
+        'log'          : (c:any,i:number) => this.mapLog(c,i)
     }
     options: TimelineOptions;
     dataItems: DataItem[];
@@ -79,14 +80,14 @@ export class DetailTimelineComponent implements OnChanges {
                     (this.request.ldapRequests ?? []).map(r => ({...r, typeTimeline: 'ldap'})),
                     (this.request.databaseRequests ?? []).map(r => ({...r, typeTimeline: 'database'})),
                     (this.request.localRequests ?? []).map(r => ({...r, typeTimeline: 'local'})),
-                    (this.request.logEntries ?? []).map(r => ({...r, typeTimeline: 'log'})))
-                this.dataArray.splice(0, 0, { ...this.request, typeTimeline: 'stage' });
+                    (this.request.logEntries ?? []).map(r => ({...r, typeTimeline: 'log'})),
+                    (this.request.httpSessionStages ?? []).map(r => ({...r, typeTimeline: 'session-stage'})));
                 this.sortInnerArrayByDate(this.dataArray);
                 if (this.request['type'] != null && this.request['type'] === "VIEW") {
                     this.dataGroups = [{ id: 0, content: this.instance.re }];
                     this.isWebApp = true;
                 } else {
-                    this.dataGroups = [...new Set(this.dataArray.map(c => c.threadName))].map((c: any) => ({ id: c, content: c }))
+                    this.dataGroups = [...new Set(this.dataArray.filter(c => c.threadName).map(c => c.threadName))].map((c: any) => ({ id: c, content: c }))
                 }
                 if(this.dataArray.length > 50 ){
                     this.timelineEnd = this.dataArray[51].start * 1000;
@@ -141,8 +142,9 @@ export class DetailTimelineComponent implements OnChanges {
     }
 
     mapother(c:any, id:number) : DataItem{
+        const isInProgress = !c.end && c.typeTimeline != 'action';
         let end = c.typeTimeline == 'action' ? c.start * 1000 :
-            c.end ? c.end * 1000 : INFINITY;
+            c.end ? c.end * 1000 :  new Date(new Date().setHours(23, 59, 59, 999)).getTime();
         let o = {
             id: id,
             group: this.isWebApp ? 0 : c.threadName,
@@ -155,13 +157,16 @@ export class DetailTimelineComponent implements OnChanges {
                 c.typeTimeline == 'log' ?
                     `${this.pipe.transform(new Date(c.instant * 1000), 'HH:mm:ss.SSS')}</span><br>
                       <h4>${c['message'] || ''}</h4>` :
-                    `${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${c.end ? this.pipe.transform(new Date(end), 'HH:mm:ss.SSS'):"?"}</span> ${c.end ? `(${this.durationPipe.transform({start: c.start, end: end / 1000})})`:""}<br>
+                    `${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${c.end ? this.pipe.transform(new Date(end), 'HH:mm:ss.SSS'):"En cours..."}</span> ${c.end ? `(${this.durationPipe.transform({start: c.start, end: end / 1000})})`:""}<br>
                      <h4>${c['path'] || ''}</h4>`,
             className: c.typeTimeline != 'stage' ? c.typeTimeline : "",
             type: ''
         }
         o.type = c.typeTimeline == 'stage' ? 'background' : o.end == o.start ? 'point' : 'range';
-        if (o.end > this.timelineEnd && o.end != INFINITY) {
+        if (isInProgress) {
+            o.className += ' in-progress';
+        }
+        if (o.end > this.timelineEnd) {
             this.timelineEnd = o.end;
         }
         if(o.type == 'range'){
@@ -182,6 +187,17 @@ export class DetailTimelineComponent implements OnChanges {
             title: `${this.pipe.transform(new Date(le.instant * 1000), 'HH:mm:ss.SSS')}</span><br><h4>${le.message || ''}</h4>`,
             className: `log-${le.level.toLowerCase()}`,
         }
+    }
+
+    mapSessionStage(le: any, id: number): DataItem {
+        return {
+          id: 'stage_' + id,
+          content: "",
+          start: le.start * 1000,
+          end: le.end * 1000,
+          className: `stage-${le.name.toLowerCase() ==="process"? "process":"other-process"}`,//
+          type: "background"
+      }
     }
 
 

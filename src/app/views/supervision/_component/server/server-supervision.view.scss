@@ -45,6 +45,7 @@
 }
 
 .stats-card {
+
   &.trace {
     cursor: pointer;
     &:hover {
@@ -60,7 +61,6 @@
   &.report:hover {
     transform: translateY(-3px);
   }
-
 }
 
 .stats-icon {

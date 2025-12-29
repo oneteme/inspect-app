@@ -1,30 +1,43 @@
 :host {
-    display: flex;
-    align-items: center;
-    margin-bottom: 0.5em;
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  flex-wrap: wrap;
 }
 
 .title-container {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  .title-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    color: #3b82f6;
+    flex-shrink: 0;
+  }
+
+  .title-content {
     display: flex;
-    align-items: center;
-    justify-content: center;
+    flex-direction: column;
+    gap: 4px;
 
-    .title-icon {
-        display: flex;
+    .title-label {
+      font-size: 24px;
+      font-weight: 700;
+      color: #1e293b;
+      margin: 0;
+      line-height: 1.2;
     }
 
-    .title {
-        .main {
-            margin-right: 0.5em;
-            font-size: 24px;
-            font-weight: 700
-        }
-
-        .sub {
-            font-size: 14px;
-            font-weight: 500;
-            font-style: italic;
-            color: #6c6c6c;
-        }
+    .subtitle-label {
+      font-size: 14px;
+      color: #64748b;
+      margin: 0;
+      font-weight: 500;
     }
+  }
 }

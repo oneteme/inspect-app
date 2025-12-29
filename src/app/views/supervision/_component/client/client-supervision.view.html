@@ -53,7 +53,6 @@
       <mat-icon matSuffix>search</mat-icon>
     </button>
   </div>
-
 </header-page>
 <div style="display: flex;">
   <div style="width: 50%" class="card-container mat-elevation-z5">
@@ -125,12 +124,12 @@
           </div>
         </div>
       </div>
-      <div class="activity-content" [ngSwitch]="activityDisplayType">
-        <chart *ngSwitchDefault type="line" [config]="USAGE_INSTANCE_TRACE_BY_PERIOD_LINE"
+      <div class="activity-content">
+        <chart [class.hidden]="activityDisplayType != 'TRACE'" type="line" [config]="USAGE_INSTANCE_TRACE_BY_PERIOD_LINE"
                [data]="instanceTraceByPeriod" [isLoading]="isLoading"></chart>
-        <chart *ngSwitchCase="'ATTEMPT'" type="line" [config]="ATTEMPT_INSTANCE_TRACE_BY_PERIOD_LINE"
+        <chart [class.hidden]="activityDisplayType != 'ATTEMPT'" type="line" [config]="ATTEMPT_INSTANCE_TRACE_BY_PERIOD_LINE"
                [data]="instanceTraceByPeriod" [isLoading]="isLoading"></chart>
-        <report-table *ngSwitchCase="'REPORT'" style="height: 252px;" [data]="logEntryByPeriod" (onClick)="open($event)"></report-table>
+        <report-table [class.hidden]="activityDisplayType != 'REPORT'" style="height: 252px;" [data]="logEntryByPeriod" (onClick)="open($event)"></report-table>
       </div>
     </div>
   </div>

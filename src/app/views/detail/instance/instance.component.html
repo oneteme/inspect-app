@@ -68,7 +68,7 @@
             </div>
         </div>
     </div>
-    <div class="tab-content" >
+    <div class="tab-content">
         <div *ngIf="tabs[selectedTabIndex]?.type === 'instances'" class="tab-panel">
             <app-instance-table [requests]="allInstance"[mainId]="instance?.id">
             </app-instance-table>

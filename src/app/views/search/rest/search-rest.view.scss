@@ -52,55 +52,11 @@
   }
 }
 
-.header-container {
-  padding: 14px 16px;
+.filter-container {
+  margin-left: auto;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 32px;
-  height: 64px;
-
-  .title-container {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-
-    .title-icon {
-      font-size: 40px;
-      width: 40px;
-      height: 40px;
-      color: #3b82f6;
-      flex-shrink: 0;
-    }
-
-    .title-content {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-
-      .title-label {
-        font-size: 24px;
-        font-weight: 700;
-        color: #1e293b;
-        margin: 0;
-        line-height: 1.2;
-      }
-
-      .subtitle-label {
-        font-size: 14px;
-        color: #64748b;
-        margin: 0;
-        font-weight: 500;
-      }
-    }
-  }
-
-  .filter-container {
-    margin-left: auto;
-    display: flex;
-    align-items: center;
-    gap: 0.5em;
-  }
+  gap: 0.5em;
 }
 
 .additional-selection {

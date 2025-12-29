@@ -100,7 +100,7 @@
 
 <mat-menu #menuStatistic="matMenu">
   <a mat-menu-item [routerLink]="['/dashboard', 'server', instance?.name]" [queryParams]="{api_name: session?.name, env: instance?.env}"><mat-icon class="material-symbols-outlined">call_received</mat-icon>Appel REST</a>
-  <a mat-menu-item [routerLink]="['/dashboard', 'user', session?.user]"><mat-icon class="material-symbols-outlined">person</mat-icon>Utilisateur</a>
+  <a mat-menu-item [routerLink]="['/dashboard', 'user', session?.user]" [ngStyle]="{'pointer-events': !session?.user ? 'none' : ''}" [disabled]="!session?.user"><mat-icon class="material-symbols-outlined">person</mat-icon>Utilisateur</a>
 </mat-menu>
 
 <mat-menu #menuServer="matMenu">

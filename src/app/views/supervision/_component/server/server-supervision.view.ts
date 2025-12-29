@@ -9,7 +9,6 @@ import {ChartProvider, field} from "@oneteme/jquery-core";
 import {InstanceTraceService} from "../../../../service/jquery/instance-trace.service";
 import {DatePipe, DecimalPipe, Location} from "@angular/common";
 import {MatDialog} from "@angular/material/dialog";
-import {StacktraceDialogComponent} from "../stacktrace-dialog/stacktrace-dialog.component";
 import {DateAdapter, MAT_DATE_FORMATS} from "@angular/material/core";
 import {CustomDateAdapter} from "../../../../shared/material/custom-date-adapter";
 import {MY_DATE_FORMATS} from "../../../../shared/shared.module";
@@ -20,6 +19,9 @@ import {ConfigDialogComponent} from "../config-dialog/config-dialog.component";
 import {InstanceService} from "../../../../service/jquery/instance.service";
 import {ServerInstanceSelectorDialogComponent} from "./server-instance-selector-dialog/server-instance-selector-dialog.component";
 import {MatSnackBar} from "@angular/material/snack-bar";
+import {
+  StacktraceDialogComponent
+} from "../../../../shared/_component/exception-display/stacktrace-dialog/stacktrace-dialog.component";
 
 @Component({
   templateUrl: './server-supervision.view.html',
@@ -410,7 +412,6 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
         this.reloadInstances = !!(this.params.env && queryParams.env && this.params.env !== queryParams.env);
         this.params.instance = params.instance;
         this.params.env = queryParams.env;
-        console.log(params.env)
         this.params.start = new Date(queryParams.start);
         this.params.end = new Date(queryParams.end);
         this.patchDateValue(this.params.start, this.params.end);
@@ -508,7 +509,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
 
   open(row: any) {
     this._dialog.open(StacktraceDialogComponent, {
-      data: row
+      data: { message: row.message, stackTraceRows: row.stacktrace }
     });
   }
 
@@ -540,12 +541,6 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     this.formGroup.patchValue({
       server: server
     }, { emitEvent: false });
-  }
-
-  openConfig() {
-    this._dialog.open(ConfigDialogComponent, {
-      data: this.instance.configuration
-    });
   }
 
   openInstanceSelector() {
