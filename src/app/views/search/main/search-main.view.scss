@@ -1,46 +1,65 @@
-.header-filter {
-    margin-left: auto;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5em;
-}   
-
-table 
-{
-    table-layout: fixed;
-}
-
-.example-container {
-    position: relative;
-}
-
-.example-table-container {
-    max-height: calc(100vh - 96px - 56px - 48px - 28px);
-    overflow: auto;
-}
-
 .searchwidth {
-    flex-grow: 1;
+  display: flex;
+  margin-bottom: 0.5em;
 }
 
+.table-container {
+  .table-wrapper {
+    max-height: calc(100vh - 96px - 56px - 48px - 64px);
+  }
+}
 
-.mat-mdc-row .mat-mdc-cell {
+.mat-mdc-row {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+  &:hover {
     cursor: pointer;
+    background-color: rgba(63, 81, 181, 0.04);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+
+    .mat-mdc-cell {
+      background-color: transparent;
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  }
 }
 
-.mat-mdc-row:hover .mat-mdc-cell {
-    background-color: rgb(206, 206, 206);
+.mat-mdc-cell {
+  &.success {
+    border-left: 3px solid #4caf50;
+    background: linear-gradient(90deg, rgba(76, 175, 80, 0.08) 0%, transparent 100%);
+  }
+
+  &.warning {
+    border-left: 3px solid orange;
+    background: linear-gradient(90deg, rgba(255, 165, 0, 0.08) 0%, transparent 100%);
+  }
+
+  &.fail {
+    border-left: 3px solid #f44336;
+    background: linear-gradient(90deg, rgba(244, 67, 54, 0.08) 0%, transparent 100%);
+  }
+
+  &.in-progress {
+    border-left: 3px solid #0080ff;
+    background: linear-gradient(90deg, rgba(255, 152, 0, 0.08) 0%, transparent 100%);
+    animation: pulse 2s ease-in-out infinite;
+  }
 }
 
-td {
-    &.success {
-        border-left: 4px solid green;
-    }
-    &.fail {
-        border-left: 4px solid red;
-    }
-    &.in-progress {
-        border-left: 4px solid #2196F3;
-    }
+.filter-container {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+}
+
+.additional-selection {
+  opacity: 0.75;
+  font-size: 0.75em;
 }

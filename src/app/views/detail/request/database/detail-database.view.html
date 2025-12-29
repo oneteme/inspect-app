@@ -1,84 +1,74 @@
-<div *ngIf="!isLoading && request && instance" class="header-card">
-  <mat-card style="width: 50vw; min-width: 50vw;"
-            [ngClass]="{'success': request.end && !request.failed,
+<div *ngIf="!isLoading && request && instance">
+  <div  class="header-card">
+    <mat-card style="width: 60vw; min-width: 60vw;"
+              [ngClass]="{'success': request.end && !request.failed,
                           'fail': request.end && request.failed,
                           'in-progress': !request.end}">
-    <mat-card-title>
-      <label-icon [icon]="REQUEST_TYPE['jdbc'].icon">
-        <div style="display: flex; gap: 0.5em; align-items: center;">
-          {{ 'jdbc:' + (request.productName ? request.productName.toLowerCase() : 'N/A') + '://' + (request.host ?
-          request.host : 'N/A') + (request.port == -1 ? '' : ':' + request.port) + '/' + (request.name ? request.name :
-          'N/A')}}
+      <mat-card-title>
+        <div style="display: flex; gap: 0.5em; align-items: center; width: 85%">
+          <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['jdbc'].icon }}</mat-icon>
+          <div class="ellipsis"
+               [matTooltip]="'jdbc:' + (request.productName ? request.productName.toLowerCase() : 'N/A') + '://' + (request.host ?
+                            request.host : 'N/A') + (request.port == -1 ? '' : ':' + request.port) + '/' + (request.name ? request.name :
+                            'N/A')">
+            {{ 'jdbc:' + (request.productName ? request.productName.toLowerCase() : 'N/A') + '://' + (request.host ?
+              request.host : 'N/A') + (request.port == -1 ? '' : ':' + request.port) + '/' + (request.name ? request.name :
+              'N/A')}}
+          </div>
           <mat-spinner *ngIf="!request.end" [diameter]="18"></mat-spinner>
         </div>
-      </label-icon>
-      <div class="right">
-        <button mat-icon-button [disabled]="sessionParent == null"
-                [ngStyle]="sessionParent == null ? {'pointer-events': 'none'}: ''" (click)="navigate($event,'parent')"
-                matTooltip="Détail de l'appel parent">
-          <mat-icon>move_up</mat-icon>
-        </button>
-      </div>
-    </mat-card-title>
+        <div class="right">
+          <button mat-icon-button [disabled]="sessionParent == null"
+                  [ngStyle]="{'pointer-events': sessionParent == null ? 'none' : ''}" (click)="navigate($event,'parent')"
+                  matTooltip="Détail de l'appel parent">
+            <mat-icon>move_up</mat-icon>
+          </button>
+        </div>
+      </mat-card-title>
 
-    <mat-card-content>
-      <div style="display: flex; align-items: center; gap: .5em; color: red; font-weight: 500; margin-top: 0.5em;"
-           *ngIf="exception"
-           [matTooltip]="exception.type">
-        <mat-icon style="width: 28px" class="material-symbols-outlined">warning</mat-icon>
-        <div class="ellipsis">{{exception.message}}</div>
+      <mat-card-content>
+        <exception-display [exception]="exception"></exception-display>
+      </mat-card-content>
+      <mat-card-footer>
+        <mat-icon class="material-symbols-outlined" style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
+        {{request.user || "N/A"}} le {{( request.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }} en <b>{{{ start: request.start, end: request.end } | duration}}</b>
+      </mat-card-footer>
+    </mat-card>
+    <app-server-card style="width: 40vw"
+                     (onClick)="navigateOnStatusIndicator($event)"
+                     [menu]="menuServer"
+                     [instance]="instance"></app-server-card>
+  </div>
+  <div class="tabs-container">
+    <!-- Navigation verticale des onglets -->
+    <div class="vertical-tabs">
+      <div *ngFor="let tab of tabs; let i = index"
+           class="tab-button"
+           [class.active]="selectedTabIndex === i"
+           [class.hidden]="!tab.visible"
+           (click)="selectedTabIndex = i">
+        <mat-icon class="material-symbols-outlined">{{ tab.icon }}</mat-icon>
+        <span class="tab-label">{{ tab.label }}</span>
+        <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
       </div>
-    </mat-card-content>
-    <mat-card-footer>
-      <mat-icon class="material-symbols-outlined" style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
-      <div style="display: flex; align-items: center; gap: 0.5em">
-        {{request.user || "N/A"}} le {{( request.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }} en <span
-              style="font-weight: bold">{{{ start: request.start, end: request.end } | duration}}</span>
+    </div>
+
+    <div class="tab-content">
+      <div *ngIf="tabs[selectedTabIndex]?.type === 'stage'" class="tab-panel">
+        <request-stage-table [requests]="stages">
+        </request-stage-table>
       </div>
-      <div class="right">
-        {{ request.productName || "N/A"}} v.{{ request.productVersion || "N/A"}}
+      <div *ngIf="tabs[selectedTabIndex]?.type === 'timeline'" class="tab-panel">
+        <app-timeline [options]="options"
+                      [groups]="dataGroups"
+                      [items]="dataItems"
+                      [displayHeader]="false"
+                      (onTimelineCreated)="onTimelineCreate($event)">
+        </app-timeline>
       </div>
-    </mat-card-footer>
-  </mat-card>
-  <mat-card style="width: 50vw;">
-    <mat-card-title>
-      <label-icon icon="widgets">
-        {{instance.name}}
-        <span style="font-size: 12px; font-style: italic; font-weight: normal; margin-left: 0.5em" [matTooltip]="instance.collector">{{instance.version}}</span>
-      </label-icon>
-      <div class="right">
-        <button mat-icon-button [matMenuTriggerFor]="menuServer">
-          <mat-icon>more_vert</mat-icon>
-        </button>
-      </div>
-    </mat-card-title>
-    <mat-card-content style="margin-left: 1em;">
-      <label-icon [icon]="'data_table'">
-        <div style="font-weight: 500; font-size: 14px;">
-          {{instance.os}}
-        </div>
-        <div style="font-style: italic; font-size: 12px;">
-          {{instance.re}}
-        </div>
-      </label-icon>
-    </mat-card-content>
-    <mat-card-footer>
-      <label-icon icon="person" [iconOutlined]="true" [size]="20">
-        {{instance.user || "N/A"}}
-        le {{ (instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
-      </label-icon>
-      <div *ngIf="instance.end" class="right" [matTooltip]="((instance.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')">
-        en <span style="font-weight: bold">{{((instance.end - instance.instant) | duration)}}</span>
-      </div>
-    </mat-card-footer>
-  </mat-card>
+    </div>
+  </div>
 </div>
-
-<app-timeline [options]="options"
-              [groups]="dataGroups"
-              [items]="dataItems"
-              [displayHeader]="false">
-</app-timeline>
 
 <div *ngIf="!isLoading && !request && !instance" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">
   <h2>
@@ -94,5 +84,4 @@
 <mat-menu #menuServer="matMenu">
   <a mat-menu-item [routerLink]="['/session', instance?.name, 'dump']" [queryParams]="{env: instance?.env, date: getDate(request?.start * 1000).toISOString()}"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
   <a mat-menu-item [routerLink]="['/dashboard', 'server', instance?.name]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur</a>
-  <a mat-menu-item [routerLink]="['/supervision', instance?.id]" [queryParams]="{start: getDate((request?.start * 1000) - 43200000).toISOString(), end: getDate((request?.start * 1000) + 43200000).toISOString(), env: instance?.env}"><mat-icon class="material-symbols-outlined">browse_activity</mat-icon>Supervision</a>
 </mat-menu>

@@ -1,75 +1,87 @@
-<div *ngIf="useFilter" style="display: flex; justify-content: space-between; margin-bottom: 0.5em;" >
-    <mat-form-field  appearance="outline" class="searchwidth md-3 no-subscript">
-        <input [disabled]="isLoading"  matInput #input (keyup)="applyFilter($event)" placeholder="Filtrer..." autocomplete="off">
-        <mat-icon matSuffix>search</mat-icon>
-    </mat-form-field>
-</div>
-<div class="mat-elevation-z8">
-  <div class="table-container">
+ <mat-form-field *ngIf="useFilter" appearance="outline" class="searchwidth md-3 no-subscript">
+      <input [disabled]="isLoading" [(ngModel)]="filterValue"   matInput #input (keyup)="applyFilter($event)" placeholder="Filtrer..." autocomplete="off">
+      <mat-icon matSuffix>search</mat-icon>
+ </mat-form-field>
 
+<div class="table-container">
+  <div class="table-wrapper">
+    <table mat-table [dataSource]="dataSource" #sort="matSort" matSort
+           matSortActive="start" matSortDirection="desc">
+      <ng-container matColumnDef="host">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          <div class="header-cell-content">
+            <mat-icon class="material-symbols-outlined">dns</mat-icon>
+            Hôte
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let element"
+            [ngClass]="{'success': element.end && !element.failed,
+                        'fail': element.end && element.failed,
+                        'in-progress': !element.end}" [matTooltip]="element.exception ? (element.exception?.type | exceptionType) + ' ' + element.exception?.message : ''">
+          <div class="cell-primary">{{element['host'] || 'N/A'}}</div>
+        </td>
+      </ng-container>
 
-    <table mat-table [dataSource]="dataSource" style="width:100%;" #sort="matSort" matSort
-        matSortActive="start" matSortDirection="desc" class="fullwidthFixed">
+      <ng-container matColumnDef="schema">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          <div class="header-cell-content">
+            <mat-icon class="material-symbols-outlined">database</mat-icon>
+            Base de données
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let element">
+          <span style="font-weight: bold;">{{element.command | typeColumnFormat}}</span>
+          <div class="cell-primary" style="overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+            {{element["schema"] || element["name"] || 'N/A'}}
+          </div>
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef style="width:1%"></th>
-            <td [ngClass]="{'success': element.end && !element.failed,
-                          'fail': element.end && element.failed,
-                          'in-progress': !element.end}" mat-cell *matCellDef="let element"
-                [matTooltip]="(element.exception?.type | exceptionType) + ' ' + (element.exception?.message | truncString: 100)" matTooltipPosition="after">
-            </td>
-        </ng-container>
+      <ng-container matColumnDef="start">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          <div class="header-cell-content">
+            <mat-icon class="material-symbols-outlined">schedule</mat-icon>
+            Début
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let element">
+          {{ (element.start*1000 |date:'dd/MM/yyyy')}}
+          <br>
+          {{ (element.start*1000 |date:'HH:mm:ss.SSS')}}
+        </td>
+      </ng-container>
 
-        <ng-container matColumnDef="host">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:50%"> Hôte </th>
-            <td mat-cell *matCellDef="let element" [matTooltip]="element['productVersion']" matTooltipPosition="below">
-              {{element["host"] || 'N/A'}}
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="schema">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:20%"> BDD </th>
-            <td mat-cell *matCellDef="let element">
-                <span style="font-weight: bold;">{{element.command | typeColumnFormat}}</span>
-                <br>
-                {{element["schema"] || element["name"] || 'N/A'}}
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="start">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:20%"> Début </th>
-            <td mat-cell *matCellDef="let element">
-              {{ (element.start*1000 |date:'dd/MM/yyyy')}}
-              <br>
-              {{ (element.start*1000 |date:'HH:mm:ss.SSS')}}
-            </td>
-        </ng-container>
-
-        <ng-container matColumnDef="duree">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:10%"> Durée </th>
-            <td mat-cell *matCellDef="let element">
-              <mat-spinner *ngIf="!element.end" [diameter]="16"></mat-spinner>
-              <div *ngIf="element.end" [matTooltip]="element.end * 1000 | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr'">{{ { start: element.start, end: element.end } | duration }}</div>
-            </td>
-        </ng-container>
-        <tr mat-header-row *matHeaderRowDef="displayedColumns;sticky: true"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectedQuery($event, row.id)"></tr>
-        <tr class="mat-row" *matNoDataRow>
-            <td class="mat-cell" colspan="7">
-                <div *ngIf="!isLoading" class="loading-row">
-                <span class="material-symbols-outlined">
-                  info
-                </span>
-                    <span style="font-style: italic;">Aucun résultat</span>
-                </div>
-                <div *ngIf="isLoading" class="loading-row">
-                  <span style="display: flex; flex-direction: column; font-style: italic;">
-                    Chargement en cours...
-                    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-                  </span>
-                </div>
-            </td>
-        </tr>
+      <ng-container matColumnDef="duree">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          <div class="header-cell-content">
+            <mat-icon class="material-symbols-outlined">timer</mat-icon>
+            Durée
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let element">
+          <div *ngIf="!element.end" style="display: flex; align-items: center; gap: 6px;">
+            <mat-spinner [diameter]="14"></mat-spinner>
+            <span class="cell-secondary">En cours...</span>
+          </div>
+          <div *ngIf="element.end" class="cell-primary" [matTooltip]="element.end * 1000 | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr'">
+            {{ { start: element.start, end: element.end } | duration }}
+          </div>
+        </td>
+      </ng-container>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns;sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectedQuery($event, row.id)"></tr>
+      <tr class="mat-row" *matNoDataRow>
+        <td class="mat-cell" [attr.colspan]="displayedColumns.length">
+          <div *ngIf="!isLoading" class="empty-state-inline">
+            <mat-icon class="material-symbols-outlined">cloud_off</mat-icon>
+            <span>Aucun résultat pour cette recherche</span>
+          </div>
+          <div *ngIf="isLoading" class="loading-state-inline">
+            <mat-spinner diameter="40"></mat-spinner>
+            <span>Chargement des requêtes...</span>
+          </div>
+        </td>
+      </tr>
     </table>
   </div>
   <mat-paginator #paginator [pageSize]="pageSize || 3"

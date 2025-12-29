@@ -11,6 +11,7 @@ import {ExceptionInfo, HttpRequestStage, InstanceEnvironment, RestRequest} from 
 import {DataGroup, DataItem, TimelineOptions} from "vis-timeline";
 import {DatePipe} from "@angular/common";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
+import {TabData} from "../../session/_component/detail-session.component";
 
 @Component({
   templateUrl: './detail-rest.view.html',
@@ -26,14 +27,15 @@ export class DetailRestView implements OnInit, OnDestroy {
 
   private params: Partial<{idRest: string, env: string}> = {};
   REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
-
+  tabs: TabData[] = [];
+  selectedTabIndex: number = 0;
   options: TimelineOptions;
   dataItems: DataItem[];
   dataGroups: DataGroup[];
 
   request: RestRequest;
   stages: HttpRequestStage[];
-  exception: ExceptionInfo;
+  exception: Partial<ExceptionInfo>;
   instance: InstanceEnvironment;
 
   isLoading: boolean;
@@ -51,6 +53,29 @@ export class DetailRestView implements OnInit, OnDestroy {
         this.getRequest();
       }
     });
+  }
+
+  initTabs() {
+    this.tabs = [
+      {
+        label: 'Stages',
+        icon: 'view_object_track',
+        count: this.stages.length || 0,
+        visible: true,
+        type: 'stage',
+        hasError: false,
+        errorCount: 0
+      },
+      {
+        label: 'Chronologie',
+        icon: 'view_timeline',
+        count: 0,
+        visible: true,
+        type: 'timeline',
+        hasError: false,
+        errorCount: 0
+      }
+    ]
   }
 
   ngOnDestroy() {
@@ -83,7 +108,8 @@ export class DetailRestView implements OnInit, OnDestroy {
         this.instance = result.instance;
         this.request = result.request;
         this.stages = result.stages;
-        this.exception = result.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
+        this.exception = result.stages.find(s => s.exception?.type || s.exception?.message)?.exception || { message: result.request.bodyContent };
+        this.initTabs();
         this.createTimeline();
       }
     });
@@ -116,7 +142,7 @@ export class DetailRestView implements OnInit, OnDestroy {
       type: "background"
     });
 
-    let groups: any[] = this.stages.map((a:HttpRequestStage, i:number) => ({ id: i, content: a?.name,treeLevel: 2}));
+    let groups: any[] = this.stages.map((a:HttpRequestStage, i:number) => ({ id: i, content: a?.name, treeLevel: 2}));
     groups.splice(0, 0, {id: 'parent', content: this.request.threadName, treeLevel: 1, nestedGroups:groups.map(g=>(g.id))});
     let padding = (Math.ceil((timelineEnd - timelineStart)*0.01));
     this.dataItems = items;
@@ -136,11 +162,20 @@ export class DetailRestView implements OnInit, OnDestroy {
     return Utils.getSessionUrl(this.request);
   }
 
+  navigateOnStatusIndicator(event: MouseEvent) {
+    var date = new Date(this.request.start * 1000);
+    this._router.navigateOnClick(event, ['/supervision', this.instance.type.toLowerCase(), this.instance.id], { queryParams: {start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString(), env: this.instance?.env} });
+  }
+
   navigate(event: MouseEvent, targetType: string, extraParam?: string) {
     let params: any[] = [];
     switch (targetType) {
       case "parent":
         params.push('session', this.sessionParent.type.toLowerCase(), this.sessionParent.id);
+        break;
+      case "remote":
+        params.push('session', 'rest', this.request.id);
+        break;
     }
     if (event.ctrlKey) {
       this._router.open(`#/${params.join('/')}`, '_blank')

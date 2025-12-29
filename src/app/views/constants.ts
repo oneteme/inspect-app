@@ -498,23 +498,22 @@ export class Constants {
         }
     };
 
-    static readonly MAPPING_TYPE: {[key: string]: {title: string, icon: string}} = {
+    static readonly MAPPING_TYPE: {[key: string]: Partial<{title: string, subtitle: string, icon: string}>} = {
         request: {title: 'Requêtes', icon: 'call_made'},
-        rest: {title: 'Appels reçus', icon: 'call_received'},
-        batch: {title: 'Exécution de Batch', icon: 'manufacturing'},
-        test: {title: 'Exécution de Test', icon: 'rule'},
-        startup: {title: 'Lancement de Serveur', icon: 'restart_alt'},
-        view: {title: 'Navigation', icon: 'ads_click'},
+        rest: {title: 'Appels reçus', subtitle: 'Gestion et supervision des sessions', icon: 'call_received'},
+        batch: {title: 'Exécution de Batch', subtitle: 'Gestion et supervision des sessions', icon: 'manufacturing'},
+        test: {title: 'Exécution de Test', subtitle: 'Gestion et supervision des sessions', icon: 'rule'},
+        startup: {title: 'Lancement de Serveur', subtitle: 'Gestion et supervision des sessions', icon: 'restart_alt'},
+        view: {title: 'Navigation', subtitle: 'Gestion et supervision des sessions', icon: 'ads_click'},
         dashboard: {title:'Page d\'Accueil', icon: 'home'},
-        deploiment: {title:'Versions déployées', icon:'deployed_code'},
+        deploiment: {title:'Versions déployées', subtitle: 'Gestion et supervision des deploiements', icon:'deployed_code'},
     }
-
-    static readonly REQUEST_MAPPING_TYPE: {[key: string]: {title: string, icon: string}} = {
-        rest: {title: 'HTTP', icon: 'public'},
-        jdbc: {title: 'BDD', icon: 'database'},
-        ftp: {title: 'FTP', icon: 'smb_share'},
-        smtp: {title: 'SMTP', icon: 'outgoing_mail'},
-        ldap: {title: 'LDAP', icon: 'user_attributes'}
+    static readonly REQUEST_MAPPING_TYPE: {[key: string]: Partial<{title: string, subtitle: string, icon: string}>} = {
+        rest: {title: 'HTTP', subtitle: 'Gestion et supervision des requêtes', icon: 'public'},
+        jdbc: {title: 'BDD', subtitle: 'Gestion et supervision des requêtes', icon: 'database'},
+        ftp: {title: 'FTP', subtitle: 'Gestion et supervision des requêtes', icon: 'smb_share'},
+        smtp: {title: 'SMTP', subtitle: 'Gestion et supervision des requêtes', icon: 'outgoing_mail'},
+        ldap: {title: 'LDAP', subtitle: 'Gestion et supervision des requêtes', icon: 'user_attributes'},
     }
 
 
@@ -525,7 +524,7 @@ export class Constants {
         height: 100,
         continue: true,
         series: [
-            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions REST', color: "#ff0000" },
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions REST', color: "#ff0000" },
         ],
         options: {
             chart: {
@@ -562,7 +561,7 @@ export class Constants {
         height: 100,
         continue: true,
         series: [
-            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions JDBC', color: "#ff0000" }
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions JDBC', color: "#ff0000" }
         ],
         options: {
             chart: {
@@ -599,7 +598,7 @@ export class Constants {
         height: 100,
         continue: true,
         series: [
-            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions FTP', color: "#ff0000"}
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions FTP', color: "#ff0000"}
         ],
         options: {
             chart: {
@@ -634,7 +633,7 @@ export class Constants {
         height: 100,
         continue: true,
         series: [
-            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions SMTP', color: "#ff0000" }
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions SMTP', color: "#ff0000" }
         ],
         options: {
             chart: {
@@ -669,7 +668,7 @@ export class Constants {
         height: 100,
         continue: true,
         series: [
-            { data: { x: field('date'), y: field('perc') }, name: 'Nombre d\'exceptions LDAP', color: "#ff0000" }
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions LDAP', color: "#ff0000" }
         ],
         options: {
             chart: {
@@ -741,7 +740,7 @@ export class FilterConstants {
             //{ key: 'status', label: 'Status', type: 'select', row: 3, col: 1, endpoint: "session/rest", query: { 'column.distinct': 'status:status', 'order': 'status.asc' }, op: Operation.eq },
             { key: 'method', label: 'Method', type: 'select', width: 20, row: 1, col: 1, endpoint: "session/rest",  query: { 'column.distinct': 'method:method', 'order': 'method.asc' }, op: Operation.eq },
             { key: 'path', label: 'Path', type: 'input', row: 1, col: 2, op: Operation.like },
-            { key: 'apiName', label: 'Nom API', type: 'select', row: 3, col: 2, endpoint: "session/rest", query: { 'column.distinct': 'api_name', 'api_name.notNull': '', 'order': 'api_name.asc' }, op: Operation.eq  },
+            { key: 'apiname', label: 'Nom API', type: 'select', row: 3, col: 2, endpoint: "session/rest", query: { 'column.distinct': 'api_name:apiname', 'api_name.notNull': '', 'order': 'api_name.asc' }, op: Operation.eq  },
             { key: 'user', label: 'Utilisateur', type: 'select', row: 3, col: 3, endpoint: "session/rest", query: { 'column.distinct': 'user', 'user.notNull': '', 'order': 'user.asc' }, op: Operation.eq  }
             // new Filter("err_type", "Exception", 'select', 50, "/stat/apisession", null, null, { 'column.distinct': 'err_type:err_type', 'order': 'err_type.asc' }),
             // new Filter("address", "adresse", 'input', 50),

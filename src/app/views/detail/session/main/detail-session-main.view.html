@@ -1,35 +1,30 @@
 <div *ngIf="session && instance">
     <div class="header-card">
-        <mat-card style="width: 50vw; min-width: 50vw;"
+      <mat-card style="width: 60vw; min-width: 60vw;"
                   [ngClass]="{'success': session.end && (!session.exception?.type || !session.exception?.message),
                               'fail': session.end && (session.exception?.type || session.exception?.message),
                               'in-progress': !session.end}">
             <mat-card-title>
-                <label-icon [icon]="MAPPING_TYPE[type]?.icon">
-                  <div style="display: flex; gap: 0.5em; align-items: center;">
-                    {{ session.name || 'N/A' }}
-                    <mat-spinner *ngIf="!session.end" [diameter]="18"></mat-spinner>
-                  </div>
-                </label-icon>
-                <div class="right">
-                  <button mat-icon-button [matMenuTriggerFor]="menuEndPoint">
-                    <mat-icon>more_vert</mat-icon>
-                  </button>
+              <div style="display: flex; gap: 0.5em; align-items: center; width: 85%">
+                <mat-icon class="material-symbols-outlined">{{MAPPING_TYPE[type]?.icon}}</mat-icon>
+                <div class="ellipsis" [matTooltip]="session.name">
+                  {{ session.name || 'N/A' }}
                 </div>
+                <mat-spinner *ngIf="!session.end" [diameter]="18"></mat-spinner>
+              </div>
+              <div class="right">
+                <button mat-icon-button [matMenuTriggerFor]="menuEndPoint">
+                  <mat-icon>more_vert</mat-icon>
+                </button>
+              </div>
             </mat-card-title>
             <mat-card-content>
-                <span *ngIf="session.location">
-                    <a class="url" [href]="session.location" target="_blank">
-                        {{ session.location }}
-                    </a>
-                </span>
-
-                <div style="display: flex; align-items: center; gap: 0.5em; color: red; font-weight: 500; margin-top: 0.5em;"
-                     *ngIf="session.exception?.type || session.exception?.message"
-                     [matTooltip]="session.exception?.type">
-                    <mat-icon class="material-symbols-outlined" style="overflow: initial !important; width: 28px; height: 28px;">warning</mat-icon>
-                    <div class="ellipsis">{{ session.exception?.message || session.exception?.type }}</div>
-                </div>
+              <div class="ellipsis" [matTooltip]="session.location" *ngIf="session.location">
+                  <a class="url" [href]="session.location" target="_blank">
+                      {{ session.location }}
+                  </a>
+              </div>
+              <exception-display [exception]="session.exception"></exception-display>
             </mat-card-content>
             <mat-card-footer>
               <label-icon icon="person" [size]="20">
@@ -41,37 +36,10 @@
               </div>
             </mat-card-footer>
         </mat-card>
-        <mat-card style="width: 50vw;">
-            <mat-card-title>
-              <label-icon style="height: 48px" icon="widgets">
-                {{instance.name}}
-                <span style="font-size: 12px; font-style: italic; font-weight: normal; margin-left: 0.5em" [matTooltip]="instance.collector">{{instance.version}}</span>
-              </label-icon>
-              <div class="right">
-                <button mat-icon-button [matMenuTriggerFor]="menuServer">
-                  <mat-icon>more_vert</mat-icon>
-                </button>
-              </div>
-            </mat-card-title>
-            <mat-card-content style="margin-left: 1em;" >
-              <label-icon [icon]="instance.type==='CLIENT' ? 'devices' : 'data_table'">
-                <div style="font-weight: 500; font-size: 14px;">
-                  {{instance.os}}
-                </div>
-                <div style="font-style: italic; font-size: 12px;">
-                  {{instance.re}}
-                </div>
-              </label-icon>
-            </mat-card-content>
-            <mat-card-footer>
-              <label-icon icon="person" [size]="20">
-                {{instance.user || "N/A"}} le {{ (instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
-              </label-icon>
-              <div *ngIf="instance.end" class="right" [matTooltip]="((instance.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')">
-                en <span style="font-weight: bold">{{((instance.end - instance.instant) | duration)}}</span>
-              </div>
-            </mat-card-footer>
-        </mat-card>
+      <app-server-card style="width: 40vw"
+                       (onClick)="navigateOnStatusIndicator($event)"
+                       [menu]="menuServer"
+                       [instance]="instance"></app-server-card>
     </div>
     <detail-session [session]="session" [completedSession]="completedSession" [instance]="instance"></detail-session>
 </div>
@@ -91,9 +59,9 @@
     <mat-icon class="material-symbols-outlined">lan</mat-icon>
     Arbre d'appels
   </a>
-  <a [routerLink]="['/analytic', session?.user]" [queryParams]="{env: instance?.env, date: getDate(session?.start * 1000, false).toISOString()}" [disabled]="!session?.user" *ngIf="session?.type == 'VIEW'" mat-menu-item><mat-icon class="material-symbols-outlined">web_traffic</mat-icon>Parcours Utilisateur</a>
+  <a [routerLink]="['/analytic', session?.user]" [queryParams]="{env: instance?.env, date: getDate(session?.start * 1000, false).toISOString()}" [ngStyle]="{'pointer-events': !session?.user ? 'none' : ''}" [disabled]="!session?.user" *ngIf="session?.type == 'VIEW'" mat-menu-item><mat-icon class="material-symbols-outlined">web_traffic</mat-icon>Parcours Utilisateur</a>
   <button *ngIf="session?.type == 'BATCH'" mat-menu-item [matMenuTriggerFor]="menuStatistic"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI</button>
-  <a [routerLink]="['/dashboard', 'user', session?.user]" [disabled]="!session?.user" *ngIf="session?.type != 'BATCH'" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Utilisateur</a>
+  <a [routerLink]="['/dashboard', 'user', session?.user]" [ngStyle]="{'pointer-events': !session?.user ? 'none' : ''}" [disabled]="!session?.user" *ngIf="session?.type != 'BATCH'" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Utilisateur</a>
 </mat-menu>
 
 <mat-menu #menuStatistic="matMenu">
@@ -105,5 +73,4 @@
   <a *ngIf="session?.type != 'VIEW'" [routerLink]="['/session', instance?.name, 'dump']" [queryParams] = "{env: instance?.env, date: getDate(session?.start * 1000, true).toISOString()}" mat-menu-item><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
   <a *ngIf="session?.type != 'VIEW'" [routerLink]="['/dashboard', 'server', instance?.name]" [queryParams]="{env: instance?.env}" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur</a>
   <a *ngIf="session?.type == 'VIEW'" [routerLink]="['/dashboard', 'client', instance?.name]" [queryParams]="{env: instance?.env}" mat-menu-item><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Client</a>
-  <a mat-menu-item [routerLink]="['/supervision', instance?.id]" [queryParams]="{start: getDate((session?.start * 1000) - 43200000, true).toISOString(), end: getDate((session?.start * 1000) + 43200000, true).toISOString(), env: instance?.env}"><mat-icon class="material-symbols-outlined">browse_activity</mat-icon>Supervision</a>
 </mat-menu>

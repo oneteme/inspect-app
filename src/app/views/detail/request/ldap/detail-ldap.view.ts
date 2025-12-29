@@ -1,7 +1,7 @@
 import {Component, inject, OnDestroy, OnInit} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
-import {DataGroup, DataItem, TimelineOptions} from "vis-timeline";
+import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
 import {catchError, combineLatest, finalize, forkJoin, of, Subject, switchMap, takeUntil} from "rxjs";
 import {DatePipe} from "@angular/common";
 import {app} from "../../../../../environments/environment";
@@ -15,7 +15,8 @@ import {
     InstanceEnvironment
 } from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
-import {getErrorClassName} from "../../../../shared/util";
+import {getDataForRange, getErrorClassName, showifnotnull} from "../../../../shared/util";
+import {TabData} from "../../session/_component/detail-session.component";
 
 @Component({
     templateUrl: './detail-ldap.view.html',
@@ -35,15 +36,18 @@ export class DetailLdapView implements OnInit, OnDestroy {
     options: TimelineOptions;
     dataItems: DataItem[];
     dataGroups: DataGroup[];
-
+    dataArray: any[] = [];
     request: DirectoryRequest;
     stages: DirectoryRequestStage[];
     exception: ExceptionInfo;
     instance: InstanceEnvironment;
     isLoading: boolean;
-
+    tabs: TabData[] = [];
+    selectedTabIndex: number = 0;
     sessionParent: { id: string, type: string };
     parentLoading: boolean = false;
+    timelineStart: number
+    timelineEnd: number
 
     ngOnInit() {
         combineLatest([
@@ -56,6 +60,29 @@ export class DetailLdapView implements OnInit, OnDestroy {
             }
         });
     }
+
+  initTabs() {
+    this.tabs = [
+      {
+        label: 'Stages',
+        icon: 'view_object_track',
+        count: this.stages.length || 0,
+        visible: true,
+        type: 'stage',
+        hasError: false,
+        errorCount: 0
+      },
+      {
+        label: 'Chronologie',
+        icon: 'view_timeline',
+        count: 0,
+        visible: true,
+        type: 'timeline',
+        hasError: false,
+        errorCount: 0
+      }
+    ]
+  }
 
     ngOnDestroy() {
         this.$destroy.next();
@@ -88,16 +115,17 @@ export class DetailLdapView implements OnInit, OnDestroy {
                 this.request = result.request;
                 this.stages = result.stages;
                 this.exception = result.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
+                this.initTabs();
                 this.createTimeline();
             }
         });
     }
 
     createTimeline() {
-        let timelineStart = Math.trunc(this.request.start * 1000);
-        let timelineEnd = this.request.end ? Math.trunc(this.request.end * 1000) : timelineStart + 3600000;
+        this.timelineStart = Math.trunc(this.request.start * 1000);
+        this.timelineEnd = this.request.end ? Math.trunc(this.request.end * 1000) : this.timelineStart + 3600000;
 
-        let items = this.stages.map((a: DirectoryRequestStage, i: number) => {
+        this.dataArray = this.stages.map((a: DirectoryRequestStage, i: number) => {
             let start= Math.trunc(a.start * 1000);
             let end = a.end? Math.trunc(a.end * 1000) : INFINITY;
             return {
@@ -105,36 +133,53 @@ export class DetailLdapView implements OnInit, OnDestroy {
                 start: start,
                 end: end,
                 type: end <= start ? 'point' : 'range',
-                content: '',
+                content: `<div class="content" style="display: flex; align-items: center; gap: 0.5rem; flex-direction: row;">
+                                <span class="command" style="color: #1565c0; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">${showifnotnull(a.command, ()=> a.command)}</span>
+                                <span>${showifnotnull(a.args, ()=> a.args.join(', '))}</span>
+                         </div>`,
                 className: `ldap ${getErrorClassName(a)}`,
-                title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end , 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform((end/1000) - (start/1000))})<br>
-                        <span>${a?.args ? a.args.join('</br>') : ''}</span>`
+                title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end , 'HH:mm:ss.SSS')}</span> (⏱ ${this.durationPipe.transform((end/1000) - (start/1000))})<br>
+                        <span>${showifnotnull(a.command, ()=> a.command)} ${showifnotnull(a.args, ()=> a.args.join(', '))}</span>`
             };
         });
-        items.splice(0,0,{
+        this.dataArray.splice(0,0,{
             title: "",
             group: 'parent',
-            start: timelineStart,
-            end: timelineEnd,
+            start: this.timelineStart,
+            end: this.timelineEnd,
             content: (this.request.host || 'N/A'),
             className: "overflow",
             type: "background"
         });
 
-        let groups: any[] = this.stages.map((a:DirectoryRequestStage, i:number) => ({ id: i, content: a?.name,treeLevel: 2}));
+        let groups: any[];
+        let padding = (Math.ceil((this.timelineEnd - this.timelineStart)*0.01));
+
+        if(this.dataArray.length > 50) {
+            this.timelineStart = this.dataArray[0].start;
+            this.timelineEnd = this.dataArray[50].start;
+            this.dataItems = getDataForRange(this.dataArray, this.timelineStart, this.timelineEnd);
+            groups = getDataForRange(this.dataArray, this.timelineStart, this.timelineEnd).map((a:DirectoryRequestStage, i:number) => ({ id: i, content: a?.name,treeLevel: 2}));
+        }else {
+            this.dataItems = this.dataArray
+            groups = this.stages.map((a:DirectoryRequestStage, i:number) => ({ id: i, content: a?.name,treeLevel: 2}));
+        }
         groups.splice(0, 0, {id: 'parent', content: this.request.threadName, treeLevel: 1, nestedGroups:groups.map(g=>(g.id))});
-        let padding = (Math.ceil((timelineEnd - timelineStart)*0.01));
-        this.dataItems = items;
         this.dataGroups = groups;
         this.options = {
-            start: timelineStart - padding,
-            end: timelineEnd + padding,
+            start: this.timelineStart - padding,
+            end: this.timelineEnd + padding,
             selectable : false,
             clickToUse: true,
             tooltip: {
                 followMouse: true
             }
         };
+    }
+
+    navigateOnStatusIndicator(event: MouseEvent) {
+      var date = new Date(this.request.start * 1000);
+      this._router.navigateOnClick(event, ['/supervision', this.instance.type.toLowerCase(), this.instance.id], { queryParams: {start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString(), env: this.instance?.env} });
     }
 
     navigate(event: MouseEvent, targetType: string, extraParam?: string) {
@@ -154,5 +199,15 @@ export class DetailLdapView implements OnInit, OnDestroy {
 
     getDate(start: number) {
         return new Date(start);
+    }
+
+    onTimelineCreate(timeline: Timeline) {
+        timeline.on('rangechanged', (props)=>{
+            let d = getDataForRange( this.dataArray, props.start.getTime(), props.end.getTime());
+            let groups:any[]= getDataForRange(this.stages.map(s=>({...s, start:Math.trunc(s.start*1000), end: s.end ? Math.trunc(s.end*1000 ) : INFINITY })), props.start.getTime() , props.end.getTime()).map((a: DirectoryRequestStage, i:number) => ({ id: `${d[i+1].group}`, content: a?.name, treeLevel: 2}))
+            groups.splice(0,0,{id:'parent', content: this.request.threadName,treeLevel: 1, nestedGroups:groups.map(g=>(g.id))})
+            timeline.setGroups(groups);
+            timeline.setItems(d);
+        });
     }
 }

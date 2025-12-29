@@ -39,10 +39,14 @@ body {
   white-space: nowrap;
 }
 
-.ellipsis:hover {
-  text-overflow: clip;
-  white-space:  pre-line;
-  word-break: break-all;
+.hidden {
+  display: none !important;
+}
+
+.mat-mdc-tooltip .mdc-tooltip__surface {
+  max-width: 400px;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 mat-form-field.no-subscript {
@@ -64,41 +68,79 @@ mat-form-field.no-subscript {
     color:#000000 !important;
 }
 
+.vis-cluster{
+  background-color: #e3f2fd!important;
+  border: 1px solid #2196f3!important;
+  color: #0d47a1!important;
+  font-weight: bold!important;
+}
+
+
 .vis-item {
 
+  &.instance {
+    background-color: #4FB7B3;
+    border-color: #4FB7B3;
+
+  }
+  &.instance-active {
+    background-color: #A8FBD3 !important;
+    border-color: #A8FBD3 !important;
+  }
   &.rest {
-    color: white !important;
     background-color: #3F51B5;
     border-color: #3F51B5;
   }
   &.ftp {
-    color: white !important;
     background-color: #2196F3;
     border-color: #2196F3;
   }
   &.ldap {
-    color: white !important;
     background-color: #00BCD4;
     border-color: #00BCD4;
   }
   &.smtp {
-    color: white !important;
     background-color: #9C27B0;
     border-color: #9C27B0;
   }
-  &.database {
-    color: white !important;
+  &.jdbc {
     background-color: #a5673f;
     border-color: #a5673f;
   }
   &.local {
-    color: white !important;
     background-color: #3b3b38;
     border-color: #3b3b38;
   }
   &.action {
     background-color: #FF6F61;
     border-color: #FF6F61;
+  }
+
+  &.log-info{
+    color: #2196f3;
+    background-color: #c1e4ff;
+    border-color: #71bcf7;
+  }
+
+  &.log-error{
+    color:  rgb(187, 33, 36);
+    background-color: #eed0d0;
+    border-color: #c35449;
+  }
+
+  &.log-warn{
+    color: rgb(249, 173, 78);
+    background-color: #ffe7cf;
+    border-color: #f5b87a;
+  }
+
+  &.stage-process{
+    background-color: rgba(217, 221, 250, 0.50) !important;
+    border: 1px solid rgb(217, 221, 250) !important;
+  }
+  &.stage-other-process{
+    background-color: rgba(217, 221, 250, 0.20) !important;
+    border: 1px solid rgb(217, 221, 250) !important;
   }
 }
 
@@ -114,10 +156,6 @@ mat-form-field.no-subscript {
 
 .vis-custom-time { // makes markers not draggable
   pointer-events: none;
-}
-
-.error {
-  color: #bb2124 !important;
 }
 
 .badge {
@@ -352,4 +390,15 @@ loading.hidden {
 
 .mat-mdc-form-field-icon-prefix>.mat-icon, .mat-mdc-form-field-icon-suffix>.mat-icon {
   padding: 0 12px 0 0 !important;
+}
+
+
+.vis-item.vis-range.in-progress {
+  background-image: repeating-linear-gradient(
+                  -45deg,
+                  transparent,
+                  transparent 5px,
+                  rgba(255, 255, 255, 0.1) 5px,
+                  rgba(255, 255, 255, 0.1) 10px
+  ) !important;
 }

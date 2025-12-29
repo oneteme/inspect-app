@@ -29,6 +29,12 @@ $inspect-dark-red: #880808;
   --inspect-dark-red: #{$inspect-dark-red};
 
   --mat-sidenav-content-background-color: white;
+
+  --mat-table-header-headline-weight: 600;
+  --mat-table-header-headline-size: 13px;
+  --mat-table-header-headline-color: #64748b;
+  --mat-table-row-item-label-text-size: 12px;
+
 }
 
 $blue: mat.define-palette((

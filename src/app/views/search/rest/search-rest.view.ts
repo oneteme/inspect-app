@@ -50,7 +50,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   MAPPING_TYPE = Constants.MAPPING_TYPE;
   filterConstants = FilterConstants;
   nameDataList: any[];
-  displayedColumns: string[] = ['status', 'app_name', 'method/path', 'query', 'start', 'durée', 'user'];
+  displayedColumns: string[] = ['app_name', 'method/path', 'start', 'durée', 'user'];
   dataSource: MatTableDataSource<RestSessionDto> = new MatTableDataSource();
   isLoading = true;
   serverNameIsLoading = true;
@@ -64,7 +64,8 @@ export class SearchRestView implements OnInit, OnDestroy {
   });
 
   filterTable = new Map<string, any>();
-  filters: {icon: string, label: string,color: string, value: any} [] =[{icon: 'warning', label: '5xx',color:'#bb2124', value:'5xx'}, {icon: 'error', label: '4xx',color:'#f9ad4e', value:'4xx'}, {icon: 'done', label: '2xx',color:'#22bb33', value:'2xx'}, {icon: 'pending', label: 'En cours',color:'#2196F3', value:'0'}]
+  filterValue: string = '';
+  filters: {icon: string, label: string, color: string, value: any} [] = [{icon: 'warning', label: '5xx', color:'#bb2124', value:'5xx'}, {icon: 'error', label: '4xx', color:'#f9ad4e', value:'4xx'}, {icon: 'done', label: '2xx', color:'#22bb33', value:'2xx'}, {icon: 'pending', label: 'En cours', color:'#2196F3', value:'lazy'}]
   advancedParams: Partial<{ [key: string]: any }> ={}
   queryParams: Partial<QueryParams> = {};
   focusFieldName: any;
@@ -110,6 +111,9 @@ export class SearchRestView implements OnInit, OnDestroy {
             }
             this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), params.env || app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server], null, !params.rangestatus ? []: Array.isArray(params.rangestatus) ? params.rangestatus : [params.rangestatus]);
           }
+           if(params.q){
+             this.queryParams.optional = { 'q': params.q }
+           }
           this.patchStatusValue(this.queryParams.rangestatus)
           this.patchServerValue(this.queryParams.appname);
           this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
@@ -160,7 +164,8 @@ export class SearchRestView implements OnInit, OnDestroy {
     let params = {
       'env': this.queryParams.env,
       'appname': this.queryParams.appname,
-      'rangestatus': this.queryParams.rangestatus,
+      'rangestatus': this.queryParams.rangestatus.filter(r => r != 'lazy'),
+      'lazy': !!this.queryParams.rangestatus.find(r => r == 'lazy'),
       'start': this.queryParams.period.start.toISOString(),
       'end': this.queryParams.period.end.toISOString()
     };
@@ -182,6 +187,13 @@ export class SearchRestView implements OnInit, OnDestroy {
             this.dataSource.sort = this.sort;
             this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
             this.dataSource.filterPredicate = this.filterPredicate;
+
+            // Appliquer le filtre q s'il existe
+            if (this.queryParams.optional?.['q']) {
+              this.filterValue = this.queryParams.optional['q'];
+              this.filterTable.set('filter', this.filterValue.trim().toLowerCase());
+            }
+
             this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
             this.dataSource.paginator.pageIndex = 0;
           }

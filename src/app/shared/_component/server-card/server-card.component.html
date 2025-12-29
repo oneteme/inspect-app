@@ -1,0 +1,36 @@
+<mat-card style="height: 100%">
+  <mat-card-title>
+    <label-icon icon="widgets">
+      <div style="display: flex; align-items: center; gap: 1.5em;">
+        {{_instance.name}}
+        <app-status-indicator *ngIf="!_isLoadingLastTrace"
+                              (onClick)="navigate($event)"
+                              [params]="{id: _instance.id, end: _instance.end, configuration: _instance.configuration, lastTrace: _lastTrace}"></app-status-indicator>
+      </div>
+    </label-icon>
+    <div class="right">
+      <button mat-icon-button [matMenuTriggerFor]="menu">
+        <mat-icon>more_vert</mat-icon>
+      </button>
+    </div>
+  </mat-card-title>
+  <mat-card-content style="margin-left: 1em;">
+    <label-icon [icon]="_instance.type === 'CLIENT' ? 'devices' : 'data_table'">
+      <div style="font-weight: 500; font-size: 14px;">
+        {{_instance.os}}
+      </div>
+      <div style="font-style: italic; font-size: 12px;">
+        {{_instance.re}}
+      </div>
+    </label-icon>
+  </mat-card-content>
+  <mat-card-footer>
+    <label-icon icon="person" [iconOutlined]="true" [size]="20">
+      {{_instance.user || "N/A"}}
+      le {{ (_instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
+    </label-icon>
+    <div *ngIf="_instance.end" class="right" [matTooltip]="((_instance.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')">
+      en <span style="font-weight: bold">{{((_instance.end - _instance.instant) | duration)}}</span>
+    </div>
+  </mat-card-footer>
+</mat-card>

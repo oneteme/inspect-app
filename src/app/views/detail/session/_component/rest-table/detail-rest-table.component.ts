@@ -18,10 +18,10 @@ export class DetailRestTableComponent implements OnDestroy {
     private readonly pipe = new DatePipe('fr-FR');
     private readonly $destroy = new Subject<void>();
 
-    displayedColumns: string[] = ['status', 'host', 'path', 'start', 'duree','remote'];
+    displayedColumns: string[] = ['host', 'path', 'start', 'duree','action'];
     dataSource: MatTableDataSource<RestRequestDto> = new MatTableDataSource();
-    filterTable :string;
-
+    filterTable =new Map<string, any>();
+    @Input() filterValue: string = '';
     @ViewChild('paginator', {static: true}) paginator: MatPaginator;
     @ViewChild('sort', {static: true}) sort: MatSort;
 
@@ -34,8 +34,13 @@ export class DetailRestTableComponent implements OnDestroy {
             this.dataSource.paginator = this.paginator;
             this.dataSource.sort = this.sort;
             this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
-            this.dataSource.filterPredicate = this.useFilter && this.filterPredicate;
-            this.dataSource.filter = JSON.stringify(this.filterTable);
+            if(this.useFilter){
+                this.dataSource.filterPredicate = this.filterPredicate;
+                if(this.filterValue){
+                    this.filterTable.set('filter', this.filterValue.trim().toLowerCase());
+                    this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
+                }
+            }
             this.dataSource.paginator.pageIndex = 0;
         }else{
             this.dataSource = new MatTableDataSource();
@@ -58,26 +63,32 @@ export class DetailRestTableComponent implements OnDestroy {
     }
 
     applyFilter(event: Event) {
-        this.filterTable = (event.target as HTMLInputElement).value.trim().toLowerCase();
-        this.dataSource.filter = JSON.stringify(this.filterTable);
+        const filterValue = (event.target as HTMLInputElement).value;
+        this.filterTable.set('filter', filterValue.trim().toLowerCase());
+        this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
         if (this.dataSource.paginator) {
             this.dataSource.paginator.firstPage();
         }
     }
 
     filterPredicate = (data: RestRequestDto, filter: string) => {
+        var map: Map<string, any> = new Map(JSON.parse(filter));
         let date = new Date(data.start*1000)
-        filter = JSON.parse(filter)
         let isMatch = true;
-        return  isMatch && (filter == '' ||
-            (data.host?.toLowerCase().includes(filter) ||
-                data.path?.toLowerCase().includes(filter) ||
-                data.status?.toString().toLowerCase().includes(filter) ||
-                this.pipe.transform(date,"dd/MM/yyyy").toLowerCase().includes(filter) ||
-                this.pipe.transform(date,"HH:mm:ss.SSS").toLowerCase().includes(filter) ||
-                data.exception?.message?.toString().toLowerCase().includes(filter) ||
-                data.exception?.type?.toString().toLowerCase().includes(filter)
-            ));
+        for (let [key, value] of map.entries()) {
+            if (key == 'filter') {
+                isMatch = isMatch && (value == '' ||
+                    (data.host?.toLowerCase().includes(value) ||
+                        data.path?.toLowerCase().includes(value) ||
+                        data.status?.toString().toLowerCase().includes(value) ||
+                        this.pipe.transform(date,"dd/MM/yyyy").toLowerCase().includes(value) ||
+                        this.pipe.transform(date,"HH:mm:ss.SSS").toLowerCase().includes(value) ||
+                        data.exception?.message?.toString().toLowerCase().includes(value) ||
+                        data.exception?.type?.toString().toLowerCase().includes(value)
+                    ));
+            }
+        }
+        return isMatch;
     };
 
     sortingDataAccessor = (row: any, columnName: string) => {

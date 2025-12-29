@@ -60,8 +60,6 @@ import {DetailTimelineComponent} from "./detail/session/_component/timeline/deta
 import {ActionTableComponent} from "./detail/session/_component/action-table/action-table.component";
 import {DetailRequestView} from "./detail/request/detail-request.view";
 import {DetailRestView} from "./detail/request/rest/detail-rest.view";
-import {SupervisionView} from "./supervision/supervision.view";
-import {StacktraceDialogComponent} from "./supervision/_component/stacktrace-dialog/stacktrace-dialog.component";
 import {ConfigDialogComponent} from "./supervision/_component/config-dialog/config-dialog.component";
 import {StatisticRequestView} from "./statistic/request/statistic-request.view";
 import {StatisticRequestJdbcComponent} from "./statistic/request/jdbc/statistic-request-jdbc.component";
@@ -69,8 +67,19 @@ import {StatisticRequestFtpComponent} from "./statistic/request/ftp/statistic-re
 import {StatisticRequestSmtpComponent} from "./statistic/request/smtp/statistic-request-smtp.component";
 import {StatisticRequestLdapComponent} from "./statistic/request/ldap/statistic-request-ldap.component";
 import {StatisticRequestHttpComponent} from "./statistic/request/http/statistic-request-http.component";
-
-
+import {ReportTableComponent} from "./supervision/_component/report-table/report-table.component";
+import {DetailStageTableComponent} from "./detail/session/_component/stage-table/detail-stage-table.component";
+import {RequestStageTableComponent} from "./detail/request/_component/stage-table/request-stage-table.component";
+import {RequestMailTableComponent} from "./detail/request/_component/mail-table/request-mail-table.component";
+import {ServerInstanceSelectorDialogComponent} from "./supervision/_component/server/server-instance-selector-dialog/server-instance-selector-dialog.component";
+import {ServerSupervisionView} from "./supervision/_component/server/server-supervision.view";
+import {ClientSupervisionView} from "./supervision/_component/client/client-supervision.view";
+import {
+  ClientInstanceSelectorDialogComponent
+} from "./supervision/_component/client/client-instance-selector-dialog/client-instance-selector-dialog.component";
+import { InstanceComponent } from './detail/instance/instance.component';
+import { InstanceTableComponent } from './detail/request/_component/instance-table/instance-table.component';
+import {DetailLogTableComponent} from "./detail/session/_component/log-table/detail-log-table.component";
 
 @NgModule({
   imports: [
@@ -113,7 +122,6 @@ import {StatisticRequestHttpComponent} from "./statistic/request/http/statistic-
     ArchitectureView,
     TreeView,
     DumpView,
-    SupervisionView,
     StatisticServerView,
     StatisticRequestView,
     StatisticRequestJdbcComponent,
@@ -135,8 +143,19 @@ import {StatisticRequestHttpComponent} from "./statistic/request/http/statistic-
     AnalyticView,
     ActionTableComponent,
     SearchRequestView,
-    StacktraceDialogComponent,
-    ConfigDialogComponent
+    ConfigDialogComponent,
+    ReportTableComponent,
+    DetailStageTableComponent,
+    RequestStageTableComponent,
+    RequestMailTableComponent,
+    ReportTableComponent,
+    ServerInstanceSelectorDialogComponent,
+    ClientInstanceSelectorDialogComponent,
+    ServerSupervisionView,
+    ClientSupervisionView,
+    DetailLogTableComponent,
+    InstanceComponent,
+    InstanceTableComponent
   ]
 })
 export class ViewsModule { }

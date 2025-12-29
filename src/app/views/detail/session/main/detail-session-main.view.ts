@@ -64,7 +64,8 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
                                 (this.session.requestsMask & 1) > 0 ? defer(()=> {this.session.localRequests = []; return this._traceService.getLocalRequests(this.session.id).pipe(map(d=>(this.session.localRequests = d)))}) : of(),
                                 (this.session.requestsMask & 8) > 0 ? defer(()=> {this.session.ftpRequests = []; return this._traceService.getFtpRequests(this.session.id).pipe(map(d=>(this.session.ftpRequests = d)))}) : of(),
                                 (this.session.requestsMask & 16) > 0 ? defer(()=> {this.session.mailRequests = []; return this._traceService.getSmtpRequests(this.session.id).pipe(map(d=>(this.session.mailRequests = d)))}) : of(),
-                                (this.session.requestsMask & 32) > 0 ? defer(()=> {this.session.ldapRequests = []; return this._traceService.getLdapRequests(this.session.id).pipe(map(d=>(this.session.ldapRequests = d)))}) : of()
+                                (this.session.requestsMask & 32) > 0 ? defer(()=> {this.session.ldapRequests = []; return this._traceService.getLdapRequests(this.session.id).pipe(map(d=>(this.session.ldapRequests = d)))}) : of(),
+                                defer(()=> {this.session.logEntries = []; return this._traceService.getLogEntryBySession(this.session.id).pipe(map(d=>(this.session.logEntries = d)))})
                             )
                         }));
                 }),
@@ -82,5 +83,10 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.$destroy.next();
         this.$destroy.complete();
+    }
+
+    navigateOnStatusIndicator(event: MouseEvent) {
+      var date = new Date(this.session.start * 1000);
+      this._router.navigateOnClick(event, ['/supervision', this.instance.type.toLowerCase(), this.instance.id], { queryParams: {start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString(), env: this.instance?.env} });
     }
 }

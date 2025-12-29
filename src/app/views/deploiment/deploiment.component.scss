@@ -1,23 +1,327 @@
+.stats-container {
+  display: flex;
+  align-items: center;
+  gap: 24px;
 
+  .stat-divider {
+    width: 1px;
+    height: 48px;
+    background: #e2e8f0;
+  }
 
-table {
-    height: 100%;
-    table-layout: fixed;
+  .stat-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    border-radius: 10px;
+
+    .stat-icon-wrapper {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+
+      mat-icon {
+        font-size: 22px;
+        width: 22px;
+        height: 22px;
+      }
+    }
+
+    .stat-details {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+
+      .stat-value {
+        font-size: 20px;
+        font-weight: 700;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .stat-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+    }
+
+    &.stat-online {
+      background: rgba(16, 185, 129, 0.08);
+
+      .stat-icon-wrapper {
+        background: rgba(16, 185, 129, 0.15);
+
+        mat-icon {
+          color: #10b981;
+        }
+      }
+
+      .stat-details {
+        .stat-value {
+          color: #059669;
+        }
+
+        .stat-label {
+          color: #047857;
+        }
+      }
+    }
+
+    &.stat-pending {
+      background: rgba(245, 158, 11, 0.08);
+
+      .stat-icon-wrapper {
+        background: rgba(245, 158, 11, 0.15);
+
+        mat-icon {
+          color: #f59e0b;
+        }
+      }
+
+      .stat-details {
+        .stat-value {
+          color: #d97706;
+        }
+
+        .stat-label {
+          color: #b45309;
+        }
+      }
+    }
+
+    &.stat-offline {
+      background: rgba(100, 116, 139, 0.08);
+
+      .stat-icon-wrapper {
+        background: rgba(100, 116, 139, 0.15);
+
+        mat-icon {
+          color: #64748b;
+        }
+      }
+
+      .stat-details {
+        .stat-value {
+          color: #475569;
+        }
+
+        .stat-label {
+          color: #64748b;
+        }
+      }
+    }
+
+    &.stat-total {
+      background: rgba(59, 130, 246, 0.08);
+
+      .stat-icon-wrapper {
+        background: rgba(59, 130, 246, 0.15);
+
+        mat-icon {
+          color: #3b82f6;
+        }
+      }
+
+      .stat-details {
+        .stat-value {
+          color: #2563eb;
+        }
+
+        .stat-label {
+          color: #1d4ed8;
+        }
+      }
+    }
+  }
 }
 
-div.label-chip {
-    display:inline-block;
-    padding:.2em .7em;
-    font-size: 12px;
-    background-color:#696969;
-    color:#fff;
-    border-radius:6px;
-    position:relative
+// ===========================
+// Cellules Personnalisées
+// ===========================
+
+// Cellule Serveur
+.server-cell-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  .server-name {
+    font-weight: 600;
+    color: #1e293b;
+  }
 }
 
-.table-container {
-    max-height: calc(100vh - 96px - 56px - 25px);
-    overflow: auto;
+// Lien Uptime
+.uptime-link {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  padding: 4px 8px;
+  border-radius: 6px;
+
+  .uptime-duration {
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
+
+  &:hover {
+    background: rgba(59, 130, 246, 0.08);
+    cursor: pointer;
+    .uptime-duration {
+      color: #3b82f6;
+    }
+  }
+}
+
+// Badge Redémarrages
+.restart-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  border: none;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+  transition: all 0.2s ease-in-out;
+  text-decoration: none;
+  background: rgba(245, 158, 11, 0.12); // léger voile orange
+  color: #b45309; // texte orange soutenu
+  &:hover {
+    background: rgba(245, 158, 11, 0.2);
+    box-shadow: 0 4px 10px rgba(245, 158, 11, 0.15);
+    cursor: pointer;
+    color: #a14808;
+  }
+}
+
+.branch-info {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
+  border: 1px solid #ddd6fe;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #5b21b6;
+  line-height: 1;
+  max-width: 240px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  box-shadow: 0 2px 4px rgba(91, 33, 182, 0.08);
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: #7c3aed;
+    flex-shrink: 0;
+  }
+}
+
+.empty-state-inline,
+.loading-state-inline {
+  height: calc(100vh - 48px - 14px - 56px - 57px - 96px);
 }
 
 
+
+// ===========================
+// Responsive
+// ===========================
+@media (max-width: 1200px) {
+  .page-header-modern {
+    .server-stats {
+      gap: 16px;
+
+      .stat-item {
+        padding: 10px 12px;
+
+        .stat-icon-wrapper {
+          width: 36px;
+          height: 36px;
+
+          mat-icon {
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+          }
+        }
+
+        .stat-details {
+          .stat-value {
+            font-size: 18px;
+          }
+
+          .stat-label {
+            font-size: 10px;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .page-header-modern {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 20px;
+    gap: 20px;
+
+    .page-title-section {
+      .page-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+      }
+
+      .title-content {
+        .page-title {
+          font-size: 20px;
+        }
+
+        .page-subtitle {
+          font-size: 13px;
+        }
+      }
+    }
+
+    .server-stats {
+      width: 100%;
+      flex-wrap: wrap;
+      gap: 12px;
+
+      .stat-divider {
+        display: none;
+      }
+
+      .stat-item {
+        flex: 1;
+        min-width: calc(50% - 6px);
+        padding: 12px;
+      }
+    }
+  }
+
+  .table-container {
+    .modern-mat-table {
+      .mat-mdc-header-cell,
+      .mat-mdc-cell {
+        padding: 12px 16px;
+        font-size: 13px;
+      }
+    }
+  }
+}

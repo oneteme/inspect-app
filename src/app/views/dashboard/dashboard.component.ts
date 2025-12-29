@@ -1,12 +1,12 @@
 import {AfterViewInit, Component, inject, OnDestroy} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
-import {combineLatest, finalize, forkJoin, map, Observable, Subscription, take} from 'rxjs';
+import {combineLatest, finalize, map, Observable, Subscription, take} from 'rxjs';
 import {DatePipe, DecimalPipe, Location} from '@angular/common';
 import {app, makeDatePeriod} from 'src/environments/environment';
 import {EnvRouter} from "../../service/router.service";
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {Constants} from '../constants';
-import {formatters, periodManagement} from 'src/app/shared/util';
+import {formatters, periodManagement, recreateDate} from 'src/app/shared/util';
 import {MatDialog} from '@angular/material/dialog';
 import {ProtocolExceptionComponent} from './components/protocol-exception-modal/protocol-exception-modal.component';
 import {InstanceService} from 'src/app/service/jquery/instance.service';
@@ -17,16 +17,13 @@ import {DatabaseRequestService} from 'src/app/service/jquery/database-request.se
 import {FtpRequestService} from 'src/app/service/jquery/ftp-request.service';
 import {LdapRequestService} from 'src/app/service/jquery/ldap-request.service';
 import {
-    FtpMainExceptionsByPeriodAndappname,
     FtpSessionExceptionsByPeriodAndappname,
     JdbcMainExceptionsByPeriodAndappname,
     JdbcExceptionsByPeriodAndAppname,
     LdapMainExceptionsByPeriodAndappname,
     LdapSessionExceptionsByPeriodAndappname,
-    RestMainExceptionsByPeriodAndappname,
     RestSessionExceptionsByPeriodAndappname,
     SessionExceptionsByPeriodAndAppname,
-    SmtpMainExceptionsByPeriodAndappname,
     SmtpSessionExceptionsByPeriodAndappname
 } from 'src/app/model/jquery.model';
 import {SmtpRequestService} from 'src/app/service/jquery/smtp-request.service';
@@ -85,7 +82,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
     serverNameIsLoading = true;
     params: Partial<{ env: string, start: Date, end: Date, serveurs: string[] }> = {};
     nameDataList: any[];
-
+    groupedBy: string;
     constructor() {
         this.subscriptions.push(combineLatest({
             params: this._activatedRoute.params,
@@ -157,7 +154,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         })
     }
 
-    search() { 
+    search() {
         if (this.serverFilterForm.valid) {
             let appname = this.serverFilterForm.getRawValue().appname;
             let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
@@ -200,7 +197,14 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         if (exceptions.observable.data?.length > 0) {
             this._dialog.open(ProtocolExceptionComponent, {
                 width: "70%",
-                data: exceptions
+                data: {
+                    exceptions: exceptions,
+                    env: this.params.env,
+                    start: this.params.start,
+                    groupedBy: this.groupedBy,
+                    type: exceptions.type
+                },
+
             })
         }
     }
@@ -214,7 +218,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
     setTitle(type: string, data: any[]): {title: string, subtitle: string} {
         let title = `${type}: 0.00%`;
         let subtitle = 'sur 0 requête(s)';
-        let arr = this.groupByProperty("date", data).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } }).sort((a,b)=> a.date.localeCompare(b.date));
+        let arr = this.groupByProperty("stringDate", data).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } }).sort((a,b)=> a.stringDate.localeCompare(b.stringDate));
         if (arr.length) {
             let sumRes = this.sumcounts(arr);
             title = `${type}: ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%`;
@@ -224,7 +228,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
     }
 
     setChartData(data: any[]) {
-        let arr = this.groupByProperty("date", data).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } }).sort((a,b)=> a.date.localeCompare(b.date));
+        let arr = this.groupByProperty("stringDate", data).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } }).sort((a,b)=> a.stringDate.localeCompare(b.stringDate));
         data = data.filter((a:any)=> a.count>0)
         return {chart : arr, data :data}
     }
@@ -254,24 +258,24 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
     }
 
     TAB_REQUESTS = (env: string, start: Date, end: Date, app_name: string) => {
-        let groupedBy = periodManagement(start, end);
+        this.groupedBy = periodManagement(start, end);
         return {
             // Server start
             serverStartTable: { observable: this._instanceService.getServerStart({ env: env, start: start, end: end, app_name: app_name }) },
 
-            //   Rest-Main Sessions exceptions 
+            //   Rest-Main Sessions exceptions
             sessionExceptionsTable: {
-                observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, server: app_name })
+                observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, server: app_name })
                     .pipe(map(((result: SessionExceptionsByPeriodAndAppname[]) => {
-                        formatters[groupedBy](result, this._datePipe, 'stringDate');
+                        formatters[this.groupedBy](result, this._datePipe, 'stringDate');
                         return result.filter(r => r.errorType != null); // rename errorType to errType in backend
                     })))
             },
 
             batchExceptionTable: {
-                observable: this._mainService.getMainExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
+                observable: this._mainService.getMainExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, app_name: app_name })
                     .pipe(map(((result: SessionExceptionsByPeriodAndAppname[]) => {
-                        formatters[groupedBy](result, this._datePipe, 'stringDate')
+                        formatters[this.groupedBy](result, this._datePipe, 'stringDate')
                         return result.filter(r => r.errorType != null);
                     })))
             },
@@ -286,16 +290,16 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
             restRequestExceptionsTable: {
                 observable: this._restService.getRestExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map(((result: RestSessionExceptionsByPeriodAndappname[]) => {
-                        formatters[groupedBy](result, this._datePipe)
+                        formatters[groupedBy](result, this._datePipe, 'stringDate')
                         this.sparklineTitles.rest = this.setTitle('REST', [...result]);
                         return this.setChartData([...result])
                     })))
             },
 
             databaseRequestExceptionsTable: {
-                observable: this._datebaseService.getJdbcExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, appName: app_name })
+                observable: this._datebaseService.getJdbcMainSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map(((result: JdbcExceptionsByPeriodAndAppname[]) => {
-                        formatters[groupedBy](result, this._datePipe);
+                        formatters[groupedBy](result, this._datePipe, 'stringDate');
                         this.sparklineTitles.jdbc = this.setTitle('JDBC', [...result]);
                         return this.setChartData(result)
                     })))
@@ -303,7 +307,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
             ftpRequestExceptionsTable: {
                 observable: this._ftpService.getftpSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map(((result: FtpSessionExceptionsByPeriodAndappname[]) => {
-                        formatters[groupedBy](result, this._datePipe);
+                        formatters[groupedBy](result, this._datePipe, 'stringDate');
                         this.sparklineTitles.ftp = this.setTitle('FTP', [...result]);
                         return this.setChartData(result)
                     })))
@@ -311,7 +315,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
             smtpRequestExceptionsTable: {
                 observable: this._smtpService.getSmtpExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map(((result: SmtpSessionExceptionsByPeriodAndappname[]) => {
-                        formatters[groupedBy](result, this._datePipe);
+                        formatters[groupedBy](result, this._datePipe, 'stringDate');
                         this.sparklineTitles.smtp = this.setTitle('SMTP', [...result]);
                         return this.setChartData(result)
                     })))
@@ -319,7 +323,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
             ldapRequestExceptionsTable: {
                 observable: this._ldapService.getLdapExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map(((result: LdapSessionExceptionsByPeriodAndappname[]) => {
-                        formatters[groupedBy](result, this._datePipe);
+                        formatters[groupedBy](result, this._datePipe, 'stringDate');
                         this.sparklineTitles.ldap = this.setTitle('LDAP', [...result]);
                         return  this.setChartData(result)
                     })))
@@ -327,9 +331,42 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         }
     }
 
-  ngOnDestroy(): void {
-    this.subscriptions.forEach(s => s.unsubscribe());
-  }
+    onSessionExceptionRowSelected(row:any) {
+        const result = recreateDate(this.groupedBy, row, this.params.start);
+        if(result) {
+            this._router.navigate(['/session/rest'], {
+                queryParams: {
+                    'env': this.params.env,
+                    'start': result.start.toISOString(),
+                    'end': result.end.toISOString(),
+                    'q': row.errorType,
+                    'rangestatus': ['5xx', '4XX']
+                }
+            });
+        }
+    }
+
+    onBatchExceptionRowSelected(row: any){
+        const result = recreateDate(this.groupedBy, row, this.params.start);
+        if(result){
+            this._router.navigate(['/session/batch'], {
+                queryParams: {
+                    'env': this.params.env,
+                    'start': result.start.toISOString(),
+                    'end': result.end.toISOString(),
+                    'q' : row.errorType,
+                    'rangestatus': ['false']
+                }
+            });
+        }
+    }
+
+    ngOnDestroy(): void {
+        this.subscriptions.forEach(s => s.unsubscribe());
+        if(this._dialog){
+            this._dialog.closeAll();
+        }
+    }
 }
 
 

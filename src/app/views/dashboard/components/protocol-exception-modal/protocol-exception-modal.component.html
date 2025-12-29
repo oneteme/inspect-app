@@ -1,4 +1,4 @@
-<div mat-dialog-title style="background-color:#3f51b5;color:white;">{{exceptions.type}} Exceptions</div>
+<div mat-dialog-title style="background-color:#3f51b5;color:white;">{{data.exceptions.type}} Exceptions</div>
 
 <mat-dialog-content>
   <div class="filter-container mat-elevation-z5">
@@ -7,7 +7,7 @@
       <ng-container matColumnDef="date">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Instant</th>
         <td mat-cell *matCellDef="let row">
-          {{ row.date }}
+          {{ row.stringDate }}
         </td>
       </ng-container>
 
@@ -26,7 +26,7 @@
       </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="protocolExceptionsDisplyedColumns;sticky: true"></tr>
-      <tr mat-row *matRowDef="let row; columns: protocolExceptionsDisplyedColumns;" [class.hidden]="row.count==0"></tr>
+      <tr mat-row *matRowDef="let row; columns: protocolExceptionsDisplyedColumns;" [class.hidden]="row.count==0" (click)="selectedRow($event, row)"></tr>
 
     </table>
     

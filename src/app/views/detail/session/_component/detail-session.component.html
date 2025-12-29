@@ -1,59 +1,87 @@
-<div [hidden]="!session.restRequests?.length" style="margin-bottom: 2em;">
-    <header-section icon="call_made" [iconOutlined]="false">
-        <div  [matBadgeHidden]="session.restRequests?.length==0" [matBadge]="session.restRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.restRequests?.length | numberFormat).length > 2">API</div>
-    </header-section>
-    <rest-table  [requests]="session.restRequests"
-                 (onClickRemote)="selectedRemote($event)"
-                 (onClickRow)="selectedRest($event)"></rest-table>
-</div>
-<div [hidden]="!session.localRequests?.length"  style="margin-bottom: 2em;">
-    <header-section icon="memory" [iconOutlined]="false">
-        <div [matBadgeHidden]="session.localRequests?.length==0" [matBadge]="session.localRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.localRequests?.length | numberFormat).length > 2">LOCAL</div>
-    </header-section>
-    <local-table [requests]="session.localRequests"></local-table>
-</div>
-<div [hidden]="!session.ftpRequests?.length"  style="margin-bottom: 2em;">
-    <header-section icon="smb_share">
-        <div [matBadgeHidden]="session.ftpRequests?.length==0" [matBadge]="session.ftpRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.ftpRequests?.length | numberFormat).length > 2">FTP</div>
-    </header-section>
-    <ftp-table [requests]="session.ftpRequests" 
-               (onClickRow)="selectedFtp($event)">
-    </ftp-table>
-</div>
-<div [hidden]="!session.mailRequests?.length"  style="margin-bottom: 2em;">
-    <header-section icon="outgoing_mail">
-        <div [matBadgeHidden]="session.mailRequests?.length==0" [matBadge]="session.mailRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.mailRequests?.length | numberFormat).length > 2">SMTP</div>
-    </header-section>
-    <smtp-table [requests]="session.mailRequests" 
-                (onClickRow)="selectedSmtp($event)">
-    </smtp-table>
-</div>
+<div class="tabs-container">
+  <!-- Navigation verticale des onglets -->
+  <div class="vertical-tabs">
+    <div *ngFor="let tab of tabs; let i = index"
+         class="tab-button"
+         [class.active]="selectedTabIndex === i"
+         [class.hidden]="!tab.visible"
+         (click)="selectedTabIndex = i">
+      <mat-icon class="material-symbols-outlined">{{ tab.icon }}</mat-icon>
+      <div class="tab-label-container">
+        <span class="tab-label">{{ tab.label }}</span>
+        <mat-icon *ngIf="tab.hasError && tab.errorCount > 0"
+                  class="error-indicator material-symbols-outlined"
+                  [matTooltip]="tab.errorCount + ' erreur(s)'"
+                  matTooltipPosition="right">
+          error
+        </mat-icon>
+      </div>
+      <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
+    </div>
+  </div>
 
-<div [hidden]="!session.ldapRequests?.length" style="margin-bottom: 2em;">
-    <header-section icon="user_attributes">
-        <div [matBadgeHidden]="session.ldapRequests?.length==0" [matBadge]="session.ldapRequests?.length | numberFormat:0:'≈'" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.ldapRequests?.length | numberFormat).length > 2">LDAP</div>
-    </header-section>
-    <ldap-table [requests]="session.ldapRequests"
-                (onClickRow)="selectedLdap($event)">
-    </ldap-table>
-</div>
-<div [hidden]="!session.databaseRequests?.length" style="margin-bottom: 2em;">
-    <header-section icon="database">
-        <div [matBadgeHidden]="session.databaseRequests?.length==0" [matBadge]="(session.databaseRequests?.length | numberFormat:0:'≈')" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session.databaseRequests?.length | numberFormat).length > 2">BDD</div>
-    </header-section>
-    <database-table [requests]="session.databaseRequests" 
-                    (onClickRow)="selectedQuery($event)">
-    </database-table>
-</div>
+  <!-- Contenu des onglets -->
+  <div class="tab-content">
+    <!-- API -->
+    <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'rest'" class="tab-panel">
+      <rest-table [requests]="session.restRequests"
+                  (onClickRemote)="selectedRemote($event)"
+                  (onClickRow)="selectedRest($event)">
+      </rest-table>
+    </div>
 
-<div [hidden]="!session['userActions']?.length" style="margin-bottom: 2em;">
-  <header-section icon="web_traffic">
-    <div [matBadgeHidden]="session['userActions']?.length==0" [matBadge]="(session['userActions']?.length | numberFormat:0:'≈')" matBadgeOverlap="false" matBadgeColor="primary" [class.stretch-badge]="(session['userActions']?.length | numberFormat).length > 2">Action</div>
-  </header-section>
-  <action-table [requests]="session['userActions']">
-  </action-table>
-</div>
+    <!-- LOCAL -->
+    <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'local'" class="tab-panel">
+      <local-table [requests]="session.localRequests"></local-table>
+    </div>
 
-<detail-timeline [request]="completedSession"
-                 [instance]="instance">
-</detail-timeline>
+    <!-- FTP -->
+    <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'ftp'" class="tab-panel">
+      <ftp-table [requests]="session.ftpRequests"
+                 (onClickRow)="selectedFtp($event)">
+      </ftp-table>
+    </div>
+
+    <!-- SMTP -->
+    <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'smtp'" class="tab-panel">
+      <smtp-table [requests]="session.mailRequests"
+                  (onClickRow)="selectedSmtp($event)">
+      </smtp-table>
+    </div>
+
+    <!-- LDAP -->
+    <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'ldap'" class="tab-panel">
+      <ldap-table [requests]="session.ldapRequests"
+                  (onClickRow)="selectedLdap($event)">
+      </ldap-table>
+    </div>
+
+    <!-- BDD -->
+    <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'database'" class="tab-panel">
+      <database-table [requests]="session.databaseRequests"
+                      (onClickRow)="selectedQuery($event)">
+      </database-table>
+    </div>
+
+    <!-- Actions -->
+    <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'action'" class="tab-panel">
+      <action-table [requests]="session['userActions']">
+      </action-table>
+    </div>
+
+    <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'stage'" class="tab-panel">
+      <stage-table [requests]="session['httpSessionStages']">
+      </stage-table>
+    </div>
+    <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'log'" class="tab-panel">
+      <log-table [requests]="session.logEntries">
+      </log-table>
+    </div>
+    <!-- Timeline -->
+    <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'timeline'" class="tab-panel">
+      <detail-timeline [request]="completedSession"
+                       [instance]="instance">
+      </detail-timeline>
+    </div>
+  </div>
+</div>

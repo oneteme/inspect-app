@@ -74,7 +74,7 @@ export interface LocalRequest extends AbstractRequest {
 
 export interface DatabaseRequestStage extends AbstractStage {
   count: number[];
-  commands: string[];
+  args: string[];
 }
 
 export interface DirectoryRequestStage extends AbstractStage {
@@ -123,7 +123,7 @@ export interface AbstractRequest {
   start: number;
   end: number;
   threadName: string;
-
+  command: string;
   sessionId: string;
   instanceId: string;
   id: string;
@@ -134,7 +134,8 @@ export interface AbstractStage {
   start: number;
   end: number;
   exception: ExceptionInfo;
-
+  command: string;
+  arg: string;
   order: number;
   requestId: string;
   instanceId: string;
@@ -170,6 +171,7 @@ export interface InstanceEnvironment {
   collector: string;
   resource: MachineResource;
   configuration: InspectCollectorConfiguration;
+  properties:any;
 }
 
 export interface InspectCollectorConfiguration {

@@ -2,6 +2,9 @@
 @use 'palettes' as p;
 
 @import 'styles.scss';
+@import '_table.scss';
+@import '_tab.scss';
+@import '_card.scss';
 
 $inspect-font-family: 'Public sans', 'Segoe UI', sans-serif;
 $inspect-font-size: 14px;

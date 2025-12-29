@@ -35,7 +35,9 @@ import {AnalyticView} from "./views/analytic/analytic.view";
 import {SearchRequestView} from "./views/search/request/search-request.view";
 import {Constants} from "./views/constants";
 import {DetailRequestView} from "./views/detail/request/detail-request.view";
-import {SupervisionView} from "./views/supervision/supervision.view";
+import { InstanceComponent } from './views/detail/instance/instance.component';
+import {ServerSupervisionView} from "./views/supervision/_component/server/server-supervision.view";
+import {ClientSupervisionView} from "./views/supervision/_component/client/client-supervision.view";
 import {StatisticRequestView} from "./views/statistic/request/statistic-request.view";
 
 
@@ -199,6 +201,19 @@ const routes: Route[] = [
     ]
   },
   {
+    path: 'instance',
+  children:[
+    {
+      path: 'detail/:id_instance',
+      component: InstanceComponent,
+      title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+        return `instance > ${route.paramMap.get('id_instance')}`;
+      }
+    },
+  ]
+  },
+
+  {
     path: 'analytic/:user',
     component: AnalyticView,
     title: 'Parcours Utilisateur'
@@ -219,9 +234,14 @@ const routes: Route[] = [
     title: 'Architecture'
   },
   {
-    path: 'supervision/:instance',
-    component: SupervisionView,
-    title: 'Supervision'
+    path: 'supervision/server/:instance',
+    component: ServerSupervisionView,
+    title: 'Server Supervision'
+  },
+  {
+    path: 'supervision/client/:instance',
+    component: ClientSupervisionView,
+    title: 'Client Supervision'
   },
   { path: '**', pathMatch: 'full', redirectTo: `/home` }
 ];

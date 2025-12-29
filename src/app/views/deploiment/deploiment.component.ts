@@ -1,88 +1,143 @@
 import {Component, inject, OnDestroy, ViewChild} from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
-import {combineLatest, finalize, Subscription} from 'rxjs';
-import { app} from 'src/environments/environment';
-import { Constants } from '../constants';
-import { MatPaginator } from '@angular/material/paginator';
-import { MatSort } from '@angular/material/sort';
-import { InstanceService } from 'src/app/service/jquery/instance.service';
-import { LastServerStart } from 'src/app/model/jquery.model';
-import { MatTableDataSource } from '@angular/material/table';
+import {ActivatedRoute, Params} from '@angular/router';
+import {combineLatest, finalize, forkJoin, of, Subscription, switchMap} from 'rxjs';
+import {app} from 'src/environments/environment';
+import {Constants} from '../constants';
+import {MatPaginator} from '@angular/material/paginator';
+import {MatSort} from '@angular/material/sort';
+import {InstanceService} from 'src/app/service/jquery/instance.service';
+import {LastServerStart} from 'src/app/model/jquery.model';
+import {MatTableDataSource} from '@angular/material/table';
+import {InstanceTraceService} from "../../service/jquery/instance-trace.service";
+import {EnvRouter} from "../../service/router.service";
 
 @Component({
-    templateUrl: './deploiment.component.html',
-    styleUrls: ['./deploiment.component.scss'],
+  templateUrl: './deploiment.component.html',
+  styleUrls: ['./deploiment.component.scss'],
 
 })
-export class DeploimentComponent implements OnDestroy  {
-    constants = Constants;
-    private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
-    private readonly _instanceService= inject(InstanceService);
+export class DeploimentComponent implements OnDestroy {
+  constants = Constants;
+  private readonly _router = inject(EnvRouter);
+  private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+  private readonly _instanceService = inject(InstanceService);
+  private readonly _instanceTraceService = inject(InstanceTraceService);
 
-    today: Date = new Date();
-    MAPPING_TYPE = Constants.MAPPING_TYPE;
-    couleur = ["#22577a","#38a3a5","#57cc99","#80ed99","#c7f9cc"]
-    serverStartDisplayedColumns: string[] = ["appName", "version", "duree","branch"];
-    lastServerStart: {data?:MatTableDataSource<LastServerStart[]>, isLoading?:boolean} = {};
-    versionColor: any;
-    params: Partial<{ env: string }> = {};
-    subscriptions: Subscription[] = [];
+  today: Date = new Date();
+  MAPPING_TYPE = Constants.MAPPING_TYPE;
+  couleur = ["#22577a", "#38a3a5", "#57cc99", "#80ed99", "#c7f9cc"]
+  serverStartDisplayedColumns: string[] = ["appName", "duree", "version", "branch", "restart"];
+  lastServerStart: { data?: MatTableDataSource<LastServerStart>, isLoading?: boolean } = {};
+  versionColor: any;
+  params: Partial<{ env: string }> = {};
+  subscriptions: Subscription[] = [];
+  onlineServerStat: number = 0;
+  pendingServerStat: number = 0;
+  offlineServerStat: number = 0;
+  @ViewChild('lastServerStartTablePaginator', {static: true}) lastServerStartTablePaginator: MatPaginator;
+  @ViewChild('lastServerStartTableSort') lastServerStartTableSort: MatSort;
 
-    @ViewChild('lastServerStartTablePaginator')lastServerStartTablePaginator: MatPaginator;
-    @ViewChild('lastServerStartTableSort') lastServerStartTableSort: MatSort;
+  constructor() {
+    this.subscriptions.push(combineLatest({
+      params: this._activatedRoute.params,
+      queryParams: this._activatedRoute.queryParams
+    })
+    .subscribe({
+      next: (v: { params: Params, queryParams: Params }) => {
+        this.params.env = v.queryParams.env || app.defaultEnv;
+        this.getLastServerStart();
+      }
+    }));
+  }
 
-    constructor() {
-        this.subscriptions.push(combineLatest({
-            params: this._activatedRoute.params,
-            queryParams: this._activatedRoute.queryParams
-        })
-        .subscribe({
-            next: (v: { params: Params, queryParams: Params }) => {
-                this.params.env = v.queryParams.env || app.defaultEnv;
-                this.getLastServerStart();
-            }
-        }));
-    }
+  getLastServerStart() {
+    this.lastServerStart.isLoading = true;
+    this.today = new Date();
+    this.subscriptions.push(
+      this._instanceService.getLastServerStart({env: this.params.env})
+      .pipe(
+        switchMap((lastServers: LastServerStart[]) => {
+          return forkJoin({
+            lastTraces: lastServers.length ? this._instanceTraceService.getLastInstanceTrace({instance: lastServers.map(last => last.id)}) : of([]),
+            lastServers: of(lastServers)
+          });
+        }),
+        finalize(() => (this.lastServerStart.isLoading = false)))
+      .subscribe({
+        next: (value: {lastTraces: {id: string, date: number}[], lastServers: LastServerStart[]}) => {
+          this.versionColor = this.groupBy(value.lastServers, (v: any) => v.version)
+          this.lastServerStart.data = new MatTableDataSource(value.lastServers.map(ls => ({...ls, lastTrace: value.lastTraces.find(lt => lt.id === ls.id)?.date})));
+          this.lastServerStart.data.paginator = this.lastServerStartTablePaginator;
+          this.lastServerStart.data.sort = this.lastServerStartTableSort;
+          this.lastServerStart.data.sortingDataAccessor = sortingDataAccessor;
+          this.onlineServerStat = this.getOnlineServers();
+          this.pendingServerStat = this.getPendingServers();
+          this.offlineServerStat = this.getOfflineServers();
+        }
+      })
+    );
+  }
 
-    getLastServerStart(){
-        this.lastServerStart.isLoading =true;
+  groupBy<T>(array: T[], fn: (o: T) => any): { [name: string]: T[] } { // todo : refacto
+    let i = 0;
+    return array.reduce((acc: any, item: any) => {
+      let id = fn(item);
+      if (id) {
+        if (!acc[id]) {
+          if (i == 4) {
+            i = 0;
+          }
+          acc[id] = this.couleur[i];
+          i++;
+        }
+      }
+      return acc;
+    }, {})
+  }
 
-        this.subscriptions.push(this._instanceService.getlastServerStart({ env: this.params.env})
-        .pipe(finalize(()=>(this.lastServerStart.isLoading =false)))
-        .subscribe({
-            next: ((d:any)=> {
-                this.versionColor  = this.groupBy(d,(v:any)=> v.version)
-                this.lastServerStart.data = new MatTableDataSource(d);
-                this.lastServerStart.data.paginator = this.lastServerStartTablePaginator;
-                this.lastServerStart.data.sort = this.lastServerStartTableSort;
-                this.lastServerStart.data.sortingDataAccessor = sortingDataAccessor;
-            })
-        }));
-    }    
+  ngOnDestroy(): void {
+    this.subscriptions.forEach(s => s.unsubscribe());
+  }
 
-    groupBy<T>(array: T[], fn: (o: T) => any): { [name: string]: T[] } { // todo : refacto
-        let i = 0;
-        return array.reduce((acc: any, item: any) => {
-            let id = fn(item);
-            if(id){
-                if (!acc[id]) {
-                    if(i==4){
-                        i=0;
-                    }
-                    acc[id] = this.couleur[i];
-                    i++;
-                }
-            }
-            return acc;
-        }, {})
-    }
+  // Méthodes pour calculer les statistiques de serveurs
+  getOnlineServers(): number {
+    const servers = this.lastServerStart.data?.data || [];
+    return servers.filter(server => {
+      return !server.end && server['lastTrace'] && server['lastTrace'] >= new Date().getTime() - (server.configuration?.scheduling.interval + 60 || 60 * 60) * 1000;
+    }).length;
+  }
 
-    ngOnDestroy(): void {
-        this.subscriptions.forEach(s => s.unsubscribe());
-    }
+  getPendingServers(): number {
+    const servers = this.lastServerStart.data?.data || [];
+    return servers.filter(server => {
+      return !server.end && server['lastTrace'] && server['lastTrace'] < new Date().getTime() - (server.configuration?.scheduling.interval + 60 || 60 * 60) * 1000;
+    }).length;
+  }
+
+  getOfflineServers(): number {
+    const servers = this.lastServerStart.data?.data || [];
+    return servers.filter(server => {
+      return server.end || !server['lastTrace'];
+    }).length;
+  }
+
+  navigateOnStatusIndicator(event: MouseEvent, row: any) {
+    var date = new Date(row.lastTrace);
+    this._router.navigateOnClick(event, ['/supervision', row.type.toLowerCase(), row.id], { queryParams: {env: row.env, start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString()} });
+  }
+
+  navigateOnSinceClick(event: MouseEvent, row: any) {
+    this._router.navigateOnClick(event, ['/session/startup', row.id], { queryParams: {env: this.params.env} });
+  }
+  navigateOnServerClick(event: MouseEvent, row: any) {
+    this._router.navigateOnClick(event, ['/instance/detail', row.id], { queryParams: {env: this.params.env} });
+  }
+  navigateOnRestartClick(event: MouseEvent, row: any) {
+    this._router.navigateOnClick(event, ['/session/startup'], { queryParams: {env: this.params.env, start: new Date(row.minStart).toISOString(), end: new Date().toISOString(), server: row.appName} });
+  }
 }
 
 const sortingDataAccessor = (row: any, columnName: string) => {
-    if (columnName == "duree") return (new Date().getTime() - row["start"])
-    return row[columnName as keyof any] as string;
+  if (columnName == "duree") return (new Date().getTime() - row["start"])
+  return row[columnName as keyof any] as string;
 }

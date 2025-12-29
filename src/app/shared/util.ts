@@ -5,6 +5,7 @@ import { makeDateTimePeriod, makeDateTimePeriodFrom } from "src/environments/env
 
 export class Utils {
 
+
     reIcon: any = {
 
     }
@@ -124,6 +125,60 @@ export function groupingBy(arr: any[], field: string): {[key: string]: any[]} {
         acc[key].push(o);
         return acc;
     }, {})
+}
+
+export function recreateDate(chartGroup: string, row: any, start: Date): {start: Date, end: Date} {
+    switch (chartGroup) {
+        case "hour": {
+            const hour = parseInt(row['stringDate']);
+            const startDate = new Date(start);
+            const endDate = new Date(startDate);
+            startDate.setHours(hour, 0, 0, 0);
+            endDate.setHours(hour + 1, 0, 0, 0);
+            return { start: startDate, end: endDate };
+        }
+        case "date": {
+            const startDate = new Date(row["date"]);
+            const endDate = new Date(startDate);
+            endDate.setDate(endDate.getDate() + 1);
+            return { start: startDate, end: endDate };
+        }
+        case "week": {
+            const weekNumber = row['date'];
+            const year = row['year'];
+
+            // Calculer le premier jour de la semaine ISO (lundi)
+            const jan4 = new Date(year, 0, 4);
+            const dayOfWeek = jan4.getDay() || 7;
+            const startDate = new Date(jan4);
+            startDate.setDate(jan4.getDate() - dayOfWeek + 1 + (weekNumber - 1) * 7);
+            startDate.setHours(0, 0, 0, 0);
+
+            const endDate = new Date(startDate);
+            endDate.setDate(endDate.getDate() + 7);
+
+            return { start: startDate, end: endDate };
+        }
+        case "month": {
+            const month = row['date'] - 1; // Les mois sont 0-indexés en JS
+            const year = row['year'];
+
+            const startDate = new Date(year, month, 1, 0, 0, 0, 0);
+            const endDate = new Date(year, month + 1, 1, 0, 0, 0, 0);
+
+            return { start: startDate, end: endDate };
+        }
+        case "year": {
+            const year = row['date'];
+
+            const startDate = new Date(year, 0, 1, 0, 0, 0, 0);
+            const endDate = new Date(year + 1, 0, 1, 0, 0, 0, 0);
+
+            return { start: startDate, end: endDate };
+        }
+        default:
+            return null;
+    }
 }
 
 export function periodManagement(start: Date, end: Date): string {
@@ -247,4 +302,14 @@ export function countByFields<T>(arr: any[], combiner: (args: any[], o: string)=
         acc[o] = combiner(arr, o);
         return acc;
     }, {});
+}
+
+export function showifnotnull(value: any,fn: (value:any)=>any) {
+    if(value)
+        return fn(value);
+    return "";
+}
+
+export function getDataForRange(items: any[], start: number, end: number) {
+    return items.filter(c=> (c.end>= start && c.start <=end))
 }

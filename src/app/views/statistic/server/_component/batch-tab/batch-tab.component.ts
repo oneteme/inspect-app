@@ -1,9 +1,10 @@
 import {Component, inject, Input, OnDestroy} from "@angular/core";
 import {DatePipe} from "@angular/common";
 import {MainSessionService} from "../../../../../service/jquery/main-session.service";
-import {formatters, groupByField, periodManagement} from "../../../../../shared/util";
+import {formatters, groupByField, periodManagement, recreateDate} from "../../../../../shared/util";
 import {finalize, map, Subscription} from "rxjs";
 import {HttpParams} from "../rest-tab/rest-tab.component";
+import {EnvRouter} from "../../../../../service/router.service";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 import {field} from "@oneteme/jquery-core";
 
@@ -13,38 +14,40 @@ import {field} from "@oneteme/jquery-core";
   styleUrls: ['./batch-tab.component.scss']
 })
 export class BatchTabComponent implements OnDestroy {
-  private _mainSessionService = inject(MainSessionService);
-  private _datePipe = inject(DatePipe);
-  private subscriptions: Subscription[] = [];
+    private _mainSessionService = inject(MainSessionService);
+    private _datePipe = inject(DatePipe);
+    private _router: EnvRouter = inject(EnvRouter);
+    private subscriptions: Subscription[] = [];
+    readonly seriesProvider: SerieProvider<string, number>[] = [
+        {data: {x: field('date'), y: field('countSuccess')}, name: 'OK', color: '#33cc33'},
+        {data: {x: field('date'), y: field('countError')}, name: 'KO', color: '#ff0000'},
+    ];
+    $timeAndTypeResponse: {
+        bar: any[],
+        loading: boolean,
+        stats: { statCount: number, statCountOk: number, statCountErr: number }
+    } = {bar: [], loading: true, stats: {statCount: 0, statCountOk: 0, statCountErr: 0}};
+    $evolUserResponse: { line: any[], loading: boolean } = { line: [], loading: true };
+    $dependentsResponse: { table: any[], loading: boolean } = {table: [], loading: true};
+    $exceptionsResponse: { table: any[], loading: boolean } = {table: [], loading: true};
+    groupedBy: string;
+    private _httpParams: HttpParams;
 
-  readonly seriesProvider: SerieProvider<string, number>[] = [
-    {data: {x: field('date'), y: field('countSuccess')}, name: 'OK', color: '#33cc33'},
-    {data: {x: field('date'), y: field('countError')}, name: 'KO', color: '#ff0000'},
-  ];
-
-  $timeAndTypeResponse: {
-    bar: any[],
-    loading: boolean,
-    stats: { statCount: number, statCountOk: number, statCountErr: number }
-  } = {bar: [], loading: true, stats: {statCount: 0, statCountOk: 0, statCountErr: 0}};
-  $evolUserResponse: { line: any[], loading: boolean } = {line: [], loading: true};
-  $dependentsResponse: { table: any[], loading: boolean } = {table: [], loading: true};
-  $exceptionsResponse: { table: any[], loading: boolean } = {table: [], loading: true};
-
-  @Input() set httpParams(httpParams: HttpParams) {
-    if (httpParams && httpParams.params?.optional?.tab == '1') {
-      let groupedBy = periodManagement(httpParams.params.period.start, httpParams.params.period.end);
-      let advancedParams = {};
-      Object.entries(httpParams.params.optional).forEach(([key, value]) => {
-        if (value && Array.isArray(value)) advancedParams[`${key}`] = (<Array<string>>value).map(v => `"${v}"`).join(',');
-      });
-      this.subscriptions.forEach(s => s.unsubscribe());
-      this.subscriptions.push(this.getTimeAndTypeResponse(httpParams, groupedBy, advancedParams));
-      this.subscriptions.push(this.getUsersByPeriod(httpParams, groupedBy, advancedParams));
-      this.subscriptions.push(this.getDependents(httpParams, advancedParams));
-      this.subscriptions.push(this.getExceptions(httpParams, advancedParams, groupedBy));
+    @Input() set httpParams(httpParams: HttpParams) {
+        this._httpParams = httpParams;
+      if(httpParams && httpParams.params?.optional?.tab == '1') {
+        this.groupedBy = periodManagement(httpParams.params.period.start, httpParams.params.period.end);
+        let advancedParams = {};
+        Object.entries(httpParams.params.optional).forEach(([key, value]) => {
+            if(value && Array.isArray(value)) advancedParams[`${key}`] = (<Array<string>>value).map(v => `"${v}"`).join(',');
+        });
+        this.subscriptions.forEach(s => s.unsubscribe());
+        this.subscriptions.push(this.getTimeAndTypeResponse(httpParams, this.groupedBy, advancedParams));
+        this.subscriptions.push(this.getUsersByPeriod(httpParams, this.groupedBy, advancedParams));
+        this.subscriptions.push(this.getDependents(httpParams, advancedParams));
+        this.subscriptions.push(this.getExceptions(httpParams, advancedParams, this.groupedBy));
+      }
     }
-  }
 
   getTimeAndTypeResponse(httpParams: HttpParams, groupedBy: string, advancedParams) {
     this.$timeAndTypeResponse.bar = [];
@@ -159,4 +162,19 @@ export class BatchTabComponent implements OnDestroy {
     this.$dependentsResponse.table = [];
     this.$exceptionsResponse.table = [];
   }
+
+    onBatchExceptionRowSelected(row: any){
+        const result = recreateDate(this.groupedBy, row, this._httpParams.params.period.start);
+        if(result){
+            this._router.navigate(['/session/batch'], {
+                queryParams: {
+                    'env': this._httpParams.params.env,
+                    'start': result.start.toISOString(),
+                    'end': result.end.toISOString(),
+                    'q' : row.errorType,
+                    'rangestatus': ['false']
+                }
+            });
+        }
+    }
 }

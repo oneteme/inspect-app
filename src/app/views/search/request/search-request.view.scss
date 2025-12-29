@@ -1,33 +1,11 @@
-.header-filter {
-    margin-left: auto;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.5em;
+.filter-container {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
 }
 
-.mat-mdc-row .mat-mdc-cell {
-    cursor: pointer;
+.additional-selection {
+  opacity: 0.75;
+  font-size: 0.75em;
 }
-
-.mat-mdc-row:hover .mat-mdc-cell {
-    background-color: rgb(206, 206, 206);
-}
-
-.searchwidth {
-    flex-grow: 1;
-}
-
-table {
-    table-layout: fixed;
-}
-
-.example-table-container {
-    max-height: calc(100vh - 96px - 56px - 48px - 1.5em);
-    overflow: auto;
-}
-
-.status:hover ~ th.status {
-    width: auto;
-}
-
