@@ -5,11 +5,6 @@
   margin-bottom: 2em;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
-}
-
 mat-card-title {
   display: flex;
   align-items: center;
@@ -36,56 +31,6 @@ mat-card-footer {
     margin-left: auto;
     display: flex;
     align-items: center;
-  }
-}
-
-
-table {
-  table-layout: auto;
-}
-.dbfailed {
-  background-color: red !important;
-}
-
-.progress {
-  height: 20px;
-  display: flex;
-}
-
-.progress-bar {
-  justify-content: center;
-  overflow: hidden;
-  color: #fff;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.mat-mdc-row .mat-mdc-cell {
-  cursor: pointer;
-}
-
-.mat-mdc-row:hover .mat-mdc-cell {
-  background-color: rgb(206, 206, 206);
-}
-
-.mat-mdc-table .mdc-data-table__header-row {
-  background-color: #d1d1d1;
-}
-
-.url {
-  color: blue;
-  text-decoration: solid;
-}
-
-mat-card {
-  &.success {
-    border-left: 4px solid green;
-  }
-  &.fail {
-    border-left: 4px solid red;
-  }
-  &.in-progress {
-    border-left: 4px solid #2196F3;
   }
 }
 

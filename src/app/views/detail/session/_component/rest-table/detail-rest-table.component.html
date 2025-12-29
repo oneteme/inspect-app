@@ -76,7 +76,7 @@
       <ng-container matColumnDef="action">
         <th mat-header-cell *matHeaderCellDef style="width: 10%"></th>
         <td mat-cell *matCellDef="let element">
-          <button matTooltip="Détail de la session" [style.visibility]="element.linked ? 'visible' : 'hidden'" mat-icon-button color="primary"
+          <button matTooltip="Détail de la session" [style.visibility]="element.linked || element.status == 0 ? 'visible' : 'hidden'" mat-icon-button color="primary"
                   (click)="selectedRemote($event, element.id)">
             <mat-icon class="material-symbols-outlined">link</mat-icon>
           </button>

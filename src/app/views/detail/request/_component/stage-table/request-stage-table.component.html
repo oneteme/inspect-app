@@ -11,7 +11,8 @@
         </th>
         <td mat-cell *matCellDef="let element"
             [ngClass]="{'success': element.end && !element.exception,
-                        'fail': element.end && element.exception}">
+                        'fail': element.end && element.exception}"
+            [matTooltip]="element.exception ? (element.exception?.type | exceptionType) + ' ' + element.exception?.message : null">
           <span style="font-weight: bold;">{{element.command | typeColumnFormat}}</span>
           <div class="cell-primary">
             {{ element['name'] || 'N/A' }}

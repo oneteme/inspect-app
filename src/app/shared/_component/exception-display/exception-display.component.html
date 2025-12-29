@@ -6,7 +6,7 @@
       <div class="type" *ngIf="_exception.type">
         {{ _exception.type }}
       </div>
-      <div class="message ellipsis" *ngIf="_exception.message">
+      <div class="message ellipsis" *ngIf="_exception.message" [matTooltip]="_exception.message" >
         {{ _exception.message }}
       </div>
     </div>

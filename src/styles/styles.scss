@@ -403,3 +403,25 @@ loading.hidden {
                   rgba(255, 255, 255, 0.1) 10px
   ) !important;
 }
+
+.mat-mdc-cell, .mat-mdc-card {
+  &.success {
+    border-left: 3px solid #4caf50 !important;
+    background: linear-gradient(90deg, rgba(76, 175, 80, 0.08) 0%, transparent 100%) !important;
+  }
+
+  &.warning {
+    border-left: 3px solid orange !important;
+    background: linear-gradient(90deg, rgba(255, 165, 0, 0.08) 0%, transparent 100%) !important;
+  }
+
+  &.fail {
+    border-left: 3px solid #f44336 !important;
+    background: linear-gradient(90deg, rgba(244, 67, 54, 0.08) 0%, transparent 100%) !important;
+  }
+
+  &.unavailable {
+    border-left: 3px solid gray !important;
+    background: linear-gradient(90deg, rgba(128, 128, 128, 0.08) 0%, transparent 100%) !important;
+  }
+}

@@ -48,7 +48,6 @@ import {DatePipe} from "@angular/common";
 
               .status-dot {
                   background: #f59e0b;
-                  animation: pulse-warning 2s infinite;
               }
 
               &:hover {
@@ -61,7 +60,6 @@ import {DatePipe} from "@angular/common";
 
               .status-dot {
                   background: #94a3b8;
-                  animation: pulse-offline 2s infinite;
               }
 
               &:hover {
@@ -76,24 +74,6 @@ import {DatePipe} from "@angular/common";
           }
           50% {
               box-shadow: 0 0 0 4px rgba(16, 185, 129, 0);
-          }
-      }
-
-      @keyframes pulse-warning {
-          0%, 100% {
-              box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
-          }
-          50% {
-              box-shadow: 0 0 0 4px rgba(245, 158, 11, 0);
-          }
-      }
-
-      @keyframes pulse-offline {
-          0%, 100% {
-              box-shadow: 0 0 0 0 rgba(148, 163, 184, 0.7);
-          }
-          50% {
-              box-shadow: 0 0 0 4px rgba(148, 163, 184, 0);
           }
       }
   `]

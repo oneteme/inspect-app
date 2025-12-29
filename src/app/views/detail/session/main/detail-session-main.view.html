@@ -32,7 +32,7 @@
                   le {{ (session.start * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
               </label-icon>
               <div class="right" [matTooltip]="((session.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')">
-                  en <span style="font-weight: bold">{{{ start: session.start, end: session.end } | duration }}</span>
+                  <div>en <span style="font-weight: bold">{{{ start: session.start, end: session.end } | duration }}</span></div>
               </div>
             </mat-card-footer>
         </mat-card>

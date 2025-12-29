@@ -30,7 +30,7 @@
       le {{ (_instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
     </label-icon>
     <div *ngIf="_instance.end" class="right" [matTooltip]="((_instance.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')">
-      en <span style="font-weight: bold">{{((_instance.end - _instance.instant) | duration)}}</span>
+      <div>en <span style="font-weight: bold">{{((_instance.end - _instance.instant) | duration)}}</span></div>
     </div>
   </mat-card-footer>
 </mat-card>

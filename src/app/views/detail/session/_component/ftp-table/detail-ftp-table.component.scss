@@ -28,21 +28,3 @@
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   }
 }
-
-.mat-mdc-cell {
-  &.success {
-    border-left: 3px solid #4caf50;
-    background: linear-gradient(90deg, rgba(76, 175, 80, 0.08) 0%, transparent 100%);
-  }
-
-  &.fail {
-    border-left: 3px solid #f44336;
-    background: linear-gradient(90deg, rgba(244, 67, 54, 0.08) 0%, transparent 100%);
-  }
-
-  &.in-progress {
-    border-left: 3px solid #0080ff;
-    background: linear-gradient(90deg, rgba(255, 152, 0, 0.08) 0%, transparent 100%);
-    animation: pulse 2s ease-in-out infinite;
-  }
-}

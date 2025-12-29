@@ -4,28 +4,26 @@
   margin-top: 1.5em;
 }
 
-// ===========================
-// Navigation Verticale "Minimal Lines"
-// ===========================
 .vertical-tabs {
   display: flex;
   flex-direction: column;
+  gap: 4px;
   min-width: 200px;
   max-width: 200px;
+  padding: 16px 0 16px 0;
 }
 
 .tab-button {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 20px;
-  border-radius: 0;
+  padding: 10px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.25s ease;
-  background: transparent;
-  color: #64748b;
+  font-size: 14px;
   font-weight: 500;
-  font-size: 13px;
+  color: #475569;
+  transition: all 0.2s ease;
   position: relative;
   border-right: 4px solid transparent;
   margin-bottom: 2px;
@@ -64,7 +62,10 @@
     }
 
     .error-indicator {
-      color: #ef4444 !important;
+      color: #ef4444;
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
     }
   }
 
@@ -79,6 +80,13 @@
     flex-shrink: 0;
     transition: all 0.25s ease;
     color: inherit;
+  }
+
+  .tab-label-container {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+    gap: 4px;
   }
 
   .tab-label {
