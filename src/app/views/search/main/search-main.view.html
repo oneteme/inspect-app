@@ -1,4 +1,4 @@
-<header-page [titleIcon]="MAPPING_TYPE[type].icon" [ui-title]="MAPPING_TYPE[type].title" [ui-subtitle]="MAPPING_TYPE[type].subtitle">
+<header-page [iconOutlined]="true" [titleIcon]="MAPPING_TYPE[type].icon" [ui-title]="MAPPING_TYPE[type].title" [ui-subtitle]="MAPPING_TYPE[type].subtitle">
   <div class="filter-container md-3" [formGroup]="serverFilterForm">
     <advanced-filter-recap [filters]="advancedParams" (filterRemoved)="handleRemovedFilter($event)"
                            (focusField)="focusField($event)"></advanced-filter-recap>

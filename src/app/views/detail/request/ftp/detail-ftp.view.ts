@@ -65,8 +65,8 @@ export class DetailFtpView implements OnInit, OnDestroy {
         count: this.stages.length || 0,
         visible: true,
         type: 'stage',
-        hasError: false,
-        errorCount: 0
+        hasError: this.stages.some(s => s.exception),
+        errorCount: this.stages.filter(s => s.exception).length || 0
       },
       {
         label: 'Chronologie',

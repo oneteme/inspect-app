@@ -70,7 +70,15 @@
            [class.hidden]="!tab.visible"
            (click)="selectedTabIndex = i">
         <mat-icon class="material-symbols-outlined">{{ tab.icon }}</mat-icon>
-        <span class="tab-label">{{ tab.label }}</span>
+        <div class="tab-label-container">
+          <span class="tab-label">{{ tab.label }}</span>
+          <mat-icon *ngIf="tab.hasError && tab.errorCount > 0"
+                    class="error-indicator material-symbols-outlined"
+                    [matTooltip]="tab.errorCount + ' erreur(s)'"
+                    matTooltipPosition="right">
+            error
+          </mat-icon>
+        </div>
         <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
       </div>
     </div>

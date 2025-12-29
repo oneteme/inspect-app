@@ -491,15 +491,25 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
       }
       this.instance = res;
       return forkJoin([
-        this.instance.end ? of(null) : this._instanceTraceService.getLastInstanceTrace({instance: [this.params.instance]}),
+        this.instance.end ? of([]) : this._instanceTraceService.getLastInstanceTrace({instance: [this.params.instance]}),
         this._machineUsageService.getResourceMachineByPeriod({instance: this.params.instance, start: this.params.start, end: this.params.end}),
         this._instanceTraceService.getInstanceTraceByPeriod({instance: this.params.instance, start: this.params.start, end: this.params.end}),
+        this._instanceTraceService.getPendingSum({instance: this.params.instance, date: this.params.start}),
         this._traceService.getLogEntryByPeriod(this.params.instance, this.params.start, this.params.end)
       ]);
     }),finalize(()=>(this.isLoading=false)), takeUntil(this.$destroy)).subscribe({
-      next: ([last, usage, trace, log]) => {
+      next: ([last, usage, trace, pending, log]) => {
         this.usageResourceByPeriod = usage?.length ? usage.map(r => ({...r, date: new Date(r.date), maxHeap: this.instance.resource.maxHeap, diskTotalSpace: this.instance.resource.diskTotalSpace})) : [];
-        this.instanceTraceByPeriod = trace?.length ? trace.map(r => ({...r, date: new Date(r.date), queueCapacity: this.instance.configuration?.tracing?.queueCapacity})) : [];
+        let prv = pending;
+        this.instanceTraceByPeriod =
+          trace?.length
+            ? trace.map((acc: any) => {
+                acc.date = new Date(acc.date);
+                acc.pending = (prv = acc.pending + prv);
+                acc.queueCapacity = this.instance.configuration?.tracing?.queueCapacity;
+                return acc;
+              })
+            : [];
         this.logEntryByPeriod = log.map(r => ({...r, date: this._datePipe.transform(r.instant * 1000, 'dd/MM/yyyy HH:mm:ss')}));
         this.lastTrace = last[0]?.date;
         this.getStatActivity();
