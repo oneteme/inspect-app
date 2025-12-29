@@ -51,6 +51,9 @@ export class InstanceComponent implements OnInit {
   timelineEnd: number
   selectedTabIndex: number = 0;
   displayedColumns: string[] = ['resource', 'additional-properties'];
+  resourceData: { key: string; value: any }[] = [];
+  propertiesData: { key: string; value: any }[] = [];
+  kvColumns = ['key', 'value'];
 
   ngOnDestroy() {
     this.$destroy.next();
@@ -79,6 +82,8 @@ export class InstanceComponent implements OnInit {
     }).pipe(takeUntil(this.$destroy),
         switchMap(instance => {
           this.instance = instance;
+          this.resourceData = this.toKeyValueArray( this.instance.resource);
+          this.propertiesData = this.toKeyValueArray( this.instance.properties);
           this.dataSource = new MatTableDataSource([instance]);
           return this._instanceService.getInstancesPeriodsByAppName({
             env: this.params.env,
@@ -93,6 +98,7 @@ export class InstanceComponent implements OnInit {
         finalize(() => this.isLoading = false)
         ).subscribe({
         next : result => {
+
           this.allInstance = result.instances;
           if (this.instance?.configuration) {
             this.configuration = JSON.stringify(this.instance.configuration, null, 4);
@@ -160,7 +166,6 @@ export class InstanceComponent implements OnInit {
     const groupByContent = new Map<string, number>(
         groups.map(g => [g.content, g.id])
     );
-    console.log(this.instance.id === this.allInstance.at(-1).id);
     let items = this.allInstance.map((a: any, i: number) => {
       let start= Math.trunc(a.start);
       let end = a.end? Math.trunc(a.end) : INFINITY;
@@ -189,6 +194,18 @@ export class InstanceComponent implements OnInit {
         followMouse: true
       }
     };
+  }
+  toKeyValueArray(obj: any): { key: string; value: any }[] {
+    if (!obj) {
+      return [];
+    }
+
+    return Object.entries(obj).map(([key, value]) => ({
+      key,
+      value: typeof value === 'object'
+          ? JSON.stringify(value, null, 2)
+          : value
+    }));
   }
 
 }

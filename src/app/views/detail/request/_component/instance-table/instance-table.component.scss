@@ -9,3 +9,13 @@
     background: linear-gradient(90deg, rgba(244, 67, 54, 0.08) 0%, transparent 100%);
   }
 }
+.clickable-row {
+  cursor: pointer;
+}
+.disabled-row {
+  cursor: default;
+}
+
+.clickable-row:hover {
+  background-color: rgba(0, 0, 0, 0.04); /* style Material */
+}

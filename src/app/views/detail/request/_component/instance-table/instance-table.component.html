@@ -9,7 +9,8 @@
                         Version
                     </div>
                 </th>
-                <td mat-cell *matCellDef="let element" class="success">
+                <td mat-cell *matCellDef="let element" class="success"
+                    [ngClass]="{'success': element.id === mainId}">
                     <span style="font-weight: bold;">{{ element['version'] || 'N/A' }}</span>
 
                 </td>
@@ -18,7 +19,7 @@
             <ng-container matColumnDef="args">
                 <th mat-header-cell *matHeaderCellDef>
                     <div class="header-cell-content">
-                        <mat-icon class="material-symbols-outlined">list_alt</mat-icon>
+                        <mat-icon class="material-symbols-outlined">fork_right</mat-icon>
                         Branches
                     </div>
                 </th>
@@ -49,18 +50,19 @@
                     </div>
                 </th>
                 <td mat-cell *matCellDef="let element">
-                    <div *ngIf="!element.end" style="display: flex; align-items: center; gap: 6px;">
+                    <div *ngIf="!element.end ||element.end> dateNow" style="display: flex; align-items: center; gap: 6px;">
                         <mat-spinner [diameter]="14"></mat-spinner>
                         <span class="cell-secondary">En cours...</span>
                     </div>
-                    <div *ngIf="element.end" class="cell-primary" [matTooltip]="element.end | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr'">
+                    <div *ngIf="element.end < dateNow" class="cell-primary" [matTooltip]="element.end | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr'">
                         {{ { start: element.start / 1000, end: element.end/ 1000 } | duration }}
                     </div>
                 </td>
             </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns;sticky: true"></tr>
-            <tr mat-row *matRowDef="let row;columns: displayedColumns;"></tr>
+            <tr mat-row     [class.clickable-row]="row.id !== mainId" [class.disabled-row]="!(row.id !== mainId)"
+                *matRowDef="let row;columns: displayedColumns;"  (click)="row.id !== mainId && goToDetail($event,row)"   class="clickable-row"></tr>
         </table>
     </div>
     <mat-paginator #paginator [pageSize]="3" [hidePageSize]="true"

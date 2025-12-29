@@ -129,3 +129,9 @@ mat-card {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   }
 }
+.tables-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
