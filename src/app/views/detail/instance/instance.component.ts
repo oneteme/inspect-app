@@ -98,7 +98,9 @@ export class InstanceComponent implements OnInit {
         finalize(() => this.isLoading = false)
         ).subscribe({
         next : result => {
-
+          if(this.instance.resource || this.instance.properties) {
+            this.tabs[2].visible = true;
+          }
           this.allInstance = result.instances;
           if (this.instance?.configuration) {
             this.configuration = JSON.stringify(this.instance.configuration, null, 4);
@@ -138,10 +140,10 @@ export class InstanceComponent implements OnInit {
         label: 'Properties',
         icon: 'settings',
         count: 0,
-        visible: true,
+        visible: false,
         type: 'properties',
         hasError: false,
-        errorCount: 0
+        errorCount: 0,
       }
     ]
   }
@@ -168,14 +170,14 @@ export class InstanceComponent implements OnInit {
     );
     let items = this.allInstance.map((a: any, i: number) => {
       let start= Math.trunc(a.start);
-      let end = a.end? Math.trunc(a.end) : INFINITY;
+      let end = a.end? Math.trunc(a.end) :  new Date(new Date().setHours(23, 59, 59, 999)).getTime();
       return {
         group: `${groupByContent.get(a.version)}`,
         start: start,
         end: end,
         type: end <= start ? 'point' : 'range',
         content:  this.instance.type === 'CLIENT' ? a.re:a.branch + ' / ' + a.hash,
-        className: `${this.instance.id === a.id ? 'instance-active' : 'instance'}`,
+        className: `${this.instance.id === a.id ? 'instance-active' : 'instance'}` + `${a.end ? '' : ' in-progress'}`,
         title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end , 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform((end/1000) - (start/1000))})<br>`
       };
     });

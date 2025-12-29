@@ -84,14 +84,14 @@
             <div class="table-container">
                 <div class="table-wrapper tables-container">
                     <!-- TABLE RESOURCE -->
-                    <table mat-table [dataSource]="resourceData" class="mat-elevation-z8">
+                    <table mat-table [dataSource]="resourceData" class="mat-elevation-z8 no-hover"  *ngIf="instance.resource">
                         <ng-container matColumnDef="key">
-                            <th mat-header-cell *matHeaderCellDef> Attribut </th>
+                            <th mat-header-cell *matHeaderCellDef> Resource </th>
                             <td mat-cell *matCellDef="let element">{{ element.key }}</td>
                         </ng-container>
 
                         <ng-container matColumnDef="value">
-                            <th mat-header-cell *matHeaderCellDef> Valeur </th>
+                            <th mat-header-cell *matHeaderCellDef></th>
                             <td mat-cell *matCellDef="let element">{{ element.value }}</td>
                         </ng-container>
 
@@ -100,15 +100,14 @@
                     </table>
 
                     <!-- TABLE PROPERTIES -->
-                    <table mat-table [dataSource]="propertiesData" class="mat-elevation-z8">
-
+                    <table mat-table [dataSource]="propertiesData" class="mat-elevation-z8 no-hover "  *ngIf="instance.properties">
                         <ng-container matColumnDef="key">
-                            <th mat-header-cell *matHeaderCellDef> Attribut </th>
+                            <th mat-header-cell *matHeaderCellDef> Additional properties </th>
                             <td mat-cell *matCellDef="let element">{{ element.key }}</td>
                         </ng-container>
 
                         <ng-container matColumnDef="value">
-                            <th mat-header-cell *matHeaderCellDef> Valeur </th>
+                            <th mat-header-cell *matHeaderCellDef></th>
                             <td mat-cell *matCellDef="let element">{{ element.value }}</td>
                         </ng-container>
 
