@@ -143,7 +143,7 @@ export class InstanceService {
     re:string,
   }[]> {
     let args: any = {
-      'column': 'id,start,end.coalesce(2040-12-31T00:00:00.000Z):end,version,address,branch,hash,re',
+      'column': 'id,start,end,version,address,branch,hash,re',
       'environement': filters.env,
       'app_name': `"${filters.appName}"`,
       'order': 'start.asc'

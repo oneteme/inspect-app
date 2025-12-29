@@ -45,13 +45,7 @@ table {
   background-color: red !important;
 }
 
-.mat-mdc-row .mat-mdc-cell {
-  cursor: pointer;
-}
 
-.mat-mdc-row:hover .mat-mdc-cell {
-  background-color: rgb(206, 206, 206);
-}
 
 .url {
   color: blue;
@@ -128,4 +122,13 @@ mat-card {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   }
+}
+.tables-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  align-items: start;
+}
+.no-hover .mat-row:hover {
+  background-color: transparent !important;
 }
