@@ -1,10 +1,11 @@
 import {DatePipe} from "@angular/common";
-import {Component, ElementRef, Input, OnChanges, SimpleChanges, ViewChild} from "@angular/core";
+import {Component, ElementRef, inject, Input, OnChanges, SimpleChanges, ViewChild} from "@angular/core";
 import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
 import {DurationPipe} from "../../../../../shared/pipe/duration.pipe";
 import {ANALYTIC_MAPPING} from "../../../../constants";
 import {MainSessionView, RestSessionView} from "../../../../../model/request.model";
 import {InstanceEnvironment} from "../../../../../model/trace.model";
+import {EnvRouter} from "../../../../../service/router.service";
 
 let options: any = {
     clickToUse: true,
@@ -38,6 +39,7 @@ let options: any = {
 export class DetailTimelineComponent implements OnChanges {
 
     private readonly durationPipe = new DurationPipe();
+    private readonly _router: EnvRouter = inject(EnvRouter);
     private readonly pipe = new DatePipe('fr-FR');
     protected readonly ANALYTIC_MAPPING = ANALYTIC_MAPPING;
     maptype : {
@@ -50,7 +52,7 @@ export class DetailTimelineComponent implements OnChanges {
         'ftp'          : (c:any,i:number) => this.mapother(c,i),
         'smtp'         : (c:any,i:number) => this.mapother(c,i),
         'ldap'         : (c:any,i:number) => this.mapother(c,i),
-        'database'     : (c:any,i:number) => this.mapother(c,i),
+        'jdbc'         : (c:any,i:number) => this.mapother(c,i),
         'local'        : (c:any,i:number) => this.mapother(c,i),
         'log'          : (c:any,i:number) => this.mapLog(c,i)
     }
@@ -78,7 +80,7 @@ export class DetailTimelineComponent implements OnChanges {
                     (this.request.ftpRequests ?? []).map(r => ({...r, typeTimeline: 'ftp'})),
                     (this.request.mailRequests ?? []).map(r => ({...r, typeTimeline: 'smtp'})),
                     (this.request.ldapRequests ?? []).map(r => ({...r, typeTimeline: 'ldap'})),
-                    (this.request.databaseRequests ?? []).map(r => ({...r, typeTimeline: 'database'})),
+                    (this.request.databaseRequests ?? []).map(r => ({...r, typeTimeline: 'jdbc'})),
                     (this.request.localRequests ?? []).map(r => ({...r, typeTimeline: 'local'})),
                     (this.request.logEntries ?? []).map(r => ({...r, typeTimeline: 'log'})),
                     (this.request.httpSessionStages ?? []).map(r => ({...r, typeTimeline: 'session-stage'})));
@@ -145,8 +147,9 @@ export class DetailTimelineComponent implements OnChanges {
         const isInProgress = !c.end && c.typeTimeline != 'action';
         let end = c.typeTimeline == 'action' ? c.start * 1000 :
             c.end ? c.end * 1000 :  new Date(new Date().setHours(23, 59, 59, 999)).getTime();
+
         let o = {
-            id: id,
+            id: c.id ?`${c.id}_${c.typeTimeline}`: id,
             group: this.isWebApp ? 0 : c.threadName,
             content: c.typeTimeline == 'stage' ? '' : c.typeTimeline == 'action' ? this.ANALYTIC_MAPPING[c.type].label : (c.schema || c.name || c.host || c.level || 'N/A'),
             start: c.start * 1000,
@@ -180,7 +183,7 @@ export class DetailTimelineComponent implements OnChanges {
         const el = document.createElement('span');
         el.innerHTML = `<span class="material-icons ${le.level.toLowerCase()}" >${le.level.toLowerCase()}</span>`
         return {
-            id: `log_${id}`,
+            id: le.id ?`${le.id}_${le.typeTimeline}` : id,
             group:  this.isWebApp ? 0 : this.dataArray[0].threadName,
             content: el as unknown as any,
             start: le.instant * 1000,
@@ -191,7 +194,7 @@ export class DetailTimelineComponent implements OnChanges {
 
     mapSessionStage(le: any, id: number): DataItem {
         return {
-          id: 'stage_' + id,
+          id:  le.id ? `${le.id}_${le.typeTimeline}` : id,
           content: "",
           start: le.start * 1000,
           end: le.end * 1000,
@@ -210,6 +213,16 @@ export class DetailTimelineComponent implements OnChanges {
 
         if (this.timelineEnd != this.request.end * 1000) {
             timeline.addCustomTime(this.request.end * 1000, "async");
+        }
+    }
+
+    onitemCLicked(event: any) {
+        if(event.item){
+            let id = event.item.split('_')[0];
+            let request_type = event.item.split('_')[1];
+            if(request_type !== "log"){
+                this._router.open(`#/request/${request_type}/${id}`)
+            }
         }
     }
 }

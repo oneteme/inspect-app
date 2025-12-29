@@ -33,7 +33,6 @@ export class DetailLdapTableComponent {
                     this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
                 }
             }
-            this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
             this.dataSource.paginator.pageIndex = 0;
         }else{
             this.dataSource = new MatTableDataSource();

@@ -165,7 +165,6 @@ export class SearchMainView implements OnInit, OnDestroy {
             'start': this.queryParams.period.start.toISOString(),
             'end': this.queryParams.period.end.toISOString()
         };
-        console.log(this.queryParams)
         if (this.advancedParams) {
             Object.assign(params, this.advancedParams);
         }
