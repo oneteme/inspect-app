@@ -103,7 +103,6 @@ export class DetailTimelineComponent implements OnChanges {
                     start: this.timelineStart - padding,
                     end: this.timelineEnd + padding
                 };
-                console.log(this.dataItems)
             }
         }
     }
@@ -209,7 +208,6 @@ export class DetailTimelineComponent implements OnChanges {
         if(this.dataItems.length > 50 ) {
             timeline.on('rangechanged', (props)=>{
                 timeline.setItems(this.getDataForRange(this.dataArray, props.start.getTime() / 1000, props.end.getTime() / 1000).map((c: any, i: number) =>this.maptype[c.typeTimeline](c, i)));
-              console.log("onTimelineCreate", this.getDataForRange(this.dataArray, props.start.getTime() / 1000, props.end.getTime() / 1000).map((c: any, i: number) =>this.maptype[c.typeTimeline](c, i)));
             });
 
         }
