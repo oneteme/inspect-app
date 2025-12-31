@@ -9,8 +9,8 @@
                         Version
                     </div>
                 </th>
-                <td mat-cell *matCellDef="let element" class="success"
-                    [ngClass]="{'success': element.id === mainId}">
+                <td mat-cell *matCellDef="let element" class=""
+                    [ngClass]="{'selected': element.id === mainId}">
                     <span style="font-weight: bold;">{{ element['version'] || 'N/A' }}</span>
 
                 </td>
@@ -24,7 +24,7 @@
                     </div>
                 </th>
                 <td mat-cell *matCellDef="let element">
-                    <span [matTooltip]="element['args']">{{ element['branch']  }} / {{ element['hash']  }}</span>
+                    <app-branch-hash-badge [branch]="element['branch']" [hash]="element['hash']"/>
                 </td>
             </ng-container>
 
