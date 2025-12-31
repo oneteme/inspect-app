@@ -1,6 +1,8 @@
 <div class="container" *ngIf="_exception?.type || _exception?.message">
-  <div class="content">
-    <mat-icon class="material-symbols-outlined">error</mat-icon>
+  <div class="content" [ngClass]="type">
+
+
+    <mat-icon class="material-symbols-outlined">{{type == 'success' ? 'info' : type == 'warning' ? 'warning' : 'error'}}</mat-icon>
 
     <div class="exception">
       <div class="type" *ngIf="_exception.type">

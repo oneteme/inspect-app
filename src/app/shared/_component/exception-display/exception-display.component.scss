@@ -1,6 +1,5 @@
 .container {
   margin-top: 0.5em;
-  background: linear-gradient(135deg, #fff5f5 0%, #ffe5e5 100%);
   border-radius: 8px;
   padding: 1em;
 
@@ -9,8 +8,19 @@
     align-items: center;
     gap: 0.75em;
 
+    &.warning {
+      color: #ff9800;
+    }
+
+    &.fail {
+      color: #f44336;
+    }
+
+    &.success {
+      color: #4caf50;
+    }
+
     mat-icon {
-      color: #e53935;
       width: 24px;
       height: 24px;
       font-size: 24px;
@@ -20,25 +30,15 @@
     .exception {
       flex: 1;
       overflow: hidden;
-
       .type {
         font-weight: 600;
-        color: #c62828;
         font-size: 13px;
         margin-bottom: 0.25em;
       }
 
       .message {
-        color: #d32f2f;
         font-size: 12px;
         line-height: 1.5;
-      }
-    }
-
-    .actions {
-
-      button {
-        color: #d32f2f;
       }
     }
   }
