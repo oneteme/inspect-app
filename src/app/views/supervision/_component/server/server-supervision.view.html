@@ -131,7 +131,7 @@
                [data]="instanceTraceByPeriod" [isLoading]="isLoading"></chart>
         <chart [class.hidden]="activityDisplayType != 'ATTEMPT'" type="line" [config]="ATTEMPT_INSTANCE_TRACE_BY_PERIOD_LINE"
                [data]="instanceTraceByPeriod" [isLoading]="isLoading"></chart>
-        <report-table [class.hidden]="activityDisplayType != 'REPORT'" style="height: 252px;" [data]="logEntryByPeriod" (onClick)="open($event)"></report-table>
+        <report-table [class.hidden]="activityDisplayType != 'REPORT'" style="height: 252px;" [data]="logEntryByPeriod" (onClick)="open($event)" [useFilter]="true"></report-table>
       </div>
     </div>
   </div>
