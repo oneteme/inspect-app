@@ -79,7 +79,7 @@ mat-card {
   background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
   border: 1px solid #ddd6fe;
   border-radius: 8px;
-  margin-right: 12px;
+  margin-left: 12px;
   font-size: 12px;
   font-weight: 600;
   color: #5b21b6;
@@ -123,12 +123,16 @@ mat-card {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
   }
 }
-.tables-container {
+.grid-table {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 16px;
   align-items: start;
 }
+.grid-table:has(div:nth-child(2)) {
+  grid-template-columns: 1fr 1fr;
+}
+
 .no-hover .mat-row:hover {
   background-color: transparent !important;
 }

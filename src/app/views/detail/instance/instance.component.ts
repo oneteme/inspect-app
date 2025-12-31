@@ -176,7 +176,7 @@ export class InstanceComponent implements OnInit {
         start: start,
         end: end,
         type: end <= start ? 'point' : 'range',
-        content:  this.instance.type === 'CLIENT' ? a.re:a.branch + ' / ' + a.hash,
+        content:  this.instance.type === 'CLIENT' ? a.re:a.branch? a.branch + ' / ' + a.hash : 'N/A',
         className: `${this.instance.id === a.id ? 'instance-active' : 'instance'}` + `${a.end ? '' : ' in-progress'}`,
         title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end , 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform((end/1000) - (start/1000))})<br>`
       };
