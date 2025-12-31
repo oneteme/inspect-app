@@ -10,7 +10,7 @@ import {LocalRequest} from "../../../../../model/trace.model";
     styleUrls: ['./detail-local-table.component.scss']
 })
 export class DetailLocalTableComponent{
-    displayedColumns: string[] = ['location', 'name',  'start', 'duree'];
+    displayedColumns: string[] = ['type', 'location', 'name',  'start', 'duree'];
     dataSource: MatTableDataSource<LocalRequest> = new MatTableDataSource();
 
     @ViewChild('paginator', {static: true}) paginator: MatPaginator;
