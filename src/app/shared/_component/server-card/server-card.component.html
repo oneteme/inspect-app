@@ -2,7 +2,7 @@
   <mat-card-title>
     <label-icon icon="widgets">
       <div style="display: flex; align-items: center; gap: 1.5em;">
-        {{_instance.name}}
+        <span style="cursor: pointer" (click)="navigateOnServerClick($event)">{{_instance.name}}</span>
         <app-status-indicator *ngIf="!_isLoadingLastTrace"
                               (onClick)="navigate($event)"
                               [params]="{id: _instance.id, end: _instance.end, configuration: _instance.configuration, lastTrace: _lastTrace}"></app-status-indicator>
