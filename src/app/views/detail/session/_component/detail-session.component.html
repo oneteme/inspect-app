@@ -25,6 +25,7 @@
     <!-- API -->
     <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'rest'" class="tab-panel">
       <rest-table [requests]="session.restRequests"
+                  [useFilter]="true"
                   (onClickRemote)="selectedRemote($event)"
                   (onClickRow)="selectedRest($event)">
       </rest-table>
@@ -38,6 +39,7 @@
     <!-- FTP -->
     <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'ftp'" class="tab-panel">
       <ftp-table [requests]="session.ftpRequests"
+                 [useFilter]="true"
                  (onClickRow)="selectedFtp($event)">
       </ftp-table>
     </div>
@@ -45,6 +47,7 @@
     <!-- SMTP -->
     <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'smtp'" class="tab-panel">
       <smtp-table [requests]="session.mailRequests"
+                  [useFilter]="true"
                   (onClickRow)="selectedSmtp($event)">
       </smtp-table>
     </div>
@@ -52,6 +55,7 @@
     <!-- LDAP -->
     <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'ldap'" class="tab-panel">
       <ldap-table [requests]="session.ldapRequests"
+                  [useFilter]="true"
                   (onClickRow)="selectedLdap($event)">
       </ldap-table>
     </div>
@@ -59,6 +63,7 @@
     <!-- BDD -->
     <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'database'" class="tab-panel">
       <database-table [requests]="session.databaseRequests"
+                      [useFilter]="true"
                       (onClickRow)="selectedQuery($event)">
       </database-table>
     </div>
