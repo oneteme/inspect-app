@@ -20,6 +20,8 @@ import { StacktraceDialogComponent } from './_component/exception-display/stackt
 import {VersionBadgeComponent} from "./_component/version-badge/version-badge.component";
 import {StatusIndicatorComponent} from "./_component/status-indicator/status-indicator.component";
 import {ServerCardComponent} from "./_component/server-card/server-card.component";
+import {BranchHashBadgeComponent} from "./_component/branch-hash-badge/branch-hash-badge.component";
+
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -60,6 +62,7 @@ export const MY_DATE_FORMATS = {
     ExceptionDisplayComponent,
     StacktraceDialogComponent,
     VersionBadgeComponent,
+    BranchHashBadgeComponent,
     StatusIndicatorComponent,
     ServerCardComponent
   ],
@@ -79,6 +82,7 @@ export const MY_DATE_FORMATS = {
     HeaderSectionComponent,
     ExceptionDisplayComponent,
     VersionBadgeComponent,
+    BranchHashBadgeComponent,
     StatusIndicatorComponent,
     ServerCardComponent
   ]
