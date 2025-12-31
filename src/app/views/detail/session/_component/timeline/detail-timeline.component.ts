@@ -89,7 +89,7 @@ export class DetailTimelineComponent implements OnChanges {
                     this.dataGroups = [{ id: 0, content: this.instance.re }];
                     this.isWebApp = true;
                 } else {
-                    this.dataGroups = [...new Set(this.dataArray.filter(c => c.threadName).map(c => c.threadName))].map((c: any) => ({ id: c, content: c }))
+                    this.dataGroups = [...new Set(this.dataArray.map(c => c.threadName || '?'))].map((c: any) => ({ id: c, content: c }))
                 }
                 if(this.dataArray.length > 50 ){
                     this.timelineEnd = this.dataArray[51].start * 1000;
@@ -150,7 +150,7 @@ export class DetailTimelineComponent implements OnChanges {
 
         let o = {
             id: c.id ?`${c.id}_${c.typeTimeline}`: id,
-            group: this.isWebApp ? 0 : c.threadName,
+            group: this.isWebApp ? 0 : c.threadName || '?',
             content: c.typeTimeline == 'stage' ? '' : c.typeTimeline == 'action' ? this.ANALYTIC_MAPPING[c.type].label : (c.schema || c.name || c.host || c.level || 'N/A'),
             start: c.start * 1000,
             end: end,
@@ -209,6 +209,7 @@ export class DetailTimelineComponent implements OnChanges {
             timeline.on('rangechanged', (props)=>{
                 timeline.setItems(this.getDataForRange(this.dataArray, props.start.getTime() / 1000, props.end.getTime() / 1000).map((c: any, i: number) =>this.maptype[c.typeTimeline](c, i)));
             });
+
         }
 
         if (this.timelineEnd != this.request.end * 1000) {
