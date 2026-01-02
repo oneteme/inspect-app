@@ -17,8 +17,7 @@
         </th>
         <td mat-cell *matCellDef="let element"
             [ngClass]="{'success': element.end && !element.failed,
-                        'fail': element.end && element.failed,
-                        'in-progress': !element.end}"
+                        'fail': element.end && element.failed}"
             [matTooltip]="element.exception ? (element.exception?.type | exceptionType) + ' ' + element.exception?.message : null">
           {{ element['host'] || 'N/A' }}
         </td>
@@ -27,8 +26,8 @@
       <ng-container matColumnDef="command">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>
           <div class="header-cell-content">
-            <mat-icon class="material-symbols-outlined">data_object</mat-icon>
-            Commande
+            <mat-icon class="material-symbols-outlined">category</mat-icon>
+            Ressource
           </div>
         </th>
         <td mat-cell *matCellDef="let element">
@@ -68,6 +67,15 @@
         </td>
       </ng-container>
 
+      <ng-container matColumnDef="user">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          <div class="header-cell-content">
+            <mat-icon class="material-symbols-outlined">person</mat-icon>
+            Utilisateur
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let row"> {{row.user || 'N/A'}} </td>
+      </ng-container>
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns;sticky: true"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectedRequest($event, row.id)"></tr>

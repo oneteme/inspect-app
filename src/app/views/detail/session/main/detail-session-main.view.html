@@ -2,8 +2,7 @@
     <div class="header-card">
       <mat-card style="width: 60vw; min-width: 60vw;"
                   [ngClass]="{'success': session.end && (!session.exception?.type || !session.exception?.message),
-                              'fail': session.end && (session.exception?.type || session.exception?.message),
-                              'in-progress': !session.end}">
+                              'fail': session.end && (session.exception?.type || session.exception?.message)}">
             <mat-card-title>
               <div style="display: flex; gap: 0.5em; align-items: center; width: 85%">
                 <mat-icon class="material-symbols-outlined">{{MAPPING_TYPE[type]?.icon}}</mat-icon>

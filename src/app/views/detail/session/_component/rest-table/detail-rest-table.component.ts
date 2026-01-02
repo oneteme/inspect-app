@@ -18,7 +18,7 @@ export class DetailRestTableComponent implements OnDestroy {
     private readonly pipe = new DatePipe('fr-FR');
     private readonly $destroy = new Subject<void>();
 
-    displayedColumns: string[] = ['host', 'path', 'start', 'duree','action'];
+    displayedColumns: string[] = ['host', 'path', 'start', 'duree', 'user', 'action'];
     dataSource: MatTableDataSource<RestRequestDto> = new MatTableDataSource();
     filterTable =new Map<string, any>();
     @Input() filterValue: string = '';

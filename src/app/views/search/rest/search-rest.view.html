@@ -11,7 +11,7 @@
       <mat-date-range-picker #picker></mat-date-range-picker>
     </mat-form-field>
     <mat-form-field class="no-subscript" [class.loading]="serverNameIsLoading" appearance="outline">
-      <mat-label>Serveur</mat-label>
+      <mat-label>Hôte</mat-label>
       <mat-select [formControl]="serverFilterForm.controls.appname" multiple (selectionChange)="onChangeServer($event)">
 
         <span *ngIf="serverNameIsLoading && queryParams.appname && queryParams.appname[0]!=''"><mat-option *ngFor="let s of queryParams.appname" [value]="s">{{s}}</mat-option></span>
@@ -69,7 +69,7 @@
         <th mat-header-cell *matHeaderCellDef mat-sort-header>
           <div class="header-cell-content">
             <mat-icon class="material-symbols-outlined">dns</mat-icon>
-            Serveur
+            Hôte
           </div>
         </th>
         <td mat-cell *matCellDef="let element"
@@ -85,11 +85,11 @@
       <ng-container matColumnDef="method/path">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>
           <div class="header-cell-content">
-            <mat-icon class="material-symbols-outlined">api</mat-icon>
-            API
+            <mat-icon class="material-symbols-outlined">category</mat-icon>
+            Ressource
           </div>
         </th>
-        <td mat-cell *matCellDef="let element" [matTooltip]="element.query" matTooltipClass="tooltip-class">
+        <td mat-cell *matCellDef="let element" [matTooltip]="element.query">
           <span style="font-weight: bold;"
                 [ngStyle]="{'color': element.protocol=='https' ? 'green':'gray'}">{{ element.method | typeColumnFormat }} </span>
           <br>
@@ -98,7 +98,7 @@
       </ng-container>
 
       <ng-container matColumnDef="start">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:15%">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:10%">
           <div class="header-cell-content">
             <mat-icon class="material-symbols-outlined">schedule</mat-icon>
             Début
@@ -112,7 +112,7 @@
       </ng-container>
 
       <ng-container matColumnDef="durée">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:15%">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:10%">
           <div class="header-cell-content">
             <mat-icon class="material-symbols-outlined">timer</mat-icon>
             Durée
@@ -130,7 +130,7 @@
       </ng-container>
 
       <ng-container matColumnDef="user">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width:15%">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
           <div class="header-cell-content">
             <mat-icon class="material-symbols-outlined">person</mat-icon>
             Utilisateur

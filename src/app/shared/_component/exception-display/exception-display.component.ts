@@ -13,6 +13,7 @@ export class ExceptionDisplayComponent {
 
   constructor(private dialog: MatDialog) {}
 
+  @Input() type: 'fail' | 'warning' | 'success' = 'fail';
   @Input() set exception(value: ExceptionInfo) {
     if(value) {
       this._exception = value;

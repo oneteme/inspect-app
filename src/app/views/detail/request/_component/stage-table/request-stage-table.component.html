@@ -5,18 +5,15 @@
       <ng-container matColumnDef="name">
         <th mat-header-cell *matHeaderCellDef mat-sort-header style="width: 15%">
           <div class="header-cell-content">
-            <mat-icon class="material-symbols-outlined">label</mat-icon>
-            Nom
+            <mat-icon class="material-symbols-outlined">event_list</mat-icon>
+            Evènement
           </div>
         </th>
         <td mat-cell *matCellDef="let element"
             [ngClass]="{'success': element.end && !element.exception,
                         'fail': element.end && element.exception}"
             [matTooltip]="element.exception ? (element.exception?.type | exceptionType) + ' ' + element.exception?.message : null">
-          <span style="font-weight: bold;">{{element.command | typeColumnFormat}}</span>
-          <div class="cell-primary">
-            {{ element['name'] || 'N/A' }}
-          </div>
+          {{ element['name'] || 'N/A' }}
         </td>
       </ng-container>
 
@@ -24,11 +21,24 @@
         <th mat-header-cell *matHeaderCellDef>
           <div class="header-cell-content">
             <mat-icon class="material-symbols-outlined">list_alt</mat-icon>
-            Arguments
+            Argument
           </div>
         </th>
-        <td mat-cell *matCellDef="let element">
-          <span [matTooltip]="element['args']">{{ element['args'] }}</span>
+        <td mat-cell *matCellDef="let element" [matTooltip]="element['args']">
+          <span style="font-weight: bold;">{{element.command | typeColumnFormat}}</span><br/>
+          {{ element['args'] }}
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="count">
+        <th mat-header-cell *matHeaderCellDef style="width: 15%">
+          <div class="header-cell-content">
+            <mat-icon class="material-symbols-outlined">numbers</mat-icon>
+            Nombre
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let element" [matTooltip]="element['count']">
+          {{ element['count'] }}
         </td>
       </ng-container>
 

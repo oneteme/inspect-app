@@ -13,7 +13,7 @@ import {INFINITY} from "../../../../constants";
 })
 export class DetailFtpTableComponent {
     private readonly pipe = new DatePipe('fr-FR');
-    displayedColumns: string[] = ['host', 'command', 'start', 'duree'];
+    displayedColumns: string[] = ['host', 'command', 'start', 'duree', 'user'];
     dataSource: MatTableDataSource<FtpRequestDto> = new MatTableDataSource();
 
     filterTable =new Map<string, any>();
