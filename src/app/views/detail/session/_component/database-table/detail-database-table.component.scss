@@ -50,20 +50,3 @@
     margin-top: 3px;
     line-height: 1.2;
 }
-
-.cell-badge {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 3px 10px;
-    border-radius: 6px;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    line-height: 1.4;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    transition: all 0.2s ease;
-    border: 1px solid rgba(0, 0, 0, 0.1);
-    background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-    color: #333;
-}

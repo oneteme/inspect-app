@@ -19,8 +19,7 @@
             [ngClass]="{'success': element.status >= 200 && element.status < 300,
                         'warning': element.status >= 300 && element.status < 500,
                         'fail': element.status >= 500,
-                        'unavailable': element.status == 0 && element.end,
-                        'in-progress': !element.end}"
+                        'unavailable': element.status == 0 && element.end}"
             [matTooltip]="element.exception ? (element.exception?.type | exceptionType) + ' ' + element.exception?.message : element.bodyContent">
           {{element['host'] || 'N/A'}}
         </td>
@@ -29,8 +28,8 @@
       <ng-container matColumnDef="path">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>
           <div class="header-cell-content">
-            <mat-icon class="material-symbols-outlined">api</mat-icon>
-            API
+            <mat-icon class="material-symbols-outlined">category</mat-icon>
+            Ressource
           </div>
         </th>
         <td mat-cell *matCellDef="let element" [matTooltip]="element.query">
@@ -71,6 +70,16 @@
             {{ { start: element.start, end: element.end } | duration }}
           </div>
         </td>
+      </ng-container>
+
+      <ng-container matColumnDef="user">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>
+          <div class="header-cell-content">
+            <mat-icon class="material-symbols-outlined">person</mat-icon>
+            Utilisateur
+          </div>
+        </th>
+        <td mat-cell *matCellDef="let row"> {{row.user || 'N/A'}} </td>
       </ng-container>
 
       <ng-container matColumnDef="action">
