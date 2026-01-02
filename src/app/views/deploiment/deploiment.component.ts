@@ -31,6 +31,7 @@ export class DeploimentComponent implements OnDestroy {
   versionColor: any;
   params: Partial<{ env: string }> = {};
   subscriptions: Subscription[] = [];
+  date = new Date().getTime();
   onlineServerStat: number = 0;
   pendingServerStat: number = 0;
   offlineServerStat: number = 0;
@@ -57,6 +58,7 @@ export class DeploimentComponent implements OnDestroy {
       this._instanceService.getLastServerStart({env: this.params.env})
       .pipe(
         switchMap((lastServers: LastServerStart[]) => {
+          console.log(lastServers);
           return forkJoin({
             lastTraces: lastServers.length ? this._instanceTraceService.getLastInstanceTrace({instance: lastServers.map(last => last.id)}) : of([]),
             lastServers: of(lastServers)

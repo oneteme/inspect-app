@@ -501,7 +501,7 @@ export class Constants {
     static readonly MAPPING_TYPE: {[key: string]: Partial<{title: string, subtitle: string, icon: string}>} = {
         request: {title: 'Requêtes', icon: 'call_made'},
         rest: {title: 'Appels reçus', subtitle: 'Gestion et supervision des sessions', icon: 'call_received'},
-        batch: {title: 'Exécution de Batch', subtitle: 'Gestion et supervision des sessions', icon: 'manufacturing'},
+        batch: {title: 'Exécution de CRON', subtitle: 'Gestion et supervision des sessions', icon: 'manufacturing'},
         test: {title: 'Exécution de Test', subtitle: 'Gestion et supervision des sessions', icon: 'rule'},
         startup: {title: 'Lancement de Serveur', subtitle: 'Gestion et supervision des sessions', icon: 'restart_alt'},
         view: {title: 'Navigation', subtitle: 'Gestion et supervision des sessions', icon: 'ads_click'},

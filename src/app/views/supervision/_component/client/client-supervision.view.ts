@@ -393,7 +393,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   unavailableStat:  number = 0;
   traceStat:  number = 0;
   params: Partial<{instance: string, env: string, start: Date, end: Date, app_name?: string}> = {};
-
+  date = new Date().getTime();
   isLoading = false;
   isLoadingInstances = false;
   reloadInstances = true;

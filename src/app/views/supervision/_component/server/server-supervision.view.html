@@ -3,7 +3,7 @@
     <div style="display: flex; align-items: center; gap: 1.5em">
       {{ instance?.name || 'Aucune instance sélectionnée' }}
       <app-status-indicator *ngIf="!isLoading && instance"
-                            [params]="{id: instance.id, end: instance.end, configuration: instance.configuration, lastTrace: lastTrace}"></app-status-indicator>
+                            [params]="{id: instance.id, end: instance.end, configuration: instance.configuration, lastTrace: lastTrace, date: date}"></app-status-indicator>
     </div>
 
   </ng-template>
@@ -102,7 +102,7 @@
           </div>
           <div class="stats-info">
             <div class="stats-value">{{ traceStat | number }}</div>
-            <div class="stats-label">Nombre de Traces</div>
+            <div class="stats-label">Traces</div>
           </div>
         </div>
         <div class="stats-card unavailable" (click)="activityDisplayType = 'ATTEMPT'">
