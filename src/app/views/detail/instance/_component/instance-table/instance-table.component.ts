@@ -15,7 +15,7 @@ import {groupByColor} from "../../../../../shared/util";
 export class InstanceTableComponent {
   private readonly _router = inject(EnvRouter);
 
-  displayedColumns: string[] = ['name', 'args', 'start', 'duree'];
+  displayedColumns: string[] = ['version', 'branch', 'start', 'duree'];
   dataSource: MatTableDataSource<AbstractStage> = new MatTableDataSource();
   dateNow = new Date().getTime();
   versionColor: any;

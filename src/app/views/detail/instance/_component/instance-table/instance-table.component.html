@@ -4,7 +4,7 @@
 
         <table mat-table [dataSource]="dataSource" #sort="matSort" matSort
                matSortActive="start" matSortDirection="asc">
-            <ng-container matColumnDef="name">
+            <ng-container matColumnDef="version">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header style="width: 15%">
                     <div class="header-cell-content">
                         <mat-icon class="material-symbols-outlined">label</mat-icon>
@@ -21,7 +21,7 @@
                 </td>
             </ng-container>
 
-            <ng-container matColumnDef="args">
+            <ng-container matColumnDef="branch">
                 <th mat-header-cell *matHeaderCellDef style="width: 15%">
                     <div class="header-cell-content">
                         <mat-icon class="material-symbols-outlined">fork_right</mat-icon>
