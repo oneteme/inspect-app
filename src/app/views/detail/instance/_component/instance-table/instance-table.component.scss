@@ -1,0 +1,21 @@
+.mat-mdc-cell {
+  &.selected {
+    border-left: 3px solid #7c3aed;
+    background: linear-gradient(90deg, rgba(124, 58, 237, 0.08) 0%, transparent 100%);
+  }
+}
+
+.mat-mdc-row {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+
+  &.clickable-row:hover {
+    cursor: pointer;
+    background-color: rgba(63, 81, 181, 0.04);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transform: translateY(-1px);
+
+    .mat-mdc-cell {
+      background-color: transparent;
+    }
+  }
+}

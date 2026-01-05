@@ -1,37 +1,27 @@
-import {Component, inject, OnInit} from '@angular/core';
-import {catchError, combineLatest, finalize, forkJoin, map, of, Subject, switchMap, takeUntil} from "rxjs";
-import {app} from "../../../../environments/environment";
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {combineLatest, finalize, map, Subject, switchMap, takeUntil} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
-import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
-import {
-  AbstractStage,
-  DatabaseRequestStage, FtpRequestStage,
-  HttpRequestStage,
-  InspectCollectorConfiguration,
-  InstanceEnvironment, MachineResource
-} from "../../../model/trace.model";
-import {RequestType} from "../../../model/request.model";
+import {DataGroup, DataItem, TimelineOptions} from "vis-timeline";
+import {InstanceEnvironment} from "../../../model/trace.model";
 import {DatePipe} from "@angular/common";
 import {DurationPipe} from "../../../shared/pipe/duration.pipe";
 import {InstanceService} from "../../../service/jquery/instance.service";
-import {INFINITY} from "../../constants";
-import {getDataForRange, getErrorClassName, showifnotnull} from "../../../shared/util";
-import {ConfigDialogComponent} from "../../supervision/_component/config-dialog/config-dialog.component";
-import {MatDialog} from "@angular/material/dialog";
+import {groupByColor} from "../../../shared/util";
 import {TabData} from "../session/_component/detail-session.component";
 import {EnvRouter} from "../../../service/router.service";
 import {MatTableDataSource} from "@angular/material/table";
+import {TraceService} from "../../../service/trace.service";
 
 @Component({
   selector: 'app-instance',
   templateUrl: './instance.component.html',
   styleUrls: ['./instance.component.scss']
 })
-export class InstanceComponent implements OnInit {
-  private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
-  private _instanceService = inject(InstanceService);
-  private readonly _dialog = inject(MatDialog);
-  private readonly _router: EnvRouter = inject(EnvRouter);
+export class InstanceComponent implements OnInit, OnDestroy {
+  private readonly _activatedRoute = inject(ActivatedRoute);
+  private readonly _instanceService = inject(InstanceService);
+  private readonly _traceService = inject(TraceService);
+  private readonly _router = inject(EnvRouter);
 
   params: Partial<{id: string, env: string}> = {};
   private readonly $destroy = new Subject<void>();
@@ -41,7 +31,6 @@ export class InstanceComponent implements OnInit {
   dataItems: DataItem[];
   tabs: TabData[] = [];
   dataGroups: DataGroup[];
-  dataSource: MatTableDataSource<InstanceEnvironment> = new MatTableDataSource();
   instance: InstanceEnvironment;
   configuration: string;
   resource: string;
@@ -50,15 +39,15 @@ export class InstanceComponent implements OnInit {
   timelineStart: number
   timelineEnd: number
   selectedTabIndex: number = 0;
-  displayedColumns: string[] = ['resource', 'additional-properties'];
   resourceData: { key: string; value: any }[] = [];
   propertiesData: { key: string; value: any }[] = [];
-  kvColumns = ['key', 'value'];
+  versionColor: any;
 
   ngOnDestroy() {
     this.$destroy.next();
     this.$destroy.complete();
   }
+
   ngOnInit() {
     combineLatest([
       this._activatedRoute.params,
@@ -68,51 +57,46 @@ export class InstanceComponent implements OnInit {
         this.params.id = params.id_instance;
         this.params.env = queryParams.env;
         this.getRequest();
-        this.initTabs();
       }
     });
   }
+
   getRequest() {
     this.instance = null;
     this.isLoading = true;
 
-    this._instanceService.getInstanceInfo({
-      env: this.params.env,
-      id: this.params.id
-    }).pipe(takeUntil(this.$destroy),
-        switchMap(instance => {
-          this.instance = instance;
-          this.resourceData = this.toKeyValueArray( this.instance.resource);
-          this.propertiesData = this.toKeyValueArray( this.instance.properties);
-          this.dataSource = new MatTableDataSource([instance]);
-          return this._instanceService.getInstancesPeriodsByAppName({
-            env: this.params.env,
-            appName: this.instance.name,
-            address: this.instance.type === 'CLIENT' ? this.instance.address : undefined
-          }).pipe(
-              map(instances => ({
-                instances
-              }))
+    this._traceService.getInstance(this.params.id)
+    .pipe(
+      takeUntil(this.$destroy),
+      switchMap(instance => {
+        this.instance = instance;
+        this.versionColor = groupByColor([instance], (v: any) => v.version)
+        this.resourceData = this.toKeyValueArray( this.instance.resource);
+        this.propertiesData = this.toKeyValueArray( this.instance.properties);
+        return this._instanceService.getInstancesPeriodsByAppName({
+          env: this.params.env,
+          appName: this.instance.name,
+          address: this.instance.type === 'CLIENT' ? this.instance.address : undefined
+        })
+        .pipe(
+            map(instances => ({
+              instances
+            }))
         );
-        }),
-        finalize(() => this.isLoading = false)
-        ).subscribe({
+      }),
+      finalize(() => this.isLoading = false))
+    .subscribe({
         next : result => {
-          if(this.instance.resource || this.instance.properties) {
-            this.tabs[2].visible = true;
-          }
           this.allInstance = result.instances;
           if (this.instance?.configuration) {
             this.configuration = JSON.stringify(this.instance.configuration, null, 4);
           }
-
           if (this.instance?.resource) {
             this.resource = JSON.stringify(this.instance.resource, null, 4);
           }
-
           this.createTimeline();
+          this.initTabs();
         }
-
     })
   }
 
@@ -137,11 +121,20 @@ export class InstanceComponent implements OnInit {
         errorCount: 0
       },
       {
-        label: 'Properties',
-        icon: 'settings',
+        label: 'Paramètres ',
+        icon: 'tune',
         count: 0,
-        visible: false,
-        type: 'properties',
+        visible: !!this.instance.resource,
+        type: 'resource',
+        hasError: false,
+        errorCount: 0,
+      },
+      {
+        label: 'Propriétés',
+        icon: 'list_alt',
+        count: 0,
+        visible: !!this.instance.properties,
+        type: 'property',
         hasError: false,
         errorCount: 0,
       }

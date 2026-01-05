@@ -10,6 +10,7 @@ import {LastServerStart} from 'src/app/model/jquery.model';
 import {MatTableDataSource} from '@angular/material/table';
 import {InstanceTraceService} from "../../service/jquery/instance-trace.service";
 import {EnvRouter} from "../../service/router.service";
+import {groupByColor} from "../../shared/util";
 
 @Component({
   templateUrl: './deploiment.component.html',
@@ -25,7 +26,6 @@ export class DeploimentComponent implements OnDestroy {
 
   today: Date = new Date();
   MAPPING_TYPE = Constants.MAPPING_TYPE;
-  couleur = ["#22577a", "#38a3a5", "#57cc99", "#80ed99", "#c7f9cc"]
   serverStartDisplayedColumns: string[] = ["appName", "duree", "version", "branch", "restart"];
   lastServerStart: { data?: MatTableDataSource<LastServerStart>, isLoading?: boolean } = {};
   versionColor: any;
@@ -65,7 +65,7 @@ export class DeploimentComponent implements OnDestroy {
         finalize(() => (this.lastServerStart.isLoading = false)))
       .subscribe({
         next: (value: {lastTraces: {id: string, date: number}[], lastServers: LastServerStart[]}) => {
-          this.versionColor = this.groupBy(value.lastServers, (v: any) => v.version)
+          this.versionColor = groupByColor(value.lastServers, (v: any) => v.version);
           this.lastServerStart.data = new MatTableDataSource(value.lastServers.map(ls => ({...ls, lastTrace: value.lastTraces.find(lt => lt.id === ls.id)?.date})));
           this.lastServerStart.data.paginator = this.lastServerStartTablePaginator;
           this.lastServerStart.data.sort = this.lastServerStartTableSort;
@@ -76,23 +76,6 @@ export class DeploimentComponent implements OnDestroy {
         }
       })
     );
-  }
-
-  groupBy<T>(array: T[], fn: (o: T) => any): { [name: string]: T[] } { // todo : refacto
-    let i = 0;
-    return array.reduce((acc: any, item: any) => {
-      let id = fn(item);
-      if (id) {
-        if (!acc[id]) {
-          if (i == 4) {
-            i = 0;
-          }
-          acc[id] = this.couleur[i];
-          i++;
-        }
-      }
-      return acc;
-    }, {})
   }
 
   ngOnDestroy(): void {
