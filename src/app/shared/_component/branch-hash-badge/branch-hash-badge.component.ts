@@ -20,7 +20,6 @@ import {MatDialog} from "@angular/material/dialog";
             background: linear-gradient(135deg, #f5f3ff 0%, #ede9fe 100%);
             border: 1px solid #ddd6fe;
             border-radius: 8px;
-            margin-left: 12px;
             font-size: 12px;
             font-weight: 600;
             color: #5b21b6;

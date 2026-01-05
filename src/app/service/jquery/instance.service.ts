@@ -2,7 +2,7 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {map, Observable} from "rxjs";
 import {LastServerStart, ServerStartByPeriodAndAppname} from "src/app/model/jquery.model";
-import {InstanceEnvironment} from "../../model/trace.model";
+import {InspectCollectorConfiguration, InstanceEnvironment} from "../../model/trace.model";
 
 @Injectable({providedIn: 'root'})
 export class InstanceService {
@@ -123,14 +123,6 @@ export class InstanceService {
   }
 
   //new
-  getInstanceInfo(filters: { env: string, id: string }): Observable<InstanceEnvironment> {
-    return this.getInstance<any>({
-      'column': `id,app_name:name,version,environement:env,collector,start:instant,os,re,address,user,branch,configuration,type,end,resource,hash,additional_properties:properties`,
-      'id.varchar': `"${filters.id}"`
-    }).pipe(map(res => { return res.map(r => ({...r, configuration: r.configuration?.value ? JSON.parse(r.configuration?.value) : null, resource: r.resource?.value ? JSON.parse(r.resource?.value) : null,properties: r.properties?.value ? JSON.parse(r.properties?.value) : null}))[0] }));
-  }
-
-  //new
   getInstancesPeriodsByAppName(filters: { env: string,appName: string, address: string | undefined}): Observable<{
     id: string,
     version: string,
@@ -139,10 +131,12 @@ export class InstanceService {
     address:string,
     start: number,
     end: number,
+    collector: string,
+    configuration: InspectCollectorConfiguration,
     re:string,
   }[]> {
     let args: any = {
-      'column': 'id,start,end,version,address,branch,hash,re',
+      'column': 'id,start,end,version,address,branch,hash,re,collector,configuration',
       'environement': filters.env,
       'app_name': `"${filters.appName}"`,
       'order': 'start.asc'
@@ -150,7 +144,7 @@ export class InstanceService {
     if(filters.address){
       args['address']= `"${filters.address}"`;
     }
-    return this.getInstance(args);
+    return this.getInstance<any>(args).pipe(map(res => { return res.map(r => ({...r, configuration: r.configuration?.value ? JSON.parse(r.configuration?.value) : null})) }));
   }
   getCountVersions(filters: { env: string, appName: string }): Observable<number> {
     return this.getInstance({

@@ -9,7 +9,7 @@ import {MatDialog} from "@angular/material/dialog";
     <div class="version-badge"
          *ngIf="version"
          [ngStyle]="{'cursor': configuration ? 'pointer' : 'default'}"
-         (click)="configuration ? openConfig(configuration) : null"
+         (click)="configuration ? openConfig(configuration, $event) : null"
          [style.background-color]="backgroundColor"
          [matTooltip]="collector">
       <mat-icon class="material-symbols-outlined" *ngIf="configuration">settings</mat-icon>
@@ -49,7 +49,8 @@ export class VersionBadgeComponent {
   @Input() collector: string;
   @Input() configuration: InspectCollectorConfiguration;
 
-  openConfig(config: InspectCollectorConfiguration) {
+  openConfig(config: InspectCollectorConfiguration, event: any) {
+    event.stopPropagation();
     this._dialog.open(ConfigDialogComponent, {
       data: config
     });
