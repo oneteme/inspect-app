@@ -23,7 +23,6 @@ export class DetailDatabaseTableComponent {
 
   @Input() set requests(requests: DatabaseRequestDto[]) {
     if (requests) {
-      console.log(requests);
       this.dataSource = new MatTableDataSource(requests);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
