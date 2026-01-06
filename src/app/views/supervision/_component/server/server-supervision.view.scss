@@ -1,27 +1,9 @@
-@keyframes pulse-green {
-  0% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(31, 214, 85, 0.7);
-  }
-
-  70% {
-    transform: scale(1);
-    box-shadow: 0 0 0 5px rgba(31, 214, 85, 0);
-  }
-
-  100% {
-    transform: scale(0.95);
-    box-shadow: 0 0 0 0 rgba(31, 214, 85, 0);
-  }
-}
-
 .activity-container {
   display: flex;
-  height: 300px;
 }
 
 .stats-sidebar {
-  width: 250px;
+  min-width: 200px;
   padding: 10px;
   display: flex;
   flex-direction: column;
@@ -31,6 +13,8 @@
 
 .activity-content {
   flex-grow: 1;
+  min-height: 350px;
+  padding: 0 0.5em 0 0.5em;
 }
 
 .stats-card {
@@ -45,15 +29,13 @@
 }
 
 .stats-card {
-
+  cursor: pointer;
   &.trace {
-    cursor: pointer;
     &:hover {
       transform: translateY(-3px);
     }
   }
   &.unavailable {
-    cursor: pointer;
     &:hover {
         transform: translateY(-3px);
     }

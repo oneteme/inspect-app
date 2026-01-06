@@ -184,9 +184,9 @@ export class SearchRestView implements OnInit, OnDestroy {
           if (d) {
             this.dataSource = new MatTableDataSource(d);
             this.dataSource.paginator = this.paginator;
-            this.dataSource.sort = this.sort;
             this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
             this.dataSource.filterPredicate = this.filterPredicate;
+            this.dataSource.sort = this.sort;
 
             // Appliquer le filtre q s'il existe
             if (this.queryParams.optional?.['q']) {
@@ -236,11 +236,6 @@ export class SearchRestView implements OnInit, OnDestroy {
         queryParams: { 'env': this.queryParams.env }
       });
     }
-  }
-
-  statusBorder(status: number) {
-
-    return Utils.statusBorder(status)
   }
 
   applyFilter(event: Event) {

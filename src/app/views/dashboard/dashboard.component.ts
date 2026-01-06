@@ -349,7 +349,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
     onBatchExceptionRowSelected(row: any){
         const result = recreateDate(this.groupedBy, row, this.params.start);
         if(result){
-            console.log(this.params.serveurs)
             this._router.navigate(['/session/batch'], {
                 queryParams: {
                     'env': this.params.env,

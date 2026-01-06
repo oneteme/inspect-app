@@ -20,25 +20,13 @@
       <ng-container matColumnDef="args">
         <th mat-header-cell *matHeaderCellDef>
           <div class="header-cell-content">
-            <mat-icon class="material-symbols-outlined">list_alt</mat-icon>
-            Argument
+            <mat-icon class="material-symbols-outlined">category</mat-icon>
+            Ressource
           </div>
         </th>
         <td mat-cell *matCellDef="let element" [matTooltip]="element['args']">
           <span style="font-weight: bold;">{{element.command | typeColumnFormat}}</span><br/>
           {{ element['args'] }}
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="count">
-        <th mat-header-cell *matHeaderCellDef style="width: 15%">
-          <div class="header-cell-content">
-            <mat-icon class="material-symbols-outlined">numbers</mat-icon>
-            Nombre
-          </div>
-        </th>
-        <td mat-cell *matCellDef="let element" [matTooltip]="element['count']">
-          {{ element['count'] }}
         </td>
       </ng-container>
 
