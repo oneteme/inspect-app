@@ -113,7 +113,6 @@
           </div>
         </div>
         <div class="stats-card report"
-             [ngStyle]="{'cursor': logEntryByPeriod.length ? 'pointer': '', 'pointer-events': logEntryByPeriod.length ? '': 'none'}"
              (click)="activityDisplayType = 'REPORT'">
           <div class="stats-icon">
             <mat-icon class="material-symbols-outlined">exclamation</mat-icon>
@@ -129,7 +128,7 @@
                [data]="instanceTraceByPeriod" [isLoading]="isLoading"></chart>
         <chart [class.hidden]="activityDisplayType != 'ATTEMPT'" type="line" [config]="ATTEMPT_INSTANCE_TRACE_BY_PERIOD_LINE"
                [data]="instanceTraceByPeriod" [isLoading]="isLoading"></chart>
-        <report-table [class.hidden]="activityDisplayType != 'REPORT'" style="height: 252px;" [data]="logEntryByPeriod" (onClick)="open($event)"  [useFilter]="true"></report-table>
+        <report-table [class.hidden]="activityDisplayType != 'REPORT'" [data]="logEntryByPeriod" (onClick)="open($event)"  [useFilter]="true"></report-table>
       </div>
     </div>
   </div>

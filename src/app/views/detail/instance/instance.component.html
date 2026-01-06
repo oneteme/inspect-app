@@ -1,33 +1,11 @@
 
 
 <div class="header-card"  *ngIf="instance">
-    <mat-card style="width: 60vw; min-width: 60vw;">
-        <mat-card-title>
-            <label-icon icon="call_received" style="height: 48px">
-                <div style="display: flex; gap: 0.5em; align-items: center;">
-                    {{ instance?.id || 'N/A' }} <span *ngIf="instance?.type ==='CLIENT'">/ {{instance?.address}}</span>
-                </div>
-            </label-icon>
-        </mat-card-title>
-        <mat-card-content>
-        </mat-card-content>
-        <mat-card-footer>
-            <label-icon icon="person" [iconOutlined]="true" [size]="20">
-                <div style="display: flex; align-items: center; gap: 0.5em">
-                    {{ instance?.user || "N/A" }}
-                    le {{ (instance?.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
-                </div>
-            </label-icon>
-        </mat-card-footer>
-    </mat-card>
-    <app-server-card style="width: 40vw; min-width: 40vw;"
+    <app-server-card style="width: 100vw;"
                      (onClick)="navigateOnStatusIndicator($event)"
                      [menu]="menuServer"
                      [instance]="instance"></app-server-card>
 </div>
-
-
-
 
 <div class="tabs-container">
     <!-- Navigation verticale des onglets -->

@@ -13,7 +13,7 @@ import {INFINITY} from "../../../../constants";
   styleUrls: ['./request-stage-table.component.scss']
 })
 export class RequestStageTableComponent {
-  displayedColumns: string[] = ['name', 'args', 'count', 'start', 'duree'];
+  displayedColumns: string[] = ['name', 'args', 'start', 'duree'];
   dataSource: MatTableDataSource<AbstractStage> = new MatTableDataSource();
 
   @ViewChild('paginator', {static: true}) paginator: MatPaginator;
