@@ -11,6 +11,7 @@ import {extractPeriod} from "../../../shared/util";
 import {EnvRouter} from "../../../service/router.service";
 import {Location} from "@angular/common";
 import {MainSessionService} from "../../../service/jquery/main-session.service";
+import {InspectCollectorConfiguration} from "../../../model/trace.model";
 
 @Component({
     templateUrl: './statistic-server.view.html',
@@ -31,7 +32,7 @@ export class StatisticServerView implements OnInit, OnDestroy {
     })
 
     $httpParams: HttpParams;
-    $lastServerInfo: {appName: string, version: string, collector: string, start: number};
+    $lastServerInfo: {appName: string, version: string, collector: string, start: number, branch: string, hash: string, configuration: InspectCollectorConfiguration};
     $countServerStart: number = 0;
     $countVersions: number = 0;
 

@@ -313,3 +313,22 @@ export function showifnotnull(value: any,fn: (value:any)=>any) {
 export function getDataForRange(items: any[], start: number, end: number) {
     return items.filter(c=> (c.end>= start && c.start <=end))
 }
+
+
+export function groupByColor<T>(array: T[], fn: (o: T) => any): { [name: string]: T[] } { // todo : refacto
+  var colors = ["#22577a", "#38a3a5", "#57cc99", "#80ed99", "#c7f9cc"];
+  let i = 0;
+  return array.reduce((acc: any, item: any) => {
+    let id = fn(item);
+    if (id) {
+      if (!acc[id]) {
+        if (i == 4) {
+          i = 0;
+        }
+        acc[id] = colors[i];
+        i++;
+      }
+    }
+    return acc;
+  }, {})
+}

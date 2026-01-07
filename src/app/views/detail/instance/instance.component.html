@@ -1,48 +1,11 @@
 
 
 <div class="header-card"  *ngIf="instance">
-    <mat-card style="width: 60vw; min-width: 60vw;">
-        <mat-card-title>
-            <label-icon icon="call_received">
-                <div style="display: flex; gap: 0.5em; align-items: center;">
-                    {{ instance?.id || 'N/A' }} <span *ngIf="instance?.type ==='CLIENT'">/ {{instance?.address}}</span>
-
-                </div>
-            </label-icon>
-        </mat-card-title>
-        <mat-card-content>
-
-            <div style="display: flex; gap: 0.5em">
-                <div>
-                    <app-version-badge [backgroundColor]="'#22577a'"
-                                       [configuration]="instance.configuration"
-                                       [collector]="instance.collector"
-                                       [version]="instance.version" />
-                    <app-branch-hash-badge [branch]="instance?.branch" [hash]="instance?.hash"/>
-
-                </div>
-
-            </div>
-        </mat-card-content>
-        <mat-card-footer>
-            <label-icon icon="person" [iconOutlined]="true" [size]="20">
-                <div style="display: flex; align-items: center; gap: 0.5em">
-                    {{ instance?.user || "N/A" }}
-                    le {{ (instance?.instant) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
-                </div>
-            </label-icon>
-
-
-        </mat-card-footer>
-    </mat-card>
-    <app-server-card style="width: 40vw"
+    <app-server-card style="width: 100vw;"
                      (onClick)="navigateOnStatusIndicator($event)"
                      [menu]="menuServer"
                      [instance]="instance"></app-server-card>
 </div>
-
-
-
 
 <div class="tabs-container">
     <!-- Navigation verticale des onglets -->
@@ -66,64 +29,22 @@
         </div>
     </div>
     <div class="tab-content">
-        <div *ngIf="tabs[selectedTabIndex]?.type === 'instances'" class="tab-panel">
-            <app-instance-table [requests]="allInstance"[mainId]="instance?.id">
-            </app-instance-table>
-        </div>
-        <div *ngIf="tabs[selectedTabIndex]?.type === 'timeline'" class="tab-panel">
-            <app-timeline [options]="options"
-                          [groups]="dataGroups"
-                          [items]="dataItems"
-                          [displayHeader]="false">
-            </app-timeline>
-        </div>
-        <div *ngIf="tabs[selectedTabIndex]?.type === 'properties'"class="tab-panel">
-
-            <div class="grid-table">
-            <div class="table-container">
-                <div class="table-wrapper tables-container">
-                    <!-- TABLE RESOURCE -->
-                    <table mat-table [dataSource]="resourceData" class="no-hover"  *ngIf="instance.resource">
-                        <ng-container matColumnDef="key">
-                            <th mat-header-cell *matHeaderCellDef> Resource </th>
-                            <td mat-cell *matCellDef="let element">{{ element.key }}</td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="value">
-                            <th mat-header-cell *matHeaderCellDef></th>
-                            <td mat-cell *matCellDef="let element">{{ element.value }}</td>
-                        </ng-container>
-
-                        <tr mat-header-row *matHeaderRowDef="kvColumns"></tr>
-                        <tr mat-row *matRowDef="let row; columns: kvColumns;"></tr>
-                    </table>
-                    <mat-divider></mat-divider>
-                </div>
-            </div>
-                <div class="table-container"  *ngIf="instance.properties">
-                    <div class="table-wrapper tables-container">
-                    <!-- TABLE PROPERTIES -->
-                    <table mat-table [dataSource]="propertiesData" class=" no-hover "  >
-                        <ng-container matColumnDef="key">
-                            <th mat-header-cell *matHeaderCellDef> Additional properties </th>
-                            <td mat-cell *matCellDef="let element">{{ element.key }}</td>
-                        </ng-container>
-
-                        <ng-container matColumnDef="value">
-                            <th mat-header-cell *matHeaderCellDef></th>
-                            <td mat-cell *matCellDef="let element">{{ element.value }}</td>
-                        </ng-container>
-
-                        <tr mat-header-row *matHeaderRowDef="kvColumns"></tr>
-                        <tr mat-row *matRowDef="let row; columns: kvColumns;"></tr>
-                    </table>
-                        <mat-divider  ></mat-divider >
-                </div>
-
-            </div>
-
-            </div>
-
+      <div *ngIf="tabs[selectedTabIndex]?.type === 'instances'" class="tab-panel">
+          <instance-table [requests]="allInstance"[mainId]="instance?.id">
+          </instance-table>
+      </div>
+      <div *ngIf="tabs[selectedTabIndex]?.type === 'timeline'" class="tab-panel">
+          <app-timeline [options]="options"
+                        [groups]="dataGroups"
+                        [items]="dataItems"
+                        [displayHeader]="false">
+          </app-timeline>
+      </div>
+      <div *ngIf="tabs[selectedTabIndex]?.type === 'resource'" class="tab-panel">
+          <parameter-table [data]="resourceData"></parameter-table>
+      </div>
+      <div *ngIf="tabs[selectedTabIndex]?.type === 'property'" class="tab-panel">
+          <parameter-table [data]="propertiesData"></parameter-table>
         </div>
     </div>
 </div>

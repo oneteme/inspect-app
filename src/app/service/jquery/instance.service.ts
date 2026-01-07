@@ -2,7 +2,7 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {map, Observable} from "rxjs";
 import {LastServerStart, ServerStartByPeriodAndAppname} from "src/app/model/jquery.model";
-import {InstanceEnvironment} from "../../model/trace.model";
+import {InspectCollectorConfiguration, InstanceEnvironment} from "../../model/trace.model";
 
 @Injectable({providedIn: 'root'})
 export class InstanceService {
@@ -61,8 +61,8 @@ export class InstanceService {
 
   getLastServerStart(filters: { env: string }): Observable<LastServerStart[]> {
     return this.getInstance<any>({
-      'column': `view1.id,view1.environement:env,view1.type,view1.appName,view1.version,view1.branch,view1.hash,view1.start,view1.end,view1.collector,view1.configuration,view1.restart,view1.minStart,view1.lastEnv`,
-      'view': `select(id,environement,type,app_name,version,branch,hash,start,end,collector,configuration,start.min.over(partition(environement,app_name,version)):minStart,rank.over(partition(environement,app_name).order(end.coalesce(9999-12-31T00:00:00.000Z).desc,start.desc)):rk,count.over(partition(environement,app_name,version)):restart,start.max.over(partition(environement,app_name)):lastEnv).filter(type.eq(SERVER).and(environement.eq(${filters.env}))):view1`,
+      'column': `view1.id,view1.environement:env,view1.type,view1.appName,view1.version,view1.branch,view1.hash,view1.start,view1.end,view1.collector,view1.configuration,view1.restart,view1.minStart,view1.lastStart`,
+      'view': `select(id,environement,type,app_name,version,branch,hash,start,end,collector,configuration,start.min.over(partition(environement,app_name,version)):minStart,rank.over(partition(environement,app_name).order(end.coalesce(9999-12-31T00:00:00.000Z).desc,start.desc)):rk,count.over(partition(environement,app_name,version)):restart,start.max.over(partition(environement,app_name)):lastStart).filter(type.eq(SERVER).and(environement.eq(${filters.env}))):view1`,
       'view1.rk': '1', 'order': 'view1.start.desc'
     }).pipe(map(res => { return res.map(r => ({...r, configuration: r.configuration?.value ? JSON.parse(r.configuration?.value) : null})) }));
   }
@@ -113,21 +113,16 @@ export class InstanceService {
     appName: string,
     version: string,
     collector: string,
-    start: number
+    start: number,
+    branch: string,
+    hash: string,
+    configuration: InspectCollectorConfiguration
   }> {
-    return this.getInstance({
-      'column': `view1.appName,view1.version,view1.collector,view1.start`,
-      'view': `select(app_name,version,collector,start,rank.over(partition(environement,app_name).order(start.desc)):rk).filter(type.eq(SERVER).and(environement.eq(${filters.env})).and(app_name.eq("${filters.appName}"))):view1`,
-      'view1.rk': '1', 'order': 'view1.start.desc'
-    }).pipe(map(res => res[0]));
-  }
-
-  //new
-  getInstanceInfo(filters: { env: string, id: string }): Observable<InstanceEnvironment> {
     return this.getInstance<any>({
-      'column': `id,app_name:name,version,environement:env,collector,start:instant,os,re,address,user,branch,configuration,type,end,resource,hash,additional_properties:properties`,
-      'id.varchar': `"${filters.id}"`
-    }).pipe(map(res => { return res.map(r => ({...r, configuration: r.configuration?.value ? JSON.parse(r.configuration?.value) : null, resource: r.resource?.value ? JSON.parse(r.resource?.value) : null,properties: r.properties?.value ? JSON.parse(r.properties?.value) : null}))[0] }));
+      'column': `view1.appName,view1.version,view1.collector,view1.start,view1.branch,view1.hash,view1.configuration`,
+      'view': `select(app_name,version,collector,start,branch,hash,configuration,rank.over(partition(environement,app_name).order(start.desc)):rk).filter(type.eq(SERVER).and(environement.eq(${filters.env})).and(app_name.eq("${filters.appName}"))):view1`,
+      'view1.rk': '1', 'order': 'view1.start.desc'
+    }).pipe(map(res => { return res.map(r => ({...r, configuration: r.configuration?.value ? JSON.parse(r.configuration?.value) : null}))[0] }));
   }
 
   //new
@@ -139,10 +134,12 @@ export class InstanceService {
     address:string,
     start: number,
     end: number,
+    collector: string,
+    configuration: InspectCollectorConfiguration,
     re:string,
   }[]> {
     let args: any = {
-      'column': 'id,start,end,version,address,branch,hash,re',
+      'column': 'id,start,end,version,address,branch,hash,re,collector,configuration',
       'environement': filters.env,
       'app_name': `"${filters.appName}"`,
       'order': 'start.asc'
@@ -150,7 +147,7 @@ export class InstanceService {
     if(filters.address){
       args['address']= `"${filters.address}"`;
     }
-    return this.getInstance(args);
+    return this.getInstance<any>(args).pipe(map(res => { return res.map(r => ({...r, configuration: r.configuration?.value ? JSON.parse(r.configuration?.value) : null})) }));
   }
   getCountVersions(filters: { env: string, appName: string }): Observable<number> {
     return this.getInstance({

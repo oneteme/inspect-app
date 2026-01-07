@@ -4,8 +4,7 @@
                   [ngClass]="{'success': session.status >= 200 && session.status < 400,
                               'warning': session.status >= 400 && session.status < 500,
                               'fail': session.status >= 500,
-                              'unavailable': session.status == 0 && session.end,
-                              'in-progress': !session.end}">
+                              'unavailable': session.status == 0 && session.end}">
             <mat-card-title>
               <div style="display: flex; gap: 0.5em; align-items: center; width: 90%">
                 <mat-icon style="overflow: visible !important;" class="material-symbols-outlined">call_received</mat-icon>
@@ -35,7 +34,7 @@
                     </a>
                 </div>
 
-              <exception-display [exception]="session.exception"></exception-display>
+              <exception-display [type]="session.status >= 200 && session.status < 400 ? 'success' : session.status >= 400 && session.status < 500 ? 'warning' : 'fail'" [exception]="session.exception"></exception-display>
             </mat-card-content>
             <mat-card-footer>
               <label-icon icon="person" [iconOutlined]="true" [size]="20">

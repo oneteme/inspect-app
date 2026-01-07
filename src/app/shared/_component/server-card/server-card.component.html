@@ -5,7 +5,7 @@
         <span style="cursor: pointer" (click)="navigateOnServerClick($event)">{{_instance.name}}</span>
         <app-status-indicator *ngIf="!_isLoadingLastTrace"
                               (onClick)="navigate($event)"
-                              [params]="{id: _instance.id, end: _instance.end, configuration: _instance.configuration, lastTrace: _lastTrace}"></app-status-indicator>
+                              [params]="{id: _instance.id, end: _instance.end, configuration: _instance.configuration, lastTrace: _lastTrace, date: date}"></app-status-indicator>
       </div>
     </label-icon>
     <div class="right">
@@ -14,23 +14,31 @@
       </button>
     </div>
   </mat-card-title>
-  <mat-card-content style="margin-left: 1em;">
-    <label-icon [icon]="_instance.type === 'CLIENT' ? 'devices' : 'data_table'">
-      <div style="font-weight: 500; font-size: 14px;">
-        {{_instance.os}}
+  <mat-card-content style="margin-left: 1em; margin-bottom: 1em">
+    <div style="display: flex; flex-direction: column; gap: 0.75em">
+      <div style="display: flex; align-items: center; gap: 0.5em; flex-wrap: wrap">
+        <app-version-badge [backgroundColor]="'#22577a'"
+                           [configuration]="_instance?.configuration"
+                           [collector]="_instance?.collector"
+                           [version]="_instance?.version" />
+        <app-branch-hash-badge [branch]="_instance?.branch" [hash]="_instance?.hash"/>
       </div>
-      <div style="font-style: italic; font-size: 12px;">
-        {{_instance.re}}
+      <div style="display: flex; align-items: center; gap: 0.5em; flex-wrap: wrap">
+        <div class="os-badge" *ngIf="_instance?.os">
+          <mat-icon class="material-symbols-outlined">{{_instance.type == 'CLIENT' ? 'devices' : 'data_table'}}</mat-icon>
+          <div style="display: flex; flex-direction: column">
+            <span>{{ _instance.os }}</span>
+            <span style="font-style: italic; font-size: 10px;">{{ _instance.re }}</span>
+          </div>
+        </div>
       </div>
-    </label-icon>
+    </div>
   </mat-card-content>
   <mat-card-footer>
     <label-icon icon="person" [iconOutlined]="true" [size]="20">
       {{_instance.user || "N/A"}}
       le {{ (_instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
+      <ng-container *ngIf="_instance.end">en <span style="font-weight: bold">{{((_instance.end - _instance.instant) | duration)}}</span></ng-container>
     </label-icon>
-    <div *ngIf="_instance.end" class="right" [matTooltip]="((_instance.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')">
-      <div>en <span style="font-weight: bold">{{((_instance.end - _instance.instant) | duration)}}</span></div>
-    </div>
   </mat-card-footer>
 </mat-card>

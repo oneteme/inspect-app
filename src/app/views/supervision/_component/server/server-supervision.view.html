@@ -1,20 +1,20 @@
 <header-page [templateTitle]="title" [iconOutlined]="true" titleIcon="browse_activity" [templateSubTitle]="subtitle">
   <ng-template #title>
     <div style="display: flex; align-items: center; gap: 1.5em">
-      {{ instance?.name || 'Aucune instance sélectionnée' }}
+      {{ (instance?.name | titleCase) || 'Aucune instance sélectionnée' }}
       <app-status-indicator *ngIf="!isLoading && instance"
-                            [params]="{id: instance.id, end: instance.end, configuration: instance.configuration, lastTrace: lastTrace}"></app-status-indicator>
+                            [params]="{id: instance.id, end: instance.end, configuration: instance.configuration, lastTrace: lastTrace, date: date}"></app-status-indicator>
     </div>
 
   </ng-template>
   <ng-template #subtitle>
     <div style="display: flex; gap: 0.5em">
-      <label-chip *ngIf="instance?.version" [ngStyle]="{'cursor': instance?.configuration ? 'pointer' : ''}" [matTooltip]="instance?.collector"
-                  (click)="instance?.configuration ? openConfig() : ''">{{ instance?.version }}
-      </label-chip>
+      <app-version-badge [backgroundColor]="'#22577a'"
+                         [configuration]="instance?.configuration"
+                         [collector]="instance?.collector"
+                         [version]="instance?.version" />
+      <app-branch-hash-badge [branch]="instance?.branch" [hash]="instance?.hash"/>
       <label-chip *ngIf="!instance?.version" color="gray">Version non disponible</label-chip>
-      <label-chip color="orange" *ngIf="instance?.branch" [matTooltip]="instance?.hash">{{ instance?.branch }}
-      </label-chip>
     </div>
   </ng-template>
   <div style="display: flex; align-items: center; justify-content: space-between; margin-left: auto; gap: 0.5em">
@@ -102,7 +102,7 @@
           </div>
           <div class="stats-info">
             <div class="stats-value">{{ traceStat | number }}</div>
-            <div class="stats-label">Nombre de Traces</div>
+            <div class="stats-label">Traces</div>
           </div>
         </div>
         <div class="stats-card unavailable" (click)="activityDisplayType = 'ATTEMPT'">
@@ -115,7 +115,6 @@
           </div>
         </div>
         <div class="stats-card report"
-             [ngStyle]="{'cursor': logEntryByPeriod.length ? 'pointer': '', 'pointer-events': logEntryByPeriod.length ? '': 'none'}"
              (click)="activityDisplayType = 'REPORT'">
           <div class="stats-icon">
             <mat-icon class="material-symbols-outlined">exclamation</mat-icon>
@@ -131,7 +130,7 @@
                [data]="instanceTraceByPeriod" [isLoading]="isLoading"></chart>
         <chart [class.hidden]="activityDisplayType != 'ATTEMPT'" type="line" [config]="ATTEMPT_INSTANCE_TRACE_BY_PERIOD_LINE"
                [data]="instanceTraceByPeriod" [isLoading]="isLoading"></chart>
-        <report-table [class.hidden]="activityDisplayType != 'REPORT'" style="height: 252px;" [data]="logEntryByPeriod" (onClick)="open($event)"></report-table>
+        <report-table [class.hidden]="activityDisplayType != 'REPORT'" [data]="logEntryByPeriod" (onClick)="open($event)" [useFilter]="true"></report-table>
       </div>
     </div>
   </div>

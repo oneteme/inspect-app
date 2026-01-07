@@ -52,6 +52,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   private readonly $destroy = new Subject<void>();
   private readonly _snackBar = inject(MatSnackBar);
 
+  date = new Date().getTime();
   readonly formGroup = new FormGroup({
     range: new FormGroup({
       start: new FormControl<Date | null>(null, [Validators.required]),
@@ -226,7 +227,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     }
   };
   readonly USAGE_INSTANCE_TRACE_BY_PERIOD_LINE: ChartProvider<string, number> = {
-    height: 300,
+    height: 335,
     stacked: false,
     ytitle: '',
     series: [
@@ -308,7 +309,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     }
   };
   readonly ATTEMPT_INSTANCE_TRACE_BY_PERIOD_LINE: ChartProvider<string, number> = {
-    height: 300,
+    height: 335,
     stacked: false,
     ytitle: '',
     series: [
@@ -510,7 +511,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
                 return acc;
               })
             : [];
-        this.logEntryByPeriod = log.map(r => ({...r, date: this._datePipe.transform(r.instant * 1000, 'dd/MM/yyyy HH:mm:ss')}));
+        this.logEntryByPeriod = log;
         this.lastTrace = last[0]?.date;
         this.getStatActivity();
       }
@@ -519,7 +520,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
 
   open(row: any) {
     this._dialog.open(StacktraceDialogComponent, {
-      data: { message: row.message, stackTraceRows: row.stacktrace }
+      data: { message: row.message, stackTraceRows: row.stackRows }
     });
   }
 

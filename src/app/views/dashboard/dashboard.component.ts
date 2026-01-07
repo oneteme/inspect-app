@@ -197,6 +197,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                 width: "70%",
                 data: {
                     exceptions: exceptions,
+                    serveurs: this.params.serveurs,
                     env: this.params.env,
                     start: this.params.start,
                     groupedBy: this.groupedBy,
@@ -338,6 +339,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                     'start': result.start.toISOString(),
                     'end': result.end.toISOString(),
                     'q': row.errorType,
+                    'server': this.params.serveurs,
                     'rangestatus': ['5xx', '4XX']
                 }
             });
@@ -353,6 +355,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                     'start': result.start.toISOString(),
                     'end': result.end.toISOString(),
                     'q' : row.errorType,
+                    'server': this.params.serveurs,
                     'rangestatus': ['false']
                 }
             });
