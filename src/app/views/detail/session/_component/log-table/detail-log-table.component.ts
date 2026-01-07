@@ -10,7 +10,7 @@ import {LocalRequest, LogEntry} from "../../../../../model/trace.model";
   styleUrls: ['./detail-log-table.component.scss']
 })
 export class DetailLogTableComponent {
-  displayedColumns: string[] = ['level', 'date', 'message', 'action'];
+  displayedColumns: string[] = ['date', 'message', 'action'];
   dataSource: MatTableDataSource<LogEntry> = new MatTableDataSource();
 
   @ViewChild('paginator', {static: true}) paginator: MatPaginator;

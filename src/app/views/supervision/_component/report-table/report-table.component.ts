@@ -15,7 +15,7 @@ import {INFINITY} from "../../../constants";
 export class ReportTableComponent {
   private pipe = new DatePipe('fr-FR');
 
-  displayedColumns: string[] = ['instant', 'level', 'message', 'action'];
+  displayedColumns: string[] = ['instant', 'message', 'action'];
   dataSource: MatTableDataSource<LogEntry> = new MatTableDataSource([]);
   filterTable =new Map<string, any>();
   @Input() filterValue: string = '';

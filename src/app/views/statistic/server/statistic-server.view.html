@@ -3,8 +3,12 @@
     <header-page titleIcon="monitoring" [iconOutlined]="true" [ui-title]="params.server | titleCase" [templateSubTitle]="subtitle">
         <ng-template #subtitle>
             <div style="display: flex; gap: 0.5em">
-                <label-chip>{{$lastServerInfo?.version}}</label-chip>
-                <label-chip  color="orange">{{$lastServerInfo?.collector}}</label-chip>
+              <app-version-badge [backgroundColor]="'#22577a'"
+                                 [configuration]="$lastServerInfo?.configuration"
+                                 [collector]="$lastServerInfo?.collector"
+                                 [version]="$lastServerInfo?.version" />
+              <app-branch-hash-badge [branch]="$lastServerInfo?.branch" [hash]="$lastServerInfo?.hash"/>
+
             </div>
         </ng-template>
         <div class="header-right" style="justify-content: space-between">
