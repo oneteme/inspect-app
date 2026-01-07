@@ -113,13 +113,16 @@ export class InstanceService {
     appName: string,
     version: string,
     collector: string,
-    start: number
+    start: number,
+    branch: string,
+    hash: string,
+    configuration: InspectCollectorConfiguration
   }> {
-    return this.getInstance({
-      'column': `view1.appName,view1.version,view1.collector,view1.start`,
-      'view': `select(app_name,version,collector,start,rank.over(partition(environement,app_name).order(start.desc)):rk).filter(type.eq(SERVER).and(environement.eq(${filters.env})).and(app_name.eq("${filters.appName}"))):view1`,
+    return this.getInstance<any>({
+      'column': `view1.appName,view1.version,view1.collector,view1.start,view1.branch,view1.hash,view1.configuration`,
+      'view': `select(app_name,version,collector,start,branch,hash,configuration,rank.over(partition(environement,app_name).order(start.desc)):rk).filter(type.eq(SERVER).and(environement.eq(${filters.env})).and(app_name.eq("${filters.appName}"))):view1`,
       'view1.rk': '1', 'order': 'view1.start.desc'
-    }).pipe(map(res => res[0]));
+    }).pipe(map(res => { return res.map(r => ({...r, configuration: r.configuration?.value ? JSON.parse(r.configuration?.value) : null}))[0] }));
   }
 
   //new

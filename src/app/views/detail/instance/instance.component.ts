@@ -163,7 +163,7 @@ export class InstanceComponent implements OnInit, OnDestroy {
     );
     let items = this.allInstance.map((a: any, i: number) => {
       let start= Math.trunc(a.start);
-      let end = a.end? Math.trunc(a.end) :  new Date(new Date().setHours(23, 59, 59, 999)).getTime();
+      let end = a.end? Math.trunc(a.end) :  new Date().getTime();
       return {
         group: `${groupByContent.get(a.version)}`,
         start: start,
@@ -174,8 +174,6 @@ export class InstanceComponent implements OnInit, OnDestroy {
         title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end , 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform((end/1000) - (start/1000))})<br>`
       };
     });
-
-
 
     let padding = (Math.ceil((this.timelineEnd - this.timelineStart)*0.1));
     this.dataItems = items;
