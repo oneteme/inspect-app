@@ -6,6 +6,7 @@ import {formatters, periodManagement} from "../../../../shared/util";
 import {finalize, map} from "rxjs";
 import {FtpRequestService} from "../../../../service/jquery/ftp-request.service";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
+import {ActivatedRoute} from "@angular/router";
 
 @Component({
   templateUrl: './statistic-request-ftp.component.html',
@@ -14,6 +15,7 @@ import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 export class StatisticRequestFtpComponent {
   private readonly _datePipe = inject(DatePipe);
   private readonly _ftpRequestService = inject(FtpRequestService);
+  private readonly _activatedRoute = inject(ActivatedRoute);
 
   readonly seriesProvider: SerieProvider<string, number>[] = [
     {data: {x: field('date'), y: field('countSuccess')}, name: 'OK', color: '#33cc33'},
@@ -36,7 +38,9 @@ export class StatisticRequestFtpComponent {
       start: queryParams.period.start,
       end: queryParams.period.end,
       groupedBy: groupedBy,
-      env: queryParams.env
+      env: queryParams.env,
+      host: queryParams.hosts,
+      command: queryParams.commands
     }).pipe(
       map(r => {
         formatters[groupedBy](r, this._datePipe);

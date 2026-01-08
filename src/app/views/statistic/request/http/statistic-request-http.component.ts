@@ -40,8 +40,9 @@ export class StatisticRequestHttpComponent {
       start: queryParams.period.start,
       end: queryParams.period.end,
       groupedBy: groupedBy,
-      env: queryParams.env
-    }).pipe(
+      env: queryParams.env,
+      host: queryParams.hosts,
+      method: queryParams.commands    }).pipe(
       map(r => {
         formatters[groupedBy](r, this._datePipe);
         return r;

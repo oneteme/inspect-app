@@ -39,7 +39,9 @@ export class StatisticRequestJdbcComponent {
       start: queryParams.period.start,
       end: queryParams.period.end,
       groupedBy: groupedBy,
-      env: queryParams.env
+      env: queryParams.env,
+      host: queryParams.hosts,
+      command: queryParams.commands
     }).pipe(
       map(r => {
         formatters[groupedBy](r, this._datePipe);
@@ -60,7 +62,9 @@ export class StatisticRequestJdbcComponent {
       env: queryParams.env,
       start: queryParams.period.start,
       end: queryParams.period.end,
-      groupedBy: groupedBy
+      groupedBy: groupedBy,
+      host: queryParams.hosts,
+      command: queryParams.commands
     }).pipe(
       finalize(() => this.$exceptionsResponse.loading = false),
       map(res => {

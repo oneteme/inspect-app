@@ -38,7 +38,9 @@ export class StatisticRequestLdapComponent {
       start: queryParams.period.start,
       end: queryParams.period.end,
       groupedBy: groupedBy,
-      env: queryParams.env
+      env: queryParams.env,
+      host: queryParams.hosts,
+      command: queryParams.commands
     }).pipe(
       map(r => {
         formatters[groupedBy](r, this._datePipe);
