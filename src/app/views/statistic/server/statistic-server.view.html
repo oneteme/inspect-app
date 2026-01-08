@@ -50,7 +50,7 @@
                     (overlayOutsideClick)="onOverlayOutsideClick()">
                 <div class="overlay-container">
                     <div class="overlay-header">
-                        <label-icon icon="tune" size="22">Filtre</label-icon>
+                        <label-icon icon="tune" [size]="22">Filtre</label-icon>
                     </div>
                     <div class="overlay-content">
                         <ng-container *ngIf="indexTab == 0; then firstTab else secondTab"></ng-container>
@@ -66,7 +66,8 @@
                         <autocomplete-chip label="Utilisateur" [values]="$batchUserFilter" [selected]="batchUserSelected" (selectedChange)="onBatchUserSelectedChange($event)"></autocomplete-chip>
                     </ng-template>
                     <div class="overlay-actions">
-                        <button mat-flat-button color="primary" (click)="onClickFilter()">Filtrer</button>
+                      <button mat-flat-button (click)="onResetFilter()">Réinitialiser</button>
+                      <button mat-flat-button color="primary" (click)="onClickFilter()">Filtrer</button>
                     </div>
                 </div>
             </ng-template>

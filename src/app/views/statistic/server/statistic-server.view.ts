@@ -221,6 +221,18 @@ export class StatisticServerView implements OnInit, OnDestroy {
         this.isOpen = false;
     }
 
+    onResetFilter() {
+      if(this.indexTab == 0) {
+        this.apiNameSelected = [];
+        this.apiVersionSelected = [];
+        this.apiUserSelected = [];
+      } else {
+        this.batchNameSelected = [];
+        this.batchVersionSelected = [];
+        this.batchUserSelected = [];
+      }
+    }
+
     onSelectedTabChange($event) {
         this.indexTab = $event.index;
         if(this.indexTab == 0) this.params.queryParams.optional = {tab: '0', api_name: this.apiNameSelected, api_version: this.apiVersionSelected, api_user: this.apiUserSelected };

@@ -2,8 +2,7 @@
   <div class="header-card">
     <mat-card style="width: 60vw; min-width: 60vw;"
               [ngClass]="{'success': request.end && !request.failed,
-                          'fail': request.end && request.failed,
-                          'in-progress': !request.end}">
+                          'fail': request.end && request.failed}">
       <mat-card-title>
         <div style="display: flex; gap: 0.5em; align-items: center; width: 85%">
           <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['ldap'].icon }}</mat-icon>
@@ -16,8 +15,8 @@
         <div class="right">
           <button mat-icon-button [disabled]="sessionParent == null"
                   [ngStyle]="{'pointer-events': sessionParent == null ? 'none' : ''}" (click)="navigate($event,'parent')"
-                  matTooltip="Détail de l'appel parent">
-            <mat-icon>move_up</mat-icon>
+                  matTooltip="Détail de l'appel client">
+            <mat-icon>link</mat-icon>
           </button>
         </div>
       </mat-card-title>
