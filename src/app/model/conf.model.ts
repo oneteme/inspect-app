@@ -8,7 +8,7 @@ export interface Application {
 export class QueryParams {
     private _optional: {[key: string]: any} = {};
 
-    constructor(public _period: Period, public _env: string, public _appname?: string[], public _hosts?: string[], public _rangestatus?: string[]) {
+    constructor(public _period: Period, public _env: string, public _appname?: string[], public _hosts?: string[], public _rangestatus?: string[], public _commands?: string[]) {
     }
 
     set period(period: Period) {
@@ -22,6 +22,7 @@ export class QueryParams {
     get env(): string {
         return this._env;
     }
+
 
     set appname(appname: string[]) {
        this._appname = appname;
@@ -45,6 +46,14 @@ export class QueryParams {
 
     get rangestatus(): string[] {
         return this._rangestatus;
+    }
+
+
+    set commands(command: string[]){
+        this._commands = command
+    }
+    get commands(): string[] {
+        return this._commands;
     }
 
     get optional(): {[key: string]: any} {
@@ -71,6 +80,9 @@ export class QueryParams {
         }
         if(this.env) {
             params = { ...params, env: this.env };
+        }
+        if(this.commands && this.commands.length> 0){
+            params = {...params, command: this.commands.toString()}
         }
         return params;
     }

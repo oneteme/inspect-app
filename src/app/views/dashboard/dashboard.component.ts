@@ -18,13 +18,15 @@ import {FtpRequestService} from 'src/app/service/jquery/ftp-request.service';
 import {LdapRequestService} from 'src/app/service/jquery/ldap-request.service';
 import {
     FtpSessionExceptionsByPeriodAndappname,
-    JdbcSessionExceptionsByPeriodAndappname,
+    JdbcMainExceptionsByPeriodAndappname,
+    JdbcExceptionsByPeriodAndAppname,
+    LdapMainExceptionsByPeriodAndappname,
     LdapSessionExceptionsByPeriodAndappname,
     RestSessionExceptionsByPeriodAndappname,
     SessionExceptionsByPeriodAndAppname,
     SmtpSessionExceptionsByPeriodAndappname
 } from 'src/app/model/jquery.model';
-import {smtpRequestService} from 'src/app/service/jquery/smtp-request.service';
+import {SmtpRequestService} from 'src/app/service/jquery/smtp-request.service';
 import {NumberFormatterPipe} from 'src/app/shared/pipe/number.pipe';
 
 @Component({
@@ -42,7 +44,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
     private _restService = inject(RestRequestService);
     private _datebaseService = inject(DatabaseRequestService);
     private _ftpService = inject(FtpRequestService);
-    private _smtpService = inject(smtpRequestService)
+    private _smtpService = inject(SmtpRequestService)
     private _ldapService = inject(LdapRequestService);
     private _location: Location = inject(Location);
     private _datePipe = inject(DatePipe);
@@ -296,8 +298,8 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
             },
 
             databaseRequestExceptionsTable: {
-                observable: this._datebaseService.getJdbcRestSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
-                    .pipe(map(((result: JdbcSessionExceptionsByPeriodAndappname[]) => {
+                observable: this._datebaseService.getJdbcMainSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
+                    .pipe(map(((result: JdbcExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
                         this.sparklineTitles.jdbc = this.setTitle('JDBC', [...result]);
                         return this.setChartData(result)
