@@ -1,0 +1,13 @@
+<div style="display: flex;">
+  <repartition-type-card style="width: 50%;" [seriesProvider]="seriesProvider" [data]="$timeAndTypeResponse.data" [isLoading]="$timeAndTypeResponse.loading">
+    <div class="stat" style="color: #33cc33;">
+      <div class="label" [matTooltip]="($timeAndTypeResponse.stats.statCountOk | number : '1.0-0') + ' / ' + ($timeAndTypeResponse.stats.statCount | number : '1.0-0')">{{ ($timeAndTypeResponse.stats.statCountOk / $timeAndTypeResponse.stats.statCount) * 100 | number : '1.0-2'  }}%</div>
+      <div class="sub-label">OK</div>
+    </div>
+    <div class="stat" style="color: #ff0000">
+      <div class="label" [matTooltip]="($timeAndTypeResponse.stats.statCountErr | number : '1.0-0') + ' / ' + ($timeAndTypeResponse.stats.statCount | number : '1.0-0')">{{ ($timeAndTypeResponse.stats.statCountErr / $timeAndTypeResponse.stats.statCount) * 100 | number : '1.0-2'  }}%</div>
+      <div class="sub-label">KO</div>
+    </div>
+  </repartition-type-card>
+</div>
+<performance-card [data]="$timeAndTypeResponse.data" [isLoading]="$timeAndTypeResponse.loading"></performance-card>

@@ -48,15 +48,12 @@ import {BatchTabComponent} from "./statistic/server/_component/batch-tab/batch-t
 import {DependencyTableComponent} from "./statistic/server/_component/dependency-table/dependency-table.component";
 import {ExceptionsTableComponent} from "./statistic/server/_component/exceptions-table/exceptions-table.component";
 import {EvolUserCardComponent} from "./statistic/server/_component/evol-user-card/evol-user-card.component";
-import {PerformanceCardComponent} from "./statistic/server/_component/performance-card/performance-card.component";
+import {PerformanceCardComponent} from "./statistic/_component/performance-card/performance-card.component";
 import {DependencyCardComponent} from "./statistic/server/_component/dependency-card/dependency-card.component";
 import {ServerStartTableComponent} from "./dashboard/components/server-start-table/server-start-table.component";
 import {
   RepartitionTypeCardComponent as RestRepartitionTypeCardComponent
-} from "./statistic/server/_component/rest-tab/_component/repartition-type-card/repartition-type-card.component";
-import {
-  RepartitionTypeCardComponent as BatchRepartitionTypeCardComponent
-} from "./statistic/server/_component/batch-tab/_component/repartition-type-card/repartition-type-card.component";
+} from "./statistic/_component/repartition-type-card/repartition-type-card.component";
 import {SearchRequestView} from "./search/request/search-request.view";
 import {AnalyticView} from "./analytic/analytic.view";
 import {DetailTimelineComponent} from "./detail/session/_component/timeline/detail-timeline.component";
@@ -64,6 +61,12 @@ import {ActionTableComponent} from "./detail/session/_component/action-table/act
 import {DetailRequestView} from "./detail/request/detail-request.view";
 import {DetailRestView} from "./detail/request/rest/detail-rest.view";
 import {ConfigDialogComponent} from "./supervision/_component/config-dialog/config-dialog.component";
+import {StatisticRequestView} from "./statistic/request/statistic-request.view";
+import {StatisticRequestJdbcComponent} from "./statistic/request/jdbc/statistic-request-jdbc.component";
+import {StatisticRequestFtpComponent} from "./statistic/request/ftp/statistic-request-ftp.component";
+import {StatisticRequestSmtpComponent} from "./statistic/request/smtp/statistic-request-smtp.component";
+import {StatisticRequestLdapComponent} from "./statistic/request/ldap/statistic-request-ldap.component";
+import {StatisticRequestHttpComponent} from "./statistic/request/http/statistic-request-http.component";
 import {ReportTableComponent} from "./supervision/_component/report-table/report-table.component";
 import {DetailStageTableComponent} from "./detail/session/_component/stage-table/detail-stage-table.component";
 import {RequestStageTableComponent} from "./detail/request/_component/stage-table/request-stage-table.component";
@@ -78,8 +81,6 @@ import { InstanceComponent } from './detail/instance/instance.component';
 import { InstanceTableComponent } from './detail/instance/_component/instance-table/instance-table.component';
 import {DetailLogTableComponent} from "./detail/session/_component/log-table/detail-log-table.component";
 import {ParameterTableComponent} from "./detail/instance/_component/parameter-table/parameter-table.component";
-
-
 
 @NgModule({
   imports: [
@@ -123,11 +124,16 @@ import {ParameterTableComponent} from "./detail/instance/_component/parameter-ta
     TreeView,
     DumpView,
     StatisticServerView,
+    StatisticRequestView,
+    StatisticRequestJdbcComponent,
+    StatisticRequestFtpComponent,
+    StatisticRequestSmtpComponent,
+    StatisticRequestLdapComponent,
+    StatisticRequestHttpComponent,
     RestTabComponent,
     BatchTabComponent,
     DependencyTableComponent,
     ExceptionsTableComponent,
-    BatchRepartitionTypeCardComponent,
     RestRepartitionTypeCardComponent,
     EvolUserCardComponent,
     PerformanceCardComponent,

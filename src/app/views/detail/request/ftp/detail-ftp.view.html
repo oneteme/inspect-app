@@ -19,6 +19,11 @@
             <mat-icon>move_up</mat-icon>
           </button>
         </div>
+          <div class="right">
+              <button mat-icon-button [matMenuTriggerFor]="menuHost">
+                  <mat-icon>more_vert</mat-icon>
+              </button>
+          </div>
       </mat-card-title>
       <mat-card-content>
         <exception-display [exception]="exception"></exception-display>
@@ -82,6 +87,10 @@
   <mat-progress-spinner diameter="30" mode="indeterminate"></mat-progress-spinner>
   Chargement en cours...
 </div>
+
+<mat-menu #menuHost="matMenu">
+    <a mat-menu-item [routerLink]="['/dashboard/request', 'ftp', request?.host]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Request</a>
+</mat-menu>
 
 <mat-menu #menuServer="matMenu">
   <a mat-menu-item [routerLink]="['/session', instance?.name, 'dump']" [queryParams]="{env: instance?.env, date: getDate(request?.start * 1000).toISOString()}"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
