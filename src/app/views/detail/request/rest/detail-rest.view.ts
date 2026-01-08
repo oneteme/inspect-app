@@ -63,8 +63,8 @@ export class DetailRestView implements OnInit, OnDestroy {
         count: this.stages.length || 0,
         visible: true,
         type: 'stage',
-        hasError: false,
-        errorCount: 0
+        hasError: this.stages.some(s => s.exception),
+        errorCount: this.stages.filter(s => s.exception).length || 0
       },
       {
         label: 'Chronologie',
@@ -134,7 +134,7 @@ export class DetailRestView implements OnInit, OnDestroy {
     });
     items.splice(0,0,{
       title: "",
-      group: 'parent',
+      group: this.request.method,
       start: timelineStart,
       end: timelineEnd,
       content: (this.request.host || 'N/A'),
@@ -143,7 +143,7 @@ export class DetailRestView implements OnInit, OnDestroy {
     });
 
     let groups: any[] = this.stages.map((a:HttpRequestStage, i:number) => ({ id: i, content: a?.name, treeLevel: 2}));
-    groups.splice(0, 0, {id: 'parent', content: this.request.threadName, treeLevel: 1, nestedGroups:groups.map(g=>(g.id))});
+    groups.splice(0, 0, {id: this.request.method, content: this.request.method, treeLevel: 1, nestedGroups:groups.map(g=>(g.id))});
     let padding = (Math.ceil((timelineEnd - timelineStart)*0.01));
     this.dataItems = items;
     this.dataGroups = groups;

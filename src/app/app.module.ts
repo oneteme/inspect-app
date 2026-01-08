@@ -110,7 +110,7 @@ const routes: Route[] = [
             component: SearchMainView,
             title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
               if (route.paramMap.get('type_main') == 'batch') {
-                return 'Exécution de Batch';
+                return 'Exécution de CRON';
               } else if(route.paramMap.get('type_main') == 'startup') {
                 return 'Lancement de Serveur';
               } else if (route.paramMap.get('type_main') == 'test') {
@@ -128,7 +128,7 @@ const routes: Route[] = [
                 title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
                   let detail = '> Detail';
                   if (route.paramMap.get('type_main') == 'batch') {
-                    return `Exécution de Batch ${detail}`;
+                    return `Exécution de CRON ${detail}`;
                   } else if (route.paramMap.get('type_main') == 'startup') {
                     return `Lancement de Serveur ${detail}`;
                   } else if (route.paramMap.get('type_main') == 'test') {
@@ -144,7 +144,7 @@ const routes: Route[] = [
                 title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
                   let detail = `> Arbre d'Appels`;
                   if (route.paramMap.get('type_main') == 'batch') {
-                    return `Exécution de Batch ${detail}`;
+                    return `Exécution de CRON ${detail}`;
                   } else if (route.paramMap.get('type_main') == 'startup') {
                     return `Lancement de Serveur ${detail}`;
                   } else if (route.paramMap.get('type_main') == 'test') {

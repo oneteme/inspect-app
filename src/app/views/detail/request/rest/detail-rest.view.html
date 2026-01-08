@@ -4,11 +4,17 @@
               [ngClass]="{'success': request.status >= 200 && request.status < 400,
                         'warning': request.status >= 400 && request.status < 500,
                         'fail': request.status >= 500,
-                        'unavailable': request.end && request.status == 0,
-                        'in-progress': !request.end}">
+                        'unavailable': request.end && request.status == 0}">
       <mat-card-title>
         <div style="display: flex; gap: 0.5em; align-items: center; width: 85%">
-          <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['rest'].icon }}</mat-icon>
+          <mat-icon style="overflow: visible !important;" class="material-symbols-outlined">{{ REQUEST_TYPE['rest'].icon }}</mat-icon>
+          <span *ngIf="request.end" class="status-badge"
+            [ngClass]="{'success': request.status >= 200 && request.status < 400,
+                'warning': request.status >= 400 && request.status < 500,
+                'fail': request.status >= 500,
+                'unavailable': request.status == 0}">
+              {{request.status}}
+          </span>
           <div class="ellipsis" [matTooltip]="request.path">
             {{ request.path || 'N/A' }}
           </div>
@@ -16,6 +22,7 @@
         </div>
         <div class="right">
           <button matTooltip="Détail de la session"  mat-icon-button color="primary"
+                  [disabled]="request.status != 0 && !request.linked"
                   (click)="navigate($event, 'remote')">
               <mat-icon class="material-symbols-outlined">link</mat-icon>
           </button>
@@ -37,28 +44,23 @@
             [{{ request.method }}] {{ getSessionUrl() }}
           </a>
         </div>
-        <exception-display [exception]="exception"></exception-display>
+        <exception-display [type]="request.status >= 200 && request.status < 400 ? 'success' : request.status >= 400 && request.status < 500 ? 'warning' : 'fail'" [exception]="exception"></exception-display>
       </mat-card-content>
       <mat-card-footer>
-        <div style="display: flex; align-items: center; gap: 0.5em">
-          le {{ (request.start * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
-        </div>
+        <label-icon icon="person" [iconOutlined]="true" [size]="20">
+          <div style="display: flex; align-items: center; gap: 0.5em">
+            {{ request.user || "N/A" }}
+            le {{ (request.start * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
+          </div>
+        </label-icon>
         <div class="right">
           {{ request.outDataSize }}o
           <mat-icon style="width: 20px; height: 20px; font-size: 20px;">swap_vert</mat-icon>
-          {{ request.inDataSize }}o en
+          <div>{{ request.inDataSize }}o en
           <span [matTooltip]="((request.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss': 'fr')" style="font-weight: bold">
-          {{{start: request.start, end: request.end} | duration }}
-        </span>
+            {{{start: request.start, end: request.end} | duration }}
+          </span></div>
         </div>
-        <span class="badge"
-              [ngClass]="{'success': request.status >= 200 && request.status < 400,
-                        'warning': request.status >= 400 && request.status < 500,
-                        'fail': request.status >= 500,
-                        'unavailable': request.status == 0 && request.end,
-                        'in-progress': !request.end}">
-        {{ request.end ? request.status : 'En cours' }}
-      </span>
       </mat-card-footer>
     </mat-card>
     <app-server-card style="width: 40vw"
@@ -75,7 +77,15 @@
            [class.hidden]="!tab.visible"
            (click)="selectedTabIndex = i">
         <mat-icon class="material-symbols-outlined">{{ tab.icon }}</mat-icon>
-        <span class="tab-label">{{ tab.label }}</span>
+        <div class="tab-label-container">
+          <span class="tab-label">{{ tab.label }}</span>
+          <mat-icon *ngIf="tab.hasError && tab.errorCount > 0"
+                    class="error-indicator material-symbols-outlined"
+                    [matTooltip]="tab.errorCount + ' erreur(s)'"
+                    matTooltipPosition="right">
+            error
+          </mat-icon>
+        </div>
         <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
       </div>
     </div>

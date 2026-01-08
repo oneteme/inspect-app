@@ -30,9 +30,9 @@
         <exception-display [exception]="exception"></exception-display>
       </mat-card-content>
       <mat-card-footer>
-        <mat-icon class="material-symbols-outlined" style="width: 20px; height: 20px; font-size: 20px;">person</mat-icon>
-        {{request.user || "N/A"}} le {{( request.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
-        en <b>{{{ start: request.start, end: request.end } | duration}}</b>
+        <label-icon icon="person" [iconOutlined]="true" [size]="20">
+          {{request.user || "N/A"}} le {{( request.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }} en <b [matTooltip]="((request.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')">{{{ start: request.start, end: request.end } | duration}}</b>
+        </label-icon>
       </mat-card-footer>
     </mat-card>
     <app-server-card style="width: 40vw"
@@ -49,7 +49,15 @@
            [class.hidden]="!tab.visible"
            (click)="selectedTabIndex = i">
         <mat-icon class="material-symbols-outlined">{{ tab.icon }}</mat-icon>
-        <span class="tab-label">{{ tab.label }}</span>
+        <div class="tab-label-container">
+          <span class="tab-label">{{ tab.label }}</span>
+          <mat-icon *ngIf="tab.hasError && tab.errorCount > 0"
+                    class="error-indicator material-symbols-outlined"
+                    [matTooltip]="tab.errorCount + ' erreur(s)'"
+                    matTooltipPosition="right">
+            error
+          </mat-icon>
+        </div>
         <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
       </div>
     </div>

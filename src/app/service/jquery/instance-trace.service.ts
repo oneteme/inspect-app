@@ -24,6 +24,14 @@ export class InstanceTraceService {
     return this.getInstanceTrace(args);
   }
 
+  getPendingSum(filters: {instance: string, date: Date}): Observable<number> {
+    return this.getInstanceTrace({
+      'column': 'pending.sum:pending',
+      'instance_env.varchar': `"${filters.instance}"`,
+      'start.lt': filters.date.toISOString()
+    }).pipe(map((res: {pending: number}[]) => res[0].pending || 0));
+  }
+
   getLastInstanceTrace(filters: {instance: string[]}): Observable<{id: string, date: number}[]> {
     let args: any = {
       'column': 'instance_env:id,start:date',

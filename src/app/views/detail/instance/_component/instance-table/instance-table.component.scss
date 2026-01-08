@@ -1,18 +1,14 @@
-.searchwidth {
-  display: flex;
-  margin-bottom: 0.5em;
-}
-
-.table-container {
-  .table-wrapper {
-    max-height: calc(100vh - 96px - 56px - 48px - 64px);
+.mat-mdc-cell {
+  &.selected {
+    border-left: 3px solid #7c3aed;
+    background: linear-gradient(90deg, rgba(124, 58, 237, 0.08) 0%, transparent 100%);
   }
 }
 
 .mat-mdc-row {
   border-bottom: 1px solid rgba(0, 0, 0, 0.06);
 
-  &:hover {
+  &.clickable-row:hover {
     cursor: pointer;
     background-color: rgba(63, 81, 181, 0.04);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -21,10 +17,5 @@
     .mat-mdc-cell {
       background-color: transparent;
     }
-  }
-
-  &:active {
-    transform: translateY(0);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   }
 }

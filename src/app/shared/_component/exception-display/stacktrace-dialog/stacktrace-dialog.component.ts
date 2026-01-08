@@ -18,18 +18,13 @@ import {StackTraceRow} from "../../../../model/trace.model";
       display: flex;
       align-items: center;
       gap: 8px;
-      
     }
     .mdc-dialog__title {
       padding: 9px 24px 9px;
       color: #f44336;
     }
-    [mat-dialog-content] {
-      background-color: #f7f7f7;
-      border-radius: 8px;
-      margin-top: 8px;
-    }
     pre {
+      background-color: #f7f7f7;
       margin: 0;
       padding: 16px;
       white-space: pre-wrap;
@@ -37,7 +32,7 @@ import {StackTraceRow} from "../../../../model/trace.model";
     }
     code {
       font-family: 'Courier New', Courier, monospace;
-      font-size: 13px;
+      font-size: 11px;
       color: #333;
     }
   `]

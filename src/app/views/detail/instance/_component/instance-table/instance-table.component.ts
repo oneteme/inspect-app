@@ -5,21 +5,24 @@ import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {INFINITY} from "../../../../constants";
 import {EnvRouter} from "../../../../../service/router.service";
+import {groupByColor} from "../../../../../shared/util";
 
 @Component({
-  selector: 'app-instance-table',
+  selector: 'instance-table',
   templateUrl: './instance-table.component.html',
   styleUrls: ['./instance-table.component.scss']
 })
 export class InstanceTableComponent {
   private readonly _router = inject(EnvRouter);
 
-  displayedColumns: string[] = ['name', 'args', 'start', 'duree'];
+  displayedColumns: string[] = ['version', 'branch', 'start', 'duree'];
   dataSource: MatTableDataSource<AbstractStage> = new MatTableDataSource();
   dateNow = new Date().getTime();
+  versionColor: any;
 
   @ViewChild('paginator', {static: true}) paginator: MatPaginator;
   @ViewChild('sort', {static: true}) sort: MatSort;
+
   @Input() mainId='';
   @Input() set requests(requests: AbstractStage[]) {
     if(requests) {
@@ -33,6 +36,7 @@ export class InstanceTableComponent {
         active: this.sort.active,
         direction: this.sort.direction
       });
+      this.versionColor = groupByColor(requests, (v: any) => v.version)
     } else {
       this.dataSource = new MatTableDataSource();
     }

@@ -6,25 +6,13 @@
         <th mat-header-cell *matHeaderCellDef mat-sort-header>
           <div class="header-cell-content">
             <mat-icon class="material-symbols-outlined">schedule</mat-icon>
-            Début
+            Date
           </div>
         </th>
         <td mat-cell *matCellDef="let row">
           {{ (row.instant*1000 | date:'dd/MM/yyyy')}}
           <br>
           {{ (row.instant*1000 | date:'HH:mm:ss.SSS')}}
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="level">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>
-          <div class="header-cell-content">
-            <mat-icon class="material-symbols-outlined">flag</mat-icon>
-            Type
-          </div>
-        </th>
-        <td mat-cell *matCellDef="let row">
-          <span> {{ row.level }}  </span>
         </td>
       </ng-container>
 
@@ -36,7 +24,8 @@
           </div>
         </th>
         <td mat-cell *matCellDef="let row">
-          <span> {{ row.message }}  </span>
+          <span style="font-weight: bold;">{{ row.level | typeColumnFormat }}</span>
+          <div>{{ row.message }}</div>
         </td>
       </ng-container>
       <ng-container matColumnDef="action">
@@ -54,6 +43,6 @@
       <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
     </table>
   </div>
-  <mat-paginator #paginator [pageSize]="3" [hidePageSize]="true"
+  <mat-paginator #paginator [pageSize]="4" [hidePageSize]="true"
                  showFirstLastButtons></mat-paginator>
 </div>

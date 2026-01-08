@@ -65,8 +65,8 @@ export class DetailFtpView implements OnInit, OnDestroy {
         count: this.stages.length || 0,
         visible: true,
         type: 'stage',
-        hasError: false,
-        errorCount: 0
+        hasError: this.stages.some(s => s.exception),
+        errorCount: this.stages.filter(s => s.exception).length || 0
       },
       {
         label: 'Chronologie',
@@ -141,7 +141,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
     });
     this.dataArray.splice(0, 0, {
       title: '',
-      group: 'parent',
+      group: this.request.command,
       start: this.timelineStart,
       end: this.timelineEnd,
       content: (this.request.host || 'N/A'),
@@ -168,8 +168,8 @@ export class DetailFtpView implements OnInit, OnDestroy {
     }
 
     groups.splice(0, 0, {
-      id: 'parent',
-      content: this.request.threadName,
+      id: this.request.command,
+      content: this.request.command,
       treeLevel: 1,
       nestedGroups: groups.map(g => (g.id))
     })
@@ -222,8 +222,8 @@ export class DetailFtpView implements OnInit, OnDestroy {
         treeLevel: 2
       }))
       groups.splice(0, 0, {
-        id: 'parent',
-        content: this.request.threadName,
+        id: this.request.command,
+        content: this.request.command,
         treeLevel: 1,
         nestedGroups: groups.map(g => (g.id))
       })

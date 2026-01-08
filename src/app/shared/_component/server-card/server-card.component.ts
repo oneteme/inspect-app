@@ -4,6 +4,7 @@ import {InstanceTraceService} from "../../../service/jquery/instance-trace.servi
 import {finalize} from "rxjs";
 import {MatMenu} from "@angular/material/menu";
 import {EnvRouter} from "../../../service/router.service";
+import {Router} from "@angular/router";
 
 @Component({
   selector: 'app-server-card',
@@ -12,7 +13,9 @@ import {EnvRouter} from "../../../service/router.service";
 })
 export class ServerCardComponent {
   private readonly _instanceTraceService = inject(InstanceTraceService);
+  protected readonly _router: EnvRouter = inject(EnvRouter);
 
+  date = new Date().getTime();
   _instance: InstanceEnvironment;
   _lastTrace: number;
   _isLoadingLastTrace: boolean = false;
@@ -36,5 +39,9 @@ export class ServerCardComponent {
 
   navigate(event: MouseEvent) {
     this.onClick.emit(event);
+  }
+
+  navigateOnServerClick(event: MouseEvent) {
+    this._router.navigateOnClick(event, ['/instance/detail', this._instance.id], { queryParams: {env: this._instance.env} });
   }
 }

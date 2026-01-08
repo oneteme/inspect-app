@@ -46,7 +46,6 @@ export class DetailTimelineComponent implements OnChanges {
         [key: string]: (c:any,i:number)=> DataItem
     } = {
         'session-stage': (c:any,i:number) => this.mapSessionStage(c,i),
-        'stage'        : (c:any,i:number) => this.mapother(c,i),
         'action'       : (c:any,i:number) => this.mapother(c,i),
         'rest'         : (c:any,i:number) => this.mapother(c,i),
         'ftp'          : (c:any,i:number) => this.mapother(c,i),
@@ -89,7 +88,7 @@ export class DetailTimelineComponent implements OnChanges {
                     this.dataGroups = [{ id: 0, content: this.instance.re }];
                     this.isWebApp = true;
                 } else {
-                    this.dataGroups = [...new Set(this.dataArray.filter(c => c.threadName).map(c => c.threadName))].map((c: any) => ({ id: c, content: c }))
+                    this.dataGroups = [...new Set(this.dataArray.filter(c => c.typeTimeline != 'session-stage' && c.typeTimeline != 'log').map(c => c.threadName || '?'))].map((c: any) => ({ id: c, content: c }))
                 }
                 if(this.dataArray.length > 50 ){
                     this.timelineEnd = this.dataArray[51].start * 1000;
@@ -146,26 +145,23 @@ export class DetailTimelineComponent implements OnChanges {
     mapother(c:any, id:number) : DataItem{
         const isInProgress = !c.end && c.typeTimeline != 'action';
         let end = c.typeTimeline == 'action' ? c.start * 1000 :
-            c.end ? c.end * 1000 :  new Date(new Date().setHours(23, 59, 59, 999)).getTime();
+            c.end ? c.end * 1000 :  new Date().getTime();
 
         let o = {
             id: c.id ?`${c.id}_${c.typeTimeline}`: id,
-            group: this.isWebApp ? 0 : c.threadName,
-            content: c.typeTimeline == 'stage' ? '' : c.typeTimeline == 'action' ? this.ANALYTIC_MAPPING[c.type].label : (c.schema || c.name || c.host || c.level || 'N/A'),
+            group: this.isWebApp ? 0 : c.threadName || '?',
+            content: c.typeTimeline == 'action' ? this.ANALYTIC_MAPPING[c.type].label : (c.schema || c.name || c.host || c.level || 'N/A'),
             start: c.start * 1000,
             end: end,
             title: c.typeTimeline == 'action' ?
                 `${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')}</span><br>
                      <h4>${this.ANALYTIC_MAPPING[c['type']].text(c)}</h4>` :
-                c.typeTimeline == 'log' ?
-                    `${this.pipe.transform(new Date(c.instant * 1000), 'HH:mm:ss.SSS')}</span><br>
-                      <h4>${c['message'] || ''}</h4>` :
-                    `${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${c.end ? this.pipe.transform(new Date(end), 'HH:mm:ss.SSS'):"En cours..."}</span> ${c.end ? `(${this.durationPipe.transform({start: c.start, end: end / 1000})})`:""}<br>
-                     <h4>${c['path'] || ''}</h4>`,
-            className: c.typeTimeline != 'stage' ? c.typeTimeline : "",
+                `${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${c.end ? this.pipe.transform(new Date(end), 'HH:mm:ss.SSS'):"En cours..."}</span> ${c.end ? `(${this.durationPipe.transform({start: c.start, end: end / 1000})})`:""}<br>
+                 <h4>${c['path'] || ''}</h4>`,
+            className: c.typeTimeline,
             type: ''
         }
-        o.type = c.typeTimeline == 'stage' ? 'background' : o.end == o.start ? 'point' : 'range';
+        o.type = o.end == o.start ? 'point' : 'range';
         if (isInProgress) {
             o.className += ' in-progress';
         }
@@ -209,6 +205,7 @@ export class DetailTimelineComponent implements OnChanges {
             timeline.on('rangechanged', (props)=>{
                 timeline.setItems(this.getDataForRange(this.dataArray, props.start.getTime() / 1000, props.end.getTime() / 1000).map((c: any, i: number) =>this.maptype[c.typeTimeline](c, i)));
             });
+
         }
 
         if (this.timelineEnd != this.request.end * 1000) {

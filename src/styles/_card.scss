@@ -21,8 +21,8 @@ mat-card-footer {
   gap: 0.5em;
   font-style: italic;
   font-size: 14px;
+  justify-content: space-between;
   .right {
-    margin-left: auto;
     display: flex;
     align-items: center;
   }

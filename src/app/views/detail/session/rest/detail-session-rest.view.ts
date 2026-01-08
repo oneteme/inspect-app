@@ -46,11 +46,9 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     getSession(id: string) {
         this.$destroy.next();
         this.isLoading = true;
-        this.parentLoading = true;
         this.session = null;
         this.completedSession = null;
         this.sessionParent = null;
-        this._traceService.getSessionParent(RequestType.REST, id).pipe(takeUntil(this.$destroy), catchError(() => of(null)),finalize(()=>(this.parentLoading = false))).subscribe(d=>this.sessionParent = d);
         this._traceService.getRestSession(id)
             .pipe(
                 takeUntil(this.$destroy),
@@ -63,6 +61,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
                             return merge(
                                 this._traceService.getInstance(this.session.instanceId).pipe(map(d=>(this.instance=d))),
                                 this._traceService.getRestSessionStages(this.session.id).pipe(map(d=>(this.session.httpSessionStages=d))),
+                                this.session.linked ? defer(() => { this.parentLoading = true; return this._traceService.getSessionParent(RequestType.REST, this.session.id).pipe(catchError(() => of(null)), finalize(()=>(this.parentLoading = false)), map(d => this.sessionParent = d))}) : of(),
                                 (this.session.requestsMask & 4) > 0 ? defer(()=> {this.session.restRequests = []; return this._traceService.getRestRequests(this.session.id).pipe(map(d=>(this.session.restRequests=d)))}) : of(),
                                 (this.session.requestsMask & 2) > 0 ? defer(()=> {this.session.databaseRequests = []; return this._traceService.getDatabaseRequests(this.session.id).pipe(map(d=>(this.session.databaseRequests=d)))}) : of(),
                                 (this.session.requestsMask & 1) > 0 ? defer(()=> {this.session.localRequests = []; return this._traceService.getLocalRequests(this.session.id).pipe(map(d=>(this.session.localRequests=d)))}) : of(),

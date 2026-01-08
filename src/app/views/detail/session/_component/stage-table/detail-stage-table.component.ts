@@ -5,6 +5,7 @@ import {HttpSessionStage} from "../../../../../model/trace.model";
 import {MatTableDataSource} from "@angular/material/table";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
+import {INFINITY} from "../../../../constants";
 
 @Component({
   selector: 'stage-table',
@@ -22,9 +23,16 @@ export class DetailStageTableComponent {
     if(requests) {
       this.dataSource = new MatTableDataSource(requests);
       this.dataSource.paginator = this.paginator;
+      this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
       this.dataSource.sort = this.sort;
     }else{
       this.dataSource = new MatTableDataSource();
     }
+  }
+
+  sortingDataAccessor = (row: any, columnName: string) => {
+    if (columnName == "duree") return row['end'] ? row["end"] - row["start"] : INFINITY;
+
+    return row[columnName as keyof any] as string;
   }
 }
