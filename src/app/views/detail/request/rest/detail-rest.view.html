@@ -20,18 +20,6 @@
           </div>
           <mat-spinner *ngIf="!request.end" [diameter]="18"></mat-spinner>
         </div>
-        <div class="right">
-          <button matTooltip="Détail de la session"  mat-icon-button color="primary"
-                  [disabled]="request.status != 0 && !request.linked"
-                  (click)="navigate($event, 'remote')">
-              <mat-icon class="material-symbols-outlined">link</mat-icon>
-          </button>
-          <button mat-icon-button [disabled]="sessionParent == null"
-                  [ngStyle]="{'pointer-events': sessionParent == null ? 'none' : ''}" (click)="navigate($event,'parent')"
-                  matTooltip="Détail de l'appel parent">
-            <mat-icon>move_up</mat-icon>
-          </button>
-        </div>
           <div class="right">
               <button mat-icon-button [matMenuTriggerFor]="menuHost">
                   <mat-icon>more_vert</mat-icon>
@@ -117,7 +105,10 @@
 </div>
 
 <mat-menu #menuHost="matMenu">
+    <div mat-menu-item [disabled]="request.status != 0 && !request.linked" (click)="navigate($event, 'remote')"><mat-icon class="material-symbols-outlined">link</mat-icon>Détail de la session</div>
+    <div mat-menu-item [disabled]="sessionParent == null" (click)="navigate($event,'parent')"><mat-icon class="material-symbols-outlined" (click)="navigate($event,'parent')">move_up</mat-icon>Détail de l'appel parent</div>
     <a mat-menu-item [routerLink]="['/dashboard/request', 'rest', request?.host]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Request</a>
+
 </mat-menu>
 
 <mat-menu #menuServer="matMenu">
