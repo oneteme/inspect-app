@@ -38,19 +38,19 @@ export class DetailSessionComponent implements OnChanges {
   initTabs() {
     this.tabs = [
       {
-        label: 'API',
+        label: 'HTTP',
         icon: 'call_made',
         count: this.session.restRequests?.length || 0,
-        visible: !!this.session.restRequests?.length,
+        visible: (this.session.requestsMask & 4) > 0,
         type: 'rest',
         hasError: this.hasRestErrors(),
         errorCount: this.getRestErrorCount()
       },
       {
-        label: 'BDD',
+        label: 'JDBC',
         icon: 'database',
         count: this.session.databaseRequests?.length || 0,
-        visible: this.session.databaseRequests?.length > 0,
+        visible: (this.session.requestsMask & 2) > 0,
         type: 'database',
         hasError: this.hasDatabaseErrors(),
         errorCount: this.getDatabaseErrorCount()
@@ -59,7 +59,7 @@ export class DetailSessionComponent implements OnChanges {
         label: 'FTP',
         icon: 'smb_share',
         count: this.session.ftpRequests?.length || 0,
-        visible: !!this.session.ftpRequests?.length,
+        visible: (this.session.requestsMask & 8) > 0,
         type: 'ftp',
         hasError: this.hasFtpErrors(),
         errorCount: this.getFtpErrorCount()
@@ -68,7 +68,7 @@ export class DetailSessionComponent implements OnChanges {
         label: 'SMTP',
         icon: 'outgoing_mail',
         count: this.session.mailRequests?.length || 0,
-        visible: !!this.session.mailRequests?.length,
+        visible: (this.session.requestsMask & 16) > 0,
         type: 'smtp',
         hasError: this.hasSmtpErrors(),
         errorCount: this.getSmtpErrorCount()
@@ -77,7 +77,7 @@ export class DetailSessionComponent implements OnChanges {
         label: 'LDAP',
         icon: 'user_attributes',
         count: this.session.ldapRequests?.length || 0,
-        visible: !!this.session.ldapRequests?.length,
+        visible: (this.session.requestsMask & 32) > 0,
         type: 'ldap',
         hasError: this.hasLdapErrors(),
         errorCount: this.getLdapErrorCount()
@@ -86,7 +86,7 @@ export class DetailSessionComponent implements OnChanges {
         label: 'LOCAL',
         icon: 'memory',
         count: this.session.localRequests?.length || 0,
-        visible: !!this.session.localRequests?.length,
+        visible: (this.session.requestsMask & 1) > 0,
         type: 'local',
         hasError: this.hasLocalErrors(),
         errorCount: this.getLocalErrorCount()

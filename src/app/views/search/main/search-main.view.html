@@ -80,8 +80,7 @@
         </th>
         <td mat-cell *matCellDef="let element"
             [ngClass]="{'success': element.end && (!element.exception?.type || !element.exception?.type),
-                            'fail': element.end && (element.exception?.type || element.exception?.type),
-                            'in-progress': !element.end}"
+                            'fail': element.end && (element.exception?.type || element.exception?.type)}"
             [matTooltip]="element.exception ? (element.exception?.type | exceptionType) + ' ' + element.exception?.message : null">
           {{ element["appName"] || 'N/A' }}
         </td>
