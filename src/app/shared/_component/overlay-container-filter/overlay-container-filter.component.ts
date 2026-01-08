@@ -7,5 +7,6 @@ import {Component, EventEmitter, Input, Output, TemplateRef} from "@angular/core
 })
 export class OverlayContainerFilterComponent {
   @Input() templateContent: TemplateRef<any>;
+  @Output() onReset: EventEmitter<any> = new EventEmitter();
   @Output() onClick: EventEmitter<any> = new EventEmitter();
 }

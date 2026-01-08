@@ -96,8 +96,6 @@ export class StatisticServerView implements OnInit, OnDestroy {
         let end = this.dateRangePicker.controls.end.value;
         if(this.dateRangePicker.valid) {
             this.params.queryParams.period = new IPeriod(start, new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1));
-            if(this.indexTab == 0) this.params.queryParams.optional = {tab: '0', api_name: [], api_version: [], api_user: [] };
-            else this.params.queryParams.optional = {tab: '1', batch_name: [], batch_version: [], batch_user: [] };
             this._router.navigate([], {
                 relativeTo: this._activatedRoute,
                 queryParams: this.params.queryParams.buildParams(),

@@ -48,7 +48,7 @@
                     [cdkConnectedOverlayOpen]="isOpen"
                     [cdkConnectedOverlayHasBackdrop]="true"
                     (overlayOutsideClick)="onOverlayOutsideClick()">
-              <overlay-container-filter [templateContent]="indexTab == 0 ? firstTab : secondTab" (onClick)="onClickFilter()" />
+              <overlay-container-filter [templateContent]="indexTab == 0 ? firstTab : secondTab" (onReset)="onResetFilter()" (onClick)="onClickFilter()" />
               <ng-template #firstTab>
                   <autocomplete-chip label="Nom d'API" [values]="$apiNameFilter" [selected]="apiNameSelected" (selectedChange)="onApiNameSelectedChange($event)"></autocomplete-chip>
                   <autocomplete-chip label="Version" [values]="$apiVersionFilter" [selected]="apiVersionSelected" (selectedChange)="onApiVersionSelectedChange($event)"></autocomplete-chip>
