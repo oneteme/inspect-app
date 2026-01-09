@@ -1,0 +1,34 @@
+<header-page titleIcon="monitoring" [iconOutlined]="true" [ui-title]="params.host | titleCase">
+
+
+  <form class="filter-container" [formGroup]="filterForm">
+
+    <mat-form-field style="width: 240px" class="no-subscript md-3" appearance="outline">
+      <mat-label>Période</mat-label>
+      <mat-date-range-input [formGroup]="filterForm.controls.dateRange" [rangePicker]="picker">
+        <input matStartDate formControlName="start" placeholder="Start date" readonly>
+        <input matEndDate formControlName="end" placeholder="End date" (dateChange)="onChangeEnd($event)" readonly>
+      </mat-date-range-input>
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-date-range-picker #picker></mat-date-range-picker>
+    </mat-form-field>
+      <button mat-button (click)="isOpen = !isOpen" [matBadge]="commandSelectedCopy.length" cdkOverlayOrigin #trigger="cdkOverlayOrigin">
+          <mat-icon>tune</mat-icon>
+          Filtre
+      </button>
+  </form>
+    <ng-template
+            cdkConnectedOverlay
+            [cdkConnectedOverlayOrigin]="trigger"
+            [cdkConnectedOverlayOpen]="isOpen"
+            [cdkConnectedOverlayHasBackdrop]="true"
+            (overlayOutsideClick)="onOverlayOutsideClick()">
+        <overlay-container-filter [templateContent]="firstTab" (onClick)="onClickFilter()" />
+        <ng-template #firstTab>
+            <autocomplete-chip *ngIf="params.type !== 'rest'" label="Commande" [values]="$commandFilter" [selected]="commandSelected" (selectedChange)="onCommandSelectedChange($event)"></autocomplete-chip>
+            <autocomplete-chip *ngIf="params.type === 'rest'" label="Methode" [values]="$mthREstFilter" [selected]="commandSelected" (selectedChange)="onCommandSelectedChange($event)"></autocomplete-chip>
+
+        </ng-template>
+    </ng-template>
+</header-page>
+<ng-container #container></ng-container>

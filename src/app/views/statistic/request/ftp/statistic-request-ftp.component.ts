@@ -1,0 +1,86 @@
+import {Component, inject, Input} from "@angular/core";
+import {DatePipe, DecimalPipe} from "@angular/common";
+import {ChartProvider, field} from "@oneteme/jquery-core";
+import {QueryParams} from "../../../../model/conf.model";
+import {formatters, periodManagement} from "../../../../shared/util";
+import {finalize, map} from "rxjs";
+import {FtpRequestService} from "../../../../service/jquery/ftp-request.service";
+import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
+import {ActivatedRoute} from "@angular/router";
+
+@Component({
+  templateUrl: './statistic-request-ftp.component.html',
+  styleUrls: ['./statistic-request-ftp.component.scss']
+})
+export class StatisticRequestFtpComponent {
+  private readonly _datePipe = inject(DatePipe);
+  private readonly _ftpRequestService = inject(FtpRequestService);
+  private readonly _activatedRoute = inject(ActivatedRoute);
+
+  readonly seriesProvider: SerieProvider<string, number>[] = [
+    {data: {x: field('date'), y: field('countSuccess')}, name: 'OK', color: '#33cc33'},
+    {data: {x: field('date'), y: field('countError')}, name: 'KO', color: '#ff0000'},
+  ];
+
+  $timeAndTypeResponse: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErr: number} } = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErr: 0} };
+  $exceptionsResponse: { data: any[], loading: boolean } = {data: [], loading: true};
+
+  @Input() set queryParams(queryParams: QueryParams) {
+    if(queryParams) {
+      let groupedBy = periodManagement(queryParams.period.start, queryParams.period.end);
+      this.getRepartitionTimeAndTypeResponseByPeriod(queryParams, groupedBy);
+      this.getExceptions(queryParams, groupedBy);
+    }
+  }
+
+  getRepartitionTimeAndTypeResponseByPeriod(queryParams: QueryParams, groupedBy: string) {
+    this.$timeAndTypeResponse.data = [];
+    this.$timeAndTypeResponse.loading = true;
+    return this._ftpRequestService.getRepartitionTimeAndTypeResponseByPeriod({
+      start: queryParams.period.start,
+      end: queryParams.period.end,
+      groupedBy: groupedBy,
+      env: queryParams.env,
+      host: queryParams.hosts,
+      command: queryParams.commands
+    }).pipe(
+      map(r => {
+        formatters[groupedBy](r, this._datePipe);
+        return r;
+      }), finalize(() => this.$timeAndTypeResponse.loading = false)
+    ).subscribe({
+      next: res => {
+        this.$timeAndTypeResponse.data = res;
+        this.$timeAndTypeResponse.stats = this.calculateStats(res);
+      }
+    });
+  }
+  getExceptions(queryParams: QueryParams, groupedBy: string) {
+    this.$exceptionsResponse.data = [];
+    this.$exceptionsResponse.loading = true;
+    return this._ftpRequestService.getftpSessionExceptionsByHost({
+      env: queryParams.env,
+      start: queryParams.period.start,
+      end: queryParams.period.end,
+      groupedBy: groupedBy,
+      host: queryParams.hosts,
+      command: queryParams.commands
+    }).pipe(
+        finalize(() => this.$exceptionsResponse.loading = false),
+        map(res => {
+          formatters[groupedBy](res, this._datePipe, 'stringDate');
+          return res.filter(r => r.errorType != null)
+        }))
+        .subscribe({
+          next: res => {
+            this.$exceptionsResponse.data = res;
+          }
+        })
+  }
+
+    calculateStats(res: any[]) {
+    return res.reduce((acc: {statCount: number, statCountOk: number, statCountErr: number}, o) => {
+      return {statCount: acc.statCount + o['countSuccess'] + o['countError'], statCountOk: acc.statCountOk + o['countSuccess'], statCountErr: acc.statCountErr + o['countError']};
+    }, {statCount: 0, statCountOk: 0, statCountErr: 0});
+  }
+}
