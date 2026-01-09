@@ -63,6 +63,22 @@ export class FtpRequestService {
         return this.getFtp(args);
     }
 
+    getftpSessionExceptionsByHost(filters: { env: string, start: Date, end: Date, groupedBy: string, host: string[],command?: string[]  }): Observable<FtpSessionExceptionsByPeriodAndappname[]> {
+        let args = {
+            'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
+            'join': 'exception,instance',
+            'instance.environement': filters.env,
+            'host':`"${filters.host}"`,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'order': 'date.asc'
+        }
+        if(filters.command){
+            args['command'] = filters.command.toString();
+        }
+        return this.getFtp(args);
+    }
+
     getftpSessionExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<FtpSessionExceptionsByPeriodAndappname[]> {
         let args = {
             'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,

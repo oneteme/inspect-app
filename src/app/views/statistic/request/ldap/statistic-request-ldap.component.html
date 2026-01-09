@@ -11,3 +11,9 @@
   </repartition-type-card>
 </div>
 <performance-card [data]="$timeAndTypeResponse.data" [isLoading]="$timeAndTypeResponse.loading"></performance-card>
+<div class="card-container mat-elevation-z5" style="height: 306px">
+    <div class="title-container">
+        <span class="title">Erreur</span>
+    </div>
+    <exceptions-table-new [data]="$exceptionsResponse.data" [isLoading]="$exceptionsResponse.loading"></exceptions-table-new>
+</div>

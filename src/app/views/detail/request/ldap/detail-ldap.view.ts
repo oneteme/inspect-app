@@ -183,17 +183,19 @@ export class DetailLdapView implements OnInit, OnDestroy {
     }
 
     navigate(event: MouseEvent, targetType: string, extraParam?: string) {
-        let params: any[] = [];
-        switch (targetType) {
-            case "parent":
-                params.push('session', this.sessionParent.type.toLowerCase(), this.sessionParent.id);
-        }
-        if (event.ctrlKey) {
-            this._router.open(`#/${params.join('/')}`, '_blank')
-        } else {
-            this._router.navigate(params, {
-                queryParams: {env: this.params.env}
-            });
+        if(this.sessionParent){
+            let params: any[] = [];
+            switch (targetType) {
+                case "parent":
+                    params.push('session', this.sessionParent.type.toLowerCase(), this.sessionParent.id);
+            }
+            if (event.ctrlKey) {
+                this._router.open(`#/${params.join('/')}`, '_blank')
+            } else {
+                this._router.navigate(params, {
+                    queryParams: {env: this.params.env}
+                });
+            }
         }
     }
 
