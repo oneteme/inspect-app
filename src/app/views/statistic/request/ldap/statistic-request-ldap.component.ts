@@ -23,11 +23,13 @@ export class StatisticRequestLdapComponent {
   ];
 
   $timeAndTypeResponse: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErr: number} } = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErr: 0} };
+  $exceptionsResponse: { data: any[], loading: boolean } = {data: [], loading: true};
 
   @Input() set queryParams(queryParams: QueryParams) {
     if(queryParams) {
       let groupedBy = periodManagement(queryParams.period.start, queryParams.period.end);
       this.getRepartitionTimeAndTypeResponseByPeriod(queryParams, groupedBy);
+      this.getExceptions(queryParams, groupedBy);
     }
   }
 
@@ -52,6 +54,29 @@ export class StatisticRequestLdapComponent {
         this.$timeAndTypeResponse.stats = this.calculateStats(res);
       }
     });
+  }
+  getExceptions(queryParams: QueryParams, groupedBy: string) {
+    this.$exceptionsResponse.data = [];
+    this.$exceptionsResponse.loading = true;
+    return this._ldapRequestService.getLdapExceptions({
+      env: queryParams.env,
+      start: queryParams.period.start,
+      end: queryParams.period.end,
+      groupedBy: groupedBy,
+      app_name: null,
+      host: queryParams.hosts,
+      command: queryParams.commands
+    }).pipe(
+        finalize(() => this.$exceptionsResponse.loading = false),
+        map(res => {
+          formatters[groupedBy](res, this._datePipe, 'stringDate');
+          return res.filter(r => r.errorType != null)
+        }))
+        .subscribe({
+          next: res => {
+            this.$exceptionsResponse.data = res;
+          }
+        })
   }
 
   calculateStats(res: any[]) {

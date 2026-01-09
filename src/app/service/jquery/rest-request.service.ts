@@ -30,6 +30,24 @@ export class RestRequestService {
         return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, { params: filters });
     }
 
+
+    getRestExceptionsByHost(filters: { env: string, start: Date, end: Date, groupedBy: string, host: string[],command?: string[]  }): Observable<RestSessionExceptionsByPeriodAndappname[]> {
+        let args = {
+            'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
+            'join': 'exception,instance',
+            'instance.environement': filters.env,
+            'host':`"${filters.host}"`,
+            'instance.type': 'SERVER',
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'order': 'date.asc'
+        }
+        if(filters.command){
+            args['command'] = filters.command.toString();
+        }
+        return this.getRestRequest(args);
+    }
+
     getRestExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<RestSessionExceptionsByPeriodAndappname[]> {
         let args = {
             'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,

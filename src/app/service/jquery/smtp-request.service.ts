@@ -29,7 +29,7 @@ export class SmtpRequestService {
     }
 
 
-    getSmtpExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<SmtpSessionExceptionsByPeriodAndappname[]> {
+    getSmtpExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string,host?: string[],command?: string[] }): Observable<SmtpSessionExceptionsByPeriodAndappname[]> {
         let args = {
             'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
             'join': 'exception,instance',
@@ -40,6 +40,12 @@ export class SmtpRequestService {
         }
         if(filters.app_name) {
             args['instance.app_name.in'] = filters.app_name;
+        }
+        if(filters.host){
+            args['host'] = `"${filters.host}"`;
+        }
+        if(filters.command){
+            args['command'] = filters.command.toString();
         }
         return this.getSmtp(args);
     }

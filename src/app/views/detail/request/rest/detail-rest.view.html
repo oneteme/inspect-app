@@ -105,7 +105,7 @@
 </div>
 
 <mat-menu #menuHost="matMenu">
-    <div mat-menu-item [disabled]="request.status != 0 && !request.linked" (click)="navigate($event, 'remote')"><mat-icon class="material-symbols-outlined">link</mat-icon>Détail de la session</div>
+    <div mat-menu-item [disabled]="request && request.status != 0 && !request.linked" (click)="navigate($event, 'remote')"><mat-icon class="material-symbols-outlined">link</mat-icon>Détail de la session</div>
     <div mat-menu-item [disabled]="sessionParent == null" (click)="navigate($event,'parent')"><mat-icon class="material-symbols-outlined" (click)="navigate($event,'parent')">move_up</mat-icon>Détail de l'appel parent</div>
     <a mat-menu-item [routerLink]="['/dashboard/request', 'rest', request?.host]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Request</a>
 
