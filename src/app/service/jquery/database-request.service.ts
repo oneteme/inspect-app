@@ -100,17 +100,18 @@ export class DatabaseRequestService {
         return this.getDatabaseRequest(args);
     }
 
-    getJdbcMainSessionExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<JdbcMainExceptionsByPeriodAndappname[]>{
-        let args = { 
-            'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
-            'instance.environement': filters.env,
-             'join': 'exception,main_session,main_session.instance',
-              'start.ge': filters.start.toISOString(),
-              'start.lt': filters.end.toISOString(),
-            'main_session.start.ge': filters.start.toISOString(),
-            'main_session.start.lt': filters.end.toISOString(),
-              [filters.app_name]: '', 
-              'order': 'date.asc' }
-        return this.getDatabaseRequest(args);
+    getJdbcRestSessionExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<JdbcExceptionsByPeriodAndAppname[]> {
+      let args = {
+        'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
+        'join': 'exception,instance',
+        'instance.environement': filters.env,
+        'start.ge': filters.start.toISOString(),
+        'start.lt': filters.end.toISOString(),
+        'order': 'date.asc'
+      }
+      if(filters.app_name) {
+        args['instance.app_name.in'] = filters.app_name;
+      }
+      return this.getDatabaseRequest(args);
     }
 }
