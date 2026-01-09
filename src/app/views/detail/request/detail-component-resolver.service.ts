@@ -8,7 +8,7 @@ import {DetailRestView} from "./rest/detail-rest.view";
 @Injectable({
   providedIn: 'root'
 })
-export class ComponentResolverService {
+export class DetailComponentResolverService {
   private componentMap: { [key: string]: Type<any> } = {
     'rest': DetailRestView,
     'jdbc': DetailDatabaseView,

@@ -78,6 +78,7 @@ export class DetailSmtpTableComponent {
             this.pipe.transform(date, "HH:mm:ss.SSS").toLowerCase().includes(value) ||
             data.exception?.message?.toString().toLowerCase().includes(value) ||
             data.exception?.type?.toString().toLowerCase().includes(value) ||
+            (!data.failed && value.toLowerCase() == 'ok') || (data.failed && value.toLowerCase() == 'ko') ||
             data.command?.toString().toLowerCase().includes(value)
           ));
       }

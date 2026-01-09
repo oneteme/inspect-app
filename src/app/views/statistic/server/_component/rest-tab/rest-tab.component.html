@@ -1,5 +1,18 @@
 <div style="display: flex;">
-    <rest-repartition-type-card style="width: 50%" [data]="$timeAndTypeResponse.bar" [isLoading]="$timeAndTypeResponse.loading"></rest-repartition-type-card>
+    <repartition-type-card style="width: 50%" [seriesProvider]="seriesProvider" [data]="$timeAndTypeResponse.bar" [isLoading]="$timeAndTypeResponse.loading">
+      <div class="stat" style="color: #33cc33;">
+        <div class="label" [matTooltip]="($timeAndTypeResponse.stats.statCountOk | number : '1.0-0') + ' / ' + ($timeAndTypeResponse.stats.statCount | number : '1.0-0')">{{ ($timeAndTypeResponse.stats.statCountOk / $timeAndTypeResponse.stats.statCount) * 100 | number : '1.0-2'  }}%</div>
+        <div class="sub-label">2xx</div>
+      </div>
+      <div class="stat" style="color: #ffa31a">
+        <div class="label" [matTooltip]="($timeAndTypeResponse.stats.statCountErrClient | number : '1.0-0') + ' / ' + ($timeAndTypeResponse.stats.statCount | number : '1.0-0')">{{ ($timeAndTypeResponse.stats.statCountErrClient / $timeAndTypeResponse.stats.statCount) * 100 | number : '1.0-2'  }}%</div>
+        <div class="sub-label">4xx</div>
+      </div>
+      <div class="stat" style="color: #ff0000">
+        <div class="label" [matTooltip]="($timeAndTypeResponse.stats.statCountErrorServer | number : '1.0-0') + ' / ' + ($timeAndTypeResponse.stats.statCount | number : '1.0-0')">{{ ($timeAndTypeResponse.stats.statCountErrorServer / $timeAndTypeResponse.stats.statCount) * 100 | number : '1.0-2' }}%</div>
+        <div class="sub-label">5xx</div>
+      </div>
+    </repartition-type-card>
 
     <evol-user-card style="width: 50%" [data]="$evolUserResponse.line" [isLoading]="$evolUserResponse.loading"></evol-user-card>
 </div>

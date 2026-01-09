@@ -1,22 +1,24 @@
 import {Component, inject, Input} from "@angular/core";
 import {DecimalPipe} from "@angular/common";
 import {ChartProvider, field} from "@oneteme/jquery-core";
+import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 
 @Component({
-  selector: 'batch-repartition-type-card',
+  selector: 'repartition-type-card',
   templateUrl: './repartition-type-card.component.html',
   styleUrls: ['./repartition-type-card.component.scss']
 })
 export class RepartitionTypeCardComponent {
-  private _decimalPipe: DecimalPipe = inject(DecimalPipe);
+  private readonly _decimalPipe: DecimalPipe = inject(DecimalPipe);
 
-  readonly REPARTITION_TYPE_RESPONSE_BAR: ChartProvider<string, number> = {
+  REPARTITION_TYPE_RESPONSE_BAR: ChartProvider<string, number> = {
     height: 200,
-    series: [
-      {data: {x: field('date'), y: field('countSucces')}, name: 'Succès', color: '#33cc33'},
-      {data: {x: field('date'), y: field('countError')}, name: 'Erreur', color: '#ff0000'}
-    ],
     stacked: true,
+    series: [
+      {data: {x: field('date'), y: field('countSuccess')}, name: '2xx', color: '#33cc33'},
+      {data: {x: field('date'), y: field('countErrorClient')}, name: '4xx', color: '#ffa31a'},
+      {data: {x: field('date'), y: field('countErrorServer')}, name: '5xx', color: '#ff0000'}
+    ],
     options: {
       chart: {
         toolbar: {
@@ -81,18 +83,14 @@ export class RepartitionTypeCardComponent {
   };
 
   _data: any[] = [];
-  _stats: {statCount: number, statCountOk: number, statCountErr: number} = {statCount: 0, statCountOk: 0, statCountErr: 0};
+
+  @Input() set seriesProvider(objects: SerieProvider<string, number>[]) {
+    this.REPARTITION_TYPE_RESPONSE_BAR.series = objects;
+  }
 
   @Input() set data(objects: any[]) {
     this._data = objects;
-    this._stats = this.calculateStats();
   }
 
   @Input() isLoading: boolean;
-
-  calculateStats() {
-    return this._data.reduce((acc: {statCount: number, statCountOk: number, statCountErr: number}, o) => {
-      return {statCount: acc.statCount + o['countSucces'] + o['countError'], statCountOk: acc.statCountOk + o['countSucces'], statCountErr: acc.statCountErr + o['countError']};
-    }, {statCount: 0, statCountOk: 0, statCountErr: 0});
-  }
 }

@@ -1,0 +1,27 @@
+.overlay-container {
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0px 4px 5px 0px rgba(0, 0, 0, 0.14), 0px 1px 10px 0px rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  background-color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+
+  .overlay-header {
+    padding: 8px;
+  }
+
+  .overlay-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    padding: 8px;
+  }
+
+  .overlay-actions {
+    padding: 8px;
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 0.5em;
+  }
+}

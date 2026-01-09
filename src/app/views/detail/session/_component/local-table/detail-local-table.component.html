@@ -9,7 +9,10 @@
             Hôte
           </div>
         </th>
-        <td mat-cell *matCellDef="let element">
+        <td mat-cell *matCellDef="let element"
+            [ngClass]="{'success': element.end && !element.exception,
+                        'fail': element.end && element.exception}"
+            [matTooltip]="element.exception ? (element.exception?.type | exceptionType) + ' ' + element.exception?.message : null">
           <span [matTooltip]="element['location']">{{ element["location"] || 'N/A' }}</span>
         </td>
       </ng-container>

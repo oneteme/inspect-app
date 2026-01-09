@@ -1,6 +1,6 @@
 import {Component, ComponentFactoryResolver, OnInit, ViewContainerRef} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
-import {ComponentResolverService} from "./component-resolver.service";
+import {DetailComponentResolverService} from "./detail-component-resolver.service";
 
 @Component({
   template: '<ng-container #container></ng-container>'
@@ -8,7 +8,7 @@ import {ComponentResolverService} from "./component-resolver.service";
 export class DetailRequestView implements OnInit {
   constructor(
     private route: ActivatedRoute,
-    private componentResolver: ComponentResolverService,
+    private componentResolver: DetailComponentResolverService,
     private viewContainerRef: ViewContainerRef
   ) {}
 

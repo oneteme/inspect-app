@@ -71,6 +71,7 @@ export class DetailDatabaseTableComponent {
             data.command?.toLowerCase().includes(value) ||
             this.pipe.transform(date, "dd/MM/yyyy").toLowerCase().includes(value) ||
             this.pipe.transform(date, "HH:mm:ss.SSS").toLowerCase().includes(value) ||
+            (!data.failed && value.toLowerCase() == 'ok') || (data.failed && value.toLowerCase() == 'ko') ||
             data.exception?.message?.toString().toLowerCase().includes(value) ||
             data.exception?.type?.toString().toLowerCase().includes(value)
           ));
