@@ -510,7 +510,7 @@ export class Constants {
     }
     static readonly REQUEST_MAPPING_TYPE: {[key: string]: Partial<{title: string, subtitle: string, icon: string}>} = {
         rest: {title: 'HTTP', subtitle: 'Gestion et supervision des requêtes', icon: 'public'},
-        jdbc: {title: 'BDD', subtitle: 'Gestion et supervision des requêtes', icon: 'database'},
+        jdbc: {title: 'JDBC', subtitle: 'Gestion et supervision des requêtes', icon: 'database'},
         ftp: {title: 'FTP', subtitle: 'Gestion et supervision des requêtes', icon: 'smb_share'},
         smtp: {title: 'SMTP', subtitle: 'Gestion et supervision des requêtes', icon: 'outgoing_mail'},
         ldap: {title: 'LDAP', subtitle: 'Gestion et supervision des requêtes', icon: 'user_attributes'},

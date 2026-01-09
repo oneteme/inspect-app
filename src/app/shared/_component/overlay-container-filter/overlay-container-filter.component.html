@@ -6,6 +6,7 @@
     <ng-container *ngIf="templateContent" [ngTemplateOutlet]="templateContent"></ng-container>
   </div>
   <div class="overlay-actions">
+    <button mat-flat-button (click)="onReset.emit()">Réinitialiser</button>
     <button mat-flat-button color="primary" (click)="onClick.emit()">Filtrer</button>
   </div>
 </div>

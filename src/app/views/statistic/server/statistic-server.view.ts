@@ -96,8 +96,6 @@ export class StatisticServerView implements OnInit, OnDestroy {
         let end = this.dateRangePicker.controls.end.value;
         if(this.dateRangePicker.valid) {
             this.params.queryParams.period = new IPeriod(start, new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1));
-            if(this.indexTab == 0) this.params.queryParams.optional = {tab: '0', api_name: [], api_version: [], api_user: [] };
-            else this.params.queryParams.optional = {tab: '1', batch_name: [], batch_version: [], batch_user: [] };
             this._router.navigate([], {
                 relativeTo: this._activatedRoute,
                 queryParams: this.params.queryParams.buildParams(),
@@ -219,6 +217,18 @@ export class StatisticServerView implements OnInit, OnDestroy {
         this.$httpParams = {server: `"${this.params.server}"`, params: this.params.queryParams};
         this._location.replaceState(`${this._router.url.split('?')[0]}?${this.params.queryParams.buildPath()}`);
         this.isOpen = false;
+    }
+
+    onResetFilter() {
+      if(this.indexTab == 0) {
+        this.apiNameSelected = [];
+        this.apiVersionSelected = [];
+        this.apiUserSelected = [];
+      } else {
+        this.batchNameSelected = [];
+        this.batchVersionSelected = [];
+        this.batchUserSelected = [];
+      }
     }
 
     onSelectedTabChange($event) {

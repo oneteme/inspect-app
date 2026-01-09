@@ -2,8 +2,7 @@
   <div class="header-card">
     <mat-card style="width: 60vw; min-width: 60vw;"
               [ngClass]="{'success': request.end && !request.failed,
-                          'fail': request.end && request.failed,
-                          'in-progress': !request.end}">
+                          'fail': request.end && request.failed}">
       <mat-card-title>
         <div style="display: flex; gap: 0.5em; align-items: center; width: 85%">
           <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['ldap'].icon }}</mat-icon>
@@ -85,7 +84,7 @@
 </div>
 
 <mat-menu #menuHost="matMenu">
-    <a mat-menu-item (click)="navigate($event,'parent')" [disabled]="sessionParent == null"><mat-icon class="material-symbols-outlined">move_up</mat-icon>Détail de l'appel parent</a>
+    <a mat-menu-item (click)="navigate($event,'parent')" [disabled]="sessionParent == null"><mat-icon class="material-symbols-outlined">link</mat-icon>Détail de l'appel client</a>
     <a mat-menu-item [routerLink]="['/dashboard/request', 'ldap', request?.host]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Request</a>
 </mat-menu>
 
