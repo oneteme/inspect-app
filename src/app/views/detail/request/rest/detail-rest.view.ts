@@ -168,7 +168,6 @@ export class DetailRestView implements OnInit, OnDestroy {
   }
 
   navigate(event: MouseEvent, targetType: string, extraParam?: string) {
-    if ((targetType === 'parent' && this.sessionParent != null) || (targetType === 'remote' && this.request.status == 0 && this.request.linked)) {
       let params: any[] = [];
       switch (targetType) {
         case "parent":
@@ -185,7 +184,6 @@ export class DetailRestView implements OnInit, OnDestroy {
           queryParams: {env: this.params.env}
         });
       }
-    }
   }
 
   getDate(start: number) {
