@@ -72,7 +72,7 @@ export class StatisticRequestFtpComponent {
       groupedBy: groupedBy,
       env: queryParams.env,
       host: queryParams.hosts,
-      method: queryParams.commands
+      command: queryParams.commands
     }).pipe(
       finalize(() => this.$evolUserResponse.loading = false),
       map(r => {

@@ -63,7 +63,7 @@ export class LdapRequestService {
         return this.getLdap(args);
     }
 
-    getUsersByPeriod(filters: {env: string, start: Date, end: Date, groupedBy: string, host: string[],method?: string[] }): Observable<{user: string, date: number, year: number}[]> {
+    getUsersByPeriod(filters: {env: string, start: Date, end: Date, groupedBy: string, host: string[],command?: string[]}): Observable<{user: string, date: number, year: number}[]> {
       let args = {
         'column.distinct': `user,start.${filters.groupedBy}:date,start.year:year`,
         'instance_env': 'instance.id',
@@ -74,8 +74,8 @@ export class LdapRequestService {
         'start.lt': filters.end.toISOString(),
         'order': `year.asc,date.asc`
       };
-      if(filters.method){
-        args['method'] = filters.method.toString();
+      if(filters.command){
+        args['command'] = filters.command.toString();
       }
       return this.getLdap(args);
     }
