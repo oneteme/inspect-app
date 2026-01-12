@@ -26,6 +26,22 @@ export class LdapRequestService {
         return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, { params: filters });
     }
 
+
+    getDependentsNew(filters: { start: Date, end: Date,env: string, host: string[],command?: string[] }): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, appName: string}[]> {
+        let args: any = {
+            'column': `count_request_success:countSucces,count_request_error:countErrServer,instance.app_name:appName`,
+            'host':`"${filters.host}"`,
+            'join': 'instance',
+            'instance.type': 'SERVER',
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'instance.environement': filters.env,
+            'order': 'count.desc'
+        }
+        return this.getLdap(args);
+    }
+
+
     getLdapExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string, host?: string[],command?: string[]  }): Observable<LdapSessionExceptionsByPeriodAndappname[]> {
         let args = {
             'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,

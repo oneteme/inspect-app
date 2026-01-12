@@ -95,4 +95,16 @@ export class RestRequestService {
         }
         return this.getRestRequest(args);
     }
+    getDependentsNew(filters: { start: Date, end: Date,env: string, host: string[],command?: string[] }): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, appName: string}[]> {
+        let args: any = {
+            'column': `count_succes:countSucces,count_error_server:countErrServer,count_error_client:countErrClient,instance.app_name:appName`,
+            'host':`"${filters.host}"`,
+            'join': 'instance',
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'instance.environement': filters.env,
+            'order': 'count.desc'
+        }
+        return this.getRestRequest(args);
+    }
 }

@@ -26,11 +26,14 @@ export class StatisticRequestHttpComponent {
 
   $timeAndTypeResponse: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number} } = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0} };
   $exceptionsResponse: { data: any[], loading: boolean } = {data: [], loading: true};
+  $dependenciesResponse: { table: any[], loading: boolean } = {table: [], loading: true};
+
   @Input() set queryParams(queryParams: QueryParams) {
     if(queryParams) {
       let groupedBy = periodManagement(queryParams.period.start, queryParams.period.end);
       this.getRepartitionTimeAndTypeResponseByPeriod(queryParams, groupedBy);
       this.getExceptions(queryParams, groupedBy);
+      this.getDependencies(queryParams);
     }
   }
 
@@ -77,7 +80,28 @@ export class StatisticRequestHttpComponent {
           }
         })
   }
-
+  getDependencies(queryParams: QueryParams) {
+    this.$dependenciesResponse.table = [];
+    this.$dependenciesResponse.loading = true;
+    return this._httpRequestService.getDependentsNew({
+      start: queryParams.period.start,
+      end: queryParams.period.end,
+      env: queryParams.env,
+      host: queryParams.hosts,
+      command: queryParams.commands
+    }).pipe(
+        map(r => {
+          return r;
+        }), finalize(() => this.$dependenciesResponse.loading = false)
+    ).subscribe({
+      next: res => {
+        this.$dependenciesResponse.table = res.map(item => ({
+          ...item,
+          count: item.countSucces + item.countErrServer+  item.countErrClient
+        }));
+      }
+    });
+  }
   calculateStats(res: any[]) {
     return res.reduce((acc: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number}, o) => {
       return {statCount: acc.statCount + o['countSuccess'] + o['countErrorClient'] + o['countErrorServer'], statCountOk: acc.statCountOk + o['countSuccess'], statCountErrClient: acc.statCountErrClient + o['countErrorClient'], statCountErrorServer: acc.statCountErrorServer + o['countErrorServer']};
