@@ -138,11 +138,11 @@ export class DetailSessionComponent implements OnChanges {
 
   // Méthodes pour calculer les erreurs
   private hasRestErrors(): boolean {
-    return this.session.restRequests?.some(req => req.status && req.status >= 400) || false;
+    return this.session.restRequests?.some(req => req.status && (req.status >= 400 || req.status == 0)) || false;
   }
 
   private getRestErrorCount(): number {
-    return this.session.restRequests?.filter(req => req.status && req.status >= 400).length || 0;
+    return this.session.restRequests?.filter(req => req.status && (req.status >= 400 || req.status == 0)).length || 0;
   }
 
   private hasLocalErrors(): boolean {
