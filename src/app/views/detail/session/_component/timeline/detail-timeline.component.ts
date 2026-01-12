@@ -148,7 +148,7 @@ export class DetailTimelineComponent implements OnChanges {
             c.end ? c.end * 1000 :  new Date().getTime();
 
         let o = {
-            id: c.id ?`${c.id}_${c.typeTimeline}`: id,
+            id: c.id ?`${c.id}_${c.typeTimeline}_${id}`: id,
             group: this.isWebApp ? 0 : c.threadName || '?',
             content: c.typeTimeline == 'action' ? this.ANALYTIC_MAPPING[c.type].label : (c.schema || c.name || c.host || c.level || 'N/A'),
             start: c.start * 1000,
