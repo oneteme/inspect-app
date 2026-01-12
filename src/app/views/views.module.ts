@@ -81,6 +81,10 @@ import { InstanceComponent } from './detail/instance/instance.component';
 import { InstanceTableComponent } from './detail/instance/_component/instance-table/instance-table.component';
 import {DetailLogTableComponent} from "./detail/session/_component/log-table/detail-log-table.component";
 import {ParameterTableComponent} from "./detail/instance/_component/parameter-table/parameter-table.component";
+import { DependencyTableRequestComponent } from './statistic/_component/dependency-table-request/dependency-table-request.component';
+import {
+  DependencyTableRequestHttpComponent
+} from "./statistic/_component/dependency-table-request-http/dependency-table-request-http.component";
 
 @NgModule({
   imports: [
@@ -157,7 +161,9 @@ import {ParameterTableComponent} from "./detail/instance/_component/parameter-ta
     DetailLogTableComponent,
     InstanceComponent,
     InstanceTableComponent,
-    ParameterTableComponent
+    ParameterTableComponent,
+    DependencyTableRequestComponent,
+    DependencyTableRequestHttpComponent
   ]
 })
 export class ViewsModule { }

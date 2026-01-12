@@ -113,4 +113,17 @@ export class DatabaseRequestService {
               'order': 'date.asc' }
         return this.getDatabaseRequest(args);
     }
+    getDependentsNew(filters: { start: Date, end: Date,env: string, host: string[],command?: string[] }): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, appName: string}[]> {
+            let args: any = {
+            'column': `count_request_success:countSucces,count_request_error:countErrServer,instance.app_name:appName`,
+            'host':`"${filters.host}"`,
+            'join': 'instance',
+            'instance.type': 'SERVER',
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'instance.environement': filters.env,
+            'order': 'count.desc'
+        }
+        return this.getDatabaseRequest(args);
+    }
 }
