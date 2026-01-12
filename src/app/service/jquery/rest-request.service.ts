@@ -37,7 +37,6 @@ export class RestRequestService {
             'join': 'exception,instance',
             'instance.environement': filters.env,
             'host':`"${filters.host}"`,
-            'instance.type': 'SERVER',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'order': 'date.asc'
@@ -95,6 +94,24 @@ export class RestRequestService {
         }
         return this.getRestRequest(args);
     }
+
+    getUsersByPeriod(filters: {env: string, start: Date, end: Date, groupedBy: string, host: string[],method?: string[] }): Observable<{user: string, date: number, year: number}[]> {
+      let args = {
+        'column.distinct': `user,start.${filters.groupedBy}:date,start.year:year`,
+        'instance_env': 'instance.id',
+        'user.notNull': '',
+        'host':`"${filters.host}"`,
+        'instance.environement': filters.env,
+        'start.ge': filters.start.toISOString(),
+        'start.lt': filters.end.toISOString(),
+        'order': `year.asc,date.asc`
+      };
+      if(filters.method){
+        args['method'] = filters.method.toString();
+      }
+      return this.getRestRequest(args);
+    }
+
     getDependentsNew(filters: { start: Date, end: Date,env: string, host: string[],command?: string[] }): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, appName: string}[]> {
         let args: any = {
             'column': `count_succes:countSucces,count_error_server:countErrServer,count_error_client:countErrClient,instance.app_name:appName`,

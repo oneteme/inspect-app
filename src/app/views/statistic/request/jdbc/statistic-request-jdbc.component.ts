@@ -3,7 +3,7 @@ import {ChartProvider, field} from "@oneteme/jquery-core";
 import {DatePipe, DecimalPipe} from "@angular/common";
 import {DatabaseRequestService} from "../../../../service/jquery/database-request.service";
 import {QueryParams} from "../../../../model/conf.model";
-import {formatters, periodManagement, recreateDate} from "../../../../shared/util";
+import {formatters, groupByField, periodManagement, recreateDate} from "../../../../shared/util";
 import {finalize, map} from "rxjs";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 import {HttpParams} from "../../server/_component/rest-tab/rest-tab.component";
@@ -25,6 +25,7 @@ export class StatisticRequestJdbcComponent {
   groupedBy: string;
   params: QueryParams;
   $timeAndTypeResponse: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErr: number} } = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErr: 0} };
+  $evolUserResponse: { line: any[], loading: boolean } = { line: [], loading: true };
   $exceptionsResponse: { data: any[], loading: boolean } = {data: [], loading: true};
   $dependenciesResponse: { table: any[], loading: boolean } = {table: [], loading: true};
 
@@ -33,6 +34,7 @@ export class StatisticRequestJdbcComponent {
       this.params = queryParams;
       this.groupedBy = periodManagement(queryParams.period.start, queryParams.period.end);
       this.getRepartitionTimeAndTypeResponseByPeriod(queryParams, this.groupedBy);
+      this.getUsersByPeriod(queryParams, this.groupedBy);
       this.getExceptions(queryParams, this.groupedBy);
       this.getDependencies(queryParams);
     }
@@ -59,6 +61,32 @@ export class StatisticRequestJdbcComponent {
         this.$timeAndTypeResponse.stats = this.calculateStats(res);
       }
     });
+  }
+
+  getUsersByPeriod(queryParams: QueryParams, groupedBy: string) {
+    this.$evolUserResponse.line = [];
+    this.$evolUserResponse.loading = true;
+    return this._databaseRequestService.getUsersByPeriod({
+      start: queryParams.period.start,
+      end: queryParams.period.end,
+      groupedBy: groupedBy,
+      env: queryParams.env,
+      host: queryParams.hosts,
+      method: queryParams.commands
+    }).pipe(
+      finalize(() => this.$evolUserResponse.loading = false),
+      map(r => {
+        formatters[groupedBy](r, this._datePipe);
+        return Object.entries(groupByField(r, "date")).map(([key, value]) => {
+          return {count: value.length, date: key, year: value[0].year};
+        });
+      })
+    )
+    .subscribe({
+      next: res => {
+        this.$evolUserResponse.line = res;
+      }
+    })
   }
 
   getExceptions(queryParams: QueryParams, groupedBy: string) {
@@ -119,8 +147,7 @@ export class StatisticRequestJdbcComponent {
           'start': result.start.toISOString(),
           'end': result.end.toISOString(),
           'q': row.errorType,
-          'host': this.params.hosts,
-          'rangestatus': 'Ok'
+          'host': this.params.hosts
         }
       });
     }
