@@ -3,10 +3,11 @@ import {ChartProvider, field} from "@oneteme/jquery-core";
 import {DatePipe, DecimalPipe} from "@angular/common";
 import {DatabaseRequestService} from "../../../../service/jquery/database-request.service";
 import {QueryParams} from "../../../../model/conf.model";
-import {formatters, periodManagement} from "../../../../shared/util";
+import {formatters, periodManagement, recreateDate} from "../../../../shared/util";
 import {finalize, map} from "rxjs";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 import {HttpParams} from "../../server/_component/rest-tab/rest-tab.component";
+import {EnvRouter} from "../../../../service/router.service";
 
 @Component({
   templateUrl: './statistic-request-jdbc.component.html',
@@ -15,21 +16,24 @@ import {HttpParams} from "../../server/_component/rest-tab/rest-tab.component";
 export class StatisticRequestJdbcComponent {
   private readonly _datePipe = inject(DatePipe);
   private readonly _databaseRequestService = inject(DatabaseRequestService);
+  private _router: EnvRouter = inject(EnvRouter);
 
   readonly seriesProvider: SerieProvider<string, number>[] = [
     {data: {x: field('date'), y: field('countSuccess')}, name: 'OK', color: '#33cc33'},
     {data: {x: field('date'), y: field('countError')}, name: 'KO', color: '#ff0000'},
   ];
-
+  groupedBy: string;
+  params: QueryParams;
   $timeAndTypeResponse: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErr: number} } = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErr: 0} };
   $exceptionsResponse: { data: any[], loading: boolean } = {data: [], loading: true};
   $dependenciesResponse: { table: any[], loading: boolean } = {table: [], loading: true};
 
   @Input() set queryParams(queryParams: QueryParams) {
     if(queryParams) {
-      let groupedBy = periodManagement(queryParams.period.start, queryParams.period.end);
-      this.getRepartitionTimeAndTypeResponseByPeriod(queryParams, groupedBy);
-      this.getExceptions(queryParams, groupedBy);
+      this.params = queryParams;
+      this.groupedBy = periodManagement(queryParams.period.start, queryParams.period.end);
+      this.getRepartitionTimeAndTypeResponseByPeriod(queryParams, this.groupedBy);
+      this.getExceptions(queryParams, this.groupedBy);
       this.getDependencies(queryParams);
     }
   }
@@ -105,5 +109,20 @@ export class StatisticRequestJdbcComponent {
     return res.reduce((acc: {statCount: number, statCountOk: number, statCountErr: number}, o) => {
       return {statCount: acc.statCount + o['countSuccess'] + o['countError'], statCountOk: acc.statCountOk + o['countSuccess'], statCountErr: acc.statCountErr + o['countError']};
     }, {statCount: 0, statCountOk: 0, statCountErr: 0});
+  }
+  onSessionExceptionRowSelected(row:any) {
+    const result = recreateDate(this.groupedBy, row, this.params.period.start);
+    if(result) {
+      this._router.navigate(['/request/jdbc'], {
+        queryParams: {
+          'env': this.params.env,
+          'start': result.start.toISOString(),
+          'end': result.end.toISOString(),
+          'q': row.errorType,
+          'host': this.params.hosts,
+          'rangestatus': 'Ok'
+        }
+      });
+    }
   }
 }

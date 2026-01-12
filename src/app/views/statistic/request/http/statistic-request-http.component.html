@@ -1,5 +1,5 @@
 <div style="display: flex; align-items: stretch;">
-  <repartition-type-card style="width: 50%; height: 350px" [seriesProvider]="seriesProvider" [data]="$timeAndTypeResponse.data" [isLoading]="$timeAndTypeResponse.loading">
+  <repartition-type-card style="width: 50%" [seriesProvider]="seriesProvider" [data]="$timeAndTypeResponse.data" [isLoading]="$timeAndTypeResponse.loading">
     <div class="stat" style="color: #33cc33;">
       <div class="label" [matTooltip]="($timeAndTypeResponse.stats.statCountOk | number : '1.0-0') + ' / ' + ($timeAndTypeResponse.stats.statCount | number : '1.0-0')">{{ ($timeAndTypeResponse.stats.statCountOk / $timeAndTypeResponse.stats.statCount) * 100 | number : '1.0-2'  }}%</div>
       <div class="sub-label">2xx</div>
@@ -13,14 +13,14 @@
       <div class="sub-label">5xx</div>
     </div>
   </repartition-type-card>
-  <app-dependency-table-request-http style="height: 100%" [data]="$dependenciesResponse.table" [isLoading]="$dependenciesResponse.loading"></app-dependency-table-request-http>
 
 </div>
 
 <performance-card [data]="$timeAndTypeResponse.data" [isLoading]="$timeAndTypeResponse.loading"></performance-card>
+<app-dependency-table-request-http style="height: 100%" [data]="$dependenciesResponse.table" [isLoading]="$dependenciesResponse.loading"></app-dependency-table-request-http>
 <div class="card-container mat-elevation-z5" style="height: 306px">
     <div class="title-container">
         <span class="title">Erreur</span>
     </div>
-    <exceptions-table-new [data]="$exceptionsResponse.data" [isLoading]="$exceptionsResponse.loading"></exceptions-table-new>
+    <exceptions-table-new [data]="$exceptionsResponse.data" [isLoading]="$exceptionsResponse.loading" (onRowSelected)="onSessionExceptionRowSelected($event)"></exceptions-table-new>
 </div>

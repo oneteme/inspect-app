@@ -39,6 +39,9 @@ export class StatisticRequestView implements OnInit, OnDestroy {
 
   params: Partial<{type: 'jdbc' | 'ftp' | 'smtp' | 'ldap' | 'rest',host: string, queryParams: QueryParams}> = {};
 
+
+
+
   ngOnInit() {
 
 
