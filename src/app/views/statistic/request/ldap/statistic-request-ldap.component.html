@@ -9,6 +9,7 @@
       <div class="sub-label">KO</div>
     </div>
   </repartition-type-card>
+  <evol-user-card style="width: 50%" [data]="$evolUserResponse.line" [isLoading]="$evolUserResponse.loading"></evol-user-card>
 
 </div>
 <performance-card [data]="$timeAndTypeResponse.data" [isLoading]="$timeAndTypeResponse.loading"></performance-card>

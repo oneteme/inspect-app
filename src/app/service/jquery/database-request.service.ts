@@ -114,6 +114,24 @@ export class DatabaseRequestService {
       }
       return this.getDatabaseRequest(args);
     }
+
+    getUsersByPeriod(filters: {env: string, start: Date, end: Date, groupedBy: string, host: string[],method?: string[] }): Observable<{user: string, date: number, year: number}[]> {
+      let args = {
+        'column.distinct': `user,start.${filters.groupedBy}:date,start.year:year`,
+        'instance_env': 'instance.id',
+        'user.notNull': '',
+        'host':`"${filters.host}"`,
+        'instance.environement': filters.env,
+        'start.ge': filters.start.toISOString(),
+        'start.lt': filters.end.toISOString(),
+        'order': `year.asc,date.asc`
+      };
+      if(filters.method){
+        args['method'] = filters.method.toString();
+      }
+      return this.getDatabaseRequest(args);
+    }
+
     getDependentsNew(filters: { start: Date, end: Date,env: string, host: string[],command?: string[] }): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, appName: string}[]> {
             let args: any = {
             'column': `count_request_success:countSucces,count_request_error:countErrServer,instance.app_name:appName`,
