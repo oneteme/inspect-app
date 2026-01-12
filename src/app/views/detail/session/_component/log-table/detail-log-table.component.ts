@@ -32,6 +32,6 @@ export class DetailLogTableComponent {
 
 const sortingDataAccessor = (row: any, columnName: string) => {
   if (columnName == "message") return row["message"] as string;
-  if (columnName == "instant") return row['instant'] as string;
+  if (columnName == "date") return row['instant'] as string;
   return row[columnName as keyof any] as string;
 }

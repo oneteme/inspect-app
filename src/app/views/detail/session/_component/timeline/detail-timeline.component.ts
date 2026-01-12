@@ -91,7 +91,7 @@ export class DetailTimelineComponent implements OnChanges {
                     this.dataGroups = [...new Set(this.dataArray.filter(c => c.typeTimeline != 'session-stage' && c.typeTimeline != 'log').map(c => c.threadName || '?'))].map((c: any) => ({ id: c, content: c }))
                 }
                 if(this.dataArray.length > 50 ){
-                    this.timelineEnd = this.dataArray[51].start * 1000;
+                    this.timelineEnd = (this.dataArray[51].start || this.dataArray[51].instant) * 1000;
                     this.dataItems = this.getDataForRange(this.dataArray, this.timelineStart / 1000, this.timelineEnd / 1000).map((c: any, i: number) =>this.maptype[c.typeTimeline](c, i));
                 } else {
                     this.dataItems = this.dataArray.map((c: any, i: number) =>this.maptype[c.typeTimeline](c, i));
@@ -167,6 +167,7 @@ export class DetailTimelineComponent implements OnChanges {
         }
         if (o.end > this.timelineEnd) {
             this.timelineEnd = o.end;
+            console.log('update timeline end to ', o.end);
         }
         if(o.type == 'range'){
             o.className += ` ${this.getErrorClassName(c)}`;
