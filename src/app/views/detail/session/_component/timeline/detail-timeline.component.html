@@ -6,11 +6,11 @@
                   (onTimelineCreated)="onTimelineCreate($event)"
                   (onitemCLicked)="onitemCLicked($event)">
   <div class="legend">
-    <div *ngIf="request.restRequests?.length" class="item"><div class="dot api"></div><b>API</b></div>
+    <div *ngIf="request.restRequests?.length" class="item"><div class="dot api"></div><b>HTTP</b></div>
     <div *ngIf="request.ftpRequests?.length" class="item"><div class="dot ftp"></div><b>FTP</b></div>
     <div *ngIf="request.mailRequests?.length" class="item"><div class="dot smtp"></div><b>SMTP</b></div>
     <div *ngIf="request.ldapRequests?.length" class="item"><div class="dot ldap"></div><b>LDAP</b></div>
-    <div *ngIf="request.databaseRequests?.length" class="item"><div class="dot bdd"></div><b>BDD</b></div>
+    <div *ngIf="request.databaseRequests?.length" class="item"><div class="dot bdd"></div><b>JDBC</b></div>
     <div *ngIf="request.stages?.length" class="item"><div class="dot local"></div><b>LOCAL</b></div>
     <div  *ngIf="request['userActions']?.length" class="item"><div class="dot action"></div><b>Action</b></div>
   </div>

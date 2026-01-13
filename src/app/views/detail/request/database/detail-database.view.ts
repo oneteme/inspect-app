@@ -149,7 +149,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
                                 <span class="arg" style="color: #7f8c8d; font-style: italic; font-size: 0.7rem;">${showifnotnull(c.args, () => `(${c.args.join(', ')})`)}</span>
                                 <span class="count" style="color: #2c3e50; font-weight: 500; font-size: 0.7rem;">${showifnotnull(c.count, () => `×${c.count}`)}</span>
                           </div>`,
-        className: `database overflow ${getErrorClassName(c)}`,
+        className: `jdbc overflow ${getErrorClassName(c)}`,
         title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end, 'HH:mm:ss.SSS')}</span>  (⏱ ${this.durationPipe.transform((end / 1000) - (start / 1000))})<br>
                         <span>${showifnotnull(c.command, () => c.command)}${showifnotnull(c.args, () => `(${c.args.join(', ')})`)} ${showifnotnull(c.count, () => `×${c.count}`)}</span>`
       }
@@ -204,17 +204,19 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
   }
 
   navigate(event: MouseEvent, targetType: string, extraParam?: string) {
-    let params: any[] = [];
-    switch (targetType) {
-      case "parent":
-        params.push('session', this.sessionParent.type.toLowerCase(), this.sessionParent.id);
-    }
-    if (event.ctrlKey) {
-      this._router.open(`#/${params.join('/')}`, '_blank')
-    } else {
-      this._router.navigate(params, {
-        queryParams: {env: this.params.env}
-      });
+    if (this.sessionParent !== null) {
+      let params: any[] = [];
+      switch (targetType) {
+        case "parent":
+          params.push('session', this.sessionParent.type.toLowerCase(), this.sessionParent.id);
+      }
+      if (event.ctrlKey) {
+        this._router.open(`#/${params.join('/')}`, '_blank')
+      } else {
+        this._router.navigate(params, {
+          queryParams: {env: this.params.env}
+        });
+      }
     }
   }
 

@@ -18,7 +18,7 @@ import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../model/conf.model"
 import {RestRequestService} from "../../../service/jquery/rest-request.service";
 import {DatabaseRequestService} from "../../../service/jquery/database-request.service";
 import {FtpRequestService} from "../../../service/jquery/ftp-request.service";
-import {smtpRequestService} from "../../../service/jquery/smtp-request.service";
+import {SmtpRequestService} from "../../../service/jquery/smtp-request.service";
 import {LdapRequestService} from "../../../service/jquery/ldap-request.service";
 
 
@@ -43,7 +43,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
   private readonly _restRequestService = inject(RestRequestService);
   private readonly _databaseRequestService = inject(DatabaseRequestService);
   private readonly _ftpRequestService = inject(FtpRequestService);
-  private readonly _smtpRequestService = inject(smtpRequestService);
+  private readonly _smtpRequestService = inject(SmtpRequestService);
   private readonly _ldapRequestService = inject(LdapRequestService);
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _location = inject(Location);
@@ -69,7 +69,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
   subscriptions: Subscription[] = [];
   hostSubscription: Subscription;
   RequestSubscription: Subscription;
-  seviceType: { [key: string]: {service : RestRequestService | DatabaseRequestService | FtpRequestService | smtpRequestService | LdapRequestService,
+  seviceType: { [key: string]: {service : RestRequestService | DatabaseRequestService | FtpRequestService | SmtpRequestService | LdapRequestService,
                                 filters: {icon: string, label: string,color: string, value: any}[]
   }
   } =

@@ -1,0 +1,49 @@
+
+<div class="card-container mat-elevation-z5" style="height: 350px">
+    <div class="title-container"><div class="title">Dépendances</div></div>
+    <div style="display: flex; justify-content: space-between; height: 100%">
+        <div style="display: flex; flex-direction: column; width: 100%;">
+            <div class="title-container"><div class="sub-title">Serveur Appelant</div></div>
+
+            <div [ngStyle]="{'display': !dataSource.data.length ? 'none' : 'flex'}" style="flex-direction: column; justify-content: space-between; height: 100%">
+                <table mat-table #sort="matSort"
+                       matSort matSortActive="appName" matSortDirection="desc" [dataSource]="dataSource">
+
+                    <ng-container matColumnDef="appName">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header>Serveur</th>
+                        <td mat-cell *matCellDef="let element"> {{element.appName}} </td>
+                    </ng-container>
+
+                    <ng-container matColumnDef="success">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width: 15%">OK</th>
+                        <td mat-cell *matCellDef="let element">
+                            <div style="font-weight: bold; color: #33cc33;" [matTooltip]="(element.countSucces | number : '1.0-0') + ' / ' + (element.count | number : '1.0-0')">{{ (element.countSucces / element.count) * 100 | number : '1.0-2'  }}%</div>
+                        </td>
+                    </ng-container>
+                    <ng-container matColumnDef="errorServer">
+                        <th mat-header-cell *matHeaderCellDef mat-sort-header style="width: 15%">KO</th>
+                        <td mat-cell *matCellDef="let element">
+                            <div style="font-weight: bold; color: #ff0000;" [matTooltip]="(element.countErrServer | number : '1.0-0') + ' / ' + (element.count | number : '1.0-0')">{{ (element.countErrServer / element.count) * 100 | number : '1.0-2'  }}%</div>
+                        </td>
+                    </ng-container>
+                    <tr mat-header-row *matHeaderRowDef="displayedColumns;"></tr>
+                    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+                </table>
+                <div [hidden]="dataSource?.data?.length < 4" >
+                    <mat-paginator [pageSize]="3" [hidePageSize]="true" showFirstLastButtons></mat-paginator>
+                </div>
+            </div>
+
+
+            <div [hidden]="dataSource?.data?.length" style="height: 100%">
+                <div class="loading">
+                    {{isLoading ? 'Chargement des données...' : 'Aucune donnée'}}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+

@@ -34,7 +34,8 @@ export class EvolUserCardComponent {
         }
       },
       yaxis: {
-        stepSize: 1
+        tickAmount: 6,
+        decimalsInFloat: 0
       },
       dataLabels: {
         enabled: false

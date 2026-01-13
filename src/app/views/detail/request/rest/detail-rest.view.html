@@ -20,18 +20,11 @@
           </div>
           <mat-spinner *ngIf="!request.end" [diameter]="18"></mat-spinner>
         </div>
-        <div class="right">
-          <button matTooltip="Détail de la session"  mat-icon-button color="primary"
-                  [disabled]="request.status != 0 && !request.linked"
-                  (click)="navigate($event, 'remote')">
-              <mat-icon class="material-symbols-outlined">link</mat-icon>
-          </button>
-          <button mat-icon-button [disabled]="sessionParent == null"
-                  [ngStyle]="{'pointer-events': sessionParent == null ? 'none' : ''}" (click)="navigate($event,'parent')"
-                  matTooltip="Détail de l'appel parent">
-            <mat-icon>move_up</mat-icon>
-          </button>
-        </div>
+          <div class="right">
+              <button mat-icon-button [matMenuTriggerFor]="menuHost">
+                  <mat-icon>more_vert</mat-icon>
+              </button>
+          </div>
       </mat-card-title>
       <mat-card-content>
         <div class="ellipsis">
@@ -110,6 +103,28 @@
   <mat-progress-spinner diameter="30" mode="indeterminate"></mat-progress-spinner>
   Chargement en cours...
 </div>
+
+<mat-menu #menuHost="matMenu">
+    <div mat-menu-item
+         [ngStyle]="{'pointer-events': request && request.status != 0 && !request.linked ? 'none' : ''}"
+         [disabled]="request && request.status != 0 && !request.linked"
+         (click)="navigate($event, 'remote')">
+      <mat-icon class="material-symbols-outlined">link</mat-icon>Détail de la session
+    </div>
+    <div mat-menu-item
+         [ngStyle]="{'pointer-events': sessionParent == null ? 'none' : ''}"
+         [disabled]="sessionParent == null"
+         (click)="navigate($event,'parent')">
+      <div style="display: flex;">
+        <mat-progress-spinner *ngIf="parentLoading"  style="margin-right: 16px" diameter="24" mode="indeterminate"
+                              matTooltip="Chargement de l'appel parent">
+        </mat-progress-spinner>
+        <mat-icon *ngIf="!parentLoading">move_up</mat-icon>
+        Détail de l'appel parent
+      </div>
+    </div>
+    <a mat-menu-item [routerLink]="['/dashboard/request', 'rest', request?.host]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Request</a>
+</mat-menu>
 
 <mat-menu #menuServer="matMenu">
   <a mat-menu-item [routerLink]="['/session', instance?.name, 'dump']" [queryParams]="{env: instance?.env, date: getDate(request?.start * 1000).toISOString()}"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
