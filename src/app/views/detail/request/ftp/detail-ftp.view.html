@@ -83,7 +83,7 @@
 </div>
 
 <mat-menu #menuHost="matMenu">
-    <div mat-menu-item (click)="navigate($event,'parent')" [disabled]="sessionParent == null"><mat-icon class="material-symbols-outlined">link</mat-icon>Détail de l'appel client</div>
+    <div mat-menu-item (click)="navigate($event,'parent')" [disabled]="sessionParent == null"><mat-icon class="material-symbols-outlined">move_up</mat-icon>Appelé par</div>
     <a mat-menu-item [routerLink]="['/dashboard/request', 'ftp', request?.host]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Request</a>
 </mat-menu>
 
