@@ -37,19 +37,19 @@ export class ProtocolExceptionComponent {
         },
         "JDBC" : {
             uri: "/request/jdbc",
-            rangestatus: 'true'
+            rangestatus: 'Ko'
         },
         "FTP" : {
             uri: "/request/ftp",
-            rangestatus: 'true'
+            rangestatus: 'Ko'
         },
         "SMTP" : {
             uri: "/request/smtp",
-            rangestatus: 'true'
+            rangestatus: 'Ko'
         },
         "LDAP" : {
             uri: "/request/ldap",
-            rangestatus: 'true'
+            rangestatus: 'Ko'
         }
     }
     table: MatTableDataSource<{ stringDate: string, errorType: string, count: number }>
