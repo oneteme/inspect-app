@@ -22,16 +22,14 @@
     <mat-form-field style="width: 200px" class="no-subscript" appearance="outline">
       <mat-label>Status</mat-label>
       <mat-select [formControl]="requestFilterForm.controls.rangestatus" multiple (selectionChange)="onChangeStatus($event)">
-        <mat-select-trigger>
-          <div style="display: flex; gap: 0.5em; align-items: center">
-            <mat-icon [style.color]="requestFilterForm.controls.rangestatus.value?.[0]?.color" >
-              {{requestFilterForm.controls.rangestatus.value?.[0]?.icon}}
-            </mat-icon>
-            {{requestFilterForm.controls.rangestatus.value?.[0]?.label || ''}}
-            <span *ngIf="(requestFilterForm.controls.rangestatus.value?.length || 0) > 1" class="additional-selection">
-            (+{{(requestFilterForm.controls.rangestatus.value?.length || 0) - 1}} {{requestFilterForm.controls.rangestatus.value.length === 2 ? 'autre' : 'autres'}})
-            </span>
-          </div>
+        <mat-select-trigger style="display: flex; gap: 0.5em; align-items: center">
+          <mat-icon [style.color]="requestFilterForm.controls.rangestatus.value?.[0]?.color" >
+            {{requestFilterForm.controls.rangestatus.value?.[0]?.icon}}
+          </mat-icon>
+          {{requestFilterForm.controls.rangestatus.value?.[0]?.label || ''}}
+          <span *ngIf="(requestFilterForm.controls.rangestatus.value?.length || 0) > 1" class="additional-selection">
+          (+{{(requestFilterForm.controls.rangestatus.value?.length || 0) - 1}} {{requestFilterForm.controls.rangestatus.value.length === 2 ? 'autre' : 'autres'}})
+          </span>
         </mat-select-trigger>
         <mat-option *ngFor="let s of seviceType[params.type].filters" [value]="s">
           <div style="display: flex; align-content: center">
