@@ -23,7 +23,6 @@ export class DependencyTableRequestComponent {
 
   @Input() set data(objects: any[]) {
     if (objects?.length) {
-      console.log(objects)
       this.dataSource = new MatTableDataSource(objects);
       this.dataSource.paginator = this.paginator;
       this.dataSource.sortingDataAccessor = (row: any, columnName: string) => {
