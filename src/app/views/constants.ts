@@ -499,12 +499,12 @@ export class Constants {
     };
 
     static readonly MAPPING_TYPE: {[key: string]: Partial<{title: string, subtitle: string, icon: string}>} = {
-        request: {title: 'Requêtes', icon: 'call_made'},
-        rest: {title: 'Appels reçus', subtitle: 'Gestion et supervision des sessions', icon: 'call_received'},
-        batch: {title: 'Exécution de CRON', subtitle: 'Gestion et supervision des sessions', icon: 'manufacturing'},
-        test: {title: 'Exécution de Test', subtitle: 'Gestion et supervision des sessions', icon: 'rule'},
-        startup: {title: 'Lancement de Serveur', subtitle: 'Gestion et supervision des sessions', icon: 'restart_alt'},
-        view: {title: 'Navigation', subtitle: 'Gestion et supervision des sessions', icon: 'ads_click'},
+        request: {title: 'Intéractions', icon: 'call_made'},
+        rest: {title: 'Services Exposés', subtitle: 'Gestion et supervision des sessions', icon: 'call_received'},
+        batch: {title: 'Tâches planifiées', subtitle: 'Gestion et supervision des sessions', icon: 'manufacturing'},
+        test: {title: 'Validation & Tests', subtitle: 'Gestion et supervision des sessions', icon: 'rule'},
+        startup: {title: 'Initialisation', subtitle: 'Gestion et supervision des sessions', icon: 'restart_alt'},
+        view: {title: 'Parcours Client', subtitle: 'Gestion et supervision des sessions', icon: 'ads_click'},
         dashboard: {title:'Page d\'Accueil', icon: 'home'},
         deploiment: {title:'Versions déployées', subtitle: 'Gestion et supervision des deploiements', icon:'deployed_code'},
     }
