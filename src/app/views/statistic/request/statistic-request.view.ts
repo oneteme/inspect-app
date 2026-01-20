@@ -1,7 +1,7 @@
 import {Component, inject, OnDestroy, OnInit, ViewContainerRef} from "@angular/core";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {Constants} from "../../constants";
-import {BehaviorSubject, combineLatest} from "rxjs";
+import {BehaviorSubject, combineLatest, map} from "rxjs";
 import {ActivatedRoute, Params} from "@angular/router";
 import {EnvRouter} from "../../../service/router.service";
 import {IPeriod, QueryParams} from "../../../model/conf.model";
@@ -10,6 +10,7 @@ import {StatisticComponentResolverService} from "./statistic-component-resolver.
 import {InstanceService} from "../../../service/jquery/instance.service";
 import {HttpParams} from "../server/_component/rest-tab/rest-tab.component";
 import {Location} from "@angular/common";
+import {DatabaseRequestService} from "../../../service/jquery/database-request.service";
 
 @Component({
   templateUrl: './statistic-request.view.html',
@@ -20,14 +21,18 @@ export class StatisticRequestView implements OnInit, OnDestroy {
   private readonly _router = inject(EnvRouter);
   private readonly _componentResolver = inject(StatisticComponentResolverService);
   private readonly _viewContainerRef = inject(ViewContainerRef);
+  private _datebaseService = inject(DatabaseRequestService);
 
 
   isOpen: boolean = false;
   $commandFilter =['READ','SCRIPT','EDIT','EMIT'];
   $mthREstFilter =['GET','DELETE','PUT','POST','PATCH'];
+  $Schemafilter =['tets'];
 
   commandSelected: string[] =[];
   commandSelectedCopy: string[] =[];
+  schemaSelected: string[] =[];
+  schemaSelectedCopy: string[] =[];
   filterForm = new FormGroup({
     type: new FormControl<'jdbc' | 'ftp' | 'smtp' | 'ldap' | 'rest' | null>(null, [Validators.required]),
     dateRange: new FormGroup({
@@ -55,8 +60,23 @@ export class StatisticRequestView implements OnInit, OnDestroy {
         this.patchTypeValue();
         this.commandSelected = !v.queryParams.command ? [] : v.queryParams.command.split(',');
         this.commandSelectedCopy = [...this.commandSelected];
+        this.schemaSelected = !v.queryParams.schema ? [] : v.queryParams.schema.split(',');
+        this.schemaSelectedCopy = [...this.schemaSelected];
         this.params.queryParams.commands = v.queryParams.command;
+        this.params.queryParams.schemas = v.queryParams.schema;
         this.params.queryParams.hosts = [this.params.host];
+
+
+        if(this.params.type === 'jdbc'){
+          this._datebaseService.getSchemaList({
+            start: this.params.queryParams.period.start,
+            end: this.params.queryParams.period.end,
+            host:[ this.params.host],
+            env :this.params.queryParams.env
+          }).subscribe({next : res => {
+              this.$Schemafilter = res.map( item => item.schema);
+            }})
+        }
 
         this.patchDateValue(this.params.queryParams.period.start, new Date(this.params.queryParams.period.end.getFullYear(), this.params.queryParams.period.end.getMonth(), this.params.queryParams.period.end.getDate() - 1));
         if(this.params.type) {
@@ -87,6 +107,9 @@ export class StatisticRequestView implements OnInit, OnDestroy {
   onCommandSelectedChange($event) {
     this.commandSelected = $event;
   }
+  onSchemaSelectedChange($event) {
+    this.schemaSelected = $event;
+  }
   patchTypeValue() {
     this.filterForm.patchValue({
       type: this.params.type
@@ -102,6 +125,7 @@ export class StatisticRequestView implements OnInit, OnDestroy {
   onOverlayOutsideClick() {
 
     this.commandSelected = [...this.commandSelectedCopy];
+    this.schemaSelected = [...this.schemaSelectedCopy];
     this.isOpen = false;
   }
 
@@ -110,7 +134,13 @@ export class StatisticRequestView implements OnInit, OnDestroy {
     if (this.commandSelected.length > 0) {
       this.params.queryParams.commands = [...this.commandSelected];
     } else {
-      this.params.queryParams.commands = null; // 🔥 OBLIGATOIRE
+      this.params.queryParams.commands = null;
+    }
+    this.schemaSelectedCopy = [...this.schemaSelected];
+    if(this.schemaSelected.length > 0){
+      this.params.queryParams.schemas = [...this.schemaSelected];
+    }else {
+      this.params.queryParams.schemas = null;
     }
     this.isOpen = false;
 
