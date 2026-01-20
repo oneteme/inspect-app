@@ -8,7 +8,7 @@ export interface Application {
 export class QueryParams {
     private _optional: {[key: string]: any} = {};
 
-    constructor(public _period: Period, public _env: string, public _appname?: string[], public _hosts?: string[], public _rangestatus?: string[], public _commands?: string[]) {
+    constructor(public _period: Period, public _env: string, public _appname?: string[], public _hosts?: string[], public _rangestatus?: string[], public _commands?: string[], public _schemas?: string[]) {
     }
 
     set period(period: Period) {
@@ -56,6 +56,14 @@ export class QueryParams {
         return this._commands;
     }
 
+    set schemas(schema: string[]){
+        this._schemas = schema
+    }
+    get schemas(): string[] {
+        return this._schemas;
+    }
+
+
     get optional(): {[key: string]: any} {
         return this._optional;
     }
@@ -83,6 +91,9 @@ export class QueryParams {
         }
         if(this.commands && this.commands.length> 0){
             params = {...params, command: this.commands.toString()}
+        }
+        if(this.schemas && this.schemas.length> 0){
+            params = {...params, schema: this.schemas.toString()}
         }
         return params;
     }

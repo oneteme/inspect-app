@@ -122,7 +122,7 @@ export class StatisticRequestHttpComponent {
       end: queryParams.period.end,
       env: queryParams.env,
       host: queryParams.hosts,
-      command: queryParams.commands
+      method: queryParams.commands
     }).pipe(
         map(r => {
           return r;
