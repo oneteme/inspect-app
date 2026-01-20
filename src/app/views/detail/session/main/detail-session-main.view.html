@@ -54,7 +54,7 @@
 </div>
 
 <mat-menu #menuEndPoint="matMenu" xPosition="after">
-  <a [routerLink]="['/session', session?.type, session?.id, 'tree']" mat-menu-item matTooltip="Diagramme de bout en bout des flux d'exécution" matTooltipPosition="left">
+  <a [routerLink]="['/session', session?.type, session?.id, 'tree']" mat-menu-item >
     <mat-icon class="material-symbols-outlined">lan</mat-icon>
     Arbre d'appels
   </a>

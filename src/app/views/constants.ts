@@ -499,21 +499,22 @@ export class Constants {
     };
 
     static readonly MAPPING_TYPE: {[key: string]: Partial<{title: string, subtitle: string, icon: string}>} = {
-        request: {title: 'Intéractions', icon: 'call_made'},
-        rest: {title: 'Services Exposés', subtitle: 'Gestion et supervision des sessions', icon: 'call_received'},
-        batch: {title: 'Tâches planifiées', subtitle: 'Gestion et supervision des sessions', icon: 'manufacturing'},
-        test: {title: 'Validation & Tests', subtitle: 'Gestion et supervision des sessions', icon: 'rule'},
-        startup: {title: 'Initialisation', subtitle: 'Gestion et supervision des sessions', icon: 'restart_alt'},
-        view: {title: 'Parcours Client', subtitle: 'Gestion et supervision des sessions', icon: 'ads_click'},
+        request: {title: 'Intéractions', subtitle: 'Communications externes',icon: 'call_made'},
+        rest: {title: 'Services Exposés', subtitle: 'Appels API et distribution de ressources statiques', icon: 'call_received'},
+        batch: {title: 'Tâches planifiées', subtitle: 'Historique des jobs asynchrones et tâches de fond', icon: 'manufacturing'},
+        test: {title: 'Validation & Tests', subtitle: 'Lancements de tests automatisés et résultats', icon: 'rule'},
+        startup: {title: 'Initialisation', subtitle: 'Chronologie et durée des démarrages d\'application', icon: 'restart_alt'},
+        view: {title: 'Parcours Client', subtitle: 'Navigation utilisateurs et accès aux pages', icon: 'ads_click'},
         dashboard: {title:'Page d\'Accueil', icon: 'home'},
         deploiment: {title:'Versions déployées', subtitle: 'Gestion et supervision des deploiements', icon:'deployed_code'},
+        tree: {title: 'Arborescence des ressources', subtitle: 'Diagramme de bout en bout des flux d\'exécution', icon: 'account_tree'},
     }
     static readonly REQUEST_MAPPING_TYPE: {[key: string]: Partial<{title: string, subtitle: string, icon: string}>} = {
-        rest: {title: 'HTTP', subtitle: 'Gestion et supervision des requêtes', icon: 'public'},
-        jdbc: {title: 'JDBC', subtitle: 'Gestion et supervision des requêtes', icon: 'database'},
-        ftp: {title: 'FTP', subtitle: 'Gestion et supervision des requêtes', icon: 'smb_share'},
-        smtp: {title: 'SMTP', subtitle: 'Gestion et supervision des requêtes', icon: 'outgoing_mail'},
-        ldap: {title: 'LDAP', subtitle: 'Gestion et supervision des requêtes', icon: 'user_attributes'},
+        rest: {title: 'HTTP', subtitle: 'Communications externes', icon: 'public'},
+        jdbc: {title: 'JDBC', subtitle: 'Communications externes', icon: 'database'},
+        ftp: {title: 'FTP', subtitle: 'Communications externes', icon: 'smb_share'},
+        smtp: {title: 'SMTP', subtitle: 'Communications externes', icon: 'outgoing_mail'},
+        ldap: {title: 'LDAP', subtitle: 'Communications externes', icon: 'user_attributes'},
     }
 
 
