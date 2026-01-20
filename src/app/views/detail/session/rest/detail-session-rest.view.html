@@ -86,10 +86,10 @@
                             matTooltip="Chargement de l'appel parent">
       </mat-progress-spinner>
       <mat-icon *ngIf="!parentLoading">move_up</mat-icon>
-      Détail de l'appel parent
+      Origine Client
     </div>
   </a>
-  <a mat-menu-item [routerLink]="['/session', 'rest', session?.id, 'tree']">
+  <a mat-menu-item [routerLink]="['/session', 'rest', session?.id, 'tree']" matTooltip="Diagramme de bout en bout des flux d'exécution" matTooltipPosition="left">
     <mat-icon class="material-symbols-outlined">lan</mat-icon>
     Arbre d'appels
   </a>
