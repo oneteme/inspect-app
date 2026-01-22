@@ -167,7 +167,6 @@ export class DetailTimelineComponent implements OnChanges {
         }
         if (o.end > this.timelineEnd) {
             this.timelineEnd = o.end;
-            console.log('update timeline end to ', o.end);
         }
         if(o.type == 'range'){
             o.className += ` ${this.getErrorClassName(c)}`;
