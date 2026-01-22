@@ -32,6 +32,7 @@ export class DeploimentComponent implements OnDestroy {
   params: Partial<{ env: string }> = {};
   subscriptions: Subscription[] = [];
   date = new Date().getTime();
+  filterValue: string = '';
   onlineServerStat: number = 0;
   pendingServerStat: number = 0;
   offlineServerStat: number = 0;
@@ -118,6 +119,13 @@ export class DeploimentComponent implements OnDestroy {
   }
   navigateOnRestartClick(event: MouseEvent, start: number, server: string) {
     this._router.navigateOnClick(event, ['/session/startup'], { queryParams: {env: this.params.env, start: new Date(start).toISOString(), end: new Date().toISOString(), server: server} });
+  }
+
+  applyFilter(event: Event) {
+    this.lastServerStart.data.filter = (event.target as HTMLInputElement).value.trim().toLowerCase();
+    if (this.lastServerStart.data.paginator) {
+      this.lastServerStart.data.paginator.firstPage();
+    }
   }
 }
 

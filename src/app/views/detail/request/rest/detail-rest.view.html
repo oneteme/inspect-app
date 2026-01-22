@@ -109,7 +109,7 @@
          [ngStyle]="{'pointer-events': request && request.status != 0 && !request.linked ? 'none' : ''}"
          [disabled]="request && request.status != 0 && !request.linked"
          (click)="navigate($event, 'remote')">
-      <mat-icon class="material-symbols-outlined">link</mat-icon>Détail de la session
+      <mat-icon class="material-symbols-outlined">link</mat-icon>Service Distant
     </div>
     <div mat-menu-item
          [ngStyle]="{'pointer-events': sessionParent == null ? 'none' : ''}"
@@ -120,7 +120,7 @@
                               matTooltip="Chargement de l'appel parent">
         </mat-progress-spinner>
         <mat-icon *ngIf="!parentLoading">move_up</mat-icon>
-        Détail de l'appel parent
+         Contexte de l'Appel
       </div>
     </div>
     <a mat-menu-item [routerLink]="['/dashboard/request', 'rest', request?.host]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Request</a>

@@ -173,7 +173,7 @@ export class BatchTabComponent implements OnDestroy {
                     'end': result.end.toISOString(),
                     'q' : row.errorType,
                     'server': this._httpParams.server.replace(/"/g, ''),
-                    'rangestatus': ['false']
+                    'rangestatus': ['Ko']
                 }
             });
         }

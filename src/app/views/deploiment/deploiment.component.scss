@@ -1,3 +1,14 @@
+.searchwidth {
+  display: flex;
+  margin-bottom: 0.5em;
+}
+
+.table-container {
+  .table-wrapper {
+    max-height: calc(100vh - 96px - 56px - 48px - 64px);
+  }
+}
+
 .stats-container {
   display: flex;
   align-items: center;

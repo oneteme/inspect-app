@@ -75,10 +75,10 @@ export class SearchRequestView implements OnInit, OnDestroy {
   } =
       {
         "rest": { service: this._restRequestService, filters:  [{icon: 'warning', label: '5xx', color:'#bb2124', value: '5xx'}, {icon: 'error', label: '4xx',color:'#f9ad4e', value:'4xx'}, {icon: 'done', label: '2xx',color:'#22bb33', value:'2xx'}, {icon: 'priority_high', label: '0', color:'gray', value:'0xx'}, {icon: 'pending', label: 'En cours', color:'#2196F3', value:'lazy'}]},
-        "jdbc": { service: this._databaseRequestService, filters:  [{icon: 'warning', label: 'KO', color:'#bb2124', value: 'Ok'}, {icon: 'done', label: 'OK',color:'#22bb33', value: 'Ko'}, {icon: 'pending', label: 'En cours', color:'#2196F3', value:'lazy'}] },
-        "ftp" :  { service: this._ftpRequestService, filters:  [{icon: 'warning', label: 'KO', color:'#bb2124', value: 'Ok'}, {icon: 'done', label: 'OK',color:'#22bb33', value: 'Ko'}, {icon: 'pending', label: 'En cours', color:'#2196F3', value:'lazy'}] },
-        "smtp": { service: this._smtpRequestService, filters:  [{icon: 'warning', label: 'KO', color:'#bb2124', value: 'Ok'}, {icon: 'done', label: 'OK',color:'#22bb33', value: 'Ko'}, {icon: 'pending', label: 'En cours', color:'#2196F3', value:'lazy'}] },
-        "ldap": { service: this._ldapRequestService, filters:  [{icon: 'warning', label: 'KO', color:'#bb2124', value: 'Ok'}, {icon: 'done', label: 'OK',color:'#22bb33', value: 'Ko'}, {icon: 'pending', label: 'En cours', color:'#2196F3', value:'lazy'}] },
+        "jdbc": { service: this._databaseRequestService, filters:  [{icon: 'warning', label: 'KO', color:'#bb2124', value: 'Ko'}, {icon: 'done', label: 'OK',color:'#22bb33', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'#2196F3', value:'lazy'}] },
+        "ftp" :  { service: this._ftpRequestService, filters:  [{icon: 'warning', label: 'KO', color:'#bb2124', value: 'Ko'}, {icon: 'done', label: 'OK',color:'#22bb33', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'#2196F3', value:'lazy'}] },
+        "smtp": { service: this._smtpRequestService, filters:  [{icon: 'warning', label: 'KO', color:'#bb2124', value: 'Ko'}, {icon: 'done', label: 'OK',color:'#22bb33', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'#2196F3', value:'lazy'}] },
+        "ldap": { service: this._ldapRequestService, filters:  [{icon: 'warning', label: 'KO', color:'#bb2124', value: 'Ko'}, {icon: 'done', label: 'OK',color:'#22bb33', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'#2196F3', value:'lazy'}] },
       }
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -198,8 +198,8 @@ export class SearchRequestView implements OnInit, OnDestroy {
       'env': this.queryParams.env,
       'host': this.queryParams.hosts,
       'rangestatus': this.queryParams.rangestatus.filter(r => r != 'lazy').map(r => {
-        if(r == 'Ok') return true;
-        if(r == 'Ko') return false;
+        if(r == 'Ok') return false;
+        if(r == 'Ko') return true;
         return r;
       }),
       'lazy': !!this.queryParams.rangestatus.find(r => r == 'lazy'),

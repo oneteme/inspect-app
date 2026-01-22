@@ -17,6 +17,7 @@ import {
   MainSessionTree, RestRequestNode, RestServerNode,
   RestSessionTree
 } from "../../model/tree.model";
+import {Constants} from "../constants";
 
 
 @Component({
@@ -39,7 +40,7 @@ export class TreeView implements OnDestroy {
   env: any;
   isLoading: boolean;
   data: any;
-
+  MAPPING_TYPE = Constants.MAPPING_TYPE;
   TreeObj: any;
   serverLbl: Label;
   linkLbl: Label;

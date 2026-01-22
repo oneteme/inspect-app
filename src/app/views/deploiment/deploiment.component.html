@@ -44,6 +44,12 @@
   </div>
 </header-page>
 
+<mat-form-field appearance="outline" class="searchwidth md-3 no-subscript">
+  <input [disabled]="lastServerStart.isLoading" [(ngModel)]="filterValue" matInput #input (keyup)="applyFilter($event)"  placeholder="Filtrer..."
+         autocomplete="off">
+  <mat-icon matSuffix>search</mat-icon>
+</mat-form-field>
+
 <div class="table-container">
     <div class="table-wrapper">
       <table mat-table [dataSource]="lastServerStart.data || []" #lastServerStartTableSort="matSort" matSort

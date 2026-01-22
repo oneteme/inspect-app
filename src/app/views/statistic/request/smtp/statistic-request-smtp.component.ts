@@ -148,7 +148,8 @@ export class StatisticRequestSmtpComponent {
           'start': result.start.toISOString(),
           'end': result.end.toISOString(),
           'q': row.errorType,
-          'host': this.params.hosts
+          'host': this.params.hosts,
+          'rangestatus' : 'Ko'
         }
       });
     }
