@@ -47,7 +47,7 @@ export class StacktraceDialogComponent {
   }
 
   stacktraceFormatter(message: string, stackTraceRows: StackTraceRow[]) {
-    return stackTraceRows && message ? `${message} \n  at ${stackTraceRows.map(d => `${d.className}.${d.methodName}(${this.getFileName(d)}:${d.lineNumber})`).join('\n  at ')}` : null;
+    return stackTraceRows ? `${message ? `${message} \n` : ''}  at ${stackTraceRows.map(d => `${d.className}.${d.methodName}(${this.getFileName(d)}:${d.lineNumber})`).join('\n  at ')}` : null;
   }
 
   getFileName(row: StackTraceRow): string {
