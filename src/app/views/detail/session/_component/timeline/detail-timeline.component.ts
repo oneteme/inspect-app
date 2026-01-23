@@ -12,7 +12,7 @@ let options: any = {
     selectable : false,
     cluster: {
         clusterCriteria : (firstItem: any, secondItem: any) => {
-            if(firstItem.id.toString().includes("log_") && secondItem.id.toString().includes("log_")){
+            if(firstItem.id.toString().includes("_log") && secondItem.id.toString().includes("_log")){
                 return true;
             }
             return false;
@@ -96,7 +96,6 @@ export class DetailTimelineComponent implements OnChanges {
                 } else {
                     this.dataItems = this.dataArray.map((c: any, i: number) =>this.maptype[c.typeTimeline](c, i));
                 }
-
                 this.options = {
                     ...options,
                     start: this.timelineStart - padding,
@@ -167,7 +166,6 @@ export class DetailTimelineComponent implements OnChanges {
         }
         if (o.end > this.timelineEnd) {
             this.timelineEnd = o.end;
-            console.log('update timeline end to ', o.end);
         }
         if(o.type == 'range'){
             o.className += ` ${this.getErrorClassName(c)}`;
@@ -180,7 +178,7 @@ export class DetailTimelineComponent implements OnChanges {
         const el = document.createElement('span');
         el.innerHTML = `<span class="material-icons ${le.level.toLowerCase()}" >${le.level.toLowerCase()}</span>`
         return {
-            id: le.id ?`${le.id}_${le.typeTimeline}` : id,
+            id: le.id ?`${le.id}_${le.typeTimeline}` : `${id}_log`,
             group:  this.isWebApp ? 0 : this.dataArray[0].threadName,
             content: el as unknown as any,
             start: le.instant * 1000,

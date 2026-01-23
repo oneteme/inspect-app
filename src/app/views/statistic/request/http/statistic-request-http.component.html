@@ -12,6 +12,10 @@
       <div class="label" [matTooltip]="($timeAndTypeResponse.stats.statCountErrorServer | number : '1.0-0') + ' / ' + ($timeAndTypeResponse.stats.statCount | number : '1.0-0')">{{ ($timeAndTypeResponse.stats.statCountErrorServer / $timeAndTypeResponse.stats.statCount) * 100 | number : '1.0-2' }}%</div>
       <div class="sub-label">5xx</div>
     </div>
+    <div class="stat" style="color: gray">
+        <div class="label" [matTooltip]="($timeAndTypeResponse.stats.statCountUnavailableServer | number : '1.0-0') + ' / ' + ($timeAndTypeResponse.stats.statCount | number : '1.0-0')">{{ ($timeAndTypeResponse.stats.statCountUnavailableServer / $timeAndTypeResponse.stats.statCount) * 100 | number : '1.0-2' }}%</div>
+        <div class="sub-label">0</div>
+    </div>
   </repartition-type-card>
   <evol-user-card style="width: 50%" [data]="$evolUserResponse.line" [isLoading]="$evolUserResponse.loading"></evol-user-card>
 </div>

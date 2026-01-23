@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, inject, OnDestroy} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
-import {combineLatest, finalize, map, Observable, Subscription, take} from 'rxjs';
+import {combineLatest, finalize, map, Observable, Subscription} from 'rxjs';
 import {DatePipe, DecimalPipe, Location} from '@angular/common';
 import {app, makeDatePeriod} from 'src/environments/environment';
 import {EnvRouter} from "../../service/router.service";
@@ -18,9 +18,7 @@ import {FtpRequestService} from 'src/app/service/jquery/ftp-request.service';
 import {LdapRequestService} from 'src/app/service/jquery/ldap-request.service';
 import {
     FtpSessionExceptionsByPeriodAndappname,
-    JdbcMainExceptionsByPeriodAndappname,
     JdbcExceptionsByPeriodAndAppname,
-    LdapMainExceptionsByPeriodAndappname,
     LdapSessionExceptionsByPeriodAndappname,
     RestSessionExceptionsByPeriodAndappname,
     SessionExceptionsByPeriodAndAppname,
@@ -126,7 +124,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
             this.chartRequests[k].chart = [];
             this.chartRequests[k].isLoading = true;
             this.chartSubscriptions.push(this.chartRequests[k].observable
-                .pipe(finalize(() => {   this.chartRequests[k].isLoading = false;  })).pipe(take(1))
+                .pipe(finalize(() => {   this.chartRequests[k].isLoading = false;  }))
                 .subscribe({
                     next: (res: any) => {
                         this.chartRequests[k].data = res.data;
@@ -145,7 +143,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
             this.tabRequests[i].data = [];
             this.tabRequests[i].isLoading = true;
             this.tabSubscriptions.push(this.tabRequests[i].observable
-                .pipe(finalize(() => {   this.tabRequests[i].isLoading = false;  })).pipe(take(1))
+                .pipe(finalize(() => {   this.tabRequests[i].isLoading = false;  }))
                 .subscribe({
                     next: (res: any[]) => {
                         this.tabRequests[i].data = res;

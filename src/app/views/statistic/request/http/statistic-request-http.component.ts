@@ -23,12 +23,13 @@ export class StatisticRequestHttpComponent {
   seriesProvider: SerieProvider<string, number>[] = [
     {data: {x: field('date'), y: field('countSuccess')}, name: '2xx', color: '#33cc33'},
     {data: {x: field('date'), y: field('countErrorClient')}, name: '4xx', color: '#ffa31a'},
-    {data: {x: field('date'), y: field('countErrorServer')}, name: '5xx', color: '#ff0000'}
+    {data: {x: field('date'), y: field('countErrorServer')}, name: '5xx', color: '#ff0000'},
+    {data: {x: field('date'), y: field('countServerUnavailableRows')}, name: '0', color: 'gray'}
   ];
 
   groupedBy: string;
   params: QueryParams;
-  $timeAndTypeResponse: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number} } = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0} };
+  $timeAndTypeResponse: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number, statCountUnavailableServer: number} } = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0, statCountUnavailableServer:0} };
   $evolUserResponse: { line: any[], loading: boolean } = { line: [], loading: true };
   $exceptionsResponse: { data: any[], loading: boolean } = {data: [], loading: true};
   $dependenciesResponse: { table: any[], loading: boolean } = {table: [], loading: true};
@@ -131,15 +132,15 @@ export class StatisticRequestHttpComponent {
       next: res => {
         this.$dependenciesResponse.table = res.map(item => ({
           ...item,
-          count: item.countSucces + item.countErrServer+  item.countErrClient
+          count: item.countSucces + item.countErrServer+  item.countErrClient + item.countServerUnavailableRows
         }));
       }
     });
   }
   calculateStats(res: any[]) {
-    return res.reduce((acc: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number}, o) => {
-      return {statCount: acc.statCount + o['countSuccess'] + o['countErrorClient'] + o['countErrorServer'], statCountOk: acc.statCountOk + o['countSuccess'], statCountErrClient: acc.statCountErrClient + o['countErrorClient'], statCountErrorServer: acc.statCountErrorServer + o['countErrorServer']};
-    }, {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0});
+    return res.reduce((acc: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number, statCountUnavailableServer: number}, o) => {
+      return {statCount: acc.statCount + o['countSuccess'] + o['countErrorClient'] + o['countErrorServer']+ o['countServerUnavailableRows'], statCountOk: acc.statCountOk + o['countSuccess'], statCountErrClient: acc.statCountErrClient + o['countErrorClient'], statCountErrorServer: acc.statCountErrorServer + o['countErrorServer'], statCountUnavailableServer: acc.statCountUnavailableServer + o['countServerUnavailableRows']};
+    }, {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0, statCountUnavailableServer: 0});
   }
   onSessionExceptionRowSelected(row:any) {
     const result = recreateDate(this.groupedBy, row, this.params.period.start);

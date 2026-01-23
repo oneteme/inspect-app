@@ -12,8 +12,8 @@ import {MatSort} from "@angular/material/sort";
 export class DependencyTableRequestHttpComponent {
   private _decimalPipe = inject(DecimalPipe);
 
-  displayedColumns: string[] = ['appName', 'success', 'errorClient', 'errorServer'];
-  dataSource: MatTableDataSource<{ appName: string, type: string, count: number, countSucces: number, countErrClient: number, countErrServer: number }> = new MatTableDataSource([]);
+  displayedColumns: string[] = ['appName', 'success', 'errorClient', 'errorServer', 'unavailableServer'];
+  dataSource: MatTableDataSource<{ appName: string, type: string, count: number, countSucces: number, countErrClient: number, countErrServer: number, countServerUnavailableRows: number }> = new MatTableDataSource([]);
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild('sort') sort: MatSort;
@@ -29,6 +29,7 @@ export class DependencyTableRequestHttpComponent {
         if (columnName == "success") return parseFloat(this._decimalPipe.transform((row['countSucces'] / row['count']) * 100, '1.0-2', 'en_US'));
         if (columnName == "errorClient") return parseFloat(this._decimalPipe.transform((row['countErrClient'] / row['count']) * 100, '1.0-2', 'en_US'));
         if (columnName == "errorServer") return parseFloat(this._decimalPipe.transform((row['countErrServer'] / row['count']) * 100, '1.0-2', 'en_US'));
+        if (columnName == "countServerUnavailableRows") return parseFloat(this._decimalPipe.transform((row['countServerUnavailableRows'] / row['count']) * 100, '1.0-2', 'en_US'));
         return row[columnName as keyof any] as string;
       };
       this.dataSource.sort = this.sort;
