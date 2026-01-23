@@ -165,6 +165,10 @@ export class InstanceComponent implements OnInit, OnDestroy {
     let items = this.allInstance.map((a: any, i: number) => {
       let start= Math.trunc(a.start);
       let end = a.end? Math.trunc(a.end) :  new Date().getTime();
+
+      if (end> this.timelineEnd) {
+        this.timelineEnd =  end;
+      }
       return {
         group: `${groupByContent.get(a.version)}`,
         start: start,

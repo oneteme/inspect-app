@@ -287,11 +287,12 @@ export class RestSessionService {
 
     getSessionExceptions(filters: {env: string, start: Date, end: Date, groupedBy: string, server?: string, apiNames?: string, users?: string, versions?: string }): Observable<SessionExceptionsByPeriodAndAppname[]> {
         let args = {
-            "column": `start.${filters.groupedBy}:date,err_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`,
+            "column": `start.${filters.groupedBy}:date,err_type,count:count,status,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`,
             'join': 'instance',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'instance.environement': filters.env,
+            'status.ge': '500',
             'instance.type': 'SERVER',
             "order": "date.desc,count.desc"
         }
