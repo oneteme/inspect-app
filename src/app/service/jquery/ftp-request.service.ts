@@ -121,6 +121,9 @@ export class FtpRequestService {
             'instance.environement': filters.env,
             'order': 'count.desc'
         }
+        if(filters.command){
+            args['command'] = filters.command.toString();
+        }
         return this.getFtp(args);
     }
 

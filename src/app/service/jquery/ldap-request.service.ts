@@ -38,6 +38,9 @@ export class LdapRequestService {
             'instance.environement': filters.env,
             'order': 'count.desc'
         }
+        if(filters.command){
+            args['command'] = filters.command.toString();
+        }
         return this.getLdap(args);
     }
 

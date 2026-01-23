@@ -33,7 +33,7 @@ export class RestRequestService {
 
     getRestExceptionsByHost(filters: { env: string, start: Date, end: Date, groupedBy: string, host: string[],command?: string[]  }): Observable<RestSessionExceptionsByPeriodAndappname[]> {
         let args = {
-            'column': `start.${filters.groupedBy}:date,count.sum.over(partition(date)):countok,exception.count_exception:count,count.divide(countok).multiply(100).round(2):pct,exception.err_type.coalesce():errorType,start.year:year`,
+            'column': `start.${filters.groupedBy}:date,count.sum.over(partition(date)):countok,exception.count_exception_rest:count,count.divide(countok).multiply(100).round(2):pct,exception.err_type.coalesce(body_content):errorType,start.year:year`,
             'join': 'exception,instance',
             'instance.environement': filters.env,
             'host':`"${filters.host}"`,
@@ -42,14 +42,14 @@ export class RestRequestService {
             'order': 'date.asc'
         }
         if(filters.command){
-            args['command'] = filters.command.toString();
+            args['method'] = filters.command.toString();
         }
         return this.getRestRequest(args);
     }
 
     getRestExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<RestSessionExceptionsByPeriodAndappname[]> {
         let args = {
-            'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
+            'column': `count:countok,exception.count_exception_rest:count,exception.err_type.coalesce(body_content):errorType,start.${filters.groupedBy}:date,start.year:year`,
             'join': 'exception,instance',
             'instance.environement': filters.env,
             'instance.type': 'SERVER',
@@ -112,9 +112,11 @@ export class RestRequestService {
       return this.getRestRequest(args);
     }
 
-    getDependentsNew(filters: { start: Date, end: Date,env: string, host: string[],command?: string[] }): Observable<{
+
+    getDependentsNew(filters: { start: Date, end: Date,env: string, host: string[],method?: string[] }): Observable<{
         countServerUnavailableRows: number;
         count: number, countSucces: number, countErrClient: number, countErrServer: number, appName: string}[]> {
+
         let args: any = {
             'column': `count_succes:countSucces,count_error_server:countErrServer,count_error_client:countErrClient,count_unavailable_server:countServerUnavailableRows,instance.app_name:appName`,
             'host':`"${filters.host}"`,
@@ -123,6 +125,9 @@ export class RestRequestService {
             'start.lt': filters.end.toISOString(),
             'instance.environement': filters.env,
             'order': 'count.desc'
+        }
+        if(filters.method){
+            args['method'] = filters.method.toString();
         }
         return this.getRestRequest(args);
     }

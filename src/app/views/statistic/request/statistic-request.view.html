@@ -12,7 +12,7 @@
       <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-date-range-picker #picker></mat-date-range-picker>
     </mat-form-field>
-      <button mat-button (click)="isOpen = !isOpen" [matBadge]="commandSelectedCopy.length" cdkOverlayOrigin #trigger="cdkOverlayOrigin">
+      <button mat-button (click)="isOpen = !isOpen" [matBadge]="commandSelectedCopy.length + schemaSelectedCopy.length" cdkOverlayOrigin #trigger="cdkOverlayOrigin">
           <mat-icon>tune</mat-icon>
           Filtre
       </button>
@@ -27,6 +27,7 @@
         <ng-template #firstTab>
             <autocomplete-chip *ngIf="params.type !== 'rest'" label="Commande" [values]="$commandFilter" [selected]="commandSelected" (selectedChange)="onCommandSelectedChange($event)"></autocomplete-chip>
             <autocomplete-chip *ngIf="params.type === 'rest'" label="Methode" [values]="$mthREstFilter" [selected]="commandSelected" (selectedChange)="onCommandSelectedChange($event)"></autocomplete-chip>
+            <autocomplete-chip *ngIf="params.type === 'jdbc'" label="Schémas" [values]="$Schemafilter" [selected]="schemaSelected" (selectedChange)="onSchemaSelectedChange($event)"></autocomplete-chip>
 
         </ng-template>
     </ng-template>

@@ -126,6 +126,9 @@ export class SmtpRequestService {
             'instance.environement': filters.env,
             'order': 'count.desc'
         }
+        if(filters.command){
+            args['command'] = filters.command.toString();
+        }
         return this.getSmtp(args);
     }
 
