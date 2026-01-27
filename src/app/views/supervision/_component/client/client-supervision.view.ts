@@ -542,6 +542,22 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
     }
   }
 
+  onServerChange(){
+    this.updateFormValues();
+  }
+
+  updateFormValues() {
+    const matchingInstances = this.instances.filter(
+        instance => instance.appName === this.formGroup.controls.server.value && instance.address === this.formGroup.controls.address.value
+    );
+
+    const selectedInstance = matchingInstances.length
+        ? matchingInstances.reduce((latest, current) => (current.start > latest.start ? current : latest))
+        : null;
+
+    this.patchInstanceValue(selectedInstance);
+  }
+
   patchDateValue(start: Date, end: Date) {
     this.formGroup.patchValue({
       range: {
@@ -576,6 +592,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   }
 
   openInstanceSelector() {
+    this.updateFormValues();
     const dialogRef = this._dialog.open(ClientInstanceSelectorDialogComponent, {
       width: '500px',
       data: {
@@ -593,6 +610,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
         this.patchServerValue(result.server);
         this.patchInstanceValue(result.instance);
         this.patchAddressValue(result.address);
+        this.search()
       }
     });
   }
