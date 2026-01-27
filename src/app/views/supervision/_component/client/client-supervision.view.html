@@ -30,7 +30,7 @@
   <mat-form-field style="width: 260px" class="no-subscript md-3" [class.loading]="isLoadingInstances"
                   appearance="outline">
       <mat-label>Serveur</mat-label>
-      <mat-select [formControl]="formGroup.controls.server">
+      <mat-select [formControl]="formGroup.controls.server" (selectionChange)="onServerChange()">
           <mat-select-trigger>
               {{ formGroup.controls.server?.value || '' }}
           </mat-select-trigger>
