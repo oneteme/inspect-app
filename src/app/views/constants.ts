@@ -506,7 +506,7 @@ export class Constants {
         startup: {title: 'Initialisation', subtitle: 'Chronologie et durée des démarrages d\'application', icon: 'restart_alt'},
         view: {title: 'Parcours Client', subtitle: 'Navigation utilisateurs et accès aux pages', icon: 'ads_click'},
         dashboard: {title:'Page d\'Accueil', icon: 'home'},
-        deploiment: {title:'Versions déployées', subtitle: 'Gestion et supervision des deploiements', icon:'deployed_code'},
+        deploiment: {title:'Instances Actives', subtitle: 'Navigation utilisateurs et accès aux pages', icon:'deployed_code'},
         tree: {title: 'Arborescence des ressources', subtitle: 'Diagramme de bout en bout des flux d\'exécution', icon: 'account_tree'},
     }
     static readonly REQUEST_MAPPING_TYPE: {[key: string]: Partial<{title: string, subtitle: string, icon: string}>} = {
