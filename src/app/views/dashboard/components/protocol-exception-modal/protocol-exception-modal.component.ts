@@ -68,25 +68,41 @@ export class ProtocolExceptionComponent {
     }
 
     removePackage(errorType: string) {
-        if (errorType) {
-            const index = errorType.lastIndexOf('.') + 1;
-            return errorType?.substring(index);
+        if (errorType!== null) {
+            const index = errorType.toString().lastIndexOf('.');
+            if(index>=0){
+                return errorType?.substring(index +1);
+            }
+           return errorType
         }
         return 'N/A';
     }
 
     selectedRow(event: MouseEvent, row: any) {
+        const redirectFn = this.data.type === 'REST' ? this.redirectRest : this.redirectOther;
+        redirectFn.call(this, row);
+    }
+
+    redirectRest(row: any) {
+        this.redirect(row, 'rangestatus');
+    }
+
+    redirectOther(row: any) {
+        this.redirect(row, 'q');
+    }
+
+    private redirect(row: any, queryParamKey: string) {
         const result = recreateDate(this.data.groupedBy, row, this.data.start);
-        if(result){
-            let uri  = this.filterType[this.data.type].uri;
-            delete this.filterType[this.data.type].uri;
+        if (result) {
+            const { uri, ...queryParams } = this.filterType[this.data.type];
             this._router.navigate([uri], {
-                queryParams: Object.assign({
-                    'env': this.data.env,
-                    'start': result.start.toISOString(),
-                    'end': result.end.toISOString(),
-                    'q' : row.errorType
-                },this.filterType[this.data.type])
+                queryParams: {
+                    ...queryParams,
+                    env: this.data.env,
+                    start: result.start.toISOString(),
+                    end: result.end.toISOString(),
+                    [queryParamKey]: row.errorType
+                }
             });
         }
     }

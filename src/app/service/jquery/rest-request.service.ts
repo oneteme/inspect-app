@@ -49,10 +49,9 @@ export class RestRequestService {
 
     getRestExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<RestSessionExceptionsByPeriodAndappname[]> {
         let args = {
-            'column': `count:countok,exception.count_exception_rest:count,exception.err_type.coalesce(body_content):errorType,start.${filters.groupedBy}:date,start.year:year`,
-            'join': 'exception,instance',
+            'column': `count:countok,count_error_client.plus(count_error_server).plus(count_unavailable_server):count,count_error_client,count_error_server,count_unavailable_server,start.${filters.groupedBy}:date,start.year:year`,
+            'join': 'instance',
             'instance.environement': filters.env,
-            'instance.type': 'SERVER',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'order': 'date.asc'

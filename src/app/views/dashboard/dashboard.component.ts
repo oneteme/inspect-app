@@ -264,7 +264,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
 
             //   Rest-Main Sessions exceptions
             sessionExceptionsTable: {
-                observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, server: app_name })
+                observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, server: app_name, others: {"status.ge(500).or(status.lt(400))": ""}})
                     .pipe(map(((result: SessionExceptionsByPeriodAndAppname[]) => {
                         formatters[this.groupedBy](result, this._datePipe, 'stringDate');
                         return result.filter(r => r.errorType != null); // rename errorType to errType in backend
@@ -290,6 +290,21 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                 observable: this._restService.getRestExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map(((result: RestSessionExceptionsByPeriodAndappname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate')
+                        result = result.flatMap((item:any) =>
+                            [
+                                "countServerErrorRows",
+                                "countServerUnavailableRows",
+                                "countClientErrorRows"
+                            ]
+                                .filter(field => item[field] > 0)
+                                .map(field => ({
+                                    ...item,
+                                    countServerErrorRows: field === "countServerErrorRows" ? item.countServerErrorRows : 0,
+                                    countServerUnavailableRows: field === "countServerUnavailableRows" ? item.countServerUnavailableRows : 0,
+                                    countClientErrorRows: field === "countClientErrorRows" ? item.countClientErrorRows : 0,
+                                    errorType: field === "countServerErrorRows" ? '5xx' : field === "countServerUnavailableRows" ? '0xx' : '4xx',
+                                    count: item[field]
+                                })));
                         this.sparklineTitles.rest = this.setTitle('REST', [...result]);
                         return this.setChartData([...result])
                     })))
