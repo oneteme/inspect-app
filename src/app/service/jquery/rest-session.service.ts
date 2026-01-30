@@ -285,14 +285,13 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getSessionExceptions(filters: {env: string, start: Date, end: Date, groupedBy: string, server?: string, apiNames?: string, users?: string, versions?: string }): Observable<SessionExceptionsByPeriodAndAppname[]> {
+    getSessionExceptions(filters: {env: string, start: Date, end: Date, groupedBy: string, server?: string, apiNames?: string, users?: string, versions?: string, others?: {[key: string]: any}  }): Observable<SessionExceptionsByPeriodAndAppname[]> {
         let args = {
             "column": `start.${filters.groupedBy}:date,err_type,count:count,status,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`,
             'join': 'instance',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'instance.environement': filters.env,
-            'status.ge': '500',
             'instance.type': 'SERVER',
             "order": "date.desc,count.desc"
         }
@@ -307,6 +306,10 @@ export class RestSessionService {
         }
         if (filters.users) {
             args['user.in'] = filters.users;
+        }
+        if(filters.others) {
+            const key = Object.keys(filters.others)[0];
+            args[key] = filters.others[key];
         }
         return this.getRestSession(args);
     }

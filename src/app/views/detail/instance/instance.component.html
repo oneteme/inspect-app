@@ -50,5 +50,5 @@
 </div>
 <mat-menu #menuServer="matMenu">
     <a mat-menu-item [routerLink]="['/session', instance?.name, 'dump']" [queryParams]="{env: instance?.env, date: getDate(instance?.instant * 1000).toISOString()}"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
-    <a mat-menu-item [routerLink]="['/dashboard', 'server', instance?.name]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur</a>
+    <a mat-menu-item [routerLink]="['/dashboard', instance?.type.toLowerCase() , instance?.name]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur</a>
 </mat-menu>

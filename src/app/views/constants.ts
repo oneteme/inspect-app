@@ -506,7 +506,7 @@ export class Constants {
         startup: {title: 'Initialisation', subtitle: 'Chronologie et durée des démarrages d\'application', icon: 'restart_alt'},
         view: {title: 'Parcours Client', subtitle: 'Navigation utilisateurs et accès aux pages', icon: 'ads_click'},
         dashboard: {title:'Page d\'Accueil', icon: 'home'},
-        deploiment: {title:'Instances Actives', subtitle: 'Navigation utilisateurs et accès aux pages', icon:'deployed_code'},
+        deploiment: {title:'Instances Actives', subtitle: 'Suivi des applications en cours d\'exécution', icon:'deployed_code'},
         tree: {title: 'Arborescence des ressources', subtitle: 'Diagramme de bout en bout des flux d\'exécution', icon: 'account_tree'},
     }
     static readonly REQUEST_MAPPING_TYPE: {[key: string]: Partial<{title: string, subtitle: string, icon: string}>} = {
@@ -520,8 +520,6 @@ export class Constants {
 
     
     static REST_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<string, number> = {
-   
-    
         height: 100,
         continue: true,
         series: [
@@ -558,7 +556,6 @@ export class Constants {
     };
     
     static  DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-      
         height: 100,
         continue: true,
         series: [
@@ -594,8 +591,6 @@ export class Constants {
     };
 
     static  FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-
-
         height: 100,
         continue: true,
         series: [

@@ -115,6 +115,7 @@ export class StatisticRequestHttpComponent {
           }
         })
   }
+
   getDependencies(queryParams: QueryParams) {
     this.$dependenciesResponse.table = [];
     this.$dependenciesResponse.loading = true;
@@ -137,11 +138,13 @@ export class StatisticRequestHttpComponent {
       }
     });
   }
+
   calculateStats(res: any[]) {
     return res.reduce((acc: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number, statCountUnavailableServer: number}, o) => {
       return {statCount: acc.statCount + o['countSuccess'] + o['countErrorClient'] + o['countErrorServer']+ o['countServerUnavailableRows'], statCountOk: acc.statCountOk + o['countSuccess'], statCountErrClient: acc.statCountErrClient + o['countErrorClient'], statCountErrorServer: acc.statCountErrorServer + o['countErrorServer'], statCountUnavailableServer: acc.statCountUnavailableServer + o['countServerUnavailableRows']};
     }, {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0, statCountUnavailableServer: 0});
   }
+
   onSessionExceptionRowSelected(row:any) {
     const result = recreateDate(this.groupedBy, row, this.params.period.start);
     if(result) {
@@ -150,11 +153,20 @@ export class StatisticRequestHttpComponent {
           'env': this.params.env,
           'start': result.start.toISOString(),
           'end': result.end.toISOString(),
-          'q': row.errorType,
+          'q': this.isJsonConvertible(row.errorType) ? undefined : row.errorType,
           'host': this.params.hosts,
-          'rangestatus' : 'Ko'
+          'rangestatus': ['5xx','4xx','0xx']
         }
       });
+    }
+  }
+
+   isJsonConvertible(value: any): boolean {
+    try {
+      JSON.stringify(value);
+      return true;
+    } catch {
+      return false;
     }
   }
 }
