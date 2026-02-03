@@ -1,7 +1,7 @@
 <header-page [titleIcon]="MAPPING_TYPE['rest'].icon" [ui-title]="MAPPING_TYPE['rest'].title" [ui-subtitle]="MAPPING_TYPE['rest'].subtitle">
   <div class="filter-container md-3" [formGroup]="serverFilterForm">
     <advanced-filter-recap [filters]="advancedParams" (filterRemoved)="handleRemovedFilter($event)" (focusField)="focusField($event)"></advanced-filter-recap>
-    <mat-form-field style="width: 302px" class="no-subscript" appearance="outline" >
+    <mat-form-field style="width: 310px" class="no-subscript" appearance="outline" >
       <mat-label>Période</mat-label>
       <mat-date-range-input [formGroup]="serverFilterForm.controls.dateRangePicker" [rangePicker]="picker">
         <input matStartDate  formControlName="start" placeholder="Start date" (dateChange)="onChangeStart($event)">

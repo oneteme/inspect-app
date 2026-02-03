@@ -19,7 +19,10 @@ export class StatisticRequestHttpComponent {
   private readonly _datePipe = inject(DatePipe);
   private readonly _httpRequestService = inject(RestRequestService);
   private _router: EnvRouter = inject(EnvRouter);
-
+  errorStatus = {
+    "ServerError": "5xx",
+    "ClientError": "4xx",
+  }
   seriesProvider: SerieProvider<string, number>[] = [
     {data: {x: field('date'), y: field('countSuccess')}, name: '2xx', color: '#33cc33'},
     {data: {x: field('date'), y: field('countErrorClient')}, name: '4xx', color: '#ffa31a'},
@@ -153,20 +156,13 @@ export class StatisticRequestHttpComponent {
           'env': this.params.env,
           'start': result.start.toISOString(),
           'end': result.end.toISOString(),
-          'q': this.isJsonConvertible(row.errorType) ? undefined : row.errorType,
+          'q':  !this.errorStatus[row.errorType] ? row.errorType : '',
           'host': this.params.hosts,
-          'rangestatus': ['5xx','4xx','0xx']
+          'rangestatus': this.errorStatus[row.errorType] || '0xx'
         }
       });
     }
   }
 
-   isJsonConvertible(value: any): boolean {
-    try {
-      JSON.stringify(value);
-      return true;
-    } catch {
-      return false;
-    }
-  }
+
 }

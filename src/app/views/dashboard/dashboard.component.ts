@@ -232,6 +232,22 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         return {chart : arr, data :data}
     }
 
+    groupBypropertyRest(property: string, array: any[]) {
+        let helper: any = {};
+        return array.reduce((acc: any, item: any) => {
+            if (!helper[item[property]]) {
+                helper[item[property]] = Object.assign({}, item);
+                helper[item[property]].count = item.errorType ? item.count : 0;
+                acc.push(helper[item[property]]);
+            } else {
+                if(item.errorType){
+                    helper[item[property]].count += item["count"];
+                }
+            }
+            return acc;
+        }, []);
+    }
+
     groupByProperty(property: string, array: any[]) {
         let helper: any = {};
         return array.reduce((acc: any, item: any) => {
@@ -287,26 +303,19 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         return {
             //------- TABLE + CHART
             restRequestExceptionsTable: {
-                observable: this._restService.getRestExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
+                observable: this._restService.getRestExceptions1({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map(((result: RestSessionExceptionsByPeriodAndappname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate')
-                        result = result.flatMap((item:any) =>
-                            [
-                                "countServerErrorRows",
-                                "countServerUnavailableRows",
-                                "countClientErrorRows"
-                            ]
-                                .filter(field => item[field] > 0)
-                                .map(field => ({
-                                    ...item,
-                                    countServerErrorRows: field === "countServerErrorRows" ? item.countServerErrorRows : 0,
-                                    countServerUnavailableRows: field === "countServerUnavailableRows" ? item.countServerUnavailableRows : 0,
-                                    countClientErrorRows: field === "countClientErrorRows" ? item.countClientErrorRows : 0,
-                                    errorType: field === "countServerErrorRows" ? '5xx' : field === "countServerUnavailableRows" ? '0xx' : '4xx',
-                                    count: item[field]
-                                })));
-                        this.sparklineTitles.rest = this.setTitle('REST', [...result]);
-                        return this.setChartData([...result])
+                        let res = this.groupBypropertyRest("stringDate", result).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } }).sort((a,b)=> a.stringDate.localeCompare(b.stringDate));
+                        let title = `REST: 0.00%`;
+                        let subtitle = 'sur 0 requête(s)';
+                        if (res.length) {
+                            let sumRes = this.sumcounts(res);
+                            title = `REST: ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%`;
+                            subtitle = `sur ${this._decimalPipe.transform(sumRes.countok)} requête(s)`;
+                        }
+                        this.sparklineTitles.rest = {title: title, subtitle: subtitle};
+                        return {chart : res, data : result.filter((a:any)=> a.errorType!= null)}
                     })))
             },
 
