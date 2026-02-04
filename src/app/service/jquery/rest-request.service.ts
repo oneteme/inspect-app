@@ -33,7 +33,7 @@ export class RestRequestService {
 
     getRestExceptionsByHost(filters: { env: string, start: Date, end: Date, groupedBy: string, host: string[],command?: string[]  }): Observable<RestSessionExceptionsByPeriodAndappname[]> {
         let args = {
-            'column': `start.${filters.groupedBy}:date,count.sum.over(partition(date)):countok,exception.count_exception_rest:count,count.divide(countok).multiply(100).round(2):pct,exception.err_type.coalesce(body_content):errorType,start.year:year`,
+            'column': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,error_type,start.${filters.groupedBy}:date,start.year:year`,
             'join': 'exception,instance',
             'instance.environement': filters.env,
             'host':`"${filters.host}"`,
@@ -47,10 +47,10 @@ export class RestRequestService {
         return this.getRestRequest(args);
     }
 
-    getRestExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<RestSessionExceptionsByPeriodAndappname[]> {
+    getRestExceptions1(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<RestSessionExceptionsByPeriodAndappname[]> {
         let args = {
-            'column': `count:countok,count_error_client.plus(count_error_server).plus(count_unavailable_server):count,count_error_client,count_error_server,count_unavailable_server,start.${filters.groupedBy}:date,start.year:year`,
-            'join': 'instance',
+            'column': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,error_type,start.${filters.groupedBy}:date,start.year:year`,
+            'join': 'exception,instance',
             'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),

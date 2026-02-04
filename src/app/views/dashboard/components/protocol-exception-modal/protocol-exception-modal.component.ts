@@ -30,6 +30,10 @@ export class ProtocolExceptionComponent {
     @ViewChild("sort", { static: true }) sort: MatSort;
     @Output() onRowSelected = new EventEmitter<any>();
     private _router: EnvRouter = inject(EnvRouter);
+    errorStatus = {
+        "ServerError": "5xx",
+        "ClientError": "4xx",
+    }
     filterType = {
         "REST" : {
             uri: "/request/rest",
@@ -68,7 +72,7 @@ export class ProtocolExceptionComponent {
     }
 
     removePackage(errorType: string) {
-        if (errorType!== null) {
+        if (errorType!= null) {
             const index = errorType.toString().lastIndexOf('.');
             if(index>=0){
                 return errorType?.substring(index +1);
@@ -84,14 +88,14 @@ export class ProtocolExceptionComponent {
     }
 
     redirectRest(row: any) {
-        this.redirect(row, 'rangestatus');
+        this.redirect(row, { 'rangestatus': this.errorStatus[row.errorType] || '0xx', ...(!this.errorStatus[row.errorType] && { 'q': row.errorType })});
     }
 
     redirectOther(row: any) {
-        this.redirect(row, 'q');
+        this.redirect(row, {'q': row.errorType});
     }
 
-    private redirect(row: any, queryParamKey: string) {
+    private redirect(row:any,  params: { [key: string]: any }) {
         const result = recreateDate(this.data.groupedBy, row, this.data.start);
         if (result) {
             const { uri, ...queryParams } = this.filterType[this.data.type];
@@ -101,7 +105,7 @@ export class ProtocolExceptionComponent {
                     env: this.data.env,
                     start: result.start.toISOString(),
                     end: result.end.toISOString(),
-                    [queryParamKey]: row.errorType
+                    ...params
                 }
             });
         }
