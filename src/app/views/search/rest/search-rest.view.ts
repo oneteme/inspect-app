@@ -101,6 +101,7 @@ export class SearchRestView implements OnInit, OnDestroy {
     this._activatedRoute.queryParams
         .subscribe({
         next: (params: Params) => {
+          this.filterValue = '';
            if(params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.env ||  app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server],null,!params.rangestatus ? []: Array.isArray(params.rangestatus) ? params.rangestatus : [params.rangestatus] )
            if(!params.start && !params.end)  {
             let period;
@@ -239,6 +240,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   }
 
   applyFilter(event: Event) {
+    console.log('apply')
     const filterValue = (event.target as HTMLInputElement).value;
     this.filterTable.set('filter', filterValue.trim().toLowerCase());
     this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
