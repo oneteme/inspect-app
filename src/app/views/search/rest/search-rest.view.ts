@@ -240,7 +240,6 @@ export class SearchRestView implements OnInit, OnDestroy {
   }
 
   applyFilter(event: Event) {
-    console.log('apply')
     const filterValue = (event.target as HTMLInputElement).value;
     this.filterTable.set('filter', filterValue.trim().toLowerCase());
     this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
