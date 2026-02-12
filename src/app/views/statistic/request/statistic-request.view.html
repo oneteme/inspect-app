@@ -1,4 +1,4 @@
-<header-page titleIcon="monitoring" [iconOutlined]="true" [ui-title]="params.host">
+<header-page titleIcon="monitoring" [iconOutlined]="true" [ui-title]="'statistiques des Requêtes '" >
 
 
   <form class="filter-container" [formGroup]="filterForm">
@@ -12,10 +12,17 @@
       <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-date-range-picker #picker></mat-date-range-picker>
     </mat-form-field>
-      <button mat-button (click)="isOpen = !isOpen" [matBadge]="commandSelectedCopy.length + schemaSelectedCopy.length" cdkOverlayOrigin #trigger="cdkOverlayOrigin">
-          <mat-icon>tune</mat-icon>
-          Filtre
-      </button>
+   <mat-form-field  style="width: 240px" class="no-subscript md-3" appearance="outline" [class.loading]="serverNameIsLoading" >
+       <mat-label>Host</mat-label>
+       <mat-select [formControl]="filterForm.controls.host" multiple (openedChange)="onHostopenedChange($event)" (selectionchange)="onChangeHost($event)" )>
+           <span *ngIf="filterForm && params.queryParams.appname && params.queryParams.appname[0]!=''"><mat-option *ngFor="let s of params.queryParams.appname">{{s}}</mat-option></span>
+           <mat-option *ngFor="let d of nameDataList" [value]="d" >{{d}}</mat-option>
+       </mat-select>
+       <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>
+   </mat-form-field>
+   <button mat-button (click)="isOpen = !isOpen" [matBadge]="" cdkOverlayOrigin #trigger="cdkOverlayOrigin">
+       <mat-icon>tune</mat-icon>
+   </button>
   </form>
     <ng-template
             cdkConnectedOverlay
@@ -25,9 +32,23 @@
             (overlayOutsideClick)="onOverlayOutsideClick()">
         <overlay-container-filter [templateContent]="firstTab" (onClick)="onClickFilter()" />
         <ng-template #firstTab>
-            <autocomplete-chip *ngIf="params.type !== 'rest'" label="Commande" [values]="$commandFilter" [selected]="commandSelected" (selectedChange)="onCommandSelectedChange($event)"></autocomplete-chip>
-            <autocomplete-chip *ngIf="params.type === 'rest'" label="Methode" [values]="$mthREstFilter" [selected]="commandSelected" (selectedChange)="onCommandSelectedChange($event)"></autocomplete-chip>
-            <autocomplete-chip *ngIf="params.type === 'jdbc'" label="Schémas" [values]="$Schemafilter" [selected]="schemaSelected" (selectedChange)="onSchemaSelectedChange($event)"></autocomplete-chip>
+            <mat-form-field class="no-subscript md-3" appearance="outline">
+                <mat-label>Grouper par</mat-label>
+                <mat-select [formControl]="filterForm.controls.group" (selectionchange)="onGroupChange($event)">
+                    <mat-option value="date">Horodate</mat-option>
+                    <mat-option value="method">Methode</mat-option>
+                    <mat-option value="media">Media-type</mat-option>
+                    <mat-option value="auth">Auth</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <mat-form-field class="no-subscript md-3" appearance="outline" >
+                <mat-label>Croiser avec</mat-label>
+                <mat-select [formControl]="filterForm.controls.cross" (selectionchange)="onCrossChange($event)">
+                    <mat-option value="user">User</mat-option>
+                    <mat-option value="app">App</mat-option>
+                </mat-select>
+            </mat-form-field>
 
         </ng-template>
     </ng-template>

@@ -4,20 +4,19 @@ import {ChartProvider, field} from "@oneteme/jquery-core";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 
 @Component({
-  selector: 'repartition-type-card',
-  templateUrl: './repartition-type-card.component.html',
-  styleUrls: ['./repartition-type-card.component.scss']
+  selector: 'repartition-size-card',
+  templateUrl: './repartition-size-card-http.component.html',
+  styleUrls: ['./repartition-size-card-http.component.scss']
 })
-export class RepartitionTypeCardComponent {
+export class RepartitionSizeCardHttpComponent {
   private readonly _decimalPipe: DecimalPipe = inject(DecimalPipe);
 
-  REPARTITION_TYPE_RESPONSE_BAR: ChartProvider<string, number> = {
+  REPARTITION_SIZE_BAR: ChartProvider<string, number> = {
     height: 200,
     stacked: true,
     series: [
-      {data: {x: field('date'), y: field('countSuccess')}, name: '2xx', color: '#33cc33'},
-      {data: {x: field('date'), y: field('countErrorClient')}, name: '4xx', color: '#ffa31a'},
-      {data: {x: field('date'), y: field('countErrorServer')}, name: '5xx', color: '#ff0000'}
+      {data: {x: field('date'), y: field('sizeIn')}, name: 'Size In', color: '#4DB6AC'},
+      {data: {x: field('date'), y: field('sizeOut')}, name: 'Size Out', color: '#014e48'},
     ],
     options: {
       chart: {
@@ -85,7 +84,7 @@ export class RepartitionTypeCardComponent {
   _data: any[] = [];
 
   @Input() set seriesProvider(objects: SerieProvider<string, number>[]) {
-    this.REPARTITION_TYPE_RESPONSE_BAR.series = objects;
+    this.REPARTITION_SIZE_BAR.series = objects;
   }
 
   @Input() set data(objects: any[]) {
@@ -95,6 +94,6 @@ export class RepartitionTypeCardComponent {
   @Input() isLoading: boolean;
 
   @Input() set group(value: string) {
-    this.REPARTITION_TYPE_RESPONSE_BAR.series.map((s) => s.data.x = field(value));
+    this.REPARTITION_SIZE_BAR.series.map((s) => s.data.x = field(value));
   }
 }

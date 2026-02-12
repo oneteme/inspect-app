@@ -1,16 +1,16 @@
 import {Component, inject, OnDestroy, OnInit, ViewContainerRef} from "@angular/core";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {Constants} from "../../constants";
-import {BehaviorSubject, combineLatest, map} from "rxjs";
 import {ActivatedRoute, Params} from "@angular/router";
 import {EnvRouter} from "../../../service/router.service";
 import {IPeriod, QueryParams} from "../../../model/conf.model";
 import {app, makeDatePeriod} from "../../../../environments/environment";
 import {StatisticComponentResolverService} from "./statistic-component-resolver.service";
-import {InstanceService} from "../../../service/jquery/instance.service";
-import {HttpParams} from "../server/_component/rest-tab/rest-tab.component";
-import {Location} from "@angular/common";
 import {DatabaseRequestService} from "../../../service/jquery/database-request.service";
+import {combineLatest, finalize, Subscription} from "rxjs";
+import {RestRequestService} from "../../../service/jquery/rest-request.service";
+import {FtpRequestService} from "../../../service/jquery/ftp-request.service";
+import {SmtpRequestService} from "../../../service/jquery/smtp-request.service";
+import {LdapRequestService} from "../../../service/jquery/ldap-request.service";
 
 @Component({
   templateUrl: './statistic-request.view.html',
@@ -21,64 +21,67 @@ export class StatisticRequestView implements OnInit, OnDestroy {
   private readonly _router = inject(EnvRouter);
   private readonly _componentResolver = inject(StatisticComponentResolverService);
   private readonly _viewContainerRef = inject(ViewContainerRef);
-  private _datebaseService = inject(DatabaseRequestService);
+  private readonly _restRequestService = inject(RestRequestService);
+  private readonly _databaseRequestService = inject(DatabaseRequestService);
+  private readonly _ftpRequestService = inject(FtpRequestService);
+  private readonly _smtpRequestService = inject(SmtpRequestService);
+  private readonly _ldapRequestService = inject(LdapRequestService);
+  private readonly _datebaseService = inject(DatabaseRequestService);
 
 
   isOpen: boolean = false;
-  $commandFilter =['READ','SCRIPT','EDIT','EMIT'];
-  $mthREstFilter =['GET','DELETE','PUT','POST','PATCH'];
-  $Schemafilter =['tets'];
 
-  commandSelected: string[] =[];
-  commandSelectedCopy: string[] =[];
-  schemaSelected: string[] =[];
-  schemaSelectedCopy: string[] =[];
+
+
+  nameDataList: any[] =[];
   filterForm = new FormGroup({
+    group: new FormControl(),
+    cross: new FormControl(),
+    host: new FormControl([""]),
     type: new FormControl<'jdbc' | 'ftp' | 'smtp' | 'ldap' | 'rest' | null>(null, [Validators.required]),
     dateRange: new FormGroup({
       start: new FormControl<Date | null>(null, [Validators.required]),
       end: new FormControl<Date | null>(null, [Validators.required])
     })
   });
-
-
-  params: Partial<{type: 'jdbc' | 'ftp' | 'smtp' | 'ldap' | 'rest',host: string, queryParams: QueryParams}> = {};
-
+  serverNameIsLoading:boolean;
+  hostSubscription: Subscription;
+  params: Partial<{type: 'jdbc' | 'ftp' | 'smtp' | 'ldap' | 'rest', queryParams: QueryParams}> = {};
+  seviceType: { [key: string]: {service : RestRequestService | DatabaseRequestService | FtpRequestService | SmtpRequestService | LdapRequestService, } } =
+      {
+        "rest": { service: this._restRequestService },
+        "jdbc": { service: this._databaseRequestService },
+        "ftp" :  { service: this._ftpRequestService },
+        "smtp": { service: this._smtpRequestService },
+        "ldap": { service: this._ldapRequestService },
+      }
 
 
 
   ngOnInit() {
-
-
     combineLatest({
       params: this._activatedRoute.params,
       queryParams: this._activatedRoute.queryParams}).subscribe({
       next: (v: { params: Params, queryParams: Params }) => {
         this.params.type = v.params.request_type;
-        this.params.host = v.params.request_host;
-        this.params.queryParams = new QueryParams(new IPeriod(v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(0, 1).start, v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(0, 1).end), v.queryParams.env || app.defaultEnv)
+        this.params.queryParams = new QueryParams(new IPeriod(v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(0, 1).start, v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(0, 1).end), v.queryParams.env || app.defaultEnv,null,!v.queryParams.host ? [] : Array.isArray(v.queryParams.host) ? v.queryParams.host : [v.queryParams.host])
         this.patchTypeValue();
-        this.commandSelected = !v.queryParams.command ? [] : v.queryParams.command.split(',');
-        this.commandSelectedCopy = [...this.commandSelected];
-        this.schemaSelected = !v.queryParams.schema ? [] : v.queryParams.schema.split(',');
-        this.schemaSelectedCopy = [...this.schemaSelected];
-        this.params.queryParams.commands = v.queryParams.command;
-        this.params.queryParams.schemas = v.queryParams.schema;
-        this.params.queryParams.hosts = [this.params.host];
-
-
-        if(this.params.type === 'jdbc'){
-          this._datebaseService.getSchemaList({
-            start: this.params.queryParams.period.start,
-            end: this.params.queryParams.period.end,
-            host:[ this.params.host],
-            env :this.params.queryParams.env
-          }).subscribe({next : res => {
-              this.$Schemafilter = res.map( item => item.schema);
-            }})
-        }
+        this.params.queryParams.optional = {...this.params.queryParams.optional, cross: v.queryParams.cross || "user", group: v.queryParams.group || "date"};
+        this.patchGroupValue(this.params.queryParams.optional.group);
+        this.patchCrossValue(this.params.queryParams.optional.cross);
+        this.filterForm.controls.group.valueChanges.subscribe({
+          next: (value) => {
+            this.params.queryParams.optional = {...this.params.queryParams.optional, group: value};
+          }
+        });
+        this.filterForm.controls.cross.valueChanges.subscribe({
+          next: (value) =>{
+            this.params.queryParams.optional = {...this.params.queryParams.optional, cross: value};
+          }
+        });
 
         this.patchDateValue(this.params.queryParams.period.start, new Date(this.params.queryParams.period.end.getFullYear(), this.params.queryParams.period.end.getMonth(), this.params.queryParams.period.end.getDate() - 1));
+        this.getHosts();
         if(this.params.type) {
           const componentType = this._componentResolver.resolveComponent(this.params.type);
           this.loadComponent(componentType);
@@ -94,22 +97,9 @@ export class StatisticRequestView implements OnInit, OnDestroy {
 
 
   onChangeEnd(event) {
-    if(this.filterForm.valid) {
-      let start = this.filterForm.controls.dateRange.controls.start.value;
-      let end = this.filterForm.controls.dateRange.controls.end.value;
-      this.params.queryParams.period = new IPeriod(start, new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1));
-      this._router.navigate([], {
-        relativeTo: this._activatedRoute,
-        queryParams: this.params.queryParams.buildParams()
-      });
-    }
+    this.search();
   }
-  onCommandSelectedChange($event) {
-    this.commandSelected = $event;
-  }
-  onSchemaSelectedChange($event) {
-    this.schemaSelected = $event;
-  }
+ on
   patchTypeValue() {
     this.filterForm.patchValue({
       type: this.params.type
@@ -123,25 +113,11 @@ export class StatisticRequestView implements OnInit, OnDestroy {
     }, {emitEvent: false, onlySelf: true});
   }
   onOverlayOutsideClick() {
-
-    this.commandSelected = [...this.commandSelectedCopy];
-    this.schemaSelected = [...this.schemaSelectedCopy];
-    this.isOpen = false;
+  //this.isOpen = false;
   }
 
   onClickFilter() {
-    this.commandSelectedCopy = [...this.commandSelected];
-    if (this.commandSelected.length > 0) {
-      this.params.queryParams.commands = [...this.commandSelected];
-    } else {
-      this.params.queryParams.commands = null;
-    }
-    this.schemaSelectedCopy = [...this.schemaSelected];
-    if(this.schemaSelected.length > 0){
-      this.params.queryParams.schemas = [...this.schemaSelected];
-    }else {
-      this.params.queryParams.schemas = null;
-    }
+
     this.isOpen = false;
 
     this._router.navigate([], {
@@ -154,5 +130,80 @@ export class StatisticRequestView implements OnInit, OnDestroy {
     this._viewContainerRef.clear();
     let componentRef = this._viewContainerRef.createComponent(componentType);
     componentRef.setInput('queryParams', this.params.queryParams);
+  }
+
+  getHosts(){
+    if(this.hostSubscription){
+      this.hostSubscription.unsubscribe();
+    }
+    this.nameDataList =null;
+    this.serverNameIsLoading =true;
+    this.hostSubscription = this.seviceType[this.params.type].service.getHost(this.params.type, { env: this.params.queryParams.env, start: this.params.queryParams.period.start.toISOString(), end: this.params.queryParams.period.end.toISOString()})
+        .pipe(finalize(()=> this.serverNameIsLoading = false))
+        .subscribe({
+          next: res => {
+            this.nameDataList = res;
+            this.patchHostValue(this.params.queryParams.hosts);
+          }, error: (e) => {
+            console.log(e)
+          }
+        });
+  }
+
+  patchHostValue(hosts: any[]) {
+    this.filterForm.patchValue({
+      host: hosts
+    },{ emitEvent: false })
+  }
+
+  search(){
+    if(this.filterForm.valid) {
+      let start = this.filterForm.controls.dateRange.controls.start.value;
+      let end = this.filterForm.controls.dateRange.controls.end.value;
+      this.params.queryParams.period = new IPeriod(start, new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1));
+      this._router.navigate([], {
+        relativeTo: this._activatedRoute,
+        queryParams: this.params.queryParams.buildParams()
+      });
+    }
+  }
+
+  onChangeHost($event){
+    if (this.filterForm.controls.host.value.includes('global')) {
+      // Si "Global" est sélectionné, vider le tableau des hosts
+      this.params.queryParams.hosts = [];
+    } else {
+      // Sinon, utiliser les valeurs sélectionnées
+      this.params.queryParams.hosts = [...this.filterForm.controls.host.value];
+    }
+    console.log( this.params.queryParams)
+  }
+
+  onHostopenedChange($event){
+    let doSearch= this.params.queryParams.hosts != this.filterForm.controls.host.value;
+    this.params.queryParams.hosts = [...this.filterForm.controls.host.value];
+    doSearch && this.search();
+  }
+
+  onGroupChange($event){
+
+    this.params.queryParams.optional = {...this.params.queryParams.optional, group: $event.value};
+  }
+
+  onCrossChange($event){
+
+    this.params.queryParams.optional = {...this.params.queryParams.optional, cross: $event.value};
+  }
+
+  patchGroupValue(group: string){
+    this.filterForm.patchValue({
+      group: group
+    },{ emitEvent: false })
+  }
+
+  patchCrossValue(cross: string){
+    this.filterForm.patchValue({
+      cross: cross
+    },{ emitEvent: false })
   }
 }

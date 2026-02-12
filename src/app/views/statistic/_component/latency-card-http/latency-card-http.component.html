@@ -1,0 +1,12 @@
+<div class="card-container mat-elevation-z5">
+    <div class="title-container">
+        <span class="title" style="width: 40%">Latence</span>
+        <div class="stats-container" style="width: 60%">
+            <ng-content></ng-content>
+        </div>
+    </div>
+    <chart type="column" [config]="LATENCY_BAR"
+           [data]="_data"
+           [isLoading]="isLoading"></chart>
+</div>
+

@@ -1,14 +1,11 @@
 import {Component, inject, Input} from "@angular/core";
-import {DatePipe, DecimalPipe} from "@angular/common";
-import {DatabaseRequestService} from "../../../../service/jquery/database-request.service";
-import {SmtpRequestService} from "../../../../service/jquery/smtp-request.service";
-import {ChartProvider, field} from "@oneteme/jquery-core";
+import {DatePipe} from "@angular/common";
+import {field} from "@oneteme/jquery-core";
 import {QueryParams} from "../../../../model/conf.model";
 import {formatters, groupByField, periodManagement, recreateDate} from "../../../../shared/util";
 import {finalize, map} from "rxjs";
 import {RestRequestService} from "../../../../service/jquery/rest-request.service";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
-import {HttpParams} from "../../server/_component/rest-tab/rest-tab.component";
 import {EnvRouter} from "../../../../service/router.service";
 
 @Component({
@@ -30,122 +27,146 @@ export class StatisticRequestHttpComponent {
     {data: {x: field('date'), y: field('countServerUnavailableRows')}, name: '0', color: 'gray'}
   ];
 
-  groupedBy: string;
+  groupedBy: string = ''
   params: QueryParams;
-  $timeAndTypeResponse: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number, statCountUnavailableServer: number} } = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0, statCountUnavailableServer:0} };
-  $evolUserResponse: { line: any[], loading: boolean } = { line: [], loading: true };
-  $exceptionsResponse: { data: any[], loading: boolean } = {data: [], loading: true};
-  $dependenciesResponse: { table: any[], loading: boolean } = {table: [], loading: true};
+  $timeAndTypeResponse: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number, statCountUnavailableServer: number}} = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0, statCountUnavailableServer:0}};
+  $timeAndTypeResponseCross: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number, statCountUnavailableServer: number}} = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0, statCountUnavailableServer:0}};
+  $exceptionsResponse: { data: any[], loading: boolean, type: string } = {data: [], loading: true, type: 'exceptionsResponse'};
+  $exceptionsResponseCross: { data: any[], loading: boolean, type: string } = {data: [], loading: true, type: 'exceptionsResponseCross'};
+  $latencyTypeResponse: { data: any[], loading: boolean, stats: { avg: number, max: number }} = { data: [], loading: false, stats: { avg: 0, max: 0 }};
+  $latencyTypeResponseCross: { data: any[], loading: boolean, stats: { avg: number, max: number }} = { data: [], loading: false, stats: { avg: 0, max: 0 }};
+  getRequestColumns(type: 'timeAndTypeResponse' | 'exceptionsResponse', group: string) {
+    const columns = {
+      method: { column: 'method.coalesce("<empty>"):method' },
+      auth: { column: 'auth.coalesce("<no_auth>"):auth' },
+      media: { column: 'media.coalesce("<empty>"):media' },
+      user: { column: 'user.coalesce("<empty>"):name' },
+      app: { column: 'instance.app_name.coalesce("<empty>"):name' }
+    };
+    if (group === 'date') {
+      return type === 'timeAndTypeResponse'
+        ? { column: `start.${this.groupedBy}:date,start.year:year`, order: 'year.asc,date.asc' }
+        : { column: `count.sum.over(partition(start.${this.groupedBy}:date,start.year)):countok,start.${this.groupedBy}:date,start.year:year`, order: 'date.asc' };
+    }
+
+    return columns[group];
+  }
 
   @Input() set queryParams(queryParams: QueryParams) {
     if(queryParams) {
       this.params = queryParams;
       this.groupedBy = periodManagement(queryParams.period.start, queryParams.period.end);
-      this.getRepartitionTimeAndTypeResponseByPeriod(queryParams,  this.groupedBy);
-      this.getUsersByPeriod(queryParams, this.groupedBy);
-      this.getExceptions(queryParams,  this.groupedBy);
-      this.getDependencies(queryParams);
+      this.getRepartitionTimeAndTypeResponseByPeriod(this.$timeAndTypeResponse, queryParams.optional?.group, queryParams, this.groupedBy);
+      this.getRepartitionTimeAndTypeResponseByPeriod(this.$timeAndTypeResponseCross, queryParams.optional?.cross, queryParams, this.groupedBy);
+      this.getExceptions(this.$exceptionsResponse, queryParams.optional?.group, queryParams,  this.groupedBy);
+      this.getExceptions(this.$exceptionsResponseCross, queryParams.optional?.cross, queryParams,  this.groupedBy);
+      this.getLatencyByHost(this.$latencyTypeResponse, queryParams.optional?.group, queryParams, this.groupedBy);
+      this.getLatencyByHost(this.$latencyTypeResponseCross, queryParams.optional?.cross, queryParams, this.groupedBy);
     }
   }
 
-  getRepartitionTimeAndTypeResponseByPeriod(queryParams: QueryParams, groupedBy: string) {
-    this.$timeAndTypeResponse.data = [];
-    this.$timeAndTypeResponse.loading = true;
-    return this._httpRequestService.getRepartitionTimeAndTypeResponseByPeriod({
-      start: queryParams.period.start,
-      end: queryParams.period.end,
-      groupedBy: groupedBy,
-      env: queryParams.env,
-      host: queryParams.hosts,
-      method: queryParams.commands    }).pipe(
-      map(r => {
-        formatters[groupedBy](r, this._datePipe);
-        return r;
-      }), finalize(() => this.$timeAndTypeResponse.loading = false)
+  getLatencyByHost(arr: { data: any[], loading: boolean, stats: { avg: number, max: number } },
+                                            groupOrCross:string,
+                                            queryParams: QueryParams,
+                                            groupedBy: string) {
+    arr.data = [];
+    arr.loading = true;
+    return this._httpRequestService.getLatencyByHost(
+        this.getRequestColumns('timeAndTypeResponse', groupOrCross), {
+          start: queryParams.period.start,
+          end: queryParams.period.end,
+          groupedBy: groupedBy,
+          env: queryParams.env,
+          hosts: queryParams.hosts}).pipe(
+        map(r => {
+          if (groupOrCross === 'date') {
+            formatters[groupedBy](r, this._datePipe);
+          }
+          return r;
+        }), finalize(() => arr.loading = false)
     ).subscribe({
       next: res => {
-        this.$timeAndTypeResponse.data = res;
-        this.$timeAndTypeResponse.stats = this.calculateStats(res);
+        arr.data = res;
+        arr.stats = this.calculateLatencyStats(res);
       }
     });
   }
 
-  getUsersByPeriod(queryParams: QueryParams, groupedBy: string) {
-    this.$evolUserResponse.line = [];
-    this.$evolUserResponse.loading = true;
-    return this._httpRequestService.getUsersByPeriod({
+  getRepartitionTimeAndTypeResponseByPeriod(arr: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number, statCountUnavailableServer: number} },
+                                            groupOrCross:string,
+                                            queryParams: QueryParams,
+                                            groupedBy: string) {
+    arr.data = [];
+    arr.loading = true;
+    return this._httpRequestService.getRepartitionTimeAndTypeResponseByPeriod(
+        this.getRequestColumns('timeAndTypeResponse', groupOrCross), {
       start: queryParams.period.start,
       end: queryParams.period.end,
       groupedBy: groupedBy,
       env: queryParams.env,
-      host: queryParams.hosts,
-      method: queryParams.commands
-    }).pipe(
-      finalize(() => this.$evolUserResponse.loading = false),
+      hosts: queryParams.hosts,
+      method: queryParams.commands}).pipe(
       map(r => {
-        formatters[groupedBy](r, this._datePipe);
-        return Object.entries(groupByField(r, "date")).map(([key, value]) => {
-          return {count: value.length, date: key, year: value[0].year};
-        });
-      })
-    )
-    .subscribe({
+        if (groupOrCross === 'date') {
+          formatters[groupedBy](r, this._datePipe);
+        }
+        return r;
+      }), finalize(() => arr.loading = false)
+    ).subscribe({
       next: res => {
-        this.$evolUserResponse.line = res;
+        arr.data = res;
+        arr.stats = this.calculateStats(res);
       }
-    })
+    });
   }
 
-  getExceptions(queryParams: QueryParams, groupedBy: string) {
-    this.$exceptionsResponse.data = [];
-    this.$exceptionsResponse.loading = true;
-    return this._httpRequestService.getRestExceptionsByHost({
+  getExceptions(arr: { data: any[], loading: boolean },
+                groupOrCross:string,
+                queryParams: QueryParams,
+                groupedBy: string) {
+    arr.data = [];
+    arr.loading = true;
+    return this._httpRequestService.getRestExceptionsByHost(
+        this.getRequestColumns('exceptionsResponse', groupOrCross), {
       env: queryParams.env,
       start: queryParams.period.start,
       end: queryParams.period.end,
       groupedBy: groupedBy,
-      host: queryParams.hosts,
+      hosts: queryParams.hosts,
       command: queryParams.commands
     }).pipe(
-        finalize(() => this.$exceptionsResponse.loading = false),
+        finalize(() => arr.loading = false),
         map(res => {
-          formatters[groupedBy](res, this._datePipe, 'stringDate');
-          return res.filter(r => r.errorType != null)
+          if (groupOrCross === 'date') {
+            formatters[groupedBy](res, this._datePipe, 'stringDate');
+          }
+         /* const filtered = res.filter(r => r.errorType != null);
+          const e = groupOrCross ? Object.entries(groupByField(filtered, groupOrCross)).map(([key, value]) => ({ group: key, items: value }))
+              : filtered;
+          console.log(e)
+          return e;*/
+          return res.filter(r => r.errorType != null);
         }))
         .subscribe({
           next: res => {
-            this.$exceptionsResponse.data = res;
+            arr.data = res;
+
           }
         })
   }
 
-  getDependencies(queryParams: QueryParams) {
-    this.$dependenciesResponse.table = [];
-    this.$dependenciesResponse.loading = true;
-    return this._httpRequestService.getDependentsNew({
-      start: queryParams.period.start,
-      end: queryParams.period.end,
-      env: queryParams.env,
-      host: queryParams.hosts,
-      method: queryParams.commands
-    }).pipe(
-        map(r => {
-          return r;
-        }), finalize(() => this.$dependenciesResponse.loading = false)
-    ).subscribe({
-      next: res => {
-        this.$dependenciesResponse.table = res.map(item => ({
-          ...item,
-          count: item.countSucces + item.countErrServer+  item.countErrClient + item.countServerUnavailableRows
-        }));
-      }
-    });
-  }
 
   calculateStats(res: any[]) {
     return res.reduce((acc: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number, statCountUnavailableServer: number}, o) => {
       return {statCount: acc.statCount + o['countSuccess'] + o['countErrorClient'] + o['countErrorServer']+ o['countServerUnavailableRows'], statCountOk: acc.statCountOk + o['countSuccess'], statCountErrClient: acc.statCountErrClient + o['countErrorClient'], statCountErrorServer: acc.statCountErrorServer + o['countErrorServer'], statCountUnavailableServer: acc.statCountUnavailableServer + o['countServerUnavailableRows']};
     }, {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0, statCountUnavailableServer: 0});
+  }
+
+  calculateLatencyStats(res: any[]): { avg: number, max: number } {
+    if (!res?.length) return { avg: 0, max: 0 };
+    const totalAvg = res.reduce((sum, o) => sum + (o['avg'] || 0), 0);
+    const maxValue = Math.max(...res.map(o => o['max'] || 0));
+    return { avg: totalAvg / res.length, max: maxValue };
   }
 
   onSessionExceptionRowSelected(row:any) {
@@ -163,6 +184,4 @@ export class StatisticRequestHttpComponent {
       });
     }
   }
-
-
 }

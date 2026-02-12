@@ -2,7 +2,6 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {RestSessionExceptionsByPeriodAndappname} from "src/app/model/jquery.model";
-import {RestRequestDto} from "../../model/request.model";
 
 
 @Injectable({ providedIn: 'root' })
@@ -18,31 +17,70 @@ export class RestRequestService {
         return this.http.get<T>(url, { params: params });
     }
 
-    getRequests(params: any): Observable<Array<RestRequestDto>> {
-        return this.http.get<Array<RestRequestDto>>(`${this.server}/request/rest`, { params: params });
-    }
-
-    getRequestById(id: string): Observable<RestRequestDto> {
-        return this.http.get<RestRequestDto>(`${this.server}/request/rest/${id}`);
-    }
-
     getHost(type: string, filters: any): Observable<{ host: string }[]> {
         return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, { params: filters });
     }
 
-
-    getRestExceptionsByHost(filters: { env: string, start: Date, end: Date, groupedBy: string, host: string[],command?: string[]  }): Observable<RestSessionExceptionsByPeriodAndappname[]> {
+    getRestExceptionsByHost(data: { column: string; order?: string }, filters: { env: string, start: Date, end: Date, groupedBy: string, hosts: string[],command?: string[]  }): Observable<RestSessionExceptionsByPeriodAndappname[]> {
         let args = {
-            'column': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,error_type,start.${filters.groupedBy}:date,start.year:year`,
+            'column': `count:count,error_type`,
             'join': 'exception,instance',
             'instance.environement': filters.env,
-            'host':`"${filters.host}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            'order': 'date.asc'
         }
-        if(filters.command){
-            args['method'] = filters.command.toString();
+        if(data?.column){
+            args['column'] += `,${data.column}`;
+        }
+        if(data?.order){
+            args['order'] = data.order;
+        }
+        if(filters.hosts && filters.hosts.length){
+            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+        }
+
+        return this.getRestRequest(args);
+    }
+
+    getRepartitionTimeAndTypeResponseByPeriod(data: { column: string; order?: string }, filters: {env: string, start: Date, end: Date, groupedBy: string, hosts: string[], method?: string[] }): Observable<{countSuccess: number, countError: number, elapsedTimeSlowest: number, elapsedTimeSlow: number, elapsedTimeMedium: number, elapsedTimeFast: number, elapsedTimeFastest: number, avg: number, max: number, date: number, year: number}[]> {
+        let args: any = {
+            'column': `avg(size_out).trunc(2):sizeOut,avg(size_in).trunc(2):sizeIn,count_succes:countSuccess,count_error_server:countErrorServer,count_error_client:countErrorClient,count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max,count_unavailable_server:countServerUnavailableRows`,
+            'instance_env': 'instance.id',
+            'instance.environement': filters.env,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString()
+        }
+        if(data?.column){
+            args['column'] += `,${data.column}`;
+        }
+        if(data?.order){
+            args['order'] = data.order;
+        }
+        if(filters.hosts?.length){
+            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+        }
+        return this.getRestRequest(args);
+    }
+
+    getLatencyByHost(data: { column: string; order?: string }, filters: { env: string, start: Date, end: Date, groupedBy: string, hosts: string[] }): Observable<{ elapsedtime: number}[]> {
+        let args: any = {
+            'column': `avg(elapsedtime).minus(avg(rest_session.elapsedtime):ep2):elapsedtime`,
+            'join': 'instance,rest_session_inner',
+            'status.gt': 0,
+            'instance.environement': filters.env,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'rest_session.start.ge': filters.start.toISOString(),
+            'rest_session.start.lt': filters.end.toISOString(),
+        }
+        if(data?.column){
+            args['column'] += `,${data.column}`;
+        }
+        if(data?.order){
+            args['order'] = data.order;
+        }
+        if(filters.hosts?.length){
+            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
         }
         return this.getRestRequest(args);
     }
@@ -78,33 +116,19 @@ export class RestRequestService {
         });
     }
 
-    getRepartitionTimeAndTypeResponseByPeriod(filters: {env: string, start: Date, end: Date, groupedBy: string, host: string[],method?: string[] }): Observable<{countSuccess: number, countError: number, elapsedTimeSlowest: number, elapsedTimeSlow: number, elapsedTimeMedium: number, elapsedTimeFast: number, elapsedTimeFastest: number, avg: number, max: number, date: number, year: number}[]> {
-        let args: any = {
-            'column': `count_succes:countSuccess,count_error_server:countErrorServer,count_error_client:countErrorClient,count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max,count_unavailable_server:countServerUnavailableRows,start.${filters.groupedBy}:date,start.year:year`,
-            'instance_env': 'instance.id',
-            'host':`"${filters.host}"`,
-            'instance.environement': filters.env,
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString(),
-            'order': `year.asc,date.asc`
-        }
-        if(filters.method){
-            args['method'] = filters.method.toString();
-        }
-        return this.getRestRequest(args);
-    }
-
-    getUsersByPeriod(filters: {env: string, start: Date, end: Date, groupedBy: string, host: string[],method?: string[] }): Observable<{user: string, date: number, year: number}[]> {
+    getUsersByPeriod(filters: {env: string, start: Date, end: Date, groupedBy: string, hosts: string[],method?: string[] }): Observable<{user: string, date: number, year: number}[]> {
       let args = {
         'column.distinct': `user,start.${filters.groupedBy}:date,start.year:year`,
         'instance_env': 'instance.id',
         'user.notNull': '',
-        'host':`"${filters.host}"`,
         'instance.environement': filters.env,
         'start.ge': filters.start.toISOString(),
         'start.lt': filters.end.toISOString(),
         'order': `year.asc,date.asc`
       };
+      if(filters.hosts && filters.hosts.length){
+          args['host.in'] =`${filters.hosts.map(o=> `"${o}"` )}`;
+      }
       if(filters.method){
         args['method'] = filters.method.toString();
       }
@@ -112,18 +136,20 @@ export class RestRequestService {
     }
 
 
-    getDependentsNew(filters: { start: Date, end: Date,env: string, host: string[],method?: string[] }): Observable<{
+    getDependentsNew(filters: { start: Date, end: Date,env: string, hosts: string[],method?: string[] }): Observable<{
         countServerUnavailableRows: number;
         count: number, countSucces: number, countErrClient: number, countErrServer: number, appName: string}[]> {
 
         let args: any = {
             'column': `count_succes:countSucces,count_error_server:countErrServer,count_error_client:countErrClient,count_unavailable_server:countServerUnavailableRows,instance.app_name:appName`,
-            'host':`"${filters.host}"`,
             'join': 'instance',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'instance.environement': filters.env,
             'order': 'count.desc'
+        }
+        if(filters.hosts && filters.hosts.length){
+            args['host.in'] =`${filters.hosts.map(o=> `"${o}"` )}`;
         }
         if(filters.method){
             args['method'] = filters.method.toString();
