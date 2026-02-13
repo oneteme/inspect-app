@@ -104,7 +104,7 @@ export class InstanceComponent implements OnInit, OnDestroy {
     this.tabs = [
       {
         label: 'Instances',
-        icon: 'stacks',
+        icon: 'deployed_code_history',
         count: 0,
         visible: true,
         type: 'instances',
