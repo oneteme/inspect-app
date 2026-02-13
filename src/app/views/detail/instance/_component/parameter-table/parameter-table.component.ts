@@ -3,6 +3,8 @@ import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
 
+
+
 @Component({
   selector: 'parameter-table',
   templateUrl: './parameter-table.component.html',
@@ -15,6 +17,13 @@ export class ParameterTableComponent {
 
   @ViewChild('paginator', {static: true}) paginator: MatPaginator;
   @ViewChild('sort', {static: true}) sort: MatSort;
+  UNIT_MAP: Record<string, string> = {
+    minHeap: 'Mo',
+    maxHeap: 'Mo',
+    diskTotalSpace: 'Mo',
+  };
+
+
 
   @Input() set data(requests: { key: string; value: any }[]) {
     if(requests) {
@@ -24,5 +33,10 @@ export class ParameterTableComponent {
     } else {
       this.dataSource = new MatTableDataSource();
     }
+  }
+
+  formatValue(key : string, value : string){
+    const unit  = this.UNIT_MAP[key];
+    return unit ? `${value} ${unit}` : value;
   }
 }

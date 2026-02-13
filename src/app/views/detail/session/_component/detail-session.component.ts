@@ -25,7 +25,7 @@ export class DetailSessionComponent implements OnChanges {
   @Input() session: MainSessionView | RestSessionView;
   @Input() completedSession: MainSessionView | RestSessionView;
   @Input() instance: InstanceEnvironment;
-
+  @Input() isLoading: boolean;
   tabs: TabData[] = [];
   selectedTabIndex: number = 0;
 
