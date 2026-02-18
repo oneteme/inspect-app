@@ -47,7 +47,7 @@ export class SmtpRequestService {
 
     getSmtpExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string,host?: string[],command?: string[] }): Observable<SmtpSessionExceptionsByPeriodAndappname[]> {
         let args = {
-            'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
+            'column': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
             'join': 'exception,instance',
             'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),

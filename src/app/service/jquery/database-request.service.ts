@@ -4,7 +4,10 @@ import {Observable} from "rxjs";
 import {
     JdbcMainExceptionsByPeriodAndappname,
     JdbcExceptionsByPeriodAndAppname,
-    RepartitionRequestByPeriod, RepartitionTimeAndTypeResponseByPeriod, SessionExceptionsByPeriodAndAppname
+    RepartitionRequestByPeriod,
+    RepartitionTimeAndTypeResponseByPeriod,
+    SessionExceptionsByPeriodAndAppname,
+    RestSessionExceptionsByPeriodAndappname
 } from "../../model/jquery.model";
 import {DatabaseRequestDto} from "../../model/request.model";
 
@@ -106,9 +109,12 @@ export class DatabaseRequestService {
         return this.getDatabaseRequest(args);
     }
 
+
+
+
     getJdbcRestSessionExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<JdbcExceptionsByPeriodAndAppname[]> {
       let args = {
-        'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
+        'column': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
         'join': 'exception,instance',
         'instance.environement': filters.env,
         'start.ge': filters.start.toISOString(),

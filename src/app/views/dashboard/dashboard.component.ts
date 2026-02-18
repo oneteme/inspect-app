@@ -323,32 +323,64 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                 observable: this._datebaseService.getJdbcRestSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map(((result: JdbcExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
-                        this.sparklineTitles.jdbc = this.setTitle('JDBC', [...result]);
-                        return this.setChartData(result)
+                        let res = this.groupBypropertyRest("stringDate", result).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } }).sort((a,b)=> a.stringDate.localeCompare(b.stringDate));
+                        let title = `JDBC: 0.00%`;
+                        let subtitle = 'sur 0 requête(s)';
+                        if (res.length) {
+                            let sumRes = this.sumcounts(res);
+                            title = `JDBC: ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%`;
+                            subtitle = `sur ${this._decimalPipe.transform(sumRes.countok)} requête(s)`;
+                        }
+                        this.sparklineTitles.jdbc = {title: title, subtitle: subtitle};
+                        return  {chart : res, data : result.filter((a:any)=> a.errorType!= null)}
                     })))
             },
             ftpRequestExceptionsTable: {
                 observable: this._ftpService.getftpSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map(((result: FtpSessionExceptionsByPeriodAndappname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
-                        this.sparklineTitles.ftp = this.setTitle('FTP', [...result]);
-                        return this.setChartData(result)
+                        let res = this.groupBypropertyRest("stringDate", result).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } }).sort((a,b)=> a.stringDate.localeCompare(b.stringDate));
+                        let title = `FTP: 0.00%`;
+                        let subtitle = 'sur 0 requête(s)';
+                        if (res.length) {
+                            let sumRes = this.sumcounts(res);
+                            title = `FTP: ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%`;
+                            subtitle = `sur ${this._decimalPipe.transform(sumRes.countok)} requête(s)`;
+                        }
+                        this.sparklineTitles.ftp = {title: title, subtitle: subtitle};
+                        return  {chart : res, data : result.filter((a:any)=> a.errorType!= null)}
                     })))
             },
             smtpRequestExceptionsTable: {
                 observable: this._smtpService.getSmtpExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map(((result: SmtpSessionExceptionsByPeriodAndappname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
-                        this.sparklineTitles.smtp = this.setTitle('SMTP', [...result]);
-                        return this.setChartData(result)
+                        let res = this.groupBypropertyRest("stringDate", result).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } }).sort((a,b)=> a.stringDate.localeCompare(b.stringDate));
+                        let title = `SMTP: 0.00%`;
+                        let subtitle = 'sur 0 requête(s)';
+                        if (res.length) {
+                            let sumRes = this.sumcounts(res);
+                            title = `SMTP: ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%`;
+                            subtitle = `sur ${this._decimalPipe.transform(sumRes.countok)} requête(s)`;
+                        }
+                        this.sparklineTitles.smtp = {title: title, subtitle: subtitle};
+                        return  {chart : res, data : result.filter((a:any)=> a.errorType!= null)}
                     })))
             },
             ldapRequestExceptionsTable: {
                 observable: this._ldapService.getLdapExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map(((result: LdapSessionExceptionsByPeriodAndappname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
-                        this.sparklineTitles.ldap = this.setTitle('LDAP', [...result]);
-                        return  this.setChartData(result)
+                        let res = this.groupBypropertyRest("stringDate", result).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } }).sort((a,b)=> a.stringDate.localeCompare(b.stringDate));
+                        let title = `LDAP: 0.00%`;
+                        let subtitle = 'sur 0 requête(s)';
+                        if (res.length) {
+                            let sumRes = this.sumcounts(res);
+                            title = `LDAP: ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%`;
+                            subtitle = `sur ${this._decimalPipe.transform(sumRes.countok)} requête(s)`;
+                        }
+                        this.sparklineTitles.ldap = {title: title, subtitle: subtitle};
+                        return  {chart : res, data : result.filter((a:any)=> a.errorType!= null)}
                     })))
             },
         }
