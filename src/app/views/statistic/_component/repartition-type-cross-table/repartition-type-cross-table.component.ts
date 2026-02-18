@@ -1,6 +1,7 @@
 import { Component, EventEmitter, Input, Output, ViewChild } from "@angular/core";
 import { MatTableDataSource } from "@angular/material/table";
 import { MatPaginator } from "@angular/material/paginator";
+import {TableColumn} from "../dynamic-table/dynamic-table.component";
 
 export interface ProgressSegment {
     field: string;
@@ -14,12 +15,18 @@ export interface ProgressSegment {
     styleUrls: ['./repartition-type-cross-table.component.scss'],
 })
 export class RepartitionTypeCrossTableComponent {
-    displayedColumns: string[] = ['name', 'progress'];
+    displayedColumns: string[] = ['progress'];
     dataSource: MatTableDataSource<any> = new MatTableDataSource([]);
-
+    _columns: TableColumn[] = [];
     @ViewChild(MatPaginator) paginator: MatPaginator;
 
-    @Input() segments: ProgressSegment[]= []
+    @Input() segments: ProgressSegment[] = [];
+    @Input() set columns(cols: TableColumn[]) {
+        if (cols?.length) {
+            this._columns = cols;
+            this.displayedColumns.unshift(...cols.map(c => c.field));
+        }
+    }
 
     @Input() set data(objects: any[]) {
         if (objects?.length) {

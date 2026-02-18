@@ -35,51 +35,60 @@ export class StatisticRequestHttpComponent {
   $exceptionsResponseCross: { data: any[], loading: boolean, type: string } = {data: [], loading: true, type: 'exceptionsResponseCross'};
   $latencyTypeResponse: { data: any[], loading: boolean, stats: { avg: number, max: number }} = { data: [], loading: false, stats: { avg: 0, max: 0 }};
   $latencyTypeResponseCross: { data: any[], loading: boolean, stats: { avg: number, max: number }} = { data: [], loading: false, stats: { avg: 0, max: 0 }};
-  getRequestColumns(type: 'timeAndTypeResponse' | 'exceptionsResponse', group: string) {
+  getRequestColumns(type: 'timeAndTypeResponse' | 'exceptionsResponse', group?: string, cross?: string) {
     const columns = {
-      method: { column: 'method.coalesce("<empty>"):method' },
-      auth: { column: 'auth.coalesce("<no_auth>"):auth' },
-      media: { column: 'media.coalesce("<empty>"):media' },
+      date: () => (type === 'timeAndTypeResponse'
+          ? { column: `start.${this.groupedBy}:date,start.year:year`, order: 'year.asc,date.asc' }
+          : { column: `count.sum.over(partition(start.${this.groupedBy}:date,start.year)):countok,start.${this.groupedBy}:date,start.year:year`, order: 'date.asc' }),
+      method: { column: 'method.coalesce("<empty>"):name' },
+      auth: { column: 'auth.coalesce("<no_auth>"):name' },
+      media: { column: 'media.coalesce("<empty>"):name' },
       user: { column: 'user.coalesce("<empty>"):name' },
       app: { column: 'instance.app_name.coalesce("<empty>"):name' }
     };
-    if (group === 'date') {
-      return type === 'timeAndTypeResponse'
-        ? { column: `start.${this.groupedBy}:date,start.year:year`, order: 'year.asc,date.asc' }
-        : { column: `count.sum.over(partition(start.${this.groupedBy}:date,start.year)):countok,start.${this.groupedBy}:date,start.year:year`, order: 'date.asc' };
+
+    const groupCol = this.getStringOrCall(columns[group]);
+
+    if (cross) {
+      const crossCol = this.getStringOrCall(columns[cross]);
+      return {
+        column: `${crossCol.column},${groupCol.column}`,
+        order: groupCol.order || crossCol.order
+      };
     }
 
-    return columns[group];
+    return groupCol;
   }
 
   @Input() set queryParams(queryParams: QueryParams) {
     if(queryParams) {
       this.params = queryParams;
       this.groupedBy = periodManagement(queryParams.period.start, queryParams.period.end);
-      this.getRepartitionTimeAndTypeResponseByPeriod(this.$timeAndTypeResponse, queryParams.optional?.group, queryParams, this.groupedBy);
-      this.getRepartitionTimeAndTypeResponseByPeriod(this.$timeAndTypeResponseCross, queryParams.optional?.cross, queryParams, this.groupedBy);
-      this.getExceptions(this.$exceptionsResponse, queryParams.optional?.group, queryParams,  this.groupedBy);
-      this.getExceptions(this.$exceptionsResponseCross, queryParams.optional?.cross, queryParams,  this.groupedBy);
-      this.getLatencyByHost(this.$latencyTypeResponse, queryParams.optional?.group, queryParams, this.groupedBy);
-      this.getLatencyByHost(this.$latencyTypeResponseCross, queryParams.optional?.cross, queryParams, this.groupedBy);
+      this.getRepartitionTimeAndTypeResponseByPeriod(this.$timeAndTypeResponse, queryParams.optional?.group,null, queryParams, this.groupedBy);
+      this.getRepartitionTimeAndTypeResponseByPeriod(this.$timeAndTypeResponseCross,queryParams.optional?.group, queryParams.optional?.cross, queryParams, this.groupedBy);
+      this.getExceptions(this.$exceptionsResponse, queryParams.optional?.group, null, queryParams,  this.groupedBy);
+      this.getExceptions(this.$exceptionsResponseCross, queryParams.optional?.group, queryParams.optional?.cross, queryParams,  this.groupedBy);
+      this.getLatencyByHost(this.$latencyTypeResponse, queryParams.optional?.group,null, queryParams, this.groupedBy);
+      this.getLatencyByHost(this.$latencyTypeResponseCross, queryParams.optional?.group, queryParams.optional?.cross, queryParams, this.groupedBy);
     }
   }
 
   getLatencyByHost(arr: { data: any[], loading: boolean, stats: { avg: number, max: number } },
-                                            groupOrCross:string,
+                                            group: string,
+                                            cross: string,
                                             queryParams: QueryParams,
                                             groupedBy: string) {
     arr.data = [];
     arr.loading = true;
     return this._httpRequestService.getLatencyByHost(
-        this.getRequestColumns('timeAndTypeResponse', groupOrCross), {
+        this.getRequestColumns('timeAndTypeResponse', group, cross), {
           start: queryParams.period.start,
           end: queryParams.period.end,
           groupedBy: groupedBy,
           env: queryParams.env,
           hosts: queryParams.hosts}).pipe(
         map(r => {
-          if (groupOrCross === 'date') {
+          if (group === 'date') {
             formatters[groupedBy](r, this._datePipe);
           }
           return r;
@@ -93,13 +102,14 @@ export class StatisticRequestHttpComponent {
   }
 
   getRepartitionTimeAndTypeResponseByPeriod(arr: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number, statCountUnavailableServer: number} },
-                                            groupOrCross:string,
+                                            group: string,
+                                            cross: string,
                                             queryParams: QueryParams,
                                             groupedBy: string) {
     arr.data = [];
     arr.loading = true;
     return this._httpRequestService.getRepartitionTimeAndTypeResponseByPeriod(
-        this.getRequestColumns('timeAndTypeResponse', groupOrCross), {
+        this.getRequestColumns('timeAndTypeResponse',  group, cross), {
       start: queryParams.period.start,
       end: queryParams.period.end,
       groupedBy: groupedBy,
@@ -107,7 +117,7 @@ export class StatisticRequestHttpComponent {
       hosts: queryParams.hosts,
       method: queryParams.commands}).pipe(
       map(r => {
-        if (groupOrCross === 'date') {
+        if (group === 'date') {
           formatters[groupedBy](r, this._datePipe);
         }
         return r;
@@ -121,13 +131,14 @@ export class StatisticRequestHttpComponent {
   }
 
   getExceptions(arr: { data: any[], loading: boolean },
-                groupOrCross:string,
+                group: string,
+                cross: string,
                 queryParams: QueryParams,
                 groupedBy: string) {
     arr.data = [];
     arr.loading = true;
     return this._httpRequestService.getRestExceptionsByHost(
-        this.getRequestColumns('exceptionsResponse', groupOrCross), {
+        this.getRequestColumns('exceptionsResponse', group, cross), {
       env: queryParams.env,
       start: queryParams.period.start,
       end: queryParams.period.end,
@@ -137,14 +148,9 @@ export class StatisticRequestHttpComponent {
     }).pipe(
         finalize(() => arr.loading = false),
         map(res => {
-          if (groupOrCross === 'date') {
-            formatters[groupedBy](res, this._datePipe, 'stringDate');
+          if (group === 'date') {
+            formatters[groupedBy](res, this._datePipe);
           }
-         /* const filtered = res.filter(r => r.errorType != null);
-          const e = groupOrCross ? Object.entries(groupByField(filtered, groupOrCross)).map(([key, value]) => ({ group: key, items: value }))
-              : filtered;
-          console.log(e)
-          return e;*/
           return res.filter(r => r.errorType != null);
         }))
         .subscribe({
@@ -183,5 +189,8 @@ export class StatisticRequestHttpComponent {
         }
       });
     }
+  }
+  getStringOrCall(o?: any | (() => any)) {
+    return typeof o === "function" ? o() : o;
   }
 }

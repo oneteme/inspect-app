@@ -2,8 +2,8 @@
     <mat-divider style="margin-right: 1em; flex: 1 1 0%"></mat-divider>
     <div
         style="display: flex; align-items: center; gap: 0.5em; margin-bottom:  0.5em; font-size: 18px; font-weight: 500;">
-        <mat-icon class="material-symbols-outlined">warning</mat-icon>
-        <div>Exception</div>
+        <mat-icon class="material-symbols-outlined">{{icon}}</mat-icon>
+        <div>{{title}}</div>
     </div>
     <mat-divider style="margin-left: 1em; flex: 1 1 0%"></mat-divider>
 </div>
@@ -11,14 +11,17 @@
 <div class="mat-elevation-z5">
     <div [hidden]="!dataSource.data.length">
         <table mat-table [dataSource]="dataSource" #sort="matSort" matSort>
-            <ng-container matColumnDef="label" >
-                <td mat-cell *matCellDef="let element" class="ellipsis"> {{element.label}} </td>
-            </ng-container>
-            <ng-container matColumnDef="count" >
-                <td mat-cell *matCellDef="let element" style="width:10%">
-                    <span class="error-badge">{{element.count}}</span>
+            <ng-container *ngFor="let col of _columns" [matColumnDef]="col.field">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header [style.width]="col.width">{{col.header}}</th>
+                <td mat-cell *matCellDef="let element" [style.width]="col.width">
+                    <ng-container [ngSwitch]="col.type">
+                        <span *ngSwitchCase="'badge'" class="error-badge">{{element[col.field]}}</span>
+                        <span *ngSwitchCase="'number'">{{element[col.field] | number}}</span>
+                        <span *ngSwitchDefault class="ellipsis">{{element[col.field]}}</span>
+                    </ng-container>
                 </td>
             </ng-container>
+            <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
         </table>
     </div>

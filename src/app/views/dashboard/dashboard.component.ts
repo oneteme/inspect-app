@@ -344,7 +344,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                     })))
             },
             ldapRequestExceptionsTable: {
-                observable: this._ldapService.getLdapExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
+                observable: this._ldapService.getLdapSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map(((result: LdapSessionExceptionsByPeriodAndappname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
                         this.sparklineTitles.ldap = this.setTitle('LDAP', [...result]);

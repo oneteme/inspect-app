@@ -1,5 +1,5 @@
 <div style="display: flex; align-items: stretch; gap: 10px;">
-  <repartition-type-card style="width: 50%; display: flex; flex-direction: column;" [seriesProvider]="seriesProvider" [data]="$timeAndTypeResponse.data" [isLoading]="$timeAndTypeResponse.loading" [group]="params?.optional.group">
+  <repartition-type-card style="width: 70%; display: flex; flex-direction: column;" [seriesProvider]="seriesProvider" [data]="$timeAndTypeResponse.data" [isLoading]="$timeAndTypeResponse.loading" [group]="params?.optional.group">
     <div class="stat" style="color: #33cc33;">
       <div class="label" [matTooltip]="($timeAndTypeResponse.stats.statCountOk | number : '1.0-0') + ' / ' + ($timeAndTypeResponse.stats.statCount | number : '1.0-0')">{{ ($timeAndTypeResponse.stats.statCountOk / $timeAndTypeResponse.stats.statCount) * 100 | number : '1.0-2'  }}%</div>
       <div class="sub-label">2xx</div>
@@ -17,9 +17,13 @@
         <div class="sub-label">0</div>
     </div>
   </repartition-type-card>
-  <repartition-cross-table style="width: 50%; display: flex; flex-direction: column;"
+  <repartition-cross-table style="width: 30%; display: flex; flex-direction: column;"
                            [data]="$timeAndTypeResponseCross.data"
                            [isLoading]="$timeAndTypeResponseCross.loading"
+                           [columns]="[
+                                        { field: '' + params?.optional?.group, header: 'Nom'},
+                                        { field: 'name', header: 'Name' }
+                                     ]"
                            [segments]="[
                                         { field: 'countSuccess', label: '2xx', color: '#33cc33' },
                                         { field: 'countErrorClient', label: '4xx', color: '#ffa31a' },
@@ -29,15 +33,19 @@
   </repartition-cross-table>
 </div>
 <div style="display: flex; align-items: stretch; gap: 10px;">
-    <performance-card style="width: 50%; display: flex; flex-direction: column;"
+    <performance-card style="width: 70%; display: flex; flex-direction: column;"
                       [data]="$timeAndTypeResponse.data"
                       [isLoading]="$timeAndTypeResponse.loading"
                       [group]="params?.optional.group">
 
     </performance-card>
-    <repartition-cross-table style="width: 50%; display: flex; flex-direction: column;"
+    <repartition-cross-table style="width: 30%; display: flex; flex-direction: column;"
                              [data]="$timeAndTypeResponseCross.data"
                              [isLoading]="$timeAndTypeResponseCross.loading"
+                             [columns]="[
+                                        { field: params?.optional?.group, header: 'Nom'},
+                                        { field: 'name', header: 'Name' }
+                                     ]"
                              [segments]="[
                                             { field: 'elapsedTimeFastest', label: 'Fastest', color: '#81D4FA' },
                                             { field: 'elapsedTimeFast', label: 'Fast', color: '#82C0DC' },
@@ -49,15 +57,19 @@
 </div>
 
 <div style="display: flex; align-items: stretch; gap: 10px;">
-    <repartition-size-card style="width: 50%; display: flex; flex-direction: column;"
+    <repartition-size-card style="width: 70%; display: flex; flex-direction: column;"
                       [data]="$timeAndTypeResponse.data"
                       [isLoading]="$timeAndTypeResponse.loading"
                       [group]="params?.optional.group">
 
     </repartition-size-card>
-    <repartition-cross-table style="width: 50%; display: flex; flex-direction: column;"
+    <repartition-cross-table style="width: 30%; display: flex; flex-direction: column;"
                              [data]="$timeAndTypeResponseCross.data"
                              [isLoading]="$timeAndTypeResponseCross.loading"
+                             [columns]="[
+                                        { field: params?.optional?.group, header: 'Nom'},
+                                        { field: 'name', header: 'Name' }
+                                     ]"
                              [segments]="[
                                             {  field:'sizeIn', label: 'Size In', color: '#4DB6AC' },
                                             {  field:'sizeOut', label: 'Size Out', color: '#014e48' }
@@ -66,18 +78,19 @@
 </div>
 
 <div style="display: flex; align-items: stretch; gap: 10px;">
-    <latency-card-http style="width: 50%; display: flex; flex-direction: column;"
+    <latency-card-http style="width: 70%; display: flex; flex-direction: column;"
                        [data]="$latencyTypeResponse.data"
                        [isLoading]="$latencyTypeResponse.loading"
                        [group]="params?.optional.group">
-        <div class="stat" style="color: #2196F3;">
-            <div class="label">{{ $latencyTypeResponse.stats?.avg | number : '1.0-0' }} ms</div>
-            <div class="sub-label">Avg</div>
-        </div>
+
     </latency-card-http>
-    <repartition-cross-table style="width: 50%; display: flex; flex-direction: column;"
+    <repartition-cross-table style="width: 30%; display: flex; flex-direction: column;"
                              [data]="$latencyTypeResponseCross.data"
                              [isLoading]="$latencyTypeResponseCross.loading"
+                             [columns]="[
+                                        { field: params?.optional?.group, header: 'Nom'},
+                                        { field: 'name', header: 'Name' }
+                                     ]"
                              [segments]="[
                                             { field: 'elapsedtime', label: 'Avg', color: '#2196F3' },
                                           ]">
@@ -85,24 +98,26 @@
 </div>
 
 <div style="display: flex; align-items: stretch; gap: 10px;">
-    <dynamic-table style="width: 50%;"
+    <dynamic-table style="width: 70%;"
             [columns]="[
-        { field: params?.optional.group, header: 'Nom', width: '30%' },
+        { field: params?.optional?.group, header: 'Nom', width: '30%' },
         { field: 'errorType', header: 'Status' },
         { field: 'count', header: 'Total', width: '15%' }
     ]"
             [data]="$exceptionsResponse.data"
             [isLoading]="$exceptionsResponse.loading"
-            [pageSize]="5"> <!--(rowSelected)="onRowClick($event)"-->
+            [pageSize]="5">
     </dynamic-table>
-    <dynamic-table style="width: 50%;"
+    <dynamic-table style="width: 30%;"
             [columns]="[
-        { field: 'name', header: 'Nom', width: '30%' },
-        { field: 'errorType', header: 'Status' },
-        { field: 'count', header: 'Total', width: '15%' }
-    ]"
+                            { field: params?.optional?.group, header: 'Nom', width: '30%' },
+                            { field: 'name', header: 'Nom', width: '30%' },
+                            { field: 'errorType', header: 'Status' },
+                            { field: 'count', header: 'Total', width: '15%' }
+                        ]"
             [data]="$exceptionsResponseCross.data"
             [isLoading]="$exceptionsResponseCross.loading"
-            [pageSize]="5"> <!--(rowSelected)="onRowClick($event)"-->
+            [pageSize]="5">
     </dynamic-table>
 </div>
+

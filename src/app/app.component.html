@@ -6,6 +6,10 @@
       <mat-icon>more_vert</mat-icon>
     </button>
     <mat-menu #menu="matMenu">
+      <a mat-menu-item [matMenuTriggerFor]="dashboards">
+        <mat-icon>dashboard</mat-icon>
+        <span>Dashboards</span>
+      </a>
       <a mat-menu-item [matMenuTriggerFor]="requests">
         <mat-icon>{{ MAPPING_TYPE['request'].icon }}</mat-icon>
         <span>{{ MAPPING_TYPE['request'].title }}</span>
@@ -32,6 +36,29 @@
       <a mat-menu-item [routerLink]="['session/view']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
         <mat-icon>{{ MAPPING_TYPE['view'].icon }}</mat-icon>
         <span>{{ MAPPING_TYPE['view'].title }}</span>
+      </a>
+    </mat-menu>
+
+    <mat-menu #dashboards="matMenu">
+      <a mat-menu-item [routerLink]="['dashboard/rest']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
+        <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['rest'].icon }}</mat-icon>
+        <span>{{ REQUEST_TYPE['rest'].title }}</span>
+      </a>
+      <a mat-menu-item [routerLink]="['dashboard/jdbc']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
+        <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['jdbc'].icon }}</mat-icon>
+        <span>{{ REQUEST_TYPE['jdbc'].title }}</span>
+      </a>
+      <a mat-menu-item [routerLink]="['dashboard/ftp']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
+        <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['ftp'].icon }}</mat-icon>
+        <span>{{ REQUEST_TYPE['ftp'].title }}</span>
+      </a>
+      <a mat-menu-item [routerLink]="['dashboard/smtp']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
+        <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['smtp'].icon }}</mat-icon>
+        <span>{{ REQUEST_TYPE['smtp'].title }}</span>
+      </a>
+      <a mat-menu-item [routerLink]="['dashboard/ldap']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
+        <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['ldap'].icon }}</mat-icon>
+        <span>{{ REQUEST_TYPE['ldap'].title }}</span>
       </a>
     </mat-menu>
 

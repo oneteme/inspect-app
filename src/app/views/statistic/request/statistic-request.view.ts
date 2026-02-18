@@ -26,7 +26,6 @@ export class StatisticRequestView implements OnInit, OnDestroy {
   private readonly _ftpRequestService = inject(FtpRequestService);
   private readonly _smtpRequestService = inject(SmtpRequestService);
   private readonly _ldapRequestService = inject(LdapRequestService);
-  private readonly _datebaseService = inject(DatabaseRequestService);
 
 
   isOpen: boolean = false;
@@ -47,13 +46,29 @@ export class StatisticRequestView implements OnInit, OnDestroy {
   serverNameIsLoading:boolean;
   hostSubscription: Subscription;
   params: Partial<{type: 'jdbc' | 'ftp' | 'smtp' | 'ldap' | 'rest', queryParams: QueryParams}> = {};
-  seviceType: { [key: string]: {service : RestRequestService | DatabaseRequestService | FtpRequestService | SmtpRequestService | LdapRequestService, } } =
+  serviceType: { [key: string]: {service : RestRequestService | DatabaseRequestService | FtpRequestService | SmtpRequestService | LdapRequestService, group: {name: string, value: string}[], cross:{name: string, value: string}[] }  } =
       {
-        "rest": { service: this._restRequestService },
-        "jdbc": { service: this._databaseRequestService },
-        "ftp" :  { service: this._ftpRequestService },
-        "smtp": { service: this._smtpRequestService },
-        "ldap": { service: this._ldapRequestService },
+        "rest": {
+            service: this._restRequestService,
+            group: [{name: "Horodate", value: "date"}, {name: "Methode", value: "method"}, {name: "Media-type", value: "media"}, {name: "Auth", value: "auth"}],
+            cross: [{name: "App", value: "app"}, {name: "User", value: "user"}]
+        },
+          "jdbc": { service: this._databaseRequestService,
+              group: [{name: "Horodate", value: "date"},{ name: "Commande", value: "command"}, {name: "Version du driver ", value: "driver"}, {name: "nom de DB", value: "db_name"}, {name: "version de DB", value: "db_version"}],
+              cross: [{name: "App", value: "app"}, {name: "User", value: "user"}]
+          },
+        "ftp" :  { service: this._ftpRequestService,
+            group: [{name: "Horodate", value: "date"}, {name: "Commande", value: "command"}, {name: "Version du server ", value: "server_version"}, {name: "Version du client ", value: "client_version"}],
+            cross: [{name: "App", value: "app"}, {name: "User", value: "user"}]
+        },
+        "smtp": { service: this._smtpRequestService,
+            group: [{name: "Horodate", value: "date"},{name: "Commande", value: "command"}],
+            cross: [{name: "App", value: "app"}, {name: "User", value: "user"}]
+        },
+        "ldap": { service: this._ldapRequestService,
+            group: [{name: "Horodate", value: "date"},{name: "Commande", value: "command"}],
+            cross: [{name: "App", value: "app"}, {name: "User", value: "user"}]
+        }
       }
 
 
@@ -69,7 +84,8 @@ export class StatisticRequestView implements OnInit, OnDestroy {
         this.params.queryParams.optional = {...this.params.queryParams.optional, cross: v.queryParams.cross || "user", group: v.queryParams.group || "date"};
         this.patchGroupValue(this.params.queryParams.optional.group);
         this.patchCrossValue(this.params.queryParams.optional.cross);
-        this.filterForm.controls.group.valueChanges.subscribe({
+
+        /*this.filterForm.controls.group.valueChanges.subscribe({
           next: (value) => {
             this.params.queryParams.optional = {...this.params.queryParams.optional, group: value};
           }
@@ -78,7 +94,7 @@ export class StatisticRequestView implements OnInit, OnDestroy {
           next: (value) =>{
             this.params.queryParams.optional = {...this.params.queryParams.optional, cross: value};
           }
-        });
+        });*/
 
         this.patchDateValue(this.params.queryParams.period.start, new Date(this.params.queryParams.period.end.getFullYear(), this.params.queryParams.period.end.getMonth(), this.params.queryParams.period.end.getDate() - 1));
         this.getHosts();
@@ -113,13 +129,13 @@ export class StatisticRequestView implements OnInit, OnDestroy {
     }, {emitEvent: false, onlySelf: true});
   }
   onOverlayOutsideClick() {
-  //this.isOpen = false;
+    this.isOpen = false;
   }
 
   onClickFilter() {
 
     this.isOpen = false;
-
+    this.params.queryParams.optional = {...this.params.queryParams.optional, group: this.filterForm.controls.group.value, cross: this.filterForm.controls.cross.value};
     this._router.navigate([], {
       relativeTo: this._activatedRoute,
       queryParams: this.params.queryParams.buildParams(),
@@ -138,7 +154,7 @@ export class StatisticRequestView implements OnInit, OnDestroy {
     }
     this.nameDataList =null;
     this.serverNameIsLoading =true;
-    this.hostSubscription = this.seviceType[this.params.type].service.getHost(this.params.type, { env: this.params.queryParams.env, start: this.params.queryParams.period.start.toISOString(), end: this.params.queryParams.period.end.toISOString()})
+    this.hostSubscription = this.serviceType[this.params.type].service.getHost(this.params.type, { env: this.params.queryParams.env, start: this.params.queryParams.period.start.toISOString(), end: this.params.queryParams.period.end.toISOString()})
         .pipe(finalize(()=> this.serverNameIsLoading = false))
         .subscribe({
           next: res => {
@@ -185,15 +201,6 @@ export class StatisticRequestView implements OnInit, OnDestroy {
     doSearch && this.search();
   }
 
-  onGroupChange($event){
-
-    this.params.queryParams.optional = {...this.params.queryParams.optional, group: $event.value};
-  }
-
-  onCrossChange($event){
-
-    this.params.queryParams.optional = {...this.params.queryParams.optional, cross: $event.value};
-  }
 
   patchGroupValue(group: string){
     this.filterForm.patchValue({

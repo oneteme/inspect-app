@@ -1,4 +1,4 @@
-<div class="mat-elevation-z5" [ngStyle]="{'display': !dataSource.data.length ? 'none' : 'flex'}" style="flex-direction: column; justify-content: space-between; height: 100%">
+<div [ngStyle]="{'display': !dataSource.data.length ? 'none' : 'flex'}" style="flex-direction: column; justify-content: space-between; height: 100%">
     <table mat-table [dataSource]="dataSource" #sort="matSort" matSort>
 
         <ng-container *ngFor="let col of _columns" [matColumnDef]="col.field">
@@ -14,7 +14,7 @@
     </div>
 </div>
 
-<div class="mat-elevation-z5" [hidden]="dataSource?.data?.length" style="height: 100%">
+<div [hidden]="dataSource?.data?.length" style="height: 100%">
     <div class="loading">
         {{isLoading ? 'Chargement des données...' : 'Aucune donnée'}}
     </div>

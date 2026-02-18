@@ -1,24 +1,68 @@
 <div style="display: flex;">
-  <repartition-type-card style="width: 50%;" [seriesProvider]="seriesProvider" [data]="$timeAndTypeResponse.data" [isLoading]="$timeAndTypeResponse.loading">
-    <div class="stat" style="color: #33cc33;">
-      <div class="label" [matTooltip]="($timeAndTypeResponse.stats.statCountOk | number : '1.0-0') + ' / ' + ($timeAndTypeResponse.stats.statCount | number : '1.0-0')">{{ ($timeAndTypeResponse.stats.statCountOk / $timeAndTypeResponse.stats.statCount) * 100 | number : '1.0-2'  }}%</div>
-      <div class="sub-label">OK</div>
-    </div>
-    <div class="stat" style="color: #ff0000">
-      <div class="label" [matTooltip]="($timeAndTypeResponse.stats.statCountErr | number : '1.0-0') + ' / ' + ($timeAndTypeResponse.stats.statCount | number : '1.0-0')">{{ ($timeAndTypeResponse.stats.statCountErr / $timeAndTypeResponse.stats.statCount) * 100 | number : '1.0-2'  }}%</div>
-      <div class="sub-label">KO</div>
-    </div>
-  </repartition-type-card>
-  <evol-user-card style="width: 50%" [data]="$evolUserResponse.line" [isLoading]="$evolUserResponse.loading"></evol-user-card>
-
+    <repartition-type-card style="width: 70%;" [seriesProvider]="seriesProvider" [data]="$timeAndTypeResponse.data" [isLoading]="$timeAndTypeResponse.loading" [group]="params?.optional.group">
+        <div class="stat" style="color: #33cc33;">
+            <div class="label" [matTooltip]="($timeAndTypeResponse.stats.statCountOk | number : '1.0-0') + ' / ' + ($timeAndTypeResponse.stats.statCount | number : '1.0-0')">{{ ($timeAndTypeResponse.stats.statCountOk / $timeAndTypeResponse.stats.statCount) * 100 | number : '1.0-2'  }}%</div>
+            <div class="sub-label">OK</div>
+        </div>
+        <div class="stat" style="color: #ff0000">
+            <div class="label" [matTooltip]="($timeAndTypeResponse.stats.statCountErr | number : '1.0-0') + ' / ' + ($timeAndTypeResponse.stats.statCount | number : '1.0-0')">{{ ($timeAndTypeResponse.stats.statCountErr / $timeAndTypeResponse.stats.statCount) * 100 | number : '1.0-2'  }}%</div>
+            <div class="sub-label">KO</div>
+        </div>
+    </repartition-type-card>
+    <repartition-cross-table style="width: 30%; display: flex; flex-direction: column;"
+                             [data]="$timeAndTypeResponseCross.data"
+                             [isLoading]="$timeAndTypeResponseCross.loading"
+                             [columns]="[
+                                       { field:  params?.optional?.group, header: 'Nom'},
+                                       { field: 'name', header: 'Name' }
+                                    ]"
+                             [segments]="[
+                                        { field: 'countSuccess', label: '2xx', color: '#33cc33' },
+                                        { field: 'countErrorClient', label: '4xx', color: '#ffa31a' },
+                                        { field: 'countErrorServer', label: '5xx', color: '#ff0000' },
+                                        { field: 'countServerUnavailableRows', label: '0', color: 'gray' }
+                                       ]">
+    </repartition-cross-table>
 </div>
-<performance-card [data]="$timeAndTypeResponse.data" [isLoading]="$timeAndTypeResponse.loading"></performance-card>
-<app-dependency-table-request [data]="$dependenciesResponse.table" [isLoading]="$dependenciesResponse.loading"></app-dependency-table-request>
-
-<div class="card-container mat-elevation-z5" style="height: 306px">
-    <div class="title-container">
-        <span class="title">Erreur</span>
-    </div>
-    <exceptions-table-new [data]="$exceptionsResponse.data" [isLoading]="$exceptionsResponse.loading"  (onRowSelected)="onSessionExceptionRowSelected($event)"></exceptions-table-new>
+<div style="display: flex;">
+    <performance-card style="width: 70%;" [data]="$timeAndTypeResponse.data" [isLoading]="$timeAndTypeResponse.loading" [group]="params?.optional.group"></performance-card>
+    <repartition-cross-table style="width: 30%; display: flex; flex-direction: column;"
+                             [data]="$timeAndTypeResponseCross.data"
+                             [isLoading]="$timeAndTypeResponseCross.loading"
+                             [columns]="[
+                                        { field: params?.optional?.group, header: 'Nom'},
+                                        { field: 'name', header: 'Name' }
+                                     ]"
+                             [segments]="[
+                                            { field: 'elapsedTimeFastest', label: 'Fastest', color: '#81D4FA' },
+                                            { field: 'elapsedTimeFast', label: 'Fast', color: '#82C0DC' },
+                                            { field: 'elapsedTimeMedium', label: 'Medium', color: '#83ACBF' },
+                                            { field: 'elapsedTimeSlow', label: 'Slow', color: '#8397A1' },
+                                            { field: 'elapsedTimeSlowest', label: 'Slowest', color: '#848383' }
+                                          ]">
+    </repartition-cross-table>
 </div>
 
+<div style="display: flex; align-items: stretch; gap: 10px;">
+    <dynamic-table style="width: 70%;"
+                   [columns]="[
+        { field: params?.optional?.group, header: 'Nom', width: '30%' },
+        { field: 'errorType', header: 'Status' },
+        { field: 'count', header: 'Total', width: '15%' }
+    ]"
+                   [data]="$exceptionsResponse.data"
+                   [isLoading]="$exceptionsResponse.loading"
+                   [pageSize]="5">
+    </dynamic-table>
+    <dynamic-table style="width: 30%;"
+                   [columns]="[
+                            { field: params?.optional?.group, header: 'Nom', width: '30%' },
+                            { field: 'name', header: 'Nom', width: '30%' },
+                            { field: 'errorType', header: 'Status' },
+                            { field: 'count', header: 'Total', width: '15%' }
+                        ]"
+                   [data]="$exceptionsResponseCross.data"
+                   [isLoading]="$exceptionsResponseCross.loading"
+                   [pageSize]="5">
+    </dynamic-table>
+</div>

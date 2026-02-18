@@ -29,18 +29,22 @@ export class SmtpRequestService {
     }
 
 
-    getSmtpExceptionsByHost(filters: { env: string, start: Date, end: Date, groupedBy: string,host: string[],command?: string[] }): Observable<SmtpSessionExceptionsByPeriodAndappname[]> {
+    getSmtpExceptionsByHost(data: { column: string; order?: string }, filters: { env: string, start: Date, end: Date, groupedBy: string, hosts: string[],command?: string[] }): Observable<SmtpSessionExceptionsByPeriodAndappname[]> {
         let args = {
-            'column': `start.${filters.groupedBy}:date,count.sum.over(partition(date)):countok,exception.count_exception:count,count.divide(countok).multiply(100).round(2):pct,exception.err_type.coalesce():errorType,start.year:year`,
+            'column': `exception.err_type.coalesce():errorType`,
             'join': 'exception,instance',
             'instance.environement': filters.env,
-            'host':`"${filters.host}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            'order': 'date.asc'
         }
-        if(filters.command){
-            args['command'] = filters.command.toString();
+        if(data?.column){
+            args['column'] += `,${data.column}`;
+        }
+        if(data?.order){
+            args['order'] = data.order;
+        }
+        if(filters.hosts && filters.hosts.length){
+            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(",");
         }
         return this.getSmtp(args);
     }
@@ -81,19 +85,23 @@ export class SmtpRequestService {
         return this.getSmtp(args);
     }
 
-    getRepartitionTimeAndTypeResponseByPeriod(filters: {env: string, start: Date, end: Date, groupedBy: string, host: string[],command?: string[]}): Observable<{countSuccess: number, countError: number, elapsedTimeSlowest: number, elapsedTimeSlow: number, elapsedTimeMedium: number, elapsedTimeFast: number, elapsedTimeFastest: number, avg: number, max: number, date: number, year: number}[]> {
+    getRepartitionTimeAndTypeResponseByPeriod(data: { column: string; order?: string }, filters: {env: string, start: Date, end: Date, groupedBy: string, hosts: string[],command?: string[]}): Observable<{countSuccess: number, countError: number, elapsedTimeSlowest: number, elapsedTimeSlow: number, elapsedTimeMedium: number, elapsedTimeFast: number, elapsedTimeFastest: number, avg: number, max: number, date: number, year: number}[]> {
         let args: any = {
-            'column': `count_request_success:countSuccess,count_request_error:countError,count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max,start.${filters.groupedBy}:date,start.year:year`,
+            'column': `count_request_success:countSuccess,count_request_error:countError,count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max`,
             'instance_env': 'instance.id',
             'instance.environement': filters.env,
-            'host':`"${filters.host}"`,
             'instance.type': 'SERVER',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            'order': `year.asc,date.asc`
         }
-        if(filters.command){
-            args['command'] = filters.command.toString();
+        if(data?.column){
+            args['column'] += `,${data.column}`;
+        }
+        if(data?.order){
+            args['order'] = data.order;
+        }
+        if(filters.hosts?.length){
+            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
         }
         return this.getSmtp(args);
     }

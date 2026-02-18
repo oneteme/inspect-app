@@ -5,8 +5,8 @@
             <ng-content></ng-content>
         </div>
     </div>
-    <div [hidden]="!dataSource.data.length">
-        <div style="min-height: 156px;">
+    <div class="table-content" [hidden]="!dataSource.data.length">
+        <div class="table-wrapper">
             <table mat-table [dataSource]="dataSource" >
 
                 <!-- Name Column -->
@@ -46,7 +46,7 @@
         
         <mat-paginator [pageSizeOptions]="[3, 5, 10]" [hidePageSize]="true" showFirstLastButtons></mat-paginator>
     </div>
-    <div [hidden]="dataSource?.data?.length">
+    <div class="loading-container" [hidden]="dataSource?.data?.length">
         <div class="loading">
             {{isLoading ? 'Loading...' : 'Aucune donnée'}}
 
