@@ -101,6 +101,7 @@ export class SearchRestView implements OnInit, OnDestroy {
     this._activatedRoute.queryParams
         .subscribe({
         next: (params: Params) => {
+          this.filterValue = '';
            if(params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.env ||  app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server],null,!params.rangestatus ? []: Array.isArray(params.rangestatus) ? params.rangestatus : [params.rangestatus] )
            if(!params.start && !params.end)  {
             let period;

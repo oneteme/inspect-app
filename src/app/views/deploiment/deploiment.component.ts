@@ -72,6 +72,12 @@ export class DeploimentComponent implements OnDestroy {
           this.lastServerStart.data.paginator = this.lastServerStartTablePaginator;
           this.lastServerStart.data.sort = this.lastServerStartTableSort;
           this.lastServerStart.data.sortingDataAccessor = sortingDataAccessor;
+          if(this.filterValue){
+            this.lastServerStart.data.filter = this.filterValue.trim().toLowerCase();
+            if (this.lastServerStart.data.paginator) {
+              this.lastServerStart.data.paginator.firstPage();
+            }
+          }
           this.onlineServerStat = this.getOnlineServers();
           this.pendingServerStat = this.getPendingServers();
           this.offlineServerStat = this.getOfflineServers();

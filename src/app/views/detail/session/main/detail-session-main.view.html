@@ -40,7 +40,7 @@
                        [menu]="menuServer"
                        [instance]="instance"></app-server-card>
     </div>
-    <detail-session [session]="session" [completedSession]="completedSession" [instance]="instance"></detail-session>
+    <detail-session [session]="session" [completedSession]="completedSession" [instance]="instance" [isLoading]="isLoading"></detail-session>
 </div>
 
 <div *ngIf="!isLoading && !session" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">

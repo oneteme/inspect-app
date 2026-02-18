@@ -364,7 +364,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                     'end': result.end.toISOString(),
                     'q': row.errorType,
                     'server': this.params.serveurs,
-                    'rangestatus': ['5xx', '4XX']
+                    'rangestatus': ['5xx', '4xx']
                 }
             });
         }
