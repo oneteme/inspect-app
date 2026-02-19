@@ -15,7 +15,7 @@ export interface ProgressSegment {
     styleUrls: ['./repartition-type-cross-table.component.scss'],
 })
 export class RepartitionTypeCrossTableComponent {
-    displayedColumns: string[] = ['progress'];
+    displayedColumns: string[] = [];
     dataSource: MatTableDataSource<any> = new MatTableDataSource([]);
     _columns: TableColumn[] = [];
     @ViewChild(MatPaginator) paginator: MatPaginator;
@@ -24,7 +24,7 @@ export class RepartitionTypeCrossTableComponent {
     @Input() set columns(cols: TableColumn[]) {
         if (cols?.length) {
             this._columns = cols;
-            this.displayedColumns.unshift(...cols.map(c => c.field));
+            this.displayedColumns = [...cols.map(c => c.field), 'progress'];
         }
     }
 

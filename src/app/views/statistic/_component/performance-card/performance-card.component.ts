@@ -10,7 +10,7 @@ import {ChartProvider, field} from "@oneteme/jquery-core";
 export class PerformanceCardComponent {
   private _decimalPipe: DecimalPipe = inject(DecimalPipe);
   readonly REPARTITION_SPEED_BAR: ChartProvider<string, number> = {
-    height: 200,
+    height: 187,
     series: [
       {data: {x: field('date'), y: field('elapsedTimeFastest')}, name: '< 1', color: '#81D4FA'},
       {data: {x: field('date'), y: field('elapsedTimeFast')}, name: '1 <> 3', color: '#82C0DC'},

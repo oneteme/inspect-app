@@ -2,7 +2,7 @@ import {Component, inject, Input} from "@angular/core";
 import {DatePipe} from "@angular/common";
 import {field} from "@oneteme/jquery-core";
 import {QueryParams} from "../../../../model/conf.model";
-import {formatters, groupByField, periodManagement, recreateDate} from "../../../../shared/util";
+import {formatters, getStringOrCall, groupByField, periodManagement, recreateDate} from "../../../../shared/util";
 import {finalize, map} from "rxjs";
 import {RestRequestService} from "../../../../service/jquery/rest-request.service";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
@@ -37,27 +37,27 @@ export class StatisticRequestHttpComponent {
   $latencyTypeResponseCross: { data: any[], loading: boolean, stats: { avg: number, max: number }} = { data: [], loading: false, stats: { avg: 0, max: 0 }};
   getRequestColumns(type: 'timeAndTypeResponse' | 'exceptionsResponse', group?: string, cross?: string) {
     const columns = {
-      date: () => (type === 'timeAndTypeResponse'
+      date: ()=> (type === 'timeAndTypeResponse'
           ? { column: `start.${this.groupedBy}:date,start.year:year`, order: 'year.asc,date.asc' }
           : { column: `count.sum.over(partition(start.${this.groupedBy}:date,start.year)):countok,start.${this.groupedBy}:date,start.year:year`, order: 'date.asc' }),
-      method: { column: 'method.coalesce("<empty>"):name' },
-      auth: { column: 'auth.coalesce("<no_auth>"):name' },
-      media: { column: 'media.coalesce("<empty>"):name' },
-      user: { column: 'user.coalesce("<empty>"):name' },
-      app: { column: 'instance.app_name.coalesce("<empty>"):name' }
+      method: { column: 'method.coalesce("<empty>"):method' },
+      auth: { column: 'auth.coalesce("<no_auth>"):auth' },
+      media: { column: 'media.coalesce("<empty>"):media' },
+      user: { column: `user.coalesce("<empty>"):name` },
+      app: { column: `instance.app_name.coalesce("<empty>"):name` }
     };
+    let g= getStringOrCall(columns[group]);
 
-    const groupCol = this.getStringOrCall(columns[group]);
+    const groupCol = getStringOrCall(columns[group]);
 
     if (cross) {
-      const crossCol = this.getStringOrCall(columns[cross]);
+      const crossCol = getStringOrCall(columns[cross]);
       return {
         column: `${crossCol.column},${groupCol.column}`,
         order: groupCol.order || crossCol.order
       };
     }
-
-    return groupCol;
+    return g;
   }
 
   @Input() set queryParams(queryParams: QueryParams) {
@@ -189,8 +189,5 @@ export class StatisticRequestHttpComponent {
         }
       });
     }
-  }
-  getStringOrCall(o?: any | (() => any)) {
-    return typeof o === "function" ? o() : o;
   }
 }

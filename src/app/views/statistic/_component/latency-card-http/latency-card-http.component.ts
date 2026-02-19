@@ -15,8 +15,7 @@ export class LatencyCardHttpComponent {
     height: 200,
     stacked: false,
     series: [
-      {data: {x: field('date'), y: field('avg')}, name: 'Avg', color: '#2196F3'},
-      {data: {x: field('date'), y: field('max')}, name: 'Max', color: '#FF5722'}
+      {data: {x: field('date'), y: field('elapsedtime')}, name: 'Avg', color: '#2196F3'},
     ],
     options: {
       chart: {
@@ -37,7 +36,7 @@ export class LatencyCardHttpComponent {
       yaxis: {
         labels: {
           formatter: (value) => {
-            return this._decimalPipe.transform(value, '1.0-0') + ' ms';
+            return this._decimalPipe.transform(value, '1.0-3') + ' ms';
           }
         }
       },
@@ -48,13 +47,35 @@ export class LatencyCardHttpComponent {
         bar: {
           dataLabels: {
             total: {
-              enabled: false
+              enabled: true,
+              style: {
+                fontSize: '10px'
+              }
             }
           }
         }
       },
       dataLabels: {
-        enabled: false
+        enabled: true,
+        formatter: (value) => {
+          return this._decimalPipe.transform(value);
+        },
+        textAnchor: 'start',
+        style: {
+          fontSize: '10px',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          fontWeight: 'bold',
+          colors: undefined
+        },
+        background: {
+          enabled: true,
+          foreColor: '#fff',
+          padding: 4,
+          borderRadius: 2,
+          borderWidth: 1,
+          borderColor: '#fff',
+          opacity: 0.9
+        }
       }
     }
   };

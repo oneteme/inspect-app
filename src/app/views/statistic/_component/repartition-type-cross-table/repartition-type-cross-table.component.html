@@ -1,18 +1,17 @@
-<div class="card-container mat-elevation-z5">
+<div class="card-container">
     <div class="title-container">
         <span class="title" style="width: 40%">Repartition des Appels</span>
         <div class="stats-container" style="width: 60%">
             <ng-content></ng-content>
         </div>
     </div>
-    <div class="table-content" [hidden]="!dataSource.data.length">
-        <div class="table-wrapper">
+    <div [hidden]="!dataSource.data.length">
+        <div style="min-height: 133px;">
             <table mat-table [dataSource]="dataSource" >
 
-                <!-- Name Column -->
-                <ng-container matColumnDef="name">
-                    <th mat-header-cell *matHeaderCellDef>Nom</th>
-                    <td mat-cell *matCellDef="let element"> {{element.name}} </td>
+                <ng-container *ngFor="let col of _columns" [matColumnDef]="col.field">
+                    <th mat-header-cell *matHeaderCellDef [style.width]="col.width">{{col.header}}</th>
+                    <td mat-cell *matCellDef="let row">{{row[col.field] }}</td>
                 </ng-container>
 
                 <!-- Progress Bar Column -->
@@ -46,7 +45,7 @@
         
         <mat-paginator [pageSizeOptions]="[3, 5, 10]" [hidePageSize]="true" showFirstLastButtons></mat-paginator>
     </div>
-    <div class="loading-container" [hidden]="dataSource?.data?.length">
+    <div [hidden]="dataSource?.data?.length">
         <div class="loading">
             {{isLoading ? 'Loading...' : 'Aucune donnée'}}
 

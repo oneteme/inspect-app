@@ -11,6 +11,7 @@ import {RestRequestService} from "../../../service/jquery/rest-request.service";
 import {FtpRequestService} from "../../../service/jquery/ftp-request.service";
 import {SmtpRequestService} from "../../../service/jquery/smtp-request.service";
 import {LdapRequestService} from "../../../service/jquery/ldap-request.service";
+import {Location} from "@angular/common";
 
 @Component({
   templateUrl: './statistic-request.view.html',
@@ -26,13 +27,10 @@ export class StatisticRequestView implements OnInit, OnDestroy {
   private readonly _ftpRequestService = inject(FtpRequestService);
   private readonly _smtpRequestService = inject(SmtpRequestService);
   private readonly _ldapRequestService = inject(LdapRequestService);
+  private readonly _location = inject(Location);
 
-
-  isOpen: boolean = false;
-
-
-
-  nameDataList: any[] =[];
+  serverNameIsLoading: boolean;
+  nameDataList: any[] = [];
   filterForm = new FormGroup({
     group: new FormControl(),
     cross: new FormControl(),
@@ -43,7 +41,6 @@ export class StatisticRequestView implements OnInit, OnDestroy {
       end: new FormControl<Date | null>(null, [Validators.required])
     })
   });
-  serverNameIsLoading:boolean;
   hostSubscription: Subscription;
   params: Partial<{type: 'jdbc' | 'ftp' | 'smtp' | 'ldap' | 'rest', queryParams: QueryParams}> = {};
   serviceType: { [key: string]: {service : RestRequestService | DatabaseRequestService | FtpRequestService | SmtpRequestService | LdapRequestService, group: {name: string, value: string}[], cross:{name: string, value: string}[] }  } =
@@ -71,8 +68,6 @@ export class StatisticRequestView implements OnInit, OnDestroy {
         }
       }
 
-
-
   ngOnInit() {
     combineLatest({
       params: this._activatedRoute.params,
@@ -81,41 +76,30 @@ export class StatisticRequestView implements OnInit, OnDestroy {
         this.params.type = v.params.request_type;
         this.params.queryParams = new QueryParams(new IPeriod(v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(0, 1).start, v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(0, 1).end), v.queryParams.env || app.defaultEnv,null,!v.queryParams.host ? [] : Array.isArray(v.queryParams.host) ? v.queryParams.host : [v.queryParams.host])
         this.patchTypeValue();
-        this.params.queryParams.optional = {...this.params.queryParams.optional, cross: v.queryParams.cross || "user", group: v.queryParams.group || "date"};
+        this.params.queryParams.optional = {...this.params.queryParams.optional, cross: v.queryParams.cross || this.serviceType[this.params.type].cross[0].value, group: v.queryParams.group || this.serviceType[this.params.type].group[0].value};
         this.patchGroupValue(this.params.queryParams.optional.group);
         this.patchCrossValue(this.params.queryParams.optional.cross);
-
-        /*this.filterForm.controls.group.valueChanges.subscribe({
-          next: (value) => {
-            this.params.queryParams.optional = {...this.params.queryParams.optional, group: value};
-          }
-        });
-        this.filterForm.controls.cross.valueChanges.subscribe({
-          next: (value) =>{
-            this.params.queryParams.optional = {...this.params.queryParams.optional, cross: value};
-          }
-        });*/
-
         this.patchDateValue(this.params.queryParams.period.start, new Date(this.params.queryParams.period.end.getFullYear(), this.params.queryParams.period.end.getMonth(), this.params.queryParams.period.end.getDate() - 1));
         this.getHosts();
         if(this.params.type) {
           const componentType = this._componentResolver.resolveComponent(this.params.type);
           this.loadComponent(componentType);
         }
+        this._location.replaceState(`${this._router.url.split('?')[0]}?${this.params.queryParams.buildPath()}`);
       }
     });
   }
 
   ngOnDestroy() {
-
+    if(this.hostSubscription) {
+      this.hostSubscription.unsubscribe();
+    }
   }
 
-
-
-  onChangeEnd(event) {
+  onChangeEnd() {
     this.search();
   }
- on
+
   patchTypeValue() {
     this.filterForm.patchValue({
       type: this.params.type
@@ -128,19 +112,6 @@ export class StatisticRequestView implements OnInit, OnDestroy {
       end: end
     }, {emitEvent: false, onlySelf: true});
   }
-  onOverlayOutsideClick() {
-    this.isOpen = false;
-  }
-
-  onClickFilter() {
-
-    this.isOpen = false;
-    this.params.queryParams.optional = {...this.params.queryParams.optional, group: this.filterForm.controls.group.value, cross: this.filterForm.controls.cross.value};
-    this._router.navigate([], {
-      relativeTo: this._activatedRoute,
-      queryParams: this.params.queryParams.buildParams(),
-    });
-  }
 
   private loadComponent(componentType: any): void {
     this._viewContainerRef.clear();
@@ -152,8 +123,8 @@ export class StatisticRequestView implements OnInit, OnDestroy {
     if(this.hostSubscription){
       this.hostSubscription.unsubscribe();
     }
-    this.nameDataList =null;
-    this.serverNameIsLoading =true;
+    this.nameDataList = null;
+    this.serverNameIsLoading = true;
     this.hostSubscription = this.serviceType[this.params.type].service.getHost(this.params.type, { env: this.params.queryParams.env, start: this.params.queryParams.period.start.toISOString(), end: this.params.queryParams.period.end.toISOString()})
         .pipe(finalize(()=> this.serverNameIsLoading = false))
         .subscribe({
@@ -176,6 +147,9 @@ export class StatisticRequestView implements OnInit, OnDestroy {
     if(this.filterForm.valid) {
       let start = this.filterForm.controls.dateRange.controls.start.value;
       let end = this.filterForm.controls.dateRange.controls.end.value;
+      let group = this.filterForm.controls.group.value;
+      let cross = this.filterForm.controls.cross.value;
+      this.params.queryParams.optional = {...this.params.queryParams.optional, group: group, cross: cross};
       this.params.queryParams.period = new IPeriod(start, new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1));
       this._router.navigate([], {
         relativeTo: this._activatedRoute,
@@ -184,7 +158,7 @@ export class StatisticRequestView implements OnInit, OnDestroy {
     }
   }
 
-  onChangeHost($event){
+  onChangeHost() {
     if (this.filterForm.controls.host.value.includes('global')) {
       // Si "Global" est sélectionné, vider le tableau des hosts
       this.params.queryParams.hosts = [];
@@ -192,15 +166,14 @@ export class StatisticRequestView implements OnInit, OnDestroy {
       // Sinon, utiliser les valeurs sélectionnées
       this.params.queryParams.hosts = [...this.filterForm.controls.host.value];
     }
-    console.log( this.params.queryParams)
+    console.log(this.params.queryParams)
   }
 
-  onHostopenedChange($event){
-    let doSearch= this.params.queryParams.hosts != this.filterForm.controls.host.value;
+  onHostopenedChange() {
+    let doSearch = this.params.queryParams.hosts != this.filterForm.controls.host.value;
     this.params.queryParams.hosts = [...this.filterForm.controls.host.value];
     doSearch && this.search();
   }
-
 
   patchGroupValue(group: string){
     this.filterForm.patchValue({
@@ -214,3 +187,4 @@ export class StatisticRequestView implements OnInit, OnDestroy {
     },{ emitEvent: false })
   }
 }
+

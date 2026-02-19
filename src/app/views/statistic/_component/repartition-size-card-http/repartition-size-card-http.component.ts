@@ -12,8 +12,8 @@ export class RepartitionSizeCardHttpComponent {
   private readonly _decimalPipe: DecimalPipe = inject(DecimalPipe);
 
   REPARTITION_SIZE_BAR: ChartProvider<string, number> = {
-    height: 200,
-    stacked: true,
+    height: 235,
+    stacked: false,
     series: [
       {data: {x: field('date'), y: field('sizeIn')}, name: 'Size In', color: '#4DB6AC'},
       {data: {x: field('date'), y: field('sizeOut')}, name: 'Size Out', color: '#014e48'},

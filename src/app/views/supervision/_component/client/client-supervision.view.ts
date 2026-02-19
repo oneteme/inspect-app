@@ -547,13 +547,15 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   }
 
   updateFormValues() {
-    let e =  this.instances.filter(s => s.appName == this.formGroup.controls.server.value && s.address == this.formGroup.controls.address.value);
-    if(e.length == 0){
-      this.patchInstanceValue(null)
-    }else{
-      let i = e.reduce((a, b) => (a.start > b.start ? a : b), e[0])
-      this.patchInstanceValue(i)
-    }
+    const matchingInstances = this.instances.filter(
+        instance => instance.appName === this.formGroup.controls.server.value && instance.address === this.formGroup.controls.address.value
+    );
+
+    const selectedInstance = matchingInstances.length
+        ? matchingInstances.reduce((latest, current) => (current.start > latest.start ? current : latest))
+        : null;
+
+    this.patchInstanceValue(selectedInstance);
   }
 
   patchDateValue(start: Date, end: Date) {

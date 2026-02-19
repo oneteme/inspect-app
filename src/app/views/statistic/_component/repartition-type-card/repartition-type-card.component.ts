@@ -12,7 +12,7 @@ export class RepartitionTypeCardComponent {
   private readonly _decimalPipe: DecimalPipe = inject(DecimalPipe);
 
   REPARTITION_TYPE_RESPONSE_BAR: ChartProvider<string, number> = {
-    height: 200,
+    height: 235,
     stacked: true,
     series: [
       {data: {x: field('date'), y: field('countSuccess')}, name: '2xx', color: '#33cc33'},
