@@ -23,6 +23,7 @@ export class DynamicTableComponent {
 
   _columns: TableColumn[] = [];
 
+  @Input() title: string;
   @Input() set columns(cols: TableColumn[]) {
     if (cols?.length) {
       this._columns = cols;

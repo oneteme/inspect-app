@@ -10,7 +10,7 @@
                 <div class="sub-label">KO</div>
             </div>
         </repartition-type-card>
-        <mat-divider vertical ></mat-divider>
+        <mat-divider style="margin: 5em" [vertical]="true"></mat-divider>
         <repartition-cross-table style="width: 30%; display: flex; flex-direction: column;"
                                  [data]="$timeAndTypeResponseCross.data"
                                  [isLoading]="$timeAndTypeResponseCross.loading"
@@ -28,7 +28,7 @@
     </div>
     <div class="mat-elevation-z5" style="display: flex; align-items: stretch; gap: 10px;">
         <performance-card style="width: 70%;" [data]="$timeAndTypeResponse.data" [isLoading]="$timeAndTypeResponse.loading" [group]="params?.optional.group"></performance-card>
-        <mat-divider vertical ></mat-divider>
+        <mat-divider style="margin: 5em" [vertical]="true"></mat-divider>
         <repartition-cross-table style="width: 30%; display: flex; flex-direction: column;"
                                  [data]="$timeAndTypeResponseCross.data"
                                  [isLoading]="$timeAndTypeResponseCross.loading"
@@ -48,6 +48,7 @@
 
     <div class="mat-elevation-z5" style="display: flex; align-items: stretch; gap: 10px;">
         <dynamic-table style="width: 70%;"
+                       [title]="'Incident'"
                        [columns]="[
         { field: params?.optional?.group, header: 'Nom', width: '30%' },
         { field: 'errorType', header: 'Status' },
@@ -57,7 +58,7 @@
                        [isLoading]="$exceptionsResponse.loading"
                        [pageSize]="5">
         </dynamic-table>
-        <mat-divider vertical ></mat-divider>
+        <mat-divider style="margin: 5em" [vertical]="true"></mat-divider>
         <dynamic-table style="width: 30%;"
                        [columns]="[
                             { field: params?.optional?.group, header: 'Nom', width: '30%' },

@@ -1,5 +1,5 @@
 <div style="display: flex;flex-direction: column;gap: 20px;">
-    <div class="mat-elevation-z5" style="display: flex; align-items: stretch; gap: 10px;">
+    <div class="mat-elevation-z5"  style="display: flex; align-items: stretch; gap: 10px;">
         <repartition-type-card style="width: 70%; display: flex; flex-direction: column;" [seriesProvider]="seriesProvider" [data]="$timeAndTypeResponse.data" [isLoading]="$timeAndTypeResponse.loading" [group]="params?.optional.group">
             <div class="stat" style="color: #33cc33;">
                 <div class="label" [matTooltip]="($timeAndTypeResponse.stats.statCountOk | number : '1.0-0') + ' / ' + ($timeAndTypeResponse.stats.statCount | number : '1.0-0')">{{ ($timeAndTypeResponse.stats.statCountOk / $timeAndTypeResponse.stats.statCount) * 100 | number : '1.0-2'  }}%</div>
@@ -18,7 +18,7 @@
                 <div class="sub-label">0</div>
             </div>
         </repartition-type-card>
-        <mat-divider vertical ></mat-divider>
+        <mat-divider style="margin: 5em" [vertical]="true"></mat-divider>
         <repartition-cross-table style="width: 30%; display: flex; flex-direction: column;"
                                  [data]="$timeAndTypeResponseCross.data"
                                  [isLoading]="$timeAndTypeResponseCross.loading"
@@ -41,7 +41,7 @@
                           [group]="params?.optional.group">
 
         </performance-card>
-        <mat-divider vertical ></mat-divider>
+        <mat-divider style="margin: 5em" [vertical]="true"></mat-divider>
         <repartition-cross-table style="width: 30%; display: flex; flex-direction: column;"
                                  [data]="$timeAndTypeResponseCross.data"
                                  [isLoading]="$timeAndTypeResponseCross.loading"
@@ -66,7 +66,7 @@
                                [group]="params?.optional.group">
 
         </repartition-size-card>
-        <mat-divider vertical ></mat-divider>
+        <mat-divider style="margin: 5em" [vertical]="true"></mat-divider>
         <repartition-cross-table style="width: 30%; display: flex; flex-direction: column;"
                                  [data]="$timeAndTypeResponseCross.data"
                                  [isLoading]="$timeAndTypeResponseCross.loading"
@@ -88,7 +88,7 @@
                            [group]="params?.optional.group">
 
         </latency-card-http>
-        <mat-divider vertical ></mat-divider>
+        <mat-divider style="margin: 5em" [vertical]="true"></mat-divider>
         <repartition-cross-table style="width: 30%; display: flex; flex-direction: column;"
                                  [data]="$latencyTypeResponseCross.data"
                                  [isLoading]="$latencyTypeResponseCross.loading"
@@ -104,6 +104,7 @@
 
     <div  class="mat-elevation-z5" style="display: flex; align-items: stretch; gap: 10px;">
         <dynamic-table style="width: 70%;"
+                       [title]="'Incident'"
                        [columns]="[
         { field: params?.optional?.group, header: 'Nom', width: '30%' },
         { field: 'errorType', header: 'Status' },
@@ -113,7 +114,7 @@
                        [isLoading]="$exceptionsResponse.loading"
                        [pageSize]="5">
         </dynamic-table>
-        <mat-divider vertical ></mat-divider>
+        <mat-divider style="margin: 5em" [vertical]="true"></mat-divider>
         <dynamic-table style="width: 30%;"
                        [columns]="[
                             { field: params?.optional?.group, header: 'Nom', width: '30%' },

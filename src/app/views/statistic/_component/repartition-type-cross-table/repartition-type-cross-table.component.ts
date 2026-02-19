@@ -20,6 +20,7 @@ export class RepartitionTypeCrossTableComponent {
     _columns: TableColumn[] = [];
     @ViewChild(MatPaginator) paginator: MatPaginator;
 
+    @Input() title: string;
     @Input() segments: ProgressSegment[] = [];
     @Input() set columns(cols: TableColumn[]) {
         if (cols?.length) {
