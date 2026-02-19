@@ -85,6 +85,14 @@ import { DependencyTableRequestComponent } from './statistic/_component/dependen
 import {
   DependencyTableRequestHttpComponent
 } from "./statistic/_component/dependency-table-request-http/dependency-table-request-http.component";
+import {
+  RepartitionSizeCardHttpComponent
+} from "./statistic/_component/repartition-size-card-http/repartition-size-card-http.component";
+import {DynamicTableComponent} from "./statistic/_component/dynamic-table/dynamic-table.component";
+import {LatencyCardHttpComponent} from "./statistic/_component/latency-card-http/latency-card-http.component";
+import {
+  RepartitionTypeCrossTableComponent
+} from "./statistic/_component/repartition-type-cross-table/repartition-type-cross-table.component";
 
 @NgModule({
   imports: [
@@ -163,7 +171,11 @@ import {
     InstanceTableComponent,
     ParameterTableComponent,
     DependencyTableRequestComponent,
-    DependencyTableRequestHttpComponent
+    DependencyTableRequestHttpComponent,
+    RepartitionTypeCrossTableComponent,
+    RepartitionSizeCardHttpComponent,
+    DynamicTableComponent,
+    LatencyCardHttpComponent
   ]
 })
 export class ViewsModule { }

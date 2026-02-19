@@ -1,4 +1,4 @@
-<header-page titleIcon="monitoring" [iconOutlined]="true" [ui-title]="params.host">
+<header-page titleIcon="monitoring" [iconOutlined]="true" [ui-title]="'statistiques des Requêtes '" >
 
 
   <form class="filter-container" [formGroup]="filterForm">
@@ -7,29 +7,43 @@
       <mat-label>Période</mat-label>
       <mat-date-range-input [formGroup]="filterForm.controls.dateRange" [rangePicker]="picker">
         <input matStartDate formControlName="start" placeholder="Start date" readonly>
-        <input matEndDate formControlName="end" placeholder="End date" (dateChange)="onChangeEnd($event)" readonly>
+        <input matEndDate formControlName="end" placeholder="End date" (dateChange)="onChangeEnd()" readonly>
       </mat-date-range-input>
       <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-date-range-picker #picker></mat-date-range-picker>
     </mat-form-field>
-      <button mat-button (click)="isOpen = !isOpen" [matBadge]="commandSelectedCopy.length + schemaSelectedCopy.length" cdkOverlayOrigin #trigger="cdkOverlayOrigin">
-          <mat-icon>tune</mat-icon>
-          Filtre
-      </button>
-  </form>
-    <ng-template
-            cdkConnectedOverlay
-            [cdkConnectedOverlayOrigin]="trigger"
-            [cdkConnectedOverlayOpen]="isOpen"
-            [cdkConnectedOverlayHasBackdrop]="true"
-            (overlayOutsideClick)="onOverlayOutsideClick()">
-        <overlay-container-filter [templateContent]="firstTab" (onClick)="onClickFilter()" />
-        <ng-template #firstTab>
-            <autocomplete-chip *ngIf="params.type !== 'rest'" label="Commande" [values]="$commandFilter" [selected]="commandSelected" (selectedChange)="onCommandSelectedChange($event)"></autocomplete-chip>
-            <autocomplete-chip *ngIf="params.type === 'rest'" label="Methode" [values]="$mthREstFilter" [selected]="commandSelected" (selectedChange)="onCommandSelectedChange($event)"></autocomplete-chip>
-            <autocomplete-chip *ngIf="params.type === 'jdbc'" label="Schémas" [values]="$Schemafilter" [selected]="schemaSelected" (selectedChange)="onSchemaSelectedChange($event)"></autocomplete-chip>
-
-        </ng-template>
-    </ng-template>
+   <mat-form-field  style="width: 240px" class="no-subscript md-3" appearance="outline" [class.loading]="serverNameIsLoading" >
+       <mat-label>Host</mat-label>
+       <mat-select [formControl]="filterForm.controls.host" multiple (openedChange)="onHostopenedChange()" (selectionChange)="onChangeHost()">
+           <span *ngIf="filterForm && params.queryParams.appname && params.queryParams.appname[0]!=''"><mat-option *ngFor="let s of params.queryParams.appname">{{s}}</mat-option></span>
+           <mat-option *ngFor="let d of nameDataList" [value]="d" >{{d}}</mat-option>
+       </mat-select>
+       <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>
+   </mat-form-field>
+   <button mat-button [matMenuTriggerFor]="filterMenu" matTooltip="Options de filtrage">
+       <mat-icon>tune</mat-icon>
+   </button>
+   <mat-menu #filterMenu="matMenu" class="filter-menu">
+     <div class="filter-menu-section">
+       <div class="filter-menu-title">Grouper par</div>
+       <a mat-menu-item *ngFor="let o of serviceType[this.params.type].group"
+          (click)="filterForm.controls.group.setValue(o.value); search()"
+          [class.selected]="filterForm.controls.group.value === o.value">
+         <mat-icon *ngIf="filterForm.controls.group.value === o.value">check</mat-icon>
+         <span [style.margin-left.px]="filterForm.controls.group.value !== o.value ? 32 : 0">{{o.name}}</span>
+       </a>
+     </div>
+     <mat-divider></mat-divider>
+     <div class="filter-menu-section">
+       <div class="filter-menu-title">Croiser avec</div>
+       <a mat-menu-item *ngFor="let o of serviceType[this.params.type].cross"
+          (click)="filterForm.controls.cross.setValue(o.value); search()"
+          [class.selected]="filterForm.controls.cross.value === o.value">
+         <mat-icon *ngIf="filterForm.controls.cross.value === o.value">check</mat-icon>
+         <span [style.margin-left.px]="filterForm.controls.cross.value !== o.value ? 32 : 0">{{o.name}}</span>
+       </a>
+     </div>
+   </mat-menu>
+</form>
 </header-page>
 <ng-container #container></ng-container>

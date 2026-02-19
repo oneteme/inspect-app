@@ -123,7 +123,7 @@
          Contexte de l'Appel
       </div>
     </div>
-    <a mat-menu-item [routerLink]="['/dashboard/request', 'rest', request?.host]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Request</a>
+    <a mat-menu-item [routerLink]="['/dashboard/request', 'rest']" [queryParams]="{env: instance?.env, host: request?.host}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Request</a>
 </mat-menu>
 
 <mat-menu #menuServer="matMenu">

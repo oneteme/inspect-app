@@ -70,9 +70,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
   hostSubscription: Subscription;
   RequestSubscription: Subscription;
   seviceType: { [key: string]: {service : RestRequestService | DatabaseRequestService | FtpRequestService | SmtpRequestService | LdapRequestService,
-                                filters: {icon: string, label: string,color: string, value: any}[]
-  }
-  } =
+                                filters: {icon: string, label: string,color: string, value: any}[] } } =
       {
         "rest": { service: this._restRequestService, filters:  [{icon: 'warning', label: '5xx', color:'#bb2124', value: '5xx'}, {icon: 'error', label: '4xx',color:'#f9ad4e', value:'4xx'}, {icon: 'done', label: '2xx',color:'#22bb33', value:'2xx'}, {icon: 'priority_high', label: '0', color:'gray', value:'0xx'}, {icon: 'pending', label: 'En cours', color:'#2196F3', value:'lazy'}]},
         "jdbc": { service: this._databaseRequestService, filters:  [{icon: 'warning', label: 'KO', color:'#bb2124', value: 'Ko'}, {icon: 'done', label: 'OK',color:'#22bb33', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'#2196F3', value:'lazy'}] },
