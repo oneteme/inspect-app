@@ -91,6 +91,8 @@ export class RepartitionTypeCardComponent {
   @Input() set data(objects: any[]) {
     this._data = objects;
   }
+  @Input() categories: string[] = []
+
 
   @Input() isLoading: boolean;
 

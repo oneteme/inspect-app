@@ -1,7 +1,82 @@
 <div class="card-container">
     <div class="title-container">
         <span class="title" style="width: 40%">Disponibilité</span>
+        <button mat-button [matMenuTriggerFor]="menu" matTooltip="Options de filtrage">
+            <mat-icon>tune</mat-icon>
+        </button>
+        <mat-menu #menu="matMenu">
+            <a mat-menu-item [matMenuTriggerFor]="categories">
+                <mat-icon></mat-icon>
+                <span>Catégorie</span>
+            </a>
+            <a mat-menu-item [matMenuTriggerFor]="indicators">
+                <mat-icon></mat-icon>
+                <span>Indicateur</span>
+            </a>
+            <a mat-menu-item [matMenuTriggerFor]="group">
+                <mat-icon></mat-icon>
+                <span>Group</span>
+            </a>
+            <a mat-menu-item [matMenuTriggerFor]="slice">
+                <mat-icon></mat-icon>
+                <span>Slice</span>
+            </a>
+            <a mat-menu-item [matMenuTriggerFor]="series">
+                <mat-icon></mat-icon>
+                <span>Series</span>
+            </a>
+        </mat-menu>
 
+        <mat-menu #categories="matMenu">
+            <a mat-menu-item >
+                <mat-icon class="material-symbols-outlined"></mat-icon>
+                <span>REST</span>
+            </a>
+            <a mat-menu-item >
+                <mat-icon class="material-symbols-outlined"></mat-icon>
+                <span>REST</span>
+            </a>
+        </mat-menu>
+        <mat-menu #indicators="matMenu">
+            <a mat-menu-item >
+                <mat-icon class="material-symbols-outlined"></mat-icon>
+                <span>REST</span>
+            </a>
+            <a mat-menu-item >
+                <mat-icon class="material-symbols-outlined"></mat-icon>
+                <span>REST</span>
+            </a>
+        </mat-menu>
+        <mat-menu #group="matMenu">
+            <a mat-menu-item >
+                <mat-icon class="material-symbols-outlined"></mat-icon>
+                <span>REST</span>
+            </a>
+            <a mat-menu-item >
+                <mat-icon class="material-symbols-outlined"></mat-icon>
+                <span>REST</span>
+            </a>
+        </mat-menu>
+        <mat-menu #slice="matMenu">
+            <a mat-menu-item >
+                <mat-icon class="material-symbols-outlined"></mat-icon>
+                <span>REST</span>
+            </a>
+            <a mat-menu-item >
+                <mat-icon class="material-symbols-outlined"></mat-icon>
+                <span>REST</span>
+            </a>
+        </mat-menu>
+        <mat-menu #series="matMenu">
+            <a mat-menu-item >
+                <mat-icon class="material-symbols-outlined"></mat-icon>
+                <span>REST</span>
+            </a>
+            <a mat-menu-item >
+                <mat-icon class="material-symbols-outlined"></mat-icon>
+                <span>REST</span>
+            </a>
+        </mat-menu>
     </div>
     <chart type="column" [config]="REPARTITION_TYPE_RESPONSE_BAR"
            [data]="_data"
