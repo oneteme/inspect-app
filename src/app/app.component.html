@@ -36,25 +36,80 @@
     </mat-menu>
 
     <mat-menu #requests="matMenu">
-      <a mat-menu-item [routerLink]="['request/rest']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
-        <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['rest'].icon }}</mat-icon>
-        <span>{{ REQUEST_TYPE['rest'].title }}</span>
+      <a mat-menu-item [matMenuTriggerFor]="restMenu">
+        <mat-icon class="material-symbols-outlined">{{ REQUEST_MAPPING_TYPE['rest'].icon }}</mat-icon>
+        <span>REST</span>
       </a>
-      <a mat-menu-item [routerLink]="['request/jdbc']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
-        <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['jdbc'].icon }}</mat-icon>
-        <span>{{ REQUEST_TYPE['jdbc'].title }}</span>
+      <a mat-menu-item [matMenuTriggerFor]="jdbcMenu">
+        <mat-icon class="material-symbols-outlined">{{ REQUEST_MAPPING_TYPE['jdbc'].icon }}</mat-icon>
+        <span>JDBC</span>
       </a>
-      <a mat-menu-item [routerLink]="['request/ftp']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
-        <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['ftp'].icon }}</mat-icon>
-        <span>{{ REQUEST_TYPE['ftp'].title }}</span>
+      <a mat-menu-item [matMenuTriggerFor]="ftpMenu">
+        <mat-icon class="material-symbols-outlined">{{ REQUEST_MAPPING_TYPE['ftp'].icon }}</mat-icon>
+        <span>FTP</span>
       </a>
-      <a mat-menu-item [routerLink]="['request/smtp']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
-        <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['smtp'].icon }}</mat-icon>
-        <span>{{ REQUEST_TYPE['smtp'].title }}</span>
+      <a mat-menu-item [matMenuTriggerFor]="smtpMenu">
+        <mat-icon class="material-symbols-outlined">{{ REQUEST_MAPPING_TYPE['smtp'].icon }}</mat-icon>
+        <span>SMTP</span>
       </a>
-      <a mat-menu-item [routerLink]="['request/ldap']" [queryParams]="{env: env.value }" routerLinkActive="menu-active">
-        <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['ldap'].icon }}</mat-icon>
-        <span>{{ REQUEST_TYPE['ldap'].title }}</span>
+      <a mat-menu-item [matMenuTriggerFor]="ldapMenu">
+        <mat-icon class="material-symbols-outlined">{{ REQUEST_MAPPING_TYPE['ldap'].icon }}</mat-icon>
+        <span>LDAP</span>
+      </a>
+    </mat-menu>
+
+    <mat-menu #restMenu="matMenu">
+      <a mat-menu-item [routerLink]="['dashboard/request/rest']" [queryParams]="{env: env.value }">
+        <mat-icon>dashboard</mat-icon>
+        <span>KPI</span>
+      </a>
+      <a mat-menu-item [routerLink]="['request/rest']" [queryParams]="{env: env.value }">
+        <mat-icon>search</mat-icon>
+        <span>Recherche</span>
+      </a>
+    </mat-menu>
+
+    <mat-menu #jdbcMenu="matMenu">
+      <a mat-menu-item [routerLink]="['dashboard/request/jdbc']" [queryParams]="{env: env.value }">
+        <mat-icon>dashboard</mat-icon>
+        <span>KPI</span>
+      </a>
+      <a mat-menu-item [routerLink]="['request/jdbc']" [queryParams]="{env: env.value }">
+        <mat-icon>search</mat-icon>
+        <span>Recherche</span>
+      </a>
+    </mat-menu>
+
+    <mat-menu #ftpMenu="matMenu">
+      <a mat-menu-item [routerLink]="['dashboard/request/ftp']" [queryParams]="{env: env.value }">
+        <mat-icon>dashboard</mat-icon>
+        <span>KPI</span>
+      </a>
+      <a mat-menu-item [routerLink]="['request/ftp']" [queryParams]="{env: env.value }">
+        <mat-icon>search</mat-icon>
+        <span>Recherche</span>
+      </a>
+    </mat-menu>
+
+    <mat-menu #smtpMenu="matMenu">
+      <a mat-menu-item [routerLink]="['dashboard/request/smtp']" [queryParams]="{env: env.value }">
+        <mat-icon>dashboard</mat-icon>
+        <span>KPI</span>
+      </a>
+      <a mat-menu-item [routerLink]="['request/smtp']" [queryParams]="{env: env.value }">
+        <mat-icon>search</mat-icon>
+        <span>Recherche</span>
+      </a>
+    </mat-menu>
+
+    <mat-menu #ldapMenu="matMenu">
+      <a mat-menu-item [routerLink]="['dashboard/request/ldap']" [queryParams]="{env: env.value }">
+        <mat-icon>dashboard</mat-icon>
+        <span>KPI</span>
+      </a>
+      <a mat-menu-item [routerLink]="['request/ldap']" [queryParams]="{env: env.value }">
+        <mat-icon>search</mat-icon>
+        <span>Recherche</span>
       </a>
     </mat-menu>
     <span style="flex-grow: 1;"></span>
