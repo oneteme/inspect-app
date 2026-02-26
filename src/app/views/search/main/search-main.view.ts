@@ -1,15 +1,12 @@
-import {Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {MatPaginator} from '@angular/material/paginator';
-import {MatSort} from '@angular/material/sort';
-import {MatTableDataSource} from '@angular/material/table';
 import {ActivatedRoute} from '@angular/router';
-import {BehaviorSubject, combineLatest, finalize, Subject, takeUntil} from 'rxjs';
+import {BehaviorSubject, combineLatest, delay, finalize, of, Subject, takeUntil} from 'rxjs';
 import {DatePipe, Location} from '@angular/common';
 import {extractPeriod,} from 'src/app/shared/util';
 import {TraceService} from 'src/app/service/trace.service';
 import {app, makeDatePeriod} from 'src/environments/environment';
-import {Constants, FilterConstants, FilterMap, FilterPreset, INFINITY} from '../../constants';
+import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constants';
 import {FilterService} from 'src/app/service/filter.service';
 import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
@@ -21,6 +18,23 @@ import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-
 import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../model/conf.model";
 import {shallowEqual} from "../rest/search-rest.view";
 import {MainSessionDto} from "../../../model/request.model";
+// TODO: REMOVE MOCK — dépannage serveur uniquement
+import {generateMockMainSessions} from './search-main.mock';
+const USE_MOCK = true;
+const MOCK_DATA: MainSessionDto[] = USE_MOCK ? generateMockMainSessions(2000) : [];
+import {col, TableProvider} from "@oneteme/jquery-table";
+
+interface SearchMainTableRow {
+  app_name: string;
+  name: string;
+  location: string;
+  start: string;
+  durée: string;
+  user: string;
+  status: string;
+  exception_info?: string;
+  raw: MainSessionDto;
+}
 
 @Component({
   templateUrl: './search-main.view.html',
@@ -50,7 +64,67 @@ export class SearchMainView implements OnInit, OnDestroy {
   MAPPING_TYPE = Constants.MAPPING_TYPE;
   filterConstants = FilterConstants;
   displayedColumns: string[] = ['app_name', 'name', 'location', 'start', 'durée', 'user'];
-  dataSource: MatTableDataSource<MainSessionDto> = new MatTableDataSource();
+  readonly columnLabels: Record<string, string> = {
+    app_name: 'Hôte',
+    name: 'Nom',
+    location: 'Ressource',
+    start: 'Début',
+    durée: 'Durée',
+    user: 'Utilisateur'
+  };
+  tableRows: SearchMainTableRow[] = [];
+  filteredTableRows: SearchMainTableRow[] = [];
+  tableConfig: TableProvider<SearchMainTableRow> = {
+    columns: [
+      col<SearchMainTableRow>('app_name', 'Hôte'),
+      col<SearchMainTableRow>('name', 'Nom'),
+      col<SearchMainTableRow>('location', 'Ressource'),
+      col<SearchMainTableRow>('start', 'Début'),
+      col<SearchMainTableRow>('durée', 'Durée'),
+      { ...col<SearchMainTableRow>('user', 'Utilisateur'), optional: true },
+      { ...col<SearchMainTableRow>('status', 'Status'), optional: true },
+      {
+        key: 'exception_info',
+        header: 'Exception (lazy)',
+        sortable: true,
+        optional: true,
+        lazy: true,
+        // Simule une requête HTTP : attend Xs puis retourne une valeur par ligne
+        fetchFn: () => {
+          const rows = this.tableConfig.data as SearchMainTableRow[];
+          return of(
+            rows.map(r =>
+              r.raw?.exception?.type
+                ? `${r.raw.exception.type}${r.raw.exception.message ? ': ' + r.raw.exception.message : ''}`
+                : '—'
+            )
+          ).pipe(delay(7000));
+        }
+      },
+    ],
+    // slices: [
+    //   { title: 'Status', columnKey: 'status' },
+    //   { title: 'Utilisateur', columnKey: 'user' },
+    //   { title: 'Nom',    columnKey: 'name' }
+    // ],
+    data: [],
+    enableSearchBar: true,
+    enableViewButton: true,
+    allowColumnRemoval: false,
+    enablePagination: true,
+    pageSize: 10,
+    enableColumnDragDrop: false,
+    pageSizeOptions: [5, 10, 15, 20, 100],
+    pageSizeOptionsGroupBy: [20, 50, 100, 200],
+    emptyStateLabel: 'Aucun résultat',
+    loadingStateLabel: 'Chargement des données...',
+    rowClass: (row: SearchMainTableRow) => {
+      if (row.status === 'OK') return 'row-ok';
+      if (row.status === 'KO') return 'row-ko';
+      if (row.status === 'En cours') return 'row-in-progress';
+      return '';
+    },
+  };
   serverNameIsLoading = true;
   serverFilterForm = new FormGroup({
     appname: new FormControl([""]),
@@ -75,15 +149,10 @@ export class SearchMainView implements OnInit, OnDestroy {
   }];
   advancedParams: Partial<{ [key: string]: any }>
   focusFieldName: any
-  filterTable = new Map<string, any>();
   filterValue: string = '';
-  filter: string = '';
 
   queryParams: Partial<QueryParams> = {};
   type: string = '';
-
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild(MatSort) sort: MatSort;
 
   constructor() {
     combineLatest([
@@ -109,16 +178,21 @@ export class SearchMainView implements OnInit, OnDestroy {
         this.patchServerValue(this.queryParams.appname);
         this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
-        this._instanceService.getApplications(this.type == 'view' ? 'CLIENT' : 'SERVER', this.queryParams.env)
-        .pipe(finalize(() => this.serverNameIsLoading = false))
-        .subscribe({
-          next: res => {
-            this.nameDataList = res.map(r => r.appName);
-            this.patchServerValue(this.queryParams.appname);
-          }, error: (e) => {
-            console.log(e)
-          }
-        });
+        // TODO: REMOVE MOCK
+        if (USE_MOCK) {
+          this.serverNameIsLoading = false;
+        } else {
+          this._instanceService.getApplications(this.type == 'view' ? 'CLIENT' : 'SERVER', this.queryParams.env)
+          .pipe(finalize(() => this.serverNameIsLoading = false))
+          .subscribe({
+            next: res => {
+              this.nameDataList = res.map(r => r.appName);
+              this.patchServerValue(this.queryParams.appname);
+            }, error: (e) => {
+              console.log(e)
+            }
+          });
+        }
         this.getMainRequests();
         this._location.replaceState(`${this._router.url.split('?')[0]}?${this.queryParams.buildPath()}`);
       }
@@ -188,31 +262,46 @@ export class SearchMainView implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
-    this.dataSource.data = [];
-    this.dataSource.paginator = this.paginator;
-    this.dataSource.sort = this.sort
+    this.tableRows = [];
+    this.filteredTableRows = [];
+    this.updateTableConfig();
+
+    // TODO: REMOVE MOCK — remplacer par l'appel ci-dessous quand le serveur est dispo
+    if (USE_MOCK) {
+      this.tableRows = MOCK_DATA.map((row) => this.toTableRow(row));
+      if (this.queryParams.optional?.['q']) {
+        this.filterValue = this.queryParams.optional['q'];
+      }
+      this.applyTableFilter();
+      this.isLoading = false;
+      this.updateTableConfig();
+      return;
+    }
+
     this._traceService.getMainSessions(params)
     .pipe(takeUntil(this.$destroy))
     .subscribe({
       next: d => {
         if (d) {
-          this.dataSource = new MatTableDataSource(d);
-          this.dataSource.paginator = this.paginator;
-          this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
-          this.dataSource.filterPredicate = this.filterPredicate;
-          this.dataSource.sort = this.sort
-
+          this.tableRows = d.map((row) => this.toTableRow(row));
           if (this.queryParams.optional?.['q']) {
             this.filterValue = this.queryParams.optional['q'];
-            this.filterTable.set('filter', this.filterValue.trim().toLowerCase());
           }
-          this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
-          this.dataSource.paginator.pageIndex = 0;
-          this.isLoading = false;
+          this.applyTableFilter();
+        } else {
+          this.tableRows = [];
+          this.filteredTableRows = [];
+          this.updateTableConfig();
         }
+        this.isLoading = false;
+        this.updateTableConfig();
       },
       error: err => {
+        this.tableRows = [];
+        this.filteredTableRows = [];
+        this.updateTableConfig();
         this.isLoading = false;
+        this.updateTableConfig();
       }
     });
   }
@@ -258,23 +347,15 @@ export class SearchMainView implements OnInit, OnDestroy {
     this.queryParams.rangestatus = rangestatus;
   }
 
-  selectedRequest(event: MouseEvent, row: any) {
-    if (event.ctrlKey) {
-      this._router.open(`#/session/${row.type.toLowerCase()}/${row.id}`, '_blank')
-    } else {
-      this._router.navigate(['/session', row.type.toLowerCase(), row.id], {
-        queryParams: {'env': this.queryParams.env}
-      });
-    }
+  selectedRequest(row: MainSessionDto) {
+    this._router.navigate(['/session', row.type.toLowerCase(), row.id], {
+      queryParams: {'env': this.queryParams.env}
+    });
   }
 
   applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.filterTable.set('filter', filterValue.trim().toLowerCase());
-    this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
+    this.filterValue = (event.target as HTMLInputElement).value;
+    this.applyTableFilter();
   }
 
   resetFilters() {
@@ -329,40 +410,84 @@ export class SearchMainView implements OnInit, OnDestroy {
     }
   }
 
-  sortingDataAccessor = (row: any, columnName: string) => {
-    if (columnName == "app_name") return row["appName"] as string;
-    if (columnName == "name") return row["name"] as string;
-    if (columnName == "location") return row['location'] as string;
-    if (columnName == "start") return row['start'] as string;
-    if (columnName == "durée") return row['end'] ? row["end"] - row["start"] : INFINITY;
-
-    return row[columnName as keyof any] as string;
-  };
-
-  filterPredicate = (data: MainSessionDto, filter: string) => {
-    var map: Map<string, any> = new Map(JSON.parse(filter));
-    let isMatch = true;
-    let date = new Date(data.start * 1000);
-    for (let [key, value] of map.entries()) {
-      if (key == 'filter') {
-        isMatch = isMatch && (value == '' || (data.appName?.toLowerCase().includes(value) ||
-            data.name?.toLowerCase().includes(value) || data.location?.toLowerCase().includes(value) ||
-            data.user?.toLowerCase().includes(value)) ||
-          this.pipe.transform(date, "dd/MM/yyyy").toLowerCase().includes(value) ||
-          this.pipe.transform(date, "HH:mm:ss.SSS").toLowerCase().includes(value) ||
-          data.exception?.message?.toString().toLowerCase().includes(value) ||
-          data.exception?.type?.toString().toLowerCase().includes(value));
-      } else if (key == 'status') {
-        const s = data.exception?.type || data.exception?.message ? "KO" : "OK";
-        isMatch = isMatch && (!value.length || (value.some((status: any) => {
-          return s == status;
-        })));
-      }
+  onTableRowSelected(row: SearchMainTableRow) {
+    if (row?.raw) {
+      this.selectedRequest(row.raw);
     }
-    return isMatch;
-  };
+  }
 
+  private applyTableFilter() {
+    const query = (this.filterValue || '').trim().toLowerCase();
+    if (!query) {
+      this.filteredTableRows = [...this.tableRows];
+      this.updateTableConfig();
+      return;
+    }
 
+    this.filteredTableRows = this.tableRows.filter((row) =>
+      row.app_name.toLowerCase().includes(query) ||
+      row.name.toLowerCase().includes(query) ||
+      row.location.toLowerCase().includes(query) ||
+      row.user.toLowerCase().includes(query) ||
+      row.start.toLowerCase().includes(query) ||
+      row.durée.toLowerCase().includes(query) ||
+      row.status.toLowerCase().includes(query) ||
+      row.raw.exception?.message?.toString().toLowerCase().includes(query) ||
+      row.raw.exception?.type?.toString().toLowerCase().includes(query)
+    );
+
+    this.updateTableConfig();
+  }
+
+  private updateTableConfig() {
+    this.tableConfig = {
+      ...this.tableConfig,
+      data: this.filteredTableRows,
+      isLoading: this.isLoading
+    };
+  }
+
+  private toTableRow(row: MainSessionDto): SearchMainTableRow {
+    const startDate = new Date(row.start * 1000);
+    const datePart = this.pipe.transform(startDate, 'dd/MM/yyyy') || '';
+    const timePart = this.pipe.transform(startDate, 'HH:mm:ss.SSS') || '';
+    const hasException = !!(row.exception?.type || row.exception?.message);
+    let status = 'En cours';
+    if (row.end) {
+      if (hasException) { status = 'KO';
+      } else { status = 'OK' }
+    }
+
+    return {
+      app_name: row.appName || 'N/A',
+      name: row.name || 'N/A',
+      location: row.location || 'N/A',
+      start: `${datePart} ${timePart}`.trim(),
+      durée: row.end ? this.formatDuration(row.start, row.end) : 'En cours...',
+      user: row.user || 'N/A',
+      status,
+      raw: row
+    };
+  }
+
+  private formatDuration(startSeconds: number, endSeconds: number): string {
+    const totalSeconds = Math.max(0, endSeconds - startSeconds);
+    if (totalSeconds < 60) {
+      return `${totalSeconds.toLocaleString('fr-FR', {minimumFractionDigits: 3, maximumFractionDigits: 3})}s`;
+    }
+
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds - minutes * 60;
+    if (minutes < 60) {
+      return `${minutes}min : ${seconds.toLocaleString('fr-FR', {minimumFractionDigits: 3, maximumFractionDigits: 3})}s`;
+    }
+
+    const hours = Math.floor(minutes / 60);
+    const remainingMinutes = minutes % 60;
+    return `${hours}h ${remainingMinutes}min : ${seconds.toLocaleString('fr-FR', {minimumFractionDigits: 3, maximumFractionDigits: 3})}s`;
+  }
+
+  
 }
 
 
