@@ -23,7 +23,11 @@ export class AuthService {
             this.oauthService.setupAutomaticSilentRefresh();
 
             await this.oauthService.loadDiscoveryDocument();
-            await this.oauthService.tryLoginCodeFlow();
+            if(authCodeFlowConfig.responseType === 'code'){
+                await this.oauthService.tryLoginCodeFlow();
+            }else {
+                await this.oauthService.tryLoginImplicitFlow();
+            }
 
             this.initialized = true;
         }

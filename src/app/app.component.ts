@@ -33,10 +33,6 @@ export class AppComponent implements OnDestroy {
     constructor( private oauthService: OAuthService) {
         const iconRegistry = inject(MatIconRegistry);
         const sanitizer = inject(DomSanitizer);
-        if(auth.enabled){
-            this.oauthService.configure(authCodeFlowConfig);
-            this.oauthService.loadDiscoveryDocumentAndTryLogin();
-        }
         // Note that we provide the icon here as a string literal here due to a limitation in
         // Stackblitz. If you want to provide the icon from a URL, you can use:
         iconRegistry.addSvgIcon('github', sanitizer.bypassSecurityTrustResourceUrl('./assets/github.svg'));
