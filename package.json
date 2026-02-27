@@ -20,6 +20,7 @@
     "@angular/material": "^16.2.12",
     "@angular/platform-browser": "^16.2.12",
     "@angular/platform-browser-dynamic": "^16.2.12",
+    "angular-oauth2-oidc": "^17.0.0",
     "@angular/router": "^16.2.12",
     "@fortawesome/fontawesome-free": "^6.0.0",
     "@oneteme/jquery-apexcharts": "^0.0.24",

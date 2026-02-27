@@ -16,6 +16,9 @@ export const app: Application = {
 }
 
 
+ export  const auth = {
+  enabled : true
+ }
 export function makeDateTimePeriod(step: number): Period {
   return new IStep(step);
 }

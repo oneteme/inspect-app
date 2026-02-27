@@ -1,6 +1,6 @@
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {LOCALE_ID, NgModule} from '@angular/core';
+import {APP_INITIALIZER, LOCALE_ID, NgModule} from '@angular/core';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ActivatedRouteSnapshot, Route, RouterModule, RouterStateSnapshot} from '@angular/router';
 import {AppComponent} from './app.component';
@@ -39,9 +39,17 @@ import { InstanceComponent } from './views/detail/instance/instance.component';
 import {ServerSupervisionView} from "./views/supervision/_component/server/server-supervision.view";
 import {ClientSupervisionView} from "./views/supervision/_component/client/client-supervision.view";
 import {StatisticRequestView} from "./views/statistic/request/statistic-request.view";
+import {OAuthModule} from "angular-oauth2-oidc";
+import {AuthService} from "./auth/auth.service";
+import {authGuard} from "./auth/auth.guard";
+import {AuthInterceptor} from "./auth/auth.interceptor";
 
 
 registerLocaleData(localeFr, 'fr-FR');
+
+export function initializeAuth(authService: AuthService) {
+  return () => authService.init();
+}
 const routes: Route[] = [
     {
       path:'request', children : [
@@ -63,7 +71,8 @@ const routes: Route[] = [
           ]
         },
         { path: '**', pathMatch: 'full', redirectTo: `/request/rest` }
-      ]
+      ],
+      canActivate: [authGuard],
     },
     {
     path: 'session', children: [
@@ -160,8 +169,9 @@ const routes: Route[] = [
         ]
       },
       { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
-    ]
-  },
+    ],
+      canActivate: [authGuard],
+    },
   {
     path: 'dashboard',
     children: [
@@ -198,7 +208,8 @@ const routes: Route[] = [
         }
       },
       { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
-    ]
+    ],
+    canActivate: [authGuard],
   },
   {
     path: 'instance',
@@ -210,38 +221,45 @@ const routes: Route[] = [
         return `instance > ${route.paramMap.get('id_instance')}`;
       }
     },
-  ]
+  ],
+    canActivate: [authGuard],
   },
 
   {
     path: 'analytic/:user',
     component: AnalyticView,
-    title: 'Parcours Utilisateur'
+    title: 'Parcours Utilisateur',
+    canActivate: [authGuard],
   },
   {
     path: 'home',
     component: DashboardComponent,
-    title: 'Page d\'accueil'
+    title: 'Page d\'accueil',
+    canActivate: [authGuard],
   },
   {
     path: 'deploiment',
     component: DeploimentComponent,
-    title: 'Déploiement'
+    title: 'Déploiement',
+    canActivate: [authGuard],
   },
   {
     path: 'architecture',
     component: ArchitectureView,
-    title: 'Architecture'
+    title: 'Architecture',
+    canActivate: [authGuard],
   },
   {
     path: 'supervision/server/:instance',
     component: ServerSupervisionView,
-    title: 'Server Supervision'
+    title: 'Server Supervision',
+    canActivate: [authGuard],
   },
   {
     path: 'supervision/client/:instance',
     component: ClientSupervisionView,
-    title: 'Client Supervision'
+    title: 'Client Supervision',
+    canActivate: [authGuard],
   },
   { path: '**', pathMatch: 'full', redirectTo: `/home` }
 ];
@@ -255,7 +273,8 @@ const routes: Route[] = [
     HttpClientModule,
     ReactiveFormsModule,
     SharedModule,
-    ViewsModule
+    ViewsModule,
+    OAuthModule.forRoot()
   ],
   declarations: [
     AppComponent
@@ -269,7 +288,15 @@ const routes: Route[] = [
     EnvRouter,
     { provide: LOCALE_ID, useValue: 'fr-FR' },
     NumberFormatterPipe,
-    {provide: HTTP_INTERCEPTORS, useClass: Interceptor, multi: true}
+    {
+      provide: APP_INITIALIZER,
+      useFactory: initializeAuth,
+      deps: [AuthService],
+      multi: true
+    },
+    {provide: HTTP_INTERCEPTORS, useClass: Interceptor, multi: true},
+    { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
+
   ],
   bootstrap: [AppComponent]
 })
