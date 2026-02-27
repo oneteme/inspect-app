@@ -18,7 +18,13 @@ export const authCodeFlowConfig: AuthConfig = {
     // such applications.
     // dummyClientSecret: 'secret',
     dummyClientSecret:'t3B3lu14kQMgz3Ee4bp8D9jphj0gWVEE63b-Y_H6dMu2tolTNnSU_JgdW4AnrnqU',
-    responseType: 'code',
+
+   // implicit
+    //responseType: 'token id_token',
+   // disablePKCE: true
+   // code flow
+   responseType: 'code',
+
 
     // set the scope for the permissions the client should request
     // The first four are defined by OIDC.
