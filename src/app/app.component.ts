@@ -2,12 +2,14 @@ import {Component, inject, OnDestroy} from '@angular/core';
 import {FormControl} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
 import {distinctUntilChanged, finalize, Subscription} from 'rxjs';
-import {app} from 'src/environments/environment';
+import {app, auth} from 'src/environments/environment';
 import {EnvRouter} from "./service/router.service";
 import {Constants} from "./views/constants";
 import {InstanceService} from "./service/jquery/instance.service";
 import {MatIconRegistry} from "@angular/material/icon";
 import {DomSanitizer} from "@angular/platform-browser";
+import {OAuthService} from "angular-oauth2-oidc";
+import {authCodeFlowConfig} from "./auth/auth-code-flow.config";
 
 
 @Component({
@@ -28,10 +30,13 @@ export class AppComponent implements OnDestroy {
     subscriptions: Subscription[] = [];
 
 
-    constructor() {
+    constructor( private oauthService: OAuthService) {
         const iconRegistry = inject(MatIconRegistry);
         const sanitizer = inject(DomSanitizer);
-
+        if(auth.enabled){
+            this.oauthService.configure(authCodeFlowConfig);
+            this.oauthService.loadDiscoveryDocumentAndTryLogin();
+        }
         // Note that we provide the icon here as a string literal here due to a limitation in
         // Stackblitz. If you want to provide the icon from a URL, you can use:
         iconRegistry.addSvgIcon('github', sanitizer.bypassSecurityTrustResourceUrl('./assets/github.svg'));
@@ -74,6 +79,8 @@ export class AppComponent implements OnDestroy {
                 }
             }));
     }
+
+
 
     ngOnDestroy(): void {
         this.unsubscribe();
