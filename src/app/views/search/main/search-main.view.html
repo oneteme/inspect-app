@@ -25,12 +25,7 @@
   </div>
 </header-page>
 
-
-<div class="table-container">
-  <div class="table-wrapper">
-    <jquery-table
-      [config]="tableConfig"
-      (rowSelected)="onTableRowSelected($event)">
-    </jquery-table>
-  </div>
-</div>
+<jquery-table class="flex-table"
+    [config]="tableConfig"
+    (rowSelected)="onTableRowSelected($event)">
+</jquery-table>

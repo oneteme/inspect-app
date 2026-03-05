@@ -1,17 +1,13 @@
-.table-container {
+:host {
   display: flex;
   flex-direction: column;
-  height: calc(100% - 74px);
+  height: 100%;
+  overflow: hidden;
+}
 
-  .table-wrapper {
-    flex: 1 1 0;
-    min-height: 0;
-
-    jquery-table {
-      display: block;
-      height: 100%;
-    }
-  }
+.flex-table {
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 .mat-mdc-row {

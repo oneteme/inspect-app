@@ -36,6 +36,7 @@ import {SearchRequestView} from "./views/search/request/search-request.view";
 import {Constants} from "./views/constants";
 import {DetailRequestView} from "./views/detail/request/detail-request.view";
 import { InstanceComponent } from './views/detail/instance/instance.component';
+import {NavbarComponent} from './components/navbar/navbar.component';
 import {ServerSupervisionView} from "./views/supervision/_component/server/server-supervision.view";
 import {ClientSupervisionView} from "./views/supervision/_component/client/client-supervision.view";
 import {StatisticRequestView} from "./views/statistic/request/statistic-request.view";
@@ -258,7 +259,8 @@ const routes: Route[] = [
     ViewsModule
   ],
   declarations: [
-    AppComponent
+    AppComponent,
+    NavbarComponent
   ],
   providers: [
       SizePipe,

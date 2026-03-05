@@ -1,8 +1,8 @@
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
-import {BehaviorSubject, combineLatest, delay, finalize, of, Subject, takeUntil} from 'rxjs';
-import {DatePipe, Location} from '@angular/common';
+import {BehaviorSubject, combineLatest, finalize, Subject, takeUntil} from 'rxjs';
+import {Location} from '@angular/common';
 import {extractPeriod,} from 'src/app/shared/util';
 import {TraceService} from 'src/app/service/trace.service';
 import {app, makeDatePeriod} from 'src/environments/environment';
@@ -18,10 +18,6 @@ import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-
 import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../model/conf.model";
 import {shallowEqual} from "../rest/search-rest.view";
 import {MainSessionDto} from "../../../model/request.model";
-// TODO: REMOVE MOCK — dépannage serveur uniquement
-import {generateMockMainSessions} from './search-main.mock';
-const USE_MOCK = true;
-const MOCK_DATA: MainSessionDto[] = USE_MOCK ? generateMockMainSessions(2000) : [];
 import {col, TableProvider} from "@oneteme/jquery-table";
 
 interface SearchMainTableRow {
@@ -32,7 +28,6 @@ interface SearchMainTableRow {
   durée: string;
   user: string;
   status: string;
-  exception_info?: string;
   raw: MainSessionDto;
 }
 
@@ -40,15 +35,9 @@ interface SearchMainTableRow {
   templateUrl: './search-main.view.html',
   styleUrls: ['./search-main.view.scss'],
   providers: [
-    {
-      provide: DateAdapter, useClass: CustomDateAdapter
-    },
-    {
-      provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS
-    },
-    {
-      provide: MAT_DATE_RANGE_SELECTION_STRATEGY, useClass: CustomDateRangeSelectionStrategy
-    }
+    { provide: DateAdapter, useClass: CustomDateAdapter },
+    { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
+    { provide: MAT_DATE_RANGE_SELECTION_STRATEGY, useClass: CustomDateRangeSelectionStrategy }
   ]
 })
 export class SearchMainView implements OnInit, OnDestroy {
@@ -59,7 +48,8 @@ export class SearchMainView implements OnInit, OnDestroy {
   private readonly _location = inject(Location);
   private readonly _filter = inject(FilterService);
   private readonly $destroy = new Subject<void>();
-  private readonly pipe = new DatePipe('fr-FR');
+  private readonly _dateFmt = new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  private readonly _timeFmt = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
 
   MAPPING_TYPE = Constants.MAPPING_TYPE;
   filterConstants = FilterConstants;
@@ -76,41 +66,23 @@ export class SearchMainView implements OnInit, OnDestroy {
   filteredTableRows: SearchMainTableRow[] = [];
   tableConfig: TableProvider<SearchMainTableRow> = {
     columns: [
-      col<SearchMainTableRow>('app_name', 'Hôte'),
-      col<SearchMainTableRow>('name', 'Nom'),
-      col<SearchMainTableRow>('location', 'Ressource'),
-      col<SearchMainTableRow>('start', 'Début'),
-      col<SearchMainTableRow>('durée', 'Durée'),
-      { ...col<SearchMainTableRow>('user', 'Utilisateur'), optional: true },
-      { ...col<SearchMainTableRow>('status', 'Status'), optional: true },
-      {
-        key: 'exception_info',
-        header: 'Exception (lazy)',
-        sortable: true,
-        optional: true,
-        lazy: true,
-        // Simule une requête HTTP : attend Xs puis retourne une valeur par ligne
-        fetchFn: () => {
-          const rows = this.tableConfig.data as SearchMainTableRow[];
-          return of(
-            rows.map(r =>
-              r.raw?.exception?.type
-                ? `${r.raw.exception.type}${r.raw.exception.message ? ': ' + r.raw.exception.message : ''}`
-                : '—'
-            )
-          ).pipe(delay(7000));
-        }
-      },
+      { ...col<SearchMainTableRow>('app_name', 'Hôte'), icon: 'dns' },
+      { ...col<SearchMainTableRow>('name', 'Nom'), icon: 'label' },
+      { ...col<SearchMainTableRow>('location', 'Ressource'), icon: 'category' },
+      { ...col<SearchMainTableRow>('start', 'Début'), icon: 'schedule' },
+      { ...col<SearchMainTableRow>('durée', 'Durée'), icon: 'timer' },
+      { ...col<SearchMainTableRow>('user', 'Utilisateur'), optional: true, icon: 'person' },
+      { ...col<SearchMainTableRow>('status', 'Status'), optional: true, icon: 'info' },
     ],
-    // slices: [
-    //   { title: 'Status', columnKey: 'status' },
-    //   { title: 'Utilisateur', columnKey: 'user' },
-    //   { title: 'Nom',    columnKey: 'name' }
-    // ],
+    slices: [
+      { title: 'Status', columnKey: 'status' },
+      { title: 'Utilisateur', columnKey: 'user' },
+      { title: 'Nom', columnKey: 'name' }
+    ],
     data: [],
     enableSearchBar: true,
     enableViewButton: true,
-    allowColumnRemoval: false,
+    allowColumnRemoval: true,
     enablePagination: true,
     pageSize: 10,
     enableColumnDragDrop: false,
@@ -178,11 +150,7 @@ export class SearchMainView implements OnInit, OnDestroy {
         this.patchServerValue(this.queryParams.appname);
         this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
-        // TODO: REMOVE MOCK
-        if (USE_MOCK) {
-          this.serverNameIsLoading = false;
-        } else {
-          this._instanceService.getApplications(this.type == 'view' ? 'CLIENT' : 'SERVER', this.queryParams.env)
+        this._instanceService.getApplications(this.type == 'view' ? 'CLIENT' : 'SERVER', this.queryParams.env)
           .pipe(finalize(() => this.serverNameIsLoading = false))
           .subscribe({
             next: res => {
@@ -192,7 +160,6 @@ export class SearchMainView implements OnInit, OnDestroy {
               console.log(e)
             }
           });
-        }
         this.getMainRequests();
         this._location.replaceState(`${this._router.url.split('?')[0]}?${this.queryParams.buildPath()}`);
       }
@@ -266,18 +233,6 @@ export class SearchMainView implements OnInit, OnDestroy {
     this.filteredTableRows = [];
     this.updateTableConfig();
 
-    // TODO: REMOVE MOCK — remplacer par l'appel ci-dessous quand le serveur est dispo
-    if (USE_MOCK) {
-      this.tableRows = MOCK_DATA.map((row) => this.toTableRow(row));
-      if (this.queryParams.optional?.['q']) {
-        this.filterValue = this.queryParams.optional['q'];
-      }
-      this.applyTableFilter();
-      this.isLoading = false;
-      this.updateTableConfig();
-      return;
-    }
-
     this._traceService.getMainSessions(params)
     .pipe(takeUntil(this.$destroy))
     .subscribe({
@@ -287,19 +242,18 @@ export class SearchMainView implements OnInit, OnDestroy {
           if (this.queryParams.optional?.['q']) {
             this.filterValue = this.queryParams.optional['q'];
           }
+          this.isLoading = false;
           this.applyTableFilter();
         } else {
           this.tableRows = [];
           this.filteredTableRows = [];
+          this.isLoading = false;
           this.updateTableConfig();
         }
-        this.isLoading = false;
-        this.updateTableConfig();
       },
       error: err => {
         this.tableRows = [];
         this.filteredTableRows = [];
-        this.updateTableConfig();
         this.isLoading = false;
         this.updateTableConfig();
       }
@@ -449,8 +403,9 @@ export class SearchMainView implements OnInit, OnDestroy {
 
   private toTableRow(row: MainSessionDto): SearchMainTableRow {
     const startDate = new Date(row.start * 1000);
-    const datePart = this.pipe.transform(startDate, 'dd/MM/yyyy') || '';
-    const timePart = this.pipe.transform(startDate, 'HH:mm:ss.SSS') || '';
+    const datePart = this._dateFmt.format(startDate);
+    const ms = String(startDate.getMilliseconds()).padStart(3, '0');
+    const timePart = `${this._timeFmt.format(startDate)}.${ms}`;
     const hasException = !!(row.exception?.type || row.exception?.message);
     let status = 'En cours';
     if (row.end) {
