@@ -4,7 +4,7 @@ import {DatabaseRequestService} from "../../../../service/jquery/database-reques
 import {SmtpRequestService} from "../../../../service/jquery/smtp-request.service";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 import {QueryParams} from "../../../../model/conf.model";
-import {formatters, groupByField, periodManagement, recreateDate} from "../../../../shared/util";
+import {formatters, getStringOrCall, groupByField, periodManagement, recreateDate} from "../../../../shared/util";
 import {finalize, map} from "rxjs";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 import {HttpParams} from "../../server/_component/rest-tab/rest-tab.component";
@@ -26,119 +26,113 @@ export class StatisticRequestSmtpComponent {
   groupedBy: string;
   params: QueryParams;
   $timeAndTypeResponse: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErr: number} } = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErr: 0} };
-  $evolUserResponse: { line: any[], loading: boolean } = { line: [], loading: true };
+  $timeAndTypeResponseCross: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErr: number} } = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErr: 0} };
   $exceptionsResponse: { data: any[], loading: boolean } = {data: [], loading: true};
-  $dependenciesResponse: { table: any[], loading: boolean } = {table: [], loading: true};
+  $exceptionsResponseCross: { data: any[], loading: boolean } = {data: [], loading: true};
+
+  getRequestColumns(type: 'timeAndTypeResponse' | 'exceptionsResponse', group?: string, cross?: string) {
+    const columns = {
+      date: ()=> (type === 'timeAndTypeResponse'
+          ? { column: `start.${this.groupedBy}:date,start.year:year`, order: 'year.asc,date.asc' }
+          : { column: `start.${this.groupedBy}:date,start.year:year,count.sum.over(partition(date)):countok,exception.count_exception:count,count.divide(countok).multiply(100).round(2):pct`, order: 'date.asc' }),
+      command: { column: 'command.coalesce("<empty>"):command' },
+      auth: { column: 'auth.coalesce("<no_auth>"):auth' },
+      media: { column: 'media.coalesce("<empty>"):media' },
+      user: { column: `user.coalesce("<empty>"):name` },
+      app: { column: `instance.app_name.coalesce("<empty>"):name` }
+    };
+    let g= getStringOrCall(columns[group]);
+
+    const groupCol = getStringOrCall(columns[group]);
+
+    if (cross) {
+      const crossCol = getStringOrCall(columns[cross]);
+      return {
+        column: `${crossCol.column},${groupCol.column}`,
+        order: groupCol.order || crossCol.order
+      };
+    }
+    return g;
+  }
 
   @Input() set queryParams(queryParams: QueryParams) {
     if(queryParams) {
       this.params = queryParams;
       this.groupedBy = periodManagement(queryParams.period.start, queryParams.period.end);
-      this.getRepartitionTimeAndTypeResponseByPeriod(queryParams, this.groupedBy);
-      this.getUsersByPeriod(queryParams, this.groupedBy);
-      this.getExceptions(queryParams, this.groupedBy);
-      this.getDependencies(queryParams);
+      this.getRepartitionTimeAndTypeResponseByPeriod(this.$timeAndTypeResponse, queryParams.optional?.group,null, queryParams, this.groupedBy);
+      this.getRepartitionTimeAndTypeResponseByPeriod(this.$timeAndTypeResponseCross, queryParams.optional?.group,queryParams.optional?.cross, queryParams, this.groupedBy);
+      this.getExceptions(this.$exceptionsResponse, queryParams.optional?.group, null, queryParams,  this.groupedBy);
+      this.getExceptions(this.$exceptionsResponseCross, queryParams.optional?.group, queryParams.optional?.cross, queryParams,  this.groupedBy);
     }
   }
 
-  getRepartitionTimeAndTypeResponseByPeriod(queryParams: QueryParams, groupedBy: string) {
-    this.$timeAndTypeResponse.data = [];
-    this.$timeAndTypeResponse.loading = true;
-    return this._smtpRequestService.getRepartitionTimeAndTypeResponseByPeriod({
+  getRepartitionTimeAndTypeResponseByPeriod(arr: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErr: number} },
+                                            group: string,
+                                            cross: string,
+                                            queryParams: QueryParams,
+                                            groupedBy: string) {
+    arr.data = [];
+    arr.loading = true;
+    return this._smtpRequestService.getRepartitionTimeAndTypeResponseByPeriod(
+        this.getRequestColumns('timeAndTypeResponse', group, cross),{
       start: queryParams.period.start,
       end: queryParams.period.end,
       groupedBy: groupedBy,
       env: queryParams.env,
-      host: queryParams.hosts,
+      hosts: queryParams.hosts,
       command: queryParams.commands
     }).pipe(
       map(r => {
-        formatters[groupedBy](r, this._datePipe);
+        if (group === 'date') {
+          formatters[groupedBy](r, this._datePipe);
+        }
         return r;
-      }), finalize(() => this.$timeAndTypeResponse.loading = false)
+      }), finalize(() => arr.loading = false)
     ).subscribe({
       next: res => {
-        this.$timeAndTypeResponse.data = res;
-        this.$timeAndTypeResponse.stats = this.calculateStats(res);
+        arr.data = res;
+        arr.stats = this.calculateStats(res);
       }
     });
   }
 
-  getUsersByPeriod(queryParams: QueryParams, groupedBy: string) {
-    this.$evolUserResponse.line = [];
-    this.$evolUserResponse.loading = true;
-    return this._smtpRequestService.getUsersByPeriod({
-      start: queryParams.period.start,
-      end: queryParams.period.end,
-      groupedBy: groupedBy,
-      env: queryParams.env,
-      host: queryParams.hosts,
-      command: queryParams.commands
-    }).pipe(
-      finalize(() => this.$evolUserResponse.loading = false),
-      map(r => {
-        formatters[groupedBy](r, this._datePipe);
-        return Object.entries(groupByField(r, "date")).map(([key, value]) => {
-          return {count: value.length, date: key, year: value[0].year};
-        });
-      })
-    )
-    .subscribe({
-      next: res => {
-        this.$evolUserResponse.line = res;
-      }
-    })
-  }
 
-  getExceptions(queryParams: QueryParams, groupedBy: string) {
-    this.$exceptionsResponse.data = [];
-    this.$exceptionsResponse.loading = true;
-    return this._smtpRequestService.getSmtpExceptionsByHost({
+  getExceptions(arr: { data: any[], loading: boolean },
+                group: string,
+                cross: string,
+                queryParams: QueryParams,
+                groupedBy: string) {
+    arr.data = [];
+    arr.loading = true;
+    return this._smtpRequestService.getSmtpExceptionsByHost(
+        this.getRequestColumns('exceptionsResponse', group, cross),{
       env: queryParams.env,
       start: queryParams.period.start,
       end: queryParams.period.end,
       groupedBy: groupedBy,
-      host: queryParams.hosts,
+      hosts: queryParams.hosts,
       command: queryParams.commands
     }).pipe(
-        finalize(() => this.$exceptionsResponse.loading = false),
+        finalize(() => arr.loading = false),
         map(res => {
-          formatters[groupedBy](res, this._datePipe, 'stringDate');
-          return res.filter(r => r.errorType != null)
+          if (group === 'date') {
+            formatters[groupedBy](res, this._datePipe);
+          }
+          return res.filter(r => r.errorType != null);
         }))
         .subscribe({
           next: res => {
-            this.$exceptionsResponse.data = res;
+            arr.data = res;
           }
         })
   }
-  getDependencies(queryParams: QueryParams) {
-    this.$dependenciesResponse.table = [];
-    this.$dependenciesResponse.loading = true;
-    return this._smtpRequestService.getDependentsNew({
-      start: queryParams.period.start,
-      end: queryParams.period.end,
-      env: queryParams.env,
-      host: queryParams.hosts,
-      command: queryParams.commands
-    }).pipe(
-        map(r => {
-          return r;
-        }), finalize(() => this.$dependenciesResponse.loading = false)
-    ).subscribe({
-      next: res => {
-        this.$dependenciesResponse.table = res.map(item => ({
-          ...item,
-          count: item.countSucces + item.countErrServer
-        }));
-      }
-    });
-  }
+
   calculateStats(res: any[]) {
     return res.reduce((acc: {statCount: number, statCountOk: number, statCountErr: number}, o) => {
       return {statCount: acc.statCount + o['countSuccess'] + o['countError'], statCountOk: acc.statCountOk + o['countSuccess'], statCountErr: acc.statCountErr + o['countError']};
     }, {statCount: 0, statCountOk: 0, statCountErr: 0});
   }
+
   onSessionExceptionRowSelected(row:any) {
     const result = recreateDate(this.groupedBy, row, this.params.period.start);
     if(result) {

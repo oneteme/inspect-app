@@ -4,3 +4,64 @@
   gap: 0.5em;
   margin-left: auto;
 }
+
+.filter-menu {
+  ::ng-deep {
+    .mat-mdc-menu-content {
+      padding-top: 0 !important;
+      padding-bottom: 8px !important;
+    }
+
+    .mat-divider {
+      margin: 8px 0 !important;
+    }
+  }
+}
+
+.filter-menu-section {
+  padding: 8px 0;
+
+  .filter-menu-title {
+    padding: 8px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: rgba(0, 0, 0, 0.6);
+    opacity: 0.7;
+  }
+
+  .mat-mdc-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 16px !important;
+    min-height: 40px;
+
+    &.selected {
+      background-color: rgba(20, 100, 220, 0.08);
+      color: #1464dc;
+      font-weight: 500;
+
+      mat-icon {
+        color: #1464dc;
+      }
+    }
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+      color: #1464dc;
+    }
+
+    span {
+      flex: 1;
+    }
+
+    &:hover {
+      background-color: rgba(0, 0, 0, 0.04);
+    }
+  }
+}
+

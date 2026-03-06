@@ -52,7 +52,6 @@
       </mat-card-footer>
     </mat-card>
     <app-server-card style="width: 40vw"
-                     (onClick)="navigateOnStatusIndicator($event)"
                      [menu]="menuServer"
                      [instance]="instance"></app-server-card>
   </div>
@@ -123,7 +122,7 @@
          Contexte de l'Appel
       </div>
     </div>
-    <a mat-menu-item [routerLink]="['/dashboard/request', 'rest', request?.host]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Request</a>
+    <a mat-menu-item [routerLink]="['/dashboard/request', 'rest']" [queryParams]="{env: instance?.env, host: request?.host}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Request</a>
 </mat-menu>
 
 <mat-menu #menuServer="matMenu">

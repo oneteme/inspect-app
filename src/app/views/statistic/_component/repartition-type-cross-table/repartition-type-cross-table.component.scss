@@ -1,0 +1,40 @@
+:host {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+.card-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.loading {
+    flex: 1;
+    min-height: 250px;
+    display: flex;
+    align-items: center; 
+    justify-content: center; 
+    font-size: 14px;
+    color: #6c6c6c;
+}
+
+
+.mat-mdc-row:hover .mat-mdc-cell {
+    background-color: rgb(206, 206, 206);
+}
+
+.progress-bar-container {
+    display: flex;
+    height: 20px;
+    width: 100%;
+    background-color: #e9ecef;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-segment {
+    height: 100%;
+    transition: width 0.3s ease;
+}

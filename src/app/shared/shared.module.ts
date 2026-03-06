@@ -22,6 +22,8 @@ import {StatusIndicatorComponent} from "./_component/status-indicator/status-ind
 import {ServerCardComponent} from "./_component/server-card/server-card.component";
 import {OverlayContainerFilterComponent} from "./_component/overlay-container-filter/overlay-container-filter.component";
 import {BranchHashBadgeComponent} from "./_component/branch-hash-badge/branch-hash-badge.component";
+import {PulseComponent} from "./_component/pulse/pulse.component";
+import {PulseDialogComponent} from "./_component/pulse/dialog/pulse-dialog.component";
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -65,7 +67,9 @@ export const MY_DATE_FORMATS = {
     BranchHashBadgeComponent,
     StatusIndicatorComponent,
     ServerCardComponent,
-    OverlayContainerFilterComponent
+    OverlayContainerFilterComponent,
+    PulseComponent,
+    PulseDialogComponent
   ],
   exports: [
     MaterialModule,
@@ -86,7 +90,8 @@ export const MY_DATE_FORMATS = {
     BranchHashBadgeComponent,
     StatusIndicatorComponent,
     ServerCardComponent,
-    OverlayContainerFilterComponent
+    OverlayContainerFilterComponent,
+    PulseDialogComponent
   ]
 })
 export class SharedModule { }

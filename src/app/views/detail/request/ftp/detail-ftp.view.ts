@@ -185,11 +185,6 @@ export class DetailFtpView implements OnInit, OnDestroy {
     }
   }
 
-  navigateOnStatusIndicator(event: MouseEvent) {
-    var date = new Date(this.request.start * 1000);
-    this._router.navigateOnClick(event, ['/supervision', this.instance.type.toLowerCase(), this.instance.id], { queryParams: {start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString(), env: this.instance?.env} });
-  }
-
   navigate(event: MouseEvent, targetType: string, extraParam?: string) {
     if(this.sessionParent) {
       let params: any[] = [];

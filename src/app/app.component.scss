@@ -22,3 +22,24 @@ mat-drawer-content {
     padding: 7px;
     height: calc(100vh - 48px - 14px);
 }
+
+::ng-deep .menu-row {
+    display: flex;
+    align-items: center;
+    padding: 4px 16px;
+    gap: 8px;
+
+    .menu-row-label {
+        font-size: 14px;
+        font-weight: 500;
+        min-width: 50px;
+    }
+
+    a {
+        color: inherit;
+
+        &:hover {
+            color: var(--inspect-blue, #1976d2);
+        }
+    }
+}

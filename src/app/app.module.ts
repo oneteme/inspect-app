@@ -173,7 +173,7 @@ const routes: Route[] = [
         }
       },
       {
-        path: 'request/:request_type/:request_host',
+        path: 'request/:request_type',
         component: StatisticRequestView
       },
       {
