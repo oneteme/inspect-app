@@ -143,10 +143,6 @@ export class InstanceComponent implements OnInit, OnDestroy {
   getDate(start: number) {
     return new Date(start);
   }
-  navigateOnStatusIndicator(event: MouseEvent) {
-    var date = new Date(this.instance.instant * 1000);
-    this._router.navigateOnClick(event, ['/supervision', this.instance.type.toLowerCase(), this.instance.id], { queryParams: {start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString(), env: this.params.env} });
-  }
 
   createTimeline() {
     this.timelineStart = Math.trunc(this.allInstance[0].start );
