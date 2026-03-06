@@ -35,10 +35,10 @@ export class ServerCardComponent {
   };
 
   @Input() menu: MatMenu;
-  @Output() onClick: EventEmitter<MouseEvent> = new EventEmitter();
 
   navigate(event: MouseEvent) {
-    this.onClick.emit(event);
+    var date = new Date(this._lastTrace);
+    this._router.navigateOnClick(event, ['/supervision', this._instance.type.toLowerCase(), this._instance.id], { queryParams: {start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString(), env: this._instance.env} });
   }
 
   navigateOnServerClick(event: MouseEvent) {
