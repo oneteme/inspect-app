@@ -19,16 +19,6 @@ import { IPeriod, IStep, IStepFrom, QueryParams } from '../../../model/conf.mode
 import { RestSessionDto } from '../../../model/request.model';
 import { col, TableProvider } from '@oneteme/jquery-table';
 
-interface SearchRestTableRow {
-  app_name: string;
-  resource: string;
-  start: number;
-  end: number | undefined;
-  user: string;
-  status: string;
-  raw: RestSessionDto;
-}
-
 
 @Component({
   templateUrl: './search-rest.view.html',
@@ -76,32 +66,32 @@ export class SearchRestView implements OnInit, OnDestroy {
   queryParams: Partial<QueryParams> = {};
   focusFieldName: any;
 
-  tableRows: SearchRestTableRow[] = [];
-  filteredTableRows: SearchRestTableRow[] = [];
-  tableConfig: TableProvider<SearchRestTableRow> = {
+  tableRows: RestSessionDto[] = [];
+  filteredTableRows: RestSessionDto[] = [];
+  tableConfig: TableProvider<RestSessionDto> = {
     columns: [
-      { ...col<SearchRestTableRow>('app_name', 'Hôte'), icon: 'dns' },
-      { ...col<SearchRestTableRow>('resource', 'Ressource'), icon: 'category' },
+      { ...col<RestSessionDto>('app_name', 'Hôte'), icon: 'dns', value: (row) => row.appName || 'N/A' },
+      { ...col<RestSessionDto>('resource', 'Ressource'), icon: 'category', value: (row) => `${row.method || ''} ${row.path || ''}`.trim() },
       {
-        ...col<SearchRestTableRow>('start', 'Début'), icon: 'schedule',
+        ...col<RestSessionDto>('start', 'Début'), icon: 'schedule',
         value: (row) => {
           const d = new Date(row.start * 1000);
           const ms = String(d.getMilliseconds()).padStart(3, '0');
           return `${this._dateFmt.format(d)} ${this._timeFmt.format(d)}.${ms}`;
-        }
+        },
+        sortValue: (row) => row.start
       },
       {
-        ...col<SearchRestTableRow>('end', 'Durée'), icon: 'timer',
+        ...col<RestSessionDto>('end', 'Durée'), icon: 'timer',
         value: (row) => row.end != null ? this.formatDuration(row.start, row.end) : 'En cours...'
       },
-      { ...col<SearchRestTableRow>('user', 'Utilisateur'), icon: 'person' },
-      { ...col<SearchRestTableRow>('status', 'Status'), optional: true, icon: 'info' },
+      { ...col<RestSessionDto>('user', 'Utilisateur'), icon: 'person', value: (row) => row.user || 'N/A' },
+      { ...col<RestSessionDto>('status', 'Status'), optional: true, icon: 'info', value: (row) => row.end != null ? String(row.status) : 'En cours' },
     ],
     slices: [
       { title: 'Status', columnKey: 'status' },
       { title: 'Hôte', columnKey: 'app_name' }
     ],
-    data: [],
     enableSearchBar: true,
     enableViewButton: true,
     allowColumnRemoval: true,
@@ -110,11 +100,12 @@ export class SearchRestView implements OnInit, OnDestroy {
     enableColumnDragDrop: false,
     pageSizeOptions: [5, 10, 15, 20, 100],
     pageSizeOptionsGroupBy: [20, 50, 100, 200],
+    defaultSort: { active: 'start', direction: 'desc' },
     emptyStateLabel: 'Aucun résultat',
     loadingStateLabel: 'Chargement des requêtes...',
-    rowClass: (row: SearchRestTableRow) => {
-      if (!row.raw.end) return 'row-in-progress';
-      const code = row.raw.status;
+    rowClass: (row: RestSessionDto) => {
+      if (!row.end) return 'row-in-progress';
+      const code = row.status;
       if (code >= 500) return 'row-ko';
       if (code >= 400) return 'row-warning';
       if (code >= 200) return 'row-ok';
@@ -223,7 +214,6 @@ export class SearchRestView implements OnInit, OnDestroy {
     this.isLoading = true;
     this.tableRows = [];
     this.filteredTableRows = [];
-    this.updateTableConfig();
 
     performance.mark('rest-request-start');
 
@@ -233,7 +223,7 @@ export class SearchRestView implements OnInit, OnDestroy {
         next: d => {
           performance.mark('rest-data-received');
           if (d) {
-            this.tableRows = d.map(row => this.toTableRow(row));
+            this.tableRows = d;
             if (this.queryParams.optional?.['q']) {
               this.filterValue = this.queryParams.optional['q'];
             }
@@ -259,14 +249,12 @@ export class SearchRestView implements OnInit, OnDestroy {
             this.tableRows = [];
             this.filteredTableRows = [];
             this.isLoading = false;
-            this.updateTableConfig();
           }
         },
         error: () => {
           this.tableRows = [];
           this.filteredTableRows = [];
           this.isLoading = false;
-          this.updateTableConfig();
         }
       });
   }
@@ -287,8 +275,8 @@ export class SearchRestView implements OnInit, OnDestroy {
     this.queryParams.rangestatus = rangestatus;
   }
 
-  onTableRowSelected(row: SearchRestTableRow): void {
-    this._router.navigate(['/session/rest', row.raw.id], {
+  onTableRowSelected(row: RestSessionDto): void {
+    this._router.navigate(['/session/rest', row.id], {
       queryParams: { env: this.queryParams.env }
     });
   }
@@ -352,39 +340,17 @@ export class SearchRestView implements OnInit, OnDestroy {
     const query = (this.filterValue || '').trim().toLowerCase();
     if (!query) {
       this.filteredTableRows = [...this.tableRows];
-      this.updateTableConfig();
       return;
     }
     this.filteredTableRows = this.tableRows.filter(row =>
-      row.app_name.toLowerCase().includes(query) ||
-      row.resource.toLowerCase().includes(query) ||
-      row.user.toLowerCase().includes(query) ||
-      row.status.toLowerCase().includes(query) ||
-      row.raw.query?.toLowerCase().includes(query) ||
-      row.raw.exception?.message?.toString().toLowerCase().includes(query) ||
-      row.raw.exception?.type?.toString().toLowerCase().includes(query)
+      (row.appName || '').toLowerCase().includes(query) ||
+      `${row.method || ''} ${row.path || ''}`.toLowerCase().includes(query) ||
+      (row.user || '').toLowerCase().includes(query) ||
+      String(row.status || '').toLowerCase().includes(query) ||
+      row.query?.toLowerCase().includes(query) ||
+      row.exception?.message?.toString().toLowerCase().includes(query) ||
+      row.exception?.type?.toString().toLowerCase().includes(query)
     );
-    this.updateTableConfig();
-  }
-
-  private updateTableConfig(): void {
-    this.tableConfig = {
-      ...this.tableConfig,
-      data: this.filteredTableRows,
-      isLoading: this.isLoading
-    };
-  }
-
-  private toTableRow(row: RestSessionDto): SearchRestTableRow {
-    return {
-      app_name: row.appName || 'N/A',
-      resource: `${row.method || ''} ${row.path || ''}`.trim(),
-      start: row.start,
-      end: row.end,
-      user: row.user || 'N/A',
-      status: row.end != null ? String(row.status) : 'En cours',
-      raw: row
-    };
   }
 
   private formatDuration(startSeconds: number, endSeconds: number): string {

@@ -7,6 +7,7 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {SharedModule} from '../shared/shared.module';
 import {ChartComponent} from "@oneteme/jquery-apexcharts";
 import {TableComponent} from "@oneteme/jquery-table";
+import {JqtCellDefDirective} from "@oneteme/jquery-table";
 import {SearchRestView} from "./search/rest/search-rest.view";
 import {SearchMainView} from "./search/main/search-main.view";
 import {StatisticDatabaseView} from "./statistic/database/statistic-database.view";
@@ -97,7 +98,8 @@ import {
     BrowserAnimationsModule,
     SharedModule,
     ChartComponent,
-    TableComponent
+    TableComponent,
+    JqtCellDefDirective
   ],
   declarations: [
     SearchRestView,

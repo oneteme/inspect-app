@@ -79,7 +79,6 @@ export class SearchMainView implements OnInit, OnDestroy {
       { title: 'Utilisateur', columnKey: 'user' },
       { title: 'Nom', columnKey: 'name' }
     ],
-    data: [],
     enableSearchBar: true,
     enableViewButton: true,
     allowColumnRemoval: true,
@@ -88,6 +87,7 @@ export class SearchMainView implements OnInit, OnDestroy {
     enableColumnDragDrop: false,
     pageSizeOptions: [5, 10, 15, 20, 100],
     pageSizeOptionsGroupBy: [20, 50, 100, 200],
+    defaultSort: { active: 'start', direction: 'desc' },
     emptyStateLabel: 'Aucun résultat',
     loadingStateLabel: 'Chargement des données...',
     rowClass: (row: SearchMainTableRow) => {
@@ -231,7 +231,6 @@ export class SearchMainView implements OnInit, OnDestroy {
     this.isLoading = true;
     this.tableRows = [];
     this.filteredTableRows = [];
-    this.updateTableConfig();
 
     this._traceService.getMainSessions(params)
     .pipe(takeUntil(this.$destroy))
@@ -248,14 +247,12 @@ export class SearchMainView implements OnInit, OnDestroy {
           this.tableRows = [];
           this.filteredTableRows = [];
           this.isLoading = false;
-          this.updateTableConfig();
         }
       },
       error: err => {
         this.tableRows = [];
         this.filteredTableRows = [];
         this.isLoading = false;
-        this.updateTableConfig();
       }
     });
   }
@@ -374,7 +371,6 @@ export class SearchMainView implements OnInit, OnDestroy {
     const query = (this.filterValue || '').trim().toLowerCase();
     if (!query) {
       this.filteredTableRows = [...this.tableRows];
-      this.updateTableConfig();
       return;
     }
 
@@ -389,16 +385,6 @@ export class SearchMainView implements OnInit, OnDestroy {
       row.raw.exception?.message?.toString().toLowerCase().includes(query) ||
       row.raw.exception?.type?.toString().toLowerCase().includes(query)
     );
-
-    this.updateTableConfig();
-  }
-
-  private updateTableConfig() {
-    this.tableConfig = {
-      ...this.tableConfig,
-      data: this.filteredTableRows,
-      isLoading: this.isLoading
-    };
   }
 
   private toTableRow(row: MainSessionDto): SearchMainTableRow {

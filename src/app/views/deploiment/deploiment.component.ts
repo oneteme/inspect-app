@@ -1,16 +1,14 @@
-import {Component, inject, OnDestroy, ViewChild} from '@angular/core';
+import {Component, inject, OnDestroy} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
 import {combineLatest, finalize, forkJoin, of, Subscription, switchMap} from 'rxjs';
 import {app} from 'src/environments/environment';
 import {Constants} from '../constants';
-import {MatPaginator} from '@angular/material/paginator';
-import {MatSort} from '@angular/material/sort';
 import {InstanceService} from 'src/app/service/jquery/instance.service';
 import {LastServerStart} from 'src/app/model/jquery.model';
-import {MatTableDataSource} from '@angular/material/table';
 import {InstanceTraceService} from "../../service/jquery/instance-trace.service";
 import {EnvRouter} from "../../service/router.service";
 import {groupByColor} from "../../shared/util";
+import {TableProvider} from "@oneteme/jquery-table";
 
 @Component({
   templateUrl: './deploiment.component.html',
@@ -26,18 +24,31 @@ export class DeploimentComponent implements OnDestroy {
 
   today: Date = new Date();
   MAPPING_TYPE = Constants.MAPPING_TYPE;
-  serverStartDisplayedColumns: string[] = ["appName", "duree", "version", "branch", "restart"];
-  lastServerStart: { data?: MatTableDataSource<LastServerStart>, isLoading?: boolean } = {};
+  rawRows: (LastServerStart & { lastTrace?: number })[] = [];
+  isLoading = false;
+  readonly tableConfig: TableProvider<LastServerStart & { lastTrace?: number }> = {
+    columns: [
+      { key: 'appName', header: 'Hôte', sortable: true, icon: 'dns', groupable: false, sliceable: false },
+      { key: 'duree',   header: 'Depuis', sortable: true, icon: 'schedule', groupable: false, sliceable: false },
+      { key: 'version', header: 'Version', sortable: true, icon: 'label' },
+      { key: 'branch',  header: 'Branche', sortable: true, icon: 'fork_right' },
+      { key: 'restart', header: 'Démarrage', sortable: true, icon: 'restart_alt' },
+    ],
+    enableSearchBar: true,
+    enableViewButton: true,
+    enablePagination: true,
+    pageSize: 10,
+    pageSizeOptions: [10, 25, 50],
+    defaultSort: { active: 'duree', direction: 'desc' },
+  };
+
   versionColor: any;
   params: Partial<{ env: string }> = {};
   subscriptions: Subscription[] = [];
   date = new Date().getTime();
-  filterValue: string = '';
   onlineServerStat: number = 0;
   pendingServerStat: number = 0;
   offlineServerStat: number = 0;
-  @ViewChild('lastServerStartTablePaginator', {static: true}) lastServerStartTablePaginator: MatPaginator;
-  @ViewChild('lastServerStartTableSort') lastServerStartTableSort: MatSort;
 
   constructor() {
     this.subscriptions.push(combineLatest({
@@ -53,7 +64,7 @@ export class DeploimentComponent implements OnDestroy {
   }
 
   getLastServerStart() {
-    this.lastServerStart.isLoading = true;
+    this.isLoading = true;
     this.today = new Date();
     this.subscriptions.push(
       this._instanceService.getLastServerStart({env: this.params.env})
@@ -64,20 +75,11 @@ export class DeploimentComponent implements OnDestroy {
             lastServers: of(lastServers)
           });
         }),
-        finalize(() => (this.lastServerStart.isLoading = false)))
+        finalize(() => (this.isLoading = false)))
       .subscribe({
         next: (value: {lastTraces: {id: string, date: number}[], lastServers: LastServerStart[]}) => {
           this.versionColor = groupByColor(value.lastServers, (v: any) => v.version);
-          this.lastServerStart.data = new MatTableDataSource(value.lastServers.map(ls => ({...ls, lastTrace: value.lastTraces.find(lt => lt.id === ls.id)?.date})));
-          this.lastServerStart.data.paginator = this.lastServerStartTablePaginator;
-          this.lastServerStart.data.sort = this.lastServerStartTableSort;
-          this.lastServerStart.data.sortingDataAccessor = sortingDataAccessor;
-          if(this.filterValue){
-            this.lastServerStart.data.filter = this.filterValue.trim().toLowerCase();
-            if (this.lastServerStart.data.paginator) {
-              this.lastServerStart.data.paginator.firstPage();
-            }
-          }
+          this.rawRows = value.lastServers.map(ls => ({...ls, lastTrace: value.lastTraces.find(lt => lt.id === ls.id)?.date}));
           this.onlineServerStat = this.getOnlineServers();
           this.pendingServerStat = this.getPendingServers();
           this.offlineServerStat = this.getOfflineServers();
@@ -92,23 +94,20 @@ export class DeploimentComponent implements OnDestroy {
 
   // Méthodes pour calculer les statistiques de serveurs
   getOnlineServers(): number {
-    const servers = this.lastServerStart.data?.data || [];
-    return servers.filter(server => {
-      return !server.end && server['lastTrace'] && server['lastTrace'] >= new Date().getTime() - (server.configuration?.scheduling.interval + 60 || 60 * 60) * 1000;
+    return this.rawRows.filter(server => {
+      return !server.end && server.lastTrace && server.lastTrace >= new Date().getTime() - (server.configuration?.scheduling.interval + 60 || 60 * 60) * 1000;
     }).length;
   }
 
   getPendingServers(): number {
-    const servers = this.lastServerStart.data?.data || [];
-    return servers.filter(server => {
-      return !server.end && server['lastTrace'] && server['lastTrace'] < new Date().getTime() - (server.configuration?.scheduling.interval + 60 || 60 * 60) * 1000;
+    return this.rawRows.filter(server => {
+      return !server.end && server.lastTrace && server.lastTrace < new Date().getTime() - (server.configuration?.scheduling.interval + 60 || 60 * 60) * 1000;
     }).length;
   }
 
   getOfflineServers(): number {
-    const servers = this.lastServerStart.data?.data || [];
-    return servers.filter(server => {
-      return server.end || !server['lastTrace'];
+    return this.rawRows.filter(server => {
+      return server.end || !server.lastTrace;
     }).length;
   }
 
@@ -126,16 +125,4 @@ export class DeploimentComponent implements OnDestroy {
   navigateOnRestartClick(event: MouseEvent, start: number, server: string) {
     this._router.navigateOnClick(event, ['/session/startup'], { queryParams: {env: this.params.env, start: new Date(start).toISOString(), end: new Date().toISOString(), server: server} });
   }
-
-  applyFilter(event: Event) {
-    this.lastServerStart.data.filter = (event.target as HTMLInputElement).value.trim().toLowerCase();
-    if (this.lastServerStart.data.paginator) {
-      this.lastServerStart.data.paginator.firstPage();
-    }
-  }
-}
-
-const sortingDataAccessor = (row: any, columnName: string) => {
-  if (columnName == "duree") return (new Date().getTime() - row["start"])
-  return row[columnName as keyof any] as string;
 }
