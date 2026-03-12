@@ -17,7 +17,7 @@ import { MAT_DATE_RANGE_SELECTION_STRATEGY } from '@angular/material/datepicker'
 import { CustomDateRangeSelectionStrategy } from '../../../shared/material/custom-date-range-selection-strategy';
 import { IPeriod, IStep, IStepFrom, QueryParams } from '../../../model/conf.model';
 import { RestSessionDto } from '../../../model/request.model';
-import { col, TableProvider } from '@oneteme/jquery-table';
+import { TableProvider } from '@oneteme/jquery-table';
 
 
 @Component({
@@ -71,15 +71,15 @@ export class SearchRestView implements OnInit, OnDestroy {
   tableConfig: TableProvider<RestSessionDto> = {
 
     columns: [
-      { key: 'appName', header: 'Hôte', sortable: true, icon: 'dns', width: '220px' },
+      { key: 'appName', header: 'Hôte', sortable: true, icon: 'dns', width: '18%' },
       { key: 'resource', header: 'Ressource', sortable: true, icon: 'category', value: (row) => `${row.method || ''} ${row.path || ''}`.trim() },
-      { key: 'start', header: 'Début', sortable: true, icon: 'schedule', width: '200px',
+      { key: 'start', header: 'Début', sortable: true, icon: 'schedule', width: '17%',
         value: (row) => { const d = new Date(row.start * 1000); const ms = String(d.getMilliseconds()).padStart(3, '0'); return `${this._dateFmt.format(d)} ${this._timeFmt.format(d)}.${ms}`; },
         sortValue: (row) => row.start },
-      { key: 'end', header: 'Durée', sortable: true, icon: 'timer', width: '120px',
+      { key: 'end', header: 'Durée', sortable: true, icon: 'timer', width: '13%',
         value: (row) => row.end != null ? this.formatDuration(row.start, row.end) : 'En cours...',
         sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE },
-      { key: 'user', header: 'Utilisateur', sortable: true, icon: 'person', width: '120px' },
+      { key: 'user', header: 'Utilisateur', sortable: true, icon: 'person', width: '15%' },
     ],
 
     slices: [
@@ -115,7 +115,8 @@ export class SearchRestView implements OnInit, OnDestroy {
       if (code >= 400) return 'row-warning';
       if (code >= 200) return 'row-ok';
       return '';
-    }
+    },
+    onRowSelected: (row: RestSessionDto) => this.onTableRowSelected(row),
   };  
   
   constructor() {

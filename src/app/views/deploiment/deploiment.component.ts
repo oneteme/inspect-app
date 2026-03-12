@@ -28,11 +28,11 @@ export class DeploimentComponent implements OnDestroy {
   isLoading = false;
   readonly tableConfig: TableProvider<LastServerStart & { lastTrace?: number }> = {
     columns: [
-      { key: 'appName', header: 'Hôte', sortable: true, icon: 'dns', width: '260px', groupable: false, sliceable: false },
-      { key: 'duree',   header: 'Depuis', sortable: true, icon: 'schedule', width: '150px', groupable: false, sliceable: false, sortValue: (row) => this.today.getTime() - row.start },
+      { key: 'appName', header: 'Hôte', sortable: true, icon: 'dns', width: '23%', groupable: false, sliceable: false },
+      { key: 'duree',   header: 'Depuis', sortable: true, icon: 'schedule', width: '14%', groupable: false, sliceable: false, sortValue: (row) => this.today.getTime() - row.start },
       { key: 'version', header: 'Version', sortable: true, icon: 'label' },
-      { key: 'branch',  header: 'Branche', sortable: true, icon: 'fork_right', width: '300px' },
-      { key: 'restart', header: 'Démarrage', sortable: true, icon: 'restart_alt', width: '150px' },
+      { key: 'branch',  header: 'Branche', sortable: true, icon: 'fork_right', width: '25%' },
+      { key: 'restart', header: 'Démarrage', sortable: true, icon: 'restart_alt', width: '13%' },
     ],
     enableSearchBar: true,
     // initialSearchQuery: 'pmo',

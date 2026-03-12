@@ -66,13 +66,13 @@ export class SearchMainView implements OnInit, OnDestroy {
   filteredTableRows: SearchMainTableRow[] = [];
   tableConfig: TableProvider<SearchMainTableRow> = {
     columns: [
-      { key: 'app_name', header: 'Hôte', sortable: true, icon: 'dns',  width: '150px' },
-      { key: 'name', header: 'Nom', sortable: true, icon: 'label',  width: '200px' },
+      { key: 'app_name', header: 'Hôte', sortable: true, icon: 'dns', width: '12%' },
+      { key: 'name', header: 'Nom', sortable: true, icon: 'label', width: '15%' },
       { key: 'location', header: 'Ressource', sortable: true, icon: 'category' },
-      { key: 'start', header: 'Début', sortable: true, icon: 'schedule',  width: '170px' },
-      { key: 'durée', header: 'Durée', sortable: true, icon: 'timer',  width: '110px' },
-      { key: 'user', header: 'Utilisateur', sortable: true, icon: 'person',  width: '120px' },
-      { key: 'status', header: 'Status', sortable: true, optional: true, icon: 'info', width: '10px' },
+      { key: 'start', header: 'Début', sortable: true, icon: 'schedule', width: '17%' },
+      { key: 'durée', header: 'Durée', sortable: true, icon: 'timer', width: '12%' },
+      { key: 'user', header: 'Utilisateur', sortable: true, icon: 'person', width: '15%' },
+      { key: 'status', header: 'Status', sortable: true, optional: true, icon: 'info', width: '8%' },
     ],
     slices: [
       { title: 'Status', columnKey: 'status' },
@@ -94,6 +94,7 @@ export class SearchMainView implements OnInit, OnDestroy {
       if (row.status === 'En cours') return 'row-in-progress';
       return '';
     },
+    onRowSelected: (row: SearchMainTableRow) => this.onTableRowSelected(row),
   };
   serverNameIsLoading = true;
   serverFilterForm = new FormGroup({
