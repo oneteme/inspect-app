@@ -1,12 +1,9 @@
-import {Component, EventEmitter, inject, Input, OnDestroy, Output, ViewChild} from "@angular/core";
-import {MatPaginator} from "@angular/material/paginator";
-import {MatSort} from "@angular/material/sort";
-import {MatTableDataSource} from "@angular/material/table";
+import {Component, EventEmitter, inject, Input, OnDestroy, Output} from "@angular/core";
 import {EnvRouter} from "../../../../../service/router.service";
-import {Subject} from "rxjs";
 import {DatePipe} from "@angular/common";
-import {RestRequestDto} from "../../../../../model/request.model";
+import {RestRequestDto, RestSessionDto} from "../../../../../model/request.model";
 import {INFINITY} from "../../../../constants";
+import {TableProvider} from '@oneteme/jquery-table';
 
 @Component({
   selector: 'rest-table',
@@ -16,36 +13,46 @@ import {INFINITY} from "../../../../constants";
 export class DetailRestTableComponent implements OnDestroy {
   private readonly _router = inject(EnvRouter);
   private readonly pipe = new DatePipe('fr-FR');
-  private readonly $destroy = new Subject<void>();
 
-  displayedColumns: string[] = ['host', 'path', 'start', 'duree', 'user', 'action'];
-  dataSource: MatTableDataSource<RestRequestDto> = new MatTableDataSource();
-  filterTable = new Map<string, any>();
-  @Input() filterValue: string = '';
-  @ViewChild('paginator', {static: true}) paginator: MatPaginator;
-  @ViewChild('sort', {static: true}) sort: MatSort;
+  tableConfig: TableProvider<RestRequestDto> = {
+    columns: [
+      { key: 'host', header: 'Hôte', icon: 'dns' },
+      { key: 'path', header: 'Ressource', icon: 'category', sliceable: false,  groupable: false },
+      { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
+      { key: 'duration', header: 'Durée', icon: 'timer', sliceable: false, groupable: false },
+      { key: 'user', header: 'Utilisateur', icon: 'person', optional: true },
+      { key: 'status', header: 'Statut', optional: true},
+      { key: 'exception', header: 'Exception', optional: true, value: (row) => row.exception?.type },
+      { key: 'action', header: 'Action', sliceable: false, groupable: false, sortable: false}
+    ],
+    enableSearchBar: true,
+    enableViewButton: true,
+    allowColumnRemoval: true,
+    enablePagination: true,
+    pageSize: 10,
+    enableColumnDragDrop: false,
+    pageSizeOptions: [5, 10, 15, 20, 100],
+    pageSizeOptionsGroupBy: [20, 50, 100, 200],
+    emptyStateLabel: 'Aucun résultat',
+    loadingStateLabel: 'Chargement des requêtes...',
+    rowClass: (row: RestSessionDto) => {
+      const code = row.status;
+      if (code >= 500) return 'row-ko';
+      if (code >= 400) return 'row-warning';
+      if (code >= 200) return 'row-ok';
+      if (code == 0 && row.end) return 'row-unavailable';
+      return '';
+    }
+  };
 
-  @Input() useFilter: boolean;
+  _requests: RestRequestDto[] = [];
+
   @Input() isLoading: boolean;
-  @Input() pageSize: number;
 
   @Input() set requests(requests: RestRequestDto[]) {
-    if (requests) {
-      this.dataSource = new MatTableDataSource(requests);
-      this.dataSource.paginator = this.paginator;
-
-      this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
-      this.dataSource.sort = this.sort;
-      if (this.useFilter) {
-        this.dataSource.filterPredicate = this.filterPredicate;
-        if (this.filterValue) {
-          this.filterTable.set('filter', this.filterValue.trim().toLowerCase());
-          this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
-        }
-      }
-      this.dataSource.paginator.pageIndex = 0;
-    } else {
-      this.dataSource = new MatTableDataSource();
+    this._requests = [];
+    if(requests) {
+      this._requests = requests;
     }
   }
 
@@ -53,8 +60,7 @@ export class DetailRestTableComponent implements OnDestroy {
   @Output() onClickRemote: EventEmitter<{ event: MouseEvent, row: any }> = new EventEmitter();
 
   ngOnDestroy() {
-    this.$destroy.next();
-    this.$destroy.complete();
+
   }
 
   selectedRemote(event: MouseEvent, row: any) {
@@ -63,15 +69,6 @@ export class DetailRestTableComponent implements OnDestroy {
 
   selectedRequest(event: MouseEvent, row: any) {
     this.onClickRow.emit({event: event, row: row});
-  }
-
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.filterTable.set('filter', filterValue.trim().toLowerCase());
-    this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
   }
 
   filterPredicate = (data: RestRequestDto, filter: string) => {
@@ -100,18 +97,5 @@ export class DetailRestTableComponent implements OnDestroy {
     if (columnName == "duree") return row['end'] ? row["end"] - row["start"] : INFINITY;
 
     return row[columnName as keyof any] as string;
-  }
-
-  navigate(event: MouseEvent, element: any) {
-
-    let segment = 'rest';
-    if (element.type) segment = `main/${element.type}`;
-    if (event.ctrlKey) {
-      this._router.open(`#/session/${segment}/${element.parent}`, '_blank',)
-    } else {
-      this._router.navigate([`/session/${segment}`, element.parent,], {
-        queryParams: {env: element.env}
-      });
-    }
   }
 }

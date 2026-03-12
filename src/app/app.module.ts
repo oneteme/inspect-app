@@ -40,6 +40,7 @@ import {NavbarComponent} from './components/navbar/navbar.component';
 import {ServerSupervisionView} from "./views/supervision/_component/server/server-supervision.view";
 import {ClientSupervisionView} from "./views/supervision/_component/client/client-supervision.view";
 import {StatisticRequestView} from "./views/statistic/request/statistic-request.view";
+import {DeploimentV2Component} from "./views/deploiment_v2/deploiment_v2.component";
 
 
 registerLocaleData(localeFr, 'fr-FR');
@@ -227,6 +228,11 @@ const routes: Route[] = [
   {
     path: 'deploiment',
     component: DeploimentComponent,
+    title: 'Déploiement'
+  },
+  {
+    path: 'deploiment_v2',
+    component: DeploimentV2Component,
     title: 'Déploiement'
   },
   {

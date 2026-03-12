@@ -62,7 +62,6 @@ export class DeploimentComponent implements OnDestroy {
   versionColor: any;
   params: Partial<{ env: string }> = {};
   subscriptions: Subscription[] = [];
-  date = new Date().getTime();
   onlineServerStat: number = 0;
   pendingServerStat: number = 0;
   offlineServerStat: number = 0;

@@ -414,3 +414,25 @@ loading.hidden {
   --mdc-outlined-text-field-focus-outline-color: #2563eb;
   --mdc-outlined-text-field-focus-label-text-color: #2563eb;
 }
+
+tr.mat-mdc-row {
+  &.row-ok > td.mat-mdc-cell:first-of-type {
+    border-left: 3px solid #4caf50;
+    background: linear-gradient(90deg, rgba(76, 175, 80, 0.08) 0%, transparent 100%);
+  }
+
+  &.row-warning > td.mat-mdc-cell:first-of-type {
+    border-left: 3px solid #f9ad4e;
+    background: linear-gradient(90deg, rgba(249, 173, 78, 0.08) 0%, transparent 100%);
+  }
+
+  &.row-ko > td.mat-mdc-cell:first-of-type {
+    border-left: 3px solid #f44336;
+    background: linear-gradient(90deg, rgba(244, 67, 54, 0.08) 0%, transparent 100%);
+  }
+
+  &.row-unavailable > td.mat-mdc-cell:first-of-type {
+    border-left: 3px solid gray !important;
+    background: linear-gradient(90deg, rgba(128, 128, 128, 0.08) 0%, transparent 100%) !important;
+  }
+}

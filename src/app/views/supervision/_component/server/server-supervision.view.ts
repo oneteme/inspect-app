@@ -52,7 +52,6 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   private readonly $destroy = new Subject<void>();
   private readonly _snackBar = inject(MatSnackBar);
 
-  date = new Date().getTime();
   readonly formGroup = new FormGroup({
     range: new FormGroup({
       start: new FormControl<Date | null>(null, [Validators.required]),

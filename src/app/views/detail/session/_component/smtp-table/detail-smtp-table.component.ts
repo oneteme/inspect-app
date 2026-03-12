@@ -1,10 +1,8 @@
-import {Component, EventEmitter, Input, Output, ViewChild} from "@angular/core";
-import {MatPaginator} from "@angular/material/paginator";
-import {MatSort} from "@angular/material/sort";
-import {MatTableDataSource} from "@angular/material/table";
+import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {DatePipe} from "@angular/common";
 import {MailRequestDto} from "../../../../../model/request.model";
 import {INFINITY} from "../../../../constants";
+import {TableProvider} from '@oneteme/jquery-table';
 
 @Component({
   selector: 'smtp-table',
@@ -13,49 +11,48 @@ import {INFINITY} from "../../../../constants";
 })
 export class DetailSmtpTableComponent {
   private readonly pipe = new DatePipe('fr-FR');
-  displayedColumns: string[] = ['host', 'command', 'start', 'duree', 'user'];
-  dataSource: MatTableDataSource<MailRequestDto> = new MatTableDataSource();
-  filterTable = new Map<string, any>();
-  @Input() filterValue: string = '';
-  @ViewChild('paginator', {static: true}) paginator: MatPaginator;
-  @ViewChild('sort', {static: true}) sort: MatSort;
+
+  tableConfig: TableProvider<MailRequestDto> = {
+    columns: [
+      { key: 'host', header: 'Hôte', icon: 'dns' },
+      { key: 'command', header: 'Ressource', icon: 'category' },
+      { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
+      { key: 'duration', header: 'Durée', icon: 'timer', sliceable: false, groupable: false },
+      { key: 'user', header: 'Utilisateur', icon: 'person', optional: true },
+      { key: 'failed', header: 'Statut', optional: true, value: (row) => row.failed ? 'KO' : 'OK' },
+      { key: 'exception', header: 'Exception', optional: true, value: (row) => row.exception?.type }
+    ],
+    enableSearchBar: true,
+    enableViewButton: true,
+    allowColumnRemoval: true,
+    enablePagination: true,
+    pageSize: 10,
+    enableColumnDragDrop: false,
+    pageSizeOptions: [5, 10, 15, 20, 100],
+    pageSizeOptionsGroupBy: [20, 50, 100, 200],
+    emptyStateLabel: 'Aucun résultat',
+    loadingStateLabel: 'Chargement des requêtes...',
+    rowClass: (row: MailRequestDto) => {
+      const failed = row.failed;
+      if(row.end == null) return '';
+      if (failed) return 'row-ko';
+      if (!failed) return 'row-ok';
+    }
+  };
+
+  _requests: MailRequestDto[] = [];
 
   @Input() set requests(requests: MailRequestDto[]) {
     if (requests) {
-      this.dataSource = new MatTableDataSource(requests);
-      this.dataSource.paginator = this.paginator;
-
-      this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
-      this.dataSource.sort = this.sort;
-      if (this.useFilter) {
-        this.dataSource.filterPredicate = this.filterPredicate;
-        if (this.filterValue) {
-          this.filterTable.set('filter', this.filterValue.trim().toLowerCase());
-          this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
-        }
-      }
-      this.dataSource.paginator.pageIndex = 0;
-    } else {
-      this.dataSource = new MatTableDataSource();
+      this._requests = requests;
     }
   }
 
-  @Input() useFilter: boolean;
   @Input() isLoading: boolean;
-  @Input() pageSize: number;
   @Output() onClickRow: EventEmitter<{ event: MouseEvent, row: any }> = new EventEmitter();
 
   selectedRequest(event: MouseEvent, row: any) {
     this.onClickRow.emit({event: event, row: row});
-  }
-
-  applyFilter(event: Event) {
-    const filterValue = (event.target as HTMLInputElement).value;
-    this.filterTable.set('filter', filterValue.trim().toLowerCase());
-    this.dataSource.filter = JSON.stringify(Array.from(this.filterTable.entries()));
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
   }
 
   sortingDataAccessor = (row: any, columnName: string) => {

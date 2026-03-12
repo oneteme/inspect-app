@@ -1,11 +1,7 @@
-import {Component, Input, ViewChild} from "@angular/core";
-import {DatePipe} from "@angular/common";
-import {DurationPipe} from "../../../../../shared/pipe/duration.pipe";
+import {Component, Input} from "@angular/core";
 import {HttpSessionStage} from "../../../../../model/trace.model";
-import {MatTableDataSource} from "@angular/material/table";
-import {MatPaginator} from "@angular/material/paginator";
-import {MatSort} from "@angular/material/sort";
 import {INFINITY} from "../../../../constants";
+import {TableProvider} from '@oneteme/jquery-table';
 
 @Component({
   selector: 'stage-table',
@@ -13,20 +9,29 @@ import {INFINITY} from "../../../../constants";
   styleUrls: ['./detail-stage-table.component.scss']
 })
 export class DetailStageTableComponent {
-  displayedColumns: string[] = ['name',  'start', 'duree'];
-  dataSource: MatTableDataSource<HttpSessionStage> = new MatTableDataSource();
+  tableConfig: TableProvider<HttpSessionStage> = {
+    columns: [
+      { key: 'name', header: 'Evènement', icon: 'event_list', sliceable: false, groupable: false },
+      { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
+      { key: 'duration', header: 'Durée', icon: 'timer', sliceable: false, groupable: false }
+    ],
+    enableSearchBar: true,
+    enableViewButton: true,
+    allowColumnRemoval: true,
+    enablePagination: true,
+    pageSize: 10,
+    enableColumnDragDrop: false,
+    pageSizeOptions: [5, 10, 15, 20, 100],
+    pageSizeOptionsGroupBy: [20, 50, 100, 200],
+    emptyStateLabel: 'Aucun résultat',
+    loadingStateLabel: 'Chargement des requêtes...'
+  };
 
-  @ViewChild('paginator', {static: true}) paginator: MatPaginator;
-  @ViewChild('sort', {static: true}) sort: MatSort;
+  _requests: HttpSessionStage[] = [];
 
   @Input() set requests(requests: HttpSessionStage[]) {
     if(requests) {
-      this.dataSource = new MatTableDataSource(requests);
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
-      this.dataSource.sort = this.sort;
-    }else{
-      this.dataSource = new MatTableDataSource();
+      this._requests = requests;
     }
   }
 

@@ -10,54 +10,6 @@
   min-height: 0;
 }
 
-.mat-mdc-row {
-  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
-
-  &:hover {
-    cursor: pointer;
-    background-color: rgba(63, 81, 181, 0.04);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transform: translateY(-1px);
-
-    .mat-mdc-cell {
-      background-color: transparent;
-    }
-  }
-
-  &:active {
-    transform: translateY(0);
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
-  }
-}
-
-::ng-deep tr.mat-mdc-row {
-  &.row-ok > td.mat-mdc-cell:first-of-type {
-    border-left: 3px solid #4caf50;
-    background: linear-gradient(90deg, rgba(76, 175, 80, 0.08) 0%, transparent 100%);
-  }
-
-  &.row-warning > td.mat-mdc-cell:first-of-type {
-    border-left: 3px solid #f9ad4e;
-    background: linear-gradient(90deg, rgba(249, 173, 78, 0.08) 0%, transparent 100%);
-  }
-
-  &.row-ko > td.mat-mdc-cell:first-of-type {
-    border-left: 3px solid #f44336;
-    background: linear-gradient(90deg, rgba(244, 67, 54, 0.08) 0%, transparent 100%);
-  }
-
-  &.row-in-progress > td.mat-mdc-cell:first-of-type {
-    border-left: 3px solid #0080ff;
-    background: linear-gradient(90deg, rgba(0, 128, 255, 0.08) 0%, transparent 100%);
-    animation: pulse 2s ease-in-out infinite;
-  }
-}
-
-@keyframes pulse {
-  0%, 100% { background: linear-gradient(90deg, rgba(0, 128, 255, 0.08) 0%, transparent 100%); }
-  50%       { background: linear-gradient(90deg, rgba(0, 128, 255, 0.18) 0%, transparent 100%); }
-}
-
 .filter-container {
   margin-left: auto;
   display: flex;

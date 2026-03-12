@@ -82,6 +82,14 @@
         <mat-icon class="material-symbols-outlined">{{ MAPPING_TYPE['deploiment'].icon }}</mat-icon>
       </button>
 
+      <button
+              class="action-btn deploy-btn"
+              [matTooltip]="'Deploiement New'"
+              (click)="gotoDeploimentV2()"
+      >
+        <mat-icon class="material-symbols-outlined">{{ MAPPING_TYPE['deploiment'].icon }}</mat-icon>
+      </button>
+
       <button class="env-trigger" [matMenuTriggerFor]="envMenu" [ngClass]="'env-' + getEnvClass(env.value)">
         <span class="env-letter">{{ env.value?.charAt(0) | uppercase }}</span>
         <span class="env-label">{{ env.value | uppercase }}</span>

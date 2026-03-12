@@ -16,7 +16,7 @@ import { MY_DATE_FORMATS } from '../../../shared/shared.module';
 import { MAT_DATE_RANGE_SELECTION_STRATEGY } from '@angular/material/datepicker';
 import { CustomDateRangeSelectionStrategy } from '../../../shared/material/custom-date-range-selection-strategy';
 import { IPeriod, IStep, IStepFrom, QueryParams } from '../../../model/conf.model';
-import { RestSessionDto } from '../../../model/request.model';
+import {MainSessionDto, RestSessionDto} from '../../../model/request.model';
 import { TableProvider } from '@oneteme/jquery-table';
 
 
@@ -37,8 +37,6 @@ export class SearchRestView implements OnInit, OnDestroy {
   private readonly _location = inject(Location);
   private readonly _filter = inject(FilterService);
   private readonly $destroy = new Subject<void>();
-  private readonly _dateFmt = new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  private readonly _timeFmt = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
 
   MAPPING_TYPE = Constants.MAPPING_TYPE;
   filterConstants = FilterConstants;
@@ -55,7 +53,6 @@ export class SearchRestView implements OnInit, OnDestroy {
     })
   });
 
-  filterValue = '';
   filters: { icon: string; label: string; color: string; value: any }[] = [
     { icon: 'warning', label: '5xx', color: '#bb2124', value: '5xx' },
     { icon: 'error', label: '4xx', color: '#f9ad4e', value: '4xx' },
@@ -66,35 +63,41 @@ export class SearchRestView implements OnInit, OnDestroy {
   queryParams: Partial<QueryParams> = {};
   focusFieldName: any;
 
-  tableRows: RestSessionDto[] = [];
-  filteredTableRows: RestSessionDto[] = [];
   tableConfig: TableProvider<RestSessionDto> = {
 
     columns: [
       { key: 'appName', header: 'Hôte', sortable: true, icon: 'dns', width: '18%' },
-      { key: 'resource', header: 'Ressource', sortable: true, icon: 'category', value: (row) => `${row.method || ''} ${row.path || ''}`.trim() },
+      { key: 'path', header: 'Ressource', sortable: true, icon: 'category' },
       { key: 'start', header: 'Début', sortable: true, icon: 'schedule', width: '17%',
-        value: (row) => { const d = new Date(row.start * 1000); const ms = String(d.getMilliseconds()).padStart(3, '0'); return `${this._dateFmt.format(d)} ${this._timeFmt.format(d)}.${ms}`; },
         sortValue: (row) => row.start },
-      { key: 'end', header: 'Durée', sortable: true, icon: 'timer', width: '13%',
-        value: (row) => row.end != null ? this.formatDuration(row.start, row.end) : 'En cours...',
+      { key: 'duration', header: 'Durée', sortable: true, icon: 'timer', width: '13%',
         sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE },
       { key: 'user', header: 'Utilisateur', sortable: true, icon: 'person', width: '15%' },
+      { key: 'status', header: 'Status', sortable: true, optional: true, icon: 'task_alt', width: '13%',
+        value: (row: RestSessionDto) => {
+          if(!row.end) return 'En cours...';
+          return row.status;
+        }
+      },
+      { key: 'exception', header: 'Exception', sortable: true, optional: true, icon: 'error_outline', width: '13%',
+        value: (row: RestSessionDto) => {
+          return row.exception?.type;
+        }
+      }
     ],
-
     slices: [
       { title: 'Status', columnKey: 'status' },
       { title: 'Hôte', columnKey: 'appName' },
       {
         title: 'Durée',
-        columnKey: 'end',
+        columnKey: 'duration',
         categories: [
           { key: '<100ms', label: '< 100ms', filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
           { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1 && (row.end - row.start) < 0.5 },
           { key: '500ms-1s', label: '500ms - 1s', filter: (row) => row.end != null && (row.end - row.start) >= 0.5 && (row.end - row.start) < 1 },
           { key: '1s-5s', label: '1s - 5s', filter: (row) => row.end != null && (row.end - row.start) >= 1 && (row.end - row.start) < 5 },
           { key: '>5s', label: '> 5s', filter: (row) => row.end != null && (row.end - row.start) >= 5 },
-          { key: 'in-progress', label: 'En cours', filter: (row) => row.end == null },
+          { key: 'in-progress', label: 'En cours...', filter: (row) => row.end == null },
         ]
       }],
     enableSearchBar: true,
@@ -109,7 +112,6 @@ export class SearchRestView implements OnInit, OnDestroy {
     emptyStateLabel: 'Aucun résultat',
     loadingStateLabel: 'Chargement des requêtes...',
     rowClass: (row: RestSessionDto) => {
-      if (!row.end) return 'row-in-progress';
       const code = row.status;
       if (code >= 500) return 'row-ko';
       if (code >= 400) return 'row-warning';
@@ -117,26 +119,29 @@ export class SearchRestView implements OnInit, OnDestroy {
       return '';
     },
     onRowSelected: (row: RestSessionDto) => this.onTableRowSelected(row),
-  };  
-  
+  };
+  sessions: RestSessionDto[];
+
   constructor() {
     this._activatedRoute.queryParams.subscribe({
       next: (params: Params) => {
-        this.filterValue = '';
-           if(params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.env ||  app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server],null,!params.rangestatus ? []: Array.isArray(params.rangestatus) ? params.rangestatus : [params.rangestatus] )
-           if(!params.start && !params.end)  {
+        if(params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.env ||  app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server],null,!params.rangestatus ? []: Array.isArray(params.rangestatus) ? params.rangestatus : [params.rangestatus] )
+        if(!params.start && !params.end)  {
           let period;
-            if(params.step && params.from){
+          if(params.step && params.from){
             period = new IStepFrom(params.step, params.from);
-            } else if(params.step){
+          } else if(params.step){
             period = new IStep(params.step);
           }
-            this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), params.env || app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server], null, !params.rangestatus ? []: Array.isArray(params.rangestatus) ? params.rangestatus : [params.rangestatus]);
+          this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), params.env || app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server], null, !params.rangestatus ? []: Array.isArray(params.rangestatus) ? params.rangestatus : [params.rangestatus]);
         }
-           if(params.q){
-             this.queryParams.optional = { 'q': params.q }
+        if(params.q){
+          this.tableConfig = {
+            ...this.tableConfig,
+            initialSearchQuery: params.q
+          }
         }
-          this.patchStatusValue(this.queryParams.rangestatus)
+        this.patchStatusValue(this.queryParams.rangestatus)
         this.patchServerValue(this.queryParams.appname);
         this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
@@ -218,49 +223,33 @@ export class SearchRestView implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
-    this.tableRows = [];
-    this.filteredTableRows = [];
 
     performance.mark('rest-request-start');
 
     this._traceService.getRestSessions(params)
-      .pipe(takeUntil(this.$destroy))
+      .pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false))
       .subscribe({
         next: d => {
           performance.mark('rest-data-received');
-          if (d) {
-            this.tableRows = d;
-            if (this.queryParams.optional?.['q']) {
-              this.filterValue = this.queryParams.optional['q'];
-            }
-            this.isLoading = false;
-            this.applyTableFilter();
-            // Laisser un tick pour que le DOM se mette à jour avant de mesurer
-            setTimeout(() => {
-              performance.mark('rest-render-done');
-              performance.measure('⏱ BACK → données reçues (réseau+SQL)',  'rest-request-start',  'rest-data-received');
-              performance.measure('⏱ FRONT → traitement JS (map+filter)',  'rest-data-received',  'rest-render-done');
-              performance.measure('⏱ TOTAL bout-en-bout',                  'rest-request-start',  'rest-render-done');
-              const entries = performance.getEntriesByType('measure')
-                .filter(e => e.name.startsWith('⏱'));
-              console.group('%c[SearchRest] Mesures de performance', 'color:#2196F3;font-weight:bold');
-              entries.forEach(e =>
-                console.log(`${e.name.padEnd(45)} ${Math.round(e.duration).toString().padStart(6)} ms`)
-              );
-              console.groupEnd();
-              performance.clearMarks();
-              performance.clearMeasures();
-            }, 0);
-          } else {
-            this.tableRows = [];
-            this.filteredTableRows = [];
-            this.isLoading = false;
-          }
-        },
-        error: () => {
-          this.tableRows = [];
-          this.filteredTableRows = [];
-          this.isLoading = false;
+          this.sessions = d;
+
+          // Laisser un tick pour que le DOM se mette à jour avant de mesurer
+          setTimeout(() => {
+            performance.mark('rest-render-done');
+            performance.measure('⏱ BACK → données reçues (réseau+SQL)',  'rest-request-start',  'rest-data-received');
+            performance.measure('⏱ FRONT → traitement JS (map+filter)',  'rest-data-received',  'rest-render-done');
+            performance.measure('⏱ TOTAL bout-en-bout',                  'rest-request-start',  'rest-render-done');
+            const entries = performance.getEntriesByType('measure')
+              .filter(e => e.name.startsWith('⏱'));
+            console.group('%c[SearchRest] Mesures de performance', 'color:#2196F3;font-weight:bold');
+            entries.forEach(e =>
+              console.log(`${e.name.padEnd(45)} ${Math.round(e.duration).toString().padStart(6)} ms`)
+            );
+            console.groupEnd();
+            performance.clearMarks();
+            performance.clearMeasures();
+          }, 0);
+
         }
       });
   }
@@ -341,42 +330,7 @@ export class SearchRestView implements OnInit, OnDestroy {
       this._filter.setFilterMap(this.advancedParams);
     }
   }
-
-  private applyTableFilter(): void {
-    const query = (this.filterValue || '').trim().toLowerCase();
-    if (!query) {
-      this.filteredTableRows = [...this.tableRows];
-      return;
-    }
-    this.filteredTableRows = this.tableRows.filter(row =>
-      (row.appName || '').toLowerCase().includes(query) ||
-      `${row.method || ''} ${row.path || ''}`.toLowerCase().includes(query) ||
-      (row.user || '').toLowerCase().includes(query) ||
-      String(row.status || '').toLowerCase().includes(query) ||
-      row.query?.toLowerCase().includes(query) ||
-      row.exception?.message?.toString().toLowerCase().includes(query) ||
-      row.exception?.type?.toString().toLowerCase().includes(query)
-    );
-  }
-
-  private formatDuration(startSeconds: number, endSeconds: number): string {
-    const total = Math.max(0, endSeconds - startSeconds);
-    const intSec = Math.floor(total);
-    const ms = String(Math.round((total - intSec) * 1000)).padStart(3, '0');
-    if (intSec < 60) {
-      return `${intSec},${ms}s`;
-    }
-    const minutes = Math.floor(intSec / 60);
-    const seconds = intSec % 60;
-    if (minutes < 60) {
-      return `${minutes}min : ${seconds},${ms}s`;
-    }
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return `${hours}h ${remainingMinutes}min : ${seconds},${ms}s`;
-  }
 }
-
 
 
 export function shallowEqual(

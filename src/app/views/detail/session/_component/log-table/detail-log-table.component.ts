@@ -2,7 +2,8 @@ import {Component, Input, ViewChild} from "@angular/core";
 import {MatTableDataSource} from "@angular/material/table";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
-import {LocalRequest, LogEntry} from "../../../../../model/trace.model";
+import {LogEntry} from "../../../../../model/trace.model";
+import {TableProvider} from '@oneteme/jquery-table';
 
 @Component({
   selector: 'log-table',
@@ -10,23 +11,30 @@ import {LocalRequest, LogEntry} from "../../../../../model/trace.model";
   styleUrls: ['./detail-log-table.component.scss']
 })
 export class DetailLogTableComponent {
-  displayedColumns: string[] = ['date', 'message', 'action'];
-  dataSource: MatTableDataSource<LogEntry> = new MatTableDataSource();
+  tableConfig: TableProvider<LogEntry> = {
+    columns: [
+      { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
+      { key: 'message', header: 'Message', icon: 'chat', sliceable: false, groupable: false },
+      { key: 'action', header: 'Action' }
+    ],
+    enableSearchBar: true,
+    enableViewButton: true,
+    allowColumnRemoval: true,
+    enablePagination: true,
+    pageSize: 10,
+    enableColumnDragDrop: false,
+    pageSizeOptions: [5, 10, 15, 20, 100],
+    pageSizeOptionsGroupBy: [20, 50, 100, 200],
+    emptyStateLabel: 'Aucun résultat',
+    loadingStateLabel: 'Chargement des requêtes...'
+  };
 
-  @ViewChild('paginator', {static: true}) paginator: MatPaginator;
-  @ViewChild('sort', {static: true}) sort: MatSort;
+  _requests: LogEntry[] = [];
 
   @Input() set requests(requests: LogEntry[]) {
     if (requests) {
-      this.dataSource = new MatTableDataSource(requests);
-      this.dataSource.paginator = this.paginator;
-
-      this.dataSource.sortingDataAccessor = sortingDataAccessor;
-      this.dataSource.sort = this.sort;
-    } else {
-      this.dataSource = new MatTableDataSource();
+      this._requests = requests;
     }
-
   }
 }
 

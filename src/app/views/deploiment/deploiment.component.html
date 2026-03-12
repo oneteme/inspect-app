@@ -50,7 +50,7 @@
     <div class="server-cell-content">
       <div (click)="navigateOnServerClick($event, row)" class="uptime-link server-name">{{ row.appName || 'N/A' }}</div>
       <app-status-indicator (onClick)="navigateOnStatusIndicator($event, row)"
-        [params]="{id: row.id, end: row.end, configuration: row.configuration, lastTrace: row.lastTrace, date: date}">
+        [params]="{id: row.id, end: row.end, configuration: row.configuration, lastTrace: row.lastTrace}">
       </app-status-indicator>
     </div>
   </ng-template>

@@ -48,35 +48,45 @@ export class SearchMainView implements OnInit, OnDestroy {
   private readonly _location = inject(Location);
   private readonly _filter = inject(FilterService);
   private readonly $destroy = new Subject<void>();
-  private readonly _dateFmt = new Intl.DateTimeFormat('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
-  private readonly _timeFmt = new Intl.DateTimeFormat('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
 
   MAPPING_TYPE = Constants.MAPPING_TYPE;
   filterConstants = FilterConstants;
-  displayedColumns: string[] = ['app_name', 'name', 'location', 'start', 'durée', 'user'];
-  readonly columnLabels: Record<string, string> = {
-    app_name: 'Hôte',
-    name: 'Nom',
-    location: 'Ressource',
-    start: 'Début',
-    durée: 'Durée',
-    user: 'Utilisateur'
-  };
-  tableRows: SearchMainTableRow[] = [];
-  filteredTableRows: SearchMainTableRow[] = [];
-  tableConfig: TableProvider<SearchMainTableRow> = {
+  tableConfig: TableProvider<MainSessionDto> = {
     columns: [
-      { key: 'app_name', header: 'Hôte', sortable: true, icon: 'dns', width: '12%' },
-      { key: 'name', header: 'Nom', sortable: true, icon: 'label', width: '15%' },
+      { key: 'appName', header: 'Hôte', sortable: true, icon: 'dns',  width: '13%' },
+      { key: 'name', header: 'Nom', sortable: true, icon: 'label',  width: '13%' },
       { key: 'location', header: 'Ressource', sortable: true, icon: 'category' },
-      { key: 'start', header: 'Début', sortable: true, icon: 'schedule', width: '17%' },
-      { key: 'durée', header: 'Durée', sortable: true, icon: 'timer', width: '12%' },
-      { key: 'user', header: 'Utilisateur', sortable: true, icon: 'person', width: '15%' },
-      { key: 'status', header: 'Status', sortable: true, optional: true, icon: 'info', width: '8%' },
+      { key: 'start', header: 'Début', sortable: true, groupable: false, icon: 'schedule',  width: '13%' },
+      { key: 'duration', header: 'Durée', sortable: true, groupable: false, icon: 'timer',  width: '13%',
+        sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
+      },
+      { key: 'user', header: 'Utilisateur', sortable: true, icon: 'person',  width: '13%' },
+      { key: 'status', header: 'Status', sortable: true, optional: true, icon: 'task_alt', width: '13%',
+        value: (row: MainSessionDto) => {
+          if(!row.end) return 'En cours...';
+          if(row.exception) return 'KO';
+          if(!row.exception) return 'OK';
+        }
+      },
+      { key: 'exception', header: 'Exception', sortable: true, optional: true, icon: 'error_outline', width: '13%',
+        value: (row: MainSessionDto) => {
+          return row.exception?.type;
+        }
+      }
     ],
     slices: [
-      { title: 'Status', columnKey: 'status' },
-    ],
+      {
+        title: 'Durée',
+        columnKey: 'duration',
+        categories: [
+          { key: '<100ms', label: '< 100ms', filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
+          { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1 && (row.end - row.start) < 0.5 },
+          { key: '500ms-1s', label: '500ms - 1s', filter: (row) => row.end != null && (row.end - row.start) >= 0.5 && (row.end - row.start) < 1 },
+          { key: '1s-5s', label: '1s - 5s', filter: (row) => row.end != null && (row.end - row.start) >= 1 && (row.end - row.start) < 5 },
+          { key: '>5s', label: '> 5s', filter: (row) => row.end != null && (row.end - row.start) >= 5 },
+          { key: 'in-progress', label: 'En cours...', filter: (row) => row.end == null },
+        ]
+      }],
     enableSearchBar: true,
     enableViewButton: true,
     allowColumnRemoval: true,
@@ -88,14 +98,15 @@ export class SearchMainView implements OnInit, OnDestroy {
     defaultSort: { active: 'start', direction: 'desc' },
     emptyStateLabel: 'Aucun résultat',
     loadingStateLabel: 'Chargement des données...',
-    rowClass: (row: SearchMainTableRow) => {
-      if (row.status === 'OK') return 'row-ok';
-      if (row.status === 'KO') return 'row-ko';
-      if (row.status === 'En cours') return 'row-in-progress';
-      return '';
+    rowClass: (row: MainSessionDto) => {
+      if(!row.end) return '';
+      if (row.end && !row.exception) return 'row-ok';
+      if (row.end && row.exception) return 'row-ko';
     },
-    onRowSelected: (row: SearchMainTableRow) => this.onTableRowSelected(row),
+    onRowSelected: (row: MainSessionDto) => this.selectedRequest(row)
   };
+  sessions: MainSessionDto[];
+
   serverNameIsLoading = true;
   serverFilterForm = new FormGroup({
     appname: new FormControl([""]),
@@ -120,8 +131,6 @@ export class SearchMainView implements OnInit, OnDestroy {
   }];
   advancedParams: Partial<{ [key: string]: any }>
   focusFieldName: any
-  filterValue: string = '';
-
   queryParams: Partial<QueryParams> = {};
   type: string = '';
 
@@ -143,7 +152,10 @@ export class SearchMainView implements OnInit, OnDestroy {
           this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.env || app.defaultEnv, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server], null, !queryParams.rangestatus ? [] : Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus]);
         }
         if (queryParams.q) {
-          this.queryParams.optional = {'q': queryParams.q}
+          this.tableConfig = {
+            ...this.tableConfig,
+            initialSearchQuery: queryParams.q
+          }
         }
         this.patchStatusValue(this.queryParams.rangestatus)
         this.patchServerValue(this.queryParams.appname);
@@ -228,30 +240,11 @@ export class SearchMainView implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
-    this.tableRows = [];
-    this.filteredTableRows = [];
-
     this._traceService.getMainSessions(params)
-    .pipe(takeUntil(this.$destroy))
+    .pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false))
     .subscribe({
       next: d => {
-        if (d) {
-          this.tableRows = d.map((row) => this.toTableRow(row));
-          if (this.queryParams.optional?.['q']) {
-            this.filterValue = this.queryParams.optional['q'];
-          }
-          this.isLoading = false;
-          this.applyTableFilter();
-        } else {
-          this.tableRows = [];
-          this.filteredTableRows = [];
-          this.isLoading = false;
-        }
-      },
-      error: err => {
-        this.tableRows = [];
-        this.filteredTableRows = [];
-        this.isLoading = false;
+        this.sessions = d;
       }
     });
   }
@@ -303,11 +296,6 @@ export class SearchMainView implements OnInit, OnDestroy {
     });
   }
 
-  applyFilter(event: Event) {
-    this.filterValue = (event.target as HTMLInputElement).value;
-    this.applyTableFilter();
-  }
-
   resetFilters() {
     this.patchDateValue((extractPeriod(app.gridViewPeriod, "gridViewPeriod") || makeDatePeriod(0)).start, (extractPeriod(app.gridViewPeriod, "gridViewPeriod") || makeDatePeriod(0, 1)).end);
     this.patchServerValue([]);
@@ -320,7 +308,6 @@ export class SearchMainView implements OnInit, OnDestroy {
   handlePresetSelection(filterPreset: FilterPreset) {
     const formControlNamelist = Object.keys(this.serverFilterForm.controls);
     Object.entries(filterPreset.values).reduce((accumulator: any, [key, value]) => {
-
       if (formControlNamelist.includes(key)) {
         this.serverFilterForm.patchValue({
           [key]: value
@@ -359,75 +346,6 @@ export class SearchMainView implements OnInit, OnDestroy {
       this._filter.setFilterMap(this.advancedParams);
     }
   }
-
-  onTableRowSelected(row: SearchMainTableRow) {
-    if (row?.raw) {
-      this.selectedRequest(row.raw);
-    }
-  }
-
-  private applyTableFilter() {
-    const query = (this.filterValue || '').trim().toLowerCase();
-    if (!query) {
-      this.filteredTableRows = [...this.tableRows];
-      return;
-    }
-
-    this.filteredTableRows = this.tableRows.filter((row) =>
-      row.app_name.toLowerCase().includes(query) ||
-      row.name.toLowerCase().includes(query) ||
-      row.location.toLowerCase().includes(query) ||
-      row.user.toLowerCase().includes(query) ||
-      row.start.toLowerCase().includes(query) ||
-      row.durée.toLowerCase().includes(query) ||
-      row.status.toLowerCase().includes(query) ||
-      row.raw.exception?.message?.toString().toLowerCase().includes(query) ||
-      row.raw.exception?.type?.toString().toLowerCase().includes(query)
-    );
-  }
-
-  private toTableRow(row: MainSessionDto): SearchMainTableRow {
-    const startDate = new Date(row.start * 1000);
-    const datePart = this._dateFmt.format(startDate);
-    const ms = String(startDate.getMilliseconds()).padStart(3, '0');
-    const timePart = `${this._timeFmt.format(startDate)}.${ms}`;
-    const hasException = !!(row.exception?.type || row.exception?.message);
-    let status = 'En cours';
-    if (row.end) {
-      if (hasException) { status = 'KO';
-      } else { status = 'OK' }
-    }
-
-    return {
-      app_name: row.appName || 'N/A',
-      name: row.name || 'N/A',
-      location: row.location || 'N/A',
-      start: `${datePart} ${timePart}`.trim(),
-      durée: row.end ? this.formatDuration(row.start, row.end) : 'En cours...',
-      user: row.user || 'N/A',
-      status,
-      raw: row
-    };
-  }
-
-  private formatDuration(startSeconds: number, endSeconds: number): string {
-    const totalSeconds = Math.max(0, endSeconds - startSeconds);
-    if (totalSeconds < 60) {
-      return `${totalSeconds.toLocaleString('fr-FR', {minimumFractionDigits: 3, maximumFractionDigits: 3})}s`;
-    }
-
-    const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds - minutes * 60;
-    if (minutes < 60) {
-      return `${minutes}min : ${seconds.toLocaleString('fr-FR', {minimumFractionDigits: 3, maximumFractionDigits: 3})}s`;
-    }
-
-    const hours = Math.floor(minutes / 60);
-    const remainingMinutes = minutes % 60;
-    return `${hours}h ${remainingMinutes}min : ${seconds.toLocaleString('fr-FR', {minimumFractionDigits: 3, maximumFractionDigits: 3})}s`;
-  }
-
-  
 }
 
 
