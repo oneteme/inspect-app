@@ -18,7 +18,7 @@ import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-
 import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../model/conf.model";
 import {shallowEqual} from "../rest/search-rest.view";
 import {MainSessionDto} from "../../../model/request.model";
-import {col, TableProvider} from "@oneteme/jquery-table";
+import {TableProvider} from "@oneteme/jquery-table";
 
 interface SearchMainTableRow {
   app_name: string;
@@ -66,18 +66,16 @@ export class SearchMainView implements OnInit, OnDestroy {
   filteredTableRows: SearchMainTableRow[] = [];
   tableConfig: TableProvider<SearchMainTableRow> = {
     columns: [
-      { ...col<SearchMainTableRow>('app_name', 'Hôte'), icon: 'dns' },
-      { ...col<SearchMainTableRow>('name', 'Nom'), icon: 'label' },
-      { ...col<SearchMainTableRow>('location', 'Ressource'), icon: 'category' },
-      { ...col<SearchMainTableRow>('start', 'Début'), icon: 'schedule' },
-      { ...col<SearchMainTableRow>('durée', 'Durée'), icon: 'timer' },
-      { ...col<SearchMainTableRow>('user', 'Utilisateur'), optional: true, icon: 'person' },
-      { ...col<SearchMainTableRow>('status', 'Status'), optional: true, icon: 'info' },
+      { key: 'app_name', header: 'Hôte', sortable: true, icon: 'dns',  width: '150px' },
+      { key: 'name', header: 'Nom', sortable: true, icon: 'label',  width: '200px' },
+      { key: 'location', header: 'Ressource', sortable: true, icon: 'category' },
+      { key: 'start', header: 'Début', sortable: true, icon: 'schedule',  width: '170px' },
+      { key: 'durée', header: 'Durée', sortable: true, icon: 'timer',  width: '110px' },
+      { key: 'user', header: 'Utilisateur', sortable: true, icon: 'person',  width: '120px' },
+      { key: 'status', header: 'Status', sortable: true, optional: true, icon: 'info', width: '10px' },
     ],
     slices: [
       { title: 'Status', columnKey: 'status' },
-      { title: 'Utilisateur', columnKey: 'user' },
-      { title: 'Nom', columnKey: 'name' }
     ],
     enableSearchBar: true,
     enableViewButton: true,
