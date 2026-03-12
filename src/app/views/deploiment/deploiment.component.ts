@@ -28,18 +28,35 @@ export class DeploimentComponent implements OnDestroy {
   isLoading = false;
   readonly tableConfig: TableProvider<LastServerStart & { lastTrace?: number }> = {
     columns: [
-      { key: 'appName', header: 'Hôte', sortable: true, icon: 'dns', groupable: false, sliceable: false },
-      { key: 'duree',   header: 'Depuis', sortable: true, icon: 'schedule', groupable: false, sliceable: false },
+      { key: 'appName', header: 'Hôte', sortable: true, icon: 'dns', width: '260px', groupable: false, sliceable: false },
+      { key: 'duree',   header: 'Depuis', sortable: true, icon: 'schedule', width: '150px', groupable: false, sliceable: false, sortValue: (row) => this.today.getTime() - row.start },
       { key: 'version', header: 'Version', sortable: true, icon: 'label' },
-      { key: 'branch',  header: 'Branche', sortable: true, icon: 'fork_right' },
-      { key: 'restart', header: 'Démarrage', sortable: true, icon: 'restart_alt' },
+      { key: 'branch',  header: 'Branche', sortable: true, icon: 'fork_right', width: '300px' },
+      { key: 'restart', header: 'Démarrage', sortable: true, icon: 'restart_alt', width: '150px' },
     ],
     enableSearchBar: true,
+    // initialSearchQuery: 'pmo',
     enableViewButton: true,
     enablePagination: true,
     pageSize: 10,
     pageSizeOptions: [10, 25, 50],
-    defaultSort: { active: 'duree', direction: 'desc' },
+    defaultSort: { active: 'duree', direction: 'asc' },
+    slices: [
+      // { title: 'Version', columnKey: 'version' },
+      // { title: 'Branche', columnKey: 'branch' },
+      {
+        title: 'Durée',
+        columnKey: 'duree',
+        categories: [
+          { key: '< 1h', label: '< 1h', filter: (row) => (this.today.getTime() - row.start) / 1000 < 3600 },
+          { key: '1h - 6h', label: '1h - 6h', filter: (row) => { const s = (this.today.getTime() - row.start) / 1000; return s >= 3600 && s < 6 * 3600; } },
+          { key: '6h - 12h', label: '6h - 12h', filter: (row) => { const s = (this.today.getTime() - row.start) / 1000; return s >= 6 * 3600 && s < 12 * 3600; } },
+          { key: '12h - 1j', label: '12h - 1j', filter: (row) => { const s = (this.today.getTime() - row.start) / 1000; return s >= 12 * 3600 && s < 86400; } },
+          { key: '1j - 7j', label: '1j - 7j', filter: (row) => { const s = (this.today.getTime() - row.start) / 1000; return s >= 86400 && s < 7 * 86400; } },
+          { key: '> 7 jours', label: '> 7 jours', filter: (row) => (this.today.getTime() - row.start) / 1000 >= 7 * 86400 },
+        ]
+      },
+    ],
   };
 
   versionColor: any;

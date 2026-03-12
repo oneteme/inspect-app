@@ -69,29 +69,34 @@ export class SearchRestView implements OnInit, OnDestroy {
   tableRows: RestSessionDto[] = [];
   filteredTableRows: RestSessionDto[] = [];
   tableConfig: TableProvider<RestSessionDto> = {
+
     columns: [
-      { ...col<RestSessionDto>('app_name', 'Hôte'), icon: 'dns', value: (row) => row.appName || 'N/A' },
-      { ...col<RestSessionDto>('resource', 'Ressource'), icon: 'category', value: (row) => `${row.method || ''} ${row.path || ''}`.trim() },
-      {
-        ...col<RestSessionDto>('start', 'Début'), icon: 'schedule',
-        value: (row) => {
-          const d = new Date(row.start * 1000);
-          const ms = String(d.getMilliseconds()).padStart(3, '0');
-          return `${this._dateFmt.format(d)} ${this._timeFmt.format(d)}.${ms}`;
-        },
-        sortValue: (row) => row.start
-      },
-      {
-        ...col<RestSessionDto>('end', 'Durée'), icon: 'timer',
-        value: (row) => row.end != null ? this.formatDuration(row.start, row.end) : 'En cours...'
-      },
-      { ...col<RestSessionDto>('user', 'Utilisateur'), icon: 'person', value: (row) => row.user || 'N/A' },
-      { ...col<RestSessionDto>('status', 'Status'), optional: true, icon: 'info', value: (row) => row.end != null ? String(row.status) : 'En cours' },
+      { key: 'appName', header: 'Hôte', sortable: true, icon: 'dns', width: '220px' },
+      { key: 'resource', header: 'Ressource', sortable: true, icon: 'category', value: (row) => `${row.method || ''} ${row.path || ''}`.trim() },
+      { key: 'start', header: 'Début', sortable: true, icon: 'schedule', width: '200px',
+        value: (row) => { const d = new Date(row.start * 1000); const ms = String(d.getMilliseconds()).padStart(3, '0'); return `${this._dateFmt.format(d)} ${this._timeFmt.format(d)}.${ms}`; },
+        sortValue: (row) => row.start },
+      { key: 'end', header: 'Durée', sortable: true, icon: 'timer', width: '120px',
+        value: (row) => row.end != null ? this.formatDuration(row.start, row.end) : 'En cours...',
+        sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE },
+      { key: 'user', header: 'Utilisateur', sortable: true, icon: 'person', width: '120px' },
     ],
+
     slices: [
       { title: 'Status', columnKey: 'status' },
-      { title: 'Hôte', columnKey: 'app_name' }
-    ],
+      { title: 'Hôte', columnKey: 'appName' },
+      {
+        title: 'Durée',
+        columnKey: 'end',
+        categories: [
+          { key: '<100ms', label: '< 100ms', filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
+          { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1 && (row.end - row.start) < 0.5 },
+          { key: '500ms-1s', label: '500ms - 1s', filter: (row) => row.end != null && (row.end - row.start) >= 0.5 && (row.end - row.start) < 1 },
+          { key: '1s-5s', label: '1s - 5s', filter: (row) => row.end != null && (row.end - row.start) >= 1 && (row.end - row.start) < 5 },
+          { key: '>5s', label: '> 5s', filter: (row) => row.end != null && (row.end - row.start) >= 5 },
+          { key: 'in-progress', label: 'En cours', filter: (row) => row.end == null },
+        ]
+      }],
     enableSearchBar: true,
     enableViewButton: true,
     allowColumnRemoval: true,
@@ -111,8 +116,8 @@ export class SearchRestView implements OnInit, OnDestroy {
       if (code >= 200) return 'row-ok';
       return '';
     }
-  };
-
+  };  
+  
   constructor() {
     this._activatedRoute.queryParams.subscribe({
       next: (params: Params) => {
