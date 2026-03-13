@@ -1,6 +1,5 @@
 import {Component, Input} from "@angular/core";
 import {LocalRequest} from "../../../../../model/trace.model";
-import {INFINITY} from "../../../../constants";
 import {TableProvider} from '@oneteme/jquery-table';
 
 @Component({
@@ -9,18 +8,40 @@ import {TableProvider} from '@oneteme/jquery-table';
   styleUrls: ['./detail-local-table.component.scss']
 })
 export class DetailLocalTableComponent {
-  displayedColumns: string[] = ['location', 'name', 'start', 'duree', 'user'];
-
   tableConfig: TableProvider<LocalRequest> = {
     columns: [
       { key: 'host', header: 'Hôte', icon: 'dns' },
-      { key: 'command', header: 'Ressource', icon: 'category' },
+      { key: 'resource', header: 'Ressource', icon: 'category' },
       { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
-      { key: 'duration', header: 'Durée', icon: 'timer', sliceable: false, groupable: false },
-      { key: 'user', header: 'Utilisateur', icon: 'person', optional: true },
-      { key: 'failed', header: 'Statut', optional: true, value: (row) => row.exception ? 'KO' : 'OK' },
-      { key: 'exception', header: 'Exception', optional: true, value: (row) => row.exception?.type }
+      { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
+        sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
+      },
+      { key: 'user', header: 'Utilisateur', icon: 'person' },
+      { key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
+        value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
+      },
+      { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
     ],
+    slices: [
+      {
+        title: 'Durée',
+        columnKey: 'duration',
+        categories: [
+          { key: '<100ms', label: '< 100ms', filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
+          { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1 && (row.end - row.start) < 0.5 },
+          { key: '500ms-1s', label: '500ms - 1s', filter: (row) => row.end != null && (row.end - row.start) >= 0.5 && (row.end - row.start) < 1 },
+          { key: '1s-5s', label: '1s - 5s', filter: (row) => row.end != null && (row.end - row.start) >= 1 && (row.end - row.start) < 5 },
+          { key: '>5s', label: '> 5s', filter: (row) => row.end != null && (row.end - row.start) >= 5 },
+          { key: 'in-progress', label: 'En cours...', filter: (row) => row.end == null }
+        ]
+      },
+      {
+        title: 'Commande',
+        columnKey: 'command',
+        icon: 'label'
+      }
+    ],
+    defaultSort: { active: 'start', direction: 'desc' },
     enableSearchBar: true,
     enableViewButton: true,
     allowColumnRemoval: true,
@@ -46,11 +67,4 @@ export class DetailLocalTableComponent {
       this._requests = requests;
     }
   }
-}
-
-const sortingDataAccessor = (row: any, columnName: string) => {
-  if (columnName == "location") return row["location"] as string;
-  if (columnName == "start") return row['start'] as string;
-  if (columnName == "duree") return row['end'] ? row["end"] - row["start"] : INFINITY;
-  return row[columnName as keyof any] as string;
 }

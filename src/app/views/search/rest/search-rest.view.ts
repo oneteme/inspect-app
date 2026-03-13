@@ -64,12 +64,10 @@ export class SearchRestView implements OnInit, OnDestroy {
   focusFieldName: any;
 
   tableConfig: TableProvider<RestSessionDto> = {
-
     columns: [
       { key: 'appName', header: 'Hôte', sortable: true, icon: 'dns', width: '18%' },
       { key: 'path', header: 'Ressource', sortable: true, icon: 'category' },
-      { key: 'start', header: 'Début', sortable: true, icon: 'schedule', width: '17%',
-        sortValue: (row) => row.start },
+      { key: 'start', header: 'Début', sortable: true, icon: 'schedule', width: '17%' },
       { key: 'duration', header: 'Durée', sortable: true, icon: 'timer', width: '13%',
         sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE },
       { key: 'user', header: 'Utilisateur', sortable: true, icon: 'person', width: '15%' },
@@ -118,7 +116,7 @@ export class SearchRestView implements OnInit, OnDestroy {
       if (code >= 200) return 'row-ok';
       return '';
     },
-    onRowSelected: (row: RestSessionDto) => this.onTableRowSelected(row),
+    onRowSelected: (row: RestSessionDto) => this.onTableRowSelected(row)
   };
   sessions: RestSessionDto[];
 

@@ -1,6 +1,6 @@
 <jquery-table class="flex-table"
               [config]="tableConfig" [data]="_requests" [isLoading]="isLoading">
-  <ng-template jqtCellDef="command" let-row>
+  <ng-template jqtCellDef="resource" let-row>
     <span style="font-weight: bold;">{{ row.command | typeColumnFormat }}</span>
     <br>
     {{ row.schema || row.name || 'N/A' }}

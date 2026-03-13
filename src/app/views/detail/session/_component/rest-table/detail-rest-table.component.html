@@ -1,9 +1,9 @@
 <jquery-table class="flex-table"
              [config]="tableConfig" [data]="_requests" [isLoading]="isLoading">
-  <ng-template jqtCellDef="path" let-row>
+  <ng-template jqtCellDef="resource" let-row>
     <span style="font-weight: bold;" [ngStyle]="{'color': row.protocol=='https' ? 'green':'gray'}">{{ row.method | typeColumnFormat }} </span>
     <br>
-    {{ row.path }}
+    <span [title]="row.path">{{ row.path }}</span>
   </ng-template>
 
   <ng-template jqtCellDef="start" let-row>
