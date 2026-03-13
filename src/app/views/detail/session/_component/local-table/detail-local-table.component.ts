@@ -14,8 +14,6 @@ export class DetailLocalTableComponent {
   _requests: LocalRequest[] = [];
 
   @Input() set requests(requests: LocalRequest[]) {
-    if (requests) {
-      this._requests = requests;
-    }
+    this._requests = requests;
   }
 }

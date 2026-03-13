@@ -67,9 +67,7 @@ import {StatisticRequestFtpComponent} from "./statistic/request/ftp/statistic-re
 import {StatisticRequestSmtpComponent} from "./statistic/request/smtp/statistic-request-smtp.component";
 import {StatisticRequestLdapComponent} from "./statistic/request/ldap/statistic-request-ldap.component";
 import {StatisticRequestHttpComponent} from "./statistic/request/http/statistic-request-http.component";
-import {DetailStageTableComponent} from "./detail/session/_component/stage-table/detail-stage-table.component";
-import {RequestStageTableComponent} from "./detail/request/_component/stage-table/request-stage-table.component";
-import {RequestMailTableComponent} from "./detail/request/_component/mail-table/request-mail-table.component";
+import {MailTableComponent} from "./detail/request/smtp/_component/mail-table/mail-table.component";
 import {
   ServerInstanceSelectorDialogComponent
 } from "./supervision/_component/server/server-instance-selector-dialog/server-instance-selector-dialog.component";
@@ -151,9 +149,7 @@ import {
     ActionTableComponent,
     SearchRequestView,
     ConfigDialogComponent,
-    DetailStageTableComponent,
-    RequestStageTableComponent,
-    RequestMailTableComponent,
+    MailTableComponent,
     ServerInstanceSelectorDialogComponent,
     ClientInstanceSelectorDialogComponent,
     ServerSupervisionView,

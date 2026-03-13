@@ -14,9 +14,7 @@ export class DetailLdapTableComponent {
   _requests: DirectoryRequestDto[] = [];
 
   @Input() set requests(requests: DirectoryRequestDto[]) {
-    if (requests) {
-      this._requests = requests
-    }
+    this._requests = requests;
   }
 
   @Input() isLoading: boolean;

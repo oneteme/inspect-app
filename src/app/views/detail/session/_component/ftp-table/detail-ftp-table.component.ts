@@ -14,9 +14,7 @@ export class DetailFtpTableComponent {
   _requests: FtpRequestDto[] = [];
 
   @Input() set requests(requests: FtpRequestDto[]) {
-    if (requests) {
-      this._requests = requests
-    }
+    this._requests = requests;
   }
 
   @Input() isLoading: boolean;

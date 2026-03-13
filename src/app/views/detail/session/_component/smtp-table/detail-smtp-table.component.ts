@@ -14,9 +14,7 @@ export class DetailSmtpTableComponent {
   _requests: MailRequestDto[] = [];
 
   @Input() set requests(requests: MailRequestDto[]) {
-    if (requests) {
-      this._requests = requests;
-    }
+    this._requests = requests;
   }
 
   @Input() isLoading: boolean;

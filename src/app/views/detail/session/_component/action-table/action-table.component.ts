@@ -1,7 +1,4 @@
-import {Component, Input, ViewChild} from "@angular/core";
-import {MatTableDataSource} from "@angular/material/table";
-import {MatPaginator} from "@angular/material/paginator";
-import {MatSort} from "@angular/material/sort";
+import {Component, Input} from "@angular/core";
 import {ANALYTIC_MAPPING} from "../../../../constants";
 import {UserAction} from "../../../../../model/trace.model";
 import {TableProvider} from '@oneteme/jquery-table';
@@ -37,8 +34,6 @@ export class ActionTableComponent {
   _requests: UserAction[] = [];
 
   @Input() set requests(requests: UserAction[]) {
-    if (requests) {
-      this._requests = requests;
-    }
+    this._requests = requests;
   }
 }

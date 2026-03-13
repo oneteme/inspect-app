@@ -17,9 +17,7 @@ export class LogTableComponent {
   _requests: LogEntry[] = [];
 
   @Input() set requests(requests: LogEntry[]) {
-    if (requests) {
-      this._requests = requests;
-    }
+    this._requests = requests;
   }
 
   open(row: any) {

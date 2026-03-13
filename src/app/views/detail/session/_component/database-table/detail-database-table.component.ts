@@ -14,9 +14,7 @@ export class DetailDatabaseTableComponent {
   _requests: DatabaseRequestDto[] = [];
 
   @Input() set requests(requests: DatabaseRequestDto[]) {
-    if (requests) {
-      this._requests = requests;
-    }
+    this._requests = requests;
   }
 
   @Input() isLoading: boolean;

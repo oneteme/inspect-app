@@ -1,5 +1,10 @@
 <jquery-table class="flex-table"
               [config]="tableConfig" [data]="_requests">
+  <ng-template jqtCellDef="resource" let-row>
+    <span style="font-weight: bold;">{{row.command | typeColumnFormat}}</span><br/>
+    {{ row.args }}
+  </ng-template>
+
   <ng-template jqtCellDef="start" let-row>
     {{ (row.start * 1000 | date:'dd/MM/yyyy') }}
     <br>
