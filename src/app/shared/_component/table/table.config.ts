@@ -1,11 +1,5 @@
 import {TableProvider} from '@oneteme/jquery-table';
-import {
-  DatabaseRequestDto,
-  DirectoryRequestDto,
-  FtpRequestDto, MailRequestDto, MainSessionDto,
-  RestRequestDto,
-  RestSessionDto
-} from '../../../model/request.model';
+import { DatabaseRequestDto, DirectoryRequestDto, FtpRequestDto, MailRequestDto, MainSessionDto, RestRequestDto, RestSessionDto } from '../../../model/request.model';
 import {HttpSessionStage, LocalRequest, LogEntry} from "../../../model/trace.model";
 
 export const DEFAULT_TABLE_CONFIG: TableProvider<any> = {

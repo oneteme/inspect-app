@@ -9,7 +9,10 @@ import {REST_REQUEST_TABLE_CONFIG} from "../../../../../shared/_component/table/
   styleUrls: ['./detail-rest-table.component.scss']
 })
 export class DetailRestTableComponent implements OnDestroy {
-  tableConfig: TableProvider<RestRequestDto> = REST_REQUEST_TABLE_CONFIG;
+  tableConfig: TableProvider<RestRequestDto> = {
+    ...REST_REQUEST_TABLE_CONFIG,
+    onRowSelected: (row: RestRequestDto) => this.onClickRow.emit({ event: null as any, row: row.id })
+  };
 
   _requests: RestRequestDto[] = [];
 
