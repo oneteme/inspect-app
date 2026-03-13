@@ -1,8 +1,8 @@
-import {TableProvider} from '@oneteme/jquery-table';
+import {SliceConfig, TableProvider} from '@oneteme/jquery-table';
 import {DatabaseRequestDto, DirectoryRequestDto, FtpRequestDto, MailRequestDto, MainSessionDto, RestRequestDto, RestSessionDto} from '../../../model/request.model';
 import {AbstractStage, LocalRequest, LogEntry} from "../../../model/trace.model";
 
-export const DEFAULT_TABLE_CONFIG: TableProvider<any> = {
+export const DEFAULT_TABLE_CONFIG: TableProvider = {
   enableSearchBar: true,
   enableViewButton: true,
   allowColumnRemoval: true,
@@ -15,22 +15,38 @@ export const DEFAULT_TABLE_CONFIG: TableProvider<any> = {
   loadingStateLabel: 'Chargement des requêtes...'
 };
 
+export const DEFAULT_SORT_CONFIG: { active: string; direction: 'asc' | 'desc'; } = { active: 'start', direction: 'desc' };
+
+export const DEFAULT_DURATION_SLICE_CONFIG: SliceConfig = {
+  title: 'Durée',
+  columnKey: 'duration',
+  hidden: true,
+  categories: [
+    { key: '<100ms',     label: '< 100ms',       filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
+    { key: '100-500ms',  label: '100ms - 500ms',  filter: (row) => row.end != null && (row.end - row.start) >= 0.1  && (row.end - row.start) < 0.5 },
+    { key: '500ms-1s',   label: '500ms - 1s',     filter: (row) => row.end != null && (row.end - row.start) >= 0.5  && (row.end - row.start) < 1 },
+    { key: '1s-5s',      label: '1s - 5s',        filter: (row) => row.end != null && (row.end - row.start) >= 1    && (row.end - row.start) < 5 },
+    { key: '>5s',        label: '> 5s',           filter: (row) => row.end != null && (row.end - row.start) >= 5 },
+    { key: 'in-progress', label: 'En cours...',    filter: (row) => row.end == null }
+  ]
+};
+
 export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'Hôte', sortable: true, icon: 'dns', width: '18%' },
-    { key: 'resource', header: 'Ressource', sortable: true, icon: 'category' },
-    { key: 'start', header: 'Début', sortable: true, icon: 'schedule', width: '17%' },
-    { key: 'duration', header: 'Durée', sortable: true, icon: 'timer', width: '13%',
+    { key: 'appName', header: 'Hôte', icon: 'dns', width: '18%' },
+    { key: 'resource', header: 'Ressource', sliceable: false, icon: 'category' },
+    { key: 'start', header: 'Début', icon: 'schedule', width: '17%' },
+    { key: 'duration', header: 'Durée', icon: 'timer', width: '13%',
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE },
-    { key: 'user', header: 'Utilisateur', sortable: true, icon: 'person', width: '15%' },
-    { key: 'status', header: 'Status', sortable: true, optional: true, icon: 'task_alt', width: '13%',
+    { key: 'user', header: 'Utilisateur', icon: 'person', width: '15%' },
+    { key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
       value: (row: RestSessionDto) => {
         if(!row.end) return 'En cours...';
         return row.status;
       }
     },
-    { key: 'exception', header: 'Exception', sortable: true, optional: true, icon: 'error_outline', width: '13%',
+    { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', width: '13%',
       value: (row: RestSessionDto) => {
         return row.exception?.type;
       }
@@ -39,6 +55,8 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
   slices: [
     { title: 'Status', columnKey: 'status', hidden: true  },
     { title: 'Hôte', columnKey: 'appName', hidden: true },
+    { title: 'Méthode',   columnKey: 'method', icon: 'label', hidden: true },
+    { title: 'Ressource', columnKey: 'path',   icon: 'category', hidden: true },
     {
       title: 'Durée',
       columnKey: 'duration',
@@ -68,7 +86,7 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
     { key: 'appName', header: 'Hôte', icon: 'dns',  width: '13%' },
     { key: 'name', header: 'Nom', icon: 'label',  width: '13%' },
     { key: 'location', header: 'Ressource', icon: 'category' },
-    { key: 'start', header: 'Début', groupable: false, icon: 'schedule',  width: '13%' },
+    { key: 'start', header: 'Début', groupable: false, sliceable: false, icon: 'schedule',  width: '13%' },
     { key: 'duration', header: 'Durée', groupable: false, icon: 'timer',  width: '13%',
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
     },
@@ -90,6 +108,7 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
     {
       title: 'Durée',
       columnKey: 'duration',
+      hidden: true,
       categories: [
         { key: '<100ms', label: '< 100ms', filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
         { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1 && (row.end - row.start) < 0.5 },
@@ -129,22 +148,11 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
     { key: 'action', header: 'Action', icon: 'touch_app', sliceable: false, groupable: false, sortable: false }
   ],
   slices: [
-    {
-      title: 'Durée',
-      columnKey: 'duration',
-      categories: [
-        { key: '<100ms',     label: '< 100ms',       filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
-        { key: '100-500ms',  label: '100ms - 500ms',  filter: (row) => row.end != null && (row.end - row.start) >= 0.1  && (row.end - row.start) < 0.5 },
-        { key: '500ms-1s',   label: '500ms - 1s',     filter: (row) => row.end != null && (row.end - row.start) >= 0.5  && (row.end - row.start) < 1 },
-        { key: '1s-5s',      label: '1s - 5s',        filter: (row) => row.end != null && (row.end - row.start) >= 1    && (row.end - row.start) < 5 },
-        { key: '>5s',        label: '> 5s',           filter: (row) => row.end != null && (row.end - row.start) >= 5 },
-        { key: 'in-progress',label: 'En cours...',    filter: (row) => row.end == null }
-      ]
-    },
-    { title: 'Méthode',   columnKey: 'method', icon: 'label' },
-    { title: 'Ressource', columnKey: 'path',   icon: 'category' }
+    DEFAULT_DURATION_SLICE_CONFIG,
+    { title: 'Méthode',   columnKey: 'method', icon: 'label', hidden: true },
+    { title: 'Ressource', columnKey: 'path',   icon: 'category', hidden: true }
   ],
-  defaultSort: { active: 'start', direction: 'desc' },
+  defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: RestSessionDto) => {
     const code = row.status;
     if (code >= 500) return 'row-ko';
@@ -173,30 +181,21 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
     }
   ],
   slices: [
-    {
-      title: 'Durée',
-      columnKey: 'duration',
-      categories: [
-        { key: '<100ms', label: '< 100ms', filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
-        { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1 && (row.end - row.start) < 0.5 },
-        { key: '500ms-1s', label: '500ms - 1s', filter: (row) => row.end != null && (row.end - row.start) >= 0.5 && (row.end - row.start) < 1 },
-        { key: '1s-5s', label: '1s - 5s', filter: (row) => row.end != null && (row.end - row.start) >= 1 && (row.end - row.start) < 5 },
-        { key: '>5s', label: '> 5s', filter: (row) => row.end != null && (row.end - row.start) >= 5 },
-        { key: 'in-progress', label: 'En cours...', filter: (row) => row.end == null }
-      ]
-    },
+    DEFAULT_DURATION_SLICE_CONFIG,
     {
       title: 'Commande',
       columnKey: 'command',
-      icon: 'label'
+      icon: 'label',
+      hidden: true
     },
     {
       title: 'Ressource',
       columnKey: 'schema',
-      icon: 'category'
+      icon: 'category',
+      hidden: true
     }
   ],
-  defaultSort: { active: 'start', direction: 'desc' },
+  defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: DatabaseRequestDto) => {
     const failed = row.failed;
     if(row.end == null) return '';
@@ -223,25 +222,15 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
     }
   ],
   slices: [
-    {
-      title: 'Durée',
-      columnKey: 'duration',
-      categories: [
-        { key: '<100ms', label: '< 100ms', filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
-        { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1 && (row.end - row.start) < 0.5 },
-        { key: '500ms-1s', label: '500ms - 1s', filter: (row) => row.end != null && (row.end - row.start) >= 0.5 && (row.end - row.start) < 1 },
-        { key: '1s-5s', label: '1s - 5s', filter: (row) => row.end != null && (row.end - row.start) >= 1 && (row.end - row.start) < 5 },
-        { key: '>5s', label: '> 5s', filter: (row) => row.end != null && (row.end - row.start) >= 5 },
-        { key: 'in-progress', label: 'En cours...', filter: (row) => row.end == null }
-      ]
-    },
+    DEFAULT_DURATION_SLICE_CONFIG,
     {
       title: 'Commande',
       columnKey: 'command',
-      icon: 'label'
+      icon: 'label',
+      hidden: true
     }
   ],
-  defaultSort: { active: 'start', direction: 'desc' },
+  defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: FtpRequestDto) => {
     const failed = row.failed;
     if(row.end == null) return '';
@@ -266,25 +255,15 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
   ],
   slices: [
-    {
-      title: 'Durée',
-      columnKey: 'duration',
-      categories: [
-        { key: '<100ms', label: '< 100ms', filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
-        { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1 && (row.end - row.start) < 0.5 },
-        { key: '500ms-1s', label: '500ms - 1s', filter: (row) => row.end != null && (row.end - row.start) >= 0.5 && (row.end - row.start) < 1 },
-        { key: '1s-5s', label: '1s - 5s', filter: (row) => row.end != null && (row.end - row.start) >= 1 && (row.end - row.start) < 5 },
-        { key: '>5s', label: '> 5s', filter: (row) => row.end != null && (row.end - row.start) >= 5 },
-        { key: 'in-progress', label: 'En cours...', filter: (row) => row.end == null }
-      ]
-    },
+    DEFAULT_DURATION_SLICE_CONFIG,
     {
       title: 'Commande',
       columnKey: 'command',
-      icon: 'label'
+      icon: 'label',
+      hidden: true
     }
   ],
-  defaultSort: { active: 'start', direction: 'desc' },
+  defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: DirectoryRequestDto) => {
     const failed = row.failed;
     if(row.end == null) return '';
@@ -309,25 +288,15 @@ export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
   ],
   slices: [
-    {
-      title: 'Durée',
-      columnKey: 'duration',
-      categories: [
-        { key: '<100ms', label: '< 100ms', filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
-        { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1 && (row.end - row.start) < 0.5 },
-        { key: '500ms-1s', label: '500ms - 1s', filter: (row) => row.end != null && (row.end - row.start) >= 0.5 && (row.end - row.start) < 1 },
-        { key: '1s-5s', label: '1s - 5s', filter: (row) => row.end != null && (row.end - row.start) >= 1 && (row.end - row.start) < 5 },
-        { key: '>5s', label: '> 5s', filter: (row) => row.end != null && (row.end - row.start) >= 5 },
-        { key: 'in-progress', label: 'En cours...', filter: (row) => row.end == null }
-      ]
-    },
+    DEFAULT_DURATION_SLICE_CONFIG,
     {
       title: 'Commande',
       columnKey: 'command',
-      icon: 'label'
+      icon: 'label',
+      hidden: true
     }
   ],
-  defaultSort: { active: 'start', direction: 'desc' },
+  defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: LocalRequest) => {
     const failed = row.exception;
     if(row.end == null) return '';
@@ -352,25 +321,15 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
   ],
   slices: [
-    {
-      title: 'Durée',
-      columnKey: 'duration',
-      categories: [
-        { key: '<100ms', label: '< 100ms', filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
-        { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1 && (row.end - row.start) < 0.5 },
-        { key: '500ms-1s', label: '500ms - 1s', filter: (row) => row.end != null && (row.end - row.start) >= 0.5 && (row.end - row.start) < 1 },
-        { key: '1s-5s', label: '1s - 5s', filter: (row) => row.end != null && (row.end - row.start) >= 1 && (row.end - row.start) < 5 },
-        { key: '>5s', label: '> 5s', filter: (row) => row.end != null && (row.end - row.start) >= 5 },
-        { key: 'in-progress', label: 'En cours...', filter: (row) => row.end == null }
-      ]
-    },
+    DEFAULT_DURATION_SLICE_CONFIG,
     {
       title: 'Commande',
       columnKey: 'command',
-      icon: 'label'
+      icon: 'label',
+      hidden: true
     }
   ],
-  defaultSort: { active: 'start', direction: 'desc' },
+  defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: MailRequestDto) => {
     const failed = row.failed;
     if(row.end == null) return '';
@@ -394,25 +353,15 @@ export const STAGE_TABLE_CONFIG: TableProvider<AbstractStage> = {
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
   ],
   slices: [
-    {
-      title: 'Durée',
-      columnKey: 'duration',
-      categories: [
-        { key: '<100ms', label: '< 100ms', filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
-        { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1 && (row.end - row.start) < 0.5 },
-        { key: '500ms-1s', label: '500ms - 1s', filter: (row) => row.end != null && (row.end - row.start) >= 0.5 && (row.end - row.start) < 1 },
-        { key: '1s-5s', label: '1s - 5s', filter: (row) => row.end != null && (row.end - row.start) >= 1 && (row.end - row.start) < 5 },
-        { key: '>5s', label: '> 5s', filter: (row) => row.end != null && (row.end - row.start) >= 5 },
-        { key: 'in-progress', label: 'En cours...', filter: (row) => row.end == null }
-      ]
-    },
+    DEFAULT_DURATION_SLICE_CONFIG,
     {
       title: 'Commande',
       columnKey: 'command',
-      icon: 'label'
+      icon: 'label',
+      hidden: true
     }
   ],
-  defaultSort: { active: 'start', direction: 'desc' },
+  defaultSort: { active: 'start', direction: 'asc' },
   rowClass: (row: AbstractStage) => {
     const failed = row.exception;
     if(row.end == null) return '';
@@ -432,8 +381,9 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
     {
       title: 'Type de log',
       columnKey: 'level',
-      icon: 'label'
+      icon: 'label',
+      hidden: true
     }
   ],
-  defaultSort: { active: 'start', direction: 'desc' }
+  defaultSort: DEFAULT_SORT_CONFIG
 };
