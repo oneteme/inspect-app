@@ -22,6 +22,8 @@ import {StatusIndicatorComponent} from "./_component/status-indicator/status-ind
 import {ServerCardComponent} from "./_component/server-card/server-card.component";
 import {OverlayContainerFilterComponent} from "./_component/overlay-container-filter/overlay-container-filter.component";
 import {BranchHashBadgeComponent} from "./_component/branch-hash-badge/branch-hash-badge.component";
+import {LogTableComponent} from "./_component/table/log-table/log-table.component";
+import {JqtCellDefDirective, TableComponent} from "@oneteme/jquery-table";
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -44,6 +46,8 @@ export const MY_DATE_FORMATS = {
     MaterialModule,
     FormsModule,
     ReactiveFormsModule,
+    TableComponent,
+    JqtCellDefDirective
   ],
   declarations: [
     HeaderPageComponent,
@@ -65,7 +69,8 @@ export const MY_DATE_FORMATS = {
     BranchHashBadgeComponent,
     StatusIndicatorComponent,
     ServerCardComponent,
-    OverlayContainerFilterComponent
+    OverlayContainerFilterComponent,
+    LogTableComponent
   ],
   exports: [
     MaterialModule,
@@ -86,7 +91,10 @@ export const MY_DATE_FORMATS = {
     BranchHashBadgeComponent,
     StatusIndicatorComponent,
     ServerCardComponent,
-    OverlayContainerFilterComponent
+    OverlayContainerFilterComponent,
+    LogTableComponent,
+    TableComponent,
+    JqtCellDefDirective
   ]
 })
 export class SharedModule { }

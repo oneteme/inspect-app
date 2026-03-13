@@ -46,9 +46,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   private readonly _instanceTraceService = inject(InstanceTraceService);
   private readonly _instanceService = inject(InstanceService);
   private readonly _dialog = inject(MatDialog);
-  private readonly _location: Location = inject(Location);
   private readonly _decimalPipe: DecimalPipe = inject(DecimalPipe);
-  private readonly _datePipe = inject(DatePipe);
   private readonly $destroy = new Subject<void>();
   private readonly _snackBar = inject(MatSnackBar);
 
@@ -514,12 +512,6 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
         this.lastTrace = last[0]?.date;
         this.getStatActivity();
       }
-    });
-  }
-
-  open(row: any) {
-    this._dialog.open(StacktraceDialogComponent, {
-      data: { message: row.message, stackTraceRows: row.stackRows }
     });
   }
 

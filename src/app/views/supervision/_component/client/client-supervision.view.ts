@@ -21,9 +21,6 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 import {
   ClientInstanceSelectorDialogComponent
 } from "./client-instance-selector-dialog/client-instance-selector-dialog.component";
-import {
-  StacktraceDialogComponent
-} from "../../../../shared/_component/exception-display/stacktrace-dialog/stacktrace-dialog.component";
 
 @Component({
   templateUrl: './client-supervision.view.html',
@@ -523,12 +520,6 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
         this.lastTrace = last[0]?.date;
         this.getStatActivity();
       }
-    });
-  }
-
-  open(row: any) {
-    this._dialog.open(StacktraceDialogComponent, {
-      data: { message: row.message, stackTraceRows: row.stackRows }
     });
   }
 

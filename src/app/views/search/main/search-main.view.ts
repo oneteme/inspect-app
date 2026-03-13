@@ -19,17 +19,7 @@ import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../model/conf.model"
 import {shallowEqual} from "../rest/search-rest.view";
 import {MainSessionDto} from "../../../model/request.model";
 import {TableProvider} from "@oneteme/jquery-table";
-
-interface SearchMainTableRow {
-  app_name: string;
-  name: string;
-  location: string;
-  start: string;
-  durée: string;
-  user: string;
-  status: string;
-  raw: MainSessionDto;
-}
+import {MAIN_SESSION_TABLE_CONFIG} from "../../../shared/_component/table/table.config";
 
 @Component({
   templateUrl: './search-main.view.html',
@@ -52,57 +42,7 @@ export class SearchMainView implements OnInit, OnDestroy {
   MAPPING_TYPE = Constants.MAPPING_TYPE;
   filterConstants = FilterConstants;
   tableConfig: TableProvider<MainSessionDto> = {
-    columns: [
-      { key: 'appName', header: 'Hôte', sortable: true, icon: 'dns',  width: '13%' },
-      { key: 'name', header: 'Nom', sortable: true, icon: 'label',  width: '13%' },
-      { key: 'location', header: 'Ressource', sortable: true, icon: 'category' },
-      { key: 'start', header: 'Début', sortable: true, groupable: false, icon: 'schedule',  width: '13%' },
-      { key: 'duration', header: 'Durée', sortable: true, groupable: false, icon: 'timer',  width: '13%',
-        sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
-      },
-      { key: 'user', header: 'Utilisateur', sortable: true, icon: 'person',  width: '13%' },
-      { key: 'status', header: 'Status', sortable: true, optional: true, icon: 'task_alt', width: '13%',
-        value: (row: MainSessionDto) => {
-          if(!row.end) return 'En cours...';
-          if(row.exception) return 'KO';
-          if(!row.exception) return 'OK';
-        }
-      },
-      { key: 'exception', header: 'Exception', sortable: true, optional: true, icon: 'error_outline', width: '13%',
-        value: (row: MainSessionDto) => {
-          return row.exception?.type;
-        }
-      }
-    ],
-    slices: [
-      {
-        title: 'Durée',
-        columnKey: 'duration',
-        categories: [
-          { key: '<100ms', label: '< 100ms', filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
-          { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1 && (row.end - row.start) < 0.5 },
-          { key: '500ms-1s', label: '500ms - 1s', filter: (row) => row.end != null && (row.end - row.start) >= 0.5 && (row.end - row.start) < 1 },
-          { key: '1s-5s', label: '1s - 5s', filter: (row) => row.end != null && (row.end - row.start) >= 1 && (row.end - row.start) < 5 },
-          { key: '>5s', label: '> 5s', filter: (row) => row.end != null && (row.end - row.start) >= 5 },
-          { key: 'in-progress', label: 'En cours...', filter: (row) => row.end == null },
-        ]
-      }],
-    enableSearchBar: true,
-    enableViewButton: true,
-    allowColumnRemoval: true,
-    enablePagination: true,
-    pageSize: 10,
-    enableColumnDragDrop: false,
-    pageSizeOptions: [5, 10, 15, 20, 100],
-    pageSizeOptionsGroupBy: [20, 50, 100, 200],
-    defaultSort: { active: 'start', direction: 'desc' },
-    emptyStateLabel: 'Aucun résultat',
-    loadingStateLabel: 'Chargement des données...',
-    rowClass: (row: MainSessionDto) => {
-      if(!row.end) return '';
-      if (row.end && !row.exception) return 'row-ok';
-      if (row.end && row.exception) return 'row-ko';
-    },
+    ...MAIN_SESSION_TABLE_CONFIG,
     onRowSelected: (row: MainSessionDto) => this.selectedRequest(row)
   };
   sessions: MainSessionDto[];

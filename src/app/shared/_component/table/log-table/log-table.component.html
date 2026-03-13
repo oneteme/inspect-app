@@ -12,8 +12,8 @@
     {{ row.message }}
   </ng-template>
 
-  <ng-template jqtCellDef="message" let-row>
-    <button mat-icon-button color="primary" [class.hidden]="!row.stacktrace" (click)="onClickStack(row)"
+  <ng-template jqtCellDef="action" let-row>
+    <button mat-icon-button color="primary" [class.hidden]="!row.stacktrace" (click)="open(row)"
             matTooltip="Consulter la Stack">
       <mat-icon class="material-symbols-outlined">visibility</mat-icon>
     </button>

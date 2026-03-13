@@ -1,5 +1,5 @@
 import {DatePipe} from "@angular/common";
-import {Component, ElementRef, inject, Input, OnChanges, SimpleChanges, ViewChild} from "@angular/core";
+import {Component, inject, Input, OnChanges, SimpleChanges} from "@angular/core";
 import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
 import {DurationPipe} from "../../../../../shared/pipe/duration.pipe";
 import {ANALYTIC_MAPPING} from "../../../../constants";

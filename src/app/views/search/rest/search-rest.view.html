@@ -29,7 +29,7 @@
     [config]="tableConfig"
     [data]="sessions"
     [isLoading]="isLoading">
-  <ng-template jqtCellDef="path" let-row>
+  <ng-template jqtCellDef="resource" let-row>
     <span style="font-weight: bold;">{{ row.method | typeColumnFormat }}</span>
     <br>
     {{ row.path }}
@@ -48,6 +48,16 @@
     </div>
     <div *ngIf="row.end" [matTooltip]="row.end * 1000 | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr'">
       {{ {start: row.start, end: row.end} | duration }}
+    </div>
+  </ng-template>
+
+  <ng-template jqtCellDef="status" let-row>
+    <div *ngIf="!row.end" style="display: flex; align-items: center; gap: 6px;">
+      <mat-spinner [diameter]="14"></mat-spinner>
+      <span class="cell-secondary">En cours...</span>
+    </div>
+    <div *ngIf="row.end">
+      {{ row.exception ? 'KO' : 'OK' }}
     </div>
   </ng-template>
 </jquery-table>
