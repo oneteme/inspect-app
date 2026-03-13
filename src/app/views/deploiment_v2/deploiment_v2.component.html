@@ -1,0 +1,92 @@
+<header-page [iconOutlined]="true" [titleIcon]="MAPPING_TYPE['deploiment'].icon" [ui-title]="MAPPING_TYPE['deploiment'].title" [ui-subtitle]="MAPPING_TYPE['deploiment'].subtitle">
+  <div class="stats-container">
+    <div class="stat-item stat-online">
+      <div class="stat-icon-wrapper">
+        <mat-icon class="material-symbols-outlined">check_circle</mat-icon>
+      </div>
+      <div class="stat-details">
+        <div class="stat-value">{{ onlineServerStat }}</div>
+        <div class="stat-label">En ligne</div>
+      </div>
+    </div>
+
+    <div class="stat-item stat-pending">
+      <div class="stat-icon-wrapper">
+        <mat-icon class="material-symbols-outlined">schedule</mat-icon>
+      </div>
+      <div class="stat-details">
+        <div class="stat-value">{{ pendingServerStat }}</div>
+        <div class="stat-label">En attente</div>
+      </div>
+    </div>
+
+    <div class="stat-item stat-offline">
+      <div class="stat-icon-wrapper">
+        <mat-icon class="material-symbols-outlined">cancel</mat-icon>
+      </div>
+      <div class="stat-details">
+        <div class="stat-value">{{ offlineServerStat }}</div>
+        <div class="stat-label">Hors ligne</div>
+      </div>
+    </div>
+
+    <div class="stat-divider"></div>
+
+    <div class="stat-item stat-total">
+      <div class="stat-icon-wrapper">
+        <mat-icon class="material-symbols-outlined">dns</mat-icon>
+      </div>
+      <div class="stat-details">
+        <div class="stat-value">{{ (lastServers || []).length }}</div>
+        <div class="stat-label">Total</div>
+      </div>
+    </div>
+  </div>
+</header-page>
+
+<jquery-table class="flex-table"
+              [config]="tableConfig" [data]="lastServers" [isLoading]="loading">
+  <ng-template jqtCellDef="appName" let-row>
+    <div class="server-cell-content">
+      <app-status-indicator (onClick)="navigateOnStatusIndicator($event, row)"
+                            [params]="{id: row.id, end: row.end, configuration: row.configuration, lastTrace: row.lastTrace}">
+      </app-status-indicator>
+      <div (click)="navigateOnServerClick($event, row)" class="uptime-link server-name">{{ row.appName || 'N/A' }}</div>
+    </div>
+  </ng-template>
+
+  <ng-template jqtCellDef="duration" let-row>
+    <div (click)="navigateOnSinceClick($event, row)" class="uptime-link"
+         [matTooltip]="'Démarré le ' + (row.start | date:'dd/MM/yyyy à HH:mm:ss':'fr')">
+      <span class="uptime-duration">{{ (today.getTime() - row.start) / 1000 | duration }}</span>
+    </div>
+  </ng-template>
+
+  <ng-template jqtCellDef="version" let-row>
+    <app-version-badge
+            [backgroundColor]="versionColor[row.version]"
+            [configuration]="row.configuration"
+            [collector]="row.collector"
+            [version]="row.version" />
+  </ng-template>
+
+  <ng-template jqtCellDef="restart" let-row>
+    <div class="restart-cell">
+      <div class="restart-badge" (click)="navigateOnRestartClick($event, row.minStart, row.appName)">
+        {{ row.restart }}
+      </div>
+      <mat-icon *ngIf="row.start != row.lastStart" class="material-symbols-outlined warning-icon"
+                (click)="navigateOnRestartClick($event, row.lastStart, row.appName)">
+        deployed_code_alert
+      </mat-icon>
+    </div>
+  </ng-template>
+
+  <ng-template jqtCellDef="branch" let-row>
+    <div class="branch-info" *ngIf="row.branch">
+      <mat-icon class="material-symbols-outlined">code_blocks</mat-icon>
+      {{ row.branch }} / {{ row.hash | slice:0:7 }}
+    </div>
+  </ng-template>
+</jquery-table>
+
