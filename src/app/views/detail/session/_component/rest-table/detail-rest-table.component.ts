@@ -35,6 +35,7 @@ export class DetailRestTableComponent implements OnDestroy {
     pageSizeOptionsGroupBy: [20, 50, 100, 200],
     emptyStateLabel: 'Aucun résultat',
     loadingStateLabel: 'Chargement des requêtes...',
+    onRowSelected: (row: RestRequestDto) => this.onClickRow.emit({ event: null as any, row: row.id }),
     rowClass: (row: RestSessionDto) => {
       const code = row.status;
       if (code >= 500) return 'row-ko';

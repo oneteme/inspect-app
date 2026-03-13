@@ -87,7 +87,6 @@ import { DependencyTableRequestComponent } from './statistic/_component/dependen
 import {
   DependencyTableRequestHttpComponent
 } from "./statistic/_component/dependency-table-request-http/dependency-table-request-http.component";
-import {DeploimentV2Component} from "./deploiment_v2/deploiment_v2.component";
 
 @NgModule({
   imports: [
@@ -169,7 +168,6 @@ import {DeploimentV2Component} from "./deploiment_v2/deploiment_v2.component";
     ParameterTableComponent,
     DependencyTableRequestComponent,
     DependencyTableRequestHttpComponent,
-    DeploimentV2Component
   ]
 })
 export class ViewsModule { }

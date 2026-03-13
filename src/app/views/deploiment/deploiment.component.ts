@@ -29,10 +29,10 @@ export class DeploimentComponent implements OnDestroy {
   readonly tableConfig: TableProvider<LastServerStart & { lastTrace?: number }> = {
     columns: [
       { key: 'appName', header: 'Hôte', sortable: true, icon: 'dns', width: '23%', groupable: false, sliceable: false },
-      { key: 'duree',   header: 'Depuis', sortable: true, icon: 'schedule', width: '14%', groupable: false, sliceable: false, sortValue: (row) => this.today.getTime() - row.start },
-      { key: 'version', header: 'Version', sortable: true, icon: 'label' },
-      { key: 'branch',  header: 'Branche', sortable: true, icon: 'fork_right', width: '25%' },
-      { key: 'restart', header: 'Démarrage', sortable: true, icon: 'restart_alt', width: '13%' },
+      { key: 'duree',   header: 'Depuis', sortable: true, icon: 'schedule', width: '14%', groupable: false, sortValue: (row) => this.today.getTime() - row.start },
+      { key: 'version', header: 'Version', sortable: true, icon: 'label', groupable: false, sliceable: false },
+      { key: 'branch',  header: 'Branche', sortable: true, icon: 'fork_right', width: '25%', groupable: false, sliceable: false },
+      { key: 'restart', header: 'Démarrage', sortable: true, icon: 'restart_alt', width: '13%', groupable: false, sliceable: false },
     ],
     enableSearchBar: true,
     // initialSearchQuery: 'pmo',
@@ -47,6 +47,7 @@ export class DeploimentComponent implements OnDestroy {
       {
         title: 'Durée',
         columnKey: 'duree',
+        hidden: true,
         categories: [
           { key: '< 1h', label: '< 1h', filter: (row) => (this.today.getTime() - row.start) / 1000 < 3600 },
           { key: '1h - 6h', label: '1h - 6h', filter: (row) => { const s = (this.today.getTime() - row.start) / 1000; return s >= 3600 && s < 6 * 3600; } },

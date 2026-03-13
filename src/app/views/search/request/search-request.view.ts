@@ -251,8 +251,8 @@ export class SearchRequestView implements OnInit, OnDestroy {
   }
 
   selectedRest(event: { event: MouseEvent, row: any }) {
-    event.event.stopPropagation();
-    if (event.event.ctrlKey) {
+    if (event.event) event.event.stopPropagation();
+    if (event.event?.ctrlKey) {
       this._router.open(`#/request/rest/${event.row}`, '_blank')
     } else {
       this._router.navigate(['/request/rest', event.row], {

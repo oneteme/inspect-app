@@ -213,8 +213,19 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   transform: none;
 }
 
-.github-btn:hover {
-  background: rgba(15, 23, 42, 0.08);
+.github-btn {
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border-color: transparent;
+  color: $text-secondary;
+  opacity: 0.75;
+
+  &:hover {
+    background: rgba(15, 23, 42, 0.06);
+    border-color: transparent;
+    opacity: 1;
+  }
 }
 
 .nav-divider {
