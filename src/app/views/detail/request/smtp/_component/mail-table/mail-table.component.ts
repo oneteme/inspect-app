@@ -1,7 +1,7 @@
 import {Component, Input} from "@angular/core";
 import {Mail} from "../../../../../../model/trace.model";
 import {DEFAULT_TABLE_CONFIG} from "../../../../../../shared/_component/table/table.config";
-import {TableProvider} from '../../../../../../../../../../jarvis/jquery-charts/dist/oneteme/jquery-table';
+import {TableProvider} from '@oneteme/jquery-table';
 
 @Component({
   selector: 'request-mail-table',

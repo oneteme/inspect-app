@@ -11,7 +11,7 @@ import {REST_REQUEST_TABLE_CONFIG} from "../../../../../shared/_component/table/
 export class DetailRestTableComponent {
   tableConfig: TableProvider<RestRequestDto> = {
     ...REST_REQUEST_TABLE_CONFIG,
-    onRowSelected: (row: RestRequestDto) => this.onClickRow.emit({ event: null as any, row: row.id })
+    onRowSelected: (row: RestRequestDto, event: MouseEvent | null) => this.onClickRow.emit({ event: event as MouseEvent, row: row.id })
   };
 
   _requests: RestRequestDto[] = [];
