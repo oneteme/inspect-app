@@ -18,6 +18,7 @@ import { CustomDateRangeSelectionStrategy } from '../../../shared/material/custo
 import { IPeriod, IStep, IStepFrom, QueryParams } from '../../../model/conf.model';
 import {MainSessionDto, RestSessionDto} from '../../../model/request.model';
 import { TableProvider } from '@oneteme/jquery-table';
+import {REST_SESSION_TABLE_CONFIG} from "../../../shared/_component/table/table.config";
 
 
 @Component({
@@ -64,58 +65,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   focusFieldName: any;
 
   tableConfig: TableProvider<RestSessionDto> = {
-    columns: [
-      { key: 'appName', header: 'Hôte', sortable: true, icon: 'dns', width: '18%' },
-      { key: 'path', header: 'Ressource', sortable: true, icon: 'category' },
-      { key: 'start', header: 'Début', sortable: true, icon: 'schedule', width: '17%' },
-      { key: 'duration', header: 'Durée', sortable: true, icon: 'timer', width: '13%',
-        sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE },
-      { key: 'user', header: 'Utilisateur', sortable: true, icon: 'person', width: '15%' },
-      { key: 'status', header: 'Status', sortable: true, optional: true, icon: 'task_alt', width: '13%',
-        value: (row: RestSessionDto) => {
-          if(!row.end) return 'En cours...';
-          return row.status;
-        }
-      },
-      { key: 'exception', header: 'Exception', sortable: true, optional: true, icon: 'error_outline', width: '13%',
-        value: (row: RestSessionDto) => {
-          return row.exception?.type;
-        }
-      }
-    ],
-    slices: [
-      { title: 'Status', columnKey: 'status' },
-      { title: 'Hôte', columnKey: 'appName' },
-      {
-        title: 'Durée',
-        columnKey: 'duration',
-        categories: [
-          { key: '<100ms', label: '< 100ms', filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
-          { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1 && (row.end - row.start) < 0.5 },
-          { key: '500ms-1s', label: '500ms - 1s', filter: (row) => row.end != null && (row.end - row.start) >= 0.5 && (row.end - row.start) < 1 },
-          { key: '1s-5s', label: '1s - 5s', filter: (row) => row.end != null && (row.end - row.start) >= 1 && (row.end - row.start) < 5 },
-          { key: '>5s', label: '> 5s', filter: (row) => row.end != null && (row.end - row.start) >= 5 },
-          { key: 'in-progress', label: 'En cours...', filter: (row) => row.end == null },
-        ]
-      }],
-    enableSearchBar: true,
-    enableViewButton: true,
-    allowColumnRemoval: true,
-    enablePagination: true,
-    pageSize: 10,
-    enableColumnDragDrop: false,
-    pageSizeOptions: [5, 10, 15, 20, 100],
-    pageSizeOptionsGroupBy: [20, 50, 100, 200],
-    defaultSort: { active: 'start', direction: 'desc' },
-    emptyStateLabel: 'Aucun résultat',
-    loadingStateLabel: 'Chargement des requêtes...',
-    rowClass: (row: RestSessionDto) => {
-      const code = row.status;
-      if (code >= 500) return 'row-ko';
-      if (code >= 400) return 'row-warning';
-      if (code >= 200) return 'row-ok';
-      return '';
-    },
+    ...REST_SESSION_TABLE_CONFIG,
     onRowSelected: (row: RestSessionDto) => this.onTableRowSelected(row)
   };
   sessions: RestSessionDto[];

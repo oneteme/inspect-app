@@ -22,7 +22,7 @@ import {StatusIndicatorComponent} from "./_component/status-indicator/status-ind
 import {ServerCardComponent} from "./_component/server-card/server-card.component";
 import {OverlayContainerFilterComponent} from "./_component/overlay-container-filter/overlay-container-filter.component";
 import {BranchHashBadgeComponent} from "./_component/branch-hash-badge/branch-hash-badge.component";
-import {LogTableComponent} from "./_component/log-table/log-table.component";
+import {LogTableComponent} from "./_component/table/log-table/log-table.component";
 import {JqtCellDefDirective, TableComponent} from "@oneteme/jquery-table";
 
 export const MY_DATE_FORMATS = {
