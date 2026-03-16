@@ -55,7 +55,7 @@
     </div>
   </ng-template>
 
-  <ng-template jqtCellDef="duree" let-row>
+  <ng-template jqtCellDef="duration" let-row>
     <div (click)="navigateOnSinceClick($event, row)" class="uptime-link"
          [matTooltip]="'Démarré le ' + (row.start | date:'dd/MM/yyyy à HH:mm:ss':'fr')">
       <span class="uptime-duration">{{ (today.getTime() - row.start) / 1000 | duration }}</span>

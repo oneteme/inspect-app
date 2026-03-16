@@ -66,7 +66,7 @@ export class SearchRestView implements OnInit, OnDestroy {
 
   tableConfig: TableProvider<RestSessionDto> = {
     ...REST_SESSION_TABLE_CONFIG,
-    onRowSelected: (row: RestSessionDto) => this.onTableRowSelected(row)
+    onRowSelected: (row, event) => this.selectedRequest(event, row)
   };
   sessions: RestSessionDto[];
 
@@ -218,10 +218,12 @@ export class SearchRestView implements OnInit, OnDestroy {
     this.queryParams.rangestatus = rangestatus;
   }
 
-  onTableRowSelected(row: RestSessionDto): void {
-    this._router.navigate(['/session/rest', row.id], {
-      queryParams: { env: this.queryParams.env }
-    });
+  selectedRequest(event: MouseEvent, row: RestSessionDto): void {
+    if (row) {
+      this._router.navigateOnClick(event, ['/session/rest', row.id], {
+        queryParams: { env: this.queryParams.env }
+      });
+    }
   }
 
   resetFilters(): void {

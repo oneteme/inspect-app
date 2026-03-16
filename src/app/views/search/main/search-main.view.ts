@@ -43,7 +43,7 @@ export class SearchMainView implements OnInit, OnDestroy {
   filterConstants = FilterConstants;
   tableConfig: TableProvider<MainSessionDto> = {
     ...MAIN_SESSION_TABLE_CONFIG,
-    onRowSelected: (row: MainSessionDto) => this.selectedRequest(row)
+    onRowSelected: (row, event) => this.selectedRequest(event, row)
   };
   sessions: MainSessionDto[];
 
@@ -230,10 +230,12 @@ export class SearchMainView implements OnInit, OnDestroy {
     this.queryParams.rangestatus = rangestatus;
   }
 
-  selectedRequest(row: MainSessionDto) {
-    this._router.navigate(['/session', row.type.toLowerCase(), row.id], {
-      queryParams: {'env': this.queryParams.env}
-    });
+  selectedRequest(event: MouseEvent, row: MainSessionDto) {
+    if (row) {
+      this._router.navigateOnClick(event, ['/session', row.type.toLowerCase(), row.id], {
+        queryParams: {'env': this.queryParams.env}
+      });
+    }
   }
 
   resetFilters() {

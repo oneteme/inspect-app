@@ -9,7 +9,10 @@ import {SMTP_REQUEST_TABLE_CONFIG} from "../../../../../shared/_component/table/
   styleUrls: ['./detail-smtp-table.component.scss']
 })
 export class DetailSmtpTableComponent {
-  tableConfig: TableProvider<MailRequestDto> = SMTP_REQUEST_TABLE_CONFIG;
+  tableConfig: TableProvider<MailRequestDto> = {
+    ...SMTP_REQUEST_TABLE_CONFIG,
+    onRowSelected:  (row, event) => this.selectedRequest(event, row.id)
+  };
 
   _requests: MailRequestDto[] = [];
 
@@ -18,9 +21,9 @@ export class DetailSmtpTableComponent {
   }
 
   @Input() isLoading: boolean;
-  @Output() onClickRow: EventEmitter<{ event: MouseEvent, row: any }> = new EventEmitter();
+  @Output() onClickRow: EventEmitter<{ event: MouseEvent, row: string }> = new EventEmitter();
 
-  selectedRequest(event: MouseEvent, row: any) {
+  selectedRequest(event: MouseEvent, row: string) {
     this.onClickRow.emit({event: event, row: row});
   }
 }

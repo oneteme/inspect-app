@@ -9,7 +9,10 @@ import {FTP_REQUEST_TABLE_CONFIG} from "../../../../../shared/_component/table/t
   styleUrls: ['./detail-ftp-table.component.scss']
 })
 export class DetailFtpTableComponent {
-  tableConfig: TableProvider<FtpRequestDto> = FTP_REQUEST_TABLE_CONFIG;
+  tableConfig: TableProvider<FtpRequestDto> = {
+    ...FTP_REQUEST_TABLE_CONFIG,
+    onRowSelected: (row: FtpRequestDto, event: MouseEvent) => this.selectedRequest(event, row.id)
+  };
 
   _requests: FtpRequestDto[] = [];
 
@@ -19,9 +22,9 @@ export class DetailFtpTableComponent {
 
   @Input() isLoading: boolean;
 
-  @Output() onClickRow: EventEmitter<{ event: MouseEvent, row: any }> = new EventEmitter();
+  @Output() onClickRow: EventEmitter<{ event: MouseEvent, row: string }> = new EventEmitter();
 
-  selectedRequest(event: MouseEvent, row: any) {
+  selectedRequest(event: MouseEvent, row: string) {
     this.onClickRow.emit({event: event, row: row});
   }
 }

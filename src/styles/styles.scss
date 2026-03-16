@@ -435,6 +435,12 @@ tr.mat-mdc-row {
     border-left: 3px solid gray !important;
     background: linear-gradient(90deg, rgba(128, 128, 128, 0.08) 0%, transparent 100%) !important;
   }
+
+  &.row-actual > td.mat-mdc-cell:first-of-type {
+    border-left: 3px solid #7c3aed;
+    background: linear-gradient(90deg, rgba(124, 58, 237, 0.08) 0%, transparent 100%);
+  }
+
 }
 
 .sub-nav-menu button.nav-item-with-kpi {

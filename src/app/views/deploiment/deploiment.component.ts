@@ -9,6 +9,7 @@ import {InstanceTraceService} from "../../service/jquery/instance-trace.service"
 import {EnvRouter} from "../../service/router.service";
 import {groupByColor} from "../../shared/util";
 import {TableProvider} from "@oneteme/jquery-table";
+import {DEPLOIEMENT_TABLE_CONFIG} from "../../shared/_component/table/table.config";
 
 @Component({
   templateUrl: './deploiment.component.html',
@@ -26,37 +27,7 @@ export class DeploimentComponent implements OnDestroy {
   MAPPING_TYPE = Constants.MAPPING_TYPE;
   rawRows: (LastServerStart & { lastTrace?: number })[] = [];
   isLoading = false;
-  readonly tableConfig: TableProvider<LastServerStart & { lastTrace?: number }> = {
-    columns: [
-      { key: 'appName', header: 'Hôte', sortable: true, icon: 'dns', width: '23%', groupable: false, sliceable: false },
-      { key: 'duree',   header: 'Depuis', sortable: true, icon: 'schedule', width: '14%', groupable: false, sortValue: (row) => this.today.getTime() - row.start },
-      { key: 'version', header: 'Version', sortable: true, icon: 'label', groupable: false, sliceable: false },
-      { key: 'branch',  header: 'Branche', sortable: true, icon: 'fork_right', width: '25%', groupable: false, sliceable: false },
-      { key: 'restart', header: 'Démarrage', sortable: true, icon: 'restart_alt', width: '13%', groupable: false, sliceable: false },
-    ],
-    search: { enabled: true },
-    // search: { enabled: true, initialQuery: 'pmo' },
-    view: { enabled: true },
-    pagination: { enabled: true, pageSize: 10, pageSizeOptions: [10, 25, 50] },
-    defaultSort: { active: 'duree', direction: 'asc' },
-    slices: [
-      // { title: 'Version', columnKey: 'version' },
-      // { title: 'Branche', columnKey: 'branch' },
-      {
-        title: 'Durée',
-        columnKey: 'duree',
-        hidden: true,
-        categories: [
-          { key: '< 1h', label: '< 1h', filter: (row) => (this.today.getTime() - row.start) / 1000 < 3600 },
-          { key: '1h - 6h', label: '1h - 6h', filter: (row) => { const s = (this.today.getTime() - row.start) / 1000; return s >= 3600 && s < 6 * 3600; } },
-          { key: '6h - 12h', label: '6h - 12h', filter: (row) => { const s = (this.today.getTime() - row.start) / 1000; return s >= 6 * 3600 && s < 12 * 3600; } },
-          { key: '12h - 1j', label: '12h - 1j', filter: (row) => { const s = (this.today.getTime() - row.start) / 1000; return s >= 12 * 3600 && s < 86400; } },
-          { key: '1j - 7j', label: '1j - 7j', filter: (row) => { const s = (this.today.getTime() - row.start) / 1000; return s >= 86400 && s < 7 * 86400; } },
-          { key: '> 7 jours', label: '> 7 jours', filter: (row) => (this.today.getTime() - row.start) / 1000 >= 7 * 86400 },
-        ]
-      },
-    ],
-  };
+  readonly tableConfig: TableProvider<LastServerStart & { lastTrace?: number }> = DEPLOIEMENT_TABLE_CONFIG;
 
   versionColor: any;
   params: Partial<{ env: string }> = {};

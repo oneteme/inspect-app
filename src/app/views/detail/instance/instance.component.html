@@ -30,7 +30,7 @@
     </div>
     <div class="tab-content">
       <div *ngIf="tabs[selectedTabIndex]?.type === 'instances'" class="tab-panel">
-          <instance-table [requests]="allInstance"[mainId]="instance?.id">
+          <instance-table [requests]="allInstance">
           </instance-table>
       </div>
       <div *ngIf="tabs[selectedTabIndex]?.type === 'timeline'" class="tab-panel">

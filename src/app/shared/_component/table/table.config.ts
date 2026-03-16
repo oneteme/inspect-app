@@ -1,6 +1,7 @@
 import {SliceConfig, TableProvider} from '@oneteme/jquery-table';
 import {DatabaseRequestDto, DirectoryRequestDto, FtpRequestDto, MailRequestDto, MainSessionDto, RestRequestDto, RestSessionDto} from '../../../model/request.model';
 import {AbstractStage, LocalRequest, LogEntry} from "../../../model/trace.model";
+import {LastServerStart} from "../../../model/jquery.model";
 
 export const DEFAULT_TABLE_CONFIG: TableProvider = {
   search: { enabled: true },
@@ -381,3 +382,36 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
   ],
   defaultSort: DEFAULT_SORT_CONFIG
 };
+
+export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTrace?: number }> = {
+  ...DEFAULT_TABLE_CONFIG,
+  columns: [
+    { key: 'appName', header: 'Hôte', icon: 'dns', width: '23%', groupable: false, sliceable: false },
+    { key: 'duration', header: 'Depuis', icon: 'schedule', width: '14%', groupable: false },
+    { key: 'version', header: 'Version', icon: 'label' },
+    { key: 'branch',  header: 'Branche', icon: 'fork_right', width: '25%' },
+    { key: 'restart', header: 'Démarrage', icon: 'restart_alt', width: '13%', groupable: false, sliceable: false }
+  ],
+  defaultSort: { active: 'duration', direction: 'asc' },
+  slices: [
+    {
+      title: 'Depuis',
+      columnKey: 'duration',
+      hidden: true,
+      categories: [
+        { key: '< 1h', label: '< 1h', filter: (row) => (new Date().getTime() - row.start) / 1000 < 3600 },
+        { key: '1h - 6h', label: '1h - 6h', filter: (row) => { const s = (new Date().getTime() - row.start) / 1000; return s >= 3600 && s < 6 * 3600; } },
+        { key: '6h - 12h', label: '6h - 12h', filter: (row) => { const s = (new Date().getTime() - row.start) / 1000; return s >= 6 * 3600 && s < 12 * 3600; } },
+        { key: '12h - 1j', label: '12h - 1j', filter: (row) => { const s = (new Date().getTime() - row.start) / 1000; return s >= 12 * 3600 && s < 86400; } },
+        { key: '1j - 7j', label: '1j - 7j', filter: (row) => { const s = (new Date().getTime() - row.start) / 1000; return s >= 86400 && s < 7 * 86400; } },
+        { key: '> 7 jours', label: '> 7 jours', filter: (row) => (new Date().getTime() - row.start) / 1000 >= 7 * 86400 }
+      ]
+    },
+    {
+      title: 'Collector',
+      icon: 'sensors',
+      columnKey: 'collector',
+      hidden: true
+    }
+  ]
+}

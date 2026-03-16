@@ -9,7 +9,10 @@ import {DATABASE_REQUEST_TABLE_CONFIG} from "../../../../../shared/_component/ta
   styleUrls: ['./detail-database-table.component.scss']
 })
 export class DetailDatabaseTableComponent {
-  tableConfig: TableProvider<DatabaseRequestDto> = DATABASE_REQUEST_TABLE_CONFIG;
+  tableConfig: TableProvider<DatabaseRequestDto> = {
+    ...DATABASE_REQUEST_TABLE_CONFIG,
+    onRowSelected: (row, event) => this.selectedQuery(event, row.id)
+  };
 
   _requests: DatabaseRequestDto[] = [];
 
@@ -18,9 +21,9 @@ export class DetailDatabaseTableComponent {
   }
 
   @Input() isLoading: boolean;
-  @Output() onClickRow: EventEmitter<{ event: MouseEvent, row: any }> = new EventEmitter();
+  @Output() onClickRow: EventEmitter<{ event: MouseEvent, row: string }> = new EventEmitter();
 
-  selectedQuery(event: MouseEvent, row: number) {
+  selectedQuery(event: MouseEvent, row: string) {
     this.onClickRow.emit({event: event, row: row});
   }
 }

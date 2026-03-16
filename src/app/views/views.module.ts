@@ -8,7 +8,6 @@ import {SharedModule} from '../shared/shared.module';
 import {ChartComponent} from "@oneteme/jquery-apexcharts";
 import {SearchRestView} from "./search/rest/search-rest.view";
 import {SearchMainView} from "./search/main/search-main.view";
-import {StatisticDatabaseView} from "./statistic/database/statistic-database.view";
 import {DetailSessionRestView} from "./detail/session/rest/detail-session-rest.view";
 import {DetailSessionMainView} from "./detail/session/main/detail-session-main.view";
 import {DetailDatabaseView} from "./detail/request/database/detail-database.view";
@@ -39,7 +38,6 @@ import {
 import {StatisticClientView} from "./statistic/view/statistic-client.view";
 import {ArchitectureView} from "./architecture/architecture.view";
 import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
-import {DumpView} from "./dump/dump.view";
 import {NumberFormatterPipe} from '../shared/pipe/number.pipe';
 import {DeploimentComponent} from './deploiment/deploiment.component';
 import {StatisticServerView} from "./statistic/server/statistic-server.view";
@@ -100,7 +98,6 @@ import {
   declarations: [
     SearchRestView,
     SearchMainView,
-    StatisticDatabaseView,
     DetailRequestView,
     DetailSessionRestView,
     DetailSessionMainView,
@@ -126,7 +123,6 @@ import {
     ProtocolExceptionComponent,
     ArchitectureView,
     TreeView,
-    DumpView,
     StatisticServerView,
     StatisticRequestView,
     StatisticRequestJdbcComponent,
@@ -158,7 +154,7 @@ import {
     InstanceTableComponent,
     ParameterTableComponent,
     DependencyTableRequestComponent,
-    DependencyTableRequestHttpComponent,
+    DependencyTableRequestHttpComponent
   ]
 })
 export class ViewsModule { }

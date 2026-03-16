@@ -9,7 +9,10 @@ import {LDAP_REQUEST_TABLE_CONFIG} from "../../../../../shared/_component/table/
   styleUrls: ['./detail-ldap-table.component.scss']
 })
 export class DetailLdapTableComponent {
-  tableConfig: TableProvider<DirectoryRequestDto> = LDAP_REQUEST_TABLE_CONFIG;
+  tableConfig: TableProvider<DirectoryRequestDto> = {
+    ...LDAP_REQUEST_TABLE_CONFIG,
+    onRowSelected: (row: DirectoryRequestDto, event: MouseEvent) => this.selectedRequest(event, row.id)
+  };
 
   _requests: DirectoryRequestDto[] = [];
 
@@ -18,9 +21,9 @@ export class DetailLdapTableComponent {
   }
 
   @Input() isLoading: boolean;
-  @Output() onClickRow: EventEmitter<{ event: MouseEvent, row: any }> = new EventEmitter();
+  @Output() onClickRow: EventEmitter<{ event: MouseEvent, row: string }> = new EventEmitter();
 
-  selectedRequest(event: MouseEvent, row: any) {
+  selectedRequest(event: MouseEvent, row: string) {
     this.onClickRow.emit({event: event, row: row});
   }
 }
