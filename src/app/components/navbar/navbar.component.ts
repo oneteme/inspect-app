@@ -1,9 +1,10 @@
-import { Component, inject, OnDestroy, OnInit } from '@angular/core';
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { distinctUntilChanged, finalize, Subscription } from 'rxjs';
 import { DomSanitizer } from '@angular/platform-browser';
 import { MatIconRegistry } from '@angular/material/icon';
+import { MatMenuTrigger } from '@angular/material/menu';
 import { app } from 'src/environments/environment';
 import { Constants } from '../../views/constants';
 import { EnvRouter } from '../../service/router.service';
@@ -14,6 +15,7 @@ interface SubNavItem {
   icon: string;
   id: string;
   route: string;
+  kpiRoute?: string;
 }
 
 interface NavItem {
@@ -21,6 +23,7 @@ interface NavItem {
   icon: string;
   id: string;
   route?: string;
+  kpiRoute?: string;
   children?: SubNavItem[];
 }
 
@@ -33,6 +36,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _service = inject(InstanceService);
   private readonly _envRouter = inject(EnvRouter);
+
+  @ViewChild('mainTrigger') mainMenuTrigger: MatMenuTrigger;
 
   MAPPING_TYPE = Constants.MAPPING_TYPE;
 
@@ -47,11 +52,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
       icon: Constants.MAPPING_TYPE['request'].icon,
       id: 'request',
       children: [
-        { label: Constants.REQUEST_MAPPING_TYPE['rest'].title, icon: Constants.REQUEST_MAPPING_TYPE['rest'].icon, id: 'rest', route: 'request/rest' },
-        { label: Constants.REQUEST_MAPPING_TYPE['jdbc'].title, icon: Constants.REQUEST_MAPPING_TYPE['jdbc'].icon, id: 'jdbc', route: 'request/jdbc' },
-        { label: Constants.REQUEST_MAPPING_TYPE['ftp'].title, icon: Constants.REQUEST_MAPPING_TYPE['ftp'].icon, id: 'ftp', route: 'request/ftp' },
-        { label: Constants.REQUEST_MAPPING_TYPE['smtp'].title, icon: Constants.REQUEST_MAPPING_TYPE['smtp'].icon, id: 'smtp', route: 'request/smtp' },
-        { label: Constants.REQUEST_MAPPING_TYPE['ldap'].title, icon: Constants.REQUEST_MAPPING_TYPE['ldap'].icon, id: 'ldap', route: 'request/ldap' },
+        { label: Constants.REQUEST_MAPPING_TYPE['rest'].title, icon: Constants.REQUEST_MAPPING_TYPE['rest'].icon, id: 'rest', route: 'request/rest', kpiRoute: 'dashboard/request/rest' },
+        { label: Constants.REQUEST_MAPPING_TYPE['jdbc'].title, icon: Constants.REQUEST_MAPPING_TYPE['jdbc'].icon, id: 'jdbc', route: 'request/jdbc', kpiRoute: 'dashboard/request/jdbc' },
+        { label: Constants.REQUEST_MAPPING_TYPE['ftp'].title, icon: Constants.REQUEST_MAPPING_TYPE['ftp'].icon, id: 'ftp', route: 'request/ftp', kpiRoute: 'dashboard/request/ftp' },
+        { label: Constants.REQUEST_MAPPING_TYPE['smtp'].title, icon: Constants.REQUEST_MAPPING_TYPE['smtp'].icon, id: 'smtp', route: 'request/smtp', kpiRoute: 'dashboard/request/smtp' },
+        { label: Constants.REQUEST_MAPPING_TYPE['ldap'].title, icon: Constants.REQUEST_MAPPING_TYPE['ldap'].icon, id: 'ldap', route: 'request/ldap', kpiRoute: 'dashboard/request/ldap' },
       ]
     },
     { label: Constants.MAPPING_TYPE['rest'].title, icon: Constants.MAPPING_TYPE['rest'].icon, id: 'rest', route: 'session/rest' },
@@ -114,10 +119,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this._envRouter.navigate(['deploiment'], { queryParams: { env: this.env.value } });
   }
 
-  gotoDeploimentV2() {
-    this._envRouter.navigate(['deploiment_v2'], { queryParams: { env: this.env.value } });
-  }
-
   selectEnv(value: string) {
     this.env.setValue(value);
   }
@@ -128,6 +129,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   navigateToSub(_parent: NavItem, child: SubNavItem) {
     this._envRouter.navigate([child.route], { queryParams: { env: this.env.value } });
+  }
+
+  navigateToKpi(kpiRoute: string) {
+    this.mainMenuTrigger?.closeMenu();
+    this._envRouter.navigate([kpiRoute], { queryParams: { env: this.env.value } });
   }
 
   getEnvClass(env: string): string {

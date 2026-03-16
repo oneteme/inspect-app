@@ -436,3 +436,20 @@ tr.mat-mdc-row {
     background: linear-gradient(90deg, rgba(128, 128, 128, 0.08) 0%, transparent 100%) !important;
   }
 }
+
+.sub-nav-menu button.nav-item-with-kpi {
+  width: 100%;
+
+  .mat-mdc-menu-item-text,
+  .mdc-list-item__primary-text {
+    display: flex !important;
+    align-items: center;
+    width: 100%;
+    gap: 0;
+
+    > span:not(.nav-kpi-btn) {
+      flex: 1;
+      min-width: 0;
+    }
+  }
+}

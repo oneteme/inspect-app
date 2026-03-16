@@ -19,16 +19,10 @@ export class ActionTableComponent {
       {key: 'name', header: 'Nom'},
       {key: 'user', header: 'Utilisateur', optional: true},
     ],
-    enableSearchBar: true,
-    enableViewButton: true,
-    allowColumnRemoval: true,
-    enablePagination: true,
-    pageSize: 10,
-    enableColumnDragDrop: false,
-    pageSizeOptions: [5, 10, 15, 20, 100],
-    pageSizeOptionsGroupBy: [20, 50, 100, 200],
-    emptyStateLabel: 'Aucun résultat',
-    loadingStateLabel: 'Chargement des requêtes...'
+    search: { enabled: true },
+    view: { enabled: true, enableColumnRemoval: true },
+    pagination: { enabled: true, pageSize: 10, pageSizeOptions: [5, 10, 15, 20, 100], pageSizeOptionsGroupBy: [20, 50, 100, 200] },
+    labels: { empty: 'Aucun résultat', loading: 'Chargement des requêtes...' }
   };
 
   _requests: UserAction[] = [];

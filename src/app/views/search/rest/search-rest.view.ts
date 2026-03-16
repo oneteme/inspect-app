@@ -86,7 +86,7 @@ export class SearchRestView implements OnInit, OnDestroy {
         if(params.q){
           this.tableConfig = {
             ...this.tableConfig,
-            initialSearchQuery: params.q
+            search: { ...this.tableConfig?.search, initialQuery: params.q }
           }
         }
         this.patchStatusValue(this.queryParams.rangestatus)

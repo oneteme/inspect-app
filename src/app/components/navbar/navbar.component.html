@@ -28,7 +28,7 @@
 
     <div class="nav-main">
       <div class="nav-divider"></div>
-      <button class="menu-trigger" [matMenuTriggerFor]="mainMenu">
+      <button class="menu-trigger" [matMenuTriggerFor]="mainMenu" #mainTrigger="matMenuTrigger">
         <mat-icon>menu</mat-icon>
       </button>
       <mat-menu #mainMenu="matMenu" class="main-nav-menu">
@@ -45,11 +45,21 @@
           <mat-menu #subMenu="matMenu" class="sub-nav-menu">
             <button
               mat-menu-item
+              class="nav-item-with-kpi"
               *ngFor="let subItem of item.children"
               (click)="navigateToSub(item, subItem)"
             >
               <mat-icon class="material-symbols-outlined">{{ subItem.icon }}</mat-icon>
               <span>{{ subItem.label }}</span>
+              <span
+                *ngIf="subItem.kpiRoute"
+                class="nav-kpi-btn"
+                (click)="$event.stopPropagation(); navigateToKpi(subItem.kpiRoute)"
+                [matTooltip]="'KPI ' + subItem.label"
+                matTooltipPosition="right"
+              >
+                <mat-icon class="material-symbols-outlined">finance_mode</mat-icon>
+              </span>
             </button>
           </mat-menu>
 
@@ -68,24 +78,9 @@
 
     <div class="nav-actions">
       <button
-        class="action-btn kpi-btn"
-        matTooltip="KPI"
-      >
-        <mat-icon class="material-symbols-outlined">finance_mode</mat-icon>
-      </button>
-
-      <button
         class="action-btn deploy-btn"
         [matTooltip]="MAPPING_TYPE['deploiment'].title"
         (click)="gotoDeploiment()"
-      >
-        <mat-icon class="material-symbols-outlined">{{ MAPPING_TYPE['deploiment'].icon }}</mat-icon>
-      </button>
-
-      <button
-              class="action-btn deploy-btn"
-              [matTooltip]="'Deploiement New'"
-              (click)="gotoDeploimentV2()"
       >
         <mat-icon class="material-symbols-outlined">{{ MAPPING_TYPE['deploiment'].icon }}</mat-icon>
       </button>
