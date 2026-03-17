@@ -40,4 +40,13 @@ export class InstanceTraceService {
     }
     return this.getInstanceTrace(args);
   }
+
+  getLastInstanceTraceById(id: string): Observable<{date: number}[]> {
+    let args: any = {
+      'column': 'start:date',
+      'instance_env.varchar': `"${id}"`,
+      'rank.over(partition(instance_env).order(start.desc))': '1'
+    }
+    return this.getInstanceTrace(args);
+  }
 }

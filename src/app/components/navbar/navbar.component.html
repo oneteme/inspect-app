@@ -47,8 +47,7 @@
               mat-menu-item
               class="nav-item-with-kpi"
               *ngFor="let subItem of item.children"
-              (click)="navigateToSub(item, subItem)"
-            >
+              (click)="navigateToSub(item, subItem)">
               <mat-icon class="material-symbols-outlined">{{ subItem.icon }}</mat-icon>
               <span>{{ subItem.label }}</span>
               <span

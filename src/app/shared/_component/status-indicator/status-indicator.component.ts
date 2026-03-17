@@ -83,11 +83,9 @@ export class StatusIndicatorComponent {
 
   class: string;
   tooltip: string;
-  instance: {id: string, end: number, configuration: InspectCollectorConfiguration, lastTrace: number};
 
-  @Input() set params(value: {id: string, end: number, configuration: InspectCollectorConfiguration, lastTrace: number}) {
+  @Input() set params(value: {id: string, end: number, configuration: InspectCollectorConfiguration, lastTrace: number, date: number}) {
     if(value) {
-      this.instance = value;
       this.getStatus(value);
     }
   };
@@ -97,8 +95,8 @@ export class StatusIndicatorComponent {
     this.onClick.emit(event);
   }
 
-  getStatus(value: {id: string, end: number, configuration: InspectCollectorConfiguration, lastTrace: number}) {
-    let interval = new Date().getTime() - (value.configuration?.scheduling.interval + 60 || 60 * 60) * 1000;
+  getStatus(value: {id: string, end: number, configuration: InspectCollectorConfiguration, lastTrace: number, date: number}) {
+    let interval = value.date - (value.configuration?.scheduling.interval + 60 || 60 * 60) * 1000;
     if(value.end || !value.lastTrace) {
       this.class = 'offline';
       this.tooltip = value.end ? `Serveur arrêté le ${this._datePipe.transform(new Date(value.end * 1000), 'dd/MM/yyyy à HH:mm:ss.SSS', 'fr')}` : 'Aucune trace remontée';
