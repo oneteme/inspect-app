@@ -3,7 +3,7 @@ import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {MatTableDataSource} from "@angular/material/table";
 import {LastServerStart} from "../../../../../model/jquery.model";
-import {TableProvider} from "../../../../../../../../../jarvis/jquery-charts/dist/oneteme/jquery-table";
+import {TableProvider} from "@oneteme/jquery-table";
 import {DEFAULT_SORT_CONFIG, DEFAULT_TABLE_CONFIG} from "../../../../../shared/_component/table/table.config";
 
 

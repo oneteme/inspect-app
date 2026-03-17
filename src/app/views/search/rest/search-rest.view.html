@@ -29,6 +29,7 @@
     [config]="tableConfig"
     [data]="sessions"
     [isLoading]="isLoading">
+    
   <ng-template jqtCellDef="resource" let-row>
     <span style="font-weight: bold;">{{ row.method | typeColumnFormat }}</span>
     <br>
