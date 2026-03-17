@@ -3,7 +3,7 @@
     <div style="display: flex; align-items: center; gap: 1.5em">
       {{ (instance?.name | titleCase) || 'Aucune instance sélectionnée' }}
       <app-status-indicator *ngIf="!isLoading && instance"
-                            [params]="{id: instance.id, end: instance.end, configuration: instance.configuration, lastTrace: lastTrace}"></app-status-indicator>
+                            [params]="{id: instance.id, end: instance.end, configuration: instance.configuration, lastTrace: lastTrace, date: date.getTime()}"></app-status-indicator>
     </div>
 
   </ng-template>

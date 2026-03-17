@@ -376,6 +376,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     }
   };
 
+  date = new Date();
   servers: string[] = [];
   instance: Partial<InstanceEnvironment> = {};
   instances: {id: string, appName: string, start: number, end: number}[] = [];

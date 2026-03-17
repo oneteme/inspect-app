@@ -380,6 +380,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
     }
   };
 
+  date = new Date();
   servers: string[] = [];
   instance: Partial<InstanceEnvironment> = {};
   instances: {id: string, appName: string, address:string,  start: number, end: number}[] = [];
