@@ -93,6 +93,7 @@ import {LatencyCardHttpComponent} from "./statistic/_component/latency-card-http
 import {
   RepartitionTypeCrossTableComponent
 } from "./statistic/_component/repartition-type-cross-table/repartition-type-cross-table.component";
+import {DynamicChartComponent} from "./statistic/_component/dynamic-chart/dynamic-chart.component";
 
 @NgModule({
   imports: [
@@ -175,7 +176,8 @@ import {
     RepartitionTypeCrossTableComponent,
     RepartitionSizeCardHttpComponent,
     DynamicTableComponent,
-    LatencyCardHttpComponent
+    LatencyCardHttpComponent,
+    DynamicChartComponent
   ]
 })
 export class ViewsModule { }

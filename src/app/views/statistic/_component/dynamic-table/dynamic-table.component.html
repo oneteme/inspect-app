@@ -12,7 +12,11 @@
             </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumns;" (click)="selectedRow($event, row)"></tr>
+            <tr mat-row
+                [class.selected]="keepHighlightedRow && selectedRowData === row"
+                [style.cursor]="cursorPointer ? 'pointer' : 'default'"
+                *matRowDef="let row; columns: displayedColumns; i as index;"
+                (click)="selectedRow($event, row, index)"></tr>
         </table>
         <div [hidden]="dataSource?.data.length < pageSize + 1">
             <mat-paginator [pageSize]="pageSize" [hidePageSize]="true" showFirstLastButtons></mat-paginator>

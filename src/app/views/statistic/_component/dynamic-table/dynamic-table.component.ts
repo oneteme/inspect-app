@@ -17,6 +17,7 @@ export interface TableColumn {
 export class DynamicTableComponent {
   displayedColumns: string[] = [];
   dataSource: MatTableDataSource<any> = new MatTableDataSource([]);
+  selectedRowData: any = null;
 
   @ViewChild(MatPaginator) paginator: MatPaginator;
   @ViewChild('sort') sort: MatSort;
@@ -24,6 +25,8 @@ export class DynamicTableComponent {
   _columns: TableColumn[] = [];
 
   @Input() title: string;
+  @Input() keepHighlightedRow: boolean = false;
+  @Input() cursorPointer: boolean = true;
   @Input() set columns(cols: TableColumn[]) {
     if (cols?.length) {
       this._columns = cols;
@@ -47,8 +50,14 @@ export class DynamicTableComponent {
   @Output() rowSelected = new EventEmitter<any>();
 
   selectedRow(event: MouseEvent, row: any) {
-    this.rowSelected.emit(row);
+    if (this.keepHighlightedRow) {
+      // Toggle selection: deselect if already selected
+      this.selectedRowData = this.selectedRowData === row ? null : row;
+    } else {
+      // Clear selection if keepHighlightedRow is false
+      this.selectedRowData = null;
+    }
+    this.rowSelected.emit(this.selectedRowData);
   }
 }
-
 

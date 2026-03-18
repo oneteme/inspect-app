@@ -1,36 +1,34 @@
 import {Component, EventEmitter, inject, Input, Output, OnInit} from "@angular/core";
 import {ChartProvider, field} from "@oneteme/jquery-core";
-import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
-
 export interface RepartitionTypeCardConfig {
   title: string;
   indicators: { label: string, value: string }[];
-  groups: { label: string, value: string }[];
+  groups: { label: string, value: string, group?: (row: any) => string, properties?: string[]}[];
   slices: { label: string, value: string }[];
   series: { label: string, value: string }[];
-  groupColumns: {
-    [key: string]: { column: string, order?: string, group: (row: any) => string, properties: string[] }
+  groupColumns?: {
+    [key: string]: { column: string, order?: string}
   };
-  sliceColumns: {
+  sliceColumns?: {
     [key: string]: { selector: string, query: string, name: string }
   };
-  seriesColumns: {
-    [key: string]: Array<{
+  seriesColumns?: {
+    [key: string]: {
       selector: string,
       query: (selectedIndicateur:string) => string,
       name: string,
       color: string
-    }>
+    }
   };
   chartProvider?: ChartProvider<string, number>;
 }
 
 @Component({
-  selector: 'repartition-type-card',
-  templateUrl: './repartition-type-card.component.html',
-  styleUrls: ['./repartition-type-card.component.scss']
+  selector: 'dynamic-chart',
+  templateUrl: './dynamic-chart.component.html',
+  styleUrls: ['./dynamic-chart.component.scss']
 })
-export class RepartitionTypeCardComponent implements OnInit {
+export class DynamicChartComponent implements OnInit {
 
   private readonly dynamicSeriesMap: Map<string, any> = new Map();
   config = {
@@ -54,9 +52,6 @@ export class RepartitionTypeCardComponent implements OnInit {
   sliceFilter: any = {};
 
   @Output() chartEmitter: EventEmitter<any> = new EventEmitter<any>();
-  @Input() set seriesProvider(objects: SerieProvider<string, number>[]) {
-    //   this.REPARTITION_TYPE_RESPONSE_BAR.series = objects;
-  }
   @Input() set cardConfiguration(configuration: RepartitionTypeCardConfig) {
     if (configuration) {
       this.cardConfig = configuration;
@@ -67,14 +62,14 @@ export class RepartitionTypeCardComponent implements OnInit {
   }
   @Input() set data(objects: any[]) {
     if (objects?.length > 0) {
-      this.generateDynamicSeries(objects, this.config.selectedSerie);
+      this.generateDynamicSeries(objects);
       this._data = objects;
     }
   }
   @Input() sliceData: any[] = [];
   @Input() isLoading: boolean;
   @Input() set group(value: string) {
-    this.REPARTITION_TYPE_RESPONSE_BAR.series?.forEach((s) => s.data.x = field(value));
+    this.chartProvider.series?.forEach((s) => s.data.x = field(value));
   }
 
   ngOnInit(): void {
@@ -98,12 +93,12 @@ export class RepartitionTypeCardComponent implements OnInit {
     this.chartEmitter.emit({
       type: 'group',
       config: this.config,
-      columns: {
+     /* columns: {
         ...this.groupColumns[this.config.selectedGroup],
         agregate: this.config.selectedIndicator,
-        base: this.seriesColumns[this.config.selectedSerie].map(c => c.query(this.config.selectedIndicator)).join(','),
+        base: this.seriesColumns[this.config.selectedSerie].query(this.config.selectedIndicator),
         ...this.sliceFilter
-      }
+      }*/
     });
   }
 
@@ -114,12 +109,12 @@ export class RepartitionTypeCardComponent implements OnInit {
     this.chartEmitter.emit({
       type: 'group',
       config: this.config,
-      columns: {
+      /*columns: {
         ...this.groupColumns[this.config.selectedGroup],
         agregate: this.config.selectedIndicator,
-        base: this.seriesColumns[this.config.selectedSerie].map(c => c.query(this.config.selectedIndicator)).join(','),
+        base: this.seriesColumns[this.config.selectedSerie].query(this.config.selectedIndicator),
         ...this.sliceFilter
-      }
+      }*/
     });
   }
 
@@ -129,12 +124,12 @@ export class RepartitionTypeCardComponent implements OnInit {
     this.chartEmitter.emit({
       type: 'indicator',
       config: this.config,
-      columns: {
+      /*columns: {
         ...this.groupColumns[this.config.selectedGroup],
         agregate: this.config.selectedIndicator,
-        base: this.seriesColumns[this.config.selectedSerie].map(c => c.query(this.config.selectedIndicator)).join(','),
+        base: this.seriesColumns[this.config.selectedSerie].query(this.config.selectedIndicator),
         ...this.sliceFilter
-      }
+      }*/
     });
   }
 
@@ -165,24 +160,27 @@ export class RepartitionTypeCardComponent implements OnInit {
     this.chartEmitter.emit({
       type: 'series',
       config: this.config,
-      columns: {
+      /*columns: {
         ...this.groupColumns[this.config.selectedGroup],
         agregate: this.config.selectedIndicator,
-        base: this.seriesColumns[this.config.selectedSerie].map(c => c.query(this.config.selectedIndicator)).join(','),
+        base: this.seriesColumns[this.config.selectedSerie].query(this.config.selectedIndicator),
         ...this.sliceFilter
-      }
+      }*/
     });
   }
 
   updateSeries(): void {
-    this.REPARTITION_TYPE_RESPONSE_BAR.series = this.seriesColumns[this.config.selectedSerie].map(c => ({
-      data: {x: field(this.config.selectedGroup), y: field(c.selector)},
-      name: c.name || c.selector,
-      color: c.color
-    }));
+    this.chartProvider.series =[
+        {
+          data: {x: field(this.config.selectedGroup), y: field( this.seriesColumns[this.config.selectedSerie].selector)},
+          name:  this.seriesColumns[this.config.selectedSerie].name ||  this.seriesColumns[this.config.selectedSerie].selector,
+          color:  this.seriesColumns[this.config.selectedSerie].color
+        }
+      ]
   }
 
   sliceRowClick(event: any){
+    console.log(event)
     if (event) {
       this.sliceFilter = event;
     } else {
@@ -193,7 +191,7 @@ export class RepartitionTypeCardComponent implements OnInit {
       columns: {
         ...this.groupColumns[this.config.selectedGroup],
         agregate: this.config.selectedIndicator,
-        base: this.seriesColumns[this.config.selectedSerie].map(c => c.query(this.config.selectedIndicator)).join(','),
+        base: this.seriesColumns[this.config.selectedSerie].query(this.config.selectedIndicator),
         sliceFilter: Object.keys(this.sliceFilter).length > 0
           ? {[this.sliceColumns[this.config.selectedSlice].selector] : this.sliceFilter[this.config.selectedSlice]}
           : null
@@ -202,8 +200,7 @@ export class RepartitionTypeCardComponent implements OnInit {
   }
 
 
-
-   //------------------------------------
+  //------------------------------------
   // Color palette for dynamic series
   private readonly colorPalette: string[] = [
     '#2f8dd0', '#f7941d', '#33cc33', '#ff0000', '#9c27b0',
@@ -211,36 +208,41 @@ export class RepartitionTypeCardComponent implements OnInit {
     '#4caf50', '#ff5722', '#673ab7', '#3f51b5', '#009688'
   ];
 
-  private generateDynamicSeries(data: any[], fieldName: string): void {
-    // Extract unique values from the field
-    const uniqueValues = new Set<string>();
-    data.forEach(item => {
-      if (item[fieldName]) {
-        uniqueValues.add(String(item[fieldName]));
-      }
-    });
-
-    this.dynamicSeriesMap.clear();
-
-    let colorIndex = 0;
-    Array.from(uniqueValues).sort((a, b) => a.localeCompare(b)).forEach(value => {
-      this.dynamicSeriesMap.set(value, {
-        selector: value,
-        name: value,
-        color: this.colorPalette[colorIndex % this.colorPalette.length]
+  private generateDynamicSeries(data: any[]): void {
+    const fieldName = this.config.selectedSerie
+    if(!fieldName){
+        this.chartProvider.series = [{data: {x:field(this.config.selectedGroup), y: field('count')}, name: 'count', color: this.colorPalette[0]}];
+    }else {
+      // Extract unique values from the field
+      const uniqueValues = new Set<string>();
+      data.forEach(item => {
+        if (item[fieldName]) {
+          uniqueValues.add(String(item[fieldName]));
+        }
       });
-      colorIndex++;
-    });
+
+      this.dynamicSeriesMap.clear();
+      let colorIndex = 0;
+      Array.from(uniqueValues).sort((a, b) => a.localeCompare(b)).forEach(value => {
+        this.dynamicSeriesMap.set(value, {
+          selector: value,
+          name: value,
+          color: this.colorPalette[colorIndex % this.colorPalette.length]
+        });
+        colorIndex++;
+      });
 
 
-    if (this.config.selectedSerie === fieldName) {
-      this.REPARTITION_TYPE_RESPONSE_BAR.series = Array.from(this.dynamicSeriesMap.values()).map(s => ({
-        data: {x: field(this.config.selectedGroup), y: field(s.selector)},
-        name: s.name,
-        color: s.color
-      }));
-      this.processDataByValue(data, fieldName);
+      if (this.config.selectedSerie === fieldName) {
+        this.chartProvider.series = Array.from(this.dynamicSeriesMap.values()).map(s => ({
+          data: {x: field(this.config.selectedGroup), y: field(s.selector)},
+          name: s.name,
+          color: s.color
+        }));
+        this.processDataByValue(data, fieldName);
+      }
     }
+
   }
 
 
@@ -254,11 +256,8 @@ export class RepartitionTypeCardComponent implements OnInit {
 
     // Group data by group key and consolidate status codes and counts
     const groupedData: Map<string, any> = new Map();
-    const selectedGroupConfig = this.groupColumns[this.config.selectedGroup];
-    const groupKeyProperties = this.groupColumns[this.config.selectedGroup].properties
-
     data.forEach(item => {
-      const groupKey = selectedGroupConfig.group(item);
+      const groupKey = this.cardConfig.groups.filter(g=> g.value === this.config.selectedGroup)[0].group(item);
       const statusCode = String(item[fieldName]);
       const countValue = item['count'];
 
@@ -267,7 +266,7 @@ export class RepartitionTypeCardComponent implements OnInit {
         const newGroup: any = {};
 
         // Add properties based on selected group
-        groupKeyProperties.forEach(prop => {
+        this.cardConfig.groups.filter(g=> g.value === this.config.selectedGroup)[0].properties.forEach(prop => {
           newGroup[prop] = item[prop];
         });
 
@@ -292,11 +291,11 @@ export class RepartitionTypeCardComponent implements OnInit {
   }
 
 
-  get REPARTITION_TYPE_RESPONSE_BAR(): ChartProvider<string, number> {
+  get chartProvider(): ChartProvider<string, number> {
     return this.cardConfig.chartProvider || { height: 300, stacked: true, series: [], options: {} };
   }
 
-  set REPARTITION_TYPE_RESPONSE_BAR(value: ChartProvider<string, number>) {
+  set chartProvider(value: ChartProvider<string, number>) {
     if (this.cardConfig) {
       this.cardConfig.chartProvider = value;
     }

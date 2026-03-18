@@ -20,30 +20,30 @@
        </mat-select>
        <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>
    </mat-form-field>
-   <button mat-button [matMenuTriggerFor]="filterMenu" matTooltip="Options de filtrage">
-       <mat-icon>tune</mat-icon>
-   </button>
-   <mat-menu #filterMenu="matMenu" class="filter-menu">
-     <div class="filter-menu-section">
-       <div class="filter-menu-title">Grouper par</div>
-       <a mat-menu-item *ngFor="let o of serviceType[this.params.type].group"
-          (click)="filterForm.controls.group.setValue(o.value); search()"
-          [class.selected]="filterForm.controls.group.value === o.value">
-         <mat-icon *ngIf="filterForm.controls.group.value === o.value">check</mat-icon>
-         <span [style.margin-left.px]="filterForm.controls.group.value !== o.value ? 32 : 0">{{o.name}}</span>
-       </a>
-     </div>
-     <mat-divider></mat-divider>
-     <div class="filter-menu-section">
-       <div class="filter-menu-title">Croiser avec</div>
-       <a mat-menu-item *ngFor="let o of serviceType[this.params.type].cross"
-          (click)="filterForm.controls.cross.setValue(o.value); search()"
-          [class.selected]="filterForm.controls.cross.value === o.value">
-         <mat-icon *ngIf="filterForm.controls.cross.value === o.value">check</mat-icon>
-         <span [style.margin-left.px]="filterForm.controls.cross.value !== o.value ? 32 : 0">{{o.name}}</span>
-       </a>
-     </div>
-   </mat-menu>
+      <!--<button mat-button [matMenuTriggerFor]="filterMenu" matTooltip="Options de filtrage">
+          <mat-icon>tune</mat-icon>
+      </button>
+      <mat-menu #filterMenu="matMenu" class="filter-menu">
+        <div class="filter-menu-section">
+          <div class="filter-menu-title">Grouper par</div>
+          <a mat-menu-item *ngFor="let o of serviceType[this.params.type].group"
+             (click)="filterForm.controls.group.setValue(o.value); search()"
+             [class.selected]="filterForm.controls.group.value === o.value">
+            <mat-icon *ngIf="filterForm.controls.group.value === o.value">check</mat-icon>
+            <span [style.margin-left.px]="filterForm.controls.group.value !== o.value ? 32 : 0">{{o.name}}</span>
+          </a>
+        </div>
+        <mat-divider></mat-divider>
+        <div class="filter-menu-section">
+          <div class="filter-menu-title">Croiser avec</div>
+          <a mat-menu-item *ngFor="let o of serviceType[this.params.type].cross"
+             (click)="filterForm.controls.cross.setValue(o.value); search()"
+             [class.selected]="filterForm.controls.cross.value === o.value">
+            <mat-icon *ngIf="filterForm.controls.cross.value === o.value">check</mat-icon>
+            <span [style.margin-left.px]="filterForm.controls.cross.value !== o.value ? 32 : 0">{{o.name}}</span>
+          </a>
+        </div>
+      </mat-menu>-->
 </form>
 </header-page>
 <ng-container #container></ng-container>

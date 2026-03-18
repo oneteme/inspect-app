@@ -12,6 +12,15 @@
     background-color: rgb(206, 206, 206);
 }
 
+.mat-mdc-row.selected {
+    background-color: rgba(124, 58, 237, 0.12);
+
+    .mat-mdc-cell {
+        border-left: 3px solid #7c3aed;
+        background: linear-gradient(90deg, rgba(124, 58, 237, 0.08) 0%, transparent 100%);
+    }
+}
+
 table {
     width: 100%;
 }
