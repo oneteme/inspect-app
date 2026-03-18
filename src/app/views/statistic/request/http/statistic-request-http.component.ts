@@ -18,10 +18,7 @@ export class StatisticRequestHttpComponent {
   private readonly _httpRequestService = inject(RestRequestService);
   private _decimalPipe = inject(DecimalPipe);
   private _router: EnvRouter = inject(EnvRouter);
-  errorStatus = {
-    "ServerError": "5xx",
-    "ClientError": "4xx",
-  }
+
   REPARTITION_STATUS = createRepartitionStatusConfig((value) => this._decimalPipe.transform(value) || '');
   PERFORMANCE_REPARTITION = createRepartitionPerformanceConfig((value) => this._decimalPipe.transform(value) || '');
 
@@ -91,7 +88,7 @@ export class StatisticRequestHttpComponent {
               queryParams: QueryParams,
               groupedBy: string) {
       console.log(columns)
-    //arr.data = [];
+    arr.data = [];
     arr.loading = true;
     columns.column =  columns.column && this.replaceString(columns.column, '[grouped]', `${groupedBy}`);
     return this._httpRequestService.getCustom(
