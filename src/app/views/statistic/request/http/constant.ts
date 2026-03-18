@@ -14,10 +14,7 @@ export const createRepartitionPerformanceConfig = (formatterFn: (value: any) => 
         {label: 'App Name', value: 'app_name'}
     ],
     series: [
-
         {label: 'performance tranche par tranche', value: 'performance_tranche'},
-        {label: 'temps de réponse', value: 'elapsedtime'},
-
     ],
     chartProvider: {
         height: 300,

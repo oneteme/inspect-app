@@ -105,7 +105,6 @@ export class DynamicChartComponent implements OnInit {
   //limit group element to 50
   onSelectGroup(group: { label:string, value:string }): void {
     this.config.selectedGroup = group.value;
-    this.updateSeries();
     this.chartEmitter.emit({
       type: 'group',
       config: this.config,
@@ -120,7 +119,6 @@ export class DynamicChartComponent implements OnInit {
 
   onSelectIndicator(indicator: { label:string, value:string }): void {
     this.config.selectedIndicator = indicator.value;
-    this.updateSeries();
     this.chartEmitter.emit({
       type: 'indicator',
       config: this.config,
@@ -155,8 +153,11 @@ export class DynamicChartComponent implements OnInit {
   }
 
   onSelectSeries(serie: { label:string, value:string }): void {
-    this.config.selectedSerie = serie.value;
-    this.updateSeries();
+    if(this.config.selectedSerie === serie.value){
+      this.config.selectedSerie = '';
+    }else {
+      this.config.selectedSerie = serie.value;
+    }
     this.chartEmitter.emit({
       type: 'series',
       config: this.config,
@@ -169,15 +170,6 @@ export class DynamicChartComponent implements OnInit {
     });
   }
 
-  updateSeries(): void {
-    this.chartProvider.series =[
-        {
-          data: {x: field(this.config.selectedGroup), y: field( this.seriesColumns[this.config.selectedSerie].selector)},
-          name:  this.seriesColumns[this.config.selectedSerie].name ||  this.seriesColumns[this.config.selectedSerie].selector,
-          color:  this.seriesColumns[this.config.selectedSerie].color
-        }
-      ]
-  }
 
   sliceRowClick(event: any){
     console.log(event)

@@ -72,14 +72,11 @@ export class StatisticRequestHttpComponent {
 
 
   performanceRepartitionChange(event){
-    console.log(event)
-
     if(event.type == "slice" ){
       this.getRepartitionTimeAndTypeResponseByPeriod(this.$performanceRepartitionSlice, event.columns, null, this.params, this.groupedBy);
     }else {
       this.getRepartitionTimeAndTypeResponseByPeriod(this.$performanceRepartition, this.getColumns(event.config), event.config.selectedGroup, this.params, this.groupedBy);
     }
-
   }
 
 
@@ -95,9 +92,13 @@ export class StatisticRequestHttpComponent {
     }
   }
     getColumns(o:any) {
+      let selectedSerie = o.selectedSerie;
+      if(!o.selectedSerie){
+        selectedSerie = "elapsedtime";
+      }
       return {
         ...this.columnsConfig["groupColumns"][o.selectedGroup],
-        base: this.columnsConfig["seriesColumns"][o.selectedSerie].query(o.selectedIndicator)
+        base: this.columnsConfig["seriesColumns"][selectedSerie].query(o.selectedIndicator)
       }
     }
 
@@ -261,12 +262,11 @@ export class StatisticRequestHttpComponent {
     seriesColumns: {
       elapsedtime:
           {
-            selector: null,
+            selector: 'count',
             query: (selectedIndicator: string) => `elapsedtime.${selectedIndicator}:count`,
-            name: 'elapsedtime',
+            name: 'count',
             color: '#2f8dd0'
           },
-
       performance_tranche:
           {
             selector: 'performance_tranche',
