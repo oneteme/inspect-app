@@ -52,11 +52,6 @@ export class DynamicChartComponent implements OnInit {
   sliceFilter: any = {};
 
   @Output() chartEmitter: EventEmitter<any> = new EventEmitter<any>();
-  @Input() set cardConfiguration(configuration: RepartitionTypeCardConfig) {
-    if (configuration) {
-      this.cardConfig = configuration;
-    }
-  }
   @Input() set menuConfig(configuration: RepartitionTypeCardConfig) {
     this.cardConfig = configuration;
   }
@@ -93,6 +88,7 @@ export class DynamicChartComponent implements OnInit {
     this.chartEmitter.emit({
       type: 'group',
       config: this.config,
+      sliceFilter: this.sliceFilter
      /* columns: {
         ...this.groupColumns[this.config.selectedGroup],
         agregate: this.config.selectedIndicator,
@@ -108,6 +104,7 @@ export class DynamicChartComponent implements OnInit {
     this.chartEmitter.emit({
       type: 'group',
       config: this.config,
+      sliceFilter: this.sliceFilter
       /*columns: {
         ...this.groupColumns[this.config.selectedGroup],
         agregate: this.config.selectedIndicator,
@@ -122,6 +119,7 @@ export class DynamicChartComponent implements OnInit {
     this.chartEmitter.emit({
       type: 'indicator',
       config: this.config,
+      sliceFilter: this.sliceFilter
       /*columns: {
         ...this.groupColumns[this.config.selectedGroup],
         agregate: this.config.selectedIndicator,
@@ -138,14 +136,10 @@ export class DynamicChartComponent implements OnInit {
     } else {
       this.config.selectedSlice = slice.value;
     }
-
     if (this.config.selectedSlice) {
       this.chartEmitter.emit({
         type:"slice",
         config: this.config,
-        columns: {
-          base: this.sliceColumns[this.config.selectedSlice].query,
-        }
       });
     }else {
       this.sliceRowClick(null);
@@ -161,6 +155,7 @@ export class DynamicChartComponent implements OnInit {
     this.chartEmitter.emit({
       type: 'series',
       config: this.config,
+      sliceFilter: this.sliceFilter
       /*columns: {
         ...this.groupColumns[this.config.selectedGroup],
         agregate: this.config.selectedIndicator,
@@ -172,22 +167,23 @@ export class DynamicChartComponent implements OnInit {
 
 
   sliceRowClick(event: any){
-    console.log(event)
     if (event) {
       this.sliceFilter = event;
     } else {
       this.sliceFilter = {};
     }
     this.chartEmitter.emit({
+      type: 'sliceClick',
       config: this.config,
-      columns: {
+      sliceFilter: this.sliceFilter
+     /* columns: {
         ...this.groupColumns[this.config.selectedGroup],
         agregate: this.config.selectedIndicator,
         base: this.seriesColumns[this.config.selectedSerie].query(this.config.selectedIndicator),
         sliceFilter: Object.keys(this.sliceFilter).length > 0
           ? {[this.sliceColumns[this.config.selectedSlice].selector] : this.sliceFilter[this.config.selectedSlice]}
           : null
-      }
+      }*/
     });
   }
 
@@ -224,7 +220,6 @@ export class DynamicChartComponent implements OnInit {
         colorIndex++;
       });
 
-
       if (this.config.selectedSerie === fieldName) {
         this.chartProvider.series = Array.from(this.dynamicSeriesMap.values()).map(s => ({
           data: {x: field(this.config.selectedGroup), y: field(s.selector)},
@@ -240,10 +235,13 @@ export class DynamicChartComponent implements OnInit {
 
   private processDataByValue(data: any[], fieldName: string): void {
     // First pass: collect all unique status codes
-    const allStatusCodes = new Set<string>();
+    const uniqueValues = new Set<string>();
     data.forEach(item => {
       const statusCode = String(item[fieldName]);
-      allStatusCodes.add(statusCode);
+       if(statusCode!= 'undefined'){
+         uniqueValues.add(statusCode);
+       }
+
     });
 
     // Group data by group key and consolidate status codes and counts
@@ -263,7 +261,7 @@ export class DynamicChartComponent implements OnInit {
         });
 
         // Initialize all status codes with 0
-        allStatusCodes.forEach(code => {
+        uniqueValues.forEach(code => {
           newGroup[code] = 0;
         });
 

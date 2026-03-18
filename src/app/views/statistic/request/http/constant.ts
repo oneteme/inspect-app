@@ -89,10 +89,10 @@ export const createRepartitionStatusConfig = (formatterFn: (value: any) => strin
     title: 'Disponibilité',
     indicators: [{label: 'Count', value: 'count'}],
     groups: [
-        {label: 'Date', value: 'date'},
-        {label: 'Method', value: 'method'},
-        {label: 'Media', value: 'media'},
-        {label: 'Auth', value: 'auth'}
+        {label: 'Date', value: 'date', group: (row) => `${row['date']}_${row['year']}`, properties: ['date', 'year']},
+        {label: 'Method', value: 'method', group: (row) => (row['method']), properties: ['method']},
+        {label: 'Media', value: 'media', group: (row) => (row['media']), properties: ['media']},
+        {label: 'Auth', value: 'auth', group: (row) => (row['auth']), properties: ['auth']}
     ],
     slices: [
         {label: 'User', value: 'user'},
@@ -103,51 +103,6 @@ export const createRepartitionStatusConfig = (formatterFn: (value: any) => strin
         {label: '2xx/4xx/5xx/0', value: 'status_tranche'},
         {label: 'Status OK Client Server Error', value: 'status_ok_client_server_error'}
     ],
-    groupColumns: {
-        date: {
-            column: `start.[grouped]:date,start.year:year`,// rename stack
-            order: 'year.asc,date.asc',
-        },
-        method: {column: 'method.coalesce("<empty>"):method'},
-        auth: {column: 'auth.coalesce("<no_auth>"):auth'},
-        media: {column: 'media.coalesce("<empty>"):media'},
-    },
-    sliceColumns: {
-        user: {
-            selector: 'user',
-            query: 'user.coalesce("<empty>").distinct:user',
-            name: 'user'
-        },
-        app_name: {
-            selector: 'instance.app_name',
-            query: 'instance.app_name.coalesce("<empty>").distinct:app_name',
-            name: 'app'
-        }
-    },
-    seriesColumns: {
-        status:
-            {
-                selector: 'status',
-                query: (selectedIndicator: string) => `status,status.${selectedIndicator}:count`,
-                name: 'status',
-                color: '#2f8dd0'
-            },
-        status_tranche:
-            {
-                selector: 'status_tranche',
-                query: (selectedIndicator: string) => `status_tranche:status_tranche,status.${selectedIndicator}:count`,
-                name: 'status_tranche',
-                color: 'gray'
-            },
-        status_ok_client_server_error:
-            {
-                selector: 'status_ok_client_server_error',
-                query: (selectedIndicator: string) => `status_ok_client_server_error:status_ok_client_server_error,status.${selectedIndicator}:count`,
-                name: 'status_ok_client_server_error',
-                color: 'gray'
-            }
-
-    },
     chartProvider: {
         height: 300,
         stacked: true,

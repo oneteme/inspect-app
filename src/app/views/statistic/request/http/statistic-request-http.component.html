@@ -6,7 +6,7 @@
                                    [data]="$statusRepartition.data"
                                    [sliceData]="$statusRepartitionSlice.data"
                                    [isLoading]="$statusRepartition.loading"
-                                   (chartEmitter)="chartChange($event)">
+                                   (chartEmitter)="statusRepartitionChange($event)">
                 <!--<div class="stat" style="color: #33cc33;">
                     <div class="label" [matTooltip]="($statusRepartition.stats.statCountOk | number : '1.0-0') + ' / ' + ($statusRepartition.stats.statCount | number : '1.0-0')">{{ ($statusRepartition.stats.statCountOk / $statusRepartition.stats.statCount) * 100 | number : '1.0-2'  }}%</div>
                     <div class="sub-label">2xx</div>
@@ -129,7 +129,7 @@
                                     ]">
   </repartition-cross-table>
 </div>
--->
+
 <div  class="mat-elevation-z5" style="display: flex; align-items: stretch; gap: 10px;">
   <dynamic-table style="width: 70%;"
                  [title]="'Incident'"

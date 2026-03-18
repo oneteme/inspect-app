@@ -32,50 +32,35 @@ export class StatisticRequestHttpComponent {
   $performanceRepartition: { data: any[], loading: boolean, stats: any } = {data: [], loading: true, stats :{}};
   $performanceRepartitionSlice: { data: any[], loading: boolean, stats: any } = {data: [], loading: true, stats :{}};
 
-  $exceptionsResponse: { data: any[], loading: boolean, type: string } = {data: [], loading: true, type: 'exceptionsResponse'};
-  $exceptionsResponseCross: { data: any[], loading: boolean, type: string } = {data: [], loading: true, type: 'exceptionsResponseCross'};
-  $latencyTypeResponse: { data: any[], loading: boolean, stats: { avg: number, max: number }} = { data: [], loading: false, stats: { avg: 0, max: 0 }};
-  $latencyTypeResponseCross: { data: any[], loading: boolean, stats: { avg: number, max: number }} = { data: [], loading: false, stats: { avg: 0, max: 0 }};
 
-  getRequestColumns(type: 'timeAndTypeResponse' | 'exceptionsResponse', group?: string, cross?: string) {
-    const columns = {
-      date: ()=> (type === 'timeAndTypeResponse'
-          ? { column: `start.${this.groupedBy}:date,start.year:year`, order: 'year.asc,date.asc' }
-          : { column: `count.sum.over(partition(start.${this.groupedBy}:date,start.year)):countok,start.${this.groupedBy}:date,start.year:year`, order: 'date.asc' }),
-      method: { column: 'method.coalesce("<empty>"):method' },
-      auth: { column: 'auth.coalesce("<no_auth>"):auth' },
-      media: { column: 'media.coalesce("<empty>"):media' },
-      user: { column: `user.coalesce("<empty>"):name` },
-      app: { column: `instance.app_name.coalesce("<empty>"):name` }
-    };
-    let g= getStringOrCall(columns[group]);
 
-    const groupCol = getStringOrCall(columns[group]);
 
-    if (cross) {
-      const crossCol = getStringOrCall(columns[cross]);
-      return {
-        column: `${crossCol.column},${groupCol.column}`,
-        order: groupCol.order || crossCol.order
-      };
-    }
-    return g;
-  }
-
-  chartChange(event){
-    if(event.type == "slice" ){
-      //this.getRepartitionTimeAndTypeResponseByPeriod(this.$statusRepartitionSlice, event.columns, null, this.params, this.groupedBy);
-    }else {
-     /// this.getRepartitionTimeAndTypeResponseByPeriod(this.$statusRepartition, event.columns, event.config.selectedGroup, this.params, this.groupedBy);
+  statusRepartitionChange(event){
+    switch(event.type) {
+      case 'slice':
+        this.getCostum(this.$statusRepartitionSlice, this.getSliceColumns(event), null, this.params, this.groupedBy);
+        break;
+      default:
+        if(!event.config.selectedSerie){
+            event.config.selectedSerie = "status";
+        }
+        this.getCostum(this.$statusRepartition, this.getColumns(event), event.config.selectedGroup, this.params, this.groupedBy);
+        break;
     }
   }
 
 
   performanceRepartitionChange(event){
-    if(event.type == "slice" ){
-      this.getRepartitionTimeAndTypeResponseByPeriod(this.$performanceRepartitionSlice, event.columns, null, this.params, this.groupedBy);
-    }else {
-      this.getRepartitionTimeAndTypeResponseByPeriod(this.$performanceRepartition, this.getColumns(event.config), event.config.selectedGroup, this.params, this.groupedBy);
+    switch(event.type) {
+      case 'slice':
+        this.getCostum(this.$performanceRepartitionSlice, this.getSliceColumns(event), null, this.params, this.groupedBy);
+        break;
+      default:
+        if(!event.config.selectedSerie){
+           event.config.selectedSerie = "elapsedtime";
+        }
+        this.getCostum(this.$performanceRepartition, this.getColumns(event), event.config.selectedGroup, this.params, this.groupedBy);
+        break;
     }
   }
 
@@ -84,30 +69,29 @@ export class StatisticRequestHttpComponent {
     if(queryParams) {
       this.params = queryParams;
       this.groupedBy = periodManagement(queryParams.period.start, queryParams.period.end);
-      //this.getRepartitionTimeAndTypeResponseByPeriod(this.$timeAndTypeResponseCross,queryParams.optional?.group, queryParams.optional?.cross, this.params, this.groupedBy);
-      this.getExceptions(this.$exceptionsResponse, queryParams.optional?.group, null, queryParams,  this.groupedBy);
-      this.getExceptions(this.$exceptionsResponseCross, queryParams.optional?.group, queryParams.optional?.cross, queryParams,  this.groupedBy);
-      this.getLatencyByHost(this.$latencyTypeResponse, queryParams.optional?.group,null, queryParams, this.groupedBy);
-      this.getLatencyByHost(this.$latencyTypeResponseCross, queryParams.optional?.group, queryParams.optional?.cross, queryParams, this.groupedBy);
     }
   }
     getColumns(o:any) {
-      let selectedSerie = o.selectedSerie;
-      if(!o.selectedSerie){
-        selectedSerie = "elapsedtime";
-      }
       return {
-        ...this.columnsConfig["groupColumns"][o.selectedGroup],
-        base: this.columnsConfig["seriesColumns"][selectedSerie].query(o.selectedIndicator)
+        ...this.columnsConfig["groupColumns"][o.config.selectedGroup],
+        base: this.columnsConfig["seriesColumns"][o.config.selectedSerie].query(o.config.selectedIndicator),
+         sliceFilter:  Object.keys(o.sliceFilter).length > 0 ? {[this.columnsConfig['sliceColumns'][o.config.selectedSlice].selector] : o.sliceFilter[o.config.selectedSlice]} : null
+      }
+    }
+    getSliceColumns(o:any) {
+      return {
+         base : this.columnsConfig['sliceColumns'][o.config.selectedSlice].query
       }
     }
 
-    getRepartitionTimeAndTypeResponseByPeriod(arr: { data: any[], loading: boolean, stats: any},
-                                            columns: { column: string; order?: string, agregate: string, base: string, sliceFilter: string  },
-                                            group: string,
-                                            queryParams: QueryParams,
-                                            groupedBy: string) {
-    arr.data = [];
+
+    getCostum(arr: { data: any[], loading: boolean, stats: any},
+              columns: { column?: string; order?: string, agregate?: string, base: string, sliceFilter?: string  },
+              group: string,
+              queryParams: QueryParams,
+              groupedBy: string) {
+      console.log(columns)
+    //arr.data = [];
     arr.loading = true;
     columns.column =  columns.column && this.replaceString(columns.column, '[grouped]', `${groupedBy}`);
     return this._httpRequestService.getCustom(
@@ -127,98 +111,8 @@ export class StatisticRequestHttpComponent {
     ).subscribe({
       next: res => {
         arr.data = res;
-        arr.stats = this.calculateStats(res);
       }
     });
-  }
-
-  getLatencyByHost(arr: { data: any[], loading: boolean, stats: { avg: number, max: number } },
-                                            group: string,
-                                            cross: string,
-                                            queryParams: QueryParams,
-                                            groupedBy: string) {
-    arr.data = [];
-    arr.loading = true;
-    return this._httpRequestService.getLatencyByHost(
-        this.getRequestColumns('timeAndTypeResponse', group, cross), {
-          start: queryParams.period.start,
-          end: queryParams.period.end,
-          groupedBy: groupedBy,
-          env: queryParams.env,
-          hosts: queryParams.hosts}).pipe(
-        map(r => {
-          if (group === 'date') {
-            formatters[groupedBy](r, this._datePipe);
-          }
-          return r;
-        }), finalize(() => arr.loading = false)
-    ).subscribe({
-      next: res => {
-        arr.data = res;
-        arr.stats = this.calculateLatencyStats(res);
-      }
-    });
-  }
-
-  getExceptions(arr: { data: any[], loading: boolean },
-                group: string,
-                cross: string,
-                queryParams: QueryParams,
-                groupedBy: string) {
-    arr.data = [];
-    arr.loading = true;
-    return this._httpRequestService.getRestExceptionsByHost(
-        this.getRequestColumns('exceptionsResponse', group, cross), {
-      env: queryParams.env,
-      start: queryParams.period.start,
-      end: queryParams.period.end,
-      groupedBy: groupedBy,
-      hosts: queryParams.hosts,
-      command: queryParams.commands
-    }).pipe(
-        finalize(() => arr.loading = false),
-        map(res => {
-          if (group === 'date') {
-            formatters[groupedBy](res, this._datePipe);
-          }
-          return res.filter(r => r.errorType != null);
-        }))
-        .subscribe({
-          next: res => {
-            arr.data = res;
-
-          }
-        })
-  }
-
-
-  calculateStats(res: any[]) {
-    return res.reduce((acc: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number, statCountUnavailableServer: number}, o) => {
-      return {statCount: acc.statCount + o['countSuccess'] + o['countErrorClient'] + o['countErrorServer']+ o['countServerUnavailableRows'], statCountOk: acc.statCountOk + o['countSuccess'], statCountErrClient: acc.statCountErrClient + o['countErrorClient'], statCountErrorServer: acc.statCountErrorServer + o['countErrorServer'], statCountUnavailableServer: acc.statCountUnavailableServer + o['countServerUnavailableRows']};
-    }, {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0, statCountUnavailableServer: 0});
-  }
-
-  calculateLatencyStats(res: any[]): { avg: number, max: number } {
-    if (!res?.length) return { avg: 0, max: 0 };
-    const totalAvg = res.reduce((sum, o) => sum + (o['avg'] || 0), 0);
-    const maxValue = Math.max(...res.map(o => o['max'] || 0));
-    return { avg: totalAvg / res.length, max: maxValue };
-  }
-
-  onSessionExceptionRowSelected(row:any) {
-    const result = recreateDate(this.groupedBy, row, this.params.period.start);
-    if(result) {
-      this._router.navigate(['/request/rest'], {
-        queryParams: {
-          'env': this.params.env,
-          'start': result.start.toISOString(),
-          'end': result.end.toISOString(),
-          'q':  !this.errorStatus[row.errorType] ? row.errorType : '',
-          'host': this.params.hosts,
-          'rangestatus': this.errorStatus[row.errorType] || '0xx'
-        }
-      });
-    }
   }
 
   replaceString(str: string,search: string, replacement: string) {
@@ -226,15 +120,6 @@ export class StatisticRequestHttpComponent {
   }
 
   protected readonly Object = Object;
-  private readonly dynamicSeriesMap: Map<string, any> = new Map()
-
-
-
-
-
-
-
-
   columnsConfig = {
     groupColumns: {
       date: {
@@ -274,14 +159,27 @@ export class StatisticRequestHttpComponent {
             name: 'performance_tranche',
             color: 'gray'
           },
-      'status_ok_client_server_error':
+      status_ok_client_server_error:
           {
             selector: 'status_ok_client_server_error',
             query: (selectedIndicator: string) => `status_ok_client_server_error:status_ok_client_server_error,status.${selectedIndicator}:count`,
             name: 'status_ok_client_server_error',
             color: 'gray'
+          },
+      status:
+          {
+            selector: 'status',
+            query: (selectedIndicator: string) => `status,status.${selectedIndicator}:count`,
+            name: 'status',
+            color: '#2f8dd0'
+          },
+      status_tranche:
+          {
+            selector: 'status_tranche',
+            query: (selectedIndicator: string) => `status_tranche:status_tranche,status.${selectedIndicator}:count`,
+            name: 'status_tranche',
+            color: 'gray'
           }
-
     }
   }
 }

@@ -51,7 +51,7 @@ export class RestRequestService {
         return this.getRestRequest(args);
     }
 
-    getCustom(data: {base: string ,column: string; order?: string, sliceFilter: string },
+    getCustom(data: {base: string ,column?: string; order?: string, sliceFilter?: string },
               filters: {env: string, start: Date, end: Date, groupedBy: string, hosts: string[], method?: string[] }): Observable<{countSuccess: number, countError: number, elapsedTimeSlowest: number, elapsedTimeSlow: number, elapsedTimeMedium: number, elapsedTimeFast: number, elapsedTimeFastest: number, avg: number, max: number, date: number, year: number}[]> {
         let args: any = {
             'column': `${data.base}`,
