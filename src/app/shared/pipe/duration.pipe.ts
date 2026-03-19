@@ -14,13 +14,13 @@ export class DurationPipe implements PipeTransform {
         if(!time && time !=0){
             return "?";
         }
-        console.log("duration pipe", typeof value == "object" ? new Date(value.end) : '', typeof value == "object" ? new Date(value.start): '');
+        // console.log("duration pipe", typeof value == "object" ? new Date(value.end) : '', typeof value == "object" ? new Date(value.start): '');
         const remainingSeconds = this._decimalPipe.transform(Math.round((time % 60) * 1000) / 1000);
         const minutes = Math.floor((time % 3600) / 60);
         const hours = Math.floor(time/3600);
         const days  = Math.floor(time/86400)
 
-        console.log("duration pipe", {remainingSeconds, minutes, hours, days});
+        // console.log("duration pipe", {remainingSeconds, minutes, hours, days});
 
         const dayString = days > 0 ? `${days} jour(s)`:''
         const hourString = hours > 0 ? `${hours}h` : ''
