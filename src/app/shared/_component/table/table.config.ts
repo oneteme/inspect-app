@@ -30,9 +30,9 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'appName', header: 'Hôte', icon: 'dns', width: '18%' },
-    { key: 'resource', header: 'Ressource', sliceable: false, icon: 'category' },
-    { key: 'start', header: 'Début', icon: 'schedule', width: '17%' },
-    { key: 'duration', header: 'Durée', icon: 'timer', width: '13%',
+    { key: 'resource', header: 'Ressource', groupable: false, sliceable: false, icon: 'category' },
+    { key: 'start', header: 'Début', icon: 'schedule', width: '17%', groupable: false, sliceable: false },
+    { key: 'duration', header: 'Durée', icon: 'timer', width: '13%', groupable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE },
     { key: 'user', header: 'Utilisateur', icon: 'person', width: '15%' },
     { key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
