@@ -1,13 +1,16 @@
 import {Component, inject, Input} from "@angular/core";
 import {DatePipe, DecimalPipe} from "@angular/common";
-import {field} from "@oneteme/jquery-core";
 import {QueryParams} from "../../../../model/conf.model";
-import {formatters, getStringOrCall, groupByField, periodManagement, recreateDate} from "../../../../shared/util";
+import {formatters, periodManagement} from "../../../../shared/util";
 import {finalize, map} from "rxjs";
 import {RestRequestService} from "../../../../service/jquery/rest-request.service";
-import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
+
 import {EnvRouter} from "../../../../service/router.service";
-import {createRepartitionStatusConfig, createRepartitionPerformanceConfig} from "./constant";
+import {
+    createRepartitionStatusConfig,
+    createRepartitionPerformanceConfig,
+    createRepartitionSizeConfig, createRepartitionLatencyConfig
+} from "./constant";
 
 @Component({
   templateUrl: './statistic-request-http.component.html',
@@ -21,45 +24,78 @@ export class StatisticRequestHttpComponent {
 
   REPARTITION_STATUS = createRepartitionStatusConfig((value) => this._decimalPipe.transform(value) || '');
   PERFORMANCE_REPARTITION = createRepartitionPerformanceConfig((value) => this._decimalPipe.transform(value) || '');
+  SIZE_REPARTITION = createRepartitionSizeConfig((value) => this._decimalPipe.transform(value) || '');
+  LATENCY_REPARTITION = createRepartitionLatencyConfig((value) => this._decimalPipe.transform(value) || '');
 
   groupedBy: string = ''
   params: QueryParams;
-  $statusRepartition: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number, statCountUnavailableServer: number}} = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0, statCountUnavailableServer:0}};
-  $statusRepartitionSlice: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number, statCountUnavailableServer: number}} = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0, statCountUnavailableServer:0}};
-  $performanceRepartition: { data: any[], loading: boolean, stats: any } = {data: [], loading: true, stats :{}};
-  $performanceRepartitionSlice: { data: any[], loading: boolean, stats: any } = {data: [], loading: true, stats :{}};
-
-
+  $statusRepartition: { data: any[], loading: boolean} = { data: [], loading: false};
+  $statusRepartitionSlice: { data: any[], loading: boolean} = { data: [], loading: false};
+  $performanceRepartition: { data: any[], loading: boolean,  } = {data: [], loading: true};
+  $performanceRepartitionSlice: { data: any[], loading: boolean } = {data: [], loading: true};
+  $sizeRepartition : {data: any[], loading: boolean} = {data: [], loading: true};
+  $sizeRepartitionSlice : {data: any[], loading: boolean} = {data: [], loading: true};
+  $latencyRepartition : {data: any[], loading: boolean} = {data: [], loading: true};
+  $latencyRepartitionSlice : {data: any[], loading: boolean} = {data: [], loading: true};
 
 
   statusRepartitionChange(event){
     switch(event.type) {
       case 'slice':
-        this.getCostum(this.$statusRepartitionSlice, this.getSliceColumns(event), null, this.params, this.groupedBy);
+        this.getCustom(this.$statusRepartitionSlice, this.getSliceColumns(event), null, this.params, this.groupedBy,"getCustom");
         break;
       default:
         if(!event.config.selectedSerie){
             event.config.selectedSerie = "status";
         }
-        this.getCostum(this.$statusRepartition, this.getColumns(event), event.config.selectedGroup, this.params, this.groupedBy);
+        this.getCustom(this.$statusRepartition, this.getColumns(event), event.config.selectedGroup, this.params, this.groupedBy,"getCustom");
         break;
     }
   }
 
 
   performanceRepartitionChange(event){
-    switch(event.type) {
+    let e = { ...event, config: { ...event.config } };
+    switch(e.type) {
       case 'slice':
-        this.getCostum(this.$performanceRepartitionSlice, this.getSliceColumns(event), null, this.params, this.groupedBy);
+    this.getCustom(this.$performanceRepartitionSlice, this.getSliceColumns(e), null, this.params, this.groupedBy,"getCustom");
         break;
       default:
-        if(!event.config.selectedSerie){
-           event.config.selectedSerie = "elapsedtime";
+        if(!e.config.selectedSerie){
+            e.config.selectedSerie = "elapsedtime";
         }
-        this.getCostum(this.$performanceRepartition, this.getColumns(event), event.config.selectedGroup, this.params, this.groupedBy);
+        this.getCustom(this.$performanceRepartition, this.getColumns(e), e.config.selectedGroup, this.params, this.groupedBy,"getCustom");
         break;
     }
   }
+
+    sizeRepartitionChange(event){
+        switch(event.type) {
+            case 'slice':
+                this.getCustom(this.$sizeRepartitionSlice, this.getSliceColumns(event), null, this.params, this.groupedBy,"getCustom");
+                break;
+            default:
+               if(!event.config.selectedSerie){
+                    event.config.selectedSerie = "elapsedtime";
+                }
+                this.getCustom(this.$sizeRepartition, this.getColumns(event), event.config.selectedGroup, this.params, this.groupedBy,"getCustom");
+                break;
+        }
+    }
+
+    latencyRepartitionChange(event){
+        switch(event.type) {
+            case 'slice':
+                this.getCustom(this.$latencyRepartitionSlice, this.getSliceColumns(event), null, this.params, this.groupedBy,"getLatency");
+                break;
+            default:
+                if(!event.config.selectedSerie){
+                    event.config.selectedSerie = "elapsedtime";
+                }
+                this.getCustom(this.$latencyRepartition, this.getColumns(event), event.config.selectedGroup, this.params, this.groupedBy,"getLatency");
+                break;
+        }
+    }
 
 
   @Input() set queryParams(queryParams: QueryParams) {
@@ -82,16 +118,16 @@ export class StatisticRequestHttpComponent {
     }
 
 
-    getCostum(arr: { data: any[], loading: boolean, stats: any},
+    getCustom(arr: { data: any[], loading: boolean},
               columns: { column?: string; order?: string, agregate?: string, base: string, sliceFilter?: string  },
               group: string,
               queryParams: QueryParams,
-              groupedBy: string) {
-      console.log(columns)
+              groupedBy: string,
+              fn:string) {
     arr.data = [];
     arr.loading = true;
     columns.column =  columns.column && this.replaceString(columns.column, '[grouped]', `${groupedBy}`);
-    return this._httpRequestService.getCustom(
+    this._httpRequestService[fn](
           columns, {
           start: queryParams.period.start,
           end: queryParams.period.end,
@@ -144,39 +180,31 @@ export class StatisticRequestHttpComponent {
     seriesColumns: {
       elapsedtime:
           {
-            selector: 'count',
-            query: (selectedIndicator: string) => `elapsedtime.${selectedIndicator}:count`,
-            name: 'count',
-            color: '#2f8dd0'
+            query: (selectedIndicator: string) => `elapsedtime.${selectedIndicator}:default`,
           },
       performance_tranche:
           {
-            selector: 'performance_tranche',
             query: (selectedIndicator: string) => `performance_tranche:performance_tranche,elapsedtime.${selectedIndicator}:count`,
-            name: 'performance_tranche',
-            color: 'gray'
           },
       status_ok_client_server_error:
           {
-            selector: 'status_ok_client_server_error',
             query: (selectedIndicator: string) => `status_ok_client_server_error:status_ok_client_server_error,status.${selectedIndicator}:count`,
-            name: 'status_ok_client_server_error',
-            color: 'gray'
           },
       status:
           {
-            selector: 'status',
             query: (selectedIndicator: string) => `status,status.${selectedIndicator}:count`,
-            name: 'status',
-            color: '#2f8dd0'
           },
       status_tranche:
           {
-            selector: 'status_tranche',
             query: (selectedIndicator: string) => `status_tranche:status_tranche,status.${selectedIndicator}:count`,
-            name: 'status_tranche',
-            color: 'gray'
-          }
+          },
+        size:
+          {
+            query: (selectedIndicator: string) => `size_in_notnull.${selectedIndicator}:sizeIn,size_out_notnull.${selectedIndicator}:sizeOut`,
+          },
+        latency: {
+            query: (selectedIndicator: string) => `${selectedIndicator}(elapsedtime.minus(rest_session.elapsedtime)):latency`,
+        }
     }
   }
 }

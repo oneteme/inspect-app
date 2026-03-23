@@ -8,7 +8,6 @@
                                    [isLoading]="$statusRepartition.loading"
                                    (chartEmitter)="statusRepartitionChange($event)">
             </dynamic-chart>
-
     </div>
     <div class="mat-elevation-z5"  style="display: flex; align-items: stretch; gap: 10px;">
         <dynamic-chart style="width: 100%; display: flex; flex-direction: column;"
@@ -18,8 +17,26 @@
                                [isLoading]="$performanceRepartition.loading"
                                (chartEmitter)="performanceRepartitionChange($event)">
         </dynamic-chart>
-
     </div>
+    <div class="mat-elevation-z5"  style="display: flex; align-items: stretch; gap: 10px;">
+        <dynamic-chart style="width: 100%; display: flex; flex-direction: column;"
+                       [menuConfig]="SIZE_REPARTITION"
+                       [data]="$sizeRepartition.data"
+                       [sliceData]="$sizeRepartitionSlice.data"
+                       [isLoading]="$sizeRepartition.loading"
+                       (chartEmitter)="sizeRepartitionChange($event)">
+        </dynamic-chart>
+    </div>
+ <div class="mat-elevation-z5"  style="display: flex; align-items: stretch; gap: 10px;">
+        <dynamic-chart style="width: 100%; display: flex; flex-direction: column;"
+                       [menuConfig]="LATENCY_REPARTITION"
+                       [data]="$latencyRepartition.data"
+                       [sliceData]="$latencyRepartitionSlice.data"
+                       [isLoading]="$latencyRepartition.loading"
+                       (chartEmitter)="latencyRepartitionChange($event)">
+        </dynamic-chart>
+    </div>
+
     <!--<div class="mat-elevation-z5" style="display: flex; align-items: stretch; gap: 10px;">
 
       <performance-card style="width: 70%; display: flex; flex-direction: column;"

@@ -71,7 +71,6 @@ export class RestRequestService {
         }
 
         if(data?.sliceFilter){
-            console.log(data.sliceFilter)
             args[Object.keys(data.sliceFilter)[0]] = `"${Object.values(data.sliceFilter)[0]}"`;
         }
 
@@ -99,9 +98,10 @@ export class RestRequestService {
         return this.getRestRequest(args);
     }
 
-    getLatencyByHost(data: { column: string; order?: string }, filters: { env: string, start: Date, end: Date, groupedBy: string, hosts: string[] }): Observable<{ elapsedtime: number}[]> {
+    getLatency(data: {base: string ,column?: string; order?: string, sliceFilter?: string },
+                     filters: { env: string, start: Date, end: Date, groupedBy: string, hosts: string[] }): Observable<{ elapsedtime: number}[]> {
         let args: any = {
-            'column': `end,start,elapsedtime:ep,rest_session.elapsedtime:ep2,avg(elapsedtime.minus(rest_session.elapsedtime)):elapsedtime`,
+            'column': `${data.base}`,
             'join': 'instance,rest_session_inner',
             'status.gt': 0,
             'instance.environement': filters.env,
@@ -118,6 +118,9 @@ export class RestRequestService {
         }
         if(filters.hosts?.length){
             args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+        }
+        if(data?.sliceFilter){
+            args[Object.keys(data.sliceFilter)[0]] = `"${Object.values(data.sliceFilter)[0]}"`;
         }
         return this.getRestRequest(args);
     }

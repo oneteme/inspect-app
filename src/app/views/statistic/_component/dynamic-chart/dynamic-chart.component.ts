@@ -5,21 +5,7 @@ export interface RepartitionTypeCardConfig {
   indicators: { label: string, value: string }[];
   groups: { label: string, value: string, group?: (row: any) => string, properties?: string[]}[];
   slices: { label: string, value: string }[];
-  series: { label: string, value: string }[];
-  groupColumns?: {
-    [key: string]: { column: string, order?: string}
-  };
-  sliceColumns?: {
-    [key: string]: { selector: string, query: string, name: string }
-  };
-  seriesColumns?: {
-    [key: string]: {
-      selector: string,
-      query: (selectedIndicateur:string) => string,
-      name: string,
-      color: string
-    }
-  };
+  series: { label: string, value: string, properties?: { selector: string; name: string }[] }[];
   chartProvider?: ChartProvider<string, number>;
 }
 
@@ -30,7 +16,6 @@ export interface RepartitionTypeCardConfig {
 })
 export class DynamicChartComponent implements OnInit {
 
-  private readonly dynamicSeriesMap: Map<string, any> = new Map();
   config = {
     selectedIndicator: '',
     selectedGroup: '',
@@ -43,9 +28,6 @@ export class DynamicChartComponent implements OnInit {
     groups: [],
     slices: [],
     series: [],
-    groupColumns: {},
-    sliceColumns: {},
-    seriesColumns: {}
   };
 
   _data: any[] = [];
@@ -56,16 +38,14 @@ export class DynamicChartComponent implements OnInit {
     this.cardConfig = configuration;
   }
   @Input() set data(objects: any[]) {
-    if (objects?.length > 0) {
-      this.generateDynamicSeries(objects);
-      this._data = objects;
+    this._data = [];
+    if (objects?.length > 0 ) {
+      this._data = this.generateDynamicSeries(objects);
     }
   }
   @Input() sliceData: any[] = [];
   @Input() isLoading: boolean;
-  @Input() set group(value: string) {
-    this.chartProvider.series?.forEach((s) => s.data.x = field(value));
-  }
+
 
   ngOnInit(): void {
     setTimeout(() => this.triggerInitialChartLoad(), 0);
@@ -89,12 +69,6 @@ export class DynamicChartComponent implements OnInit {
       type: 'group',
       config: this.config,
       sliceFilter: this.sliceFilter
-     /* columns: {
-        ...this.groupColumns[this.config.selectedGroup],
-        agregate: this.config.selectedIndicator,
-        base: this.seriesColumns[this.config.selectedSerie].query(this.config.selectedIndicator),
-        ...this.sliceFilter
-      }*/
     });
   }
 
@@ -105,12 +79,6 @@ export class DynamicChartComponent implements OnInit {
       type: 'group',
       config: this.config,
       sliceFilter: this.sliceFilter
-      /*columns: {
-        ...this.groupColumns[this.config.selectedGroup],
-        agregate: this.config.selectedIndicator,
-        base: this.seriesColumns[this.config.selectedSerie].query(this.config.selectedIndicator),
-        ...this.sliceFilter
-      }*/
     });
   }
 
@@ -120,12 +88,6 @@ export class DynamicChartComponent implements OnInit {
       type: 'indicator',
       config: this.config,
       sliceFilter: this.sliceFilter
-      /*columns: {
-        ...this.groupColumns[this.config.selectedGroup],
-        agregate: this.config.selectedIndicator,
-        base: this.seriesColumns[this.config.selectedSerie].query(this.config.selectedIndicator),
-        ...this.sliceFilter
-      }*/
     });
   }
 
@@ -156,12 +118,6 @@ export class DynamicChartComponent implements OnInit {
       type: 'series',
       config: this.config,
       sliceFilter: this.sliceFilter
-      /*columns: {
-        ...this.groupColumns[this.config.selectedGroup],
-        agregate: this.config.selectedIndicator,
-        base: this.seriesColumns[this.config.selectedSerie].query(this.config.selectedIndicator),
-        ...this.sliceFilter
-      }*/
     });
   }
 
@@ -176,14 +132,6 @@ export class DynamicChartComponent implements OnInit {
       type: 'sliceClick',
       config: this.config,
       sliceFilter: this.sliceFilter
-     /* columns: {
-        ...this.groupColumns[this.config.selectedGroup],
-        agregate: this.config.selectedIndicator,
-        base: this.seriesColumns[this.config.selectedSerie].query(this.config.selectedIndicator),
-        sliceFilter: Object.keys(this.sliceFilter).length > 0
-          ? {[this.sliceColumns[this.config.selectedSlice].selector] : this.sliceFilter[this.config.selectedSlice]}
-          : null
-      }*/
     });
   }
 
@@ -196,12 +144,23 @@ export class DynamicChartComponent implements OnInit {
     '#4caf50', '#ff5722', '#673ab7', '#3f51b5', '#009688'
   ];
 
-  private generateDynamicSeries(data: any[]): void {
+  private generateDynamicSeries(data: any[]) {
     const fieldName = this.config.selectedSerie
     if(!fieldName){
-        this.chartProvider.series = [{data: {x:field(this.config.selectedGroup), y: field('count')}, name: 'count', color: this.colorPalette[0]}];
+        this.chartProvider.series = [{data: {x:field(this.config.selectedGroup), y: field('count')}, name: 'default', color: this.colorPalette[0]}];// todo make this dynamic
+        return data;
     }else {
-      // Extract unique values from the field
+      let serie = this.cardConfig.series.filter(s => s.value === fieldName)[0];
+      if(serie.properties){
+        this.chartProvider.series = serie.properties.map((c, index) => ({
+          data: {x: field(this.config.selectedGroup), y: field(c.selector)},
+          name: c.name || c.selector,
+          color: this.colorPalette[index % this.colorPalette.length]
+        }));
+        return data;
+      }
+
+      let dynamicSeriesMap: Map<string, any> = new Map();
       const uniqueValues = new Set<string>();
       data.forEach(item => {
         if (item[fieldName]) {
@@ -209,10 +168,10 @@ export class DynamicChartComponent implements OnInit {
         }
       });
 
-      this.dynamicSeriesMap.clear();
+      dynamicSeriesMap.clear();
       let colorIndex = 0;
       Array.from(uniqueValues).sort((a, b) => a.localeCompare(b)).forEach(value => {
-        this.dynamicSeriesMap.set(value, {
+       dynamicSeriesMap.set(value, {
           selector: value,
           name: value,
           color: this.colorPalette[colorIndex % this.colorPalette.length]
@@ -221,19 +180,18 @@ export class DynamicChartComponent implements OnInit {
       });
 
       if (this.config.selectedSerie === fieldName) {
-        this.chartProvider.series = Array.from(this.dynamicSeriesMap.values()).map(s => ({
+        this.chartProvider.series = Array.from(dynamicSeriesMap.values()).map(s => ({
           data: {x: field(this.config.selectedGroup), y: field(s.selector)},
           name: s.name,
           color: s.color
         }));
-        this.processDataByValue(data, fieldName);
+       return this.processDataByValue(data, fieldName);
       }
     }
-
   }
 
 
-  private processDataByValue(data: any[], fieldName: string): void {
+  private processDataByValue(data: any[], fieldName: string): any[] {
     // First pass: collect all unique status codes
     const uniqueValues = new Set<string>();
     data.forEach(item => {
@@ -241,7 +199,6 @@ export class DynamicChartComponent implements OnInit {
        if(statusCode!= 'undefined'){
          uniqueValues.add(statusCode);
        }
-
     });
 
     // Group data by group key and consolidate status codes and counts
@@ -273,16 +230,12 @@ export class DynamicChartComponent implements OnInit {
       groupObj[statusCode] = countValue;
     });
 
-    // Replace the original data array with consolidated groups
-    data.length = 0;
-    groupedData.forEach(groupObj => {
-      data.push(groupObj);
-    });
+    return Array.from(groupedData.values());
   }
 
 
   get chartProvider(): ChartProvider<string, number> {
-    return this.cardConfig.chartProvider || { height: 300, stacked: true, series: [], options: {} };
+    return this.cardConfig.chartProvider;
   }
 
   set chartProvider(value: ChartProvider<string, number>) {
@@ -298,18 +251,6 @@ export class DynamicChartComponent implements OnInit {
       slices: this.cardConfig.slices,
       series: this.cardConfig.series
     };
-  }
-
-  get groupColumns() {
-    return this.cardConfig.groupColumns;
-  }
-
-  get sliceColumns() {
-    return this.cardConfig.sliceColumns;
-  }
-
-  get seriesColumns() {
-    return this.cardConfig.seriesColumns;
   }
 }
 
