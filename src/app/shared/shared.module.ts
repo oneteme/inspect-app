@@ -74,7 +74,7 @@ export const MY_DATE_FORMATS = {
     ServerCardComponent,
     OverlayContainerFilterComponent,
     LogTableComponent,
-    StageTableComponent
+    StageTableComponent,
     PulseComponent,
     PulseDialogComponent
   ],
@@ -101,7 +101,7 @@ export const MY_DATE_FORMATS = {
     LogTableComponent,
     TableComponent,
     JqtCellDefDirective,
-    StageTableComponent
+    StageTableComponent,
     PulseDialogComponent
   ]
 })

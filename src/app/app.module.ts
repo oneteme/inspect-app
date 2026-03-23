@@ -198,7 +198,6 @@ const routes: Route[] = [
     },
   ]
   },
-
   {
     path: 'analytic/:user',
     component: AnalyticView,
