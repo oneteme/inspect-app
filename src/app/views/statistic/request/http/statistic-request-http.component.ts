@@ -7,7 +7,7 @@ import {finalize, map} from "rxjs";
 import {RestRequestService} from "../../../../service/jquery/rest-request.service";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 import {EnvRouter} from "../../../../service/router.service";
-import {createRepartitionStatusConfig, createRepartitionPerformanceConfig} from "./constant";
+import {REST_REPARTITION_STATUS, createRepartitionPerformanceConfig} from "./constant";
 
 @Component({
   templateUrl: './statistic-request-http.component.html',
@@ -19,7 +19,7 @@ export class StatisticRequestHttpComponent {
   private _decimalPipe = inject(DecimalPipe);
   private _router: EnvRouter = inject(EnvRouter);
 
-  REPARTITION_STATUS = createRepartitionStatusConfig((value) => this._decimalPipe.transform(value) || '');
+  REPARTITION_STATUS = REST_REPARTITION_STATUS((value) => this._decimalPipe.transform(value) || '');
   PERFORMANCE_REPARTITION = createRepartitionPerformanceConfig((value) => this._decimalPipe.transform(value) || '');
 
   groupedBy: string = ''
@@ -28,9 +28,6 @@ export class StatisticRequestHttpComponent {
   $statusRepartitionSlice: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number, statCountUnavailableServer: number}} = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0, statCountUnavailableServer:0}};
   $performanceRepartition: { data: any[], loading: boolean, stats: any } = {data: [], loading: true, stats :{}};
   $performanceRepartitionSlice: { data: any[], loading: boolean, stats: any } = {data: [], loading: true, stats :{}};
-
-
-
 
   statusRepartitionChange(event){
     switch(event.type) {
@@ -116,7 +113,6 @@ export class StatisticRequestHttpComponent {
     return str.includes(search) ? str.replace(search, replacement) : str;
   }
 
-  protected readonly Object = Object;
   columnsConfig = {
     groupColumns: {
       date: {

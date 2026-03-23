@@ -60,15 +60,15 @@ export class RestRequestService {
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
-        if(data?.column){
-            args['column'] += `,${data.column}`;
-        }
-        if(data?.order){
-            args['order'] = data.order;
-        }
-        if(filters.hosts?.length){
-            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
-        }
+    if(data?.column){
+        args['column'] += `,${data.column}`;
+    }
+    if(data?.order){
+        args['order'] = data.order;
+    }
+    if(filters.hosts?.length){
+        args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+    }
 
         if(data?.sliceFilter){
             console.log(data.sliceFilter)

@@ -35,37 +35,38 @@ import {AnalyticView} from "./views/analytic/analytic.view";
 import {SearchRequestView} from "./views/search/request/search-request.view";
 import {Constants} from "./views/constants";
 import {DetailRequestView} from "./views/detail/request/detail-request.view";
-import { InstanceComponent } from './views/detail/instance/instance.component';
+import {InstanceComponent} from './views/detail/instance/instance.component';
 import {ServerSupervisionView} from "./views/supervision/_component/server/server-supervision.view";
 import {ClientSupervisionView} from "./views/supervision/_component/client/client-supervision.view";
 import {StatisticRequestView} from "./views/statistic/request/statistic-request.view";
+import {KpiRequestView} from "./views/kpi/request/kpi-request.view";
 
 
 registerLocaleData(localeFr, 'fr-FR');
 const routes: Route[] = [
-    {
-      path:'request', children : [
-        {
-          path:':type',
-          children: [
-            {
-              path: '',
-              component: SearchRequestView,
-              title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => 'Requêtes '+ Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title,
-            },
-            {
-              path: ':id_request',
-              component: DetailRequestView,
-              title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-                return 'Appel d\'API > Detail ' + Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title
-              }
+  {
+    path: 'request', children: [
+      {
+        path: ':type',
+        children: [
+          {
+            path: '',
+            component: SearchRequestView,
+            title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => 'Requêtes ' + Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title,
+          },
+          {
+            path: ':id_request',
+            component: DetailRequestView,
+            title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+              return 'Appel d\'API > Detail ' + Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title
             }
-          ]
-        },
-        { path: '**', pathMatch: 'full', redirectTo: `/request/rest` }
-      ]
-    },
-    {
+          }
+        ]
+      },
+      {path: '**', pathMatch: 'full', redirectTo: `/request/rest`}
+    ]
+  },
+  {
     path: 'session', children: [
       {
         path: ':app_name/dump',
@@ -90,16 +91,16 @@ const routes: Route[] = [
               },
               {
                 path: 'tree',
-                data: { type: 'rest' },
+                data: {type: 'rest'},
                 component: TreeView,
                 title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-                    return `Lancement d'appel Rest > Arbre d'Appels`;
+                  return `Lancement d'appel Rest > Arbre d'Appels`;
                 }
               },
-              { path: '**', pathMatch: 'full', redirectTo: `/session/rest/:id_session` }
+              {path: '**', pathMatch: 'full', redirectTo: `/session/rest/:id_session`}
             ]
           },
-          { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
+          {path: '**', pathMatch: 'full', redirectTo: `/session/rest`}
         ]
       },
       {
@@ -111,7 +112,7 @@ const routes: Route[] = [
             title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
               if (route.paramMap.get('type_main') == 'batch') {
                 return 'Exécution de CRON';
-              } else if(route.paramMap.get('type_main') == 'startup') {
+              } else if (route.paramMap.get('type_main') == 'startup') {
                 return 'Lancement de Serveur';
               } else if (route.paramMap.get('type_main') == 'test') {
                 return 'Exécution de Test';
@@ -139,7 +140,7 @@ const routes: Route[] = [
               },
               {
                 path: 'tree',
-                data: { type: 'main' },
+                data: {type: 'main'},
                 component: TreeView,
                 title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
                   let detail = `> Arbre d'Appels`;
@@ -153,13 +154,13 @@ const routes: Route[] = [
                   return `Navigation ${detail}`;
                 }
               },
-              { path: '**', pathMatch: 'full', redirectTo: `/main/:type_main/:id_session` }
+              {path: '**', pathMatch: 'full', redirectTo: `/main/:type_main/:id_session`}
             ]
           },
-          { path: '**', pathMatch: 'full', redirectTo: `/main/:type_main` }
+          {path: '**', pathMatch: 'full', redirectTo: `/main/:type_main`}
         ]
       },
-      { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
+      {path: '**', pathMatch: 'full', redirectTo: `/session/rest`}
     ]
   },
   {
@@ -197,20 +198,30 @@ const routes: Route[] = [
           return `Dashboard > ${route.paramMap.get('client_name')}`;
         }
       },
-      { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
+      {path: '**', pathMatch: 'full', redirectTo: `/session/rest`}
     ]
   },
+  /*{
+    path: 'kpi',
+    children: [
+      {
+        path: 'request/:request_type',
+        component: KpiRequestView
+      },
+      {path: '**', pathMatch: 'full', redirectTo: `/session/rest`}
+    ]
+  },*/
   {
     path: 'instance',
-  children:[
-    {
-      path: 'detail/:id_instance',
-      component: InstanceComponent,
-      title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-        return `instance > ${route.paramMap.get('id_instance')}`;
-      }
-    },
-  ]
+    children: [
+      {
+        path: 'detail/:id_instance',
+        component: InstanceComponent,
+        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+          return `instance > ${route.paramMap.get('id_instance')}`;
+        }
+      },
+    ]
   },
 
   {
@@ -243,14 +254,14 @@ const routes: Route[] = [
     component: ClientSupervisionView,
     title: 'Client Supervision'
   },
-  { path: '**', pathMatch: 'full', redirectTo: `/home` }
+  {path: '**', pathMatch: 'full', redirectTo: `/home`}
 ];
 
 @NgModule({
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    RouterModule.forRoot(routes, { useHash: true }),
+    RouterModule.forRoot(routes, {useHash: true}),
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,
@@ -261,13 +272,13 @@ const routes: Route[] = [
     AppComponent
   ],
   providers: [
-      SizePipe,
+    SizePipe,
     DatePipe,
     DecimalPipe,
     DurationPipe,
     I18nPluralPipe,
     EnvRouter,
-    { provide: LOCALE_ID, useValue: 'fr-FR' },
+    {provide: LOCALE_ID, useValue: 'fr-FR'},
     NumberFormatterPipe,
     {provide: HTTP_INTERCEPTORS, useClass: Interceptor, multi: true}
   ],
