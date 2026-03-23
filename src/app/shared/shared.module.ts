@@ -22,6 +22,9 @@ import {StatusIndicatorComponent} from "./_component/status-indicator/status-ind
 import {ServerCardComponent} from "./_component/server-card/server-card.component";
 import {OverlayContainerFilterComponent} from "./_component/overlay-container-filter/overlay-container-filter.component";
 import {BranchHashBadgeComponent} from "./_component/branch-hash-badge/branch-hash-badge.component";
+import {LogTableComponent} from "./_component/table/log-table/log-table.component";
+import {JqtCellDefDirective, TableComponent} from "@oneteme/jquery-table";
+import {StageTableComponent} from "./_component/table/stage-table/stage-table.component";
 import {PulseComponent} from "./_component/pulse/pulse.component";
 import {PulseDialogComponent} from "./_component/pulse/dialog/pulse-dialog.component";
 
@@ -46,6 +49,8 @@ export const MY_DATE_FORMATS = {
     MaterialModule,
     FormsModule,
     ReactiveFormsModule,
+    TableComponent,
+    JqtCellDefDirective
   ],
   declarations: [
     HeaderPageComponent,
@@ -68,6 +73,8 @@ export const MY_DATE_FORMATS = {
     StatusIndicatorComponent,
     ServerCardComponent,
     OverlayContainerFilterComponent,
+    LogTableComponent,
+    StageTableComponent
     PulseComponent,
     PulseDialogComponent
   ],
@@ -91,6 +98,10 @@ export const MY_DATE_FORMATS = {
     StatusIndicatorComponent,
     ServerCardComponent,
     OverlayContainerFilterComponent,
+    LogTableComponent,
+    TableComponent,
+    JqtCellDefDirective,
+    StageTableComponent
     PulseDialogComponent
   ]
 })

@@ -60,8 +60,8 @@
 
     <div class="tab-content">
       <div *ngIf="tabs[selectedTabIndex]?.type === 'stage'" class="tab-panel">
-        <request-stage-table [requests]="stages">
-        </request-stage-table>
+        <stage-table [requests]="stages">
+        </stage-table>
       </div>
       <div *ngIf="tabs[selectedTabIndex]?.type === 'timeline'" class="tab-panel">
         <app-timeline [options]="options"

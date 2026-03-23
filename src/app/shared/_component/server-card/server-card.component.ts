@@ -15,7 +15,7 @@ export class ServerCardComponent {
   private readonly _instanceTraceService = inject(InstanceTraceService);
   protected readonly _router: EnvRouter = inject(EnvRouter);
 
-  date = new Date().getTime();
+  date = new Date();
   _instance: InstanceEnvironment;
   _lastTrace: number;
   _isLoadingLastTrace: boolean = false;

@@ -47,14 +47,11 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   private readonly _instanceTraceService = inject(InstanceTraceService);
   private readonly _instanceService = inject(InstanceService);
   private readonly _dialog = inject(MatDialog);
-  private readonly _location: Location = inject(Location);
   private readonly _decimalPipe: DecimalPipe = inject(DecimalPipe);
-  private readonly _datePipe = inject(DatePipe);
   private readonly $destroy = new Subject<void>();
   private readonly _snackBar = inject(MatSnackBar);
   private readonly _ngZone = inject(NgZone);
 
-  date = new Date().getTime();
   readonly formGroup = new FormGroup({
     range: new FormGroup({
       start: new FormControl<Date | null>(null, [Validators.required]),
@@ -392,6 +389,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     }
   };
 
+  date = new Date();
   servers: string[] = [];
   instance: Partial<InstanceEnvironment> = {};
   instances: {id: string, appName: string, start: number, end: number}[] = [];
@@ -544,12 +542,6 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
 
   private defaultSelectedPeriod(): {start: Date, end: Date} {
     return {start: this.getMaxDate(new Date(this.instance.instant * 1000), this.params.start), end: this.getMinDate(this.instance.end ? new Date(this.instance.end * 1000) : new Date(), this.params.end)};
-  }
-
-  open(row: any) {
-    this._dialog.open(StacktraceDialogComponent, {
-      data: { message: row.message, stackTraceRows: row.stackRows }
-    });
   }
 
   search() {

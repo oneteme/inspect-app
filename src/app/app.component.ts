@@ -1,14 +1,4 @@
-import {Component, inject, OnDestroy} from '@angular/core';
-import {FormControl} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
-import {distinctUntilChanged, finalize, Subscription} from 'rxjs';
-import {app} from 'src/environments/environment';
-import {EnvRouter} from "./service/router.service";
-import {Constants} from "./views/constants";
-import {InstanceService} from "./service/jquery/instance.service";
-import {MatIconRegistry} from "@angular/material/icon";
-import {DomSanitizer} from "@angular/platform-browser";
-
+import { Component } from '@angular/core';
 
 @Component({
     selector: 'app-root',
