@@ -1,4 +1,4 @@
-import {Component, inject, OnDestroy, OnInit} from "@angular/core";
+import {Component, inject, NgZone, OnDestroy, OnInit} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
 import {combineLatest, EMPTY, finalize, forkJoin, of, Subject, switchMap, takeUntil} from "rxjs";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
@@ -22,6 +22,7 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 import {
   StacktraceDialogComponent
 } from "../../../../shared/_component/exception-display/stacktrace-dialog/stacktrace-dialog.component";
+import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
 
 @Component({
   templateUrl: './server-supervision.view.html',
@@ -49,6 +50,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   private readonly _decimalPipe: DecimalPipe = inject(DecimalPipe);
   private readonly $destroy = new Subject<void>();
   private readonly _snackBar = inject(MatSnackBar);
+  private readonly _ngZone = inject(NgZone);
 
   readonly formGroup = new FormGroup({
     range: new FormGroup({
@@ -239,6 +241,9 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
         animations: {
           enabled: false
         },
+        events: {
+          zoomed: (chartContext, { xaxis, yaxis }) => this.getSelectedPeriod(xaxis.min, xaxis.max)
+        },
         zoom: {
           type: 'x',
           enabled: true,
@@ -248,13 +253,21 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
           show: true,
           tools: {
             download: true,
-            selection: true,
             zoom: true,
             zoomin: true,
             zoomout: true,
             pan: true,
             reset: true,
-            customIcons: []
+            customIcons: [
+              {
+                icon: '<mat-icon class="material-symbols-outlined" style="font-size: 18px; padding-top: 3px; padding-left: 3px;">view_timeline</mat-icon>',
+                index: -6,
+                title: 'Pulse',
+                click: (chart, options, e) => this._ngZone.run(() => {
+                  this.onClickPulse()
+                })
+              }
+            ]
           },
           export: {
             csv: {
@@ -393,6 +406,8 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   reloadInstances = true;
   activityDisplayType: 'TRACE' | 'ATTEMPT' | 'REPORT' = 'TRACE';
 
+  selectedPeriod: Partial<{start: Date, end: Date}>;
+
   ngOnInit() {
     this.onRouteChange();
   }
@@ -400,6 +415,14 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.$destroy.next();
     this.$destroy.complete();
+  }
+
+  getSelectedPeriod(min: number, max: number) {
+    if (min && max) {
+      this.selectedPeriod = {start: new Date(min), end: new Date(max)};
+    } else {
+      this.selectedPeriod = this.defaultSelectedPeriod();
+    }
   }
 
   onRouteChange(){
@@ -512,8 +535,13 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
         this.logEntryByPeriod = log;
         this.lastTrace = last[0]?.date;
         this.getStatActivity();
+        this.selectedPeriod = this.defaultSelectedPeriod();
       }
     });
+  }
+
+  private defaultSelectedPeriod(): {start: Date, end: Date} {
+    return {start: this.getMaxDate(new Date(this.instance.instant * 1000), this.params.start), end: this.getMinDate(this.instance.end ? new Date(this.instance.end * 1000) : new Date(), this.params.end)};
   }
 
   search() {
@@ -621,6 +649,19 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     }, 0);
   }
 
+  onClickPulse() {
+    this._dialog.open(PulseDialogComponent, {
+      width: '1000px',
+      height: '65vh',
+      data: {
+        instance: this.instance.id,
+        instanceStart: new Date(this.instance.instant * 1000),
+        start: this.selectedPeriod.start,
+        end: this.selectedPeriod.end
+      }
+    });
+  }
+
   /**
    * Retourne la date maximale entre deux dates
    * @param date1 Première date
@@ -634,6 +675,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   getMinDate(date1: Date, date2: Date): Date {
     return date1.getTime() < date2.getTime() ? date1 : date2;
   }
+
 
   onServerChange(){
     if(this.filtredInstances.length > 0) {

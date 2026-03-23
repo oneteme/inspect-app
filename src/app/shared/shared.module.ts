@@ -25,6 +25,8 @@ import {BranchHashBadgeComponent} from "./_component/branch-hash-badge/branch-ha
 import {LogTableComponent} from "./_component/table/log-table/log-table.component";
 import {JqtCellDefDirective, TableComponent} from "@oneteme/jquery-table";
 import {StageTableComponent} from "./_component/table/stage-table/stage-table.component";
+import {PulseComponent} from "./_component/pulse/pulse.component";
+import {PulseDialogComponent} from "./_component/pulse/dialog/pulse-dialog.component";
 
 export const MY_DATE_FORMATS = {
   parse: {
@@ -73,6 +75,8 @@ export const MY_DATE_FORMATS = {
     OverlayContainerFilterComponent,
     LogTableComponent,
     StageTableComponent
+    PulseComponent,
+    PulseDialogComponent
   ],
   exports: [
     MaterialModule,
@@ -98,6 +102,7 @@ export const MY_DATE_FORMATS = {
     TableComponent,
     JqtCellDefDirective,
     StageTableComponent
+    PulseDialogComponent
   ]
 })
 export class SharedModule { }

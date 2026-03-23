@@ -62,7 +62,6 @@
             </mat-card-footer>
         </mat-card>
       <app-server-card style="width: 40vw"
-                       (onClick)="navigateOnStatusIndicator($event)"
                        [menu]="menuServer"
                        [instance]="instance"></app-server-card>
     </div>
@@ -102,6 +101,6 @@
 </mat-menu>
 
 <mat-menu #menuServer="matMenu">
-  <a mat-menu-item [routerLink]="['/session', instance?.name, 'dump']" [queryParams]="{env: instance?.env, date: getDate(session?.start * 1000).toISOString()}"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
+  <a mat-menu-item (click)="onClickPulse()"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
   <a mat-menu-item [routerLink]="['/dashboard', 'server', instance?.name]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur</a>
 </mat-menu>
