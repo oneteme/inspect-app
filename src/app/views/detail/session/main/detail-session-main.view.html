@@ -1,4 +1,4 @@
-<div *ngIf="session && instance">
+<div *ngIf="session && instance" style="height: 100%">
     <div class="header-card">
       <mat-card style="width: 60vw; min-width: 60vw;"
                   [ngClass]="{'success': session.end && (!session.exception?.type || !session.exception?.message),
@@ -36,7 +36,6 @@
             </mat-card-footer>
         </mat-card>
       <app-server-card style="width: 40vw"
-                       (onClick)="navigateOnStatusIndicator($event)"
                        [menu]="menuServer"
                        [instance]="instance"></app-server-card>
     </div>

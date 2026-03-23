@@ -4,3 +4,7 @@
   gap: 0.5em;
   margin-bottom: 2em;
 }
+
+.tab-panel {
+  height: calc(100vh - 56px - 7px - 180px - 1.5em);
+}

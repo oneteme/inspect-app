@@ -1,12 +1,13 @@
-.searchwidth {
+:host {
   display: flex;
-  margin-bottom: 0.5em;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
-.table-container {
-  .table-wrapper {
-    max-height: calc(100vh - 96px - 56px - 48px - 64px);
-  }
+.flex-table {
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 .stats-container {
@@ -161,7 +162,6 @@
 .server-cell-content {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
 
   .server-name {

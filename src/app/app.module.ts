@@ -18,7 +18,6 @@ import {DetailSessionRestView} from "./views/detail/session/rest/detail-session-
 import {SearchMainView} from "./views/search/main/search-main.view";
 import {DetailSessionMainView} from "./views/detail/session/main/detail-session-main.view";
 import {StatisticUserView} from "./views/statistic/user/statistic-user.view";
-import {StatisticDatabaseView} from "./views/statistic/database/statistic-database.view";
 import {DashboardComponent} from "./views/dashboard/dashboard.component";
 import {EnvRouter} from "./service/router.service";
 import {DurationPipe} from "./shared/pipe/duration.pipe";
@@ -27,7 +26,6 @@ import {ArchitectureView} from "./views/architecture/architecture.view";
 import {NumberFormatterPipe} from './shared/pipe/number.pipe';
 import {TreeView} from './views/tree/tree.view';
 import {SizePipe} from "./shared/pipe/size.pipe";
-import {DumpView} from "./views/dump/dump.view";
 import {StatisticServerView} from "./views/statistic/server/statistic-server.view";
 import {DeploimentComponent} from './views/deploiment/deploiment.component';
 import {Interceptor} from "./shared/interceptor/interceptor";
@@ -36,11 +34,10 @@ import {SearchRequestView} from "./views/search/request/search-request.view";
 import {Constants} from "./views/constants";
 import {DetailRequestView} from "./views/detail/request/detail-request.view";
 import {InstanceComponent} from './views/detail/instance/instance.component';
+import {NavbarComponent} from './components/navbar/navbar.component';
 import {ServerSupervisionView} from "./views/supervision/_component/server/server-supervision.view";
 import {ClientSupervisionView} from "./views/supervision/_component/client/client-supervision.view";
 import {StatisticRequestView} from "./views/statistic/request/statistic-request.view";
-import {KpiRequestView} from "./views/kpi/request/kpi-request.view";
-
 
 registerLocaleData(localeFr, 'fr-FR');
 const routes: Route[] = [
@@ -68,11 +65,6 @@ const routes: Route[] = [
   },
   {
     path: 'session', children: [
-      {
-        path: ':app_name/dump',
-        component: DumpView,
-        title: 'Pulse'
-      },
       {
         path: 'rest',
         children: [
@@ -185,13 +177,6 @@ const routes: Route[] = [
         }
       },
       {
-        path: 'database/:database_name',
-        component: StatisticDatabaseView,
-        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          return `Dashboard > ${route.paramMap.get('database_name')}`;
-        }
-      },
-      {
         path: 'client/:client_name',
         component: StatisticClientView,
         title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
@@ -223,7 +208,6 @@ const routes: Route[] = [
       },
     ]
   },
-
   {
     path: 'analytic/:user',
     component: AnalyticView,
@@ -269,7 +253,8 @@ const routes: Route[] = [
     ViewsModule
   ],
   declarations: [
-    AppComponent
+    AppComponent,
+    NavbarComponent
   ],
   providers: [
     SizePipe,
