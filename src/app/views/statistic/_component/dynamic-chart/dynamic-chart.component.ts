@@ -1,5 +1,6 @@
 import {Component, EventEmitter, inject, Input, Output, OnInit} from "@angular/core";
 import {ChartProvider, field} from "@oneteme/jquery-core";
+
 export interface RepartitionTypeCardConfig {
   title: string;
   indicators: { label: string, value: string }[];
@@ -7,6 +8,17 @@ export interface RepartitionTypeCardConfig {
   slices: { label: string, value: string }[];
   series: { label: string, value: string, properties?: { selector: string; name: string }[] }[];
   chartProvider?: ChartProvider<string, number>;
+}
+
+export interface DynamicChartEvent {
+  type: 'group' | 'indicator' | 'slice' | 'series' | 'sliceClick';
+  config: {
+    selectedIndicator: string;
+    selectedGroup: string;
+    selectedSlice: string;
+    selectedSerie: string;
+  };
+  sliceFilter?: any;
 }
 
 @Component({
@@ -50,8 +62,6 @@ export class DynamicChartComponent implements OnInit {
   ngOnInit(): void {
     setTimeout(() => this.triggerInitialChartLoad(), 0);
   }
-
-
 
   private triggerInitialChartLoad(): void {
     // Set default values from configuration
@@ -232,7 +242,6 @@ export class DynamicChartComponent implements OnInit {
 
     return Array.from(groupedData.values());
   }
-
 
   get chartProvider(): ChartProvider<string, number> {
     return this.cardConfig.chartProvider;

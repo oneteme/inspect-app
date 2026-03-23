@@ -39,3 +39,7 @@ a {
     text-decoration: none;
     color: blue;
 }
+
+.tab-panel {
+  height: calc(100vh - 56px - 7px - 180px - 1.5em);
+}

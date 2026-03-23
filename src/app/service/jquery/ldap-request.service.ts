@@ -82,4 +82,30 @@ export class LdapRequestService {
         }
         return this.getLdap(args);
     }
+
+    getCustom(data: {base: string; column?: string; order?: string; sliceFilter?: string },
+              filters: {start: Date; end: Date; env: string; hosts: string[]; method?: string[] }): Observable<any[]> {
+        let args: any = {
+            'column': `${data.base}`,
+            'instance_env': 'instance.id',
+            'instance.environement': filters.env,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString()
+        }
+        if(data?.column){
+            args['column'] += `,${data.column}`;
+        }
+        if(data?.order){
+            args['order'] = data.order;
+        }
+        if(filters.hosts?.length){
+            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+        }
+
+        if(data?.sliceFilter){
+            args[Object.keys(data.sliceFilter)[0]] = `"${Object.values(data.sliceFilter)[0]}"`;
+        }
+
+        return this.getLdap(args);
+    }
 }

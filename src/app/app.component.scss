@@ -1,45 +1,18 @@
 :host {
-    display: flex; 
-    flex-direction: column;
+    display: block;
+    height: 100vh;
+    overflow: hidden;
 }
 
-.mat-mdc-menu-item.menu-active {
-    background-color: var(--mat-menu-item-hover-state-layer-color);
-    color: var(--inspect-blue);
-    font-weight: 500;
-    mat-icon {
-        color: currentColor;
-    }
-}
-
-.item-selected {
-    background-color: var(--mat-menu-item-hover-state-layer-color);
-    color: #1464dc;
+mat-drawer-container {
+    position: relative;
+    z-index: 1;
+    height: calc(100vh - 56px);
+    margin-top: 56px;
 }
 
 mat-drawer-content {
+    box-sizing: border-box;
     overflow-x: hidden;
     padding: 7px;
-    height: calc(100vh - 48px - 14px);
-}
-
-::ng-deep .menu-row {
-    display: flex;
-    align-items: center;
-    padding: 4px 16px;
-    gap: 8px;
-
-    .menu-row-label {
-        font-size: 14px;
-        font-weight: 500;
-        min-width: 50px;
-    }
-
-    a {
-        color: inherit;
-
-        &:hover {
-            color: var(--inspect-blue, #1976d2);
-        }
-    }
 }

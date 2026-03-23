@@ -11,12 +11,21 @@
   display: flex;
   align-items: center;
   gap: 16px;
+  padding: 8px 16px 8px 8px;
+  background: linear-gradient(135deg, rgba(37, 99, 235, 0.08) 0%, rgba(20, 184, 166, 0.08) 100%);
+  border: 1px solid rgba(37, 99, 235, 0.18);
+  border-radius: 10px;
 
   .title-icon {
-    font-size: 40px;
-    width: 40px;
-    height: 40px;
-    color: #3b82f6;
+    font-size: 24px;
+    width: 42px;
+    height: 42px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #2563eb 0%, #60a5fa 100%);
+    border-radius: 8px;
+    color: #ffffff;
     flex-shrink: 0;
   }
 
