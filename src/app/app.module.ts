@@ -186,16 +186,6 @@ const routes: Route[] = [
       {path: '**', pathMatch: 'full', redirectTo: `/session/rest`}
     ]
   },
-  /*{
-    path: 'kpi',
-    children: [
-      {
-        path: 'request/:request_type',
-        component: KpiRequestView
-      },
-      {path: '**', pathMatch: 'full', redirectTo: `/session/rest`}
-    ]
-  },*/
   {
     path: 'instance',
     children: [

@@ -89,10 +89,6 @@ import {
   RepartitionTypeCrossTableComponent
 } from "./statistic/_component/repartition-type-cross-table/repartition-type-cross-table.component";
 import {DynamicChartComponent} from "./statistic/_component/dynamic-chart/dynamic-chart.component";
-import {MenuComponent} from "./kpi/_component/menu/menu.component";
-import {SubMenuComponent} from "./kpi/_component/menu/sub-menu.component";
-import {KpiRequestView} from "./kpi/request/kpi-request.view";
-import {RestComponent} from "./kpi/request/rest/rest.component";
 
 @NgModule({
   imports: [
@@ -168,12 +164,7 @@ import {RestComponent} from "./kpi/request/rest/rest.component";
     RepartitionSizeCardHttpComponent,
     DynamicTableComponent,
     LatencyCardHttpComponent,
-    DynamicChartComponent,
-    //New
-    /*MenuComponent,
-    SubMenuComponent,
-    KpiRequestView,
-    RestComponent*/
+    DynamicChartComponent
   ]
 })
 export class ViewsModule { }

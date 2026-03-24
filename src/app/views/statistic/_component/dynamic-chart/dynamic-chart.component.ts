@@ -238,6 +238,7 @@ export class DynamicChartComponent implements OnInit {
         }));
         this.processDataByValue(data, fieldName);
       }
+      console.log(data, this.chartProvider.series)
     }
   }
 
