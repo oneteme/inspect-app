@@ -22,8 +22,10 @@
     "@angular/platform-browser-dynamic": "^16.2.12",
     "@angular/router": "^16.2.12",
     "@fortawesome/fontawesome-free": "^6.0.0",
-    "@oneteme/jquery-apexcharts": "^0.0.24",
+    "@oneteme/jquery-core": "file:../jquery-charts/jquery-charts/dist/oneteme/jquery-core",
+    "@oneteme/jquery-echarts": "file:../jquery-charts/jquery-charts/dist/oneteme/jquery-echarts",
     "@oneteme/jquery-table": "file:../jquery-charts/jquery-charts/dist/oneteme/jquery-table",
+    "echarts": "^6.0.0",
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.43",
     "mxgraph": "^4.2.2",
@@ -59,5 +61,8 @@
     "karma-jasmine-html-reporter": "^1.7.0",
     "mxgraph-type-definitions": "^1.0.6",
     "typescript": "~4.9.3"
+  },
+  "overrides": {
+    "@oneteme/jquery-core": "file:../jquery-charts/jquery-charts/dist/oneteme/jquery-core"
   }
 }

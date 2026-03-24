@@ -30,18 +30,12 @@
                 "glob": "**/*",
                 "input": "./node_modules/mxgraph/javascript/src",
                 "output": "./assets/mxgraph"
-              },
-              {
-                "glob": "**/*",
-                "input": "./node_modules/@oneteme/jquery-apexcharts/src/assets",
-                "output": "./assets/icons"
               }
             ],
             "styles": [
               "node_modules/vis-timeline/styles/vis-timeline-graph2d.min.css",
               "src/styles/theme.scss",
-              "node_modules/@fortawesome/fontawesome-free/css/all.css",
-              "node_modules/@oneteme/jquery-apexcharts/styles/styles.scss"
+              "node_modules/@fortawesome/fontawesome-free/css/all.css"
             ],
             "scripts": [
               "node_modules/vis-timeline/standalone/umd/vis-timeline-graph2d.min.js"
@@ -77,7 +71,7 @@
                   "with": "src/environments/environment.prod.ts"
                 }
               ],
-              
+
               "optimization": {
                 "scripts": true,
                 "styles": true,

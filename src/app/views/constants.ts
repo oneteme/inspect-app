@@ -32,17 +32,7 @@ export class Constants {
             { data: { x: values('2xx'), y: field('countSucces') }, name: '2xx', color: '#33cc33' },
             { data: { x: values('4xx'), y: field('countErrorClient') }, name: '4xx', color: '#ffa31a' },
             { data: { x: values('5xx'), y: field('countErrorServer') }, name: '5xx', color: '#ff0000' }
-        ],
-        options: {
-            chart: {
-                toolbar: {
-                    show: true
-                }
-            },
-            legend: {
-                height: 225
-            }
-        }
+        ]
     };
 
     static readonly REPARTITION_SPEED_PIE: ChartProvider<string, number> = {
@@ -53,17 +43,7 @@ export class Constants {
             { data: { x: values('3 <> 5'), y: field('elapsedTimeMedium') }, name: 'mapper 3', color: '#83ACBF' },
             { data: { x: values('1 <> 3'), y: field('elapsedTimeFast') }, name: 'mapper 4', color: '#82C0DC' },
             { data: { x: values('< 1'), y: field('elapsedTimeFastest') }, name: 'mapper 5', color: '#81D4FA' }
-        ],
-        options: {
-            chart: {
-                toolbar: {
-                    show: false
-                }
-            },
-            legend: {
-                height: 225
-            }
-        }
+        ]
     };
 
     static readonly REPARTITION_USER_POLAR: ChartProvider<string, number> = {
@@ -71,17 +51,7 @@ export class Constants {
         height: 250,
         series: [
             { data: { x: field('user'), y: field('count') }, name: 'Total' }
-        ],
-        options: {
-            chart: {
-                toolbar: {
-                    show: false
-                }
-            },
-            legend: {
-                height: 225
-            }
-        }
+        ]
     };
 
     static readonly REPARTITION_RE_PIE: ChartProvider<string, number> = {
@@ -89,14 +59,7 @@ export class Constants {
         height: 250,
         series: [
             { data: { x: field('re'), y: field('count') } }
-        ],
-        options: {
-            chart: {
-                toolbar: {
-                    show: false
-                }
-            }
-        }
+        ]
     }
 
     static readonly REPARTITION_USER_BAR: ChartProvider<string, number> = {
@@ -106,20 +69,7 @@ export class Constants {
         ],
         stacked: true,
         options: {
-            chart: {
-                toolbar: {
-                    show: false
-                }
-            },
-            tooltip: {
-                shared: true,
-                intersect: false,
-                followCursor: true
-            },
-            legend: {
-                position: 'right',
-                offsetY: 40
-            }
+            legend: { orient: 'vertical', right: 10, top: 'middle' }
         }
     }
 
@@ -129,40 +79,7 @@ export class Constants {
         series: [
             { data: { x: field('location'), y: field('count') }, name: 'Consultation par page', color: '#33cc33' }
         ],
-        stacked: true,
-        options: {
-            chart: {
-                toolbar: {
-                    show: false
-                }
-            },
-            tooltip: {
-                shared: true,
-                intersect: false,
-                followCursor: true
-            },
-            plotOptions: {
-                bar: {
-                    dataLabels: {
-                        total: {
-                            enabled: true,
-                            offsetX: 0,
-                            style: {
-                                fontSize: '13px',
-                                fontWeight: 900
-                            }
-                        }
-                    }
-                },
-            },
-            fill: {
-                opacity: 1
-            },
-            stroke: {
-                width: 1,
-                colors: ['#fff']
-            }
-        }
+        stacked: true
     };
 
     static readonly REPARTITION_API_BAR: ChartProvider<string, number> = {
@@ -175,42 +92,7 @@ export class Constants {
         ],
         stacked: true,
         options: {
-            chart: {
-                toolbar: {
-                    show: false
-                }
-            },
-            tooltip: {
-                shared: true,
-                intersect: false,
-                followCursor: true
-            },
-            plotOptions: {
-                bar: {
-                    dataLabels: {
-                        total: {
-                            enabled: true,
-                            offsetX: 0,
-                            style: {
-                                fontSize: '13px',
-                                fontWeight: 900
-                            }
-                        }
-                    }
-                },
-            },
-            fill: {
-                opacity: 1
-            },
-            stroke: {
-                width: 1,
-                colors: ['#fff']
-            },
-            legend: {
-                position: 'top',
-                horizontalAlign: 'left',
-                offsetX: 40
-            }
+            legend: { orient: 'vertical', right: 10, top: 'middle' }
         }
     };
 
@@ -226,20 +108,7 @@ export class Constants {
         ],
         stacked: true,
         options: {
-            chart: {
-                toolbar: {
-                    show: false
-                }
-            },
-            tooltip: {
-                shared: true,
-                intersect: false,
-                followCursor: true
-            },
-            legend: {
-                position: 'right',
-                offsetY: 40
-            }
+            legend: { orient: 'vertical', right: 10, top: 'middle' }
         }
     };
 
@@ -253,20 +122,7 @@ export class Constants {
         ],
         stacked: true,
         options: {
-            chart: {
-                toolbar: {
-                    show: false
-                }
-            },
-            tooltip: {
-                shared: true,
-                intersect: false,
-                followCursor: true,
-            },
-            legend: {
-                position: 'right',
-                offsetY: 40
-            }
+            legend: { orient: 'vertical', right: 10, top: 'middle' }
         }
     }
 
@@ -275,14 +131,7 @@ export class Constants {
         height: 250,
         series: [
             { data: { x: field('date'), y: field('count') }, name: 'Nombre de pages visités' }
-        ],
-        options: {
-            chart: {
-                toolbar: {
-                    show: false
-                }
-            }
-        }
+        ]
     };
 
     static readonly REPARTITION_MAX_BY_PERIOD_LINE: ChartProvider<string, number> = {
@@ -293,25 +142,7 @@ export class Constants {
             { data: { x: field('date'), y: field('max') }, name: 'Temps max', color: '#FF0000' }
         ],
         options: {
-            chart: {
-                id: 'c',
-                group: 'A',
-                toolbar: {
-                    show: false
-                }
-            },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                width: [4]
-            },
-            yaxis: {
-                decimalsInFloat: 3
-            },
-            legend: {
-                showForSingleSeries: true
-            }
+            yAxis: { axisLabel: { formatter: (v: number) => v.toFixed(3) + 's' } }
         }
     };
 
@@ -322,25 +153,7 @@ export class Constants {
             { data: { x: field('date'), y: field('avg') }, name: 'Temps moyen', color: '#FF9B00' }
         ],
         options: {
-            chart: {
-                id: 'b',
-                group: 'A',
-                toolbar: {
-                    show: false
-                }
-            },
-            dataLabels: {
-                enabled: false
-            },
-            stroke: {
-                width: [4]
-            },
-            yaxis: {
-                decimalsInFloat: 3
-            },
-            legend: {
-                showForSingleSeries: true
-            }
+            yAxis: { axisLabel: { formatter: (v: number) => v.toFixed(3) + 's' } }
         }
     };
 
@@ -351,24 +164,9 @@ export class Constants {
             { data: { x: field('date'), y: field('count') }, name: 'Utilisateurs', color: "#FFD400" }
         ],
         options: {
-            chart: {
-                id: 'sparkline-3',
-                group: 'sparkline',
-                sparkline: {
-                    enabled: true
-                },
-                toolbar: {
-                    show: false
-                }
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                }
-            },
-            subtitle: {
-                offsetY: 20
-            }
+            grid: { top: 10, bottom: 30, left: 10, right: 10, containLabel: true },
+            xAxis: { show: false },
+            yAxis: { show: false }
         }
     };
 
@@ -379,24 +177,9 @@ export class Constants {
             { data: { x: field('date'), y: field('count') }, name: 'Pages visités', color: "#DECDF5" }
         ],
         options: {
-            chart: {
-                id: 'sparkline-2',
-                group: 'sparkline',
-                sparkline: {
-                    enabled: true
-                },
-                toolbar: {
-                    show: false
-                }
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                }
-            },
-            subtitle: {
-                offsetY: 20
-            }
+            grid: { top: 10, bottom: 30, left: 10, right: 10, containLabel: true },
+            xAxis: { show: false },
+            yAxis: { show: false }
         }
     };
 
@@ -407,24 +190,9 @@ export class Constants {
             { data: { x: field('date'), y: field('count') }, name: 'Appels', color: "#1423dc" }
         ],
         options: {
-            chart: {
-                id: 'sparkline-1',
-                group: 'sparkline',
-                sparkline: {
-                    enabled: true
-                },
-                toolbar: {
-                    show: false
-                }
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                }
-            },
-            subtitle: {
-                offsetY: 20
-            }
+            grid: { top: 10, bottom: 30, left: 10, right: 10, containLabel: true },
+            xAxis: { show: false },
+            yAxis: { show: false }
         }
     };
 
@@ -435,31 +203,9 @@ export class Constants {
             { data: { x: field('date'), y: field('countErrorServer') }, name: 'Appels en erreur', color: "#ff0000" }
         ],
         options: {
-            chart: {
-                id: 'sparkline-2',
-                group: 'sparkline',
-                sparkline: {
-                    enabled: true
-                },
-                toolbar: {
-                    show: false
-                }
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-                        return val.toFixed(0);
-                    },
-                }
-            },
-            subtitle: {
-                offsetY: 20
-            }
+            grid: { top: 10, bottom: 30, left: 10, right: 10, containLabel: true },
+            xAxis: { show: false },
+            yAxis: { show: false }
         }
     };
 
@@ -470,31 +216,9 @@ export class Constants {
             { data: { x: field('date'), y: field('countSlowest') }, name: 'Appels superieur à 10 secondes', color: "#848383" }
         ],
         options: {
-            chart: {
-                id: 'sparkline-3',
-                group: 'sparkline',
-                sparkline: {
-                    enabled: true
-                },
-                toolbar: {
-                    show: false
-                }
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                }
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-                        return val.toFixed(0);
-                    },
-                }
-            },
-            subtitle: {
-                offsetY: 20
-            }
+            grid: { top: 10, bottom: 30, left: 10, right: 10, containLabel: true },
+            xAxis: { show: false },
+            yAxis: { show: false }
         }
     };
 
@@ -519,177 +243,83 @@ export class Constants {
 
 
     
-    static REST_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<string, number> = {
+    static readonly REST_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<string, number> = {
         height: 100,
         continue: true,
         series: [
             { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions REST', color: "#ff0000" },
         ],
         options: {
-            chart: {
-                sparkline: {
-                   enabled: true
-                },
-                toolbar: {
-                    show: false
-                }
-                
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
-            }
+            grid: { top: 2, bottom: 2, left: 2, right: 2, containLabel: false },
+            xAxis: { show: false },
+            yAxis: { show: false, max: 100 },
+            legend: { show: false },
+            tooltip: { formatter: (p: any) => { const v = Array.isArray(p[0]?.value) ? p[0].value[1] : p[0]?.value; return `${p[0].marker} ${p[0].seriesName}: <b>${(+v).toFixed(2)}%</b>`; } },
+            series: [{ showSymbol: false }]
         }
     };
     
-    static  DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+    static readonly DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
         height: 100,
         continue: true,
         series: [
             { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions JDBC', color: "#ff0000" }
         ],
         options: {
-            chart: {
-                sparkline: {
-                    enabled: true
-                },
-                toolbar: {
-                    show: false
-                }
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
-            }
+            grid: { top: 2, bottom: 2, left: 2, right: 2, containLabel: false },
+            xAxis: { show: false },
+            yAxis: { show: false, max: 100 },
+            legend: { show: false },
+            tooltip: { formatter: (p: any) => { const v = Array.isArray(p[0]?.value) ? p[0].value[1] : p[0]?.value; return `${p[0].marker} ${p[0].seriesName}: <b>${(+v).toFixed(2)}%</b>`; } },
+            series: [{ showSymbol: false }]
         }
     };
 
-    static  FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+    static readonly FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
         height: 100,
         continue: true,
         series: [
             { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions FTP', color: "#ff0000"}
         ],
         options: {
-            chart: {
-                sparkline: {
-                    enabled: true
-                },
-                toolbar: {
-                    show: false
-                }
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
-            }
+            grid: { top: 2, bottom: 2, left: 2, right: 2, containLabel: false },
+            xAxis: { show: false },
+            yAxis: { show: false, max: 100 },
+            legend: { show: false },
+            tooltip: { formatter: (p: any) => { const v = Array.isArray(p[0]?.value) ? p[0].value[1] : p[0]?.value; return `${p[0].marker} ${p[0].seriesName}: <b>${(+v).toFixed(2)}%</b>`; } },
+            series: [{ showSymbol: false }]
         }
     };
 
-    static  SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+    static readonly SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
         height: 100,
         continue: true,
         series: [
             { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions SMTP', color: "#ff0000" }
         ],
         options: {
-            chart: {
-                sparkline: {
-                    enabled: true
-                },
-                toolbar: {
-                    show: false
-                }
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
-            }
+            grid: { top: 2, bottom: 2, left: 2, right: 2, containLabel: false },
+            xAxis: { show: false },
+            yAxis: { show: false, max: 100 },
+            legend: { show: false },
+            tooltip: { formatter: (p: any) => { const v = Array.isArray(p[0]?.value) ? p[0].value[1] : p[0]?.value; return `${p[0].marker} ${p[0].seriesName}: <b>${(+v).toFixed(2)}%</b>`; } },
+            series: [{ showSymbol: false }]
         }
     };
 
-    static  LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
+    static readonly LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
         height: 100,
         continue: true,
         series: [
             { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions LDAP', color: "#ff0000" }
         ],
         options: {
-            chart: {
-                sparkline: {
-                    enabled: true
-                }
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
-            }
+            grid: { top: 2, bottom: 2, left: 2, right: 2, containLabel: false },
+            xAxis: { show: false },
+            yAxis: { show: false, max: 100 },
+            legend: { show: false },
+            tooltip: { formatter: (p: any) => { const v = Array.isArray(p[0]?.value) ? p[0].value[1] : p[0]?.value; return `${p[0].marker} ${p[0].seriesName}: <b>${(+v).toFixed(2)}%</b>`; } },
+            series: [{ showSymbol: false }]
         }
     };
 }
