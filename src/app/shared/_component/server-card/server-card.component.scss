@@ -1,23 +1,259 @@
-.os-badge {
+// ──────────────────────────────────────────────
+// CARTE SERVEUR
+// ──────────────────────────────────────────────
+
+.server-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: box-shadow 0.2s ease;
+
+  &:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
+  }
+}
+
+// ── Barre accent ──  (supprimée)
+
+.server-card-inner {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+// ── En-tête ──
+.server-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 14px 8px 10px 16px;
+  gap: 0.5em;
+}
+
+.server-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+  flex: 1;
+}
+
+.server-icon-wrap {
+  flex-shrink: 0;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  border: 1px solid #bae6fd;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .server-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: #0369a1;
+  }
+}
+
+.server-title-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  flex: 1;
+}
+
+.server-name-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-width: 0;
+}
+
+.server-name {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+}
+
+.status-spinner {
+  flex-shrink: 0;
+}
+
+.server-env-row {
+  display: flex;
+  align-items: center;
+}
+
+.env-badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border: 1px solid #bfdbfe;
-  border-radius: 8px;
-  font-size: 12px;
-  font-weight: 600;
-  color: #1e40af;
-  line-height: 1;
-  box-shadow: 0 2px 4px rgba(30, 64, 175, 0.08);
+  padding: 1px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  background: #f0f9ff;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
 
-  mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-    color: #2563eb;
+.menu-btn {
+  flex-shrink: 0;
+  color: #64748b;
+}
+
+// ── Contenu compacte ──
+.server-content {
+  padding: 0 14px 10px;
+  flex: 1;
+  display: flex;
+  align-items: flex-start;
+}
+
+.info-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+// Chip générique
+.info-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 10px;
+  border-radius: 20px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-size: 12px;
+  max-width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+
+  &.clickable {
+    cursor: pointer;
+    &:hover {
+      border-color: #bfdbfe;
+      background: #eff6ff;
+    }
+  }
+
+  .chip-icon {
+    font-size: 13px;
+    width: 13px;
+    height: 13px;
+    color: #94a3b8;
+    flex-shrink: 0;
+  }
+
+  .chip-value {
+    font-weight: 600;
+    color: #334155;
+    min-width: 0;
+  }
+
+  .chip-sep {
+    color: #cbd5e1;
+    flex-shrink: 0;
+  }
+
+  .chip-action {
+    font-size: 12px;
+    width: 12px;
+    height: 12px;
+    color: #94a3b8;
     flex-shrink: 0;
   }
 }
 
+// Version : accent bleu marine
+.version-chip {
+  background: #f0f4f8;
+  border-color: #c8d8e8;
+  .chip-value { color: #22577a; font-weight: 700; }
+}
+
+// Branche : accent violet
+.branch-chip {
+  background: #faf5ff;
+  border-color: #e9d8fd;
+  .chip-icon { color: #7c3aed; }
+  .chip-value { color: #5b21b6; }
+  .chip-hash {
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 11px;
+    color: #7c3aed;
+    opacity: 0.8;
+  }
+}
+
+// OS : accent bleu
+.os-chip {
+  background: #eff6ff;
+  border-color: #bfdbfe;
+  .chip-icon { color: #2563eb; }
+  .chip-value { color: #1e40af; }
+  .chip-runtime {
+    font-size: 11px;
+    font-style: italic;
+    color: #3b82f6;
+  }
+}
+
+// ── Pied de carte ──
+.server-footer {
+  display: flex;
+  align-items: center;
+  gap: 0.5em;
+  padding: 0 16px;
+  height: 52px;
+  flex-shrink: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+  background: #f8fafc;
+  flex-wrap: wrap;
+}
+
+.meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: #475569;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 4px 10px;
+  white-space: nowrap;
+
+  .meta-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    color: #94a3b8;
+  }
+
+  .duration {
+    font-weight: 700;
+    color: #1e293b;
+  }
+}

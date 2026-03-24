@@ -1,62 +1,118 @@
 <div *ngIf="!isLoading && request && instance">
   <div class="header-card">
-    <mat-card style="width: 60vw; min-width: 60vw;"
-              [ngClass]="{'success': request.status >= 200 && request.status < 400,
-                        'warning': request.status >= 400 && request.status < 500,
-                        'fail': request.status >= 500,
-                        'unavailable': request.end && request.status == 0}">
-      <mat-card-title>
-        <div style="display: flex; gap: 0.5em; align-items: center; width: 85%">
-          <mat-icon style="overflow: visible !important;" class="material-symbols-outlined">{{ REQUEST_TYPE['rest'].icon }}</mat-icon>
-          <span *ngIf="request.end" class="status-badge"
-            [ngClass]="{'success': request.status >= 200 && request.status < 400,
-                'warning': request.status >= 400 && request.status < 500,
-                'fail': request.status >= 500,
-                'unavailable': request.status == 0}">
-              {{request.status}}
-          </span>
-          <div class="ellipsis" [matTooltip]="request.path">
-            {{ request.path || 'N/A' }}
+
+    <!-- ═══ CARTE REQUEST REST ═══ -->
+    <div class="session-card"
+         [ngClass]="{'success': request.status >= 200 && request.status < 400,
+                     'warning': request.status >= 400 && request.status < 500,
+                     'fail':    request.status >= 500,
+                     'unavailable': request.end && request.status == 0,
+                     'in-progress': !request.end}">
+
+      <div class="session-card-inner">
+
+        <!-- En-tête -->
+        <div class="session-header">
+          <div class="session-title-row">
+            <div class="session-icon-wrap">
+              <mat-icon class="material-symbols-outlined session-icon">{{ REQUEST_TYPE['rest'].icon }}</mat-icon>
+            </div>
+            <div class="session-title-content">
+              <div class="session-name-row">
+                <span *ngIf="request.end" class="status-pill"
+                      [ngClass]="{'success': request.status >= 200 && request.status < 400,
+                                  'warning': request.status >= 400 && request.status < 500,
+                                  'fail':    request.status >= 500,
+                                  'unavailable': request.status == 0}">
+                  {{ request.status }}
+                </span>
+                <span class="session-name ellipsis" [matTooltip]="request.path">
+                  {{ request.path || 'N/A' }}
+                </span>
+              </div>
+              <div class="session-url-row">
+                <span class="method-badge">{{ request.method }}</span>
+                <a class="session-url ellipsis" [href]="getSessionUrl()" target="_blank"
+                   [matTooltip]="getSessionUrl()">
+                  {{ getSessionUrl() }}
+                </a>
+              </div>
+            </div>
           </div>
-          <mat-spinner *ngIf="!request.end" [diameter]="18"></mat-spinner>
+          <button mat-icon-button [matMenuTriggerFor]="menuHost" class="menu-btn">
+            <mat-icon>more_vert</mat-icon>
+          </button>
         </div>
-          <div class="right">
-              <button mat-icon-button [matMenuTriggerFor]="menuHost">
-                  <mat-icon>more_vert</mat-icon>
-              </button>
+
+        <!-- Exception -->
+        <exception-display
+          [type]="request.status >= 200 && request.status < 400 ? 'success' : request.status >= 400 && request.status < 500 ? 'warning' : 'fail'"
+          [exception]="$any(exception)">
+        </exception-display>
+
+        <!-- Pied de carte -->
+        <div class="session-footer">
+
+          <!-- Utilisateur & date -->
+          <div class="footer-section">
+            <div class="meta-chip">
+              <mat-icon class="material-symbols-outlined meta-icon">person</mat-icon>
+              <span>{{ request.user || 'N/A' }}</span>
+            </div>
+            <div class="meta-chip">
+              <mat-icon class="material-symbols-outlined meta-icon">schedule</mat-icon>
+              <span>{{ (request.start * 1000) | date: 'dd/MM/yyyy HH:mm:ss.SSS' }}</span>
+            </div>
           </div>
-      </mat-card-title>
-      <mat-card-content>
-        <div class="ellipsis">
-          <a class="url" [href]="getSessionUrl()" target="_blank">
-            [{{ request.method }}] {{ getSessionUrl() }}
-          </a>
-        </div>
-        <exception-display [type]="request.status >= 200 && request.status < 400 ? 'success' : request.status >= 400 && request.status < 500 ? 'warning' : 'fail'" [exception]="exception"></exception-display>
-      </mat-card-content>
-      <mat-card-footer>
-        <label-icon icon="person" [iconOutlined]="true" [size]="20">
-          <div style="display: flex; align-items: center; gap: 0.5em">
-            {{ request.user || "N/A" }}
-            le {{ (request.start * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
+
+          <!-- Métadonnées HTTP -->
+          <div class="footer-section http-meta">
+            <div class="meta-icon-btn"
+                 [class.disabled]="!request.contentType"
+                 [matTooltip]="request.contentType || 'Content-Type indisponible'">
+              <mat-icon class="material-symbols-outlined">line_style</mat-icon>
+            </div>
+            <div class="meta-icon-btn"
+                 [class.disabled]="!request.outContentEncoding"
+                 [matTooltip]="request.outContentEncoding || 'Encoding indisponible'">
+              <mat-icon class="material-symbols-outlined">compress</mat-icon>
+            </div>
+            <div class="meta-icon-btn"
+                 [class.disabled]="!request.authScheme"
+                 [matTooltip]="request.authScheme || 'Auth indisponible'">
+              <mat-icon class="material-symbols-outlined">lock</mat-icon>
+            </div>
           </div>
-        </label-icon>
-        <div class="right">
-          {{ request.outDataSize }}o
-          <mat-icon style="width: 20px; height: 20px; font-size: 20px;">swap_vert</mat-icon>
-          <div>{{ request.inDataSize }}o en
-          <span [matTooltip]="((request.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss': 'fr')" style="font-weight: bold">
-            {{{start: request.start, end: request.end} | duration }}
-          </span></div>
+
+          <!-- Volume & durée -->
+          <div class="footer-section data-stats">
+            <div class="stat-item">
+              <mat-icon class="material-symbols-outlined stat-icon">arrow_downward</mat-icon>
+              <span class="stat-value">{{ request.inDataSize || 0 }}o</span>
+            </div>
+            <div class="stat-item">
+              <mat-icon class="material-symbols-outlined stat-icon">arrow_upward</mat-icon>
+              <span class="stat-value">{{ request.outDataSize || 0 }}o</span>
+            </div>
+            <div class="stat-item">
+              <mat-icon class="material-symbols-outlined stat-icon">timer</mat-icon>
+              <span class="stat-value stat-duration"
+                    [matTooltip]="((request.end * 1000) | date: 'dd/MM/yyyy HH:mm:ss.SSS')">
+                {{ { start: request.start, end: request.end } | duration }}
+              </span>
+            </div>
+          </div>
+
         </div>
-      </mat-card-footer>
-    </mat-card>
-    <app-server-card style="width: 40vw"
-                     [menu]="menuServer"
-                     [instance]="instance"></app-server-card>
+      </div>
+    </div>
+
+    <!-- ═══ CARTE SERVEUR ═══ -->
+    <app-server-card class="server-card-host" [menu]="menuServer" [instance]="instance"></app-server-card>
   </div>
+
+  <!-- Onglets -->
   <div class="tabs-container">
-    <!-- Navigation verticale des onglets -->
     <div class="vertical-tabs">
       <div *ngFor="let tab of tabs; let i = index"
            class="tab-button"
@@ -78,24 +134,17 @@
     </div>
     <div class="tab-content">
       <div *ngIf="tabs[selectedTabIndex]?.type === 'stage'" class="tab-panel">
-        <stage-table [requests]="stages">
-        </stage-table>
+        <stage-table [requests]="stages"></stage-table>
       </div>
       <div *ngIf="tabs[selectedTabIndex]?.type === 'timeline'" class="tab-panel">
-        <app-timeline [options]="options"
-                      [groups]="dataGroups"
-                      [items]="dataItems"
-                      [displayHeader]="false">
-        </app-timeline>
+        <app-timeline [options]="options" [groups]="dataGroups" [items]="dataItems" [displayHeader]="false"></app-timeline>
       </div>
     </div>
   </div>
 </div>
 
 <div *ngIf="!isLoading && !request && !instance" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">
-  <h2>
-    Aucun détail disponible ..
-  </h2>
+  <h2>Aucun détail disponible ..</h2>
 </div>
 <div *ngIf="isLoading"
      style="width: 100%; height: calc(100vh - 50px - 1em); display: flex; flex-direction: row; align-items: center; justify-content: center; font-style: italic; gap: 0.5em">
@@ -115,17 +164,24 @@
          [disabled]="sessionParent == null"
          (click)="navigate($event,'parent')">
       <div style="display: flex;">
-        <mat-progress-spinner *ngIf="parentLoading"  style="margin-right: 16px" diameter="24" mode="indeterminate"
+        <mat-progress-spinner *ngIf="parentLoading" style="margin-right: 16px" diameter="24" mode="indeterminate"
                               matTooltip="Chargement de l'appel parent">
         </mat-progress-spinner>
         <mat-icon *ngIf="!parentLoading">move_up</mat-icon>
-         Contexte de l'Appel
+        Contexte de l'Appel
       </div>
     </div>
-    <a mat-menu-item [routerLink]="['/dashboard/request', 'rest']" [queryParams]="{env: instance?.env, host: request?.host}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Request</a>
+    <a mat-menu-item [routerLink]="['/dashboard/request', 'rest']" [queryParams]="{env: instance?.env, host: request?.host}">
+      <mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Request
+    </a>
 </mat-menu>
 
 <mat-menu #menuServer="matMenu">
-  <a mat-menu-item [routerLink]="['/session', instance?.name, 'dump']" [queryParams]="{env: instance?.env, date: getDate(request?.start * 1000).toISOString()}"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
-  <a mat-menu-item [routerLink]="['/dashboard', 'server', instance?.name]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur</a>
+  <a mat-menu-item [routerLink]="['/session', instance?.name, 'dump']" [queryParams]="{env: instance?.env, date: getDate(request?.start * 1000).toISOString()}">
+    <mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse
+  </a>
+  <a mat-menu-item [routerLink]="['/dashboard', 'server', instance?.name]" [queryParams]="{env: instance?.env}">
+    <mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur
+  </a>
 </mat-menu>
+
