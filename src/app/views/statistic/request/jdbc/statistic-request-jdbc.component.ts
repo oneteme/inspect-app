@@ -1,17 +1,13 @@
 import {Component, inject, Input} from "@angular/core";
-import {ChartProvider, field} from "@oneteme/jquery-core";
 import {DatePipe, DecimalPipe} from "@angular/common";
 import {DatabaseRequestService} from "../../../../service/jquery/database-request.service";
 import {QueryParams} from "../../../../model/conf.model";
-import {formatters, getStringOrCall, groupByField, periodManagement, recreateDate} from "../../../../shared/util";
+import {formatters, periodManagement} from "../../../../shared/util";
 import {finalize, map} from "rxjs";
-import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
-import {HttpParams} from "../../server/_component/rest-tab/rest-tab.component";
-import {EnvRouter} from "../../../../service/router.service";
 import {
-  FTP_REPARTITION_PERFORMANCE_CONFIG, FTP_REPARTITION_PERFORMANCE_JQUERY_CONFIG,
+  FTP_REPARTITION_STATUS_CONFIG, REPARTITION_STATUS_JQUERY_CONFIG,
   JDBC_REPARTITION_PERFORMANCE_CONFIG, JDBC_REPARTITION_PERFORMANCE_JQUERY_CONFIG
-} from "../http/constant";
+} from "../constant";
 
 @Component({
   templateUrl: './statistic-request-jdbc.component.html',
@@ -22,13 +18,28 @@ export class StatisticRequestJdbcComponent {
   private readonly _databaseRequestService = inject(DatabaseRequestService);
   private _decimalPipe = inject(DecimalPipe);
 
+  REPARTITION_STATUS_CONFIG = FTP_REPARTITION_STATUS_CONFIG((value) => this._decimalPipe.transform(value) || '');
   REPARTITION_PERFORMANCE_CONFIG = JDBC_REPARTITION_PERFORMANCE_CONFIG((value) => this._decimalPipe.transform(value) || '');
 
+  $statusRepartition: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number, statCountUnavailableServer: number}} = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0, statCountUnavailableServer:0}};
+  $statusRepartitionSlice: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number, statCountUnavailableServer: number}} = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0, statCountUnavailableServer:0}};
   $performanceRepartition: { data: any[], loading: boolean, stats: any } = {data: [], loading: true, stats :{}};
   $performanceRepartitionSlice: { data: any[], loading: boolean, stats: any } = {data: [], loading: true, stats :{}};
 
   groupedBy: string;
   params: QueryParams;
+
+  statusRepartitionChange(event) {
+    switch(event.type) {
+      case 'slice':
+        break;
+      default:
+        if(!event.config.selectedSerie){
+          event.config.selectedSerie = "status";
+        }
+        this.getCustom(this.$statusRepartition, this.getColumns(event, REPARTITION_STATUS_JQUERY_CONFIG), event.config.selectedGroup);
+    }
+  }
 
   performanceRepartitionChange(event){
     switch(event.type) {

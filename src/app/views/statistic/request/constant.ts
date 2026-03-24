@@ -1,4 +1,4 @@
-import {RepartitionTypeCardConfig} from "../../_component/dynamic-chart/dynamic-chart.component";
+import {RepartitionTypeCardConfig} from "../_component/dynamic-chart/dynamic-chart.component";
 
 export const createRepartitionStatusConfig = (formatterFn: (value: any) => string): RepartitionTypeCardConfig => ({
     title: 'Disponibilité',
@@ -524,7 +524,8 @@ export const FTP_REPARTITION_STATUS_CONFIG = (formatterFn: (value: any) => strin
         }
     }
 });
-export const FTP_REPARTITION_STATUS_JQUERY_CONFIG = {
+
+export const REPARTITION_STATUS_JQUERY_CONFIG = {
     groupColumns: {
         date: {
             column: `start.[grouped]:date,start.year:year`,

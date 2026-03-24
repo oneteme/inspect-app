@@ -10,7 +10,7 @@ import {
     createRepartitionStatusConfig,
     createRepartitionPerformanceConfig,
     createRepartitionSizeConfig, createRepartitionLatencyConfig
-} from "./constant";
+} from "../constant";
 
 @Component({
   templateUrl: './statistic-request-http.component.html',

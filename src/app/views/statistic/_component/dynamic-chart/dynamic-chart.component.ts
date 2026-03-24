@@ -157,7 +157,7 @@ export class DynamicChartComponent implements OnInit {
   private generateDynamicSeries(data: any[]) {
     const fieldName = this.config.selectedSerie
     if(!fieldName){
-        this.chartProvider.series = [{data: {x:field(this.config.selectedGroup), y: field('count')}, name: 'default', color: this.colorPalette[0]}];// todo make this dynamic
+        this.chartProvider.series = [{data: {x:field(this.config.selectedGroup), y: field('default')}, name: 'default', color: this.colorPalette[0]}];// todo make this dynamic
         return data;
     }else {
       let serie = this.cardConfig.series.filter(s => s.value === fieldName)[0];
@@ -173,10 +173,11 @@ export class DynamicChartComponent implements OnInit {
       let dynamicSeriesMap: Map<string, any> = new Map();
       const uniqueValues = new Set<string>();
       data.forEach(item => {
-        if (item[fieldName]) {
+        if (item[fieldName] != undefined) {
           uniqueValues.add(String(item[fieldName]));
         }
       });
+
 
       dynamicSeriesMap.clear();
       let colorIndex = 0;
@@ -189,12 +190,17 @@ export class DynamicChartComponent implements OnInit {
         colorIndex++;
       });
 
+
+      console.log("Unique values for series:", uniqueValues);
+      console.log(dynamicSeriesMap)
+
       if (this.config.selectedSerie === fieldName) {
         this.chartProvider.series = Array.from(dynamicSeriesMap.values()).map(s => ({
           data: {x: field(this.config.selectedGroup), y: field(s.selector)},
           name: s.name,
           color: s.color
         }));
+        console.log(this.chartProvider.series)
        return this.processDataByValue(data, fieldName);
       }
     }
