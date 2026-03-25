@@ -525,28 +525,6 @@ export const FTP_REPARTITION_STATUS_CONFIG = (formatterFn: (value: any) => strin
     }
 });
 
-export const REPARTITION_STATUS_JQUERY_CONFIG = {
-    groupColumns: {
-        date: {
-            column: `start.[grouped]:date,start.year:year`,
-            order: 'year.asc,date.asc',
-            group: (row) => `${row['date']}_${row['year']}`,
-            properties: ['date', 'year']
-        },
-        command: {column: 'command.coalesce("<empty>"):command'},
-        server_version: {column: 'server_version.coalesce("<empty>"):server_version'},
-        client_version: {column: 'client_version.coalesce("<empty>"):client_version'},
-    },
-    seriesColumns: {
-        status: {
-            selector: 'status',
-            query: (selectedIndicator: string) => `failed:status,failed.${selectedIndicator}:count`,
-            name: 'status',
-            color: '#2f8dd0'
-        }
-    }
-};
-
 export const FTP_REPARTITION_PERFORMANCE_CONFIG = (formatterFn: (value: any) => string): RepartitionTypeCardConfig => ({
     title: 'Performance',
     indicators: [{label: 'Count', value: 'count'}, {label: 'Average', value: 'avg'}, {
@@ -643,6 +621,47 @@ export const FTP_REPARTITION_PERFORMANCE_CONFIG = (formatterFn: (value: any) => 
         }
     }
 });
+
+export const FTP_REPARTITION_STATUS_JQUERY_CONFIG = {
+    groupColumns: {
+        date: {
+            column: `start.[grouped]:date,start.year:year`,
+            order: 'year.asc,date.asc',
+            group: (row) => `${row['date']}_${row['year']}`,
+            properties: ['date', 'year']
+        },
+        command: {column: 'command.coalesce("<empty>"):command'},
+        server_version: {column: 'server_version.coalesce("<empty>"):server_version'},
+        client_version: {column: 'client_version.coalesce("<empty>"):client_version'},
+    },
+    sliceColumns: {
+        user: {
+            selector: 'user',
+            query: 'user.coalesce("<empty>").distinct:user',
+            name: 'user'
+        },
+        app_name: {
+            selector: 'instance.app_name',
+            query: 'instance.app_name.coalesce("<empty>").distinct:app_name',
+            name: 'app'
+        }
+    },
+    seriesColumns: {
+        elapsedtime: {
+            selector: 'count',
+            query: (selectedIndicator: string) => `elapsedtime.${selectedIndicator}:count`,
+            name: 'count',
+            color: '#2f8dd0'
+        },
+        performance_tranche:
+            {
+                selector: 'performance_tranche',
+                query: (selectedIndicator: string) => `performance_tranche:performance_tranche,elapsedtime.${selectedIndicator}:count`,
+                name: 'performance_tranche',
+                color: 'gray'
+            }
+    }
+};
 export const FTP_REPARTITION_PERFORMANCE_JQUERY_CONFIG = {
     groupColumns: {
         date: {
@@ -683,6 +702,131 @@ export const FTP_REPARTITION_PERFORMANCE_JQUERY_CONFIG = {
             }
     }
 };
+export const JDBC_REPARTITION_STATUS_CONFIG = (formatterFn: (value: any) => string): RepartitionTypeCardConfig => ({
+    title: 'Disponibilité',
+    indicators: [{label: 'Count', value: 'count'}],
+    groups: [
+        {label: 'Date', value: 'date', group: (row) => `${row['date']}_${row['year']}`, properties: ['date', 'year']},
+        {label: 'Commande', value: 'command', group: (row) => (row['command']), properties: ['command']},
+        {label: 'Nom de la base de données', value: 'db_name', group: (row) => (row['db_name']), properties: ['db_name']},
+        {label: 'version de la base données', value: 'db_version', group: (row) => (row['db_version']), properties: ['db_version']},
+        {label: 'Version du driver', value: 'driver', group: (row) => (row['driver']), properties: ['driver']}
+    ],
+    slices: [
+        {label: 'User', value: 'user'},
+        {label: 'Schéma', value: 'schema'},
+        {label: 'App Name', value: 'app_name'}
+    ],
+    series: [
+        {label: 'Status', value: 'status'}
+    ],
+    chartProvider: {
+        height: 300,
+        stacked: true,
+        series: [],
+        options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
+            tooltip: {
+                shared: true,
+                intersect: false,
+                followCursor: true,
+            },
+            xaxis: {
+                labels: {
+                    rotateAlways: true
+                }
+            },
+            yaxis: {
+                labels: {
+                    formatter: (value) => {
+                        return formatterFn(value);
+                    }
+                }
+            },
+            legend: {
+                position: 'bottom'
+            },
+            plotOptions: {
+                bar: {
+                    dataLabels: {
+                        total: {
+                            enabled: true,
+                            style: {
+                                fontSize: '10px'
+                            }
+                        }
+                    }
+                }
+            },
+            dataLabels: {
+                enabled: false,
+                formatter: (value) => {
+                    return formatterFn(value);
+                },
+                textAnchor: 'start',
+                style: {
+                    fontSize: '10px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontWeight: 'bold',
+                    colors: undefined
+                },
+                background: {
+                    enabled: true,
+                    foreColor: '#fff',
+                    padding: 4,
+                    borderRadius: 2,
+                    borderWidth: 1,
+                    borderColor: '#fff',
+                    opacity: 0.9
+                }
+            }
+        }
+    }
+});
+
+export const JDBC_REPARTITION_STATUS_JQUERY_CONFIG = {
+    groupColumns: {
+        date: {
+            column: `start.[grouped]:date,start.year:year`,
+            order: 'year.asc,date.asc',
+            group: (row) => `${row['date']}_${row['year']}`,
+            properties: ['date', 'year']
+        },
+        command: {column: 'command.coalesce("<empty>"):command'},
+        driver: { column: 'driver.coalesce("<no_auth>"):driver' },
+        db_name: { column: 'db_name.coalesce("<empty>"):db_name' },
+        db_version: { column: 'db_version.coalesce("<empty>"):db_version' },
+    },
+    sliceColumns: {
+        user: {
+            selector: 'user',
+            query: 'user.coalesce("<empty>").distinct:user',
+            name: 'user'
+        },
+        schema: {
+            selector: 'schema',
+            query: 'schema.coalesce("<empty>").distinct:schema',
+            name: 'schema'
+        },
+        app_name: {
+            selector: 'instance.app_name',
+            query: 'instance.app_name.coalesce("<empty>").distinct:app_name',
+            name: 'app'
+        }
+    },
+    seriesColumns: {
+        status: {
+            selector: 'status',
+            query: (selectedIndicator: string) => `failed:status,failed.${selectedIndicator}:count`,
+            name: 'status',
+            color: '#2f8dd0'
+        }
+    }
+}
 
 export const JDBC_REPARTITION_PERFORMANCE_CONFIG = (formatterFn: (value: any) => string): RepartitionTypeCardConfig => ({
     title: 'Performance',
@@ -695,12 +839,9 @@ export const JDBC_REPARTITION_PERFORMANCE_CONFIG = (formatterFn: (value: any) =>
     groups: [
         {label: 'Date', value: 'date', group: (row) => `${row['date']}_${row['year']}`, properties: ['date', 'year']},
         {label: 'Commande', value: 'command', group: (row) => (row['command']), properties: ['command']},
-        {
-            label: 'Nom de la base de données',
-            value: 'db_name',
-            group: (row) => (row['db_name']),
-            properties: ['db_name']
-        }
+        {label: 'Nom de la base de données', value: 'db_name', group: (row) => (row['db_name']), properties: ['db_name']},
+        {label: 'version de la base données', value: 'db_version', group: (row) => (row['db_version']), properties: ['db_version']},
+        {label: 'Version du driver', value: 'driver', group: (row) => (row['driver']), properties: ['driver']}
     ],
     slices: [
         {label: 'User', value: 'user'},
@@ -786,7 +927,9 @@ export const JDBC_REPARTITION_PERFORMANCE_JQUERY_CONFIG = {
             properties: ['date', 'year']
         },
         command: {column: 'command.coalesce("<empty>"):command'},
-        db_name: {column: 'db_name.coalesce("<empty>"):db_name'},
+        driver: { column: 'driver.coalesce("<no_auth>"):driver' },
+        db_name: { column: 'db_name.coalesce("<empty>"):db_name' },
+        db_version: { column: 'db_version.coalesce("<empty>"):db_version' },
     },
     sliceColumns: {
         user: {
@@ -816,6 +959,125 @@ export const JDBC_REPARTITION_PERFORMANCE_JQUERY_CONFIG = {
     }
 };
 
+export const LDAP_REPARTITION_STATUS_CONFIG = (formatterFn: (value: any) => string): RepartitionTypeCardConfig => ({
+    title: 'Disponibilité',
+    indicators: [{label: 'Count', value: 'count'}],
+    groups: [
+        {label: 'Date', value: 'date', group: (row) => `${row['date']}_${row['year']}`, properties: ['date', 'year']},
+        {label: 'Commande', value: 'command', group: (row) => (row['command']), properties: ['command']},
+    ],
+    slices: [
+        {label: 'User', value: 'user'},
+        {label: 'App Name', value: 'app_name'}
+    ],
+    series: [
+        {label: 'Status', value: 'status'}
+    ],
+    chartProvider: {
+        height: 300,
+        stacked: true,
+        series: [],
+        options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
+            tooltip: {
+                shared: true,
+                intersect: false,
+                followCursor: true,
+            },
+            xaxis: {
+                labels: {
+                    rotateAlways: true
+                }
+            },
+            yaxis: {
+                labels: {
+                    formatter: (value) => {
+                        return formatterFn(value);
+                    }
+                }
+            },
+            legend: {
+                position: 'bottom'
+            },
+            plotOptions: {
+                bar: {
+                    dataLabels: {
+                        total: {
+                            enabled: true,
+                            style: {
+                                fontSize: '10px'
+                            }
+                        }
+                    }
+                }
+            },
+            dataLabels: {
+                enabled: false,
+                formatter: (value) => {
+                    return formatterFn(value);
+                },
+                textAnchor: 'start',
+                style: {
+                    fontSize: '10px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontWeight: 'bold',
+                    colors: undefined
+                },
+                background: {
+                    enabled: true,
+                    foreColor: '#fff',
+                    padding: 4,
+                    borderRadius: 2,
+                    borderWidth: 1,
+                    borderColor: '#fff',
+                    opacity: 0.9
+                }
+            }
+        }
+    }
+});
+
+export const LDAP_REPARTITION_STATUS_JQUERY_CONFIG = {
+    groupColumns: {
+        date: {
+            column: `start.[grouped]:date,start.year:year`,
+            order: 'year.asc,date.asc',
+            group: (row) => `${row['date']}_${row['year']}`,
+            properties: ['date', 'year']
+        },
+        command: {column: 'command.coalesce("<empty>"):command'},
+    },
+    sliceColumns: {
+        user: {
+            selector: 'user',
+            query: 'user.coalesce("<empty>").distinct:user',
+            name: 'user'
+        },
+        schema: {
+            selector: 'schema',
+            query: 'schema.coalesce("<empty>").distinct:schema',
+            name: 'schema'
+        },
+        app_name: {
+            selector: 'instance.app_name',
+            query: 'instance.app_name.coalesce("<empty>").distinct:app_name',
+            name: 'app'
+        }
+    },
+    seriesColumns: {
+        status: {
+            selector: 'status',
+            query: (selectedIndicator: string) => `failed:status,failed.${selectedIndicator}:count`,
+            name: 'status',
+            color: '#2f8dd0'
+        }
+    }
+}
+
 export const LDAP_REPARTITION_PERFORMANCE_CONFIG = (formatterFn: (value: any) => string): RepartitionTypeCardConfig => ({
     title: 'Performance',
     indicators: [
@@ -826,7 +1088,7 @@ export const LDAP_REPARTITION_PERFORMANCE_CONFIG = (formatterFn: (value: any) =>
     ],
     groups: [
         {label: 'Date', value: 'date', group: (row) => `${row['date']}_${row['year']}`, properties: ['date', 'year']},
-        {label: 'Commande', value: 'command', group: (row) => (row['command']), properties: ['command']}
+        {label: 'Commande', value: 'command', group: (row) => (row['command']), properties: ['command']},
     ],
     slices: [
         {label: 'User', value: 'user'},
@@ -910,7 +1172,7 @@ export const LDAP_REPARTITION_PERFORMANCE_JQUERY_CONFIG = {
             group: (row) => `${row['date']}_${row['year']}`,
             properties: ['date', 'year']
         },
-        command: {column: 'command.coalesce("<empty>"):command'}
+        command: {column: 'command.coalesce("<empty>"):command'},
     },
     sliceColumns: {
         user: {
@@ -934,6 +1196,125 @@ export const LDAP_REPARTITION_PERFORMANCE_JQUERY_CONFIG = {
             }
     }
 };
+
+export const SMTP_REPARTITION_STATUS_CONFIG = (formatterFn: (value: any) => string): RepartitionTypeCardConfig => ({
+    title: 'Disponibilité',
+    indicators: [{label: 'Count', value: 'count'}],
+    groups: [
+        {label: 'Date', value: 'date', group: (row) => `${row['date']}_${row['year']}`, properties: ['date', 'year']},
+        {label: 'Commande', value: 'command', group: (row) => (row['command']), properties: ['command']},
+    ],
+    slices: [
+        {label: 'User', value: 'user'},
+        {label: 'App Name', value: 'app_name'}
+    ],
+    series: [
+        {label: 'Status', value: 'status'}
+    ],
+    chartProvider: {
+        height: 300,
+        stacked: true,
+        series: [],
+        options: {
+            chart: {
+                toolbar: {
+                    show: false
+                }
+            },
+            tooltip: {
+                shared: true,
+                intersect: false,
+                followCursor: true,
+            },
+            xaxis: {
+                labels: {
+                    rotateAlways: true
+                }
+            },
+            yaxis: {
+                labels: {
+                    formatter: (value) => {
+                        return formatterFn(value);
+                    }
+                }
+            },
+            legend: {
+                position: 'bottom'
+            },
+            plotOptions: {
+                bar: {
+                    dataLabels: {
+                        total: {
+                            enabled: true,
+                            style: {
+                                fontSize: '10px'
+                            }
+                        }
+                    }
+                }
+            },
+            dataLabels: {
+                enabled: false,
+                formatter: (value) => {
+                    return formatterFn(value);
+                },
+                textAnchor: 'start',
+                style: {
+                    fontSize: '10px',
+                    fontFamily: 'Helvetica, Arial, sans-serif',
+                    fontWeight: 'bold',
+                    colors: undefined
+                },
+                background: {
+                    enabled: true,
+                    foreColor: '#fff',
+                    padding: 4,
+                    borderRadius: 2,
+                    borderWidth: 1,
+                    borderColor: '#fff',
+                    opacity: 0.9
+                }
+            }
+        }
+    }
+});
+
+export const SMTP_REPARTITION_STATUS_JQUERY_CONFIG = {
+    groupColumns: {
+        date: {
+            column: `start.[grouped]:date,start.year:year`,
+            order: 'year.asc,date.asc',
+            group: (row) => `${row['date']}_${row['year']}`,
+            properties: ['date', 'year']
+        },
+        command: {column: 'command.coalesce("<empty>"):command'},
+    },
+    sliceColumns: {
+        user: {
+            selector: 'user',
+            query: 'user.coalesce("<empty>").distinct:user',
+            name: 'user'
+        },
+        schema: {
+            selector: 'schema',
+            query: 'schema.coalesce("<empty>").distinct:schema',
+            name: 'schema'
+        },
+        app_name: {
+            selector: 'instance.app_name',
+            query: 'instance.app_name.coalesce("<empty>").distinct:app_name',
+            name: 'app'
+        }
+    },
+    seriesColumns: {
+        status: {
+            selector: 'status',
+            query: (selectedIndicator: string) => `failed:status,failed.${selectedIndicator}:count`,
+            name: 'status',
+            color: '#2f8dd0'
+        }
+    }
+}
 
 export const SMTP_REPARTITION_PERFORMANCE_CONFIG = (formatterFn: (value: any) => string): RepartitionTypeCardConfig => ({
     title: 'Performance',

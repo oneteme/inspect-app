@@ -10,8 +10,7 @@ import {ActivatedRoute} from "@angular/router";
 import {EnvRouter} from "../../../../service/router.service";
 import {
   FTP_REPARTITION_PERFORMANCE_CONFIG, FTP_REPARTITION_PERFORMANCE_JQUERY_CONFIG,
-  FTP_REPARTITION_STATUS_CONFIG,
-  REPARTITION_STATUS_JQUERY_CONFIG,
+  FTP_REPARTITION_STATUS_CONFIG, FTP_REPARTITION_STATUS_JQUERY_CONFIG,
   REST_REPARTITION_STATUS
 } from "../constant";
 
@@ -38,12 +37,13 @@ export class StatisticRequestFtpComponent {
   statusRepartitionChange(event) {
     switch(event.type) {
       case 'slice':
+        this.getCustom(this.$performanceRepartitionSlice, this.getSliceColumns(event, FTP_REPARTITION_STATUS_JQUERY_CONFIG), null);
         break;
       default:
         if(!event.config.selectedSerie){
           event.config.selectedSerie = "status";
         }
-        this.getCustom(this.$statusRepartition, this.getColumns(event, REPARTITION_STATUS_JQUERY_CONFIG), event.config.selectedGroup);
+        this.getCustom(this.$statusRepartition, this.getColumns(event, FTP_REPARTITION_STATUS_JQUERY_CONFIG), event.config.selectedGroup);
     }
   }
 

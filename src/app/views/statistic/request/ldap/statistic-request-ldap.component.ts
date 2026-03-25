@@ -11,8 +11,13 @@ import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 import {EnvRouter} from "../../../../service/router.service";
 import {
   FTP_REPARTITION_STATUS_CONFIG,
-  JDBC_REPARTITION_PERFORMANCE_CONFIG, JDBC_REPARTITION_PERFORMANCE_JQUERY_CONFIG,
-  LDAP_REPARTITION_PERFORMANCE_CONFIG, LDAP_REPARTITION_PERFORMANCE_JQUERY_CONFIG, REPARTITION_STATUS_JQUERY_CONFIG
+  FTP_REPARTITION_STATUS_JQUERY_CONFIG,
+  JDBC_REPARTITION_PERFORMANCE_CONFIG,
+  JDBC_REPARTITION_PERFORMANCE_JQUERY_CONFIG,
+  LDAP_REPARTITION_PERFORMANCE_CONFIG,
+  LDAP_REPARTITION_PERFORMANCE_JQUERY_CONFIG,
+  LDAP_REPARTITION_STATUS_CONFIG,
+  LDAP_REPARTITION_STATUS_JQUERY_CONFIG,
 } from "../constant";
 
 @Component({
@@ -24,7 +29,7 @@ export class StatisticRequestLdapComponent {
   private readonly _ldapRequestService = inject(LdapRequestService);
   private _decimalPipe = inject(DecimalPipe);
 
-  REPARTITION_STATUS_CONFIG = FTP_REPARTITION_STATUS_CONFIG((value) => this._decimalPipe.transform(value) || '');
+  REPARTITION_STATUS_CONFIG = LDAP_REPARTITION_STATUS_CONFIG((value) => this._decimalPipe.transform(value) || '');
   REPARTITION_PERFORMANCE_CONFIG = LDAP_REPARTITION_PERFORMANCE_CONFIG((value) => this._decimalPipe.transform(value) || '');
 
   $statusRepartition: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number, statCountUnavailableServer: number}} = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0, statCountUnavailableServer:0}};
@@ -38,12 +43,13 @@ export class StatisticRequestLdapComponent {
   statusRepartitionChange(event) {
     switch(event.type) {
       case 'slice':
+        this.getCustom(this.$performanceRepartitionSlice, this.getSliceColumns(event, LDAP_REPARTITION_STATUS_JQUERY_CONFIG), null);
         break;
       default:
         if(!event.config.selectedSerie){
           event.config.selectedSerie = "status";
         }
-        this.getCustom(this.$statusRepartition, this.getColumns(event, REPARTITION_STATUS_JQUERY_CONFIG), event.config.selectedGroup);
+        this.getCustom(this.$statusRepartition, this.getColumns(event, LDAP_REPARTITION_STATUS_JQUERY_CONFIG), event.config.selectedGroup);
     }
   }
 

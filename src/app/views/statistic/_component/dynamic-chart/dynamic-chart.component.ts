@@ -47,24 +47,25 @@ export class DynamicChartComponent implements OnInit {
 
   @Output() chartEmitter: EventEmitter<any> = new EventEmitter<any>();
   @Input() set menuConfig(configuration: RepartitionTypeCardConfig) {
+    console.log(configuration)
     this.cardConfig = configuration;
   }
   @Input() set data(objects: any[]) {
-    this._data = [];
     if (objects?.length > 0 ) {
-      this._data = this.generateDynamicSeries(objects);
+      this._data =  this.generateDynamicSeries(objects)
+      console.log(this._data, this.chartProvider.series)
+    } else {
+      this._data = [];
     }
   }
   @Input() sliceData: any[] = [];
   @Input() isLoading: boolean;
-
 
   ngOnInit(): void {
     setTimeout(() => this.triggerInitialChartLoad(), 0);
   }
 
   private triggerInitialChartLoad(): void {
-    // Set default values from configuration
     if (this.cardConfig?.indicators?.length > 0) {
       this.config.selectedIndicator = this.cardConfig.indicators[0].value;
     }
@@ -149,9 +150,8 @@ export class DynamicChartComponent implements OnInit {
   //------------------------------------
   // Color palette for dynamic series
   private readonly colorPalette: string[] = [
-    '#2f8dd0', '#f7941d', '#33cc33', '#ff0000', '#9c27b0',
-    '#00bcd4', '#e91e63', '#ffeb3b', '#795548', '#607d8b',
-    '#4caf50', '#ff5722', '#673ab7', '#3f51b5', '#009688'
+    '#ffbe0b', '#fb5607', '#ff006e', '#8338ec', '#3a86ff', '#607d8b',
+    '#4caf50', '#3f51b5', '#009688'
   ];
 
   private generateDynamicSeries(data: any[]) {
@@ -190,20 +190,16 @@ export class DynamicChartComponent implements OnInit {
         colorIndex++;
       });
 
-
-      console.log("Unique values for series:", uniqueValues);
-      console.log(dynamicSeriesMap)
-
       if (this.config.selectedSerie === fieldName) {
-        this.chartProvider.series = Array.from(dynamicSeriesMap.values()).map(s => ({
+        this.chartProvider.series =  Array.from(dynamicSeriesMap.values()).map(s => ({
           data: {x: field(this.config.selectedGroup), y: field(s.selector)},
           name: s.name,
           color: s.color
         }));
-        console.log(this.chartProvider.series)
-       return this.processDataByValue(data, fieldName);
+
+        return this.processDataByValue(data, fieldName);
       }
-      console.log(data, this.chartProvider.series)
+
     }
   }
 
