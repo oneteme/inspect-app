@@ -115,9 +115,9 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
     }],
   defaultSort: { active: 'start', direction: 'desc' },
   rowClass: (row: MainSessionDto) => {
-    if(!row.end) return 'row-in-progress';
     if (row.end && !row.exception) return 'row-ok';
     if (row.end && row.exception) return 'row-ko';
+    return '';
   }
 }
 

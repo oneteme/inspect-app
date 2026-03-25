@@ -12,7 +12,7 @@ export class DurationPipe implements PipeTransform {
 
         let time = typeof value == "object" ? value.end - value.start : value;
         if(!time && time !=0){
-            return "?";
+            return "En cours";
         }
         // console.log("duration pipe", typeof value == "object" ? new Date(value.end) : '', typeof value == "object" ? new Date(value.start): '');
         const remainingSeconds = this._decimalPipe.transform(Math.round((time % 60) * 1000) / 1000);
