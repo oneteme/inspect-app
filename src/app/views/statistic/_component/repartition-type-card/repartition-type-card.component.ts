@@ -1,326 +1,96 @@
-import {Component, EventEmitter, inject, Input, Output, OnInit} from "@angular/core";
+import {Component, inject, Input} from "@angular/core";
+import {DecimalPipe} from "@angular/common";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
-
-export interface RepartitionTypeCardConfig {
-  title: string;
-  indicators: { label: string, value: string }[];
-  groups: { label: string, value: string }[];
-  slices: { label: string, value: string }[];
-  series: { label: string, value: string }[];
-  groupColumns: {
-    [key: string]: { column: string, order?: string, group: (row: any) => string, properties: string[] }
-  };
-  sliceColumns: {
-    [key: string]: { selector: string, query: string, name: string }
-  };
-  seriesColumns: {
-    [key: string]: Array<{
-      selector: string,
-      query: (selectedIndicateur:string) => string,
-      name: string,
-      color: string
-    }>
-  };
-  chartProvider?: ChartProvider<string, number>;
-}
 
 @Component({
   selector: 'repartition-type-card',
   templateUrl: './repartition-type-card.component.html',
   styleUrls: ['./repartition-type-card.component.scss']
 })
-export class RepartitionTypeCardComponent implements OnInit {
+export class RepartitionTypeCardComponent {
+  private readonly _decimalPipe: DecimalPipe = inject(DecimalPipe);
 
-  private readonly dynamicSeriesMap: Map<string, any> = new Map();
-  config = {
-    selectedIndicator: '',
-    selectedGroup: '',
-    selectedSlice: '',
-    selectedSerie: ''
-  };
-  cardConfig: RepartitionTypeCardConfig = {
-    title:"",
-    indicators: [],
-    groups: [],
-    slices: [],
-    series: [],
-    groupColumns: {},
-    sliceColumns: {},
-    seriesColumns: {}
+  REPARTITION_TYPE_RESPONSE_BAR: ChartProvider<string, number> = {
+    height: 200,
+    stacked: true,
+    series: [
+      {data: {x: field('date'), y: field('countSuccess')}, name: '2xx', color: '#33cc33'},
+      {data: {x: field('date'), y: field('countErrorClient')}, name: '4xx', color: '#ffa31a'},
+      {data: {x: field('date'), y: field('countErrorServer')}, name: '5xx', color: '#ff0000'}
+    ],
+    options: {
+      chart: {
+        toolbar: {
+          show: false
+        }
+      },
+      tooltip: {
+        shared: true,
+        intersect: false,
+        followCursor: true,
+      },
+      xaxis: {
+        labels: {
+          rotateAlways: true
+        }
+      },
+      yaxis: {
+        labels: {
+          formatter: (value) => {
+            return this._decimalPipe.transform(value);
+          }
+        }
+      },
+      legend: {
+        position: 'bottom'
+      },
+      plotOptions: {
+        bar: {
+          dataLabels: {
+            total: {
+              enabled: true,
+              style: {
+                fontSize: '10px'
+              }
+            }
+          }
+        }
+      },
+      dataLabels: {
+        enabled: true,
+        formatter: (value) => {
+          return this._decimalPipe.transform(value);
+        },
+        textAnchor: 'start',
+        style: {
+          fontSize: '10px',
+          fontFamily: 'Helvetica, Arial, sans-serif',
+          fontWeight: 'bold',
+          colors: undefined
+        },
+        background: {
+          enabled: true,
+          foreColor: '#fff',
+          padding: 4,
+          borderRadius: 2,
+          borderWidth: 1,
+          borderColor: '#fff',
+          opacity: 0.9
+        }
+      }
+    }
   };
 
   _data: any[] = [];
-  sliceFilter: any = {};
 
-  @Output() chartEmitter: EventEmitter<any> = new EventEmitter<any>();
   @Input() set seriesProvider(objects: SerieProvider<string, number>[]) {
-    //   this.REPARTITION_TYPE_RESPONSE_BAR.series = objects;
+    this.REPARTITION_TYPE_RESPONSE_BAR.series = objects;
   }
-  @Input() set cardConfiguration(configuration: RepartitionTypeCardConfig) {
-    if (configuration) {
-      this.cardConfig = configuration;
-    }
-  }
-  @Input() set menuConfig(configuration: RepartitionTypeCardConfig) {
-    this.cardConfig = configuration;
-  }
+
   @Input() set data(objects: any[]) {
-    if (objects?.length > 0) {
-      this.generateDynamicSeries(objects, this.config.selectedSerie);
-      this._data = objects;
-    }
+    this._data = objects;
   }
-  @Input() sliceData: any[] = [];
+
   @Input() isLoading: boolean;
-  @Input() set group(value: string) {
-    this.REPARTITION_TYPE_RESPONSE_BAR.series?.forEach((s) => s.data.x = field(value));
-  }
-
-  ngOnInit(): void {
-    setTimeout(() => this.triggerInitialChartLoad(), 0);
-  }
-
-
-
-  private triggerInitialChartLoad(): void {
-    // Set default values from configuration
-    if (this.cardConfig?.indicators?.length > 0) {
-      this.config.selectedIndicator = this.cardConfig.indicators[0].value;
-    }
-    if (this.cardConfig?.groups?.length > 0) {
-      this.config.selectedGroup = this.cardConfig.groups[0].value;
-    }
-    if (this.cardConfig?.series?.length > 0) {
-      this.config.selectedSerie = this.cardConfig.series[0].value;
-    }
-
-    this.chartEmitter.emit({
-      type: 'group',
-      config: this.config,
-      columns: {
-        ...this.groupColumns[this.config.selectedGroup],
-        agregate: this.config.selectedIndicator,
-        base: this.seriesColumns[this.config.selectedSerie].map(c => c.query(this.config.selectedIndicator)).join(','),
-        ...this.sliceFilter
-      }
-    });
-  }
-
-  //limit group element to 50
-  onSelectGroup(group: { label:string, value:string }): void {
-    this.config.selectedGroup = group.value;
-    this.updateSeries();
-    this.chartEmitter.emit({
-      type: 'group',
-      config: this.config,
-      columns: {
-        ...this.groupColumns[this.config.selectedGroup],
-        agregate: this.config.selectedIndicator,
-        base: this.seriesColumns[this.config.selectedSerie].map(c => c.query(this.config.selectedIndicator)).join(','),
-        ...this.sliceFilter
-      }
-    });
-  }
-
-  onSelectIndicator(indicator: { label:string, value:string }): void {
-    this.config.selectedIndicator = indicator.value;
-    this.updateSeries();
-    this.chartEmitter.emit({
-      type: 'indicator',
-      config: this.config,
-      columns: {
-        ...this.groupColumns[this.config.selectedGroup],
-        agregate: this.config.selectedIndicator,
-        base: this.seriesColumns[this.config.selectedSerie].map(c => c.query(this.config.selectedIndicator)).join(','),
-        ...this.sliceFilter
-      }
-    });
-  }
-
-
-  onSelectSlice(slice: { label:string, value:string }): void {
-    if (this.config.selectedSlice === slice.value) {
-      this.config.selectedSlice = '';
-    } else {
-      this.config.selectedSlice = slice.value;
-    }
-
-    if (this.config.selectedSlice) {
-      this.chartEmitter.emit({
-        type:"slice",
-        config: this.config,
-        columns: {
-          base: this.sliceColumns[this.config.selectedSlice].query,
-        }
-      });
-    }else {
-      this.sliceRowClick(null);
-    }
-  }
-
-  onSelectSeries(serie: { label:string, value:string }): void {
-    this.config.selectedSerie = serie.value;
-    this.updateSeries();
-    this.chartEmitter.emit({
-      type: 'series',
-      config: this.config,
-      columns: {
-        ...this.groupColumns[this.config.selectedGroup],
-        agregate: this.config.selectedIndicator,
-        base: this.seriesColumns[this.config.selectedSerie].map(c => c.query(this.config.selectedIndicator)).join(','),
-        ...this.sliceFilter
-      }
-    });
-  }
-
-  updateSeries(): void {
-    this.REPARTITION_TYPE_RESPONSE_BAR.series = this.seriesColumns[this.config.selectedSerie].map(c => ({
-      data: {x: field(this.config.selectedGroup), y: field(c.selector)},
-      name: c.name || c.selector,
-      color: c.color
-    }));
-  }
-
-  sliceRowClick(event: any){
-    if (event) {
-      this.sliceFilter = event;
-    } else {
-      this.sliceFilter = {};
-    }
-    this.chartEmitter.emit({
-      config: this.config,
-      columns: {
-        ...this.groupColumns[this.config.selectedGroup],
-        agregate: this.config.selectedIndicator,
-        base: this.seriesColumns[this.config.selectedSerie].map(c => c.query(this.config.selectedIndicator)).join(','),
-        sliceFilter: Object.keys(this.sliceFilter).length > 0
-          ? {[this.sliceColumns[this.config.selectedSlice].selector] : this.sliceFilter[this.config.selectedSlice]}
-          : null
-      }
-    });
-  }
-
-
-
-   //------------------------------------
-  // Color palette for dynamic series
-  private readonly colorPalette: string[] = [
-    '#2f8dd0', '#f7941d', '#33cc33', '#ff0000', '#9c27b0',
-    '#00bcd4', '#e91e63', '#ffeb3b', '#795548', '#607d8b',
-    '#4caf50', '#ff5722', '#673ab7', '#3f51b5', '#009688'
-  ];
-
-  private generateDynamicSeries(data: any[], fieldName: string): void {
-    // Extract unique values from the field
-    const uniqueValues = new Set<string>();
-    data.forEach(item => {
-      if (item[fieldName]) {
-        uniqueValues.add(String(item[fieldName]));
-      }
-    });
-
-    this.dynamicSeriesMap.clear();
-
-    let colorIndex = 0;
-    Array.from(uniqueValues).sort((a, b) => a.localeCompare(b)).forEach(value => {
-      this.dynamicSeriesMap.set(value, {
-        selector: value,
-        name: value,
-        color: this.colorPalette[colorIndex % this.colorPalette.length]
-      });
-      colorIndex++;
-    });
-
-
-    if (this.config.selectedSerie === fieldName) {
-      this.REPARTITION_TYPE_RESPONSE_BAR.series = Array.from(this.dynamicSeriesMap.values()).map(s => ({
-        data: {x: field(this.config.selectedGroup), y: field(s.selector)},
-        name: s.name,
-        color: s.color
-      }));
-      this.processDataByValue(data, fieldName);
-    }
-  }
-
-
-  private processDataByValue(data: any[], fieldName: string): void {
-    // First pass: collect all unique status codes
-    const allStatusCodes = new Set<string>();
-    data.forEach(item => {
-      const statusCode = String(item[fieldName]);
-      allStatusCodes.add(statusCode);
-    });
-
-    // Group data by group key and consolidate status codes and counts
-    const groupedData: Map<string, any> = new Map();
-    const selectedGroupConfig = this.groupColumns[this.config.selectedGroup];
-    const groupKeyProperties = this.groupColumns[this.config.selectedGroup].properties
-
-    data.forEach(item => {
-      const groupKey = selectedGroupConfig.group(item);
-      const statusCode = String(item[fieldName]);
-      const countValue = item['count'];
-
-      if (!groupedData.has(groupKey)) {
-        // Initialize the group with selected group properties and all status codes set to 0
-        const newGroup: any = {};
-
-        // Add properties based on selected group
-        groupKeyProperties.forEach(prop => {
-          newGroup[prop] = item[prop];
-        });
-
-        // Initialize all status codes with 0
-        allStatusCodes.forEach(code => {
-          newGroup[code] = 0;
-        });
-
-        groupedData.set(groupKey, newGroup);
-      }
-
-      // Add the status code and its count to the group
-      const groupObj = groupedData.get(groupKey)!;
-      groupObj[statusCode] = countValue;
-    });
-
-    // Replace the original data array with consolidated groups
-    data.length = 0;
-    groupedData.forEach(groupObj => {
-      data.push(groupObj);
-    });
-  }
-
-
-  get REPARTITION_TYPE_RESPONSE_BAR(): ChartProvider<string, number> {
-    return this.cardConfig.chartProvider || { height: 300, stacked: true, series: [], options: {} };
-  }
-
-  set REPARTITION_TYPE_RESPONSE_BAR(value: ChartProvider<string, number>) {
-    if (this.cardConfig) {
-      this.cardConfig.chartProvider = value;
-    }
-  }
-
-  get configList() {
-    return {
-      indicators: this.cardConfig.indicators,
-      groups: this.cardConfig.groups,
-      slices: this.cardConfig.slices,
-      series: this.cardConfig.series
-    };
-  }
-
-  get groupColumns() {
-    return this.cardConfig.groupColumns;
-  }
-
-  get sliceColumns() {
-    return this.cardConfig.sliceColumns;
-  }
-
-  get seriesColumns() {
-    return this.cardConfig.seriesColumns;
-  }
 }
-
