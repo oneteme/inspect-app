@@ -47,13 +47,11 @@ export class DynamicChartComponent implements OnInit {
 
   @Output() chartEmitter: EventEmitter<any> = new EventEmitter<any>();
   @Input() set menuConfig(configuration: RepartitionTypeCardConfig) {
-    console.log(configuration)
     this.cardConfig = configuration;
   }
   @Input() set data(objects: any[]) {
     if (objects?.length > 0 ) {
       this._data =  this.generateDynamicSeries(objects)
-      console.log(this._data, this.chartProvider.series)
     } else {
       this._data = [];
     }
