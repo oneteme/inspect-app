@@ -9,6 +9,7 @@ import {EnvRouter} from "../../../../service/router.service";
 import {RequestType, RestSessionView} from "../../../../model/request.model";
 import {HttpSessionStage, InstanceEnvironment} from "../../../../model/trace.model";
 import {MatDialog} from "@angular/material/dialog";
+import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
 
 @Component({
     templateUrl: './detail-session-rest.view.html',
@@ -20,6 +21,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     private readonly _location: Location = inject(Location);
     private readonly $destroy = new Subject<void>();
     protected readonly _router: EnvRouter = inject(EnvRouter);
+    private readonly _dialog = inject(MatDialog);
 
     session: RestSessionView;
     stages: HttpSessionStage[];
@@ -90,8 +92,16 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
         this.$destroy.complete();
     }
 
-    navigateOnStatusIndicator(event: MouseEvent) {
-      var date = new Date(this.session.start * 1000);
-      this._router.navigateOnClick(event, ['/supervision', this.instance.type.toLowerCase(), this.instance.id], { queryParams: {start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString(), env: this.instance?.env} });
+    onClickPulse() {
+      this._dialog.open(PulseDialogComponent, {
+        width: '1000px',
+        height: '65vh',
+        data: {
+          instance: this.instance.id,
+          instanceStart: new Date(this.instance.instant * 1000),
+          start: new Date(this.session.start * 1000 - 1800000),
+          end: new Date(this.session.end * 1000 + 1800000)
+        }
+      });
     }
 }

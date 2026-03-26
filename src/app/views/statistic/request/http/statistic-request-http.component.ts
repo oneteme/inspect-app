@@ -1,15 +1,16 @@
 import {Component, inject, Input} from "@angular/core";
 import {DatePipe, DecimalPipe} from "@angular/common";
-import {DatabaseRequestService} from "../../../../service/jquery/database-request.service";
-import {SmtpRequestService} from "../../../../service/jquery/smtp-request.service";
-import {ChartProvider, field} from "@oneteme/jquery-core";
 import {QueryParams} from "../../../../model/conf.model";
-import {formatters, groupByField, periodManagement, recreateDate} from "../../../../shared/util";
+import {formatters, periodManagement} from "../../../../shared/util";
 import {finalize, map} from "rxjs";
 import {RestRequestService} from "../../../../service/jquery/rest-request.service";
-import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
-import {HttpParams} from "../../server/_component/rest-tab/rest-tab.component";
+
 import {EnvRouter} from "../../../../service/router.service";
+import {
+    createRepartitionStatusConfig,
+    createRepartitionPerformanceConfig,
+    createRepartitionSizeConfig, createRepartitionLatencyConfig
+} from "../constant";
 
 @Component({
   templateUrl: './statistic-request-http.component.html',
@@ -18,151 +19,192 @@ import {EnvRouter} from "../../../../service/router.service";
 export class StatisticRequestHttpComponent {
   private readonly _datePipe = inject(DatePipe);
   private readonly _httpRequestService = inject(RestRequestService);
+  private _decimalPipe = inject(DecimalPipe);
   private _router: EnvRouter = inject(EnvRouter);
-  errorStatus = {
-    "ServerError": "5xx",
-    "ClientError": "4xx",
-  }
-  seriesProvider: SerieProvider<string, number>[] = [
-    {data: {x: field('date'), y: field('countSuccess')}, name: '2xx', color: '#33cc33'},
-    {data: {x: field('date'), y: field('countErrorClient')}, name: '4xx', color: '#ffa31a'},
-    {data: {x: field('date'), y: field('countErrorServer')}, name: '5xx', color: '#ff0000'},
-    {data: {x: field('date'), y: field('countServerUnavailableRows')}, name: '0', color: 'gray'}
-  ];
 
-  groupedBy: string;
+  REPARTITION_STATUS = createRepartitionStatusConfig((value) => this._decimalPipe.transform(value) || '');
+  PERFORMANCE_REPARTITION = createRepartitionPerformanceConfig((value) => this._decimalPipe.transform(value) || '');
+  SIZE_REPARTITION = createRepartitionSizeConfig((value) => this._decimalPipe.transform(value) || '');
+  LATENCY_REPARTITION = createRepartitionLatencyConfig((value) => this._decimalPipe.transform(value) || '');
+
+  groupedBy: string = ''
   params: QueryParams;
-  $timeAndTypeResponse: { data: any[], loading: boolean, stats: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number, statCountUnavailableServer: number} } = { data: [], loading: false, stats: {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0, statCountUnavailableServer:0} };
-  $evolUserResponse: { line: any[], loading: boolean } = { line: [], loading: true };
-  $exceptionsResponse: { data: any[], loading: boolean } = {data: [], loading: true};
-  $dependenciesResponse: { table: any[], loading: boolean } = {table: [], loading: true};
+  $statusRepartition: { data: any[], loading: boolean} = { data: [], loading: false};
+  $statusRepartitionSlice: { data: any[], loading: boolean} = { data: [], loading: false};
+  $performanceRepartition: { data: any[], loading: boolean,  } = {data: [], loading: true};
+  $performanceRepartitionSlice: { data: any[], loading: boolean } = {data: [], loading: true};
+  $sizeRepartition : {data: any[], loading: boolean} = {data: [], loading: true};
+  $sizeRepartitionSlice : {data: any[], loading: boolean} = {data: [], loading: true};
+  $latencyRepartition : {data: any[], loading: boolean} = {data: [], loading: true};
+  $latencyRepartitionSlice : {data: any[], loading: boolean} = {data: [], loading: true};
+
+
+  statusRepartitionChange(event){
+    switch(event.type) {
+      case 'slice':
+        this.getCustom(this.$statusRepartitionSlice, this.getSliceColumns(event), null, this.params, this.groupedBy,"getCustom");
+        break;
+      default:
+        if(!event.config.selectedSerie){
+            event.config.selectedSerie = "status";
+        }
+        this.getCustom(this.$statusRepartition, this.getColumns(event), event.config.selectedGroup, this.params, this.groupedBy,"getCustom");
+        break;
+    }
+  }
+
+
+  performanceRepartitionChange(event){
+    let e = { ...event, config: { ...event.config } };
+    switch(e.type) {
+      case 'slice':
+    this.getCustom(this.$performanceRepartitionSlice, this.getSliceColumns(e), null, this.params, this.groupedBy,"getCustom");
+        break;
+      default:
+        if(!e.config.selectedSerie){
+            e.config.selectedSerie = "elapsedtime";
+        }
+        this.getCustom(this.$performanceRepartition, this.getColumns(e), e.config.selectedGroup, this.params, this.groupedBy,"getCustom");
+        break;
+    }
+  }
+
+    sizeRepartitionChange(event){
+        switch(event.type) {
+            case 'slice':
+                this.getCustom(this.$sizeRepartitionSlice, this.getSliceColumns(event), null, this.params, this.groupedBy,"getCustom");
+                break;
+            default:
+               if(!event.config.selectedSerie){
+                    event.config.selectedSerie = "elapsedtime";
+                }
+                this.getCustom(this.$sizeRepartition, this.getColumns(event), event.config.selectedGroup, this.params, this.groupedBy,"getCustom");
+                break;
+        }
+    }
+
+    latencyRepartitionChange(event){
+        switch(event.type) {
+            case 'slice':
+                this.getCustom(this.$latencyRepartitionSlice, this.getSliceColumns(event), null, this.params, this.groupedBy,"getLatency");
+                break;
+            default:
+                if(!event.config.selectedSerie){
+                    event.config.selectedSerie = "elapsedtime";
+                }
+                this.getCustom(this.$latencyRepartition, this.getColumns(event), event.config.selectedGroup, this.params, this.groupedBy,"getLatency");
+                break;
+        }
+    }
+
 
   @Input() set queryParams(queryParams: QueryParams) {
     if(queryParams) {
       this.params = queryParams;
       this.groupedBy = periodManagement(queryParams.period.start, queryParams.period.end);
-      this.getRepartitionTimeAndTypeResponseByPeriod(queryParams,  this.groupedBy);
-      this.getUsersByPeriod(queryParams, this.groupedBy);
-      this.getExceptions(queryParams,  this.groupedBy);
-      this.getDependencies(queryParams);
     }
   }
-
-  getRepartitionTimeAndTypeResponseByPeriod(queryParams: QueryParams, groupedBy: string) {
-    this.$timeAndTypeResponse.data = [];
-    this.$timeAndTypeResponse.loading = true;
-    return this._httpRequestService.getRepartitionTimeAndTypeResponseByPeriod({
-      start: queryParams.period.start,
-      end: queryParams.period.end,
-      groupedBy: groupedBy,
-      env: queryParams.env,
-      host: queryParams.hosts,
-      method: queryParams.commands    }).pipe(
-      map(r => {
-        formatters[groupedBy](r, this._datePipe);
-        return r;
-      }), finalize(() => this.$timeAndTypeResponse.loading = false)
-    ).subscribe({
-      next: res => {
-        this.$timeAndTypeResponse.data = res;
-        this.$timeAndTypeResponse.stats = this.calculateStats(res);
+    getColumns(o:any) {
+      return {
+        ...this.columnsConfig["groupColumns"][o.config.selectedGroup],
+        base: this.columnsConfig["seriesColumns"][o.config.selectedSerie].query(o.config.selectedIndicator),
+         sliceFilter:  Object.keys(o.sliceFilter).length > 0 ? {[this.columnsConfig['sliceColumns'][o.config.selectedSlice].selector] : o.sliceFilter[o.config.selectedSlice]} : null
       }
-    });
-  }
-
-  getUsersByPeriod(queryParams: QueryParams, groupedBy: string) {
-    this.$evolUserResponse.line = [];
-    this.$evolUserResponse.loading = true;
-    return this._httpRequestService.getUsersByPeriod({
-      start: queryParams.period.start,
-      end: queryParams.period.end,
-      groupedBy: groupedBy,
-      env: queryParams.env,
-      host: queryParams.hosts,
-      method: queryParams.commands
-    }).pipe(
-      finalize(() => this.$evolUserResponse.loading = false),
-      map(r => {
-        formatters[groupedBy](r, this._datePipe);
-        return Object.entries(groupByField(r, "date")).map(([key, value]) => {
-          return {count: value.length, date: key, year: value[0].year};
-        });
-      })
-    )
-    .subscribe({
-      next: res => {
-        this.$evolUserResponse.line = res;
+    }
+    getSliceColumns(o:any) {
+      return {
+         base : this.columnsConfig['sliceColumns'][o.config.selectedSlice].query
       }
-    })
-  }
+    }
 
-  getExceptions(queryParams: QueryParams, groupedBy: string) {
-    this.$exceptionsResponse.data = [];
-    this.$exceptionsResponse.loading = true;
-    return this._httpRequestService.getRestExceptionsByHost({
-      env: queryParams.env,
-      start: queryParams.period.start,
-      end: queryParams.period.end,
-      groupedBy: groupedBy,
-      host: queryParams.hosts,
-      command: queryParams.commands
-    }).pipe(
-        finalize(() => this.$exceptionsResponse.loading = false),
-        map(res => {
-          formatters[groupedBy](res, this._datePipe, 'stringDate');
-          return res.filter(r => r.errorType != null)
-        }))
-        .subscribe({
-          next: res => {
-            this.$exceptionsResponse.data = res;
-          }
-        })
-  }
 
-  getDependencies(queryParams: QueryParams) {
-    this.$dependenciesResponse.table = [];
-    this.$dependenciesResponse.loading = true;
-    return this._httpRequestService.getDependentsNew({
-      start: queryParams.period.start,
-      end: queryParams.period.end,
-      env: queryParams.env,
-      host: queryParams.hosts,
-      method: queryParams.commands
-    }).pipe(
+    getCustom(arr: { data: any[], loading: boolean},
+              columns: { column?: string; order?: string, agregate?: string, base: string, sliceFilter?: string  },
+              group: string,
+              queryParams: QueryParams,
+              groupedBy: string,
+              fn:string) {
+    arr.data = [];
+    arr.loading = true;
+    columns.column =  columns.column && this.replaceString(columns.column, '[grouped]', `${groupedBy}`);
+    this._httpRequestService[fn](
+          columns, {
+          start: queryParams.period.start,
+          end: queryParams.period.end,
+          groupedBy: groupedBy,
+          env: queryParams.env,
+          hosts: queryParams.hosts,
+          method: queryParams.commands}).pipe(
         map(r => {
+          if (group === 'date') {
+            formatters[groupedBy](r, this._datePipe);
+          }
           return r;
-        }), finalize(() => this.$dependenciesResponse.loading = false)
+        }), finalize(() => arr.loading = false)
     ).subscribe({
       next: res => {
-        this.$dependenciesResponse.table = res.map(item => ({
-          ...item,
-          count: item.countSucces + item.countErrServer+  item.countErrClient + item.countServerUnavailableRows
-        }));
+        arr.data = res;
       }
     });
   }
 
-  calculateStats(res: any[]) {
-    return res.reduce((acc: {statCount: number, statCountOk: number, statCountErrClient: number, statCountErrorServer: number, statCountUnavailableServer: number}, o) => {
-      return {statCount: acc.statCount + o['countSuccess'] + o['countErrorClient'] + o['countErrorServer']+ o['countServerUnavailableRows'], statCountOk: acc.statCountOk + o['countSuccess'], statCountErrClient: acc.statCountErrClient + o['countErrorClient'], statCountErrorServer: acc.statCountErrorServer + o['countErrorServer'], statCountUnavailableServer: acc.statCountUnavailableServer + o['countServerUnavailableRows']};
-    }, {statCount: 0, statCountOk: 0, statCountErrClient: 0, statCountErrorServer: 0, statCountUnavailableServer: 0});
+  replaceString(str: string,search: string, replacement: string) {
+    return str.includes(search) ? str.replace(search, replacement) : str;
   }
 
-  onSessionExceptionRowSelected(row:any) {
-    const result = recreateDate(this.groupedBy, row, this.params.period.start);
-    if(result) {
-      this._router.navigate(['/request/rest'], {
-        queryParams: {
-          'env': this.params.env,
-          'start': result.start.toISOString(),
-          'end': result.end.toISOString(),
-          'q':  !this.errorStatus[row.errorType] ? row.errorType : '',
-          'host': this.params.hosts,
-          'rangestatus': this.errorStatus[row.errorType] || '0xx'
+  protected readonly Object = Object;
+  columnsConfig = {
+    groupColumns: {
+      date: {
+        column: `start.[grouped]:date,start.year:year`,
+        order: 'year.asc,date.asc',
+        group: (row) => `${row['date']}_${row['year']}`,
+        properties: ['date', 'year']
+      },
+      method: {column: 'method.coalesce("<empty>"):method', group: (row) => (row['method']), properties: ['method']},
+      auth: {column: 'auth.coalesce("<no_auth>"):auth', group: (row) => (row['auth']), properties: ['auth']},
+      media: {column: 'media.coalesce("<empty>"):media', group: (row) => row['media'], properties: ['media']},
+    },
+    sliceColumns: {
+      user: {
+        selector: 'user',
+        query: 'user.coalesce("<empty>").distinct:user',
+        name: 'user'
+      },
+      app_name: {
+        selector: 'instance.app_name',
+        query: 'instance.app_name.coalesce("<empty>").distinct:app_name',
+        name: 'app'
+      }
+    },
+    seriesColumns: {
+      elapsedtime:
+          {
+            query: (selectedIndicator: string) => `elapsedtime.${selectedIndicator}:default`,
+          },
+      performance_tranche:
+          {
+            query: (selectedIndicator: string) => `performance_tranche:performance_tranche,elapsedtime.${selectedIndicator}:count`,
+          },
+      status_ok_client_server_error:
+          {
+            query: (selectedIndicator: string) => `status_ok_client_server_error:status_ok_client_server_error,status.${selectedIndicator}:count`,
+          },
+      status:
+          {
+            query: (selectedIndicator: string) => `status,status.${selectedIndicator}:count`,
+          },
+      status_tranche:
+          {
+            query: (selectedIndicator: string) => `status_tranche:status_tranche,status.${selectedIndicator}:count`,
+          },
+        size:
+          {
+            query: (selectedIndicator: string) => `size_in_notnull.${selectedIndicator}:sizeIn,size_out_notnull.${selectedIndicator}:sizeOut`,
+          },
+        latency: {
+            query: (selectedIndicator: string) => `${selectedIndicator}(elapsedtime.minus(rest_session.elapsedtime)):latency`,
         }
-      });
     }
   }
-
-
 }

@@ -1,0 +1,23 @@
+<div class="modal">
+
+  <div class="modal-header">
+    <div class="modal-header-left">
+      <div class="modal-icon">
+        <mat-icon [ngClass]="data.type">{{ data.type === 'warning' ? 'warning' : 'error' }}</mat-icon>
+      </div>
+      <div class="modal-info">
+        <div class="modal-title">
+          Exception
+        </div>
+      </div>
+    </div>
+    <button class="modal-close" mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <pre><code>{{ _stacktrace }}</code></pre>
+  </div>
+
+</div>

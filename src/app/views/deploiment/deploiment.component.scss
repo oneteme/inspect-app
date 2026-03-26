@@ -1,12 +1,13 @@
-.searchwidth {
+:host {
   display: flex;
-  margin-bottom: 0.5em;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
 }
 
-.table-container {
-  .table-wrapper {
-    max-height: calc(100vh - 96px - 56px - 48px - 64px);
-  }
+.flex-table {
+  flex: 1 1 0;
+  min-height: 0;
 }
 
 .stats-container {
@@ -161,7 +162,6 @@
 .server-cell-content {
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 12px;
 
   .server-name {
@@ -251,103 +251,5 @@
     height: 16px;
     color: #7c3aed;
     flex-shrink: 0;
-  }
-}
-
-
-
-.empty-state-inline,
-.loading-state-inline {
-  height: calc(100vh - 48px - 14px - 56px - 57px - 96px);
-}
-
-
-
-// ===========================
-// Responsive
-// ===========================
-@media (max-width: 1200px) {
-  .page-header-modern {
-    .server-stats {
-      gap: 16px;
-
-      .stat-item {
-        padding: 10px 12px;
-
-        .stat-icon-wrapper {
-          width: 36px;
-          height: 36px;
-
-          mat-icon {
-            font-size: 20px;
-            width: 20px;
-            height: 20px;
-          }
-        }
-
-        .stat-details {
-          .stat-value {
-            font-size: 18px;
-          }
-
-          .stat-label {
-            font-size: 10px;
-          }
-        }
-      }
-    }
-  }
-}
-
-@media (max-width: 768px) {
-  .page-header-modern {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 20px;
-    gap: 20px;
-
-    .page-title-section {
-      .page-icon {
-        font-size: 32px;
-        width: 32px;
-        height: 32px;
-      }
-
-      .title-content {
-        .page-title {
-          font-size: 20px;
-        }
-
-        .page-subtitle {
-          font-size: 13px;
-        }
-      }
-    }
-
-    .server-stats {
-      width: 100%;
-      flex-wrap: wrap;
-      gap: 12px;
-
-      .stat-divider {
-        display: none;
-      }
-
-      .stat-item {
-        flex: 1;
-        min-width: calc(50% - 6px);
-        padding: 12px;
-      }
-    }
-  }
-
-  .table-container {
-    .modern-mat-table {
-      .mat-mdc-header-cell,
-      .mat-mdc-cell {
-        padding: 12px 16px;
-        font-size: 13px;
-      }
-    }
   }
 }

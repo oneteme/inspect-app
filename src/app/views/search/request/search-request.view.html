@@ -47,53 +47,28 @@
   </div>
 </header-page>
 
-<div *ngIf="params.type=='rest'">
-    <rest-table
-                [useFilter]="true"
-                [requests]="requests"
+<rest-table *ngIf="params.type=='rest'"
+            [requests]="requests"
+            [isLoading]="isLoading"
+            (onClickRemote)="selectedRemote($event)"
+            (onClickRow)="selectedRest($event)">
+</rest-table>
+
+<ftp-table *ngIf="params.type=='ftp'" [requests]="requests"
+           [isLoading]="isLoading"
+           (onClickRow)="selectedFtp($event)"></ftp-table>
+
+<smtp-table *ngIf="params.type=='smtp'" [requests]="requests"
+            [isLoading]="isLoading"
+            (onClickRow)="selectedSmtp($event)" >
+</smtp-table>
+
+<ldap-table *ngIf="params.type=='ldap'" [requests]="requests"
+            [isLoading]="isLoading"
+            (onClickRow)="selectedLdap($event)">
+</ldap-table>
+
+<database-table *ngIf="params.type=='jdbc'" [requests]="requests"
                 [isLoading]="isLoading"
-                [pageSize]="10"
-                [filterValue]="queryParams?.optional?.q"
-                (onClickRemote)="selectedRemote($event)"
-                (onClickRow)="selectedRest($event)"
-    ></rest-table>
-</div>
-
-<div  *ngIf="params.type=='ftp'">
-    <ftp-table [useFilter]="true"
-               [requests]="requests"
-               [isLoading]="isLoading"
-               [filterValue]="queryParams?.optional?.q"
-               [pageSize]="10"
-               (onClickRow)="selectedFtp($event)"></ftp-table>
-</div>
-
-<div  *ngIf="params.type=='smtp'">
-    <smtp-table [useFilter]="true"
-                [requests]="requests"
-                [isLoading]="isLoading"
-                [filterValue]="queryParams?.optional?.q"
-                [pageSize]="10"
-                (onClickRow)="selectedSmtp($event)" >
-    </smtp-table>
-</div>
-
-<div  *ngIf="params.type=='ldap'">
-    <ldap-table [useFilter]="true"
-                [requests]="requests"
-                [isLoading]="isLoading"
-                [filterValue]="queryParams?.optional?.q"
-                [pageSize]="10"
-                (onClickRow)="selectedLdap($event)">
-    </ldap-table>
-</div>
-
-<div  *ngIf="params.type=='jdbc'">
-    <database-table [useFilter]="true"
-                    [requests]="requests"
-                    [isLoading]="isLoading"
-                    [filterValue]="queryParams?.optional?.q"
-                    [pageSize]="10"
-                    (onClickRow)="selectedQuery($event)" >
-    </database-table>
-</div>
+                (onClickRow)="selectedQuery($event)">
+</database-table>

@@ -3,34 +3,37 @@ import {MatTableDataSource} from "@angular/material/table";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {DecimalPipe} from "@angular/common";
+import {DEFAULT_TABLE_CONFIG, DEPLOIEMENT_TABLE_CONFIG} from "../../../../../shared/_component/table/table.config";
+import {TableProvider} from "@oneteme/jquery-table";
+import {LastServerStart} from "../../../../../model/jquery.model";
 
 @Component({
-  selector: 'exceptions-table-new',
+  selector: 'exceptions-table',
   templateUrl: './exceptions-table.component.html',
   styleUrls: ['./exceptions-table.component.scss'],
 })
 export class ExceptionsTableComponent {
   private _decimalPipe = inject(DecimalPipe);
 
-  displayedColumns: string[] = ['stringDate', 'errorType', 'count'];
-  dataSource: MatTableDataSource<{ stringDate: string, date: number, year: number, errorType: string, count: number, countok: number }> = new MatTableDataSource([]);
+  readonly tableConfig: TableProvider<{ stringDate: string, date: number, year: number, errorType: string, count: number, countok: number }> = {
+    ...DEFAULT_TABLE_CONFIG,
+    view: { enabled: false },
+    columns: [
+      { key: 'stringDate', header: 'Instant', icon: 'schedule', groupable: false, sliceable: false },
+      { key: 'errorType', header: 'Exception', icon: 'error', groupable: false, sliceable: false, value: (row) => this.removePackage(row.errorType) },
+      { key: 'percent', header: 'Taux', icon: 'percent', groupable: false, sliceable: false,
+        sortValue: (row) => parseFloat(this._decimalPipe.transform((row['count'] * 100) / row['countok'] , '1.0-2', 'en_US') || '0')
+      }
+    ],
+    defaultSort: {active: 'stringDate', direction: 'desc'},
+    onRowSelected: (row, event) => this.selectedRow(event, row)
+  };
 
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild('sort') sort: MatSort;
+  _requests: { stringDate: string, date: number, year: number, errorType: string, count: number, countok: number }[] = [];
 
   @Input() set data(objects: any[]) {
     if (objects?.length) {
-      this.dataSource = new MatTableDataSource(objects);
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sortingDataAccessor = (row: any, columnName: string) => {
-        if (columnName == "stringDate") { return row['date'] }
-        if (columnName == "count") return parseFloat(this._decimalPipe.transform((row['count'] * 100) / row['countok'] , '1.0-2', 'en_US'));
-        if (columnName == "errorType") return this.removePackage(row['errorType']);
-        return row[columnName as keyof any] as string;
-      };
-      this.dataSource.sort = this.sort;
-    } else {
-      this.dataSource = new MatTableDataSource([]);
+      this._requests = objects;
     }
   }
 
@@ -43,7 +46,6 @@ export class ExceptionsTableComponent {
   }
 
   selectedRow(event: MouseEvent, row: any) {
-    this.onRowSelected.emit(row);
+    this.onRowSelected.emit({row: row, event: event});
   }
-
 }
