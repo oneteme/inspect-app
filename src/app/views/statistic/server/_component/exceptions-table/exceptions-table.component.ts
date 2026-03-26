@@ -25,10 +25,12 @@ export class ExceptionsTableComponent {
         sortValue: (row) => parseFloat(this._decimalPipe.transform((row['count'] * 100) / row['countok'] , '1.0-2', 'en_US') || '0')
       }
     ],
-    defaultSort: {active: 'stringDate', direction: 'desc'}
+    defaultSort: {active: 'stringDate', direction: 'desc'},
+    onRowSelected: (row, event) => this.selectedRow(event, row)
   };
 
   _requests: { stringDate: string, date: number, year: number, errorType: string, count: number, countok: number }[] = [];
+
   @Input() set data(objects: any[]) {
     if (objects?.length) {
       this._requests = objects;
@@ -44,6 +46,6 @@ export class ExceptionsTableComponent {
   }
 
   selectedRow(event: MouseEvent, row: any) {
-    this.onRowSelected.emit(row);
+    this.onRowSelected.emit({row: row, event: event});
   }
 }
