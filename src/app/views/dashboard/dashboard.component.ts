@@ -65,6 +65,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
     }
 
     MAPPING_TYPE = Constants.MAPPING_TYPE;
+    selectedExceptionTab = 0;
     subscriptions: Subscription[] = [];
     chartSubscriptions: Subscription[] = [];
     tabSubscriptions: Subscription[] = [];
@@ -195,6 +196,8 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         if (exceptions.observable.data?.length > 0) {
             this._dialog.open(ProtocolExceptionComponent, {
                 width: "70%",
+                height: "60vh",
+                panelClass: "exception-modal",
                 data: {
                     exceptions: exceptions,
                     serveurs: this.params.serveurs,
@@ -386,15 +389,16 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         }
     }
 
-    onSessionExceptionRowSelected(row:any) {
-        const result = recreateDate(this.groupedBy, row, this.params.start);
+    onSessionExceptionRowSelected(event: {event: MouseEvent, row: any}) {
+        const result = recreateDate(this.groupedBy, event.row, this.params.start);
+
         if(result) {
             this._router.navigate(['/session/rest'], {
                 queryParams: {
                     'env': this.params.env,
                     'start': result.start.toISOString(),
                     'end': result.end.toISOString(),
-                    'q': row.errorType,
+                    'q': event.row.errorType,
                     'server': this.params.serveurs,
                     'rangestatus': ['5xx', '4xx']
                 }
@@ -402,15 +406,15 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         }
     }
 
-    onBatchExceptionRowSelected(row: any){
-        const result = recreateDate(this.groupedBy, row, this.params.start);
+    onBatchExceptionRowSelected(event: {event: MouseEvent, row: any}){
+        const result = recreateDate(this.groupedBy, event.row, this.params.start);
         if(result){
             this._router.navigate(['/session/batch'], {
                 queryParams: {
                     'env': this.params.env,
                     'start': result.start.toISOString(),
                     'end': result.end.toISOString(),
-                    'q' : row.errorType,
+                    'q' : event.row.errorType,
                     'server': this.params.serveurs,
                     'rangestatus': ['Ko']
                 }

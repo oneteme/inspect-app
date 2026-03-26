@@ -23,7 +23,6 @@ export class TimelineComponent implements OnChanges, OnDestroy {
     @Input() options: TimelineOptions;
     @Input() groups: DataGroup[];
     @Input() items: DataItem[];
-    @Input() displayHeader: boolean = true;
     @Output() onTimelineCreated = new EventEmitter<Timeline>();
     @Output() onitemCLicked = new EventEmitter<any>();
     ngOnChanges(changes: SimpleChanges) {

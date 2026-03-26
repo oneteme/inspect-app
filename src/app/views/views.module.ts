@@ -45,7 +45,6 @@ import {ExceptionsTableComponent} from "./statistic/server/_component/exceptions
 import {EvolUserCardComponent} from "./statistic/server/_component/evol-user-card/evol-user-card.component";
 import {PerformanceCardComponent} from "./statistic/_component/performance-card/performance-card.component";
 import {DependencyCardComponent} from "./statistic/server/_component/dependency-card/dependency-card.component";
-import {ServerStartTableComponent} from "./dashboard/components/server-start-table/server-start-table.component";
 import {
   RepartitionTypeCardComponent as RestRepartitionTypeCardComponent
 } from "./statistic/_component/repartition-type-card/repartition-type-card.component";
@@ -142,7 +141,6 @@ import {
     EvolUserCardComponent,
     PerformanceCardComponent,
     DependencyCardComponent,
-    ServerStartTableComponent,
     NumberFormatterPipe,
     DeploimentComponent,
     AnalyticView,

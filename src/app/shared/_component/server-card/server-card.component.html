@@ -20,11 +20,10 @@
               {{ _instance.name }}
             </span>
             <app-status-indicator
-              *ngIf="!_isLoadingLastTrace"
+              [loading]="_isLoadingLastTrace"
               (onClick)="navigate($event)"
               [params]="{id: _instance.id, end: _instance.end, configuration: _instance.configuration, lastTrace: _lastTrace, date: date.getTime()}">
             </app-status-indicator>
-            <mat-spinner *ngIf="_isLoadingLastTrace" [diameter]="14" class="status-spinner"></mat-spinner>
           </div>
         </div>
       </div>

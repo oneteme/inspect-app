@@ -1,5 +1,4 @@
 import {Component, EventEmitter, inject, Input, Output} from "@angular/core";
-import {EnvRouter} from "../../../service/router.service";
 import {InspectCollectorConfiguration} from "../../../model/trace.model";
 import {DatePipe} from "@angular/common";
 
@@ -8,7 +7,7 @@ import {DatePipe} from "@angular/common";
   template: `
     <div class="status-indicator"
          (click)="navigate($event)"
-         [matTooltip]="tooltip"
+         [matTooltip]="loading ? 'Chargement en cours' : tooltip"
          [ngClass]="class">
       <div class="status-dot"></div>
     </div>
@@ -83,6 +82,8 @@ export class StatusIndicatorComponent {
 
   class: string;
   tooltip: string;
+
+  @Input() loading: boolean = true;
 
   @Input() set params(value: {id: string, end: number, configuration: InspectCollectorConfiguration, lastTrace: number, date: number}) {
     if(value) {

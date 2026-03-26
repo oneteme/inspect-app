@@ -104,17 +104,47 @@
   </div>
 </div>
 
-<div class="card-container mat-elevation-z5" style="margin: 0; height: 400px">
-  <div class="title-container"><div class="title"><label-icon icon="error">Erreur</label-icon></div></div>
-  <div style="display: flex; justify-content: space-between; height: 100%">
-    <div style="display: flex; flex-direction: column; width: 100%; margin: 0.5em">
-      <div class="title-container"><div class="sub-title">Serveur</div></div>
-      <exceptions-table [data]="tabRequests.sessionExceptionsTable?.data" [isLoading]="tabRequests.sessionExceptionsTable?.isLoading" (onRowSelected)="onSessionExceptionRowSelected($event)"></exceptions-table>
+
+
+  <div class="tabs-container" style="flex: 1; min-height: 0;">
+
+    <div class="vertical-tabs">
+      <div class="tab-button" [class.active]="selectedExceptionTab === 0" (click)="selectedExceptionTab = 0">
+        <mat-icon class="material-symbols-outlined">dns</mat-icon>
+        <div class="tab-label-container">
+          <span class="tab-label">Erreur Serveur</span>
+        </div>
+        <span class="tab-count" *ngIf="tabRequests.sessionExceptionsTable?.data?.length">
+          {{ tabRequests.sessionExceptionsTable.data.length }}
+        </span>
+      </div>
+
+      <div class="tab-button" [class.active]="selectedExceptionTab === 1" (click)="selectedExceptionTab = 1">
+        <mat-icon class="material-symbols-outlined">terminal</mat-icon>
+        <div class="tab-label-container">
+          <span class="tab-label">Erreur Batch</span>
+        </div>
+        <span class="tab-count" *ngIf="tabRequests.batchExceptionTable?.data?.length">
+          {{ tabRequests.batchExceptionTable.data.length }}
+        </span>
+      </div>
     </div>
-    <mat-divider style="margin: 2em" [vertical]="true"></mat-divider>
-    <div style="display: flex; flex-direction: column; width: 100%; margin: 0.5em">
-      <div class="title-container"><div class="sub-title">Batch</div></div>
-      <exceptions-table [data]="tabRequests.batchExceptionTable?.data" [isLoading]="tabRequests.batchExceptionTable?.isLoading" (onRowSelected)="onBatchExceptionRowSelected($event)"></exceptions-table>
+
+    <div class="tab-content">
+      <div class="tab-panel" [class.hidden]="selectedExceptionTab !== 0">
+        <exceptions-table
+          [data]="tabRequests.sessionExceptionsTable?.data"
+          [isLoading]="tabRequests.sessionExceptionsTable?.isLoading"
+          (onRowSelected)="onSessionExceptionRowSelected($event)">
+        </exceptions-table>
+      </div>
+      <div class="tab-panel" [class.hidden]="selectedExceptionTab !== 1">
+        <exceptions-table
+          [data]="tabRequests.batchExceptionTable?.data"
+          [isLoading]="tabRequests.batchExceptionTable?.isLoading"
+          (onRowSelected)="onBatchExceptionRowSelected($event)">
+        </exceptions-table>
+      </div>
     </div>
+
   </div>
-</div>

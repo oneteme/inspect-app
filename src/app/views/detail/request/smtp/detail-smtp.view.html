@@ -1,4 +1,4 @@
-<div *ngIf="!isLoading && request && instance">
+<ng-container *ngIf="request && instance else noDataTemplate">
   <div class="header-card">
 
     <!-- ═══ CARTE SMTP ═══ -->
@@ -83,7 +83,7 @@
       </div>
       <div *ngIf="tabs[selectedTabIndex]?.type === 'timeline'" class="tab-panel">
         <app-timeline [options]="options" [groups]="dataGroups" [items]="dataItems"
-                      [displayHeader]="false" (onTimelineCreated)="onTimelineCreate($event)">
+                      (onTimelineCreated)="onTimelineCreate($event)">
         </app-timeline>
       </div>
       <div *ngIf="tabs[selectedTabIndex]?.type === 'mail'" class="tab-panel">
@@ -91,14 +91,15 @@
       </div>
     </div>
   </div>
-</div>
+</ng-container>
 
-<div *ngIf="!isLoading && !request && !request.mails?.length && !instance" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">
-  <h2>Aucun détail disponible ..</h2>
-</div>
-<div *ngIf="isLoading" style="width: 100%; height: calc(100vh - 50px - 1em); display: flex; align-items: center; justify-content: center; font-style: italic; gap: 0.5em">
-  <mat-progress-spinner diameter="30" mode="indeterminate"></mat-progress-spinner> Chargement en cours...
-</div>
+<ng-template #noDataTemplate>
+  <app-empty-state
+          [loading]="isLoading"
+          [icon]="REQUEST_TYPE['smtp'].icon">
+  </app-empty-state>
+</ng-template>
+
 
 <mat-menu #menuHost="matMenu">
   <a mat-menu-item (click)="navigate($event,'parent')" [disabled]="sessionParent == null">
