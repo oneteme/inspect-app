@@ -418,11 +418,39 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         }
     }
 
+    getTopExceptions(key: string, max = 3): {errorType: string, count: number}[] {
+        const data = this.chartRequests[key]?.data as any[];
+        if (!data?.length) return [];
+        const map = new Map<string, number>();
+        data.forEach(d => {
+            if (d.errorType) map.set(d.errorType, (map.get(d.errorType) ?? 0) + (d.count || 0));
+        });
+        return Array.from(map.entries())
+            .map(([errorType, count]) => ({ errorType, count }))
+            .sort((a, b) => b.count - a.count)
+            .slice(0, max);
+    }
+
+    get anyChartLoading(): boolean {
+        return Object.values(this.chartRequests).some(r => r.isLoading);
+    }
+
+    isCardVisible(key: string): boolean {
+        if (this.anyChartLoading) return false;
+        return this.getPercValue(key) > 0;
+    }
+
+    getPercValue(key: string): number {
+        const chart = this.chartRequests[key]?.chart as any[];
+        if (!chart?.length) return 0;
+        let sumOk = 0, sumErr = 0;
+        chart.forEach(d => { sumOk += d.countok || 0; sumErr += d.count || 0; });
+        return sumOk > 0 ? (sumErr * 100) / sumOk : 0;
+    }
+
     ngOnDestroy(): void {
         this.subscriptions.forEach(s => s.unsubscribe());
-        if(this._dialog){
-            this._dialog.closeAll();
-        }
+        if(this._dialog) { this._dialog.closeAll(); }
     }
 }
 

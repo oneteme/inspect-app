@@ -7,3 +7,115 @@
     align-items: center;
     gap: 0.5em;
 }
+
+// ─── Cards protocoles ────────────────────────────────────────────────────────
+
+.proto-cards-row {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 12px;
+    flex-wrap: wrap;
+}
+
+.proto-card {
+    flex: 1;
+    min-width: 160px;
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px 12px 7px 7px;
+    overflow: hidden;
+
+    &__header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        padding: 12px 4px 8px 16px;
+    }
+
+    &__left {
+        display: flex;
+        flex-direction: column;
+    }
+
+    &__label {
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #000;
+        margin-bottom: 2px;
+    }
+
+    &__perc {
+        font-size: 28px;
+        font-weight: 900;
+        line-height: 1.1;
+        white-space: nowrap;
+        color: #dc2626;
+    }
+
+    &__unit {
+        font-size: 16px;
+        font-weight: 700;
+    }
+
+    &__meta {
+        font-size: 10px;
+        opacity: 0.45;
+        margin-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    // Squelette pendant chargement
+    &--skeleton {
+        pointer-events: none;
+        cursor: default;
+    }
+
+    &__skeleton-header {
+        padding: 14px 16px 10px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    &__skeleton-line {
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.07);
+
+        &--label { height: 10px; width: 32px; }
+        &--perc  { height: 32px; width: 72px; }
+        &--meta  { height: 9px;  width: 96px; }
+    }
+
+    &__skeleton-chart {
+        margin-top: auto;
+        height: 100px;
+        background: rgba(0, 0, 0, 0.04);
+        position: relative;
+        overflow: hidden;
+
+        &::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg,
+                transparent 0%,
+                rgba(255,255,255,0.45) 50%,
+                transparent 100%
+            );
+            background-size: 200% 100%;
+            animation: skeleton-shimmer 1.6s ease-in-out infinite;
+        }
+    }
+
+
+}
+
+@keyframes skeleton-shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position:  200% 0; }
+}
+

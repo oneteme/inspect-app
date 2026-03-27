@@ -1,13 +1,20 @@
-<div mat-dialog-content>
-  <mat-form-field appearance="outline" style="width: 50vw;">
-    <mat-label>Configuration</mat-label>
-    <textarea matInput readonly
-              cdkTextareaAutosize
-              [cdkAutosizeMinRows]="5"
-              [cdkAutosizeMaxRows]="15"
-              class="config-textarea"
-              [value]="value"
-              [tabindex]="-1">
-    </textarea>
-  </mat-form-field>
+<div class="cfg-dialog">
+
+  <div class="cfg-header">
+    <mat-icon class="material-symbols-outlined cfg-header__icon">settings</mat-icon>
+    <span class="cfg-header__title">Configuration</span>
+    <button class="cfg-close-btn" mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="cfg-body">
+    <div class="cfg-code-wrapper">
+      <pre class="cfg-code" [innerHTML]="highlighted"></pre>
+      <button class="copy-overlay" (click)="copy()" [class.copied]="copied" [matTooltip]="copied ? 'Copié !' : 'Copier'">
+        <mat-icon>{{ copied ? 'check' : 'content_copy' }}</mat-icon>
+      </button>
+    </div>
+  </div>
+
 </div>

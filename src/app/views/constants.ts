@@ -254,7 +254,7 @@ export class Constants {
             xAxis: { show: false },
             yAxis: { show: false, max: 100 },
             legend: { show: false },
-            tooltip: { formatter: (p: any) => { const v = Array.isArray(p[0]?.value) ? p[0].value[1] : p[0]?.value; return `${p[0].marker} ${p[0].seriesName}: <b>${(+v).toFixed(2)}%</b>`; } },
+            tooltip: { formatter: (p: any) => { const v = Array.isArray(p[0]?.value) ? p[0].value[1] : p[0]?.value; return `<b>${p[0].name}</b><br>${p[0].marker} ${p[0].seriesName}: <b>${(+v).toFixed(2)}%</b>`; } },
             series: [{ showSymbol: false }]
         }
     };
@@ -270,7 +270,7 @@ export class Constants {
             xAxis: { show: false },
             yAxis: { show: false, max: 100 },
             legend: { show: false },
-            tooltip: { formatter: (p: any) => { const v = Array.isArray(p[0]?.value) ? p[0].value[1] : p[0]?.value; return `${p[0].marker} ${p[0].seriesName}: <b>${(+v).toFixed(2)}%</b>`; } },
+            tooltip: { formatter: (p: any) => { const v = Array.isArray(p[0]?.value) ? p[0].value[1] : p[0]?.value; return `<b>${p[0].name}</b><br>${p[0].marker} ${p[0].seriesName}: <b>${(+v).toFixed(2)}%</b>`; } },
             series: [{ showSymbol: false }]
         }
     };
@@ -286,7 +286,7 @@ export class Constants {
             xAxis: { show: false },
             yAxis: { show: false, max: 100 },
             legend: { show: false },
-            tooltip: { formatter: (p: any) => { const v = Array.isArray(p[0]?.value) ? p[0].value[1] : p[0]?.value; return `${p[0].marker} ${p[0].seriesName}: <b>${(+v).toFixed(2)}%</b>`; } },
+            tooltip: { formatter: (p: any) => { const v = Array.isArray(p[0]?.value) ? p[0].value[1] : p[0]?.value; return `<b>${p[0].name}</b><br>${p[0].marker} ${p[0].seriesName}: <b>${(+v).toFixed(2)}%</b>`; } },
             series: [{ showSymbol: false }]
         }
     };
@@ -302,7 +302,7 @@ export class Constants {
             xAxis: { show: false },
             yAxis: { show: false, max: 100 },
             legend: { show: false },
-            tooltip: { formatter: (p: any) => { const v = Array.isArray(p[0]?.value) ? p[0].value[1] : p[0]?.value; return `${p[0].marker} ${p[0].seriesName}: <b>${(+v).toFixed(2)}%</b>`; } },
+            tooltip: { formatter: (p: any) => { const v = Array.isArray(p[0]?.value) ? p[0].value[1] : p[0]?.value; return `<b>${p[0].name}</b><br>${p[0].marker} ${p[0].seriesName}: <b>${(+v).toFixed(2)}%</b>`; } },
             series: [{ showSymbol: false }]
         }
     };
@@ -318,7 +318,7 @@ export class Constants {
             xAxis: { show: false },
             yAxis: { show: false, max: 100 },
             legend: { show: false },
-            tooltip: { formatter: (p: any) => { const v = Array.isArray(p[0]?.value) ? p[0].value[1] : p[0]?.value; return `${p[0].marker} ${p[0].seriesName}: <b>${(+v).toFixed(2)}%</b>`; } },
+            tooltip: { formatter: (p: any) => { const v = Array.isArray(p[0]?.value) ? p[0].value[1] : p[0]?.value; return `<b>${p[0].name}</b><br>${p[0].marker} ${p[0].seriesName}: <b>${(+v).toFixed(2)}%</b>`; } },
             series: [{ showSymbol: false }]
         }
     };

@@ -1,4 +1,130 @@
-.config-textarea {
-  max-height: 300px;
+.cfg-dialog {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 14px;
+}
+
+// ─── Header compact ─────────────────────────────────────────────────────────
+
+.cfg-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 4px 6px 14px;
+  background: #1e293b;
+  color: white;
+  flex-shrink: 0;
+
+  &__icon {
+    font-size: 15px;
+    width: 15px;
+    height: 15px;
+    opacity: 0.6;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    flex: 1;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    opacity: 0.85;
+  }
+
+  button[mat-icon-button] {
+    display: none; // supprimé
+  }
+
+  .cfg-close-btn {
+    background: none;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 25px;
+    height: 25px;
+    color: rgba(255, 255, 255, 0.6);
+    padding: 0;
+    flex-shrink: 0;
+    margin-right: 5px;
+
+    mat-icon { font-size: 18px; width: 18px; height: 18px; }
+
+    &:hover { color: white; }
+  }
+}
+
+// ─── Body / code ─────────────────────────────────────────────────────────────
+
+.cfg-body {
+  padding: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.cfg-code-wrapper {
+  background: #0f172a;
+  overflow: hidden;
+  position: relative;
+}
+
+.cfg-code {
+  margin: 0;
+  padding: 20px 24px;
+  font-family: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', Consolas, monospace;
+  font-size: 12.5px;
+  line-height: 1.75;
+  color: #cbd5e1;
+  white-space: pre;
+  overflow-x: auto;
+  max-height: 65vh;
   overflow-y: auto;
+
+  // Syntax colors — dark+ (VSCode)
+  ::ng-deep .jk { color: #9cdcfe; }
+  ::ng-deep .js { color: #ce9178; }
+  ::ng-deep .ji { color: #b5cea8; }
+  ::ng-deep .jb { color: #569cd6; }
+  ::ng-deep .jn { color: #569cd6; }
+
+  &::-webkit-scrollbar        { width: 8px; height: 8px; }
+  &::-webkit-scrollbar-track  { background: rgba(255, 255, 255, 0.04); }
+  &::-webkit-scrollbar-thumb  { background: rgba(255, 255, 255, 0.14); border-radius: 4px; }
+  &::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.25); }
+}
+
+// ─── Bouton copier (overlay) ─────────────────────────────────────────────────
+
+.copy-overlay {
+  position: absolute;
+  bottom: 14px;
+  right: 18px;
+  z-index: 1;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  color: #94a3b8;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s;
+
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: #e2e8f0;
+  }
+
+  &.copied {
+    background: rgba(22, 163, 74, 0.3);
+    border-color: rgba(22, 163, 74, 0.6);
+    color: #86efac;
+  }
 }

@@ -52,7 +52,10 @@ export class VersionBadgeComponent {
   openConfig(config: InspectCollectorConfiguration, event: any) {
     event.stopPropagation();
     this._dialog.open(ConfigDialogComponent, {
-      data: config
+      data: config,
+      width: '680px',
+      maxWidth: '92vw',
+      panelClass: 'cfg-dialog-panel',
     });
   }
 }

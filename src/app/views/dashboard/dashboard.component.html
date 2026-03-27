@@ -28,80 +28,103 @@
   </form>
 </header-page>
 
-<div style="display: flex; justify-content: space-between; gap: 1em; margin-bottom: 1em;">
-  <div style="display: flex; flex-direction: column; justify-content: space-between; width: 25%;" class="mat-elevation-z5">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin: 0 0 0 1em">
-      <div style="display: flex; flex-direction: column">
-        <div style="font-weight: 900">{{sparklineTitles.rest.title}}</div>
-        <div style="font-style: italic; font-weight: 200; font-size: 12px">{{sparklineTitles.rest.subtitle}}</div>
+<div class="proto-cards-row">
+  <ng-container *ngIf="anyChartLoading">
+    <div class="proto-card proto-card--skeleton mat-elevation-z5">
+      <div class="proto-card__skeleton-header">
+        <div class="proto-card__skeleton-line proto-card__skeleton-line--label"></div>
+        <div class="proto-card__skeleton-line proto-card__skeleton-line--perc"></div>
+        <div class="proto-card__skeleton-line proto-card__skeleton-line--meta"></div>
       </div>
-      <button mat-icon-button [disabled]="chartRequests['restRequestExceptionsTable'].isLoading || !chartRequests['restRequestExceptionsTable'].data?.length" (click)="openProtocolDialog({observable: chartRequests['restRequestExceptionsTable'], type: 'REST'})">
+      <div class="proto-card__skeleton-chart"></div>
+    </div>
+  </ng-container>
+
+  <div *ngIf="isCardVisible('restRequestExceptionsTable')" class="proto-card mat-elevation-z5">
+    <div class="proto-card__header">
+      <div class="proto-card__left">
+        <span class="proto-card__label">REST</span>
+        <div class="proto-card__perc">{{ getPercValue('restRequestExceptionsTable') | number:'1.2-2' }}<span class="proto-card__unit">%</span></div>
+        <div class="proto-card__meta">{{ sparklineTitles.rest.subtitle }}</div>
+      </div>
+      <button mat-icon-button [disabled]="chartRequests['restRequestExceptionsTable'].isLoading || !chartRequests['restRequestExceptionsTable'].data?.length"
+              (click)="openProtocolDialog({observable: chartRequests['restRequestExceptionsTable'], type: 'REST'})">
         <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
       </button>
     </div>
-    <chart type="area"
-           [config]="constants.REST_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.restRequestExceptionsTable.chart ||[]"
+    <chart type="area" [config]="constants.REST_REQUEST_EXCEPTION_BY_PERIOD_LINE"
+           [data]="chartRequests?.restRequestExceptionsTable.chart || []"
            [isLoading]="chartRequests?.restRequestExceptionsTable?.isLoading" />
   </div>
 
-  <div style="display: flex; flex-direction: column; justify-content: space-between; width: 25%;" class="mat-elevation-z5">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin: 0 0 0 1em">
-      <div style="display: flex; flex-direction: column">
-        <div style="font-weight: 900">{{sparklineTitles.jdbc.title}}</div>
-        <div style="font-style: italic; font-weight: 200; font-size: 12px">{{sparklineTitles.jdbc.subtitle}}</div>
+  <div *ngIf="isCardVisible('databaseRequestExceptionsTable')" class="proto-card mat-elevation-z5">
+    <div class="proto-card__header">
+      <div class="proto-card__left">
+        <span class="proto-card__label">JDBC</span>
+        <div class="proto-card__perc">{{ getPercValue('databaseRequestExceptionsTable') | number:'1.2-2' }}<span class="proto-card__unit">%</span></div>
+        <div class="proto-card__meta">{{ sparklineTitles.jdbc.subtitle }}</div>
       </div>
-      <button mat-icon-button [disabled]="chartRequests['databaseRequestExceptionsTable'].isLoading || !chartRequests['databaseRequestExceptionsTable'].data?.length" (click)="openProtocolDialog({observable: chartRequests['databaseRequestExceptionsTable'], type: 'JDBC'})">
+      <button mat-icon-button [disabled]="chartRequests['databaseRequestExceptionsTable'].isLoading || !chartRequests['databaseRequestExceptionsTable'].data?.length"
+              (click)="openProtocolDialog({observable: chartRequests['databaseRequestExceptionsTable'], type: 'JDBC'})">
         <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
       </button>
     </div>
-    <chart type="area"
-           [config]="constants.DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.databaseRequestExceptionsTable.chart|| []"
+    <chart type="area" [config]="constants.DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE"
+           [data]="chartRequests?.databaseRequestExceptionsTable.chart || []"
            [isLoading]="chartRequests?.databaseRequestExceptionsTable?.isLoading" />
   </div>
 
-  <div style="display: flex; flex-direction: column; justify-content: space-between; width: 25%;" class="mat-elevation-z5">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin: 0 0 0 1em">
-      <div style="display: flex; flex-direction: column">
-        <div style="font-weight: 900">{{sparklineTitles.ftp.title}}</div>
-        <div style="font-style: italic; font-weight: 200; font-size: 12px">{{sparklineTitles.ftp.subtitle}}</div>
+  <div *ngIf="isCardVisible('ftpRequestExceptionsTable')" class="proto-card mat-elevation-z5">
+    <div class="proto-card__header">
+      <div class="proto-card__left">
+        <span class="proto-card__label">FTP</span>
+        <div class="proto-card__perc">{{ getPercValue('ftpRequestExceptionsTable') | number:'1.2-2' }}<span class="proto-card__unit">%</span></div>
+        <div class="proto-card__meta">{{ sparklineTitles.ftp.subtitle }}</div>
       </div>
-      <button mat-icon-button [disabled]="chartRequests['ftpRequestExceptionsTable'].isLoading || !chartRequests['ftpRequestExceptionsTable'].data?.length" (click)="openProtocolDialog({observable: chartRequests['ftpRequestExceptionsTable'], type: 'FTP'})">
+      <button mat-icon-button [disabled]="chartRequests['ftpRequestExceptionsTable'].isLoading || !chartRequests['ftpRequestExceptionsTable'].data?.length"
+              (click)="openProtocolDialog({observable: chartRequests['ftpRequestExceptionsTable'], type: 'FTP'})">
         <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
       </button>
     </div>
-    <chart type="area"
-           [config]="constants.FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.ftpRequestExceptionsTable.chart||[]"
+    <chart type="area" [config]="constants.FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE"
+           [data]="chartRequests?.ftpRequestExceptionsTable.chart || []"
            [isLoading]="chartRequests?.ftpRequestExceptionsTable?.isLoading" />
   </div>
 
-  <div style="display: flex; flex-direction: column; justify-content: space-between; width: 25%;" class="mat-elevation-z5">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin: 0 0 0 1em">
-      <div style="display: flex; flex-direction: column">
-        <div style="font-weight: 900">{{sparklineTitles.smtp.title}}</div>
-        <div style="font-style: italic; font-weight: 200; font-size: 12px">{{sparklineTitles.smtp.subtitle}}</div>
+  <div *ngIf="isCardVisible('smtpRequestExceptionsTable')" class="proto-card mat-elevation-z5">
+    <div class="proto-card__header">
+      <div class="proto-card__left">
+        <span class="proto-card__label">SMTP</span>
+        <div class="proto-card__perc">{{ getPercValue('smtpRequestExceptionsTable') | number:'1.2-2' }}<span class="proto-card__unit">%</span></div>
+        <div class="proto-card__meta">{{ sparklineTitles.smtp.subtitle }}</div>
       </div>
-      <button mat-icon-button [disabled]="chartRequests['smtpRequestExceptionsTable'].isLoading || !chartRequests['smtpRequestExceptionsTable'].data?.length" (click)="openProtocolDialog({observable: chartRequests['smtpRequestExceptionsTable'], type: 'SMTP'})">
+      <button mat-icon-button [disabled]="chartRequests['smtpRequestExceptionsTable'].isLoading || !chartRequests['smtpRequestExceptionsTable'].data?.length"
+              (click)="openProtocolDialog({observable: chartRequests['smtpRequestExceptionsTable'], type: 'SMTP'})">
         <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
       </button>
     </div>
-    <chart type="area"
-           [config]="constants.SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.smtpRequestExceptionsTable.chart||[]"
+    <chart type="area" [config]="constants.SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE"
+           [data]="chartRequests?.smtpRequestExceptionsTable.chart || []"
            [isLoading]="chartRequests?.smtpRequestExceptionsTable?.isLoading" />
   </div>
-  <div style="display: flex; flex-direction: column; justify-content: space-between; width: 25%;" class="mat-elevation-z5">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin: 0 0 0 1em">
-      <div style="display: flex; flex-direction: column">
-        <div style="font-weight: 900">{{sparklineTitles.ldap.title}}</div>
-        <div style="font-style: italic; font-weight: 200; font-size: 12px">{{sparklineTitles.ldap.subtitle}}</div>
+
+  <div *ngIf="isCardVisible('ldapRequestExceptionsTable')" class="proto-card mat-elevation-z5">
+    <div class="proto-card__header">
+      <div class="proto-card__left">
+        <span class="proto-card__label">LDAP</span>
+        <div class="proto-card__perc">{{ getPercValue('ldapRequestExceptionsTable') | number:'1.2-2' }}<span class="proto-card__unit">%</span></div>
+        <div class="proto-card__meta">{{ sparklineTitles.ldap.subtitle }}</div>
       </div>
-      <button mat-icon-button [disabled]="chartRequests['ldapRequestExceptionsTable'].isLoading || !chartRequests['ldapRequestExceptionsTable'].data?.length" (click)="openProtocolDialog({observable: chartRequests['ldapRequestExceptionsTable'], type: 'LDAP'})">
+      <button mat-icon-button [disabled]="chartRequests['ldapRequestExceptionsTable'].isLoading || !chartRequests['ldapRequestExceptionsTable'].data?.length"
+              (click)="openProtocolDialog({observable: chartRequests['ldapRequestExceptionsTable'], type: 'LDAP'})">
         <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
       </button>
     </div>
-    <chart type="area"
-           [config]="constants.LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.ldapRequestExceptionsTable.chart||[]"
+    <chart type="area" [config]="constants.LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE"
+           [data]="chartRequests?.ldapRequestExceptionsTable.chart || []"
            [isLoading]="chartRequests?.ldapRequestExceptionsTable?.isLoading" />
   </div>
+
 </div>
 
 <div class="card-container mat-elevation-z5" style="margin: 0; height: 400px">
