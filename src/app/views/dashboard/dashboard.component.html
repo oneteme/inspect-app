@@ -1,5 +1,5 @@
-<header-page [iconOutlined]="true" [titleIcon]="MAPPING_TYPE['dashboard'].icon" [ui-title]="MAPPING_TYPE['dashboard'].title">
-  
+﻿<header-page [iconOutlined]="true" [titleIcon]="MAPPING_TYPE['dashboard'].icon" [ui-title]="MAPPING_TYPE['dashboard'].title">
+
   <form [formGroup]="serverFilterForm" class="header-filter md-2">
     <mat-form-field class="no-subscript" appearance="outline">
       <mat-label>Période</mat-label>
@@ -14,9 +14,7 @@
     <mat-form-field class="no-subscript" [class.loading]="serverNameIsLoading" appearance="outline">
       <mat-label>Serveur</mat-label>
       <mat-select [formControl]="serverFilterForm.controls.appname" multiple>
-
-        <span *ngIf="serverNameIsLoading && params.serveurs[0]!=''"><mat-option *ngFor="let s of params.serveurs"
-            [value]="s">{{s}}</mat-option></span>
+        <span *ngIf="serverNameIsLoading && params.serveurs[0]!=''"><mat-option *ngFor="let s of params.serveurs" [value]="s">{{s}}</mat-option></span>
         <mat-option *ngFor="let d of nameDataList" [value]="d">{{d}}</mat-option>
       </mat-select>
       <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>
@@ -28,123 +26,371 @@
   </form>
 </header-page>
 
-<div style="display: flex; justify-content: space-between; gap: 1em; margin-bottom: 1em;">
-  <div style="display: flex; flex-direction: column; justify-content: space-between; width: 25%;" class="mat-elevation-z5">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin: 0 0 0 1em">
-      <div style="display: flex; flex-direction: column">
-        <div style="font-weight: 900">{{sparklineTitles.rest.title}}</div>
-        <div style="font-style: italic; font-weight: 200; font-size: 12px">{{sparklineTitles.rest.subtitle}}</div>
-      </div>
-      <button mat-icon-button [disabled]="chartRequests['restRequestExceptionsTable'].isLoading || !chartRequests['restRequestExceptionsTable'].data?.length" (click)="openProtocolDialog({observable: chartRequests['restRequestExceptionsTable'], type: 'REST'})">
-        <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
-      </button>
-    </div>
-    <chart type="area"
-           [config]="constants.REST_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.restRequestExceptionsTable.chart ||[]"
-           [isLoading]="chartRequests?.restRequestExceptionsTable?.isLoading" />
-  </div>
-
-  <div style="display: flex; flex-direction: column; justify-content: space-between; width: 25%;" class="mat-elevation-z5">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin: 0 0 0 1em">
-      <div style="display: flex; flex-direction: column">
-        <div style="font-weight: 900">{{sparklineTitles.jdbc.title}}</div>
-        <div style="font-style: italic; font-weight: 200; font-size: 12px">{{sparklineTitles.jdbc.subtitle}}</div>
-      </div>
-      <button mat-icon-button [disabled]="chartRequests['databaseRequestExceptionsTable'].isLoading || !chartRequests['databaseRequestExceptionsTable'].data?.length" (click)="openProtocolDialog({observable: chartRequests['databaseRequestExceptionsTable'], type: 'JDBC'})">
-        <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
-      </button>
-    </div>
-    <chart type="area"
-           [config]="constants.DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.databaseRequestExceptionsTable.chart|| []"
-           [isLoading]="chartRequests?.databaseRequestExceptionsTable?.isLoading" />
-  </div>
-
-  <div style="display: flex; flex-direction: column; justify-content: space-between; width: 25%;" class="mat-elevation-z5">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin: 0 0 0 1em">
-      <div style="display: flex; flex-direction: column">
-        <div style="font-weight: 900">{{sparklineTitles.ftp.title}}</div>
-        <div style="font-style: italic; font-weight: 200; font-size: 12px">{{sparklineTitles.ftp.subtitle}}</div>
-      </div>
-      <button mat-icon-button [disabled]="chartRequests['ftpRequestExceptionsTable'].isLoading || !chartRequests['ftpRequestExceptionsTable'].data?.length" (click)="openProtocolDialog({observable: chartRequests['ftpRequestExceptionsTable'], type: 'FTP'})">
-        <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
-      </button>
-    </div>
-    <chart type="area"
-           [config]="constants.FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.ftpRequestExceptionsTable.chart||[]"
-           [isLoading]="chartRequests?.ftpRequestExceptionsTable?.isLoading" />
-  </div>
-
-  <div style="display: flex; flex-direction: column; justify-content: space-between; width: 25%;" class="mat-elevation-z5">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin: 0 0 0 1em">
-      <div style="display: flex; flex-direction: column">
-        <div style="font-weight: 900">{{sparklineTitles.smtp.title}}</div>
-        <div style="font-style: italic; font-weight: 200; font-size: 12px">{{sparklineTitles.smtp.subtitle}}</div>
-      </div>
-      <button mat-icon-button [disabled]="chartRequests['smtpRequestExceptionsTable'].isLoading || !chartRequests['smtpRequestExceptionsTable'].data?.length" (click)="openProtocolDialog({observable: chartRequests['smtpRequestExceptionsTable'], type: 'SMTP'})">
-        <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
-      </button>
-    </div>
-    <chart type="area"
-           [config]="constants.SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.smtpRequestExceptionsTable.chart||[]"
-           [isLoading]="chartRequests?.smtpRequestExceptionsTable?.isLoading" />
-  </div>
-  <div style="display: flex; flex-direction: column; justify-content: space-between; width: 25%;" class="mat-elevation-z5">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin: 0 0 0 1em">
-      <div style="display: flex; flex-direction: column">
-        <div style="font-weight: 900">{{sparklineTitles.ldap.title}}</div>
-        <div style="font-style: italic; font-weight: 200; font-size: 12px">{{sparklineTitles.ldap.subtitle}}</div>
-      </div>
-      <button mat-icon-button [disabled]="chartRequests['ldapRequestExceptionsTable'].isLoading || !chartRequests['ldapRequestExceptionsTable'].data?.length" (click)="openProtocolDialog({observable: chartRequests['ldapRequestExceptionsTable'], type: 'LDAP'})">
-        <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
-      </button>
-    </div>
-    <chart type="area"
-           [config]="constants.LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.ldapRequestExceptionsTable.chart||[]"
-           [isLoading]="chartRequests?.ldapRequestExceptionsTable?.isLoading" />
-  </div>
+<!-- Banner : tous protocoles OK -->
+<div class="db-all-ok" *ngIf="!kpiLoading && inactiveProtocolsCount === 5 && !showInactiveProtocols">
+  <mat-icon class="material-symbols-outlined">check_circle</mat-icon>
+  <span>Aucun incident protocole sur la période sélectionnée</span>
+  <button (click)="showInactiveProtocols = true">Afficher l'activité</button>
 </div>
 
+<!-- Grille principale : protocoles (gauche) + sidebar (droite) -->
+<div class="db-grid">
 
+  <!-- Colonne principale : liste des protocoles -->
+  <section class="db-main">
 
-  <div class="tabs-container" style="flex: 1; min-height: 0;">
+    <div class="dmp-header">
+      <span class="dmp-title">Activité protocole</span>
+      <button class="dmp-toggle"
+          *ngIf="quietProtocols.length || showInactiveProtocols"
+          (click)="showInactiveProtocols = !showInactiveProtocols">
+        <mat-icon class="material-symbols-outlined">{{ showInactiveProtocols ? 'visibility_off' : 'visibility' }}</mat-icon>
+        {{ showInactiveProtocols ? 'Masquer inactifs' : 'Voir tous (' + quietProtocols.length + ')' }}
+      </button>
+    </div>
 
+    <div class="proto-list">
+      <ng-container *ngFor="let p of protocolDefs; trackBy: trackByKey">
+        <div class="proto-row"
+            *ngIf="chartRequests[p.reqKey].isLoading || chartRequests[p.reqKey].data?.length || showInactiveProtocols"
+            [class.pr-warn]="!chartRequests[p.reqKey].isLoading && getSparklinePerc(p.key) > 1 && getSparklinePerc(p.key) <= 5"
+            [class.pr-err]="!chartRequests[p.reqKey].isLoading && getSparklinePerc(p.key) > 5"
+            [class.pr-healthy]="!chartRequests[p.reqKey].isLoading && !chartRequests[p.reqKey].data?.length">
+
+          <!-- Tag protocole -->
+          <div class="pr-label">
+            <span class="pr-tag">{{ p.label }}</span>
+          </div>
+
+          <!-- Taux + volume -->
+          <div class="pr-kpi">
+            <span class="pr-rate"
+                [class.c-ok]="!chartRequests[p.reqKey].isLoading && !chartRequests[p.reqKey].data?.length"
+                [class.c-warn]="!chartRequests[p.reqKey].isLoading && getSparklinePerc(p.key) > 1 && getSparklinePerc(p.key) <= 5"
+                [class.c-err]="!chartRequests[p.reqKey].isLoading && getSparklinePerc(p.key) > 5">
+              <mat-spinner *ngIf="chartRequests[p.reqKey].isLoading" [diameter]="14" class="inline-spin"></mat-spinner>
+              <ng-container *ngIf="!chartRequests[p.reqKey].isLoading">{{ getSparklinePerc(p.key) | number:'1.2-2' }}%</ng-container>
+            </span>
+            <span class="pr-volume">{{ getSparklineSubtitle(p.key) }}</span>
+            <span class="pr-trend pr-trend-up"
+                *ngIf="!chartRequests[p.reqKey].isLoading && chartRequests[p.reqKey].chart?.length && getTrend(p.key) === 'up'">
+              <mat-icon class="material-symbols-outlined">trending_up</mat-icon>hausse
+            </span>
+            <span class="pr-trend pr-trend-down"
+                *ngIf="!chartRequests[p.reqKey].isLoading && chartRequests[p.reqKey].chart?.length && getTrend(p.key) === 'down'">
+              <mat-icon class="material-symbols-outlined">trending_down</mat-icon>baisse
+            </span>
+          </div>
+
+          <!-- Top 3 types d'erreur ou résumé activité -->
+          <div class="pr-errors">
+            <ng-container *ngIf="!chartRequests[p.reqKey].isLoading">
+              <ng-container *ngIf="topErrors[p.key]?.length; else prOkState">
+                <div class="pre-item" *ngFor="let e of topErrors[p.key]">
+                  <span class="pre-name" [title]="e.type">{{ e.type }}</span>
+                  <span class="pre-track"><span class="pre-fill" [style.width.%]="getProtoErrBarWidth(topErrors[p.key], e.count)"></span></span>
+                  <span class="pre-count">{{ e.count }}</span>
+                </div>
+              </ng-container>
+              <ng-template #prOkState>
+                <div class="pre-ok">
+                  <mat-icon class="material-symbols-outlined">check_circle</mat-icon>
+                  <span>Aucune erreur</span>
+                </div>
+              </ng-template>
+            </ng-container>
+          </div>
+
+          <!-- Bouton détail -->
+          <button class="pr-detail-btn"
+              [disabled]="chartRequests[p.reqKey].isLoading || !chartRequests[p.reqKey].data?.length"
+              (click)="openProtocolDialog({ observable: chartRequests[p.reqKey], type: p.label })"
+              title="Voir le détail des exceptions">
+            <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
+          </button>
+
+          <!-- Sparkline si erreurs, sinon résumé volume -->
+          <ng-container *ngIf="chartRequests[p.reqKey].isLoading || chartRequests[p.reqKey].chart?.length; else prNoChart">
+            <div class="pr-chart">
+              <chart type="area" [config]="p.chartConfig"
+                  [data]="chartRequests[p.reqKey].chart || []"
+                  [isLoading]="chartRequests[p.reqKey].isLoading" />
+            </div>
+          </ng-container>
+          <ng-template #prNoChart>
+            <div class="pr-volume-summary">
+              <span class="pvs-val">{{ getProtoTotalRequests(p.key) | number:'1.0-0' }}</span>
+              <span class="pvs-lbl">requêtes</span>
+              <div class="pvs-ok">
+                <mat-icon class="material-symbols-outlined">verified</mat-icon>
+                <span>0 erreur</span>
+              </div>
+            </div>
+          </ng-template>
+
+        </div>
+      </ng-container>
+    </div>
+
+    <!-- Insights : informations opérationnelles non affichées ailleurs -->
+    <div class="db-insights-wrap" *ngIf="serverHealthLoading || unstableServers.length || versionSummary.length > 1 || stoppedServers.length || divergentBranches.length || topSessionErrors.length || topBatchErrors.length">
+
+      <div class="db-insights-hdr">
+        <span class="dih-title">Infrastructure &amp; Erreurs</span>
+        <span class="dih-sub">Détails sur la même période analysée</span>
+      </div>
+
+      <div class="db-insights">
+
+      <!-- Skeleton -->
+      <div class="dbi-card dbi-skeleton" *ngIf="serverHealthLoading">
+        <div class="dbi-skel-line"></div>
+        <div class="dbi-skel-line dbi-skel-sm"></div>
+        <div class="dbi-skel-line dbi-skel-sm"></div>
+      </div>
+
+      <!-- Redémarrages fréquents -->
+      <div class="dbi-card" *ngIf="!serverHealthLoading && unstableServers.length">
+        <div class="dbi-header">
+          <mat-icon class="material-symbols-outlined">restart_alt</mat-icon>
+          <span>Redémarrages</span>
+          <span class="dbi-chip dbi-chip-warn">{{ unstableServers.length }}</span>
+        </div>
+        <div class="dbi-row dbi-row-link" *ngFor="let s of unstableServers; trackBy: trackByAppName" (click)="navigateToSupervision(s)">
+          <span class="dbi-dot dbi-dot-warn"></span>
+          <span class="dbi-name" [title]="s.appName">{{ s.appName }}</span>
+          <span class="dbi-badge dbi-badge-warn">{{ s.restart }}×</span>
+          <span class="dbi-meta">{{ s.version }}</span>
+          <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
+        </div>
+      </div>
+
+      <!-- Hétérogénéité de versions -->
+      <div class="dbi-card" *ngIf="!serverHealthLoading && versionSummary.length > 1">
+        <div class="dbi-header">
+          <mat-icon class="material-symbols-outlined">deployed_code</mat-icon>
+          <span>Versions actives</span>
+          <span class="dbi-chip dbi-chip-info">{{ versionSummary.length }}</span>
+        </div>
+        <div class="dbi-row" *ngFor="let v of versionSummary; let first = first; trackBy: trackByVersion">
+          <span class="dbi-dot" [class.dbi-dot-ok]="first"></span>
+          <span class="dbi-name">{{ v.version }}</span>
+          <span class="dbi-badge">{{ v.count }} serv.</span>
+        </div>
+      </div>
+
+      <!-- Serveurs arrêtés (end !== null) -->
+      <div class="dbi-card" *ngIf="!serverHealthLoading && stoppedServers.length">
+        <div class="dbi-header">
+          <mat-icon class="material-symbols-outlined">stop_circle</mat-icon>
+          <span>Serveurs arrêtés</span>
+          <span class="dbi-chip dbi-chip-err">{{ stoppedServers.length }}</span>
+        </div>
+        <div class="dbi-row dbi-row-link" *ngFor="let s of stoppedServers; trackBy: trackByAppName" (click)="navigateToSupervision(s)">
+          <span class="dbi-dot dbi-dot-err"></span>
+          <span class="dbi-name" [title]="s.appName">{{ s.appName }}</span>
+          <span class="dbi-meta">{{ s.end | date:'dd/MM HH:mm' }}</span>
+          <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
+        </div>
+      </div>
+
+      <!-- Branches non-main actives -->
+      <div class="dbi-card" *ngIf="!serverHealthLoading && divergentBranches.length">
+        <div class="dbi-header">
+          <mat-icon class="material-symbols-outlined">alt_route</mat-icon>
+          <span>Branches actives</span>
+          <span class="dbi-chip dbi-chip-warn">{{ divergentBranches.length }}</span>
+        </div>
+        <div class="dbi-row" *ngFor="let b of divergentBranches; trackBy: trackByBranch">
+          <span class="dbi-dot dbi-dot-warn"></span>
+          <span class="dbi-name dbi-mono" [title]="b.branch">{{ b.branch }}</span>
+          <span class="dbi-badge">{{ b.count }} serv.</span>
+        </div>
+      </div>
+
+      <!-- Exceptions HTTP reçues sur les sessions REST -->
+      <div class="dbi-card" *ngIf="tabRequests.sessionExceptionsTable?.isLoading !== false || topSessionErrors.length">
+        <div class="dbi-header">
+          <mat-icon class="material-symbols-outlined">http</mat-icon>
+          <span>Exceptions REST reçues</span>
+          <span class="dbi-chip dbi-chip-err" *ngIf="tabRequests.sessionExceptionsTable?.isLoading === false && topSessionErrors.length">{{ topSessionErrors.length }}</span>
+        </div>
+        <ng-container *ngIf="tabRequests.sessionExceptionsTable?.isLoading !== false">
+          <div class="dbi-skel-row" *ngFor="let _ of [1,2,3]"></div>
+        </ng-container>
+        <ng-container *ngIf="tabRequests.sessionExceptionsTable?.isLoading === false">
+          <div class="dbi-row dbi-row-link" *ngFor="let e of topSessionErrors; trackBy: trackByType" (click)="navigateToException(e.type, 'rest')">
+            <span class="dbi-dot dbi-dot-err"></span>
+            <span class="dbi-name" [title]="e.type">{{ e.type }}</span>
+            <div class="dbi-bar-wrap"><div class="dbi-bar dbi-bar-err" [style.width.%]="getErrBarWidth(topSessionErrors, e.count)"></div></div>
+            <span class="dbi-badge dbi-badge-warn">{{ e.count }}</span>
+            <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- Exceptions des tâches batch planifiées -->
+      <div class="dbi-card" *ngIf="tabRequests.batchExceptionTable?.isLoading !== false || topBatchErrors.length">
+        <div class="dbi-header">
+          <mat-icon class="material-symbols-outlined">schedule</mat-icon>
+          <span>Exceptions tâches batch</span>
+          <span class="dbi-chip dbi-chip-err" *ngIf="tabRequests.batchExceptionTable?.isLoading === false && topBatchErrors.length">{{ topBatchErrors.length }}</span>
+        </div>
+        <ng-container *ngIf="tabRequests.batchExceptionTable?.isLoading !== false">
+          <div class="dbi-skel-row" *ngFor="let _ of [1,2,3]"></div>
+        </ng-container>
+        <ng-container *ngIf="tabRequests.batchExceptionTable?.isLoading === false">
+          <div class="dbi-row dbi-row-link" *ngFor="let e of topBatchErrors; trackBy: trackByType" (click)="navigateToException(e.type, 'batch')">
+            <span class="dbi-dot dbi-dot-err"></span>
+            <span class="dbi-name" [title]="e.type">{{ e.type }}</span>
+            <div class="dbi-bar-wrap"><div class="dbi-bar dbi-bar-err" [style.width.%]="getErrBarWidth(topBatchErrors, e.count)"></div></div>
+            <span class="dbi-badge dbi-badge-warn">{{ e.count }}</span>
+            <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
+          </div>
+        </ng-container>
+      </div>
+
+      </div><!-- fin .db-insights -->
+
+      <!-- F : carte infrastructure saine -->
+      <div class="dbi-all-clear" *ngIf="insightsAllClear">
+        <mat-icon class="material-symbols-outlined">verified</mat-icon>
+        <span>Infrastructure saine — aucun incident détecté</span>
+      </div>
+
+    </div><!-- fin .db-insights-wrap -->
+
+  </section>
+
+  <!-- Sidebar : KPIs globaux + serveurs -->
+  <aside class="db-sidebar">
+
+    <!-- Bloc KPIs + distribution + actions -->
+    <div class="sb-block">
+
+      <div class="sb-kpi-grid">
+        <div class="sbk-item sbk-item-link" (click)="navigateToDeploiment()">
+          <span class="sbk-val">{{ nameDataList?.length ?? '—' }}</span>
+          <span class="sbk-lbl">Serveurs <mat-icon class="sbk-ext material-symbols-outlined">open_in_new</mat-icon></span>
+        </div>
+        <div class="sbk-item">
+          <span class="sbk-val"
+              [class.c-ok]="globalKpi && globalKpi.globalErrorRate <= 1"
+              [class.c-warn]="globalKpi && globalKpi.globalErrorRate > 1 && globalKpi.globalErrorRate <= 5"
+              [class.c-err]="globalKpi && globalKpi.globalErrorRate > 5">
+            <mat-spinner *ngIf="kpiLoading" [diameter]="14" class="inline-spin"></mat-spinner>
+            <ng-container *ngIf="!kpiLoading">{{ globalKpi?.globalErrorRate | number:'1.2-2' }}%</ng-container>
+          </span>
+          <span class="sbk-lbl">Taux d'erreur</span>
+        </div>
+        <div class="sbk-item">
+          <span class="sbk-val">
+            <mat-spinner *ngIf="kpiLoading" [diameter]="14" class="inline-spin"></mat-spinner>
+            <ng-container *ngIf="!kpiLoading">{{ globalKpi?.totalSessions | number:'1.0-0' }}</ng-container>
+          </span>
+          <span class="sbk-lbl">Requêtes</span>
+        </div>
+        <div class="sbk-item" [class.sbk-has-err]="!kpiLoading && globalKpi?.totalErrors > 0">
+          <span class="sbk-val" [class.c-err]="!kpiLoading && globalKpi && globalKpi.totalErrors > 0">
+            <mat-spinner *ngIf="kpiLoading" [diameter]="14" class="inline-spin"></mat-spinner>
+            <ng-container *ngIf="!kpiLoading">{{ globalKpi?.totalErrors | number:'1.0-0' }}</ng-container>
+          </span>
+          <span class="sbk-lbl">Erreurs</span>
+        </div>
+      </div>
+
+      <div class="sb-distribution" *ngIf="!kpiLoading && protocolSummaries.length">
+        <div class="sbd-title">Répartition par protocole</div>
+        <div class="sbd-row" *ngFor="let p of protocolSummaries"
+          [title]="(p.total | number:'1.0-0') + ' requêtes · ' + (p.count | number:'1.0-0') + ' erreurs'">
+          <span class="sbd-label">{{ p.label }}</span>
+          <div class="sbd-track">
+            <div class="sbd-fill"
+                [class.fill-ok]="p.rate <= 1"
+                [class.fill-warn]="p.rate > 1 && p.rate <= 5"
+                [class.fill-err]="p.rate > 5"
+                [style.width.%]="getProtoBarWidth(p.count)"></div>
+          </div>
+          <span class="sbd-count">{{ p.count }}</span>
+          <span class="sbd-rate"
+              [class.c-ok]="p.rate <= 1"
+              [class.c-warn]="p.rate > 1 && p.rate <= 5"
+              [class.c-err]="p.rate > 5">{{ p.rate | number:'1.2-2' }}%</span>
+        </div>
+      </div>
+
+      <div class="sb-nav" *ngIf="!kpiLoading">
+        <button class="sbn-btn sbn-primary" *ngIf="globalKpi?.totalErrors > 0" (click)="navigateToSessionRest()">
+          <mat-icon class="material-symbols-outlined">arrow_outward</mat-icon>Détail des erreurs
+        </button>
+        <button class="sbn-btn" (click)="navigateToDeploiment()">
+          <mat-icon class="material-symbols-outlined">dns</mat-icon>Vue déploiement
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Bloc serveurs actifs -->
+    <div class="sb-block sb-servers-block" *ngIf="serverHealthLoading || serverHealthData?.length">
+      <div class="sb-block-head">
+        <mat-icon class="material-symbols-outlined">dns</mat-icon>
+        <span>Serveurs actifs</span>
+        <span class="sb-badge" *ngIf="!serverHealthLoading">{{ serverHealthData?.length }}</span>
+        <button class="sb-head-link" (click)="navigateToDeploiment()">
+          <mat-icon class="material-symbols-outlined">open_in_new</mat-icon>
+        </button>
+      </div>
+      <div class="server-list">
+        <ng-container *ngIf="serverHealthLoading">
+          <div class="sl-skel" *ngFor="let _ of [1,2,3,4,5,6]"></div>
+        </ng-container>
+        <ng-container *ngIf="!serverHealthLoading">
+          <div class="sl-item" *ngFor="let server of serverHealthData; trackBy: trackByAppName" (click)="navigateToSupervision(server)">
+            <span class="sl-dot"
+                [class.sl-on]="!server.end && !isRecentlyStarted(server)"
+                [class.sl-recent]="isRecentlyStarted(server)"
+                [class.sl-off]="!!server.end"></span>
+            <div class="sl-info">
+              <span class="sl-name">{{ server.appName }}</span>
+              <span class="sl-meta">{{ server.version }} · {{ server.lastStart | date:'dd/MM HH:mm' }}<ng-container *ngIf="server.restart > 1"> · <span class="sl-rstrt">↺{{ server.restart }}</span></ng-container></span>
+            </div>
+          </div>
+        </ng-container>
+      </div>
+    </div>
+
+  </aside>
+
+</div>
+<!-- Exceptions (pleine largeur) -->
+<div class="db-exceptions">
+
+  <div class="db-exc-empty" *ngIf="exceptionsAllEmpty">
+    <mat-icon class="material-symbols-outlined">check_circle</mat-icon>
+    <span>Aucune exception serveur ni batch sur la période</span>
+  </div>
+
+  <div class="tabs-container" *ngIf="!exceptionsAllEmpty" style="flex: 1; min-height: 0;">
     <div class="vertical-tabs">
       <div class="tab-button" [class.active]="selectedExceptionTab === 0" (click)="selectedExceptionTab = 0">
         <mat-icon class="material-symbols-outlined">dns</mat-icon>
-        <div class="tab-label-container">
-          <span class="tab-label">Erreur Serveur</span>
-        </div>
-        <span class="tab-count" *ngIf="tabRequests.sessionExceptionsTable?.data?.length">
-          {{ tabRequests.sessionExceptionsTable.data.length }}
-        </span>
+        <div class="tab-label-container"><span class="tab-label">Erreur Serveur</span></div>
+        <span class="tab-count" *ngIf="tabRequests.sessionExceptionsTable?.data?.length">{{ tabRequests.sessionExceptionsTable.data.length }}</span>
       </div>
-
       <div class="tab-button" [class.active]="selectedExceptionTab === 1" (click)="selectedExceptionTab = 1">
         <mat-icon class="material-symbols-outlined">terminal</mat-icon>
-        <div class="tab-label-container">
-          <span class="tab-label">Erreur Batch</span>
-        </div>
-        <span class="tab-count" *ngIf="tabRequests.batchExceptionTable?.data?.length">
-          {{ tabRequests.batchExceptionTable.data.length }}
-        </span>
+        <div class="tab-label-container"><span class="tab-label">Erreur Batch</span></div>
+        <span class="tab-count" *ngIf="tabRequests.batchExceptionTable?.data?.length">{{ tabRequests.batchExceptionTable.data.length }}</span>
       </div>
     </div>
-
     <div class="tab-content">
       <div class="tab-panel" [class.hidden]="selectedExceptionTab !== 0">
-        <exceptions-table
-          [data]="tabRequests.sessionExceptionsTable?.data"
-          [isLoading]="tabRequests.sessionExceptionsTable?.isLoading"
-          (onRowSelected)="onSessionExceptionRowSelected($event)">
-        </exceptions-table>
+        <exceptions-table [data]="tabRequests.sessionExceptionsTable?.data" [isLoading]="tabRequests.sessionExceptionsTable?.isLoading" (onRowSelected)="onSessionExceptionRowSelected($event)"></exceptions-table>
       </div>
       <div class="tab-panel" [class.hidden]="selectedExceptionTab !== 1">
-        <exceptions-table
-          [data]="tabRequests.batchExceptionTable?.data"
-          [isLoading]="tabRequests.batchExceptionTable?.isLoading"
-          (onRowSelected)="onBatchExceptionRowSelected($event)">
-        </exceptions-table>
+        <exceptions-table [data]="tabRequests.batchExceptionTable?.data" [isLoading]="tabRequests.batchExceptionTable?.isLoading" (onRowSelected)="onBatchExceptionRowSelected($event)"></exceptions-table>
       </div>
     </div>
-
   </div>
+
+</div>

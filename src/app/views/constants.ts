@@ -692,6 +692,36 @@ export class Constants {
             }
         }
     };
+
+    static readonly SESSION_ERRORS_BAR: ChartProvider<string, number> = {
+        height: 185,
+        series: [
+            { data: { x: field('type'), y: field('count') }, name: '', color: '#ef4444' }
+        ],
+        options: {
+            chart: { toolbar: { show: false }, animations: { enabled: false } },
+            plotOptions: { bar: { horizontal: true, barHeight: '60%', borderRadius: 2 } },
+            dataLabels: { enabled: false },
+            legend: { show: false },
+            tooltip: { followCursor: true },
+            xaxis: { labels: { show: false } },
+            yaxis: {
+                labels: {
+                    maxWidth: 168,
+                    style: { fontSize: '10px' },
+                    formatter: (val: any) => {
+                        if (!val) return '';
+                        const s = String(val);
+                        const short = s.includes('$') ? s.slice(s.lastIndexOf('$') + 1)
+                            : s.includes('.') ? s.slice(s.lastIndexOf('.') + 1)
+                            : s;
+                        return short.length > 26 ? short.slice(0, 24) + '…' : short;
+                    }
+                }
+            },
+            grid: { yaxis: { lines: { show: false } }, xaxis: { lines: { show: false } } }
+        }
+    };
 }
 
 export class Filter {
