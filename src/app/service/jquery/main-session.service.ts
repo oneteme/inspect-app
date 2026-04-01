@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import {map, Observable} from "rxjs";
+import {combineLatest, map, Observable} from "rxjs";
 import { FilterMap } from "../../views/constants";
 import {
     MainExceptionsByPeriodAndAppname,
@@ -257,5 +257,26 @@ export class MainSessionService {
             'instance.environement': filters.env,
             'instance.type': 'CLIENT'
         }).pipe(map((data: {user: string}[]) => (data.map(d => d.user))));
+    }
+
+    getCountByType(filters: {env: string, start: Date, end: Date}): Observable<{type: string, total: number, errors: number}[]> {
+        const base = {
+            'column': 'type,count:count',
+            'join': 'instance',
+            'instance.environement': filters.env,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString()
+        };
+        const total$ = this.getMainSession<{type: string, count: number}[]>(base);
+        const errors$ = this.getMainSession<{type: string, count: number}[]>({ ...base, 'err_type.notNull': '' });
+        return combineLatest([total$, errors$]).pipe(
+            map(([totals, errors]) =>
+                totals.map(t => ({
+                    type: t.type,
+                    total: t.count,
+                    errors: errors.find(e => e.type === t.type)?.count ?? 0
+                }))
+            )
+        );
     }
 }

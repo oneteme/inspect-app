@@ -35,7 +35,7 @@ import {
 import {StatisticClientView} from "./statistic/view/statistic-client.view";
 import {ArchitectureView} from "./architecture/architecture.view";
 import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
-import {NumberFormatterPipe} from '../shared/pipe/number.pipe';
+import {NumberFormatterPipe, CompactNumberPipe} from '../shared/pipe/number.pipe';
 import {DeploimentComponent} from './deploiment/deploiment.component';
 import {StatisticServerView} from "./statistic/server/statistic-server.view";
 import {RestTabComponent} from "./statistic/server/_component/rest-tab/rest-tab.component";
@@ -143,6 +143,7 @@ import {DynamicChartComponent} from "./statistic/_component/dynamic-chart/dynami
     PerformanceCardComponent,
     DependencyCardComponent,
     NumberFormatterPipe,
+    CompactNumberPipe,
     DeploimentComponent,
     AnalyticView,
     ActionTableComponent,

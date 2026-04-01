@@ -362,4 +362,17 @@ export class RestSessionService {
         }
         return this.getRestSession(args);
     }
+
+    getCountByEnv(filters: {env: string, start: Date, end: Date}): Observable<{total: number, errors: number}> {
+        return this.getRestSession<{count: number, countErrorServer: number, countErrorClient: number}[]>({
+            'column': 'count:count,count_error_server:countErrorServer,count_error_client:countErrorClient',
+            'join': 'instance',
+            'instance.environement': filters.env,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString()
+        }).pipe(map(data => {
+            const d = data[0];
+            return d ? { total: d.count, errors: (d.countErrorServer ?? 0) + (d.countErrorClient ?? 0) } : { total: 0, errors: 0 };
+        }));
+    }
 }

@@ -90,6 +90,11 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
 
     serverHealthData: LastServerStart[] = [];
     serverHealthLoading = true;
+    sessionCountData: { type: string; total: number; errors: number }[] = [];
+    sessionCountLoading = true;
+    restSessionCount: { total: number; errors: number } = { total: 0, errors: 0 };
+    frontendCount: number | null = null;
+    userCount: number | null = null;
     globalKpi: { globalErrorRate: number; totalSessions: number; totalErrors: number } | null = null;
     kpiLoading = true;
     sparklinePercs: { rest: number; jdbc: number; ftp: number; smtp: number; ldap: number } = { rest: 0, jdbc: 0, ftp: 0, smtp: 0, ldap: 0 };
@@ -120,6 +125,12 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                             console.log(e)
                         }
                     }));
+                this.frontendCount = null;
+                this.subscriptions.push(this._instanceService.getApplications('CLIENT', this.params.env)
+                    .subscribe({ next: (apps) => { this.frontendCount = apps.length; console.log('[Dashboard] Frontend apps:', apps); } }));
+                this.userCount = null;
+                this.subscriptions.push(this._mainService.getUsersView({ env: this.params.env, date: this.params.start })
+                    .subscribe({ next: (users) => this.userCount = users.length }));
                 let serverParam = this.createServerFilter();
                 this.chartRequests = this.REQUESTS(this.params.env, this.params.start, this.params.end, serverParam.app_name);
                 this.tabRequests   = this.TAB_REQUESTS(this.params.env, this.params.start, this.params.end, serverParam.app_name);
@@ -127,6 +138,14 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                 this.initTab();
                 this.initCharts();
                 this.loadServerHealth(this.params.env);
+                this.sessionCountData = [];
+                this.sessionCountLoading = true;
+                this.restSessionCount = { total: 0, errors: 0 };
+                this.subscriptions.push(this._sessionService.getCountByEnv({ env: this.params.env, start: this.params.start, end: this.params.end })
+                    .subscribe({ next: (data) => this.restSessionCount = data }));
+                this.subscriptions.push(this._mainService.getCountByType({ env: this.params.env, start: this.params.start, end: this.params.end })
+                    .pipe(finalize(() => this.sessionCountLoading = false))
+                    .subscribe({ next: (data) => this.sessionCountData = data }));
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${this.params.serveurs.length > 0 ? '&' + this.params.serveurs.map(name => `appname=${name}`).join('&') : ''}`)
             }
         }));
@@ -389,8 +408,8 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
     }
 
     getProtoBarWidth(count: number): number {
-        if (!this.globalKpi?.totalErrors) return 0;
-        return Math.min(Math.round((count / this.globalKpi.totalErrors) * 100), 100);
+        if (!this.globalKpi?.totalSessions) return 0;
+        return Math.min(Math.round((count / this.globalKpi.totalSessions) * 100), 100);
     }
 
     getErrBarWidth(list: { count: number }[], count: number): number {
@@ -404,13 +423,71 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
 
     get insightsAllClear(): boolean {
         return !this.serverHealthLoading
-            && !this.unstableServers.length
             && !this.stoppedServers.length
-            && !this.divergentBranches.length
             && this.tabRequests.sessionExceptionsTable?.isLoading === false
             && this.tabRequests.batchExceptionTable?.isLoading === false
             && !this.topSessionErrors.length
-            && !this.topBatchErrors.length;
+            && !this.topBatchErrors.length
+            && !this.hasRequestErrors
+            && !this.sessionInitErrors
+            && !this.sessionWebErrors
+            && !this.sessionTestErrors;
+    }
+
+    get hasRequestErrors(): boolean {
+        return Object.values(this.topErrors).some(e => e?.length > 0);
+    }
+
+    get sessionInitErrors(): number {
+        return this.sessionCountData.find(d => d.type === 'STARTUP')?.errors ?? 0;
+    }
+
+    get sessionWebErrors(): number {
+        return this.sessionCountData.find(d => d.type === 'VIEW')?.errors ?? 0;
+    }
+
+    get sessionTestErrors(): number {
+        return this.sessionCountData.find(d => d.type === 'TEST')?.errors ?? 0;
+    }
+
+    navigateToRequestProtocol(key: string, errorType: string): void {
+        const routes: Record<string, string> = {
+            rest:  '/request/rest',
+            jdbc:  '/request/jdbc',
+            ftp:   '/request/ftp',
+            smtp:  '/request/smtp',
+            ldap:  '/request/ldap',
+        };
+        const target = routes[key];
+        if (!target) return;
+        this._router.navigate([target], {
+            queryParams: {
+                env: this.params.env,
+                start: this.params.start?.toISOString(),
+                end: this.params.end?.toISOString(),
+                q: errorType,
+                server: this.params.serveurs,
+            }
+        });
+    }
+
+    navigateToSessionByType(sessionType: string): void {
+        const routes: Record<string, string> = {
+            STARTUP: '/session/startup',
+            VIEW:    '/session/view',
+            TEST:    '/session/test',
+        };
+        const target = routes[sessionType];
+        if (!target) return;
+        this._router.navigate([target], {
+            queryParams: {
+                env: this.params.env,
+                start: this.params.start?.toISOString(),
+                end: this.params.end?.toISOString(),
+                server: this.params.serveurs,
+                rangestatus: ['Ko'],
+            }
+        });
     }
 
     navigateToException(type: string, tab: 'rest' | 'batch') {
@@ -482,7 +559,41 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         return entries.map(p => {
             const s = this.sumcounts(this.chartRequests[p.reqKey]?.chart ?? []);
             return { label: p.label, rate: p.rate, count: s.count, total: s.countok };
-        }).filter(p => p.count > 0).sort((a, b) => b.count - a.count);
+        });
+    }
+
+    get sessionSummaries(): { label: string; errors: number; total: number; rate: number; barPct: number }[] {
+        const types = [
+            { type: 'REST',    label: 'Service' },
+            { type: 'BATCH',   label: 'Batch' },
+            { type: 'STARTUP', label: 'Init' },
+            { type: 'VIEW',    label: 'Web' },
+            { type: 'TEST',    label: 'Test' },
+        ];
+        const overallTotal = this.sessionCountData.reduce((s, d) => s + d.total, 0) + this.restSessionCount.total;
+        return types.map(t => {
+            let total: number;
+            let errors: number;
+            if (t.type === 'REST') {
+                total = this.restSessionCount.total;
+                errors = this.restSessionCount.errors;
+            } else {
+                const found = this.sessionCountData.find(d => d.type === t.type);
+                total = found?.total ?? 0;
+                errors = found?.errors ?? 0;
+            }
+            return {
+                label: t.label,
+                errors,
+                total,
+                rate: total > 0 ? (errors * 100) / total : 0,
+                barPct: overallTotal > 0 ? (total * 100) / overallTotal : 0
+            };
+        });
+    }
+
+    get sessionTotal(): number {
+        return this.sessionCountData.reduce((s, d) => s + d.total, 0) + this.restSessionCount.total;
     }
 
     navigateToSupervision(server: LastServerStart) {
