@@ -386,11 +386,14 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
 export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTrace?: number }> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'Hôte', icon: 'dns', width: '23%', groupable: false, sliceable: false },
-    { key: 'duration', header: 'Depuis', icon: 'schedule', width: '14%', groupable: false },
-    { key: 'version', header: 'Version', icon: 'label' },
-    { key: 'branch',  header: 'Branche', icon: 'fork_right', width: '25%' },
-    { key: 'restart', header: 'Démarrage', icon: 'restart_alt', width: '13%', groupable: false, sliceable: false }
+    { key: 'appName', header: 'Hôte', icon: 'dns', groupable: false, sliceable: false, width: '20%' },
+    { key: 'duration', header: 'Depuis', icon: 'schedule', groupable: false, width: '15%' },
+    { key: 'version', header: 'Version', icon: 'label', width: '15%' },
+    { key: 'branch',  header: 'Branche', icon: 'fork_right', width: '20%' },
+    { key: 'restart', header: 'Démarrage', icon: 'restart_alt', groupable: false, sliceable: false },
+    { key: 'os', header: 'OS', icon: 'computer', optional: true },
+    { key: 're', header: 'RE', icon: 'sdk', optional: true },
+    { key: 'user', header: 'Utilisateur', icon: 'person', optional: true }
   ],
   defaultSort: { active: 'duration', direction: 'asc' },
   slices: [

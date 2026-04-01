@@ -2,6 +2,7 @@ import {Component, EventEmitter, Input, OnDestroy, Output} from "@angular/core";
 import {RestRequestDto} from "../../../../../model/request.model";
 import {TableProvider} from '@oneteme/jquery-table';
 import {REST_REQUEST_TABLE_CONFIG} from "../../../../../shared/_component/table/table.config";
+import {QueryParams} from "../../../../../model/conf.model";
 
 @Component({
   selector: 'rest-table',
@@ -17,6 +18,13 @@ export class DetailRestTableComponent {
   _requests: RestRequestDto[] = [];
 
   @Input() isLoading: boolean;
+
+  @Input() set initialSearch(value: string) {
+    this.tableConfig = {
+      ...this.tableConfig,
+      search: { ...this.tableConfig?.search, initialQuery: value }
+    }
+  }
 
   @Input() set requests(requests: RestRequestDto[]) {
     this._requests = requests;

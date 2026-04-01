@@ -28,7 +28,7 @@
         </div>
       </div>
 
-      <button mat-icon-button [matMenuTriggerFor]="menu" class="menu-btn">
+      <button mat-icon-button *ngIf="menu" [matMenuTriggerFor]="menu" class="menu-btn">
         <mat-icon>more_vert</mat-icon>
       </button>
     </div>
@@ -38,22 +38,15 @@
       <div class="info-chips">
 
         <!-- Version -->
-        <div class="info-chip version-chip" *ngIf="_instance?.version"
-             [class.clickable]="_instance?.configuration"
-             (click)="_instance?.configuration ? openConfig(_instance.configuration, $event) : null"
-             [matTooltip]="_instance?.collector || ''">
-          <mat-icon class="material-symbols-outlined chip-icon">label</mat-icon>
-          <span class="chip-value">{{ _instance.version }}</span>
-          <mat-icon class="material-symbols-outlined chip-action" *ngIf="_instance?.configuration">settings</mat-icon>
-        </div>
+        <app-version-badge
+          [version]="_instance?.version"
+          [collector]="_instance?.collector"
+          [configuration]="_instance?.configuration"
+          [name]="_instance?.name">
+        </app-version-badge>
 
         <!-- Branche / hash -->
-        <div class="info-chip branch-chip" *ngIf="_instance?.branch" [matTooltip]="_instance.branch">
-          <mat-icon class="material-symbols-outlined chip-icon">code_blocks</mat-icon>
-          <span class="chip-value ellipsis">{{ _instance.branch }}</span>
-          <span class="chip-sep" *ngIf="_instance?.hash">/</span>
-          <span class="chip-hash" *ngIf="_instance?.hash">{{ _instance.hash | slice:0:7 }}</span>
-        </div>
+        <app-branch-chip [branch]="_instance?.branch" [hash]="_instance?.hash"/>
 
         <!-- OS / Runtime -->
         <div class="info-chip os-chip" *ngIf="_instance?.os"

@@ -7,6 +7,6 @@ import {MAT_DIALOG_DATA} from "@angular/material/dialog";
 })
 export class PulseDialogComponent {
 
-  constructor(@Inject(MAT_DIALOG_DATA) public data: {instance: string, instanceStart: Date, start: Date, end: Date}) { }
+  constructor(@Inject(MAT_DIALOG_DATA) public data: {name: string, instance: string, instanceStart: Date, start: Date, end: Date}) { }
 
 }

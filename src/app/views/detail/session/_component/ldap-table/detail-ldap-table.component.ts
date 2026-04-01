@@ -19,7 +19,12 @@ export class DetailLdapTableComponent {
   @Input() set requests(requests: DirectoryRequestDto[]) {
     this._requests = requests;
   }
-
+  @Input() set initialSearch(value: string) {
+    this.tableConfig = {
+      ...this.tableConfig,
+      search: { ...this.tableConfig?.search, initialQuery: value }
+    }
+  }
   @Input() isLoading: boolean;
   @Output() onClickRow: EventEmitter<{ event: MouseEvent, row: string }> = new EventEmitter();
 

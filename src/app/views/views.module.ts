@@ -41,7 +41,6 @@ import {StatisticServerView} from "./statistic/server/statistic-server.view";
 import {RestTabComponent} from "./statistic/server/_component/rest-tab/rest-tab.component";
 import {BatchTabComponent} from "./statistic/server/_component/batch-tab/batch-tab.component";
 import {DependencyTableComponent} from "./statistic/server/_component/dependency-table/dependency-table.component";
-import {ExceptionsTableComponent} from "./statistic/server/_component/exceptions-table/exceptions-table.component";
 import {EvolUserCardComponent} from "./statistic/server/_component/evol-user-card/evol-user-card.component";
 import {PerformanceCardComponent} from "./statistic/_component/performance-card/performance-card.component";
 import {DependencyCardComponent} from "./statistic/server/_component/dependency-card/dependency-card.component";
@@ -54,7 +53,6 @@ import {DetailTimelineComponent} from "./detail/session/_component/timeline/deta
 import {ActionTableComponent} from "./detail/session/_component/action-table/action-table.component";
 import {DetailRequestView} from "./detail/request/detail-request.view";
 import {DetailRestView} from "./detail/request/rest/detail-rest.view";
-import {ConfigDialogComponent} from "./supervision/_component/config-dialog/config-dialog.component";
 import {StatisticRequestView} from "./statistic/request/statistic-request.view";
 import {StatisticRequestJdbcComponent} from "./statistic/request/jdbc/statistic-request-jdbc.component";
 import {StatisticRequestFtpComponent} from "./statistic/request/ftp/statistic-request-ftp.component";
@@ -137,7 +135,6 @@ import {DynamicChartComponent} from "./statistic/_component/dynamic-chart/dynami
     RestTabComponent,
     BatchTabComponent,
     DependencyTableComponent,
-    ExceptionsTableComponent,
     RestRepartitionTypeCardComponent,
     EvolUserCardComponent,
     PerformanceCardComponent,
@@ -147,7 +144,6 @@ import {DynamicChartComponent} from "./statistic/_component/dynamic-chart/dynami
     AnalyticView,
     ActionTableComponent,
     SearchRequestView,
-    ConfigDialogComponent,
     MailTableComponent,
     ServerInstanceSelectorDialogComponent,
     ClientInstanceSelectorDialogComponent,

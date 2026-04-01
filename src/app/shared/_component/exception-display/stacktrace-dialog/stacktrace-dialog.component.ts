@@ -11,7 +11,7 @@ export class StacktraceDialogComponent {
   _stacktrace: string = null;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: { type: string, message: string, stackTraceRows: StackTraceRow[] }
+    @Inject(MAT_DIALOG_DATA) public data: {type: string, message: string, stackTraceRows: StackTraceRow[] }
   ) {
     this._stacktrace = this.stacktraceFormatter(data.message, data.stackTraceRows);
   }

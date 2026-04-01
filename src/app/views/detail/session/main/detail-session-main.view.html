@@ -69,7 +69,7 @@
     </div>
 
     <!-- ═══ CARTE SERVEUR ═══ -->
-    <app-server-card class="server-card-host" [menu]="menuServer" [instance]="instance"></app-server-card>
+    <app-server-card class="server-card-host" [menu]="session?.type != 'VIEW' ? menuServer : null" [instance]="instance"></app-server-card>
   </div>
 
   <detail-session [session]="session" [completedSession]="completedSession"
@@ -96,41 +96,18 @@
      [disabled]="!session?.user">
     <mat-icon class="material-symbols-outlined">web_traffic</mat-icon>Parcours Utilisateur
   </a>
-  <button mat-menu-item *ngIf="session?.type == 'BATCH'" [matMenuTriggerFor]="menuStatistic">
-    <mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI
-  </button>
-  <a mat-menu-item *ngIf="session?.type != 'BATCH'"
-     [routerLink]="['/dashboard', 'user', session?.user]"
-     [ngStyle]="{'pointer-events': !session?.user ? 'none' : ''}"
-     [disabled]="!session?.user">
-    <mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Utilisateur
-  </a>
-</mat-menu>
-
-<mat-menu #menuStatistic="matMenu">
-  <a mat-menu-item [routerLink]="['/dashboard', 'server', instance?.name]"
+  <a mat-menu-item *ngIf="session?.type == 'BATCH'" [routerLink]="['/dashboard', 'server', instance?.name]"
      [queryParams]="{tab: 1, batch_name: session?.name, env: instance?.env}">
-    <mat-icon class="material-symbols-outlined">manufacturing</mat-icon>Batch
-  </a>
-  <a mat-menu-item [routerLink]="['/dashboard', 'user', session?.user]" [disabled]="!session?.user">
-    <mat-icon class="material-symbols-outlined">person</mat-icon>Utilisateur
+    <mat-icon class="material-symbols-outlined">finance_mode</mat-icon>{{MAPPING_TYPE['batch'].title}}
   </a>
 </mat-menu>
 
 <mat-menu #menuServer="matMenu">
-  <a mat-menu-item *ngIf="session?.type != 'VIEW'"
-     [routerLink]="['/session', instance?.name, 'dump']"
-     [queryParams]="{env: instance?.env, date: getDate(session?.start * 1000, true).toISOString()}">
-    <mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse
-  </a>
-  <a mat-menu-item *ngIf="session?.type != 'VIEW'"
+  <a mat-menu-item (click)="onClickPulse()"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
+
+  <a mat-menu-item
      [routerLink]="['/dashboard', 'server', instance?.name]"
      [queryParams]="{env: instance?.env}">
-    <mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur
-  </a>
-  <a mat-menu-item *ngIf="session?.type == 'VIEW'"
-     [routerLink]="['/dashboard', 'client', instance?.name]"
-     [queryParams]="{env: instance?.env}">
-    <mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Client
+    <mat-icon class="material-symbols-outlined">finance_mode</mat-icon>Serveur
   </a>
 </mat-menu>

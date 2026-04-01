@@ -1,11 +1,10 @@
-import { Injectable } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+import {Injectable} from "@angular/core";
+import {HttpClient} from "@angular/common/http";
 import {map, Observable} from "rxjs";
-import { FilterMap } from "../../views/constants";
 import {
+    ExceptionsByPeriodAndAppname,
     MainExceptionsByPeriodAndAppname,
-    RepartitionTimeAndTypeResponseByPeriod,
-    SessionExceptionsByPeriodAndAppname
+    RepartitionTimeAndTypeResponseByPeriod
 } from "src/app/model/jquery.model";
 
 @Injectable({ providedIn: 'root' })
@@ -33,9 +32,9 @@ export class MainSessionService {
         return this.getMainSession(args)
     }
 
-    getMainExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<MainExceptionsByPeriodAndAppname[]> {
+    getMainExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<ExceptionsByPeriodAndAppname[]> {
         let args = {
-            "column": `start.${filters.groupedBy}:date,err_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`,
+            "column": `start.${filters.groupedBy}:date,err_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year,type:type`,
             'main_session.type': 'BATCH',
             'join': 'instance',
             'instance.environement': filters.env,
@@ -219,7 +218,7 @@ export class MainSessionService {
         return this.getMainSession(args);
     }
 
-    getSessionExceptions(filters : {env: string, start:Date, end: Date,groupedBy:string, app_name: string }): Observable<SessionExceptionsByPeriodAndAppname[]> {
+    getSessionExceptions(filters : {env: string, start:Date, end: Date,groupedBy:string, app_name: string }): Observable<ExceptionsByPeriodAndAppname[]> {
         let args = {
             "column": `start.${filters.groupedBy}:date,err_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`,
             'join': 'instance',
