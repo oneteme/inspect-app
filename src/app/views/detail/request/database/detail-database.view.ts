@@ -13,6 +13,8 @@ import {Constants, INFINITY} from "../../../constants";
 import {DatabaseRequest, DatabaseRequestStage, ExceptionInfo, InstanceEnvironment} from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
 import {TabData} from "../../session/_component/detail-session.component";
+import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
+import {MatDialog} from "@angular/material/dialog";
 
 @Component({
   templateUrl: './detail-database.view.html',
@@ -25,6 +27,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
   private readonly pipe = new DatePipe('fr-FR');
   private readonly durationPipe = new DurationPipe();
   private readonly $destroy = new Subject<void>();
+  private readonly _dialog = inject(MatDialog);
 
   tabs: TabData[] = [];
   selectedTabIndex: number = 0;
@@ -220,11 +223,6 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     }
   }
 
-  navigateOnStatusIndicator(event: MouseEvent) {
-    var date = new Date(this.request.start * 1000);
-    this._router.navigateOnClick(event, ['/supervision', this.instance.type.toLowerCase(), this.instance.id], { queryParams: {start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString(), env: this.instance?.env} });
-  }
-
   ngOnDestroy() {
     this.$destroy.next();
     this.$destroy.complete();
@@ -256,6 +254,20 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
       })
       timeline.setGroups(groups);
       timeline.setItems(d);
+    });
+  }
+
+  onClickPulse() {
+    this._dialog.open(PulseDialogComponent, {
+      width: '1000px',
+      height: '65vh',
+      data: {
+        name: this.instance.name,
+        instance: this.instance.id,
+        instanceStart: new Date(this.instance.instant * 1000),
+        start: new Date(this.request.start * 1000 - 1800000),
+        end: new Date(this.request.end * 1000 + 1800000)
+      }
     });
   }
 }

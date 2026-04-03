@@ -1,0 +1,33 @@
+<div class="modal">
+
+  <div class="modal-header">
+    <div class="modal-header-left">
+      <div class="modal-icon">
+        <mat-icon>settings</mat-icon>
+      </div>
+      <div class="modal-info">
+        <div class="modal-title">
+          Configuration du collector
+        </div>
+        <div class="modal-subtitle">
+          {{ data.name }} / {{ data.version || 'N/A' }} / {{ data.collector || 'N/A' }}
+        </div>
+      </div>
+    </div>
+    <button class="modal-close" mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="json-viewer">
+      <div class="json-viewer-body">
+        <pre><code [innerHTML]="highlightedJson"></code></pre>
+      </div>
+      <button class="copy-btn" (click)="copyToClipboard()" [class.copied]="copied">
+        <mat-icon class="material-symbols-outlined">{{ copied ? 'check' : 'content_copy' }}</mat-icon>
+        <span>{{ copied ? 'Copié !' : 'Copier' }}</span>
+      </button>
+  </div>
+
+
+</div>

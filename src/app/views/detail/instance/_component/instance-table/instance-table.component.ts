@@ -6,6 +6,15 @@ import {MatSort} from "@angular/material/sort";
 import {INFINITY} from "../../../../constants";
 import {EnvRouter} from "../../../../../service/router.service";
 import {groupByColor} from "../../../../../shared/util";
+import {
+  DEFAULT_SORT_CONFIG,
+  DEFAULT_TABLE_CONFIG,
+  DEPLOIEMENT_TABLE_CONFIG
+} from "../../../../../shared/_component/table/table.config";
+import {TableProvider} from "@oneteme/jquery-table";
+import {LastServerStart} from "../../../../../model/jquery.model";
+import {DatabaseRequestDto} from "../../../../../model/request.model";
+import {ActivatedRoute} from "@angular/router";
 
 @Component({
   selector: 'instance-table',
@@ -14,41 +23,42 @@ import {groupByColor} from "../../../../../shared/util";
 })
 export class InstanceTableComponent {
   private readonly _router = inject(EnvRouter);
+  private readonly _activatedRoute = inject(ActivatedRoute);
 
-  displayedColumns: string[] = ['version', 'branch', 'start', 'duree'];
-  dataSource: MatTableDataSource<AbstractStage> = new MatTableDataSource();
-  dateNow = new Date().getTime();
+  readonly tableConfig: TableProvider<LastServerStart> = {
+    ...DEFAULT_TABLE_CONFIG,
+    columns: [
+      { key: 'version', header: 'Version', icon: 'label' },
+      { key: 'branch',  header: 'Branche', icon: 'fork_right', width: '40%' },
+      { key: 'start', header: 'Début', icon: 'schedule', groupable: false, sliceable: false },
+      { key: 'duration', header: 'Durée', icon: 'timer', groupable: false, sliceable: false,
+        sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
+      },
+      { key: 'os', header: 'OS', icon: 'computer', optional: true },
+      { key: 're', header: 'RE', icon: 'sdk', optional: true },
+      { key: 'user', header: 'Utilisateur', icon: 'person', optional: true }
+    ],
+    defaultSort: DEFAULT_SORT_CONFIG,
+    rowClass: (row) => {
+      if(row.id == this._activatedRoute.snapshot.params['id_instance']) {
+        return 'row-actual';
+      }
+      return '';
+    },
+    onRowSelected: (row, event) => this.goToDetail(event, row)
+  };
+
   versionColor: any;
+  _requests: LastServerStart[] = [];
 
-  @ViewChild('paginator', {static: true}) paginator: MatPaginator;
-  @ViewChild('sort', {static: true}) sort: MatSort;
-
-  @Input() mainId='';
-  @Input() set requests(requests: AbstractStage[]) {
+  @Input() set requests(requests: LastServerStart[]) {
     if(requests) {
-      this.dataSource = new MatTableDataSource(requests);
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sort = this.sort;
-      this.dataSource.sort.active = 'start'; // id de la colonne (matColumnDef)
-      this.dataSource.sort.direction = 'desc';
-      this.dataSource.sortingDataAccessor = this.sortingDataAccessor;
-      this.dataSource.sort.sortChange.emit({
-        active: this.sort.active,
-        direction: this.sort.direction
-      });
+      this._requests = requests;
       this.versionColor = groupByColor(requests, (v: any) => v.version)
-    } else {
-      this.dataSource = new MatTableDataSource();
     }
   }
+
   goToDetail(event: MouseEvent,row: any) {
-    this._router.navigateOnClick(event, ['/instance/detail', row.id], {       queryParamsHandling: 'preserve'});
-
-  }
-
-  sortingDataAccessor = (row: any, columnName: string) => {
-    if (columnName == "start") return row['start'] as string;
-    if (columnName == "duree") return row['end'] ? row["end"] - row["start"] : INFINITY;
-    return row[columnName as keyof any] as string;
+    this._router.navigateOnClick(event, ['/instance/detail', row.id], { queryParamsHandling: 'preserve'});
   }
 }

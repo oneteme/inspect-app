@@ -1,30 +1,89 @@
-<div style="display: flex; align-items: stretch;">
-  <repartition-type-card style="width: 50%" [seriesProvider]="seriesProvider" [data]="$timeAndTypeResponse.data" [isLoading]="$timeAndTypeResponse.loading">
-    <div class="stat" style="color: #33cc33;">
-      <div class="label" [matTooltip]="($timeAndTypeResponse.stats.statCountOk | number : '1.0-0') + ' / ' + ($timeAndTypeResponse.stats.statCount | number : '1.0-0')">{{ ($timeAndTypeResponse.stats.statCountOk / $timeAndTypeResponse.stats.statCount) * 100 | number : '1.0-2'  }}%</div>
-      <div class="sub-label">2xx</div>
+<div style="display: flex;flex-direction: column;gap: 20px;">
+
+    <div class="mat-elevation-z5"  style="display: flex; align-items: stretch; gap: 10px;">
+        <dynamic-chart style="width: 100%; display: flex; flex-direction: column;"
+                                   [menuConfig]="REPARTITION_STATUS"
+                                   [data]="$statusRepartition.data"
+                                   [sliceData]="$statusRepartitionSlice.data"
+                                   [isLoading]="$statusRepartition.loading"
+                                   (chartEmitter)="statusRepartitionChange($event)">
+            </dynamic-chart>
     </div>
-    <div class="stat" style="color: #ffa31a">
-      <div class="label" [matTooltip]="($timeAndTypeResponse.stats.statCountErrClient | number : '1.0-0') + ' / ' + ($timeAndTypeResponse.stats.statCount | number : '1.0-0')">{{ ($timeAndTypeResponse.stats.statCountErrClient / $timeAndTypeResponse.stats.statCount) * 100 | number : '1.0-2'  }}%</div>
-      <div class="sub-label">4xx</div>
+    <div class="mat-elevation-z5"  style="display: flex; align-items: stretch; gap: 10px;">
+        <dynamic-chart style="width: 100%; display: flex; flex-direction: column;"
+                               [menuConfig]="PERFORMANCE_REPARTITION"
+                               [data]="$performanceRepartition.data"
+                               [sliceData]="$performanceRepartitionSlice.data"
+                               [isLoading]="$performanceRepartition.loading"
+                               (chartEmitter)="performanceRepartitionChange($event)">
+        </dynamic-chart>
     </div>
-    <div class="stat" style="color: #ff0000">
-      <div class="label" [matTooltip]="($timeAndTypeResponse.stats.statCountErrorServer | number : '1.0-0') + ' / ' + ($timeAndTypeResponse.stats.statCount | number : '1.0-0')">{{ ($timeAndTypeResponse.stats.statCountErrorServer / $timeAndTypeResponse.stats.statCount) * 100 | number : '1.0-2' }}%</div>
-      <div class="sub-label">5xx</div>
+    <div class="mat-elevation-z5"  style="display: flex; align-items: stretch; gap: 10px;">
+        <dynamic-chart style="width: 100%; display: flex; flex-direction: column;"
+                       [menuConfig]="SIZE_REPARTITION"
+                       [data]="$sizeRepartition.data"
+                       [sliceData]="$sizeRepartitionSlice.data"
+                       [isLoading]="$sizeRepartition.loading"
+                       (chartEmitter)="sizeRepartitionChange($event)">
+        </dynamic-chart>
     </div>
-    <div class="stat" style="color: gray">
-        <div class="label" [matTooltip]="($timeAndTypeResponse.stats.statCountUnavailableServer | number : '1.0-0') + ' / ' + ($timeAndTypeResponse.stats.statCount | number : '1.0-0')">{{ ($timeAndTypeResponse.stats.statCountUnavailableServer / $timeAndTypeResponse.stats.statCount) * 100 | number : '1.0-2' }}%</div>
-        <div class="sub-label">0</div>
+ <div class="mat-elevation-z5"  style="display: flex; align-items: stretch; gap: 10px;">
+        <dynamic-chart style="width: 100%; display: flex; flex-direction: column;"
+                       [menuConfig]="LATENCY_REPARTITION"
+                       [data]="$latencyRepartition.data"
+                       [sliceData]="$latencyRepartitionSlice.data"
+                       [isLoading]="$latencyRepartition.loading"
+                       (chartEmitter)="latencyRepartitionChange($event)">
+        </dynamic-chart>
     </div>
-  </repartition-type-card>
-  <evol-user-card style="width: 50%" [data]="$evolUserResponse.line" [isLoading]="$evolUserResponse.loading"></evol-user-card>
+
+    <!--<div class="mat-elevation-z5" style="display: flex; align-items: stretch; gap: 10px;">
+
+      <performance-card style="width: 70%; display: flex; flex-direction: column;"
+                        [data]="$performanceRepartition.data"
+                        [isLoading]="$performanceRepartition.loading"
+                        [group]="params?.optional.group">
+
+      </performance-card>
+  </div>
+
+  <mat-divider style="margin: 5em" [vertical]="true"></mat-divider>
+  <repartition-cross-table style="width: 30%; display: flex; flex-direction: column;"
+                           [data]="$timeAndTypeResponseCross.data"
+                           [isLoading]="$timeAndTypeResponseCross.loading"
+                           [columns]="[
+                                  { field: params?.optional?.group, header: 'Nom'},
+                                  { field: 'name', header: 'Name' }
+                               ]"
+                           [segments]="[
+                                      { field: 'elapsedTimeFastest', label: 'Fastest', color: '#81D4FA' },
+                                      { field: 'elapsedTimeFast', label: 'Fast', color: '#82C0DC' },
+                                      { field: 'elapsedTimeMedium', label: 'Medium', color: '#83ACBF' },
+                                      { field: 'elapsedTimeSlow', label: 'Slow', color: '#8397A1' },
+                                      { field: 'elapsedTimeSlowest', label: 'Slowest', color: '#848383' }
+                                    ]">
+  </repartition-cross-table>
 </div>
 
-<performance-card [data]="$timeAndTypeResponse.data" [isLoading]="$timeAndTypeResponse.loading"></performance-card>
-<app-dependency-table-request-http style="height: 100%" [data]="$dependenciesResponse.table" [isLoading]="$dependenciesResponse.loading"></app-dependency-table-request-http>
-<div class="card-container mat-elevation-z5" style="height: 306px">
-    <div class="title-container">
-        <span class="title">Erreur</span>
-    </div>
-    <exceptions-table-new [data]="$exceptionsResponse.data" [isLoading]="$exceptionsResponse.loading" (onRowSelected)="onSessionExceptionRowSelected($event)"></exceptions-table-new>
+<div class="mat-elevation-z5" style="display: flex; align-items: stretch; gap: 10px;">
+  <repartition-size-card style="width: 70%; display: flex; flex-direction: column;"
+                         [data]="$timeAndTypeResponse.data"
+                         [isLoading]="$timeAndTypeResponse.loading"
+                         [group]="params?.optional.group">
+
+  </repartition-size-card>
+  <mat-divider style="margin: 5em" [vertical]="true"></mat-divider>
+  <repartition-cross-table style="width: 30%; display: flex; flex-direction: column;"
+                           [data]="$timeAndTypeResponseCross.data"
+                           [isLoading]="$timeAndTypeResponseCross.loading"
+                           [columns]="[
+                                  { field: params?.optional?.group, header: 'Nom'},
+                                  { field: 'name', header: 'Name' }
+                               ]"
+                           [segments]="[
+                                      {  field:'sizeIn', label: 'Size In', color: '#4DB6AC' },
+                                      {  field:'sizeOut', label: 'Size Out', color: '#014e48' }
+                                    ]">
+  </repartition-cross-table>
 </div>
+-->

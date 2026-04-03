@@ -15,15 +15,12 @@ import {MY_DATE_FORMATS} from "../../../../shared/shared.module";
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
 import {CustomDateRangeSelectionStrategy} from "../../../../shared/material/custom-date-range-selection-strategy";
 import {EnvRouter} from "../../../../service/router.service";
-import {ConfigDialogComponent} from "../config-dialog/config-dialog.component";
+import {ConfigDialogComponent} from "../../../../shared/_component/config-dialog/config-dialog.component";
 import {InstanceService} from "../../../../service/jquery/instance.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {
   ClientInstanceSelectorDialogComponent
 } from "./client-instance-selector-dialog/client-instance-selector-dialog.component";
-import {
-  StacktraceDialogComponent
-} from "../../../../shared/_component/exception-display/stacktrace-dialog/stacktrace-dialog.component";
 
 @Component({
   templateUrl: './client-supervision.view.html',
@@ -383,6 +380,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
     }
   };
 
+  date = new Date();
   servers: string[] = [];
   instance: Partial<InstanceEnvironment> = {};
   instances: {id: string, appName: string, address:string,  start: number, end: number}[] = [];
@@ -393,7 +391,6 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   unavailableStat:  number = 0;
   traceStat:  number = 0;
   params: Partial<{instance: string, env: string, start: Date, end: Date, app_name?: string}> = {};
-  date = new Date().getTime();
   isLoading = false;
   isLoadingInstances = false;
   reloadInstances = true;
@@ -527,12 +524,6 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
     });
   }
 
-  open(row: any) {
-    this._dialog.open(StacktraceDialogComponent, {
-      data: { message: row.message, stackTraceRows: row.stackRows }
-    });
-  }
-
   search() {
     if (this.formGroup.valid) {
       this.reloadInstances = false;
@@ -583,12 +574,6 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
     this.formGroup.patchValue({
       server: server
     }, { emitEvent: false });
-  }
-
-  openConfig() {
-    this._dialog.open(ConfigDialogComponent, {
-      data: this.instance.configuration
-    });
   }
 
   openInstanceSelector() {
