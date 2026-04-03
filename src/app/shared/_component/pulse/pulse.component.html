@@ -1,0 +1,24 @@
+<mat-form-field appearance="outline" class="searchwidth md-3 no-subscript">
+  <input matInput #input placeholder="Filtrer..." autocomplete="off">
+  <mat-icon matSuffix>search</mat-icon>
+</mat-form-field>
+
+<div class="timeline-container">
+  <div class="skeleton-overlay" *ngIf="loading()">
+    <div class="skeleton-groups">
+      <div class="skeleton-row" *ngFor="let row of skeletonRows">
+        <div class="skeleton-label shimmer"></div>
+        <div class="skeleton-bar shimmer" [style.width.%]="row.width"></div>
+      </div>
+    </div>
+    <div class="skeleton-axis shimmer"></div>
+  </div>
+
+  <app-timeline
+      [options]="options"
+      [groups]="groups"
+      [items]="items"
+      (onTimelineCreated)="onTimelineCreate($event)">
+  </app-timeline>
+</div>
+

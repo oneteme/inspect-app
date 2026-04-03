@@ -1,0 +1,23 @@
+<jquery-table class="flex-table"
+              [config]="tableConfig" [data]="_requests">
+  <ng-template jqtCellDef="resource" let-row>
+    <span style="font-weight: bold;">{{row.command | typeColumnFormat}}</span><br/>
+    {{ row.args }}
+  </ng-template>
+
+  <ng-template jqtCellDef="start" let-row>
+    {{ (row.start * 1000 | date:'dd/MM/yyyy') }}
+    <br>
+    {{ (row.start * 1000 | date:'HH:mm:ss.SSS') }}
+  </ng-template>
+
+  <ng-template jqtCellDef="duration" let-row>
+    <div *ngIf="!row.end" style="display: flex; align-items: center; gap: 6px;">
+      <mat-spinner [diameter]="14"></mat-spinner>
+      En cours...
+    </div>
+    <div *ngIf="row.end" [matTooltip]="row.end * 1000 | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr'">
+      {{ {start: row.start, end: row.end} | duration }}
+    </div>
+  </ng-template>
+</jquery-table>

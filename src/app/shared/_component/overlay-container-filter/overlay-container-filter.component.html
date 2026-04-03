@@ -1,12 +1,12 @@
 <div class="overlay-container">
   <div class="overlay-header">
-    <label-icon icon="tune" size="22">Filtre</label-icon>
+    <label-icon icon="tune" size="22"></label-icon>
   </div>
   <div class="overlay-content">
     <ng-container *ngIf="templateContent" [ngTemplateOutlet]="templateContent"></ng-container>
   </div>
   <div class="overlay-actions">
     <button mat-flat-button (click)="onReset.emit()">Réinitialiser</button>
-    <button mat-flat-button color="primary" (click)="onClick.emit()">Filtrer</button>
+    <button mat-flat-button color="primary" (click)="onClick.emit()">Valider</button>
   </div>
 </div>

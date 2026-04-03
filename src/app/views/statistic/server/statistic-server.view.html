@@ -3,11 +3,13 @@
     <header-page titleIcon="monitoring" [iconOutlined]="true" [ui-title]="params.server | titleCase" [templateSubTitle]="subtitle">
         <ng-template #subtitle>
             <div style="display: flex; gap: 0.5em">
-              <app-version-badge [backgroundColor]="'#22577a'"
-                                 [configuration]="$lastServerInfo?.configuration"
-                                 [collector]="$lastServerInfo?.collector"
-                                 [version]="$lastServerInfo?.version" />
-              <app-branch-hash-badge [branch]="$lastServerInfo?.branch" [hash]="$lastServerInfo?.hash"/>
+              <app-version-badge
+                      [backgroundColor]="'#22577a'"
+                      [configuration]="$lastServerInfo?.configuration"
+                      [collector]="$lastServerInfo?.collector"
+                      [version]="$lastServerInfo?.version"
+                      [name]="params.server"/>
+              <app-branch-chip [branch]="$lastServerInfo?.branch" [hash]="$lastServerInfo?.hash"/>
 
             </div>
         </ng-template>

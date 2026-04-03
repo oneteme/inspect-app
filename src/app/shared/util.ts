@@ -130,7 +130,7 @@ export function groupingBy(arr: any[], field: string): {[key: string]: any[]} {
 export function recreateDate(chartGroup: string, row: any, start: Date): {start: Date, end: Date} {
     switch (chartGroup) {
         case "hour": {
-            const hour = parseInt(row['stringDate']);
+            const hour = parseInt(row['date']);
             const startDate = new Date(start);
             const endDate = new Date(startDate);
             startDate.setHours(hour, 0, 0, 0);
@@ -316,7 +316,7 @@ export function getDataForRange(items: any[], start: number, end: number) {
 
 
 export function groupByColor<T>(array: T[], fn: (o: T) => any): { [name: string]: T[] } { // todo : refacto
-  var colors = ["#22577a", "#38a3a5", "#57cc99", "#80ed99", "#c7f9cc"];
+  var colors = ["#4f46e5", "#0891b2", "#059669", "#d97706", "#e11d48"];
   let i = 0;
   return array.reduce((acc: any, item: any) => {
     let id = fn(item);
@@ -331,4 +331,8 @@ export function groupByColor<T>(array: T[], fn: (o: T) => any): { [name: string]
     }
     return acc;
   }, {})
+}
+
+export function   getStringOrCall(o?: any | (() => any)) {
+    return typeof o === "function" ? o() : o;
 }

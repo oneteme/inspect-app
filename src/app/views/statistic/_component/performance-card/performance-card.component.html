@@ -1,9 +1,8 @@
-<div class="card-container mat-elevation-z5">
+<div class="card-container">
     <div class="title-container">
         <div class="title">Performances</div>
     </div>
-    <div style="display: flex;">
-        <div style="display: flex; flex-direction: column; width: 50%">
+
             <div class="title-container">
                 <div class="sub-title" style="width: 30%">Appels par tranche de temps</div>
                 <div class="stats-container"  style="width: 70%">
@@ -32,16 +31,5 @@
             <chart type="column" [config]="REPARTITION_SPEED_BAR"
                    [data]="_data"
                    [isLoading]="isLoading"></chart>
-        </div>
-        <div style="display: flex; flex-direction: column; width: 50%">
-            <div class="title-container"><div class="sub-title">Temps de reponse moyen et maximum</div></div>
-            <chart type="line"
-                   [config]="REPARTITION_MAX_BY_PERIOD_LINE"
-                   [data]="_data"
-                   [isLoading]="isLoading" />
-            <chart type="line" [config]="REPARTITION_AVG_BY_PERIOD_LINE"
-                   [data]="_data"
-                   [isLoading]="isLoading" />
-        </div>
-    </div>
+
 </div>

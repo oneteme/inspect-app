@@ -3,17 +3,19 @@
     <div style="display: flex; align-items: center; gap: 1.5em">
       {{ (instance?.name | titleCase) || 'Aucune instance sélectionnée' }}
       <app-status-indicator *ngIf="!isLoading && instance"
-                            [params]="{id: instance.id, end: instance.end, configuration: instance.configuration, lastTrace: lastTrace, date: date}"></app-status-indicator>
+                            [params]="{id: instance.id, end: instance.end, configuration: instance.configuration, lastTrace: lastTrace, date: date.getTime()}"></app-status-indicator>
     </div>
 
   </ng-template>
   <ng-template #subtitle>
     <div style="display: flex; gap: 0.5em">
-      <app-version-badge [backgroundColor]="'#22577a'"
-                         [configuration]="instance?.configuration"
-                         [collector]="instance?.collector"
-                         [version]="instance?.version" />
-      <app-branch-hash-badge [branch]="instance?.branch" [hash]="instance?.hash"/>
+      <app-version-badge
+              [backgroundColor]="'#22577a'"
+              [configuration]="instance?.configuration"
+              [collector]="instance?.collector"
+              [version]="instance?.version"
+              [name]="instance?.name"/>
+      <app-branch-chip [branch]="instance?.branch" [hash]="instance?.hash"/>
       <label-chip *ngIf="!instance?.version" color="gray">Version non disponible</label-chip>
     </div>
   </ng-template>
@@ -130,7 +132,7 @@
                [data]="instanceTraceByPeriod" [isLoading]="isLoading"></chart>
         <chart [class.hidden]="activityDisplayType != 'ATTEMPT'" type="line" [config]="ATTEMPT_INSTANCE_TRACE_BY_PERIOD_LINE"
                [data]="instanceTraceByPeriod" [isLoading]="isLoading"></chart>
-        <report-table [class.hidden]="activityDisplayType != 'REPORT'" [data]="logEntryByPeriod" (onClick)="open($event)" [useFilter]="true"></report-table>
+        <log-table [class.hidden]="activityDisplayType != 'REPORT'" [requests]="logEntryByPeriod"></log-table>
       </div>
     </div>
   </div>

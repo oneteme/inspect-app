@@ -1,0 +1,26 @@
+<div class="es-wrapper" style="height: calc(100vh - 56px - 14px);">
+
+  <!-- ── État de chargement ── -->
+  <ng-container *ngIf="loading; else emptyTpl">
+    <div class="es-card">
+      <div class="es-icon-wrap">
+        <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
+      </div>
+      <span class="es-title">Chargement en cours…</span>
+      <span class="es-subtitle">Récupération des données, veuillez patienter.</span>
+    </div>
+  </ng-container>
+
+  <!-- ── État vide ── -->
+  <ng-template #emptyTpl>
+    <div class="es-card">
+      <div class="es-icon-wrap">
+        <mat-icon class="material-symbols-outlined es-icon">{{ icon }}</mat-icon>
+      </div>
+      <span class="es-title">Aucun détail disponible</span>
+      <span class="es-subtitle">L'élément demandé est introuvable ou n'existe plus.</span>
+    </div>
+  </ng-template>
+
+</div>
+

@@ -1,0 +1,22 @@
+<jquery-table class="flex-table"
+              [config]="tableConfig" [data]="_requests">
+
+  <ng-template jqtCellDef="instant" let-row>
+    {{ (row.instant * 1000 | date:'dd/MM/yyyy') }}
+    <br>
+    {{ (row.instant * 1000 | date:'HH:mm:ss.SSS') }}
+  </ng-template>
+
+  <ng-template jqtCellDef="message" let-row>
+    <span style="font-weight: bold;">{{ row.level | typeColumnFormat }}</span><br>
+    {{ row.message }}
+  </ng-template>
+
+  <ng-template jqtCellDef="action" let-row>
+    <button mat-icon-button color="primary" [class.hidden]="!row.stacktrace" (click)="open(row)"
+            matTooltip="Consulter la Stack">
+      <mat-icon class="material-symbols-outlined">visibility</mat-icon>
+    </button>
+  </ng-template>
+
+</jquery-table>
