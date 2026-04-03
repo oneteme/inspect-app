@@ -1,0 +1,85 @@
+.json-viewer {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: #0d1117;
+  min-width: 420px;
+
+  &-body {
+    max-height: 420px;
+    overflow-y: auto;
+    overflow-x: auto;
+
+    &::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    &::-webkit-scrollbar-track { background: transparent; }
+    &::-webkit-scrollbar-thumb {
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      &:hover { background: rgba(255,255,255,0.2); }
+    }
+
+    pre {
+      margin: 0;
+      padding: 20px 24px 48px;
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #c9d1d9;
+      white-space: pre;
+
+      code {
+        display: block;
+
+        ::ng-deep {
+          .json-key     { color: #79c0ff; }
+          .json-string  { color: #a5d6ff; }
+          .json-number  { color: #ff9e64; }
+          .json-boolean { color: #56d364; }
+          .json-null    { color: #f87171; font-style: italic; }
+        }
+      }
+    }
+  }
+}
+
+.copy-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(22, 27, 34, 0.85);
+  backdrop-filter: blur(4px);
+  color: #8b949e;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  &:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.08);
+    color: #c9d1d9;
+    border-color: rgba(255, 255, 255, 0.3);
+  }
+
+  &.copied {
+    opacity: 1;
+    color: #56d364;
+    border-color: #56d364;
+    background: rgba(86, 211, 100, 0.1);
+  }
+}

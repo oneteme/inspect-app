@@ -12,8 +12,9 @@
       <app-version-badge [backgroundColor]="'#22577a'"
                          [configuration]="instance?.configuration"
                          [collector]="instance?.collector"
-                         [version]="instance?.version" />
-      <app-branch-hash-badge [branch]="instance?.branch" [hash]="instance?.hash"/>
+                         [version]="instance?.version"
+                         [name]="instance?.name"/>
+      <app-branch-chip [branch]="instance?.branch" [hash]="instance?.hash"/>
       <label-chip *ngIf="!instance?.version" color="gray">Version non disponible</label-chip>
     </div>
   </ng-template>

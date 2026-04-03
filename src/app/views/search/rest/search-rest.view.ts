@@ -84,6 +84,7 @@ export class SearchRestView implements OnInit, OnDestroy {
           this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), params.env || app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server], null, !params.rangestatus ? []: Array.isArray(params.rangestatus) ? params.rangestatus : [params.rangestatus]);
         }
         if(params.q){
+          this.queryParams.optional = {q: params.q};
           this.tableConfig = {
             ...this.tableConfig,
             search: { ...this.tableConfig?.search, initialQuery: params.q }

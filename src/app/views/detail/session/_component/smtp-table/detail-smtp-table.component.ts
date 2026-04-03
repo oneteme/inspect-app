@@ -19,7 +19,12 @@ export class DetailSmtpTableComponent {
   @Input() set requests(requests: MailRequestDto[]) {
     this._requests = requests;
   }
-
+  @Input() set initialSearch(value: string) {
+    this.tableConfig = {
+      ...this.tableConfig,
+      search: { ...this.tableConfig?.search, initialQuery: value }
+    }
+  }
   @Input() isLoading: boolean;
   @Output() onClickRow: EventEmitter<{ event: MouseEvent, row: string }> = new EventEmitter();
 

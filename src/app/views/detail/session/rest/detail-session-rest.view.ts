@@ -10,6 +10,7 @@ import {RequestType, RestSessionView} from "../../../../model/request.model";
 import {HttpSessionStage, InstanceEnvironment} from "../../../../model/trace.model";
 import {MatDialog} from "@angular/material/dialog";
 import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
+import {Constants} from "../../../constants";
 
 @Component({
     templateUrl: './detail-session-rest.view.html',
@@ -23,6 +24,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     protected readonly _router: EnvRouter = inject(EnvRouter);
     private readonly _dialog = inject(MatDialog);
 
+    MAPPING_TYPE = Constants.MAPPING_TYPE;
     session: RestSessionView;
     stages: HttpSessionStage[];
     instance: InstanceEnvironment;
@@ -97,6 +99,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
         width: '1000px',
         height: '65vh',
         data: {
+          name: this.instance.name,
           instance: this.instance.id,
           instanceStart: new Date(this.instance.instant * 1000),
           start: new Date(this.session.start * 1000 - 1800000),

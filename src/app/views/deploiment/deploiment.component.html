@@ -67,6 +67,7 @@
       [backgroundColor]="versionColor[row.version]"
       [configuration]="row.configuration"
       [collector]="row.collector"
+      [name]="row.appName"
       [version]="row.version" />
   </ng-template>
 
@@ -83,10 +84,7 @@
   </ng-template>
 
   <ng-template jqtCellDef="branch" let-row>
-    <div class="branch-info" *ngIf="row.branch">
-      <mat-icon class="material-symbols-outlined">code_blocks</mat-icon>
-      {{ row.branch }} / {{ row.hash | slice:0:7 }}
-    </div>
+    <app-branch-chip [branch]="row.branch" [hash]="row.hash"/>
   </ng-template>
 
 </jquery-table>

@@ -2,7 +2,7 @@
   <div class="navbar-glow"></div>
 
   <div class="navbar-content">
-    <div class="nav-brand" (click)="gotoHome()">
+    <div class="nav-brand" (click)="gotoHome($event)">
       <svg
         class="brand-logo"
         xmlns="http://www.w3.org/2000/svg"
@@ -47,13 +47,13 @@
               mat-menu-item
               class="nav-item-with-kpi"
               *ngFor="let subItem of item.children"
-              (click)="navigateToSub(item, subItem)">
+              (click)="navigateToSub($event, item, subItem)">
               <mat-icon class="material-symbols-outlined">{{ subItem.icon }}</mat-icon>
               <span>{{ subItem.label }}</span>
               <span
                 *ngIf="subItem.kpiRoute"
                 class="nav-kpi-btn"
-                (click)="$event.stopPropagation(); navigateToKpi(subItem.kpiRoute)"
+                (click)="$event.stopPropagation(); navigateToKpi($event, subItem.kpiRoute)"
                 [matTooltip]="'KPI ' + subItem.label"
                 matTooltipPosition="right"
               >
@@ -65,7 +65,7 @@
           <button
             mat-menu-item
             *ngIf="!item.children"
-            (click)="navigateTo(item.route)"
+            (click)="navigateTo($event, item.route)"
           >
             <mat-icon class="material-symbols-outlined">{{ item.icon }}</mat-icon>
             <span>{{ item.label }}</span>
@@ -79,7 +79,7 @@
       <button
         class="action-btn deploy-btn"
         [matTooltip]="MAPPING_TYPE['deploiment'].title"
-        (click)="gotoDeploiment()"
+        (click)="gotoDeploiment($event)"
       >
         <mat-icon class="material-symbols-outlined">{{ MAPPING_TYPE['deploiment'].icon }}</mat-icon>
       </button>

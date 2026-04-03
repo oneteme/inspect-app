@@ -127,7 +127,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
             this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.env || app.defaultEnv, null, !queryParams.host ? [] : Array.isArray(queryParams.host) ? queryParams.host : [queryParams.host],!queryParams.rangestatus ? [/*this.seviceType[this.params.type].filters[0].value*/]: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] );
           }
           if(queryParams.q){
-            this.queryParams.optional = { 'q': queryParams.q }
+            this.queryParams.optional = { 'q': queryParams.q };
           }
           this.patchStatusValue(this.queryParams.rangestatus)
           this.patchHostValue(this.queryParams.hosts);
