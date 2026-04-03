@@ -111,29 +111,29 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.subscriptions.forEach(s => s.unsubscribe());
   }
 
-  gotoHome() {
-    this._envRouter.navigate(['home'], { queryParams: { env: this.env.value } });
+  gotoHome(event: MouseEvent) {
+    this._envRouter.navigateOnClick(event, ['home'], { queryParams: { env: this.env.value } });
   }
 
-  gotoDeploiment() {
-    this._envRouter.navigate(['deploiment'], { queryParams: { env: this.env.value } });
+  gotoDeploiment(event: MouseEvent) {
+    this._envRouter.navigateOnClick(event, ['deploiment'], { queryParams: { env: this.env.value } });
   }
 
   selectEnv(value: string) {
     this.env.setValue(value);
   }
 
-  navigateTo(route: string) {
-    this._envRouter.navigate([route], { queryParams: { env: this.env.value } });
+  navigateTo(event: MouseEvent, route: string) {
+    this._envRouter.navigateOnClick(event, [route], { queryParams: { env: this.env.value } });
   }
 
-  navigateToSub(_parent: NavItem, child: SubNavItem) {
-    this._envRouter.navigate([child.route], { queryParams: { env: this.env.value } });
+  navigateToSub(event: MouseEvent, _parent: NavItem, child: SubNavItem) {
+    this._envRouter.navigateOnClick(event, [child.route], { queryParams: { env: this.env.value } });
   }
 
-  navigateToKpi(kpiRoute: string) {
+  navigateToKpi(event: MouseEvent, kpiRoute: string) {
     this.mainMenuTrigger?.closeMenu();
-    this._envRouter.navigate([kpiRoute], { queryParams: { env: this.env.value } });
+    this._envRouter.navigateOnClick(event, [kpiRoute], { queryParams: { env: this.env.value } });
   }
 
   getEnvClass(env: string): string {

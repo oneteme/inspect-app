@@ -9,7 +9,6 @@ import {InstanceService} from "../../../service/jquery/instance.service";
 import {groupByColor} from "../../../shared/util";
 import {TabData} from "../session/_component/detail-session.component";
 import {EnvRouter} from "../../../service/router.service";
-import {MatTableDataSource} from "@angular/material/table";
 import {TraceService} from "../../../service/trace.service";
 
 @Component({

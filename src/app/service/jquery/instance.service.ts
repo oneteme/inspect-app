@@ -101,7 +101,7 @@ export class InstanceService {
     re:string,
   }[]> {
     let args: any = {
-      'column': 'id,start,end,version,address,branch,hash,re,collector,configuration',
+      'column': 'id,start,end,version,address,branch,hash,os,re,collector,configuration',
       'environement': filters.env,
       'app_name': `"${filters.appName}"`,
       'order': 'start.asc'
