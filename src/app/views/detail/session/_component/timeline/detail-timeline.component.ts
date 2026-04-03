@@ -64,6 +64,43 @@ export class DetailTimelineComponent implements OnChanges {
     timelineStart: number;
     timelineEnd: number;
 
+    private visTimeline: Timeline | null = null;
+    activeFilters = new Set<string>(['rest', 'ftp', 'smtp', 'ldap', 'jdbc', 'local', 'action']);
+
+    isFilterActive(type: string): boolean {
+        return this.activeFilters.has(type);
+    }
+
+    toggleFilter(type: string): void {
+        if (this.activeFilters.has(type)) {
+            this.activeFilters.delete(type);
+        } else {
+            this.activeFilters.add(type);
+        }
+        const items = this.computeDataItems();
+        if (this.visTimeline) {
+            this.visTimeline.setItems(items);
+        } else {
+            this.dataItems = items;
+        }
+    }
+
+    private getFilteredArray(): any[] {
+        const alwaysVisible = ['session-stage', 'log'];
+        return this.dataArray.filter(c =>
+            alwaysVisible.includes(c.typeTimeline) || this.activeFilters.has(c.typeTimeline)
+        );
+    }
+
+    private computeDataItems(): DataItem[] {
+        const filtered = this.getFilteredArray();
+        if (this.dataArray.length > 50) {
+            return this.getDataForRange(filtered, this.timelineStart / 1000, this.timelineEnd / 1000)
+                .map((c: any, i: number) => this.maptype[c.typeTimeline](c, i));
+        }
+        return filtered.map((c: any, i: number) => this.maptype[c.typeTimeline](c, i));
+    }
+
     @Input() instance: InstanceEnvironment;
     @Input() request: MainSessionView | RestSessionView;
 
@@ -92,10 +129,8 @@ export class DetailTimelineComponent implements OnChanges {
                 }
                 if(this.dataArray.length > 50 ){
                     this.timelineEnd = (this.dataArray[51].start || this.dataArray[51].instant) * 1000;
-                    this.dataItems = this.getDataForRange(this.dataArray, this.timelineStart / 1000, this.timelineEnd / 1000).map((c: any, i: number) =>this.maptype[c.typeTimeline](c, i));
-                } else {
-                    this.dataItems = this.dataArray.map((c: any, i: number) =>this.maptype[c.typeTimeline](c, i));
                 }
+                this.dataItems = this.computeDataItems();
                 this.options = {
                     ...options,
                     start: this.timelineStart - padding,
@@ -200,9 +235,10 @@ export class DetailTimelineComponent implements OnChanges {
 
 
     onTimelineCreate(timeline: Timeline) {
+        this.visTimeline = timeline;
         if(this.dataItems.length > 50 ) {
             timeline.on('rangechanged', (props)=>{
-                timeline.setItems(this.getDataForRange(this.dataArray, props.start.getTime() / 1000, props.end.getTime() / 1000).map((c: any, i: number) =>this.maptype[c.typeTimeline](c, i)));
+                timeline.setItems(this.getDataForRange(this.getFilteredArray(), props.start.getTime() / 1000, props.end.getTime() / 1000).map((c: any, i: number) =>this.maptype[c.typeTimeline](c, i)));
             });
 
         }
@@ -212,7 +248,7 @@ export class DetailTimelineComponent implements OnChanges {
         }
     }
 
-    onitemCLicked(event: any) {
+    onItemCLicked(event: any) {
         if(event.item){
             let id = event.item.split('_')[0];
             let request_type = event.item.split('_')[1];
