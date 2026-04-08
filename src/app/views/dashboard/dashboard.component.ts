@@ -1,11 +1,11 @@
-import {AfterViewInit, Component, inject, OnDestroy} from '@angular/core';
+import {AfterViewInit, Component, ElementRef, inject, NgZone, OnDestroy, ViewChild} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
-import {combineLatest, finalize, map, Observable, Subscription} from 'rxjs';
+import {catchError, combineLatest, EMPTY, finalize, map, Observable, Subscription} from 'rxjs';
 import {DatePipe, DecimalPipe, Location} from '@angular/common';
 import {app, makeDatePeriod} from 'src/environments/environment';
 import {EnvRouter} from "../../service/router.service";
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {Constants} from '../constants';
+import {Constants, UA_CATEGORY_DEFS, UA_PIE_BASE, UaGroup, TECH_CATALOG, TechDef} from '../constants';
 import {formatters, periodManagement, recreateDate} from 'src/app/shared/util';
 import {MatDialog} from '@angular/material/dialog';
 import {ProtocolExceptionComponent} from './components/protocol-exception-modal/protocol-exception-modal.component';
@@ -22,6 +22,8 @@ import {
 } from 'src/app/model/jquery.model';
 import {SmtpRequestService} from 'src/app/service/jquery/smtp-request.service';
 import {NumberFormatterPipe} from 'src/app/shared/pipe/number.pipe';
+import {ChartProvider} from '@oneteme/jquery-core';
+import {APP_TECH_STACK} from 'src/app/config/tech-stack.config';
 
 @Component({
     templateUrl: './dashboard.component.html',
@@ -54,6 +56,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
     private _dialog = inject(MatDialog);
     private _decimalPipe = inject(DecimalPipe);
     private _numberFormatter = inject(NumberFormatterPipe);
+    private _ngZone = inject(NgZone);
 
     sparklineTitles: {
         rest: {title: string, subtitle: string},
@@ -100,6 +103,121 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
     sparklinePercs: { rest: number; jdbc: number; ftp: number; smtp: number; ldap: number } = { rest: 0, jdbc: 0, ftp: 0, smtp: 0, ldap: 0 };
     topErrors: Record<string, { type: string; count: number }[]> = {};
     showInactiveProtocols = false;
+    selectedInsights = new Set<string>();
+    userAgentData: { label: string; count: number; pct: number; color: string; group: UaGroup }[] = [];
+    userAgentLoading = true;
+    hiddenAgents = new Set<string>();
+    uaPieConfig: ChartProvider<string, number> = UA_PIE_BASE as ChartProvider<string, number>;
+    uaChartData: { label: string; count: number; pct: number; color: string; group: UaGroup }[] = [];
+
+    toggleAgent(label: string): void {
+        if (this.hiddenAgents.has(label)) {
+            this.hiddenAgents.delete(label);
+        } else {
+            this.hiddenAgents.add(label);
+        }
+        this.hiddenAgents = new Set(this.hiddenAgents);
+        this.uaChartData = this.userAgentData.filter(d => !this.hiddenAgents.has(d.label));
+        this._rebuildUaPieConfig();
+    }
+
+    readonly uaGroupDefs: { key: UaGroup; label: string; icon: string }[] = [
+        { key: 'service', label: 'Microservices & APIs', icon: 'hub'          },
+        { key: 'user',    label: 'Navigateurs',          icon: 'public'       },
+        { key: 'tool',    label: 'Outils',               icon: 'terminal'     },
+        { key: 'unknown', label: 'Non identifiés',       icon: 'help_outline' },
+    ];
+
+    get uaGroups(): { key: UaGroup; label: string; icon: string; items: typeof this.userAgentData }[] {
+        return this.uaGroupDefs.map(g => ({
+            ...g,
+            items: this.userAgentData.filter(d => d.group === g.key)
+        }));
+    }
+
+    @ViewChild('techScrollTrack') techScrollTrack!: ElementRef<HTMLElement>;
+    private _techScrollRaf: number | null = null;
+    private _techScrollPos = 0;
+    private _techScrollPaused = false;
+    private readonly _techScrollSpeed = 0.4;
+
+    private _startTechAutoScroll(): void {
+        const el = this.techScrollTrack?.nativeElement;
+        if (!el) return;
+        this._ngZone.runOutsideAngular(() => {
+            const step = () => {
+                if (!this._techScrollPaused) {
+                    this._techScrollPos += this._techScrollSpeed;
+                    const half = el.scrollWidth / 2;
+                    if (half > 0 && this._techScrollPos >= half) {
+                        this._techScrollPos -= half;
+                    }
+                    el.scrollLeft = this._techScrollPos;
+                }
+                this._techScrollRaf = requestAnimationFrame(step);
+            };
+            this._techScrollRaf = requestAnimationFrame(step);
+        });
+    }
+
+    onTechMouseEnter(): void { this._techScrollPaused = true; }
+    onTechMouseLeave(): void { this._techScrollPaused = false; }
+
+    onTechWheel(event: WheelEvent): void {
+        event.preventDefault();
+        const el = this.techScrollTrack?.nativeElement;
+        if (!el) return;
+        const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+        this._techScrollPos += delta;
+        const half = el.scrollWidth / 2;
+        if (half > 0) {
+            if (this._techScrollPos >= half) this._techScrollPos -= half;
+            if (this._techScrollPos < 0)    this._techScrollPos += half;
+        }
+        el.scrollLeft = this._techScrollPos;
+    }
+
+    getTechTitle(tech: TechDef & { id: string; version?: string }): string {
+        const v = tech.version ? ' ' + tech.version : '';
+        return tech.name + v;
+    }
+
+    get techStack(): (TechDef & { id: string; version?: string })[] {
+        return APP_TECH_STACK
+            .map(entry => {
+                const def = TECH_CATALOG[entry.id];
+                return def ? { ...def, id: entry.id, version: entry.version } : null;
+            })
+            .filter((t): t is NonNullable<typeof t> => t !== null)
+            .sort((a, b) => a.order - b.order);
+    }
+
+    private _rebuildUaPieConfig(): void {
+        const visible = this.uaChartData;
+        const total = visible.reduce((s, d) => s + d.count, 0);
+        const baseDonutLabels = (UA_PIE_BASE.options?.plotOptions as any)?.pie?.donut?.labels ?? {};
+        this.uaPieConfig = {
+            ...UA_PIE_BASE,
+            options: {
+                ...UA_PIE_BASE.options,
+                colors: visible.map(d => d.color),
+                plotOptions: {
+                    pie: {
+                        donut: {
+                            labels: {
+                                ...baseDonutLabels,
+                                total: {
+                                    ...baseDonutLabels.total,
+                                    formatter: () => total.toLocaleString('fr-FR') + ' req.'
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        };
+    }
+
     private _chartsResolved = 0;
     constructor() {
         this.subscriptions.push(combineLatest({
@@ -127,7 +245,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                     }));
                 this.frontendCount = null;
                 this.subscriptions.push(this._instanceService.getApplications('CLIENT', this.params.env)
-                    .subscribe({ next: (apps) => { this.frontendCount = apps.length; console.log('[Dashboard] Frontend apps:', apps); } }));
+                    .subscribe({ next: (apps) => { this.frontendCount = apps.length; } }));
                 this.userCount = null;
                 this.subscriptions.push(this._mainService.getUsersView({ env: this.params.env, date: this.params.start })
                     .subscribe({ next: (users) => this.userCount = users.length }));
@@ -138,6 +256,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                 this.initTab();
                 this.initCharts();
                 this.loadServerHealth(this.params.env);
+                this.loadUserAgentData();
                 this.sessionCountData = [];
                 this.sessionCountLoading = true;
                 this.restSessionCount = { total: 0, errors: 0 };
@@ -152,6 +271,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
     }
     ngAfterViewInit(): void {
         this.initTab();
+        this._startTechAutoScroll();
     }
 
     initCharts() {
@@ -298,6 +418,54 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                 .pipe(finalize(() => this.serverHealthLoading = false))
                 .subscribe({ next: (data: LastServerStart[]) => this.serverHealthData = data })
         );
+    }
+
+    loadUserAgentData(): void {
+        this.userAgentLoading = true;
+        this.userAgentData = [];
+        const serverFilter = this.createServerFilter();
+        this.subscriptions.push(
+            this._sessionService.getCountByUserAgent({
+                env: this.params.env,
+                start: this.params.start,
+                end: this.params.end,
+                app_name: serverFilter.app_name
+            })
+            .pipe(
+                catchError(() => { this.userAgentLoading = false; return EMPTY; }),
+                finalize(() => this.userAgentLoading = false)
+            )
+            .subscribe({
+                next: (data: { count: number, userAgent: string }[]) => {
+                    const categorized: Record<string, number> = {};
+                    data.forEach(d => {
+                        const label = this._categorizeUserAgent(d.userAgent ?? '');
+                        categorized[label] = (categorized[label] ?? 0) + d.count;
+                    });
+                    const total = Object.values(categorized).reduce((s, n) => s + n, 0);
+                    this.userAgentData = Object.entries(categorized)
+                        .map(([label, count]) => ({
+                            label,
+                            count,
+                            pct: total > 0 ? Math.round((count * 10000) / total) / 100 : 0,
+                            color: UA_CATEGORY_DEFS[label]?.color ?? '#94a3b8',
+                            group: UA_CATEGORY_DEFS[label]?.group ?? 'unknown'
+                        }))
+                        .sort((a, b) => b.count - a.count);
+                    this.uaChartData = [...this.userAgentData];
+                    this._rebuildUaPieConfig();
+                }
+            })
+        );
+    }
+
+    private _categorizeUserAgent(ua: string): string {
+        const u = (ua ?? '').toLowerCase().trim();
+        if (!u || u === 'null') return 'Inconnu';
+        for (const [label, def] of Object.entries(UA_CATEGORY_DEFS)) {
+            if (def.keywords.some(kw => u.includes(kw))) return label;
+        }
+        return 'Autre';
     }
 
     navigateToSessionRest() {
@@ -471,7 +639,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         });
     }
 
-    navigateToSessionByType(sessionType: string): void {
+    navigateToSessionByType(sessionType: string, errorType?: string): void {
         const routes: Record<string, string> = {
             STARTUP: '/session/startup',
             VIEW:    '/session/view',
@@ -486,6 +654,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                 end: this.params.end?.toISOString(),
                 server: this.params.serveurs,
                 rangestatus: ['Ko'],
+                ...(errorType ? { q: errorType } : {}),
             }
         });
     }
@@ -503,6 +672,42 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                 rangestatus
             }
         });
+    }
+
+    toggleInsight(key: string): void {
+        if (this.selectedInsights.has(key)) {
+            this.selectedInsights.delete(key);
+        } else {
+            this.selectedInsights.add(key);
+        }
+    }
+
+    get hasAnyRequestInsight(): boolean {
+        return this.protocolSummaries.some(p => p.rate > 0 && this.selectedInsights.has(p.key));
+    }
+
+    get hasAnySessionInsight(): boolean {
+        return this.sessionSummaries.some(s => s.rate > 0 && this.selectedInsights.has(s.key));
+    }
+
+    toggleAllRequestInsights(): void {
+        if (this.hasAnyRequestInsight) {
+            this.protocolSummaries.forEach(p => this.selectedInsights.delete(p.key));
+        } else {
+            this.protocolSummaries.filter(p => p.rate > 0).forEach(p => this.selectedInsights.add(p.key));
+        }
+    }
+
+    toggleAllSessionInsights(): void {
+        if (this.hasAnySessionInsight) {
+            this.sessionSummaries.forEach(s => this.selectedInsights.delete(s.key));
+        } else {
+            this.sessionSummaries.filter(s => s.rate > 0).forEach(s => this.selectedInsights.add(s.key));
+        }
+    }
+
+    get hasSelectedInsights(): boolean {
+        return this.selectedInsights.size > 0;
     }
 
     trackByKey(_: number, item: { key: string }): string { return item.key; }
@@ -548,27 +753,27 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         });
     }
 
-    get protocolSummaries(): { label: string; rate: number; count: number; total: number }[] {
+    get protocolSummaries(): { key: string; label: string; rate: number; count: number; total: number }[] {
         const entries = [
-            { label: 'REST',  reqKey: 'restRequestExceptionsTable',     rate: this.sparklinePercs.rest  },
-            { label: 'JDBC',  reqKey: 'databaseRequestExceptionsTable',  rate: this.sparklinePercs.jdbc  },
-            { label: 'FTP',   reqKey: 'ftpRequestExceptionsTable',       rate: this.sparklinePercs.ftp   },
-            { label: 'SMTP',  reqKey: 'smtpRequestExceptionsTable',      rate: this.sparklinePercs.smtp  },
-            { label: 'LDAP',  reqKey: 'ldapRequestExceptionsTable',      rate: this.sparklinePercs.ldap  },
+            { key: 'rest',  label: 'REST',  reqKey: 'restRequestExceptionsTable',     rate: this.sparklinePercs.rest  },
+            { key: 'jdbc',  label: 'JDBC',  reqKey: 'databaseRequestExceptionsTable',  rate: this.sparklinePercs.jdbc  },
+            { key: 'ftp',   label: 'FTP',   reqKey: 'ftpRequestExceptionsTable',       rate: this.sparklinePercs.ftp   },
+            { key: 'smtp',  label: 'SMTP',  reqKey: 'smtpRequestExceptionsTable',      rate: this.sparklinePercs.smtp  },
+            { key: 'ldap',  label: 'LDAP',  reqKey: 'ldapRequestExceptionsTable',      rate: this.sparklinePercs.ldap  },
         ];
         return entries.map(p => {
             const s = this.sumcounts(this.chartRequests[p.reqKey]?.chart ?? []);
-            return { label: p.label, rate: p.rate, count: s.count, total: s.countok };
+            return { key: p.key, label: p.label, rate: p.rate, count: s.count, total: s.countok };
         });
     }
 
-    get sessionSummaries(): { label: string; errors: number; total: number; rate: number; barPct: number }[] {
+    get sessionSummaries(): { key: string; label: string; errors: number; total: number; rate: number; barPct: number }[] {
         const types = [
-            { type: 'REST',    label: 'Service' },
-            { type: 'BATCH',   label: 'Batch' },
-            { type: 'STARTUP', label: 'Init' },
-            { type: 'VIEW',    label: 'Web' },
-            { type: 'TEST',    label: 'Test' },
+            { key: 'SERVICE', type: 'REST',    label: 'Service' },
+            { key: 'BATCH',   type: 'BATCH',   label: 'Batch' },
+            { key: 'STARTUP', type: 'STARTUP', label: 'Init' },
+            { key: 'VIEW',    type: 'VIEW',    label: 'Web' },
+            { key: 'TEST',    type: 'TEST',    label: 'Test' },
         ];
         const overallTotal = this.sessionCountData.reduce((s, d) => s + d.total, 0) + this.restSessionCount.total;
         return types.map(t => {
@@ -583,6 +788,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                 errors = found?.errors ?? 0;
             }
             return {
+                key: t.key,
                 label: t.label,
                 errors,
                 total,
@@ -755,6 +961,9 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         this.subscriptions.forEach(s => s.unsubscribe());
         this.chartSubscriptions.forEach(s => s.unsubscribe());
         this.tabSubscriptions.forEach(s => s.unsubscribe());
+        if (this._techScrollRaf !== null) {
+            cancelAnimationFrame(this._techScrollRaf);
+        }
         if(this._dialog){
             this._dialog.closeAll();
         }

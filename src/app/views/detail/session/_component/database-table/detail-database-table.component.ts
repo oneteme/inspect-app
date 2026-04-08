@@ -16,6 +16,10 @@ export class DetailDatabaseTableComponent {
 
   _requests: DatabaseRequestDto[] = [];
 
+  @Input() set initialQuery(q: string) {
+    if (q) this.tableConfig = { ...this.tableConfig, search: { ...this.tableConfig.search, initialQuery: q } };
+  }
+
   @Input() set requests(requests: DatabaseRequestDto[]) {
     this._requests = requests;
   }

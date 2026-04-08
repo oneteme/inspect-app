@@ -16,6 +16,10 @@ export class DetailSmtpTableComponent {
 
   _requests: MailRequestDto[] = [];
 
+  @Input() set initialQuery(q: string) {
+    if (q) this.tableConfig = { ...this.tableConfig, search: { ...this.tableConfig.search, initialQuery: q } };
+  }
+
   @Input() set requests(requests: MailRequestDto[]) {
     this._requests = requests;
   }

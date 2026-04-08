@@ -40,33 +40,47 @@
     <!-- Distribution Request + Session côte à côte -->
     <div class="db-dist-row">
       <div class="sb-distribution" *ngIf="!kpiLoading">
-        <div class="sbd-title">Request <span class="sbd-title-total">{{ (globalKpi?.totalSessions ?? 0) | number:'1.0-0' }} req.</span></div>
+        <div class="sbd-title">Request
+          <button class="sbd-all-btn" [class.active]="hasAnyRequestInsight" (click)="toggleAllRequestInsights()" [title]="hasAnyRequestInsight ? 'Masquer les erreurs' : 'Afficher les erreurs'">
+            <mat-icon class="material-symbols-outlined">{{ hasAnyRequestInsight ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
+        </div>
         <div class="sbd-row" *ngFor="let p of protocolSummaries"
-          [title]="(p.total | number:'1.0-0') + ' requêtes · ' + (p.count | number:'1.0-0') + ' erreurs'">
+          [class.sbd-row-selected]="selectedInsights.has(p.key)"
+          [class.sbd-row-clickable]="p.rate > 0"
+          [title]="(p.total | number:'1.0-0') + ' requêtes · ' + (p.count | number:'1.0-0') + ' erreurs'"
+          (click)="p.rate > 0 && toggleInsight(p.key)">
           <span class="sbd-label">{{ p.label }}</span>
           <div class="sbd-track" [class.track-active]="p.total > 0">
             <div class="sbd-fill" [style.width.%]="p.total > 0 ? (100 - p.rate) : 0"></div>
           </div>
           <span class="sbd-count">{{ p.total | compact }}</span>
-          <span class="sbd-rate" [class.c-ok]="p.rate === 0" [class.c-err]="p.rate > 0">{{ p.rate | number:'1.2-2' }}%</span>
+          <span class="sbd-rate" [class.c-ok]="p.rate === 0" [class.c-err]="p.rate > 0">{{ p.rate === 0 ? '100' : (p.rate | number:'1.2-2') }}%</span>
         </div>
       </div>
       <div class="sb-distribution" *ngIf="!sessionCountLoading">
-        <div class="sbd-title">Session <span class="sbd-title-total">{{ sessionTotal | number:'1.0-0' }} sess.</span></div>
+        <div class="sbd-title">Session
+          <button class="sbd-all-btn" [class.active]="hasAnySessionInsight" (click)="toggleAllSessionInsights()" [title]="hasAnySessionInsight ? 'Masquer les erreurs' : 'Afficher les erreurs'">
+            <mat-icon class="material-symbols-outlined">{{ hasAnySessionInsight ? 'visibility' : 'visibility_off' }}</mat-icon>
+          </button>
+        </div>
         <div class="sbd-row" *ngFor="let s of sessionSummaries"
-          [title]="(s.total | number:'1.0-0') + ' sessions · ' + (s.errors | number:'1.0-0') + ' erreurs'">
+          [class.sbd-row-selected]="selectedInsights.has(s.key)"
+          [class.sbd-row-clickable]="s.rate > 0"
+          [title]="(s.total | number:'1.0-0') + ' sessions · ' + (s.errors | number:'1.0-0') + ' erreurs'"
+          (click)="s.rate > 0 && toggleInsight(s.key)">
           <span class="sbd-label">{{ s.label }}</span>
           <div class="sbd-track" [class.track-active]="s.total > 0">
             <div class="sbd-fill" [style.width.%]="s.total > 0 ? (100 - s.rate) : 0"></div>
           </div>
           <span class="sbd-count">{{ s.total | compact }}</span>
-          <span class="sbd-rate" [class.c-ok]="s.rate === 0" [class.c-err]="s.rate > 0">{{ s.rate | number:'1.2-2' }}%</span>
+          <span class="sbd-rate" [class.c-ok]="s.rate === 0" [class.c-err]="s.rate > 0">{{ s.rate === 0 ? '100' : (s.rate | number:'1.2-2') }}%</span>
         </div>
       </div>
     </div>
 
     <!-- Insights : informations opérationnelles non affichées ailleurs -->
-    <div class="db-insights-wrap" *ngIf="serverHealthLoading || kpiLoading || hasRequestErrors || sessionInitErrors || sessionWebErrors || sessionTestErrors || stoppedServers.length || topSessionErrors.length || topBatchErrors.length">
+    <div class="db-insights-wrap" *ngIf="hasSelectedInsights && (serverHealthLoading || kpiLoading || stoppedServers.length || (selectedInsights.has('rest') && topErrors['rest']?.length) || (selectedInsights.has('jdbc') && topErrors['jdbc']?.length) || (selectedInsights.has('ftp') && topErrors['ftp']?.length) || (selectedInsights.has('smtp') && topErrors['smtp']?.length) || (selectedInsights.has('ldap') && topErrors['ldap']?.length) || (selectedInsights.has('SERVICE') && (tabRequests.sessionExceptionsTable?.isLoading !== false || topSessionErrors.length)) || (selectedInsights.has('BATCH') && (tabRequests.batchExceptionTable?.isLoading !== false || topBatchErrors.length)) || (selectedInsights.has('STARTUP') && sessionInitErrors > 0) || (selectedInsights.has('VIEW') && sessionWebErrors > 0) || (selectedInsights.has('TEST') && sessionTestErrors > 0))">
 
       <div class="db-insights-hdr">
         <span class="dih-title">Infrastructure &amp; Erreurs</span>
@@ -99,7 +113,7 @@
 
       <!-- Erreurs requêtes sortantes par protocole (Request: REST → JDBC → FTP → SMTP → LDAP) -->
       <ng-container *ngFor="let p of protocolDefs">
-        <div class="dbi-card" *ngIf="kpiLoading || topErrors[p.key]?.length">
+        <div class="dbi-card" *ngIf="selectedInsights.has(p.key) && (kpiLoading || topErrors[p.key]?.length)">
           <div class="dbi-header">
             <mat-icon class="material-symbols-outlined">arrow_outward</mat-icon>
             <span>Req. {{ p.label }}</span>
@@ -121,7 +135,7 @@
       </ng-container>
 
       <!-- Session Service (REST) : exceptions reçues -->
-      <div class="dbi-card" *ngIf="tabRequests.sessionExceptionsTable?.isLoading !== false || topSessionErrors.length">
+      <div class="dbi-card" *ngIf="selectedInsights.has('SERVICE') && (tabRequests.sessionExceptionsTable?.isLoading !== false || topSessionErrors.length)">
         <div class="dbi-header">
           <mat-icon class="material-symbols-outlined">http</mat-icon>
           <span>Sess. Service</span>
@@ -142,7 +156,7 @@
       </div>
 
       <!-- Session Batch : exceptions -->
-      <div class="dbi-card" *ngIf="tabRequests.batchExceptionTable?.isLoading !== false || topBatchErrors.length">
+      <div class="dbi-card" *ngIf="selectedInsights.has('BATCH') && (tabRequests.batchExceptionTable?.isLoading !== false || topBatchErrors.length)">
         <div class="dbi-header">
           <mat-icon class="material-symbols-outlined">schedule</mat-icon>
           <span>Sess. Batch</span>
@@ -163,7 +177,7 @@
       </div>
 
       <!-- Session Init : erreurs -->
-      <div class="dbi-card" *ngIf="!sessionCountLoading && sessionInitErrors > 0">
+      <div class="dbi-card" *ngIf="selectedInsights.has('STARTUP') && !sessionCountLoading && sessionInitErrors > 0">
         <div class="dbi-header">
           <mat-icon class="material-symbols-outlined">power_settings_new</mat-icon>
           <span>Sess. Init</span>
@@ -177,7 +191,7 @@
       </div>
 
       <!-- Session Web : erreurs -->
-      <div class="dbi-card" *ngIf="!sessionCountLoading && sessionWebErrors > 0">
+      <div class="dbi-card" *ngIf="selectedInsights.has('VIEW') && !sessionCountLoading && sessionWebErrors > 0">
         <div class="dbi-header">
           <mat-icon class="material-symbols-outlined">web</mat-icon>
           <span>Sess. Web</span>
@@ -191,7 +205,7 @@
       </div>
 
       <!-- Session Test : erreurs -->
-      <div class="dbi-card" *ngIf="!sessionCountLoading && sessionTestErrors > 0">
+      <div class="dbi-card" *ngIf="selectedInsights.has('TEST') && !sessionCountLoading && sessionTestErrors > 0">
         <div class="dbi-header">
           <mat-icon class="material-symbols-outlined">science</mat-icon>
           <span>Sess. Test</span>
@@ -351,6 +365,30 @@
       </ng-container>
     </div>
 
+    <!-- Stack technique détectée -->
+    <div class="ts-sep"></div>
+    <div class="ts-section" *ngIf="techStack.length">
+      <div class="dmp-header ts-header">
+        <span class="dmp-title">Stack Technique</span>
+      </div>
+
+      <div class="ts-scroll-outer"
+           (mouseenter)="onTechMouseEnter()"
+           (mouseleave)="onTechMouseLeave()"
+           (wheel)="onTechWheel($event)">
+        <div class="ts-scroll-track" #techScrollTrack>
+          <ng-container *ngFor="let _ of [1, 2]">
+            <div class="ts-pill" *ngFor="let tech of techStack" [title]="getTechTitle(tech)">
+              <img *ngIf="tech.svgUrl" [src]="tech.svgUrl" class="ts-devicon-img" [alt]="tech.name" />
+              <i *ngIf="!tech.svgUrl" [class]="tech.devicon" class="ts-devicon" [style.color]="tech.color"></i>
+              <span class="ts-pill-name">{{ tech.name }}</span>
+              <span class="ts-pill-version" *ngIf="tech.version">{{ tech.version }}</span>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </div>
+
   </section>
 
   <!-- Sidebar : KPIs globaux + serveurs -->
@@ -378,6 +416,52 @@
         </div>
       </div>
 
+    </div>
+
+    <!-- Bloc clients / user agents -->
+    <div class="sb-block sb-ua-block">
+      <div class="sb-block-head">
+        <mat-icon class="material-symbols-outlined">devices</mat-icon>
+        <span>Clients</span>
+        <span class="sb-badge" *ngIf="!userAgentLoading && userAgentData.length" title="{{ userAgentData.length }} type(s) de client détecté(s)">{{ userAgentData.length }}</span>
+      </div>
+      <div class="ua-body">
+        <ng-container *ngIf="userAgentLoading">
+          <div class="ua-chart-skel"></div>
+          <div class="ua-legend-skel">
+            <div class="dbi-skel-line" *ngFor="let _ of [1,2,3]"></div>
+          </div>
+        </ng-container>
+        <ng-container *ngIf="!userAgentLoading && userAgentData.length">
+          <chart type="donut"
+                 [config]="uaPieConfig"
+                 [data]="uaChartData"
+                 [isLoading]="false">
+          </chart>
+          <div class="ua-legend">
+            <ng-container *ngFor="let group of uaGroups">
+              <ng-container *ngIf="group.items.length">
+                <div class="ua-group-head">
+                  <mat-icon class="material-symbols-outlined">{{ group.icon }}</mat-icon>
+                  <span>{{ group.label }}</span>
+                </div>
+                <div class="ua-leg-row"
+                     *ngFor="let item of group.items"
+                     [class.ua-leg-hidden]="hiddenAgents.has(item.label)"
+                     (click)="toggleAgent(item.label)">
+                  <span class="ua-dot" [style.background]="item.color"></span>
+                  <span class="ua-leg-label">{{ item.label }}</span>
+                  <span class="ua-leg-pct">{{ item.pct | number:'1.2-2' }}%</span>
+                  <span class="ua-leg-count">{{ item.count | compact }}</span>
+                </div>
+              </ng-container>
+            </ng-container>
+          </div>
+        </ng-container>
+        <div class="ua-empty" *ngIf="!userAgentLoading && !userAgentData.length">
+          <span>Aucune donnée</span>
+        </div>
+      </div>
     </div>
 
     <!-- Bloc serveurs actifs -->

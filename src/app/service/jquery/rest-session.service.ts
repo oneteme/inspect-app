@@ -375,4 +375,21 @@ export class RestSessionService {
             return d ? { total: d.count, errors: (d.countErrorServer ?? 0) + (d.countErrorClient ?? 0) } : { total: 0, errors: 0 };
         }));
     }
+
+    getCountByUserAgent(filters: { env: string, start: Date, end: Date, app_name?: string }): Observable<{ count: number, userAgent: string }[]> {
+        const args: any = {
+            'column': 'count:count,user_agt',
+            'join': 'instance',
+            'instance.environement': filters.env,
+            'instance.type': 'SERVER',
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'order': 'count.desc',
+            'limit': 100
+        };
+        if (filters.app_name) {
+            args['instance.app_name'] = filters.app_name;
+        }
+        return this.getRestSession(args);
+    }
 }

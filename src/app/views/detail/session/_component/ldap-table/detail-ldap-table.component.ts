@@ -16,6 +16,10 @@ export class DetailLdapTableComponent {
 
   _requests: DirectoryRequestDto[] = [];
 
+  @Input() set initialQuery(q: string) {
+    if (q) this.tableConfig = { ...this.tableConfig, search: { ...this.tableConfig.search, initialQuery: q } };
+  }
+
   @Input() set requests(requests: DirectoryRequestDto[]) {
     this._requests = requests;
   }

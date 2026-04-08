@@ -50,25 +50,30 @@
 <rest-table *ngIf="params.type=='rest'"
             [requests]="requests"
             [isLoading]="isLoading"
+            [initialQuery]="queryParams.optional?.['q']"
             (onClickRemote)="selectedRemote($event)"
             (onClickRow)="selectedRest($event)">
 </rest-table>
 
 <ftp-table *ngIf="params.type=='ftp'" [requests]="requests"
            [isLoading]="isLoading"
+           [initialQuery]="queryParams.optional?.['q']"
            (onClickRow)="selectedFtp($event)"></ftp-table>
 
 <smtp-table *ngIf="params.type=='smtp'" [requests]="requests"
             [isLoading]="isLoading"
+            [initialQuery]="queryParams.optional?.['q']"
             (onClickRow)="selectedSmtp($event)" >
 </smtp-table>
 
 <ldap-table *ngIf="params.type=='ldap'" [requests]="requests"
             [isLoading]="isLoading"
+            [initialQuery]="queryParams.optional?.['q']"
             (onClickRow)="selectedLdap($event)">
 </ldap-table>
 
 <database-table *ngIf="params.type=='jdbc'" [requests]="requests"
                 [isLoading]="isLoading"
+                [initialQuery]="queryParams.optional?.['q']"
                 (onClickRow)="selectedQuery($event)">
 </database-table>
