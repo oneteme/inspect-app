@@ -26,8 +26,15 @@
   </form>
 </header-page>
 
+<!-- Banner : pas de données -->
+<div class="db-all-ok db-no-data" *ngIf="hasNoData && !showInactiveProtocols">
+  <mat-icon class="material-symbols-outlined">info</mat-icon>
+  <span>Aucune donnée disponible sur la période sélectionnée</span>
+  <button (click)="showInactiveProtocols = true">Afficher quand même</button>
+</div>
+
 <!-- Banner : tous protocoles OK -->
-<div class="db-all-ok" *ngIf="!kpiLoading && inactiveProtocolsCount === 5 && !showInactiveProtocols">
+<div class="db-all-ok" *ngIf="!hasNoData && !kpiLoading && inactiveProtocolsCount === 5 && !showInactiveProtocols">
   <mat-icon class="material-symbols-outlined">check_circle</mat-icon>
   <span>Aucun incident protocole sur la période sélectionnée</span>
   <button (click)="showInactiveProtocols = true">Afficher l'activité</button>
@@ -37,461 +44,161 @@
   <!-- Colonne principale : liste des protocoles -->
   <section class="db-main">
 
-    <!-- Distribution Request + Session côte à côte -->
-    <div class="db-dist-row">
-      <div class="sb-distribution" *ngIf="!kpiLoading">
-        <div class="sbd-title">Request
-          <button class="sbd-all-btn" [class.active]="hasAnyRequestInsight" (click)="toggleAllRequestInsights()" [title]="hasAnyRequestInsight ? 'Masquer les erreurs' : 'Afficher les erreurs'">
-            <mat-icon class="material-symbols-outlined">{{ hasAnyRequestInsight ? 'visibility' : 'visibility_off' }}</mat-icon>
-          </button>
-        </div>
-        <div class="sbd-row" *ngFor="let p of protocolSummaries"
-          [class.sbd-row-selected]="selectedInsights.has(p.key)"
-          [class.sbd-row-clickable]="p.rate > 0"
-          [title]="(p.total | number:'1.0-0') + ' requêtes · ' + (p.count | number:'1.0-0') + ' erreurs'"
-          (click)="p.rate > 0 && toggleInsight(p.key)">
-          <span class="sbd-label">{{ p.label }}</span>
-          <div class="sbd-track" [class.track-active]="p.total > 0">
-            <div class="sbd-fill" [style.width.%]="p.total > 0 ? (100 - p.rate) : 0"></div>
-          </div>
-          <span class="sbd-count">{{ p.total | compact }}</span>
-          <span class="sbd-rate" [class.c-ok]="p.rate === 0" [class.c-err]="p.rate > 0">{{ p.rate === 0 ? '100' : (p.rate | number:'1.2-2') }}%</span>
-        </div>
-      </div>
-      <div class="sb-distribution" *ngIf="!sessionCountLoading">
-        <div class="sbd-title">Session
-          <button class="sbd-all-btn" [class.active]="hasAnySessionInsight" (click)="toggleAllSessionInsights()" [title]="hasAnySessionInsight ? 'Masquer les erreurs' : 'Afficher les erreurs'">
-            <mat-icon class="material-symbols-outlined">{{ hasAnySessionInsight ? 'visibility' : 'visibility_off' }}</mat-icon>
-          </button>
-        </div>
-        <div class="sbd-row" *ngFor="let s of sessionSummaries"
-          [class.sbd-row-selected]="selectedInsights.has(s.key)"
-          [class.sbd-row-clickable]="s.rate > 0"
-          [title]="(s.total | number:'1.0-0') + ' sessions · ' + (s.errors | number:'1.0-0') + ' erreurs'"
-          (click)="s.rate > 0 && toggleInsight(s.key)">
-          <span class="sbd-label">{{ s.label }}</span>
-          <div class="sbd-track" [class.track-active]="s.total > 0">
-            <div class="sbd-fill" [style.width.%]="s.total > 0 ? (100 - s.rate) : 0"></div>
-          </div>
-          <span class="sbd-count">{{ s.total | compact }}</span>
-          <span class="sbd-rate" [class.c-ok]="s.rate === 0" [class.c-err]="s.rate > 0">{{ s.rate === 0 ? '100' : (s.rate | number:'1.2-2') }}%</span>
-        </div>
-      </div>
-    </div>
+    <!-- Vue d'ensemble : tableau des instances serveur -->
+    <dashboard-instances-table
+      *ngIf="!hasSelectedInsights && showOverview"
+      [rows]="filteredDeployRows"
+      [isLoading]="serverHealthLoading"
+      [today]="deployTableToday"
+      [versionColor]="versionColor"
+      (statusIndicatorClick)="navigateOnStatusIndicator($event.event, $event.row)"
+      (serverClick)="navigateOnServerClick($event.event, $event.row)"
+      (sinceClick)="navigateOnSinceClick($event.event, $event.row)"
+      (restartClick)="navigateOnRestartClick($event.event, $event.minStart, $event.appName)">
+    </dashboard-instances-table>
 
-    <!-- Insights : informations opérationnelles non affichées ailleurs -->
-    <div class="db-insights-wrap" *ngIf="hasSelectedInsights && (serverHealthLoading || kpiLoading || stoppedServers.length || (selectedInsights.has('rest') && topErrors['rest']?.length) || (selectedInsights.has('jdbc') && topErrors['jdbc']?.length) || (selectedInsights.has('ftp') && topErrors['ftp']?.length) || (selectedInsights.has('smtp') && topErrors['smtp']?.length) || (selectedInsights.has('ldap') && topErrors['ldap']?.length) || (selectedInsights.has('SERVICE') && (tabRequests.sessionExceptionsTable?.isLoading !== false || topSessionErrors.length)) || (selectedInsights.has('BATCH') && (tabRequests.batchExceptionTable?.isLoading !== false || topBatchErrors.length)) || (selectedInsights.has('STARTUP') && sessionInitErrors > 0) || (selectedInsights.has('VIEW') && sessionWebErrors > 0) || (selectedInsights.has('TEST') && sessionTestErrors > 0))">
-
-      <div class="db-insights-hdr">
-        <span class="dih-title">Infrastructure &amp; Erreurs</span>
-        <span class="dih-sub">Détails sur la même période analysée</span>
-      </div>
-
-      <div class="db-insights">
-
-      <!-- Skeleton -->
-      <div class="dbi-card dbi-skeleton" *ngIf="serverHealthLoading">
-        <div class="dbi-skel-line"></div>
-        <div class="dbi-skel-line dbi-skel-sm"></div>
-        <div class="dbi-skel-line dbi-skel-sm"></div>
-      </div>
-
-      <!-- Serveurs arrêtés (end !== null) -->
-      <div class="dbi-card" *ngIf="!serverHealthLoading && stoppedServers.length">
-        <div class="dbi-header">
-          <mat-icon class="material-symbols-outlined">stop_circle</mat-icon>
-          <span>Serveurs arrêtés</span>
-          <span class="dbi-chip dbi-chip-err">{{ stoppedServers.length }}</span>
-        </div>
-        <div class="dbi-row dbi-row-link" *ngFor="let s of stoppedServers; trackBy: trackByAppName" (click)="navigateToSupervision(s)">
-          <span class="dbi-dot dbi-dot-err"></span>
-          <span class="dbi-name" [title]="s.appName">{{ s.appName }}</span>
-          <span class="dbi-meta">{{ s.end | date:'dd/MM HH:mm' }}</span>
-          <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
-        </div>
-      </div>
-
-      <!-- Erreurs requêtes sortantes par protocole (Request: REST → JDBC → FTP → SMTP → LDAP) -->
-      <ng-container *ngFor="let p of protocolDefs">
-        <div class="dbi-card" *ngIf="selectedInsights.has(p.key) && (kpiLoading || topErrors[p.key]?.length)">
-          <div class="dbi-header">
-            <mat-icon class="material-symbols-outlined">arrow_outward</mat-icon>
-            <span>Req. {{ p.label }}</span>
-            <span class="dbi-chip dbi-chip-err" *ngIf="!kpiLoading && topErrors[p.key]?.length">{{ topErrors[p.key].length }}</span>
-          </div>
-          <ng-container *ngIf="kpiLoading">
-            <div class="dbi-skel-row" *ngFor="let _ of [1,2]"></div>
-          </ng-container>
-          <ng-container *ngIf="!kpiLoading">
-            <div class="dbi-row dbi-row-link" *ngFor="let e of topErrors[p.key]; trackBy: trackByType" (click)="navigateToRequestProtocol(p.key, e.type)">
-              <span class="dbi-dot dbi-dot-err"></span>
-              <span class="dbi-name" [title]="e.type">{{ e.type }}</span>
-              <div class="dbi-bar-wrap"><div class="dbi-bar dbi-bar-err" [style.width.%]="getErrBarWidth(topErrors[p.key], e.count)"></div></div>
-              <span class="dbi-badge dbi-badge-warn">{{ e.count }}</span>
-              <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
-            </div>
-          </ng-container>
-        </div>
-      </ng-container>
-
-      <!-- Session Service (REST) : exceptions reçues -->
-      <div class="dbi-card" *ngIf="selectedInsights.has('SERVICE') && (tabRequests.sessionExceptionsTable?.isLoading !== false || topSessionErrors.length)">
-        <div class="dbi-header">
-          <mat-icon class="material-symbols-outlined">http</mat-icon>
-          <span>Sess. Service</span>
-          <span class="dbi-chip dbi-chip-err" *ngIf="tabRequests.sessionExceptionsTable?.isLoading === false && topSessionErrors.length">{{ topSessionErrors.length }}</span>
-        </div>
-        <ng-container *ngIf="tabRequests.sessionExceptionsTable?.isLoading !== false">
-          <div class="dbi-skel-row" *ngFor="let _ of [1,2,3]"></div>
-        </ng-container>
-        <ng-container *ngIf="tabRequests.sessionExceptionsTable?.isLoading === false">
-          <div class="dbi-row dbi-row-link" *ngFor="let e of topSessionErrors; trackBy: trackByType" (click)="navigateToException(e.type, 'rest')">
-            <span class="dbi-dot dbi-dot-err"></span>
-            <span class="dbi-name" [title]="e.type">{{ e.type }}</span>
-            <div class="dbi-bar-wrap"><div class="dbi-bar dbi-bar-err" [style.width.%]="getErrBarWidth(topSessionErrors, e.count)"></div></div>
-            <span class="dbi-badge dbi-badge-warn">{{ e.count }}</span>
-            <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
-          </div>
-        </ng-container>
-      </div>
-
-      <!-- Session Batch : exceptions -->
-      <div class="dbi-card" *ngIf="selectedInsights.has('BATCH') && (tabRequests.batchExceptionTable?.isLoading !== false || topBatchErrors.length)">
-        <div class="dbi-header">
-          <mat-icon class="material-symbols-outlined">schedule</mat-icon>
-          <span>Sess. Batch</span>
-          <span class="dbi-chip dbi-chip-err" *ngIf="tabRequests.batchExceptionTable?.isLoading === false && topBatchErrors.length">{{ topBatchErrors.length }}</span>
-        </div>
-        <ng-container *ngIf="tabRequests.batchExceptionTable?.isLoading !== false">
-          <div class="dbi-skel-row" *ngFor="let _ of [1,2,3]"></div>
-        </ng-container>
-        <ng-container *ngIf="tabRequests.batchExceptionTable?.isLoading === false">
-          <div class="dbi-row dbi-row-link" *ngFor="let e of topBatchErrors; trackBy: trackByType" (click)="navigateToException(e.type, 'batch')">
-            <span class="dbi-dot dbi-dot-err"></span>
-            <span class="dbi-name" [title]="e.type">{{ e.type }}</span>
-            <div class="dbi-bar-wrap"><div class="dbi-bar dbi-bar-err" [style.width.%]="getErrBarWidth(topBatchErrors, e.count)"></div></div>
-            <span class="dbi-badge dbi-badge-warn">{{ e.count }}</span>
-            <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
-          </div>
-        </ng-container>
-      </div>
-
-      <!-- Session Init : erreurs -->
-      <div class="dbi-card" *ngIf="selectedInsights.has('STARTUP') && !sessionCountLoading && sessionInitErrors > 0">
-        <div class="dbi-header">
-          <mat-icon class="material-symbols-outlined">power_settings_new</mat-icon>
-          <span>Sess. Init</span>
-          <span class="dbi-chip dbi-chip-err">{{ sessionInitErrors | compact }}</span>
-        </div>
-        <div class="dbi-row dbi-row-link" (click)="navigateToSessionByType('STARTUP')">
-          <span class="dbi-dot dbi-dot-err"></span>
-          <span class="dbi-name">{{ sessionInitErrors | number:'1.0-0' }} erreurs au démarrage</span>
-          <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
-        </div>
-      </div>
-
-      <!-- Session Web : erreurs -->
-      <div class="dbi-card" *ngIf="selectedInsights.has('VIEW') && !sessionCountLoading && sessionWebErrors > 0">
-        <div class="dbi-header">
-          <mat-icon class="material-symbols-outlined">web</mat-icon>
-          <span>Sess. Web</span>
-          <span class="dbi-chip dbi-chip-err">{{ sessionWebErrors | compact }}</span>
-        </div>
-        <div class="dbi-row dbi-row-link" (click)="navigateToSessionByType('VIEW')">
-          <span class="dbi-dot dbi-dot-err"></span>
-          <span class="dbi-name">{{ sessionWebErrors | number:'1.0-0' }} erreurs navigateur</span>
-          <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
-        </div>
-      </div>
-
-      <!-- Session Test : erreurs -->
-      <div class="dbi-card" *ngIf="selectedInsights.has('TEST') && !sessionCountLoading && sessionTestErrors > 0">
-        <div class="dbi-header">
-          <mat-icon class="material-symbols-outlined">science</mat-icon>
-          <span>Sess. Test</span>
-          <span class="dbi-chip dbi-chip-err">{{ sessionTestErrors | compact }}</span>
-        </div>
-        <div class="dbi-row dbi-row-link" (click)="navigateToSessionByType('TEST')">
-          <span class="dbi-dot dbi-dot-err"></span>
-          <span class="dbi-name">{{ sessionTestErrors | number:'1.0-0' }} erreurs test</span>
-          <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
-        </div>
-      </div>
-
-      <!--
-      <div class="dbi-card" *ngIf="!serverHealthLoading && unstableServers.length">
-        <div class="dbi-header">
-          <mat-icon class="material-symbols-outlined">restart_alt</mat-icon>
-          <span>Redémarrages</span>
-          <span class="dbi-chip dbi-chip-warn">{{ unstableServers.length }}</span>
-        </div>
-        <div class="dbi-row dbi-row-link" *ngFor="let s of unstableServers; trackBy: trackByAppName" (click)="navigateToSupervision(s)">
-          <span class="dbi-dot dbi-dot-warn"></span>
-          <span class="dbi-name" [title]="s.appName">{{ s.appName }}</span>
-          <span class="dbi-badge dbi-badge-warn">{{ s.restart }}×</span>
-          <span class="dbi-meta">{{ s.version }}</span>
-          <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
-        </div>
-      </div>
-
-      <div class="dbi-card" *ngIf="!serverHealthLoading && versionSummary.length > 1">
-        <div class="dbi-header">
-          <mat-icon class="material-symbols-outlined">deployed_code</mat-icon>
-          <span>Versions actives</span>
-          <span class="dbi-chip dbi-chip-info">{{ versionSummary.length }}</span>
-        </div>
-        <div class="dbi-row" *ngFor="let v of versionSummary; let first = first; trackBy: trackByVersion">
-          <span class="dbi-dot" [class.dbi-dot-ok]="first"></span>
-          <span class="dbi-name">{{ v.version }}</span>
-          <span class="dbi-badge">{{ v.count }} serv.</span>
-        </div>
-      </div>
-
-      <div class="dbi-card" *ngIf="!serverHealthLoading && divergentBranches.length">
-        <div class="dbi-header">
-          <mat-icon class="material-symbols-outlined">alt_route</mat-icon>
-          <span>Branches actives</span>
-          <span class="dbi-chip dbi-chip-warn">{{ divergentBranches.length }}</span>
-        </div>
-        <div class="dbi-row" *ngFor="let b of divergentBranches; trackBy: trackByBranch">
-          <span class="dbi-dot dbi-dot-warn"></span>
-          <span class="dbi-name dbi-mono" [title]="b.branch">{{ b.branch }}</span>
-          <span class="dbi-badge">{{ b.count }} serv.</span>
-        </div>
-      </div>
-      -->
-
-      </div><!-- fin .db-insights -->
-
-      <!-- F : carte infrastructure saine -->
-      <div class="dbi-all-clear" *ngIf="insightsAllClear">
-        <mat-icon class="material-symbols-outlined">verified</mat-icon>
-        <span>Infrastructure saine — aucun incident détecté</span>
-      </div>
-
-    </div><!-- fin .db-insights-wrap -->
-
-    <!-- Activité protocole -->
-    <div class="dmp-header">
-      <span class="dmp-title">Activité protocole</span>
-      <button class="dmp-toggle"
-          *ngIf="quietProtocols.length || showInactiveProtocols"
-          (click)="showInactiveProtocols = !showInactiveProtocols">
-        <mat-icon class="material-symbols-outlined">{{ showInactiveProtocols ? 'visibility_off' : 'visibility' }}</mat-icon>
-        {{ showInactiveProtocols ? 'Masquer inactifs' : 'Voir tous (' + quietProtocols.length + ')' }}
-      </button>
-    </div>
-
-    <div class="proto-list">
-      <ng-container *ngFor="let p of protocolDefs; trackBy: trackByKey">
-        <div class="proto-row"
-            *ngIf="chartRequests[p.reqKey].isLoading || chartRequests[p.reqKey].data?.length || showInactiveProtocols"
-            [class.pr-warn]="!chartRequests[p.reqKey].isLoading && getSparklinePerc(p.key) > 1 && getSparklinePerc(p.key) <= 5"
-            [class.pr-err]="!chartRequests[p.reqKey].isLoading && getSparklinePerc(p.key) > 5"
-            [class.pr-healthy]="!chartRequests[p.reqKey].isLoading && !chartRequests[p.reqKey].data?.length">
-
-          <!-- Tag protocole -->
-          <div class="pr-label">
-            <span class="pr-tag">{{ p.label }}</span>
-          </div>
-
-          <!-- Taux + volume -->
-          <div class="pr-kpi">
-            <span class="pr-rate"
-                [class.c-ok]="!chartRequests[p.reqKey].isLoading && !chartRequests[p.reqKey].data?.length"
-                [class.c-warn]="!chartRequests[p.reqKey].isLoading && getSparklinePerc(p.key) > 1 && getSparklinePerc(p.key) <= 5"
-                [class.c-err]="!chartRequests[p.reqKey].isLoading && getSparklinePerc(p.key) > 5">
-              <mat-spinner *ngIf="chartRequests[p.reqKey].isLoading" [diameter]="14" class="inline-spin"></mat-spinner>
-              <ng-container *ngIf="!chartRequests[p.reqKey].isLoading">{{ getSparklinePerc(p.key) | number:'1.2-2' }}%</ng-container>
-            </span>
-            <span class="pr-volume">{{ getSparklineSubtitle(p.key) }}</span>
-            <span class="pr-trend pr-trend-up"
-                *ngIf="!chartRequests[p.reqKey].isLoading && chartRequests[p.reqKey].chart?.length && getTrend(p.key) === 'up'">
-              <mat-icon class="material-symbols-outlined">trending_up</mat-icon>hausse
-            </span>
-            <span class="pr-trend pr-trend-down"
-                *ngIf="!chartRequests[p.reqKey].isLoading && chartRequests[p.reqKey].chart?.length && getTrend(p.key) === 'down'">
-              <mat-icon class="material-symbols-outlined">trending_down</mat-icon>baisse
-            </span>
-          </div>
-
-          <!-- Top 3 types d'erreur ou résumé activité -->
-          <div class="pr-errors">
-            <ng-container *ngIf="!chartRequests[p.reqKey].isLoading">
-              <ng-container *ngIf="topErrors[p.key]?.length; else prOkState">
-                <div class="pre-item" *ngFor="let e of topErrors[p.key]">
-                  <span class="pre-name" [title]="e.type">{{ e.type }}</span>
-                  <span class="pre-track"><span class="pre-fill" [style.width.%]="getProtoErrBarWidth(topErrors[p.key], e.count)"></span></span>
-                  <span class="pre-count">{{ e.count }}</span>
-                </div>
-              </ng-container>
-              <ng-template #prOkState>
-                <div class="pre-ok">
-                  <mat-icon class="material-symbols-outlined">check_circle</mat-icon>
-                  <span>Aucune erreur</span>
-                </div>
-              </ng-template>
-            </ng-container>
-          </div>
-
-          <!-- Bouton détail -->
-          <button class="pr-detail-btn"
-              [disabled]="chartRequests[p.reqKey].isLoading || !chartRequests[p.reqKey].data?.length"
-              (click)="openProtocolDialog({ observable: chartRequests[p.reqKey], type: p.label })"
-              title="Voir le détail des exceptions">
-            <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
-          </button>
-
-          <!-- Sparkline si erreurs, sinon résumé volume -->
-          <ng-container *ngIf="chartRequests[p.reqKey].isLoading || chartRequests[p.reqKey].chart?.length; else prNoChart">
-            <div class="pr-chart">
-              <chart type="area" [config]="p.chartConfig"
-                  [data]="chartRequests[p.reqKey].chart || []"
-                  [isLoading]="chartRequests[p.reqKey].isLoading" />
-            </div>
-          </ng-container>
-          <ng-template #prNoChart>
-            <div class="pr-volume-summary">
-              <span class="pvs-val">{{ getProtoTotalRequests(p.key) | number:'1.0-0' }}</span>
-              <span class="pvs-lbl">requêtes</span>
-              <div class="pvs-ok">
-                <mat-icon class="material-symbols-outlined">verified</mat-icon>
-                <span>0 erreur</span>
-              </div>
-            </div>
-          </ng-template>
-
-        </div>
-      </ng-container>
-    </div>
-
-    <!-- Stack technique détectée -->
-    <div class="ts-sep"></div>
-    <div class="ts-section" *ngIf="techStack.length">
-      <div class="dmp-header ts-header">
-        <span class="dmp-title">Stack Technique</span>
-      </div>
-
-      <div class="ts-scroll-outer"
-           (mouseenter)="onTechMouseEnter()"
-           (mouseleave)="onTechMouseLeave()"
-           (wheel)="onTechWheel($event)">
-        <div class="ts-scroll-track" #techScrollTrack>
-          <ng-container *ngFor="let _ of [1, 2]">
-            <div class="ts-pill" *ngFor="let tech of techStack" [title]="getTechTitle(tech)">
-              <img *ngIf="tech.svgUrl" [src]="tech.svgUrl" class="ts-devicon-img" [alt]="tech.name" />
-              <i *ngIf="!tech.svgUrl" [class]="tech.devicon" class="ts-devicon" [style.color]="tech.color"></i>
-              <span class="ts-pill-name">{{ tech.name }}</span>
-              <span class="ts-pill-version" *ngIf="tech.version">{{ tech.version }}</span>
-            </div>
-          </ng-container>
-        </div>
-      </div>
-    </div>
+    <!-- Vue détail : affiché au clic sur une ligne Request ou Session -->
+    <dashboard-detail-view
+      *ngIf="hasSelectedInsights"
+      [userAgentData]="userAgentData"
+      [userAgentLoading]="userAgentLoading"
+      [uaGroups]="uaGroups"
+      [uaChartData]="uaChartData"
+      [uaPieConfig]="uaPieConfig"
+      [hiddenAgents]="hiddenAgents"
+      [selectedInsights]="selectedInsights"
+      [protocolDefs]="protocolDefs"
+      [topErrors]="topErrors"
+      [kpiLoading]="kpiLoading"
+      [serverHealthLoading]="serverHealthLoading"
+      [stoppedServers]="stoppedServers"
+      [tabRequests]="tabRequests"
+      [topSessionErrors]="topSessionErrors"
+      [topBatchErrors]="topBatchErrors"
+      [sessionCountLoading]="sessionCountLoading"
+      [sessionInitErrors]="sessionInitErrors"
+      [sessionWebErrors]="sessionWebErrors"
+      [sessionTestErrors]="sessionTestErrors"
+      [insightsAllClear]="insightsAllClear"
+      [chartRequests]="chartRequests"
+      [sparklinePercs]="sparklinePercs"
+      [sparklineTitles]="sparklineTitles"
+      (agentToggle)="toggleAgent($event)"
+      (requestProtocolNav)="navigateToRequestProtocol($event.key, $event.errorType)"
+      (sessionTypeNav)="navigateToSessionByType($event)"
+      (exceptionNav)="navigateToException($event.type, $event.tab)"
+      (supervisionNav)="navigateToSupervision($event)"
+      (protocolDialogOpen)="openProtocolDialog($event)">
+    </dashboard-detail-view>
 
   </section>
 
   <!-- Sidebar : KPIs globaux + serveurs -->
   <aside class="db-sidebar">
 
-    <!-- Bloc KPIs + distribution + actions -->
-    <div class="sb-block">
-
-      <div class="sb-kpi-grid">
-        <div class="sbk-item sbk-item-link" (click)="navigateToDeploiment()">
-          <span class="sbk-val">{{ nameDataList?.length ?? '—' }}</span>
-          <span class="sbk-lbl">Server Applications <mat-icon class="sbk-ext material-symbols-outlined">open_in_new</mat-icon></span>
-        </div>
-        <div class="sbk-item">
-          <span class="sbk-val">{{ frontendCount ?? '—' }}</span>
-          <span class="sbk-lbl">Web Applications</span>
-        </div>
-        <div class="sbk-item">
-          <span class="sbk-val">{{ serverHealthLoading ? '—' : versionSummary.length }}</span>
-          <span class="sbk-lbl">Versions actives</span>
-        </div>
-        <div class="sbk-item">
-          <span class="sbk-val">{{ userCount ?? '—' }}</span>
-          <span class="sbk-lbl">Utilisateur{{ userCount !== 1 ? 's' : '' }}</span>
+    <!-- Stats instances compactes -->
+    <ng-container *ngIf="serverHealthLoading; else instancesBlock">
+      <div class="dov-stats-wrap dov-stats-skel">
+        <div class="dov-stats-lbl">Instances actives</div>
+        <div class="dov-stats-sidebar">
+          <div class="dov-stat-sb-skel" *ngFor="let _ of [1,2,3,4]"></div>
         </div>
       </div>
-
-    </div>
-
-    <!-- Bloc clients / user agents -->
-    <div class="sb-block sb-ua-block">
-      <div class="sb-block-head">
-        <mat-icon class="material-symbols-outlined">devices</mat-icon>
-        <span>Clients</span>
-        <span class="sb-badge" *ngIf="!userAgentLoading && userAgentData.length" title="{{ userAgentData.length }} type(s) de client détecté(s)">{{ userAgentData.length }}</span>
+    </ng-container>
+    <ng-template #instancesBlock>
+    <div class="dov-stats-wrap" *ngIf="!serverHealthLoading">
+      <div class="dov-stats-lbl">Instances actives</div>
+    <div class="dov-stats-sidebar">
+      <div class="dov-stat-sb sb-online" (click)="selectServerStatus('online')" [class.dov-stat-sb-active]="serverStatusFilter === 'online' && showOverview" style="cursor:pointer">
+        <span class="dov-stat-sb-val">{{ hasNoData ? '--' : onlineServerStat }}</span>
+        <span class="dov-stat-sb-lbl">En ligne</span>
       </div>
-      <div class="ua-body">
-        <ng-container *ngIf="userAgentLoading">
-          <div class="ua-chart-skel"></div>
-          <div class="ua-legend-skel">
-            <div class="dbi-skel-line" *ngFor="let _ of [1,2,3]"></div>
-          </div>
-        </ng-container>
-        <ng-container *ngIf="!userAgentLoading && userAgentData.length">
-          <chart type="donut"
-                 [config]="uaPieConfig"
-                 [data]="uaChartData"
-                 [isLoading]="false">
-          </chart>
-          <div class="ua-legend">
-            <ng-container *ngFor="let group of uaGroups">
-              <ng-container *ngIf="group.items.length">
-                <div class="ua-group-head">
-                  <mat-icon class="material-symbols-outlined">{{ group.icon }}</mat-icon>
-                  <span>{{ group.label }}</span>
-                </div>
-                <div class="ua-leg-row"
-                     *ngFor="let item of group.items"
-                     [class.ua-leg-hidden]="hiddenAgents.has(item.label)"
-                     (click)="toggleAgent(item.label)">
-                  <span class="ua-dot" [style.background]="item.color"></span>
-                  <span class="ua-leg-label">{{ item.label }}</span>
-                  <span class="ua-leg-pct">{{ item.pct | number:'1.2-2' }}%</span>
-                  <span class="ua-leg-count">{{ item.count | compact }}</span>
-                </div>
-              </ng-container>
-            </ng-container>
-          </div>
-        </ng-container>
-        <div class="ua-empty" *ngIf="!userAgentLoading && !userAgentData.length">
-          <span>Aucune donnée</span>
-        </div>
+      <div class="dov-stat-sb sb-pending" (click)="selectServerStatus('pending')" [class.dov-stat-sb-active]="serverStatusFilter === 'pending' && showOverview" style="cursor:pointer">
+        <span class="dov-stat-sb-val">{{ hasNoData ? '--' : pendingServerStat }}</span>
+        <span class="dov-stat-sb-lbl">En attente</span>
+      </div>
+      <div class="dov-stat-sb sb-offline" (click)="selectServerStatus('offline')" [class.dov-stat-sb-active]="serverStatusFilter === 'offline' && showOverview" style="cursor:pointer">
+        <span class="dov-stat-sb-val">{{ hasNoData ? '--' : offlineServerStat }}</span>
+        <span class="dov-stat-sb-lbl">Hors ligne</span>
+      </div>
+      <div class="dov-stat-sb sb-total" (click)="selectServerStatus('all')" [class.dov-stat-sb-active]="serverStatusFilter === 'all' && showOverview" style="cursor:pointer">
+        <span class="dov-stat-sb-val">{{ hasNoData ? '--' : deployTableRows.length }}</span>
+        <span class="dov-stat-sb-lbl">Total</span>
       </div>
     </div>
+    </div>
+    </ng-template>
 
-    <!-- Bloc serveurs actifs -->
-    <div class="sb-block sb-servers-block" *ngIf="serverHealthLoading || serverHealthData?.length">
-      <div class="sb-block-head">
-        <mat-icon class="material-symbols-outlined">dns</mat-icon>
-        <span>Serveurs actifs</span>
-        <span class="sb-badge" *ngIf="!serverHealthLoading">{{ serverHealthData?.length }}</span>
-        <button class="sb-head-link" (click)="navigateToDeploiment()">
-          <mat-icon class="material-symbols-outlined">open_in_new</mat-icon>
-        </button>
+    <!-- Distribution Session -->
+    <ng-container *ngIf="sessionCountLoading; else sessionBlock">
+      <div class="sb-block sb-distribution-block sb-skel-block">
+        <div class="sbd-title">Session</div>
+        <ng-container *ngFor="let _ of [1,2,3,4]">
+          <div class="sbd-skel-label"></div>
+          <div class="sbd-skel-track"></div>
+          <div class="sbd-skel-rate"></div>
+          <div class="sbd-skel-count"></div>
+        </ng-container>
       </div>
-      <div class="server-list">
-        <ng-container *ngIf="serverHealthLoading">
-          <div class="sl-skel" *ngFor="let _ of [1,2,3,4,5,6]"></div>
-        </ng-container>
-        <ng-container *ngIf="!serverHealthLoading">
-          <div class="sl-item" *ngFor="let server of serverHealthData; trackBy: trackByAppName" (click)="navigateToSupervision(server)">
-            <span class="sl-dot"
-                [class.sl-on]="!server.end && !isRecentlyStarted(server)"
-                [class.sl-recent]="isRecentlyStarted(server)"
-                [class.sl-off]="!!server.end"></span>
-            <div class="sl-info">
-              <span class="sl-name">{{ server.appName }}</span>
-              <span class="sl-meta">{{ server.version }} · {{ server.lastStart | date:'dd/MM HH:mm' }}<ng-container *ngIf="server.restart > 1"> · <span class="sl-rstrt">↺{{ server.restart }}</span></ng-container></span>
-            </div>
-          </div>
-        </ng-container>
+    </ng-container>
+    <ng-template #sessionBlock>
+    <div class="sb-block sb-distribution-block" *ngIf="!sessionCountLoading">
+      <div class="sbd-title">Session</div>
+      <div class="sbd-empty" *ngIf="sessionSummaries.length === 0">
+        <mat-icon>info_outline</mat-icon>
+        <span>Aucune session sur la période</span>
+      </div>
+      <div class="sbd-row" *ngFor="let s of sessionSummaries"
+        [class.sbd-row-selected]="selectedInsights.has(s.key)"
+        [class.sbd-row-clickable]="s.rate > 0"
+        [title]="(s.total | number:'1.0-0') + ' sessions · ' + (s.errors | number:'1.0-0') + ' erreurs'"
+        (click)="s.rate > 0 && toggleInsight(s.key)">
+        <span class="sbd-label">{{ s.label }}</span>
+        <div class="sbd-track" [class.track-active]="s.total > 0">
+          <div class="sbd-fill" [style.width.%]="s.total > 0 ? (100 - s.rate) : 0"></div>
+        </div>
+        <span class="sbd-rate" [class.c-ok]="s.total > 0 && s.rate === 0" [class.c-err]="s.rate > 0">{{ s.rate === 0 ? '100%' : (s.rate | number:'1.2-2') + '%' }}</span>
+        <span class="sbd-count">{{ s.total | compact }}</span>
       </div>
     </div>
+    </ng-template>
+
+    <!-- Distribution Flux (ex-Request) -->
+    <ng-container *ngIf="kpiLoading; else fluxBlock">
+      <div class="sb-block sb-distribution-block sb-skel-block">
+        <div class="sbd-title">Flux</div>
+        <ng-container *ngFor="let _ of [1,2,3,4,5]">
+          <div class="sbd-skel-label"></div>
+          <div class="sbd-skel-track"></div>
+          <div class="sbd-skel-rate"></div>
+          <div class="sbd-skel-count"></div>
+        </ng-container>
+      </div>
+    </ng-container>
+    <ng-template #fluxBlock>
+    <div class="sb-block sb-distribution-block" *ngIf="!kpiLoading">
+      <div class="sbd-title">Flux</div>
+      <div class="sbd-empty" *ngIf="protocolSummaries.length === 0">
+        <mat-icon>info_outline</mat-icon>
+        <span>Aucun flux sur la période</span>
+      </div>
+      <div class="sbd-row" *ngFor="let p of protocolSummaries"
+        [class.sbd-row-selected]="selectedInsights.has(p.key)"
+        [class.sbd-row-clickable]="p.rate > 0"
+        [title]="(p.total | number:'1.0-0') + ' requêtes · ' + (p.count | number:'1.0-0') + ' erreurs'"
+        (click)="p.rate > 0 && toggleInsight(p.key)">
+        <span class="sbd-label">{{ p.label }}</span>
+        <div class="sbd-track" [class.track-active]="p.total > 0">
+          <div class="sbd-fill" [style.width.%]="p.total > 0 ? (100 - p.rate) : 0"></div>
+        </div>
+        <span class="sbd-rate" [class.c-ok]="p.rate === 0" [class.c-err]="p.rate > 0">{{ p.rate === 0 ? '100' : (p.rate | number:'1.2-2') }}%</span>
+        <span class="sbd-count">{{ p.total | compact }}</span>
+      </div>
+    </div>
+    </ng-template>
+
+    <!-- Stack Technique — Carousel -->
+    <dashboard-carousel></dashboard-carousel>
 
   </aside>
 

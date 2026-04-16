@@ -1,0 +1,17 @@
+<div class="carousel-section" *ngIf="techStack.length">
+  <div class="db-insights-hdr ts-header">
+    <span class="dih-title">Stack Technique</span>
+  </div>
+  <div class="ts-scroll-outer" #techScrollOuter>
+    <div class="ts-scroll-track" #techScrollTrack>
+      <ng-container *ngFor="let i of techRepeat; trackBy: trackByRepeatIdx">
+        <div class="ts-pill" *ngFor="let tech of techStack; trackBy: trackByTechId" [title]="getTechTitle(tech)">
+          <img *ngIf="tech.svgUrl" [src]="tech.svgUrl" class="ts-devicon-img" [alt]="tech.name" />
+          <i *ngIf="!tech.svgUrl" [class]="tech.devicon" class="ts-devicon" [style.color]="tech.color"></i>
+          <span class="ts-pill-name">{{ tech.name }}</span>
+          <span class="ts-pill-version" *ngIf="tech.version">{{ tech.version }}</span>
+        </div>
+      </ng-container>
+    </div>
+  </div>
+</div>

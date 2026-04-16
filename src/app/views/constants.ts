@@ -108,7 +108,7 @@ export const UA_CATEGORY_DEFS: Record<string, UaCategoryDef> = {
     'Axios': { color: '#8b5cf6', group: 'service', keywords: ['axios'] },
     'Chrome': { color: '#22c55e', group: 'user', keywords: ['chrome'] },
     'Edge': { color: '#0ea5e9', group: 'user', keywords: ['edge'] },
-    'Firefox': { color: '#fb923c', group: 'user', keywords: ['firefox'] },
+    'Firefox': { color: '#e8441a', group: 'user', keywords: ['firefox'] },
     'Safari': { color: '#60a5fa', group: 'user', keywords: ['safari'] },
     'Postman': { color: '#ef4444', group: 'tool', keywords: ['postman'] },
     'cURL': { color: '#6b7280', group: 'tool', keywords: ['curl'] },

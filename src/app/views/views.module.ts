@@ -36,7 +36,6 @@ import {StatisticClientView} from "./statistic/view/statistic-client.view";
 import {ArchitectureView} from "./architecture/architecture.view";
 import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
 import {NumberFormatterPipe, CompactNumberPipe} from '../shared/pipe/number.pipe';
-import {DeploimentComponent} from './deploiment/deploiment.component';
 import {StatisticServerView} from "./statistic/server/statistic-server.view";
 import {RestTabComponent} from "./statistic/server/_component/rest-tab/rest-tab.component";
 import {BatchTabComponent} from "./statistic/server/_component/batch-tab/batch-tab.component";
@@ -88,6 +87,9 @@ import {
   RepartitionTypeCrossTableComponent
 } from "./statistic/_component/repartition-type-cross-table/repartition-type-cross-table.component";
 import {DynamicChartComponent} from "./statistic/_component/dynamic-chart/dynamic-chart.component";
+import {DashboardInstancesTableComponent} from './dashboard/components/instances-table/instances-table.component';
+import {DashboardCarouselComponent} from './dashboard/components/carousel/carousel.component';
+import {DashboardDetailViewComponent} from './dashboard/components/detail-view/detail-view.component';
 
 @NgModule({
   imports: [
@@ -144,7 +146,6 @@ import {DynamicChartComponent} from "./statistic/_component/dynamic-chart/dynami
     DependencyCardComponent,
     NumberFormatterPipe,
     CompactNumberPipe,
-    DeploimentComponent,
     AnalyticView,
     ActionTableComponent,
     SearchRequestView,
@@ -163,7 +164,10 @@ import {DynamicChartComponent} from "./statistic/_component/dynamic-chart/dynami
     RepartitionSizeCardHttpComponent,
     DynamicTableComponent,
     LatencyCardHttpComponent,
-    DynamicChartComponent
+    DynamicChartComponent,
+    DashboardInstancesTableComponent,
+    DashboardCarouselComponent,
+    DashboardDetailViewComponent
   ]
 })
 export class ViewsModule { }

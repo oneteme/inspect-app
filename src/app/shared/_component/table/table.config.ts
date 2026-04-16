@@ -2,6 +2,28 @@ import {SliceConfig, TableProvider} from '@oneteme/jquery-table';
 import {DatabaseRequestDto, DirectoryRequestDto, FtpRequestDto, MailRequestDto, MainSessionDto, RestRequestDto, RestSessionDto} from '../../../model/request.model';
 import {AbstractStage, LocalRequest, LogEntry} from "../../../model/trace.model";
 import {LastServerStart} from "../../../model/jquery.model";
+import {formatDuration} from '../../pipe/duration.pipe';
+
+/** Equivalent de typeColumnFormatPipe utilisable hors template. */
+function fmtMethod(value: string | null | undefined): string {
+  return '[' + (value || '--') + ']';
+}
+/** Equivalent de `row.start * 1000 | date:'dd/MM/yyyy HH:mm:ss.SSS'` */
+function fmtStart(startSec: number): string {
+  const d = new Date(startSec * 1000);
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  const hh = String(d.getHours()).padStart(2, '0');
+  const min = String(d.getMinutes()).padStart(2, '0');
+  const ss = String(d.getSeconds()).padStart(2, '0');
+  const ms = String(d.getMilliseconds()).padStart(3, '0');
+  return `${dd}/${mm}/${yyyy} ${hh}:${min}:${ss}.${ms}`;
+}
+/** Equivalent de `{start, end} | duration` ou 'En cours...' si end absent. */
+function fmtDuration(start: number, end: number | null | undefined): string {
+  return end == null ? 'En cours...' : formatDuration(end - start);
+}
 
 export const DEFAULT_TABLE_CONFIG: TableProvider = {
   search: { enabled: true },
@@ -30,10 +52,13 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'appName', header: 'Hôte', icon: 'dns', width: '18%' },
-    { key: 'resource', header: 'Ressource', groupable: false, sliceable: false, icon: 'category' },
-    { key: 'start', header: 'Début', icon: 'schedule', width: '17%', groupable: false, sliceable: false },
+    { key: 'resource', header: 'Ressource', groupable: false, sliceable: false, icon: 'category',
+      searchValue: (row: RestSessionDto) => fmtMethod(row.method) + ' ' + (row.path || '') },
+    { key: 'start', header: 'Début', icon: 'schedule', width: '17%', groupable: false, sliceable: false,
+      searchValue: (row: RestSessionDto) => fmtStart(row.start) },
     { key: 'duration', header: 'Durée', icon: 'timer', width: '13%', groupable: false,
-      sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE },
+      sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
+      searchValue: (row: RestSessionDto) => fmtDuration(row.start, row.end) },
     { key: 'user', header: 'Utilisateur', icon: 'person', width: '15%' },
     { key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
       value: (row: RestSessionDto) => {
@@ -125,10 +150,13 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
-    { key: 'resource', header: 'Ressource', icon: 'category' },
-    { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
+    { key: 'resource', header: 'Ressource', icon: 'category',
+      searchValue: (row: RestRequestDto) => fmtMethod(row.method) + ' ' + (row.path || '') },
+    { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
+      searchValue: (row: RestRequestDto) => fmtStart(row.start) },
     { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
-      sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
+      sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
+      searchValue: (row: RestRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     { key: 'status', header: 'Status', sortable: true, optional: true, icon: 'task_alt',
@@ -162,10 +190,13 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
-    { key: 'resource', header: 'Ressource', icon: 'category' },
-    { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
+    { key: 'resource', header: 'Ressource', icon: 'category',
+      searchValue: (row: DatabaseRequestDto) => fmtMethod(row.command) + ' ' + (row.schema || row.name || 'N/A') },
+    { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
+      searchValue: (row: DatabaseRequestDto) => fmtStart(row.start) },
     { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
-      sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
+      sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
+      searchValue: (row: DatabaseRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     { key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
@@ -203,10 +234,13 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
-    { key: 'resource', header: 'Ressource', icon: 'category' },
-    { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
+    { key: 'resource', header: 'Ressource', icon: 'category',
+      searchValue: (row: FtpRequestDto) => fmtMethod(row.command) },
+    { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
+      searchValue: (row: FtpRequestDto) => fmtStart(row.start) },
     { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
-      sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
+      sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
+      searchValue: (row: FtpRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     { key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
@@ -238,10 +272,13 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
-    { key: 'resource', header: 'Ressource', icon: 'category' },
-    { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
+    { key: 'resource', header: 'Ressource', icon: 'category',
+      searchValue: (row: DirectoryRequestDto) => fmtMethod(row.command) },
+    { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
+      searchValue: (row: DirectoryRequestDto) => fmtStart(row.start) },
     { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
-      sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
+      sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
+      searchValue: (row: DirectoryRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     { key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
@@ -271,10 +308,13 @@ export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
-    { key: 'resource', header: 'Ressource', icon: 'category' },
-    { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
+    { key: 'resource', header: 'Ressource', icon: 'category',
+      searchValue: (row: LocalRequest) => fmtMethod((row as any).type) + ' ' + ((row as any).name || 'N/A') },
+    { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
+      searchValue: (row: LocalRequest) => fmtStart(row.start) },
     { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
-      sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
+      sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
+      searchValue: (row: LocalRequest) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     { key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
@@ -304,10 +344,13 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
-    { key: 'resource', header: 'Ressource', icon: 'category' },
-    { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
+    { key: 'resource', header: 'Ressource', icon: 'category',
+      searchValue: (row: MailRequestDto) => fmtMethod((row as any).command) },
+    { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
+      searchValue: (row: MailRequestDto) => fmtStart(row.start) },
     { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
-      sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
+      sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
+      searchValue: (row: MailRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     { key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
@@ -386,7 +429,7 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
 export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTrace?: number }> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'Hôte', icon: 'dns', width: '23%', groupable: false, sliceable: false },
+    { key: 'appName', header: 'Hôte', icon: 'dns', width: '28%', groupable: false, sliceable: false },
     { key: 'duration', header: 'Depuis', icon: 'schedule', width: '14%', groupable: false },
     { key: 'version', header: 'Version', icon: 'label' },
     { key: 'branch',  header: 'Branche', icon: 'fork_right', width: '25%' },

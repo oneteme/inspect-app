@@ -1,0 +1,294 @@
+<div class="db-detail-view">
+
+  <!-- ── Bloc Clients : [KPIs | donut | légende] ── -->
+  <div class="db-clt-block">
+    <div class="sb-block-head">
+      <span>{{ selectedLabel }}</span>
+    </div>
+    <div class="clt-body">
+
+      <!-- LEFT : 3 cards KPI -->
+      <div class="clt-kpi-stack">
+        <ng-container *ngIf="userAgentLoading">
+          <div class="clt-kpi-card clt-kpi-skel" *ngFor="let _ of [1,2,3]"></div>
+        </ng-container>
+        <ng-container *ngIf="!userAgentLoading">
+          <div class="clt-kpi-card">
+            <span class="clt-kpi-val">{{ selectedKey ? (getProtoTotalCalls(selectedKey) | compact) : '—' }}</span>
+            <span class="clt-kpi-lbl">appels</span>
+          </div>
+          <div class="clt-kpi-card" [class.clt-kpi-err]="selectedKey && getProtoTotalErrors(selectedKey) > 0">
+            <span class="clt-kpi-val" [class.c-err]="selectedKey && getProtoTotalErrors(selectedKey) > 0">
+              {{ selectedKey ? (getProtoTotalErrors(selectedKey) | number:'1.0-0') : '—' }}
+            </span>
+            <span class="clt-kpi-lbl">erreurs</span>
+          </div>
+          <div class="clt-kpi-card">
+            <span class="clt-kpi-val">{{ totalUaClients | compact }}</span>
+            <span class="clt-kpi-lbl">utilisateurs</span>
+          </div>
+        </ng-container>
+      </div>
+
+      <!-- CENTER : graphique donut centré -->
+      <div class="clt-chart-wrap">
+        <ng-container *ngIf="userAgentLoading">
+          <div class="clt-chart-skel"></div>
+        </ng-container>
+        <ng-container *ngIf="!userAgentLoading && userAgentData.length">
+          <chart type="donut" [config]="uaPieConfig" [data]="uaChartData" [isLoading]="false"></chart>
+        </ng-container>
+        <div class="clt-empty" *ngIf="!userAgentLoading && !userAgentData.length">
+          <span>Aucune donnée</span>
+        </div>
+      </div>
+
+      <!-- RIGHT : légende -->
+      <ng-container *ngIf="!userAgentLoading && userAgentData.length">
+        <div class="clt-legend">
+          <ng-container *ngFor="let group of uaGroups">
+            <ng-container *ngIf="group.items.length">
+              <div class="clt-leg-group">
+                <mat-icon class="material-symbols-outlined">{{ group.icon }}</mat-icon>
+                <span>{{ group.label }}</span>
+              </div>
+              <div class="clt-leg-row"
+                   *ngFor="let item of group.items"
+                   [class.clt-leg-hidden]="hiddenAgents.has(item.label)"
+                   (click)="agentToggle.emit(item.label)">
+                <span class="clt-dot" [style.background]="item.color"></span>
+                <span class="clt-leg-label">{{ item.label }}</span>
+                <span class="clt-leg-pct">{{ item.pct | number:'1.2-2' }}%</span>
+                <span class="clt-leg-count">{{ item.count | compact }}</span>
+              </div>
+            </ng-container>
+          </ng-container>
+        </div>
+      </ng-container>
+      <div class="clt-legend-skel" *ngIf="userAgentLoading">
+        <div class="dbi-skel-line" *ngFor="let _ of [1,2,3]"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Ligne du bas : Infrastructure & Erreurs | Activité protocole ── -->
+  <div class="db-detail-bottom" [class.db-detail-bottom--full]="isSessionInsight">
+
+    <!-- Infrastructure & Erreurs -->
+    <div class="db-insights-wrap"
+         *ngIf="serverHealthLoading || kpiLoading || stoppedServers.length
+           || (selectedInsights.has('rest')    && topErrors['rest']?.length)
+           || (selectedInsights.has('jdbc')    && topErrors['jdbc']?.length)
+           || (selectedInsights.has('ftp')     && topErrors['ftp']?.length)
+           || (selectedInsights.has('smtp')    && topErrors['smtp']?.length)
+           || (selectedInsights.has('ldap')    && topErrors['ldap']?.length)
+           || (selectedInsights.has('SERVICE') && (tabRequests.sessionExceptionsTable?.isLoading !== false || topSessionErrors.length))
+           || (selectedInsights.has('BATCH')   && (tabRequests.batchExceptionTable?.isLoading !== false || topBatchErrors.length))
+           || (selectedInsights.has('STARTUP') && sessionInitErrors > 0)
+           || (selectedInsights.has('VIEW')    && sessionWebErrors > 0)
+           || (selectedInsights.has('TEST')    && sessionTestErrors > 0)">
+
+      <div class="db-insights-hdr">
+        <span class="dih-title">Infrastructure &amp; Erreurs</span>
+        <span class="dih-sub">Détails sur la période analysée</span>
+      </div>
+
+      <div class="db-insights">
+
+        <!-- Skeleton -->
+        <div class="dbi-card dbi-skeleton" *ngIf="serverHealthLoading">
+          <div class="dbi-skel-line"></div>
+          <div class="dbi-skel-line dbi-skel-sm"></div>
+          <div class="dbi-skel-line dbi-skel-sm"></div>
+        </div>
+
+        <!-- Serveurs arrêtés -->
+        <div class="dbi-card" *ngIf="!serverHealthLoading && stoppedServers.length">
+          <div class="dbi-header">
+            <mat-icon class="material-symbols-outlined">stop_circle</mat-icon>
+            <span>Serveurs arrêtés</span>
+            <span class="dbi-chip dbi-chip-err">{{ stoppedServers.length }}</span>
+          </div>
+          <div class="dbi-row dbi-row-link"
+               *ngFor="let s of stoppedServers; trackBy: trackByAppName"
+               (click)="supervisionNav.emit(s)">
+            <span class="dbi-dot dbi-dot-err"></span>
+            <span class="dbi-name" [title]="s.appName">{{ s.appName }}</span>
+            <span class="dbi-meta">{{ s.end | date:'dd/MM HH:mm' }}</span>
+            <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
+          </div>
+        </div>
+
+        <!-- Erreurs requêtes par protocole -->
+        <ng-container *ngFor="let p of protocolDefs">
+          <div class="dbi-card" *ngIf="selectedInsights.has(p.key) && (kpiLoading || topErrors[p.key]?.length)">
+            <div class="dbi-header">
+              <mat-icon class="material-symbols-outlined">arrow_outward</mat-icon>
+              <span>Req. {{ p.label }}</span>
+              <span class="dbi-chip dbi-chip-err" *ngIf="!kpiLoading && topErrors[p.key]?.length">{{ topErrors[p.key].length }}</span>
+            </div>
+            <ng-container *ngIf="kpiLoading">
+              <div class="dbi-skel-row" *ngFor="let _ of [1,2]"></div>
+            </ng-container>
+            <ng-container *ngIf="!kpiLoading">
+              <div class="dbi-row dbi-row-link"
+                   *ngFor="let e of topErrors[p.key]; trackBy: trackByType"
+                   (click)="requestProtocolNav.emit({ key: p.key, errorType: e.type })">
+                <span class="dbi-dot dbi-dot-err"></span>
+                <span class="dbi-name" [title]="e.type">{{ e.type }}</span>
+                <div class="dbi-bar-wrap"><div class="dbi-bar dbi-bar-err" [style.width.%]="getErrBarWidth(topErrors[p.key], e.count)"></div></div>
+                <span class="dbi-badge dbi-badge-warn">{{ e.count }}</span>
+                <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
+              </div>
+            </ng-container>
+          </div>
+        </ng-container>
+
+        <!-- Session Service -->
+        <div class="dbi-card"
+             *ngIf="selectedInsights.has('SERVICE') && (tabRequests.sessionExceptionsTable?.isLoading !== false || topSessionErrors.length)">
+          <div class="dbi-header">
+            <mat-icon class="material-symbols-outlined">http</mat-icon>
+            <span>Sess. Service</span>
+            <span class="dbi-chip dbi-chip-err"
+                  *ngIf="tabRequests.sessionExceptionsTable?.isLoading === false && topSessionErrors.length">{{ topSessionErrors.length }}</span>
+          </div>
+          <ng-container *ngIf="tabRequests.sessionExceptionsTable?.isLoading !== false">
+            <div class="dbi-skel-row" *ngFor="let _ of [1,2,3]"></div>
+          </ng-container>
+          <ng-container *ngIf="tabRequests.sessionExceptionsTable?.isLoading === false">
+            <div class="dbi-row dbi-row-link"
+                 *ngFor="let e of topSessionErrors; trackBy: trackByType"
+                 (click)="exceptionNav.emit({ type: e.type, tab: 'rest' })">
+              <span class="dbi-dot dbi-dot-err"></span>
+              <span class="dbi-name" [title]="e.type">{{ e.type }}</span>
+              <div class="dbi-bar-wrap"><div class="dbi-bar dbi-bar-err" [style.width.%]="getErrBarWidth(topSessionErrors, e.count)"></div></div>
+              <span class="dbi-badge dbi-badge-warn">{{ e.count }}</span>
+              <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- Session Batch -->
+        <div class="dbi-card"
+             *ngIf="selectedInsights.has('BATCH') && (tabRequests.batchExceptionTable?.isLoading !== false || topBatchErrors.length)">
+          <div class="dbi-header">
+            <mat-icon class="material-symbols-outlined">schedule</mat-icon>
+            <span>Sess. Batch</span>
+            <span class="dbi-chip dbi-chip-err"
+                  *ngIf="tabRequests.batchExceptionTable?.isLoading === false && topBatchErrors.length">{{ topBatchErrors.length }}</span>
+          </div>
+          <ng-container *ngIf="tabRequests.batchExceptionTable?.isLoading !== false">
+            <div class="dbi-skel-row" *ngFor="let _ of [1,2,3]"></div>
+          </ng-container>
+          <ng-container *ngIf="tabRequests.batchExceptionTable?.isLoading === false">
+            <div class="dbi-row dbi-row-link"
+                 *ngFor="let e of topBatchErrors; trackBy: trackByType"
+                 (click)="exceptionNav.emit({ type: e.type, tab: 'batch' })">
+              <span class="dbi-dot dbi-dot-err"></span>
+              <span class="dbi-name" [title]="e.type">{{ e.type }}</span>
+              <div class="dbi-bar-wrap"><div class="dbi-bar dbi-bar-err" [style.width.%]="getErrBarWidth(topBatchErrors, e.count)"></div></div>
+              <span class="dbi-badge dbi-badge-warn">{{ e.count }}</span>
+              <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- Session Init -->
+        <div class="dbi-card" *ngIf="selectedInsights.has('STARTUP') && !sessionCountLoading && sessionInitErrors > 0">
+          <div class="dbi-header">
+            <mat-icon class="material-symbols-outlined">power_settings_new</mat-icon>
+            <span>Sess. Init</span>
+            <span class="dbi-chip dbi-chip-err">{{ sessionInitErrors | compact }}</span>
+          </div>
+          <div class="dbi-row dbi-row-link" (click)="sessionTypeNav.emit('STARTUP')">
+            <span class="dbi-dot dbi-dot-err"></span>
+            <span class="dbi-name">{{ sessionInitErrors | number:'1.0-0' }} erreurs au démarrage</span>
+            <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
+          </div>
+        </div>
+
+        <!-- Session Web -->
+        <div class="dbi-card" *ngIf="selectedInsights.has('VIEW') && !sessionCountLoading && sessionWebErrors > 0">
+          <div class="dbi-header">
+            <mat-icon class="material-symbols-outlined">web</mat-icon>
+            <span>Sess. Web</span>
+            <span class="dbi-chip dbi-chip-err">{{ sessionWebErrors | compact }}</span>
+          </div>
+          <div class="dbi-row dbi-row-link" (click)="sessionTypeNav.emit('VIEW')">
+            <span class="dbi-dot dbi-dot-err"></span>
+            <span class="dbi-name">{{ sessionWebErrors | number:'1.0-0' }} erreurs navigateur</span>
+            <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
+          </div>
+        </div>
+
+        <!-- Session Test -->
+        <div class="dbi-card" *ngIf="selectedInsights.has('TEST') && !sessionCountLoading && sessionTestErrors > 0">
+          <div class="dbi-header">
+            <mat-icon class="material-symbols-outlined">science</mat-icon>
+            <span>Sess. Test</span>
+            <span class="dbi-chip dbi-chip-err">{{ sessionTestErrors | compact }}</span>
+          </div>
+          <div class="dbi-row dbi-row-link" (click)="sessionTypeNav.emit('TEST')">
+            <span class="dbi-dot dbi-dot-err"></span>
+            <span class="dbi-name">{{ sessionTestErrors | number:'1.0-0' }} erreurs test</span>
+            <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
+          </div>
+        </div>
+
+      </div><!-- fin .db-insights -->
+
+      <div class="dbi-all-clear" *ngIf="insightsAllClear">
+        <mat-icon class="material-symbols-outlined">verified</mat-icon>
+        <span>Infrastructure saine — aucun incident détecté</span>
+      </div>
+
+    </div><!-- fin .db-insights-wrap -->
+
+    <!-- Activité protocole -->
+    <div class="db-proto-wrap" *ngIf="selectedInsights.size > 0">
+      <div class="db-insights-hdr">
+        <span class="dih-title">Activité protocole</span>
+        <span class="dih-sub">Taux d'erreur sur la période analysée</span>
+      </div>
+      <div class="proto-list">
+      <ng-container *ngFor="let p of protocolDefs; trackBy: trackByKey">
+        <div class="proto-row"
+           *ngIf="selectedInsights.has(p.key)"
+           [class.pr-warn]="!chartRequests[p.reqKey].isLoading && getSparklinePerc(p.key) > 1 && getSparklinePerc(p.key) <= 5"
+           [class.pr-err]="!chartRequests[p.reqKey].isLoading && getSparklinePerc(p.key) > 5"
+           [class.pr-healthy]="!chartRequests[p.reqKey].isLoading && !chartRequests[p.reqKey].data?.length">
+
+        <ng-container *ngIf="chartRequests[p.reqKey].isLoading || chartRequests[p.reqKey].chart?.length; else prNoChart">
+          <div class="pr-chart">
+            <chart type="area" [config]="p.chartConfig"
+                   [data]="chartRequests[p.reqKey].chart || []"
+                   [isLoading]="chartRequests[p.reqKey].isLoading" />
+            <button class="pr-detail-btn"
+                    [disabled]="chartRequests[p.reqKey].isLoading || !chartRequests[p.reqKey].data?.length"
+                    (click)="protocolDialogOpen.emit({ observable: chartRequests[p.reqKey], type: p.label })"
+                    title="Voir le détail des exceptions">
+              <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
+            </button>
+          </div>
+        </ng-container>
+        <ng-template #prNoChart>
+          <div class="pr-volume-summary">
+            <span class="pvs-val">{{ getProtoTotalRequests(p.key) | number:'1.0-0' }}</span>
+            <span class="pvs-lbl">requêtes</span>
+            <div class="pvs-ok">
+              <mat-icon class="material-symbols-outlined">verified</mat-icon>
+              <span>0 erreur</span>
+            </div>
+          </div>
+        </ng-template>
+
+      </div>
+    </ng-container>
+      </div><!-- fin .proto-list -->
+    </div><!-- fin .db-proto-wrap -->
+
+  </div><!-- fin .db-detail-bottom -->
+
+</div>

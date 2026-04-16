@@ -1,0 +1,52 @@
+<div class="db-overview">
+  <jquery-table class="dov-table" [config]="tableConfig" [data]="rows" [isLoading]="isLoading">
+
+    <ng-template jqtCellDef="appName" let-row>
+      <div class="dov-server-cell">
+        <app-status-indicator
+          (onClick)="statusIndicatorClick.emit({ event: $event, row: row })"
+          [params]="{id: row.id, end: row.end, configuration: row.configuration, lastTrace: row.lastTrace, date: today.getTime()}">
+        </app-status-indicator>
+        <div (click)="serverClick.emit({ event: $event, row: row })" class="dov-server-link dov-server-name">
+          {{ row.appName || 'N/A' }}
+        </div>
+      </div>
+    </ng-template>
+
+    <ng-template jqtCellDef="duration" let-row>
+      <div (click)="sinceClick.emit({ event: $event, row: row })" class="dov-server-link"
+           [matTooltip]="'Démarré le ' + (row.start | date:'dd/MM/yyyy à HH:mm:ss':'fr')">
+        <span class="dov-duration">{{ (today.getTime() - row.start) / 1000 | duration }}</span>
+      </div>
+    </ng-template>
+
+    <ng-template jqtCellDef="version" let-row>
+      <app-version-badge
+        [backgroundColor]="versionColor[row.version]"
+        [configuration]="row.configuration"
+        [collector]="row.collector"
+        [version]="row.version" />
+    </ng-template>
+
+    <ng-template jqtCellDef="restart" let-row>
+      <div class="dov-restart-cell">
+        <div class="dov-restart-badge"
+             (click)="restartClick.emit({ event: $event, minStart: row.minStart, appName: row.appName })">
+          {{ row.restart }}
+        </div>
+        <mat-icon *ngIf="row.start != row.lastStart" class="material-symbols-outlined dov-warning-icon"
+          (click)="restartClick.emit({ event: $event, minStart: row.lastStart, appName: row.appName })">
+          deployed_code_alert
+        </mat-icon>
+      </div>
+    </ng-template>
+
+    <ng-template jqtCellDef="branch" let-row>
+      <div class="dov-branch-info" *ngIf="row.branch" [title]="row.branch + ' / ' + (row.hash | slice:0:7)">
+        <mat-icon class="material-symbols-outlined">code_blocks</mat-icon>
+        <span class="dov-branch-text">{{ row.branch }} / {{ row.hash | slice:0:7 }}</span>
+      </div>
+    </ng-template>
+
+  </jquery-table>
+</div>

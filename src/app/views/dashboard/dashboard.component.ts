@@ -1,12 +1,12 @@
-import {AfterViewInit, Component, ElementRef, inject, NgZone, OnDestroy, ViewChild} from '@angular/core';
+import {Component, inject, OnDestroy} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
-import {catchError, combineLatest, EMPTY, finalize, map, Observable, Subscription} from 'rxjs';
+import {catchError, combineLatest, EMPTY, finalize, forkJoin, map, Observable, of, Subscription, switchMap} from 'rxjs';
 import {DatePipe, DecimalPipe, Location} from '@angular/common';
 import {app, makeDatePeriod} from 'src/environments/environment';
 import {EnvRouter} from "../../service/router.service";
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {Constants, UA_CATEGORY_DEFS, UA_PIE_BASE, UaGroup, TECH_CATALOG, TechDef} from '../constants';
-import {formatters, periodManagement, recreateDate} from 'src/app/shared/util';
+import {Constants, UA_CATEGORY_DEFS, UA_PIE_BASE, UaGroup} from '../constants';
+import {formatters, groupByColor, periodManagement, recreateDate} from 'src/app/shared/util';
 import {MatDialog} from '@angular/material/dialog';
 import {ProtocolExceptionComponent} from './components/protocol-exception-modal/protocol-exception-modal.component';
 import {InstanceService} from 'src/app/service/jquery/instance.service';
@@ -23,14 +23,14 @@ import {
 import {SmtpRequestService} from 'src/app/service/jquery/smtp-request.service';
 import {NumberFormatterPipe} from 'src/app/shared/pipe/number.pipe';
 import {ChartProvider} from '@oneteme/jquery-core';
-import {APP_TECH_STACK} from 'src/app/config/tech-stack.config';
+import {InstanceTraceService} from 'src/app/service/jquery/instance-trace.service';
 
 @Component({
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
 
 })
-export class DashboardComponent implements AfterViewInit, OnDestroy  {
+export class DashboardComponent implements OnDestroy {
     constants = Constants;
 
     readonly protocolDefs: { key: string; reqKey: string; label: string; chartConfig: any }[] = [
@@ -56,7 +56,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
     private _dialog = inject(MatDialog);
     private _decimalPipe = inject(DecimalPipe);
     private _numberFormatter = inject(NumberFormatterPipe);
-    private _ngZone = inject(NgZone);
+    private _instanceTraceService = inject(InstanceTraceService);
 
     sparklineTitles: {
         rest: {title: string, subtitle: string},
@@ -93,11 +93,21 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
 
     serverHealthData: LastServerStart[] = [];
     serverHealthLoading = true;
+    deployTableRows: (LastServerStart & { lastTrace?: number })[] = [];
+    deployTableToday: Date = new Date();
+    versionColor: any = {};
+    onlineServerStat = 0;
+    pendingServerStat = 0;
+    offlineServerStat = 0;
+    showOverview = true;
+    serverStatusFilter: 'online' | 'pending' | 'offline' | 'all' = 'all';
+    filteredDeployRows: (LastServerStart & { lastTrace?: number })[] = [];
+    private _onlineRows: (LastServerStart & { lastTrace?: number })[] = [];
+    private _pendingRows: (LastServerStart & { lastTrace?: number })[] = [];
+    private _offlineRows: (LastServerStart & { lastTrace?: number })[] = [];
     sessionCountData: { type: string; total: number; errors: number }[] = [];
     sessionCountLoading = true;
     restSessionCount: { total: number; errors: number } = { total: 0, errors: 0 };
-    frontendCount: number | null = null;
-    userCount: number | null = null;
     globalKpi: { globalErrorRate: number; totalSessions: number; totalErrors: number } | null = null;
     kpiLoading = true;
     sparklinePercs: { rest: number; jdbc: number; ftp: number; smtp: number; ldap: number } = { rest: 0, jdbc: 0, ftp: 0, smtp: 0, ldap: 0 };
@@ -118,78 +128,24 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         }
         this.hiddenAgents = new Set(this.hiddenAgents);
         this.uaChartData = this.userAgentData.filter(d => !this.hiddenAgents.has(d.label));
+        this._rebuildUaGroups();
         this._rebuildUaPieConfig();
     }
 
     readonly uaGroupDefs: { key: UaGroup; label: string; icon: string }[] = [
-        { key: 'service', label: 'Microservices & APIs', icon: 'hub'          },
-        { key: 'user',    label: 'Navigateurs',          icon: 'public'       },
+        { key: 'service', label: 'Technologies',   icon: 'hub'          },
+        { key: 'user',    label: 'Navigateurs',        icon: 'public'       },
         { key: 'tool',    label: 'Outils',               icon: 'terminal'     },
         { key: 'unknown', label: 'Non identifiés',       icon: 'help_outline' },
     ];
 
-    get uaGroups(): { key: UaGroup; label: string; icon: string; items: typeof this.userAgentData }[] {
-        return this.uaGroupDefs.map(g => ({
+    uaGroups: { key: UaGroup; label: string; icon: string; items: typeof this.userAgentData }[] = [];
+
+    private _rebuildUaGroups(): void {
+        this.uaGroups = this.uaGroupDefs.map(g => ({
             ...g,
             items: this.userAgentData.filter(d => d.group === g.key)
         }));
-    }
-
-    @ViewChild('techScrollTrack') techScrollTrack!: ElementRef<HTMLElement>;
-    private _techScrollRaf: number | null = null;
-    private _techScrollPos = 0;
-    private _techScrollPaused = false;
-    private readonly _techScrollSpeed = 0.4;
-
-    private _startTechAutoScroll(): void {
-        const el = this.techScrollTrack?.nativeElement;
-        if (!el) return;
-        this._ngZone.runOutsideAngular(() => {
-            const step = () => {
-                if (!this._techScrollPaused) {
-                    this._techScrollPos += this._techScrollSpeed;
-                    const half = el.scrollWidth / 2;
-                    if (half > 0 && this._techScrollPos >= half) {
-                        this._techScrollPos -= half;
-                    }
-                    el.scrollLeft = this._techScrollPos;
-                }
-                this._techScrollRaf = requestAnimationFrame(step);
-            };
-            this._techScrollRaf = requestAnimationFrame(step);
-        });
-    }
-
-    onTechMouseEnter(): void { this._techScrollPaused = true; }
-    onTechMouseLeave(): void { this._techScrollPaused = false; }
-
-    onTechWheel(event: WheelEvent): void {
-        event.preventDefault();
-        const el = this.techScrollTrack?.nativeElement;
-        if (!el) return;
-        const delta = Math.abs(event.deltaX) > Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
-        this._techScrollPos += delta;
-        const half = el.scrollWidth / 2;
-        if (half > 0) {
-            if (this._techScrollPos >= half) this._techScrollPos -= half;
-            if (this._techScrollPos < 0)    this._techScrollPos += half;
-        }
-        el.scrollLeft = this._techScrollPos;
-    }
-
-    getTechTitle(tech: TechDef & { id: string; version?: string }): string {
-        const v = tech.version ? ' ' + tech.version : '';
-        return tech.name + v;
-    }
-
-    get techStack(): (TechDef & { id: string; version?: string })[] {
-        return APP_TECH_STACK
-            .map(entry => {
-                const def = TECH_CATALOG[entry.id];
-                return def ? { ...def, id: entry.id, version: entry.version } : null;
-            })
-            .filter((t): t is NonNullable<typeof t> => t !== null)
-            .sort((a, b) => a.order - b.order);
     }
 
     private _rebuildUaPieConfig(): void {
@@ -201,19 +157,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
             options: {
                 ...UA_PIE_BASE.options,
                 colors: visible.map(d => d.color),
-                plotOptions: {
-                    pie: {
-                        donut: {
-                            labels: {
-                                ...baseDonutLabels,
-                                total: {
-                                    ...baseDonutLabels.total,
-                                    formatter: () => total.toLocaleString('fr-FR') + ' req.'
-                                }
-                            }
-                        }
-                    }
-                }
+                plotOptions: { pie: { donut: { labels: { ...baseDonutLabels, total: { ...baseDonutLabels.total, formatter: () => total.toLocaleString('fr-FR') + ' req.' } } } } }
             }
         };
     }
@@ -243,12 +187,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                             console.log(e)
                         }
                     }));
-                this.frontendCount = null;
-                this.subscriptions.push(this._instanceService.getApplications('CLIENT', this.params.env)
-                    .subscribe({ next: (apps) => { this.frontendCount = apps.length; } }));
-                this.userCount = null;
-                this.subscriptions.push(this._mainService.getUsersView({ env: this.params.env, date: this.params.start })
-                    .subscribe({ next: (users) => this.userCount = users.length }));
+
                 let serverParam = this.createServerFilter();
                 this.chartRequests = this.REQUESTS(this.params.env, this.params.start, this.params.end, serverParam.app_name);
                 this.tabRequests   = this.TAB_REQUESTS(this.params.env, this.params.start, this.params.end, serverParam.app_name);
@@ -261,19 +200,14 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                 this.sessionCountLoading = true;
                 this.restSessionCount = { total: 0, errors: 0 };
                 this.subscriptions.push(this._sessionService.getCountByEnv({ env: this.params.env, start: this.params.start, end: this.params.end })
-                    .subscribe({ next: (data) => this.restSessionCount = data }));
+                    .subscribe({ next: (data) => { this.restSessionCount = data; this._rebuildSessionSummaries(); } }));
                 this.subscriptions.push(this._mainService.getCountByType({ env: this.params.env, start: this.params.start, end: this.params.end })
                     .pipe(finalize(() => this.sessionCountLoading = false))
-                    .subscribe({ next: (data) => this.sessionCountData = data }));
+                    .subscribe({ next: (data) => { this.sessionCountData = data; this._rebuildSessionSummaries(); } }));
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${this.params.serveurs.length > 0 ? '&' + this.params.serveurs.map(name => `appname=${name}`).join('&') : ''}`)
             }
         }));
     }
-    ngAfterViewInit(): void {
-        this.initTab();
-        this._startTechAutoScroll();
-    }
-
     initCharts() {
         this._chartsResolved = 0;
         this.globalKpi = null;
@@ -301,6 +235,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
 
 
     initTab() {
+        this.exceptionsAllEmpty = false;
         this.tabSubscriptions.forEach(t => t.unsubscribe());
         this.selectedExceptionTab = 0;
         Object.keys(this.tabRequests).forEach(i => {
@@ -310,6 +245,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                 .pipe(finalize(() => {
                     this.tabRequests[i].isLoading = false;
                     this._autoSelectTab();
+                    this._rebuildTabErrors();
                 }))
                 .subscribe({
                     next: (res: any[]) => {
@@ -408,16 +344,65 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         };
         this.kpiLoading = false;
         this._computeTopErrors();
+        this._rebuildProtocolSummaries();
     }
 
     loadServerHealth(env: string) {
         this.serverHealthLoading = true;
         this.serverHealthData = [];
+        this.deployTableRows = [];
         this.subscriptions.push(
             this._instanceService.getLastServerStart({ env })
-                .pipe(finalize(() => this.serverHealthLoading = false))
-                .subscribe({ next: (data: LastServerStart[]) => this.serverHealthData = data })
+                .pipe(
+                    switchMap((servers: LastServerStart[]) => forkJoin({
+                        servers: of(servers),
+                        traces: servers.length
+                            ? this._instanceTraceService.getLastInstanceTrace({ instance: servers.map(s => s.id) })
+                            : of([])
+                    })),
+                    finalize(() => this.serverHealthLoading = false)
+                )
+                .subscribe({ next: ({ servers, traces }) => {
+                    this.serverHealthData = servers;
+                    this.versionColor = groupByColor(servers, (v: any) => v.version);
+                    this.deployTableRows = servers.map(s => ({ ...s, lastTrace: traces.find((t: any) => t.id === s.id)?.date }));
+                    this.deployTableToday = new Date();
+                    this._rebuildDeployStats();
+                    this._rebuildServerHealth();
+                }})
         );
+    }
+
+    private _rebuildDeployStats(): void {
+        const now = new Date().getTime();
+        this._onlineRows = [];
+        this._pendingRows = [];
+        this._offlineRows = [];
+        for (const s of this.deployTableRows) {
+            if (s.end || !s.lastTrace) {
+                this._offlineRows.push(s);
+            } else {
+                const threshold = now - ((s.configuration?.scheduling?.interval ?? 3600) + 60) * 1000;
+                if (s.lastTrace >= threshold) {
+                    this._onlineRows.push(s);
+                } else {
+                    this._pendingRows.push(s);
+                }
+            }
+        }
+        this.onlineServerStat = this._onlineRows.length;
+        this.pendingServerStat = this._pendingRows.length;
+        this.offlineServerStat = this._offlineRows.length;
+        this._applyStatusFilter();
+    }
+
+    private _applyStatusFilter(): void {
+        switch (this.serverStatusFilter) {
+            case 'online': this.filteredDeployRows = this._onlineRows; break;
+            case 'pending': this.filteredDeployRows = this._pendingRows; break;
+            case 'offline': this.filteredDeployRows = this._offlineRows; break;
+            default: this.filteredDeployRows = this.deployTableRows;
+        }
     }
 
     loadUserAgentData(): void {
@@ -453,6 +438,7 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                         }))
                         .sort((a, b) => b.count - a.count);
                     this.uaChartData = [...this.userAgentData];
+                    this._rebuildUaGroups();
                     this._rebuildUaPieConfig();
                 }
             })
@@ -479,60 +465,54 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         });
     }
 
-    get inactiveProtocolsCount(): number {
-        const keys = ['restRequestExceptionsTable', 'databaseRequestExceptionsTable', 'ftpRequestExceptionsTable', 'smtpRequestExceptionsTable', 'ldapRequestExceptionsTable'];
-        return keys.filter(k => !this.chartRequests[k]?.isLoading && !this.chartRequests[k]?.data?.length).length;
-    }
+    inactiveProtocolsCount = 0;
 
-    get quietProtocols(): typeof this.protocolDefs {
-        return this.protocolDefs.filter(p =>
+    get hasNoData(): boolean {
+        return !this.serverHealthLoading && !this.kpiLoading && this.deployTableRows.length === 0;
+    }
+    quietProtocols: typeof this.protocolDefs = [];
+    unstableServers: LastServerStart[] = [];
+    versionSummary: { version: string; count: number }[] = [];
+    stoppedServers: LastServerStart[] = [];
+    divergentBranches: { branch: string; count: number; servers: string[] }[] = [];
+
+    private _rebuildServerHealth(): void {
+        const keys = ['restRequestExceptionsTable', 'databaseRequestExceptionsTable', 'ftpRequestExceptionsTable', 'smtpRequestExceptionsTable', 'ldapRequestExceptionsTable'];
+        this.inactiveProtocolsCount = keys.filter(k => !this.chartRequests[k]?.isLoading && !this.chartRequests[k]?.data?.length).length;
+        this.quietProtocols = this.protocolDefs.filter(p =>
             !this.chartRequests[p.reqKey].isLoading &&
             !this.chartRequests[p.reqKey].data?.length
         );
-    }
-
-    get unstableServers(): LastServerStart[] {
-        return this.serverHealthData
+        this.unstableServers = this.serverHealthData
             .filter(s => s.restart > 1)
             .sort((a, b) => b.restart - a.restart)
             .slice(0, 5);
-    }
-
-    get versionSummary(): { version: string; count: number }[] {
-        if (!this.serverHealthData.length) return [];
-        const map: Record<string, number> = {};
-        this.serverHealthData.forEach(s => {
-            const v = s.version ?? '?';
-            map[v] = (map[v] ?? 0) + 1;
-        });
-        return Object.entries(map)
-            .map(([version, count]) => ({ version, count }))
-            .sort((a, b) => b.count - a.count);
-    }
-
-    get stoppedServers(): LastServerStart[] {
-        return this.serverHealthData
+        this.stoppedServers = this.serverHealthData
             .filter(s => s.end !== null && s.end !== undefined)
             .sort((a, b) => b.end - a.end)
             .slice(0, 5);
-    }
-
-    get divergentBranches(): { branch: string; count: number; servers: string[] }[] {
-        if (!this.serverHealthData.length) return [];
-        const map: Record<string, string[]> = {};
+        if (!this.serverHealthData.length) {
+            this.versionSummary = [];
+            this.divergentBranches = [];
+            return;
+        }
+        const vmap: Record<string, number> = {};
+        this.serverHealthData.forEach(s => { const v = s.version ?? '?'; vmap[v] = (vmap[v] ?? 0) + 1; });
+        this.versionSummary = Object.entries(vmap).map(([version, count]) => ({ version, count })).sort((a, b) => b.count - a.count);
+        const bmap: Record<string, string[]> = {};
         this.serverHealthData.forEach(s => {
             const b = s.branch ?? '?';
             if (b === 'main' || b === 'master') return;
-            if (!map[b]) map[b] = [];
-            map[b].push(s.appName);
+            if (!bmap[b]) bmap[b] = [];
+            bmap[b].push(s.appName);
         });
-        return Object.entries(map)
-            .map(([branch, servers]) => ({ branch, count: servers.length, servers }))
-            .sort((a, b) => b.count - a.count);
+        this.divergentBranches = Object.entries(bmap).map(([branch, servers]) => ({ branch, count: servers.length, servers })).sort((a, b) => b.count - a.count);
     }
 
-    get exceptionsAllEmpty(): boolean {
-        return !this.tabRequests.sessionExceptionsTable?.isLoading
+    exceptionsAllEmpty = false;
+
+    private _rebuildExceptionsAllEmpty(): void {
+        this.exceptionsAllEmpty = !this.tabRequests.sessionExceptionsTable?.isLoading
             && !this.tabRequests.batchExceptionTable?.isLoading
             && !this.tabRequests.sessionExceptionsTable?.data?.length
             && !this.tabRequests.batchExceptionTable?.data?.length;
@@ -551,29 +531,22 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         return 'stable';
     }
 
-    get topSessionErrors(): { type: string; count: number }[] {
-        const data: any[] = this.tabRequests['sessionExceptionsTable']?.data ?? [];
-        const map: Record<string, number> = {};
-        data.forEach(d => { if (d.errorType) map[d.errorType] = (map[d.errorType] ?? 0) + d.count; });
-        return Object.entries(map)
-            .map(([type, count]) => ({ type, count }))
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 6);
+    topSessionErrors: { type: string; count: number }[] = [];
+    topBatchErrors: { type: string; count: number }[] = [];
+
+    private _rebuildTabErrors(): void {
+        const sessionData: any[] = this.tabRequests['sessionExceptionsTable']?.data ?? [];
+        const sm: Record<string, number> = {};
+        sessionData.forEach(d => { if (d.errorType) sm[d.errorType] = (sm[d.errorType] ?? 0) + d.count; });
+        this.topSessionErrors = Object.entries(sm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
+        const batchData: any[] = this.tabRequests['batchExceptionTable']?.data ?? [];
+        const bm: Record<string, number> = {};
+        batchData.forEach(d => { if (d.errorType) bm[d.errorType] = (bm[d.errorType] ?? 0) + d.count; });
+        this.topBatchErrors = Object.entries(bm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
+        this._rebuildExceptionsAllEmpty();
+        this._rebuildInsightsAllClear();
     }
 
-    get topBatchErrors(): { type: string; count: number }[] {
-        const data: any[] = this.tabRequests['batchExceptionTable']?.data ?? [];
-        const map: Record<string, number> = {};
-        data.forEach(d => { if (d.errorType) map[d.errorType] = (map[d.errorType] ?? 0) + d.count; });
-        return Object.entries(map)
-            .map(([type, count]) => ({ type, count }))
-            .sort((a, b) => b.count - a.count)
-            .slice(0, 6);
-    }
-
-    navigateToDeploiment() {
-        this._router.navigate(['/deploiment'], { queryParams: { env: this.params.env } });
-    }
 
     getProtoBarWidth(count: number): number {
         if (!this.globalKpi?.totalSessions) return 0;
@@ -589,8 +562,18 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         return (Date.now() - new Date(server.lastStart).getTime()) < 3_600_000;
     }
 
-    get insightsAllClear(): boolean {
-        return !this.serverHealthLoading
+    insightsAllClear = false;
+    hasRequestErrors = false;
+    sessionInitErrors = 0;
+    sessionWebErrors = 0;
+    sessionTestErrors = 0;
+
+    private _rebuildInsightsAllClear(): void {
+        this.hasRequestErrors = Object.values(this.topErrors).some(e => e?.length > 0);
+        this.sessionInitErrors = this.sessionCountData.find(d => d.type === 'STARTUP')?.errors ?? 0;
+        this.sessionWebErrors  = this.sessionCountData.find(d => d.type === 'VIEW')?.errors ?? 0;
+        this.sessionTestErrors = this.sessionCountData.find(d => d.type === 'TEST')?.errors ?? 0;
+        this.insightsAllClear = !this.serverHealthLoading
             && !this.stoppedServers.length
             && this.tabRequests.sessionExceptionsTable?.isLoading === false
             && this.tabRequests.batchExceptionTable?.isLoading === false
@@ -602,29 +585,13 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
             && !this.sessionTestErrors;
     }
 
-    get hasRequestErrors(): boolean {
-        return Object.values(this.topErrors).some(e => e?.length > 0);
-    }
-
-    get sessionInitErrors(): number {
-        return this.sessionCountData.find(d => d.type === 'STARTUP')?.errors ?? 0;
-    }
-
-    get sessionWebErrors(): number {
-        return this.sessionCountData.find(d => d.type === 'VIEW')?.errors ?? 0;
-    }
-
-    get sessionTestErrors(): number {
-        return this.sessionCountData.find(d => d.type === 'TEST')?.errors ?? 0;
-    }
-
     navigateToRequestProtocol(key: string, errorType: string): void {
         const routes: Record<string, string> = {
-            rest:  '/request/rest',
-            jdbc:  '/request/jdbc',
-            ftp:   '/request/ftp',
-            smtp:  '/request/smtp',
-            ldap:  '/request/ldap',
+            rest: '/request/rest',
+            jdbc: '/request/jdbc',
+            ftp: '/request/ftp',
+            smtp: '/request/smtp',
+            ldap: '/request/ldap',
         };
         const target = routes[key];
         if (!target) return;
@@ -642,8 +609,8 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
     navigateToSessionByType(sessionType: string, errorType?: string): void {
         const routes: Record<string, string> = {
             STARTUP: '/session/startup',
-            VIEW:    '/session/view',
-            TEST:    '/session/test',
+            VIEW: '/session/view',
+            TEST: '/session/test',
         };
         const target = routes[sessionType];
         if (!target) return;
@@ -676,38 +643,50 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
 
     toggleInsight(key: string): void {
         if (this.selectedInsights.has(key)) {
-            this.selectedInsights.delete(key);
+            this.selectedInsights = new Set();
         } else {
-            this.selectedInsights.add(key);
+            this.selectedInsights = new Set([key]);
+            this.showOverview = false;
         }
     }
 
-    get hasAnyRequestInsight(): boolean {
-        return this.protocolSummaries.some(p => p.rate > 0 && this.selectedInsights.has(p.key));
+    clearInsights(): void {
+        this.selectedInsights = new Set();
+        this.showOverview = true;
     }
 
-    get hasAnySessionInsight(): boolean {
-        return this.sessionSummaries.some(s => s.rate > 0 && this.selectedInsights.has(s.key));
+    selectServerStatus(status: 'online' | 'pending' | 'offline' | 'all'): void {
+        this.clearInsights();
+        this.serverStatusFilter = status;
+        this._applyStatusFilter();
     }
 
-    toggleAllRequestInsights(): void {
-        if (this.hasAnyRequestInsight) {
-            this.protocolSummaries.forEach(p => this.selectedInsights.delete(p.key));
-        } else {
-            this.protocolSummaries.filter(p => p.rate > 0).forEach(p => this.selectedInsights.add(p.key));
-        }
+
+    get hasSelectedInsights(): boolean { return this.selectedInsights.size > 0; }
+
+    navigateOnStatusIndicator(event: MouseEvent, row: any): void {
+        const date = new Date(row.lastTrace);
+        this._router.navigateOnClick(event, ['/supervision', row.type.toLowerCase(), row.id], {
+            queryParams: {
+                env: row.env,
+                start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(),
+                end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString()
+            }
+        });
     }
 
-    toggleAllSessionInsights(): void {
-        if (this.hasAnySessionInsight) {
-            this.sessionSummaries.forEach(s => this.selectedInsights.delete(s.key));
-        } else {
-            this.sessionSummaries.filter(s => s.rate > 0).forEach(s => this.selectedInsights.add(s.key));
-        }
+    navigateOnSinceClick(event: MouseEvent, row: any): void {
+        this._router.navigateOnClick(event, ['/session/startup', row.id], { queryParams: { env: this.params.env } });
     }
 
-    get hasSelectedInsights(): boolean {
-        return this.selectedInsights.size > 0;
+    navigateOnServerClick(event: MouseEvent, row: any): void {
+        this._router.navigateOnClick(event, ['/instance/detail', row.id], { queryParams: { env: this.params.env } });
+    }
+
+    navigateOnRestartClick(event: MouseEvent, start: number, server: string): void {
+        this._router.navigateOnClick(event, ['/session/startup'], {
+            queryParams: { env: this.params.env, start: new Date(start).toISOString(), end: new Date().toISOString(), server }
+        });
     }
 
     trackByKey(_: number, item: { key: string }): string { return item.key; }
@@ -736,11 +715,11 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
 
     private _computeTopErrors(): void {
         const defs: Record<string, string> = {
-            rest:  'restRequestExceptionsTable',
-            jdbc:  'databaseRequestExceptionsTable',
-            ftp:   'ftpRequestExceptionsTable',
-            smtp:  'smtpRequestExceptionsTable',
-            ldap:  'ldapRequestExceptionsTable'
+            rest: 'restRequestExceptionsTable',
+            jdbc: 'databaseRequestExceptionsTable',
+            ftp: 'ftpRequestExceptionsTable',
+            smtp: 'smtpRequestExceptionsTable',
+            ldap: 'ldapRequestExceptionsTable'
         };
         Object.entries(defs).forEach(([key, reqKey]) => {
             const data: any[] = this.chartRequests[reqKey]?.data ?? [];
@@ -748,58 +727,50 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
             data.forEach((d: any) => { if (d.errorType) map[d.errorType] = (map[d.errorType] ?? 0) + d.count; });
             this.topErrors[key] = Object.entries(map)
                 .map(([type, count]) => ({ type, count }))
-                .sort((a, b) => b.count - a.count)
-                .slice(0, 3);
+                .sort((a, b) => b.count - a.count);
         });
     }
 
-    get protocolSummaries(): { key: string; label: string; rate: number; count: number; total: number }[] {
+    protocolSummaries: { key: string; label: string; rate: number; count: number; total: number }[] = [];
+    sessionSummaries: { key: string; label: string; errors: number; total: number; rate: number; barPct: number }[] = [];
+    sessionTotal = 0;
+
+    private _rebuildProtocolSummaries(): void {
         const entries = [
-            { key: 'rest',  label: 'REST',  reqKey: 'restRequestExceptionsTable',     rate: this.sparklinePercs.rest  },
-            { key: 'jdbc',  label: 'JDBC',  reqKey: 'databaseRequestExceptionsTable',  rate: this.sparklinePercs.jdbc  },
-            { key: 'ftp',   label: 'FTP',   reqKey: 'ftpRequestExceptionsTable',       rate: this.sparklinePercs.ftp   },
-            { key: 'smtp',  label: 'SMTP',  reqKey: 'smtpRequestExceptionsTable',      rate: this.sparklinePercs.smtp  },
-            { key: 'ldap',  label: 'LDAP',  reqKey: 'ldapRequestExceptionsTable',      rate: this.sparklinePercs.ldap  },
+            { key: 'rest', label: 'REST', reqKey: 'restRequestExceptionsTable', rate: this.sparklinePercs.rest },
+            { key: 'jdbc', label: 'JDBC', reqKey: 'databaseRequestExceptionsTable', rate: this.sparklinePercs.jdbc },
+            { key: 'ftp', label: 'FTP', reqKey: 'ftpRequestExceptionsTable', rate: this.sparklinePercs.ftp },
+            { key: 'smtp', label: 'SMTP', reqKey: 'smtpRequestExceptionsTable', rate: this.sparklinePercs.smtp },
+            { key: 'ldap', label: 'LDAP', reqKey: 'ldapRequestExceptionsTable', rate: this.sparklinePercs.ldap },
         ];
-        return entries.map(p => {
-            const s = this.sumcounts(this.chartRequests[p.reqKey]?.chart ?? []);
-            return { key: p.key, label: p.label, rate: p.rate, count: s.count, total: s.countok };
-        });
+        this.protocolSummaries = entries
+            .map(p => {
+                const s = this.sumcounts(this.chartRequests[p.reqKey]?.chart ?? []);
+                return { key: p.key, label: p.label, rate: p.rate, count: s.count, total: s.countok };
+            })
+            .filter(p => p.total > 0);
+        this._rebuildServerHealth();
     }
 
-    get sessionSummaries(): { key: string; label: string; errors: number; total: number; rate: number; barPct: number }[] {
+    private _rebuildSessionSummaries(): void {
         const types = [
-            { key: 'SERVICE', type: 'REST',    label: 'Service' },
-            { key: 'BATCH',   type: 'BATCH',   label: 'Batch' },
-            { key: 'STARTUP', type: 'STARTUP', label: 'Init' },
-            { key: 'VIEW',    type: 'VIEW',    label: 'Web' },
-            { key: 'TEST',    type: 'TEST',    label: 'Test' },
+            { key: 'SERVICE', type: 'REST', label: 'Service' },
+            { key: 'BATCH', type: 'BATCH', label: 'Job' },
+            { key: 'STARTUP', type: 'STARTUP', label: 'Startup' },
+            { key: 'VIEW', type: 'VIEW', label: 'UI' },
+            { key: 'TEST', type: 'TEST', label: 'Test' },
         ];
-        const overallTotal = this.sessionCountData.reduce((s, d) => s + d.total, 0) + this.restSessionCount.total;
-        return types.map(t => {
-            let total: number;
-            let errors: number;
-            if (t.type === 'REST') {
-                total = this.restSessionCount.total;
-                errors = this.restSessionCount.errors;
-            } else {
-                const found = this.sessionCountData.find(d => d.type === t.type);
-                total = found?.total ?? 0;
-                errors = found?.errors ?? 0;
-            }
-            return {
-                key: t.key,
-                label: t.label,
-                errors,
-                total,
-                rate: total > 0 ? (errors * 100) / total : 0,
-                barPct: overallTotal > 0 ? (total * 100) / overallTotal : 0
-            };
-        });
-    }
-
-    get sessionTotal(): number {
-        return this.sessionCountData.reduce((s, d) => s + d.total, 0) + this.restSessionCount.total;
+        this.sessionTotal = this.sessionCountData.reduce((s, d) => s + d.total, 0) + this.restSessionCount.total;
+        const overallTotal = this.sessionTotal;
+        this.sessionSummaries = types
+            .map(t => {
+                let total: number; let errors: number;
+                if (t.type === 'REST') { total = this.restSessionCount.total; errors = this.restSessionCount.errors; }
+                else { const found = this.sessionCountData.find(d => d.type === t.type); total = found?.total ?? 0; errors = found?.errors ?? 0; }
+                return { key: t.key, label: t.label, errors, total, rate: total > 0 ? (errors * 100) / total : 0, barPct: overallTotal > 0 ? (total * 100) / overallTotal : 0 };
+            })
+            .filter(s => s.total > 0);
+        this._rebuildInsightsAllClear();
     }
 
     navigateToSupervision(server: LastServerStart) {
@@ -813,12 +784,13 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
 
     setTitle(type: string, data: any[]): {title: string, subtitle: string} {
         let title = `${type}: 0.00%`;
-        let subtitle = 'sur 0 requête(s)';
+        let subtitle = 'sur 0 requête';
         let arr = this.groupByProperty("stringDate", data).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } }).sort((a,b)=> a.stringDate.localeCompare(b.stringDate));
         if (arr.length) {
             let sumRes = this.sumcounts(arr);
             title = `${type}: ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%`;
-            subtitle = `sur ${this._decimalPipe.transform(sumRes.countok)} requête(s)`;
+            const n = sumRes.countok ?? 0;
+            subtitle = `sur ${this._decimalPipe.transform(n)} requête${n > 1 ? 's' : ''}`;
         }
         return {title: title, subtitle: subtitle};
     }
@@ -883,8 +855,8 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
             const sumRes = res.length ? this.sumcounts(res) : null;
             this.sparklinePercs[key] = sumRes ? (sumRes.count * 100) / sumRes.countok : 0;
             this.sparklineTitles[key] = {
-                title:    sumRes ? `${label}: ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%` : `${label}: 0.00%`,
-                subtitle: sumRes ? `sur ${this._decimalPipe.transform(sumRes.countok)} requête(s)` : 'sur 0 requête(s)'
+                title: sumRes ? `${label}: ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%` : `${label}: 0.00%`,
+                subtitle: sumRes ? `sur ${this._decimalPipe.transform(sumRes.countok)} requête${sumRes.countok > 1 ? 's' : ''}` : 'sur 0 requête'
             };
             return { chart: res, data: result.filter((a: any) => a.errorType != null) };
         }));
@@ -916,11 +888,11 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         const groupedBy = periodManagement(start, end);
         const p = { env, start, end, groupedBy, app_name };
         return {
-            restRequestExceptionsTable:     { observable: this.buildExceptionObservable(this._restService.getRestExceptions1(p),                          groupedBy, 'REST',  'rest')  },
-            databaseRequestExceptionsTable: { observable: this.buildExceptionObservable(this._datebaseService.getJdbcRestSessionExceptions(p),           groupedBy, 'JDBC',  'jdbc')  },
-            ftpRequestExceptionsTable:      { observable: this.buildExceptionObservable(this._ftpService.getftpSessionExceptions(p),                      groupedBy, 'FTP',   'ftp')   },
-            smtpRequestExceptionsTable:     { observable: this.buildExceptionObservable(this._smtpService.getSmtpExceptions(p),                          groupedBy, 'SMTP',  'smtp')  },
-            ldapRequestExceptionsTable:     { observable: this.buildExceptionObservable(this._ldapService.getLdapSessionExceptions(p),                   groupedBy, 'LDAP',  'ldap')  },
+            restRequestExceptionsTable: { observable: this.buildExceptionObservable(this._restService.getRestExceptions1(p), groupedBy, 'REST', 'rest') },
+            databaseRequestExceptionsTable: { observable: this.buildExceptionObservable(this._datebaseService.getJdbcRestSessionExceptions(p), groupedBy, 'JDBC', 'jdbc') },
+            ftpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ftpService.getftpSessionExceptions(p), groupedBy, 'FTP', 'ftp') },
+            smtpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._smtpService.getSmtpExceptions(p), groupedBy, 'SMTP', 'smtp') },
+            ldapRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ldapService.getLdapSessionExceptions(p), groupedBy, 'LDAP', 'ldap') },
         };
     }
 
@@ -961,22 +933,8 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         this.subscriptions.forEach(s => s.unsubscribe());
         this.chartSubscriptions.forEach(s => s.unsubscribe());
         this.tabSubscriptions.forEach(s => s.unsubscribe());
-        if (this._techScrollRaf !== null) {
-            cancelAnimationFrame(this._techScrollRaf);
-        }
         if(this._dialog){
             this._dialog.closeAll();
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-

@@ -115,10 +115,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this._envRouter.navigate(['home'], { queryParams: { env: this.env.value } });
   }
 
-  gotoDeploiment() {
-    this._envRouter.navigate(['deploiment'], { queryParams: { env: this.env.value } });
-  }
-
   selectEnv(value: string) {
     this.env.setValue(value);
   }
