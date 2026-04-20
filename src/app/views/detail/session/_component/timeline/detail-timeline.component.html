@@ -3,20 +3,44 @@
                   [groups]="dataGroups"
                   [items]="dataItems"
                   (onTimelineCreated)="onTimelineCreate($event)"
-                  (onitemCLicked)="onitemCLicked($event)">
+                  (onItemCLicked)="onItemCLicked($event)">
   <div class="legend">
-    <div *ngIf="request.restRequests?.length" class="item"><div class="dot api"></div><b>HTTP</b></div>
-    <div *ngIf="request.ftpRequests?.length" class="item"><div class="dot ftp"></div><b>FTP</b></div>
-    <div *ngIf="request.mailRequests?.length" class="item"><div class="dot smtp"></div><b>SMTP</b></div>
-    <div *ngIf="request.ldapRequests?.length" class="item"><div class="dot ldap"></div><b>LDAP</b></div>
-    <div *ngIf="request.databaseRequests?.length" class="item"><div class="dot bdd"></div><b>JDBC</b></div>
-    <div *ngIf="request.stages?.length" class="item"><div class="dot local"></div><b>LOCAL</b></div>
-    <div  *ngIf="request['userActions']?.length" class="item"><div class="dot action"></div><b>Action</b></div>
+    <div class="legend-chips">
+      <div *ngIf="request.restRequests?.length" class="chip api"
+           [class.inactive]="!isFilterActive('rest')"
+           (click)="toggleFilter('rest')">
+        <span class="chip-dot"></span>HTTP
+      </div>
+      <div *ngIf="request.ftpRequests?.length" class="chip ftp"
+           [class.inactive]="!isFilterActive('ftp')"
+           (click)="toggleFilter('ftp')">
+        <span class="chip-dot"></span>FTP
+      </div>
+      <div *ngIf="request.mailRequests?.length" class="chip smtp"
+           [class.inactive]="!isFilterActive('smtp')"
+           (click)="toggleFilter('smtp')">
+        <span class="chip-dot"></span>SMTP
+      </div>
+      <div *ngIf="request.ldapRequests?.length" class="chip ldap"
+           [class.inactive]="!isFilterActive('ldap')"
+           (click)="toggleFilter('ldap')">
+        <span class="chip-dot"></span>LDAP
+      </div>
+      <div *ngIf="request.databaseRequests?.length" class="chip bdd"
+           [class.inactive]="!isFilterActive('jdbc')"
+           (click)="toggleFilter('jdbc')">
+        <span class="chip-dot"></span>JDBC
+      </div>
+      <div *ngIf="request.localRequests?.length" class="chip local"
+           [class.inactive]="!isFilterActive('local')"
+           (click)="toggleFilter('local')">
+        <span class="chip-dot"></span>LOCAL
+      </div>
+      <div *ngIf="request['userActions']?.length" class="chip action"
+           [class.inactive]="!isFilterActive('action')"
+           (click)="toggleFilter('action')">
+        <span class="chip-dot"></span>Action
+      </div>
+    </div>
   </div>
 </app-timeline>
-<div *ngIf="!instance || !request" class="loading-row mat-elevation-z8" >
-  <span style="display: flex; flex-direction: column; font-style: italic;">
-    Chargement en cours...
-    <mat-progress-bar mode="indeterminate"></mat-progress-bar>
-  </span>
-</div>

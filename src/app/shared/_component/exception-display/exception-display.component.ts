@@ -35,7 +35,7 @@ export class ExceptionDisplayComponent {
     this.dialog.open(StacktraceDialogComponent, {
       width: '80vw',
       height: '60vh',
-      data: { type: this.type, message: this._exception.message, stackTraceRows: this._exception.stackTraceRows }
+      data: { type: this._exception.type, message: this._exception.message, stackTraceRows: this._exception.stackTraceRows }
     });
   }
 

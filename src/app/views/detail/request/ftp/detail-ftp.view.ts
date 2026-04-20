@@ -12,6 +12,8 @@ import {Constants, INFINITY} from "../../../constants";
 import {ExceptionInfo, FtpRequest, FtpRequestStage, InstanceEnvironment} from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
 import {TabData} from "../../session/_component/detail-session.component";
+import {MatDialog} from "@angular/material/dialog";
+import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
 
 @Component({
   templateUrl: './detail-ftp.view.html',
@@ -24,6 +26,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
   private readonly pipe = new DatePipe('fr-FR');
   private readonly durationPipe = new DurationPipe();
   private readonly $destroy = new Subject<void>();
+  private readonly _dialog = inject(MatDialog);
 
   private params: Partial<{ idFtp: string, env: string }> = {};
   REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
@@ -230,4 +233,17 @@ export class DetailFtpView implements OnInit, OnDestroy {
     });
   }
 
+  onClickPulse() {
+    this._dialog.open(PulseDialogComponent, {
+      width: '1000px',
+      height: '65vh',
+      data: {
+        name: this.instance.name,
+        instance: this.instance.id,
+        instanceStart: new Date(this.instance.instant * 1000),
+        start: new Date(this.request.start * 1000 - 1800000),
+        end: new Date(this.request.end * 1000 + 1800000)
+      }
+    });
+  }
 }

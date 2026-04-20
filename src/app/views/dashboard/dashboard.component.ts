@@ -18,7 +18,7 @@ import {FtpRequestService} from 'src/app/service/jquery/ftp-request.service';
 import {LdapRequestService} from 'src/app/service/jquery/ldap-request.service';
 import {
     LastServerStart,
-    SessionExceptionsByPeriodAndAppname,
+    ExceptionsByPeriodAndAppname
 } from 'src/app/model/jquery.model';
 import {SmtpRequestService} from 'src/app/service/jquery/smtp-request.service';
 import {NumberFormatterPipe} from 'src/app/shared/pipe/number.pipe';
@@ -73,7 +73,6 @@ export class DashboardComponent implements OnDestroy {
     }
 
     MAPPING_TYPE = Constants.MAPPING_TYPE;
-    selectedExceptionTab = 0;
     subscriptions: Subscription[] = [];
     chartSubscriptions: Subscription[] = [];
     tabSubscriptions: Subscription[] = [];
@@ -817,21 +816,6 @@ export class DashboardComponent implements OnDestroy {
         }, []);
     }
 
-    groupByProperty(property: string, array: any[]) {
-        let helper: any = {};
-        return array.reduce((acc: any, item: any) => {
-
-            if (!helper[item[property]]) {
-                helper[item[property]] = Object.assign({}, item);
-                acc.push(helper[item[property]]);
-            } else {
-                helper[item[property]].countok += item["countok"];
-                helper[item[property]].count += item["count"];
-            }
-            return acc;
-        }, []);
-    }
-
     sumcounts(array: any[]) {
         return array.reduce((acc, obj) => {
             return {
@@ -866,22 +850,18 @@ export class DashboardComponent implements OnDestroy {
         this.groupedBy = periodManagement(start, end);
         return {
             //   Rest-Main Sessions exceptions
-            sessionExceptionsTable: {
-                observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, server: app_name, others: {"status.ge(500).or(status.lt(400))": ""}})
-                    .pipe(map(((result: SessionExceptionsByPeriodAndAppname[]) => {
-                        formatters[this.groupedBy](result, this._datePipe, 'stringDate');
-                        return result.filter(r => r.errorType != null); // rename errorType to errType in backend
+            exceptionsTable: {
+                observable: forkJoin(
+                  [
+                    this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, server: app_name, others: {"status.ge(500).or(status.lt(400))": ""}}),
+                    this._mainService.getMainExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, app_name: app_name })
+                  ])
+                    .pipe(map(((result: [ExceptionsByPeriodAndAppname[], ExceptionsByPeriodAndAppname[]]) => {
+                        let concat = [...result[0], ...result[1]];
+                        formatters[this.groupedBy](concat, this._datePipe, 'stringDate');
+                        return concat.filter(r => r.errorType != null); // rename errorType to errType in backend
                     })))
-            },
-
-            batchExceptionTable: {
-                observable: this._mainService.getMainExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, app_name: app_name })
-                    .pipe(map(((result: SessionExceptionsByPeriodAndAppname[]) => {
-                        formatters[this.groupedBy](result, this._datePipe, 'stringDate')
-                        return result.filter(r => r.errorType != null);
-                    })))
-            },
-
+            }
         }
     }
     REQUESTS = (env: string, start: Date, end: Date, app_name: string) => {
@@ -900,32 +880,29 @@ export class DashboardComponent implements OnDestroy {
         const result = recreateDate(this.groupedBy, event.row, this.params.start);
 
         if(result) {
-            this._router.navigate(['/session/rest'], {
-                queryParams: {
-                    'env': this.params.env,
-                    'start': result.start.toISOString(),
-                    'end': result.end.toISOString(),
-                    'q': event.row.errorType,
-                    'server': this.params.serveurs,
-                    'rangestatus': ['5xx', '4xx']
-                }
-            });
-        }
-    }
-
-    onBatchExceptionRowSelected(event: {event: MouseEvent, row: any}){
-        const result = recreateDate(this.groupedBy, event.row, this.params.start);
-        if(result){
-            this._router.navigate(['/session/batch'], {
-                queryParams: {
-                    'env': this.params.env,
-                    'start': result.start.toISOString(),
-                    'end': result.end.toISOString(),
-                    'q' : event.row.errorType,
-                    'server': this.params.serveurs,
-                    'rangestatus': ['Ko']
-                }
-            });
+            if(event.row.type == 'SERVER') {
+                this._router.navigate(['/session/rest'], {
+                    queryParams: {
+                        'env': this.params.env,
+                        'start': result.start.toISOString(),
+                        'end': result.end.toISOString(),
+                        'q': event.row.errorType,
+                        'server': this.params.serveurs,
+                        'rangestatus': ['5xx', '4xx']
+                    }
+                });
+            } else if(event.row.type == 'BATCH') {
+                this._router.navigate(['/session/batch'], {
+                    queryParams: {
+                        'env': this.params.env,
+                        'start': result.start.toISOString(),
+                        'end': result.end.toISOString(),
+                        'q' : event.row.errorType,
+                        'server': this.params.serveurs,
+                        'rangestatus': ['Ko']
+                    }
+                });
+            }
         }
     }
 

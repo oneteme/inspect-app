@@ -15,7 +15,7 @@ import {MY_DATE_FORMATS} from "../../../../shared/shared.module";
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
 import {CustomDateRangeSelectionStrategy} from "../../../../shared/material/custom-date-range-selection-strategy";
 import {EnvRouter} from "../../../../service/router.service";
-import {ConfigDialogComponent} from "../config-dialog/config-dialog.component";
+import {ConfigDialogComponent} from "../../../../shared/_component/config-dialog/config-dialog.component";
 import {InstanceService} from "../../../../service/jquery/instance.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {
@@ -574,12 +574,6 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
     this.formGroup.patchValue({
       server: server
     }, { emitEvent: false });
-  }
-
-  openConfig() {
-    this._dialog.open(ConfigDialogComponent, {
-      data: this.instance.configuration
-    });
   }
 
   openInstanceSelector() {

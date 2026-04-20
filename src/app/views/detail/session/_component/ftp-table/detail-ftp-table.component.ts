@@ -25,6 +25,12 @@ export class DetailFtpTableComponent {
   }
 
   @Input() isLoading: boolean;
+  @Input() set initialSearch(value: string) {
+    this.tableConfig = {
+      ...this.tableConfig,
+      search: { ...this.tableConfig?.search, initialQuery: value }
+    }
+  }
 
   @Output() onClickRow: EventEmitter<{ event: MouseEvent, row: string }> = new EventEmitter();
 

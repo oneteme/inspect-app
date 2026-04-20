@@ -3,9 +3,10 @@ import {MatTableDataSource} from "@angular/material/table";
 import {MatPaginator} from "@angular/material/paginator";
 import {MatSort} from "@angular/material/sort";
 import {DecimalPipe} from "@angular/common";
-import {DEFAULT_TABLE_CONFIG, DEPLOIEMENT_TABLE_CONFIG} from "../../../../../shared/_component/table/table.config";
+import {DEFAULT_TABLE_CONFIG, DEPLOIEMENT_TABLE_CONFIG} from "../table.config";
 import {TableProvider} from "@oneteme/jquery-table";
-import {LastServerStart} from "../../../../../model/jquery.model";
+import {LastServerStart} from "../../../../model/jquery.model";
+import {Constants} from "../../../../views/constants";
 
 @Component({
   selector: 'exceptions-table',
@@ -15,12 +16,11 @@ import {LastServerStart} from "../../../../../model/jquery.model";
 export class ExceptionsTableComponent {
   private _decimalPipe = inject(DecimalPipe);
 
-  readonly tableConfig: TableProvider<{ stringDate: string, date: number, year: number, errorType: string, count: number, countok: number }> = {
+  tableConfig: TableProvider<{ stringDate: string, date: number, year: number, errorType: string, count: number, countok: number }> = {
     ...DEFAULT_TABLE_CONFIG,
-    view: { enabled: false },
     columns: [
       { key: 'stringDate', header: 'Instant', icon: 'schedule', groupable: false, sliceable: false },
-      { key: 'errorType', header: 'Exception', icon: 'error', groupable: false, sliceable: false, value: (row) => this.removePackage(row.errorType) },
+      { key: 'errorType', header: 'Exception', icon: 'error_outline', groupable: false, sliceable: false, value: (row) => this.removePackage(row.errorType) },
       { key: 'percent', header: 'Taux', icon: 'percent', groupable: false, sliceable: false,
         sortValue: (row) => parseFloat(this._decimalPipe.transform((row['count'] * 100) / row['countok'] , '1.0-2', 'en_US') || '0')
       }
@@ -29,11 +29,24 @@ export class ExceptionsTableComponent {
     onRowSelected: (row, event) => this.selectedRow(event, row)
   };
 
+  MAPPING_TYPE = Constants.MAPPING_TYPE;
   _requests: { stringDate: string, date: number, year: number, errorType: string, count: number, countok: number }[] = [];
 
   @Input() set data(objects: any[]) {
     if (objects?.length) {
       this._requests = objects;
+    }
+  }
+
+  @Input() set enableTypeColumn(value: boolean) {
+    if(value) {
+      this.tableConfig = {
+        ...this.tableConfig,
+        columns: [
+          ...this.tableConfig.columns,
+          { key: 'type', header: 'Type', icon: 'category', value: (row) => row.type == 'SERVER' ? this.MAPPING_TYPE['rest'].title : this.MAPPING_TYPE['batch'].title }
+        ]
+      }
     }
   }
 

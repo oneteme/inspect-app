@@ -3,11 +3,14 @@
   <div class="modal-header">
     <div class="modal-header-left">
       <div class="modal-icon">
-        <mat-icon [ngClass]="data.type">{{ data.type === 'warning' ? 'warning' : 'error' }}</mat-icon>
+        <mat-icon>warning_amber</mat-icon>
       </div>
       <div class="modal-info">
         <div class="modal-title">
           Exception
+        </div>
+        <div class="modal-subtitle">
+          {{ data.type }}
         </div>
       </div>
     </div>

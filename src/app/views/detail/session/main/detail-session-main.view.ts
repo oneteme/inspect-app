@@ -9,6 +9,8 @@ import {Constants} from "../../../constants";
 import {AnalyticService} from "../../../../service/analytic.service";
 import {MainSessionView} from "../../../../model/request.model";
 import {InstanceEnvironment} from "../../../../model/trace.model";
+import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
+import {MatDialog} from "@angular/material/dialog";
 
 @Component({
     templateUrl: './detail-session-main.view.html',
@@ -20,6 +22,7 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
     private readonly _analyticService = inject(AnalyticService);
     private readonly _location = inject(Location);
     private readonly $destroy = new Subject<void>();
+    private readonly _dialog = inject(MatDialog);
     protected readonly _router = inject(EnvRouter);
     MAPPING_TYPE = Constants.MAPPING_TYPE;
     session: MainSessionView;
@@ -83,5 +86,19 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.$destroy.next();
         this.$destroy.complete();
+    }
+
+    onClickPulse() {
+        this._dialog.open(PulseDialogComponent, {
+            width: '1000px',
+            height: '65vh',
+            data: {
+                name: this.instance.name,
+                instance: this.instance.id,
+                instanceStart: new Date(this.instance.instant * 1000),
+                start: new Date(this.session.start * 1000 - 1800000),
+                end: new Date(this.session.end * 1000 + 1800000)
+            }
+        });
     }
 }

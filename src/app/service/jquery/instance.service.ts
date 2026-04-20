@@ -15,17 +15,6 @@ export class InstanceService {
     return this.http.get<T>(url, {params: params});
   }
 
-  getIds(env: string, end: Date, appName: string): Observable<{ id: string }[]> {
-    let args: any = {
-      'column': 'id',
-      'app_name.in': `"${appName}"`,
-      'environement': env,
-      'type': 'SERVER',
-      'start.lt': end.toISOString(),
-    }
-    return this.getInstance(args);
-  }
-
   getEnvironments(): Observable<{ environement: string }[]> {
     let args = {
       'column.distinct': 'environement',
@@ -46,39 +35,12 @@ export class InstanceService {
     return this.getInstance(args);
   }
 
-  getServerStart(filters: {
-    env: string,
-    start: Date,
-    end: Date,
-    app_name: string
-  }): Observable<ServerStartByPeriodAndAppname> {
-    return this.getInstance({
-      'column': `view1.appName,view1.version,view1.start`,
-      'view': `select(app_name,version,start,rank.over(partition(environement,app_name).order(start.desc)):rk).filter(type.eq(SERVER).and(environement.eq(${filters.env})).and(start.ge(${filters.start.toISOString()})).and(start.lt(${filters.end.toISOString()}))${filters.app_name ? '.and(instance.app_name.in(' + filters.app_name + '))' : ''}):view1`,
-      'view1.rk': '1', 'order': 'view1.start.desc'
-    });
-  }
-
   getLastServerStart(filters: { env: string }): Observable<LastServerStart[]> {
     return this.getInstance<any>({
-      'column': `view1.id,view1.environement:env,view1.type,view1.appName,view1.version,view1.branch,view1.hash,view1.start,view1.end,view1.collector,view1.configuration,view1.restart,view1.minStart,view1.lastStart`,
-      'view': `select(id,environement,type,app_name,version,branch,hash,start,end,collector,configuration,start.min.over(partition(environement,app_name,version)):minStart,rank.over(partition(environement,app_name).order(end.coalesce(9999-12-31T00:00:00.000Z).desc,start.desc)):rk,count.over(partition(environement,app_name,version)):restart,start.max.over(partition(environement,app_name)):lastStart).filter(type.eq(SERVER).and(environement.eq(${filters.env}))):view1`,
+      'column': `view1.id,view1.environement:env,view1.type,view1.appName,view1.version,view1.branch,view1.hash,view1.start,view1.end,view1.collector,view1.configuration,view1.restart,view1.minStart,view1.lastStart,view1.os,view1.re,view1.user`,
+      'view': `select(id,environement,type,app_name,version,branch,hash,start,end,collector,configuration,os,re,user,start.min.over(partition(environement,app_name,version)):minStart,rank.over(partition(environement,app_name).order(end.coalesce(9999-12-31T00:00:00.000Z).desc,start.desc)):rk,count.over(partition(environement,app_name,version)):restart,start.max.over(partition(environement,app_name)):lastStart).filter(type.eq(SERVER).and(environement.eq(${filters.env}))):view1`,
       'view1.rk': '1', 'order': 'view1.start.desc'
     }).pipe(map(res => { return res.map(r => ({...r, configuration: r.configuration?.value ? JSON.parse(r.configuration?.value) : null})) }));
-  }
-
-  getServerStartHistory(filters: { env: string, start: Date, end: Date, appName: string }): Observable<{
-    version: string,
-    start: number
-  }[]> {
-    return this.getInstance({
-      'column': `version,start`,
-      'environement': filters.env,
-      'app_name': `"${filters.appName}"`,
-      'start.ge': filters.start.toISOString(),
-      'start.lt': filters.end.toISOString(),
-      'order': 'start.desc'
-    });
   }
 
   getCountByRe(filters: { env: string, start: Date, end: Date, appName: string }): Observable<{
@@ -139,7 +101,7 @@ export class InstanceService {
     re:string,
   }[]> {
     let args: any = {
-      'column': 'id,start,end,version,address,branch,hash,re,collector,configuration',
+      'column': 'id,start,end,version,address,branch,hash,os,re,collector,configuration',
       'environement': filters.env,
       'app_name': `"${filters.appName}"`,
       'order': 'start.asc'

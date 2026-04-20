@@ -37,7 +37,7 @@ export class PulseComponent implements OnDestroy {
     verticalScroll: true,
     orientation: "top",
     zoomKey: 'ctrlKey',
-    maxHeight: 'calc(65vh - 40px - 44px - 0.5em)',
+    maxHeight: 'calc(55vh - 40px - 44px - 0.5em)',
   };
 
   groups: DataGroup[];

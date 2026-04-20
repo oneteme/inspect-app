@@ -1,12 +1,11 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {map, Observable} from "rxjs";
-import {FilterMap} from "../../views/constants";
 import {
+    ExceptionsByPeriodAndAppname,
     RepartitionRequestByPeriod,
     RepartitionTimeAndTypeResponse,
-    RepartitionTimeAndTypeResponseByPeriod,
-    SessionExceptionsByPeriodAndAppname
+    RepartitionTimeAndTypeResponseByPeriod
 } from "../../model/jquery.model";
 
 @Injectable({ providedIn: 'root' })
@@ -285,9 +284,9 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getSessionExceptions(filters: {env: string, start: Date, end: Date, groupedBy: string, server?: string, apiNames?: string, users?: string, versions?: string, others?: {[key: string]: any}  }): Observable<SessionExceptionsByPeriodAndAppname[]> {
+    getSessionExceptions(filters: {env: string, start: Date, end: Date, groupedBy: string, server?: string, apiNames?: string, users?: string, versions?: string, others?: {[key: string]: any}  }): Observable<ExceptionsByPeriodAndAppname[]> {
         let args = {
-            "column": `start.${filters.groupedBy}:date,err_type,count:count,status,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`,
+            "column": `start.${filters.groupedBy}:date,err_type,count:count,status,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year,instance.type:type`,
             'join': 'instance',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),

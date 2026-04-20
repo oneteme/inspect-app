@@ -1,14 +1,7 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {
-    JdbcMainExceptionsByPeriodAndappname,
-    JdbcExceptionsByPeriodAndAppname,
-    RepartitionRequestByPeriod,
-    RepartitionTimeAndTypeResponseByPeriod,
-    SessionExceptionsByPeriodAndAppname,
-    RestSessionExceptionsByPeriodAndappname
-} from "../../model/jquery.model";
+import {JdbcExceptionsByPeriodAndAppname, RepartitionRequestByPeriod} from "../../model/jquery.model";
 import {DatabaseRequestDto} from "../../model/request.model";
 
 @Injectable({ providedIn: 'root' })

@@ -171,16 +171,14 @@
       </div>
     </div>
     <a mat-menu-item [routerLink]="['/dashboard/request', 'rest']" [queryParams]="{env: instance?.env, host: request?.host}">
-      <mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Request
+      <mat-icon class="material-symbols-outlined">finance_mode</mat-icon>{{REQUEST_TYPE['rest'].title}}
     </a>
 </mat-menu>
 
 <mat-menu #menuServer="matMenu">
-  <a mat-menu-item [routerLink]="['/session', instance?.name, 'dump']" [queryParams]="{env: instance?.env, date: getDate(request?.start * 1000).toISOString()}">
-    <mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse
-  </a>
+  <a mat-menu-item (click)="onClickPulse()"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
   <a mat-menu-item [routerLink]="['/dashboard', 'server', instance?.name]" [queryParams]="{env: instance?.env}">
-    <mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur
+    <mat-icon class="material-symbols-outlined">finance_mode</mat-icon>Serveur
   </a>
 </mat-menu>
 

@@ -7,7 +7,7 @@ import {InstanceEnvironment} from "../../../../model/trace.model";
 import {MachineUsageService} from "../../../../service/jquery/resource-usage.service";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 import {InstanceTraceService} from "../../../../service/jquery/instance-trace.service";
-import {DatePipe, DecimalPipe, Location} from "@angular/common";
+import {DecimalPipe} from "@angular/common";
 import {MatDialog} from "@angular/material/dialog";
 import {DateAdapter, MAT_DATE_FORMATS} from "@angular/material/core";
 import {CustomDateAdapter} from "../../../../shared/material/custom-date-adapter";
@@ -15,13 +15,11 @@ import {MY_DATE_FORMATS} from "../../../../shared/shared.module";
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
 import {CustomDateRangeSelectionStrategy} from "../../../../shared/material/custom-date-range-selection-strategy";
 import {EnvRouter} from "../../../../service/router.service";
-import {ConfigDialogComponent} from "../config-dialog/config-dialog.component";
 import {InstanceService} from "../../../../service/jquery/instance.service";
-import {ServerInstanceSelectorDialogComponent} from "./server-instance-selector-dialog/server-instance-selector-dialog.component";
-import {MatSnackBar} from "@angular/material/snack-bar";
 import {
-  StacktraceDialogComponent
-} from "../../../../shared/_component/exception-display/stacktrace-dialog/stacktrace-dialog.component";
+  ServerInstanceSelectorDialogComponent
+} from "./server-instance-selector-dialog/server-instance-selector-dialog.component";
+import {MatSnackBar} from "@angular/material/snack-bar";
 import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
 
 @Component({
@@ -654,6 +652,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
       width: '1000px',
       height: '65vh',
       data: {
+        name: this.instance.name,
         instance: this.instance.id,
         instanceStart: new Date(this.instance.instant * 1000),
         start: this.selectedPeriod.start,

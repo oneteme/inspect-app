@@ -1,11 +1,9 @@
 import {Component, inject, Input} from "@angular/core";
-import {InstanceEnvironment, InspectCollectorConfiguration} from "../../../model/trace.model";
+import {InstanceEnvironment} from "../../../model/trace.model";
 import {InstanceTraceService} from "../../../service/jquery/instance-trace.service";
 import {finalize} from "rxjs";
 import {MatMenu} from "@angular/material/menu";
 import {EnvRouter} from "../../../service/router.service";
-import {MatDialog} from "@angular/material/dialog";
-import {ConfigDialogComponent} from "../../../views/supervision/_component/config-dialog/config-dialog.component";
 
 @Component({
   selector: 'app-server-card',
@@ -15,7 +13,6 @@ import {ConfigDialogComponent} from "../../../views/supervision/_component/confi
 export class ServerCardComponent {
   private readonly _instanceTraceService = inject(InstanceTraceService);
   protected readonly _router: EnvRouter = inject(EnvRouter);
-  private readonly _dialog = inject(MatDialog);
 
   date = new Date();
   _instance: InstanceEnvironment;
@@ -38,10 +35,6 @@ export class ServerCardComponent {
 
   @Input() menu: MatMenu;
 
-  openConfig(config: InspectCollectorConfiguration, event: MouseEvent) {
-    event.stopPropagation();
-    this._dialog.open(ConfigDialogComponent, { data: config });
-  }
 
   navigate(event: MouseEvent) {
     var date = new Date(this._lastTrace);

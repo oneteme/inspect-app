@@ -29,11 +29,14 @@ export class InstanceTableComponent {
     ...DEFAULT_TABLE_CONFIG,
     columns: [
       { key: 'version', header: 'Version', icon: 'label' },
-      { key: 'branch',  header: 'Branche', icon: 'fork_right' },
+      { key: 'branch',  header: 'Branche', icon: 'fork_right', width: '40%' },
       { key: 'start', header: 'Début', icon: 'schedule', groupable: false, sliceable: false },
       { key: 'duration', header: 'Durée', icon: 'timer', groupable: false, sliceable: false,
         sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
-      }
+      },
+      { key: 'os', header: 'OS', icon: 'computer', optional: true },
+      { key: 're', header: 'RE', icon: 'sdk', optional: true },
+      { key: 'user', header: 'Utilisateur', icon: 'person', optional: true }
     ],
     defaultSort: DEFAULT_SORT_CONFIG,
     rowClass: (row) => {

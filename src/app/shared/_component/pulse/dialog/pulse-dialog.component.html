@@ -1,3 +1,26 @@
-<div mat-dialog-content>
-  <app-pulse [data]="data"></app-pulse>
+<div class="modal">
+
+  <div class="modal-header">
+    <div class="modal-header-left">
+      <div class="modal-icon">
+        <mat-icon>view_timeline</mat-icon>
+      </div>
+      <div class="modal-info">
+        <div class="modal-title">
+          Pulse
+        </div>
+        <div class="modal-subtitle">
+          {{ data.name }}
+        </div>
+      </div>
+    </div>
+    <button class="modal-close" mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <app-pulse [data]="data"></app-pulse>
+  </div>
+
 </div>
