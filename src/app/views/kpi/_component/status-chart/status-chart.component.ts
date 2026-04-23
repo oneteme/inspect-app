@@ -18,64 +18,7 @@ export class StatusChartComponent {
 
   chartProvider: ChartProvider<string, number> = {
     stacked: true,
-    series: [],
-    options: {
-      chart: {
-        toolbar: {
-          show: false
-        }
-      },
-      xaxis: {
-        labels: {
-          rotateAlways: true
-        }
-      },
-      yaxis: {
-        labels: {
-          formatter: (value) => {
-            return this._decimalPipe.transform(value);
-          }
-        }
-      },
-      legend: {
-        position: 'bottom',
-        showForSingleSeries: true
-      },
-      plotOptions: {
-        bar: {
-          dataLabels: {
-            total: {
-              enabled: true,
-              style: {
-                fontSize: '10px'
-              }
-            }
-          }
-        }
-      },
-      dataLabels: {
-        enabled: false,
-        formatter: (value) => {
-          return this._decimalPipe.transform(value);
-        },
-        textAnchor: 'start',
-        style: {
-          fontSize: '10px',
-          fontFamily: 'Helvetica, Arial, sans-serif',
-          fontWeight: 'bold',
-          colors: undefined
-        },
-        background: {
-          enabled: true,
-          foreColor: '#fff',
-          padding: 4,
-          borderRadius: 2,
-          borderWidth: 1,
-          borderColor: '#fff',
-          opacity: 0.9
-        }
-      }
-    }
+    series: []
   }
 
   _data: any = [];
