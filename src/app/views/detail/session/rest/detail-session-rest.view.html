@@ -97,11 +97,11 @@
           <div class="footer-section data-stats">
             <div class="stat-item">
               <mat-icon class="material-symbols-outlined stat-icon">arrow_downward</mat-icon>
-              <span class="stat-value">{{ session.inDataSize || 0 }}o</span>
+              <span class="stat-value">{{ session.outDataSize || 0 }}o</span>
             </div>
             <div class="stat-item">
               <mat-icon class="material-symbols-outlined stat-icon">arrow_upward</mat-icon>
-              <span class="stat-value">{{ session.outDataSize }}o</span>
+              <span class="stat-value">{{ session.inDataSize || 0 }}o</span>
             </div>
             <div class="stat-item">
               <mat-icon class="material-symbols-outlined stat-icon">timer</mat-icon>
@@ -148,7 +148,7 @@
     <mat-icon class="material-symbols-outlined">lan</mat-icon>
     Arbre d'appels
   </a>
-  <a mat-menu-item [routerLink]="['/dashboard', 'server', instance?.name]" [queryParams]="{api_name: session?.name, env: instance?.env}"><mat-icon class="material-symbols-outlined">finance_mode</mat-icon>{{MAPPING_TYPE['rest'].title}}</a>
+  <a mat-menu-item [routerLink]="['/kpi/session', 'rest']" [queryParams]="{host: instance?.name, env: instance?.env}"><mat-icon class="material-symbols-outlined">finance_mode</mat-icon>{{MAPPING_TYPE['rest'].title}}</a>
 </mat-menu>
 
 <mat-menu #menuServer="matMenu">

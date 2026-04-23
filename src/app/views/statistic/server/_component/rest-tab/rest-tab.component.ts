@@ -111,7 +111,7 @@ export class RestTabComponent implements OnDestroy {
   getDependencies(httpParams: HttpParams, advancedParams) {
     this.$dependenciesResponse.table = [];
     this.$dependenciesResponse.loading = true;
-    return this._restSessionService.getDependenciesNew({
+    return this._restSessionService.getDependencies({
         start: httpParams.params.period.start,
         end: httpParams.params.period.end,
         env: httpParams.params.env,
@@ -131,7 +131,7 @@ export class RestTabComponent implements OnDestroy {
   getDependents(httpParams: HttpParams, advancedParams) {
     this.$dependentsResponse.table = [];
     this.$dependentsResponse.loading = true;
-    return this._restSessionService.getDependentsNew({
+    return this._restSessionService.getDependents({
         start: httpParams.params.period.start,
         end: httpParams.params.period.end,
         env: httpParams.params.env,
