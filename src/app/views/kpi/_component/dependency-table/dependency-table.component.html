@@ -1,0 +1,29 @@
+<div class="kpi-chart-header">
+  <div class="kpi-chart-title-group">
+    <span class="kpi-accent-bar green-bar"></span>
+    <mat-icon class="kpi-chart-icon material-symbols-outlined">dns</mat-icon>
+    <span class="kpi-chart-title">Hôte appelant</span>
+  </div>
+</div>
+<div class="kpi-chart-subheader">
+  <span class="kpi-chart-period">{{(queryParams.period.start | date: 'd MMM') + '–' + (queryParams.period.end | date)}}</span>
+</div>
+
+<jquery-table class="flex-table"
+              [config]="tableConfig"
+              [data]="data"
+              [isLoading]="loading">
+  <ng-template jqtCellDef="stats" let-row>
+    <div class="stat-badges">
+      <span class="stat-badge s2xx" *ngIf="row.countSucces">
+        <span class="stat-dot"></span>{{ row.countSucces | number }}
+      </span>
+      <span class="stat-badge s4xx" *ngIf="row.countErrClient">
+        <span class="stat-dot"></span>{{ row.countErrClient | number }}
+      </span>
+      <span class="stat-badge s5xx" *ngIf="row.countErrServer">
+        <span class="stat-dot"></span>{{ row.countErrServer | number }}
+      </span>
+    </div>
+  </ng-template>
+</jquery-table>
