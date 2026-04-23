@@ -120,7 +120,7 @@ const routes: Route[] = [
                 data: {type: 'main'},
                 component: TreeView,
                 title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-                  return Constants.MAPPING_TYPE[route.paramMap.get('type_main')].title + ' > Arbre d\'Appels';
+                  return 'Arbre d\'Appels'; // TODO ajouter le type dans le titre
                 }
               },
               {path: '**', pathMatch: 'full', redirectTo: `/main/:type_main/:id_session`}
