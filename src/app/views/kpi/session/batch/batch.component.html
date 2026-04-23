@@ -1,0 +1,57 @@
+<div class="kpi-page">
+
+  <!-- ── Barre de résumé ── -->
+  <div class="kpi-summary-row">
+    <div class="kpi-stat-card">
+      <div class="kpi-stat-icon blue">
+        <mat-icon class="material-symbols-outlined">swap_horiz</mat-icon>
+      </div>
+      <div class="kpi-stat-content">
+        <span class="kpi-stat-value">{{$globalStatistic.totalRequest | number}}</span>
+        <span class="kpi-stat-label">Requêtes totales</span>
+      </div>
+    </div>
+    <div class="kpi-stat-card">
+      <div class="kpi-stat-icon green">
+        <mat-icon class="material-symbols-outlined">manufacturing</mat-icon>
+      </div>
+      <div class="kpi-stat-content">
+        <span class="kpi-stat-value">{{$globalStatistic.totalName | number}}</span>
+        <span class="kpi-stat-label">Tâches planifiées</span>
+      </div>
+    </div>
+    <div class="kpi-stat-card">
+      <div class="kpi-stat-icon purple">
+        <mat-icon class="material-symbols-outlined">dns</mat-icon>
+      </div>
+      <div class="kpi-stat-content">
+        <span class="kpi-stat-value">{{$globalStatistic.totalHost | number}}</span>
+        <span class="kpi-stat-label">Hôtes</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Grille des charts ── -->
+  <div class="kpi-grid">
+
+    <div class="kpi-chart-card span-4">
+      <status-chart
+              [chartConfig]="$statusRepartition.chartConfig"
+              [data]="$statusRepartition.data"
+              [loading]="$statusRepartition.loading"
+              [sliceData]="$statusRepartitionSlice.data"
+              [queryParams]="params"
+              title="Lancement"
+              (onChartChange)="onStatusChartChange($event)">
+      </status-chart>
+    </div>
+
+    <div class="kpi-chart-card span-4" style="height: 350px">
+      <dependent-new-table
+              [data]="$dependentTable.data"
+              [loading]="$dependentTable.loading"
+              [queryParams]="params"></dependent-new-table>
+    </div>
+  </div>
+</div>
+

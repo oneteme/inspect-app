@@ -33,7 +33,7 @@ export class ExceptionsTableComponent {
   _requests: { stringDate: string, date: number, year: number, errorType: string, count: number, countok: number }[] = [];
 
   @Input() set data(objects: any[]) {
-    if (objects?.length) {
+    if (objects) {
       this._requests = objects;
     }
   }
