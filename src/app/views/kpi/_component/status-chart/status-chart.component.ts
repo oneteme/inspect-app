@@ -11,14 +11,21 @@ import {buildSeries, ChartConfig, pivotByStack} from "../../kpi.config";
   styleUrls: ['./status-chart.component.scss']
 })
 export class StatusChartComponent {
-  private readonly _decimalPipe = inject(DecimalPipe);
-
   sliceConfigs: SliceConfig<any>[] = [];
   tasks: any[] = [];
 
   chartProvider: ChartProvider<string, number> = {
     stacked: true,
-    series: []
+    series: [],
+    options: {
+      xAxis: {
+        axisLabel: {
+          rotate: 30,        // rotation en degrés (30-45 recommandé)
+          overflow: 'truncate', // tronquer si trop long
+          width: 120         // largeur max avant troncature (ajuste selon ta résolution)
+        }
+      }
+    }
   }
 
   _data: any = [];

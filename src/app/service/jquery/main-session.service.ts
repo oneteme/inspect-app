@@ -234,9 +234,9 @@ export class MainSessionService {
         return this.getMainSession(args);
     }
 
-    getDependentsNew2(filters: {env: string, start: Date, end: Date, servers: string[]}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, dependent: string, actual: string}[]> {
+    getDependentsNew2(filters: {env: string, start: Date, end: Date, servers: string[]}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, dep: string, actual: string}[]> {
         let args: any = {
-            'column': `rest_session_join.count:count,rest_session_join.count_succes:countSucces,rest_session_join.count_error_client:countErrClient,rest_session_join.count_error_server:countErrServer,instance_join.app_name:dependent,instance.app_name:actual`,
+            'column': `rest_session_join.count:count,rest_session_join.count_succes:countSucces,rest_session_join.count_error_client:countErrClient,rest_session_join.count_error_server:countErrServer,instance_join.app_name:dep,instance.app_name:actual`,
             'id': 'rest_request.parent',
             'rest_request.id': 'rest_session_join.id',
             'rest_request.start.ge': filters.start.toISOString(),

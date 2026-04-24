@@ -324,7 +324,7 @@ export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => (
       label: 'Media'
     },
     jquery: {
-      value: `method.coalesce("<empty>")`,
+      value: `media.coalesce("<empty>")`,
       buildAlias: () => 'media',
       order: 'asc'
     }

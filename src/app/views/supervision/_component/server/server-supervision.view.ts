@@ -60,6 +60,8 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   });
 
   readonly USAGE_RESOURCE_BY_PERIOD_LINE: ChartProvider<string, number> = {
+    group: 'sync',
+    groupSync: ['tooltip', 'datazoom'],
     height: 300,
     stacked: false,
     ytitle: '',
@@ -70,79 +72,29 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
 
     ],
     options: {
-      chart: {
-        id: 'line-1',
-        group: 'group',
-        animations: {
-          enabled: false
-        },
-        zoom: {
-          type: 'x',
-          enabled: true,
-          autoScaleYaxis: true
-        },
-        toolbar: {
-          show: true,
-          tools: {
-            download: true,
-            selection: true,
-            zoom: true,
-            zoomin: true,
-            zoomout: true,
-            pan: true,
-            reset: true,
-            customIcons: []
-          },
-          export: {
-            csv: {
-              columnDelimiter: ',',
-              headerCategory: 'category',
-              headerValue: 'value'
+      animation: false,
+      dataZoom: [{ type: 'inside', xAxisIndex: 0 }],
+      xAxis: { axisLabel: { hideOverlap: true } },
+      yAxis: { axisLabel: { formatter: (v: number) => this._decimalPipe.transform(v) } },
+      series: [
+        {
+          lineStyle: { type: 'dashed' },
+          areaStyle: {
+            color: {
+              type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+              colorStops: [
+                { offset: 0, color: '#feb019CC' },
+                { offset: 1, color: '#feb01911' }
+              ]
             }
-          },
-          autoSelected: 'zoom'
-        }
-      },
-      xaxis: {
-        labels: {
-          datetimeUTC: false
-        }
-      },
-      yaxis: {
-        labels: {
-          formatter: (value) => {
-            return this._decimalPipe.transform(value);
           }
         }
-      },
-      fill: {
-        type: ['gradient', 'solid', 'solid'],
-        gradient: {
-          shade: 'light',
-          type: 'vertical',
-          inverseColors: 'false',
-          shadeIntensity: 0.4,
-          opacityFrom: 0.9,
-          opacityTo: 0.3,
-          stops: [0, 100]
-        }
-      },
-      stroke: {
-        curve: 'smooth',
-        dashArray: [5,0,0],
-        width: [1,1,1]
-      },
-      dataLabels: {
-        enabled: false
-      },
-      tooltip: {
-        x: {
-          format: 'dd MMM HH:mm:ss'
-        }
-      }
+      ]
     }
   };
   readonly USAGE_DISK_BY_PERIOD_LINE: ChartProvider<string, number> = {
+    group: 'sync',
+    groupSync: ['tooltip', 'datazoom'],
     height: 300,
     stacked: false,
     ytitle: '',
@@ -151,76 +103,24 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
       {data: {x: field('date'), y: field('usedDiskSpace')}, name: 'Utilisée', color: '#008ffb'}
     ],
     options: {
-      chart: {
-        id: 'line-2',
-        group: 'group',
-        animations: {
-          enabled: false
-        },
-        zoom: {
-          type: 'x',
-          enabled: true,
-          autoScaleYaxis: true
-        },
-        toolbar: {
-          show: true,
-          tools: {
-            download: true,
-            selection: true,
-            zoom: true,
-            zoomin: true,
-            zoomout: true,
-            pan: true,
-            reset: true,
-            customIcons: []
-          },
-          export: {
-            csv: {
-              columnDelimiter: ',',
-              headerCategory: 'category',
-              headerValue: 'value'
+      animation: false,
+      dataZoom: [{ type: 'inside', xAxisIndex: 0 }],
+      xAxis: { axisLabel: { hideOverlap: true } },
+      yAxis: { axisLabel: { formatter: (v: number) => this._decimalPipe.transform(v) } },
+      series: [
+        {
+          lineStyle: { type: 'dashed' },
+          areaStyle: {
+            color: {
+              type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+              colorStops: [
+                { offset: 0, color: '#FEB019CC' },
+                { offset: 1, color: '#FEB01911' }
+              ]
             }
-          },
-          autoSelected: 'zoom'
-        }
-      },
-      xaxis: {
-        labels: {
-          datetimeUTC: false
-        }
-      },
-      yaxis: {
-        labels: {
-          formatter: (value) => {
-            return this._decimalPipe.transform(value);
           }
         }
-      },
-      fill: {
-        type: ['gradient','solid'],
-        gradient: {
-          shade: 'light',
-          type: 'vertical',
-          inverseColors: 'false',
-          shadeIntensity: 0.4,
-          opacityFrom: 0.9,
-          opacityTo: 0.3,
-          stops: [0, 100]
-        }
-      },
-      stroke: {
-        curve: 'smooth',
-        dashArray: [5,0],
-        width: [1,1]
-      },
-      dataLabels: {
-        enabled: false
-      },
-      tooltip: {
-        x: {
-          format: 'dd MMM HH:mm:ss'
-        }
-      }
+      ]
     }
   };
   readonly USAGE_INSTANCE_TRACE_BY_PERIOD_LINE: ChartProvider<string, number> = {
@@ -233,87 +133,26 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
       {data: {x: field('date'), y: field('queueCapacity')}, name: 'Maximum', type: 'area', color: '#FEB019', visible: false}
     ],
     options: {
-      chart: {
-        id: 'line-3',
-        group: 'group',
-        animations: {
-          enabled: false
-        },
-        events: {
-          zoomed: (chartContext, { xaxis, yaxis }) => this.getSelectedPeriod(xaxis.min, xaxis.max)
-        },
-        zoom: {
-          type: 'x',
-          enabled: true,
-          autoScaleYaxis: true
-        },
-        toolbar: {
-          show: true,
-          tools: {
-            download: true,
-            zoom: true,
-            zoomin: true,
-            zoomout: true,
-            pan: true,
-            reset: true,
-            customIcons: [
-              {
-                icon: '<mat-icon class="material-symbols-outlined" style="font-size: 18px; padding-top: 3px; padding-left: 3px;">view_timeline</mat-icon>',
-                index: -6,
-                title: 'Pulse',
-                click: (chart, options, e) => this._ngZone.run(() => {
-                  this.onClickPulse()
-                })
-              }
-            ]
-          },
-          export: {
-            csv: {
-              columnDelimiter: ',',
-              headerCategory: 'category',
-              headerValue: 'value'
+      animation: false,
+      dataZoom: [{ type: 'inside', xAxisIndex: 0 }],
+      xAxis: { axisLabel: { hideOverlap: true } },
+      yAxis: { axisLabel: { formatter: (v: number) => this._decimalPipe.transform(v) } },
+      series: [
+        {},
+        {},
+        {
+          lineStyle: { type: 'dashed' },
+          areaStyle: {
+            color: {
+              type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+              colorStops: [
+                { offset: 0, color: '#FEB019CC' },
+                { offset: 1, color: '#FEB01911' }
+              ]
             }
-          },
-          autoSelected: 'zoom'
-        }
-      },
-      xaxis: {
-        labels: {
-          datetimeUTC: false
-        }
-      },
-      yaxis: {
-        labels: {
-          formatter: (value) => {
-            return this._decimalPipe.transform(value);
           }
         }
-      },
-      fill: {
-        type: ['solid', 'solid', 'gradient'],
-        gradient: {
-          shade: 'light',
-          type: 'vertical',
-          inverseColors: 'false',
-          shadeIntensity: 0.4,
-          opacityFrom: 0.9,
-          opacityTo: 0.3,
-          stops: [0, 100]
-        }
-      },
-      stroke: {
-        curve: 'smooth',
-        dashArray: [0,0,5],
-        width: [1,1,1]
-      },
-      dataLabels: {
-        enabled: false
-      },
-      tooltip: {
-        x: {
-          format: 'dd MMM HH:mm:ss'
-        }
-      }
+      ]
     }
   };
   readonly ATTEMPT_INSTANCE_TRACE_BY_PERIOD_LINE: ChartProvider<string, number> = {
@@ -324,66 +163,11 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
       {data: {x: field('date'), y: field('attempts')}, name: 'Tentative'}
     ],
     options: {
-      chart: {
-        id: 'line-4',
-        group: 'group',
-        animations: {
-          enabled: false
-        },
-        zoom: {
-          type: 'x',
-          enabled: true,
-          autoScaleYaxis: true
-        },
-        toolbar: {
-          show: true,
-          tools: {
-            download: true,
-            selection: true,
-            zoom: true,
-            zoomin: true,
-            zoomout: true,
-            pan: true,
-            reset: true,
-            customIcons: []
-          },
-          export: {
-            csv: {
-              columnDelimiter: ',',
-              headerCategory: 'category',
-              headerValue: 'value'
-            }
-          },
-          autoSelected: 'zoom'
-        }
-      },
-      xaxis: {
-        labels: {
-          datetimeUTC: false
-        }
-      },
-      yaxis: {
-        labels: {
-          formatter: (value) => {
-            return this._decimalPipe.transform(value);
-          }
-        }
-      },
-      stroke: {
-        curve: 'smooth',
-        width: [1]
-      },
-      dataLabels: {
-        enabled: false
-      },
-      legend: {
-        showForSingleSeries: true
-      },
-      tooltip: {
-        x: {
-          format: 'dd MMM HH:mm:ss'
-        }
-      }
+      animation: false,
+      dataZoom: [{ type: 'inside', xAxisIndex: 0 }],
+      xAxis: { axisLabel: { hideOverlap: true } },
+      yAxis: { axisLabel: { formatter: (v: number) => this._decimalPipe.transform(v) } },
+      legend: { show: true }
     }
   };
 
@@ -415,12 +199,8 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     this.$destroy.complete();
   }
 
-  getSelectedPeriod(min: number, max: number) {
-    if (min && max) {
-      this.selectedPeriod = {start: new Date(min), end: new Date(max)};
-    } else {
-      this.selectedPeriod = this.defaultSelectedPeriod();
-    }
+  ngAfterViewInit() {
+
   }
 
   onRouteChange(){
