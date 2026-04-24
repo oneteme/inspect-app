@@ -45,8 +45,20 @@ export class TreeView implements OnDestroy {
   serverLbl: Label;
   linkLbl: Label;
   LabelIsLoaded: { [key: string]: boolean } = { "METHOD_RESOURCE": false, "STATUS_EXCEPTION": false, "SIZE_COMPRESSION": false }
+  minimapVisible: boolean = JSON.parse(localStorage.getItem('tree_minimap') ?? 'true');
+  isFullscreen: boolean = false;
+  searchQuery: string = '';
+  searchResults: any[] = [];
+  currentSearchIndex: number = 0;
+  searchVisible: boolean = false;
+
+  // Évolution 6 — Detail panel
+  selectedCell: any = null;
+  detailPanelVisible: boolean = false;
+
   @ViewChild('graphContainer') graphContainer: ElementRef;
   @ViewChild('outlineContainer') outlineContainer: ElementRef;
+  @ViewChild('searchInput') searchInputRef: ElementRef;
   ViewForm = new FormGroup({
     nodeView: new FormControl(),
     linkView: new FormControl(),
@@ -111,7 +123,74 @@ export class TreeView implements OnDestroy {
       });
       this.ViewEvent[linklbl](Label[linklbl])// draw
       this.tree.setOutline(this.outlineContainer.nativeElement)
+      this.registerCellClickListener();
     }))
+  }
+
+  registerCellClickListener() {
+    this.tree.graph.addListener('click', (_sender: any, evt: any) => {
+      this._zone.run(() => {
+        const cell = evt.getProperty('cell');
+        if (cell) {
+          this.selectedCell = cell;
+          this.detailPanelVisible = true;
+        } else {
+          this.closeDetailPanel();
+        }
+      });
+    });
+  }
+
+  closeDetailPanel() {
+    this.detailPanelVisible = false;
+    this.selectedCell = null;
+  }
+
+  getCellDetails(): { type: string; rows: { icon: string; label: string; value: string; color?: string }[] } {
+    const cell = this.selectedCell;
+    if (!cell) return { type: '', rows: [] };
+
+    if (cell.isEdge()) {
+      const rows: any[] = [];
+      if (cell.value?.nodes) {
+        const grouped = this.groupBy(cell.value.nodes, (v: any) => v.formatLink(cell.value.linkLbl), undefined);
+        Object.entries(grouped).forEach(([key, nodes]: any) => {
+          const isError   = /red|error|KO|5[0-9]{2}/i.test(key);
+          const isWarning = /4[0-9]{2}/i.test(key);
+          rows.push({
+            icon: isError ? 'error' : isWarning ? 'warning' : 'check_circle',
+            label: key,
+            value: nodes.length > 1 ? `×${nodes.length}` : '',
+            color: isError ? '#ef4444' : isWarning ? '#f59e0b' : '#22c55e'
+          });
+        });
+      } else {
+        rows.push({ icon: 'timeline', label: String(cell.value ?? ''), value: '', color: '#3b82f6' });
+      }
+      return { type: 'Lien', rows };
+    }
+
+    if (cell.isVertex() && cell.value?.node) {
+      const node = cell.value.node;
+      const obj  = node.nodeObject;
+      const rows: any[] = [];
+      if (obj?.appName)   rows.push({ icon: 'label',         label: 'Application', value: obj.appName,             color: '#3b82f6' });
+      if (obj?.host)      rows.push({ icon: 'dns',           label: 'Hôte',        value: obj.host,                color: '#6366f1' });
+      if (obj?.port)      rows.push({ icon: 'settings_ethernet', label: 'Port',    value: String(obj.port),        color: '#8b5cf6' });
+      if (obj?.protocol)  rows.push({ icon: 'lock',          label: 'Protocole',   value: obj.protocol,            color: '#0ea5e9' });
+      if (obj?.type)      rows.push({ icon: 'category',      label: 'Type',        value: obj.type,                color: '#f59e0b' });
+      if (obj?.os)        rows.push({ icon: 'computer',      label: 'OS',          value: obj.os,                  color: '#64748b' });
+      if (obj?.re)        rows.push({ icon: 'layers',        label: 'Env',         value: obj.re,                  color: '#10b981' });
+      if (obj?.restRequests?.length)     rows.push({ icon: 'api',          label: 'REST',   value: `${obj.restRequests.length} appel(s)`,     color: '#6366f1' });
+      if (obj?.databaseRequests?.length) rows.push({ icon: 'storage',      label: 'DB',     value: `${obj.databaseRequests.length} requête(s)`, color: '#059669' });
+      if (obj?.ftpRequests?.length)      rows.push({ icon: 'folder',       label: 'FTP',    value: `${obj.ftpRequests.length} transfert(s)`,  color: '#0e7490' });
+      if (obj?.mailRequests?.length)     rows.push({ icon: 'email',        label: 'SMTP',   value: `${obj.mailRequests.length} mail(s)`,      color: '#f59e0b' });
+      if (obj?.ldapRequests?.length)     rows.push({ icon: 'badge',        label: 'LDAP',   value: `${obj.ldapRequests.length} requête(s)`,   color: '#7c3aed' });
+      if (!rows.length)   rows.push({ icon: 'info', label: node.formatNode?.(this.serverLbl) ?? '', value: '', color: '#94a3b8' });
+      return { type: 'Nœud', rows };
+    }
+
+      return { type: '', rows: [] };
   }
 
   dr(tg: TreeGraph, data: any, serverlbl: Label, linklbl: Label) {
@@ -271,15 +350,142 @@ export class TreeView implements OnDestroy {
     return ('id' in obj ? 'REST' : 'GHOST')
   }
 
+  // ── Évolution 3 : Recherche de nœud ────────────────────────────────────────
+  toggleSearch() {
+    this.searchVisible = !this.searchVisible;
+    if (this.searchVisible) {
+      setTimeout(() => this.searchInputRef?.nativeElement?.focus(), 320);
+    } else {
+      this.clearSearch();
+    }
+  }
+
+  onSearch() {
+    if (!this.tree || !this.searchQuery.trim()) {
+      this.clearSearch();
+      return;
+    }
+    const q = this.searchQuery.toLowerCase();
+    const vertices = this.tree.graph.getChildVertices(this.tree._parent);
+    this.searchResults = vertices.filter((v: any) => {
+      const label = this.tree.graph.getLabel(v);
+      return label && String(label).toLowerCase().includes(q);
+    });
+    this.currentSearchIndex = 0;
+    this.focusSearchResult();
+  }
+
+  navigateSearch(direction: 1 | -1) {
+    if (!this.searchResults.length) return;
+    this.currentSearchIndex = (this.currentSearchIndex + direction + this.searchResults.length) % this.searchResults.length;
+    this.focusSearchResult();
+  }
+
+  focusSearchResult() {
+    if (!this.searchResults.length) return;
+    const cell = this.searchResults[this.currentSearchIndex];
+    this.tree.graph.setSelectionCell(cell);
+    this.tree.graph.scrollCellToVisible(cell, true);
+  }
+
+  clearSearch() {
+    this.searchQuery = '';
+    this.searchResults = [];
+    this.currentSearchIndex = 0;
+    this.tree?.graph.clearSelection();
+  }
+
+  // ── Évolution 5 : Export PNG ─────────────────────────────────────────────
+  async exportPNG() {
+    const container = this.graphContainer.nativeElement as HTMLElement;
+    const svgEl = container.querySelector('svg');
+    if (!svgEl) return;
+
+    // 1. Clone the SVG
+    const svgClone = svgEl.cloneNode(true) as SVGElement;
+    const bbox = svgEl.getBoundingClientRect();
+    svgClone.setAttribute('width',  String(bbox.width));
+    svgClone.setAttribute('height', String(bbox.height));
+
+    // 2. Inline all <image> href/xlink:href as base64 so canvas can render them
+    const imageEls = Array.from(svgClone.querySelectorAll('image'));
+    await Promise.all(imageEls.map(async (img) => {
+      const href = img.getAttribute('href') || img.getAttribute('xlink:href') || '';
+      if (!href || href.startsWith('data:')) return;
+      try {
+        const response = await fetch(href);
+        const blob     = await response.blob();
+        const b64      = await new Promise<string>((resolve, reject) => {
+          const reader  = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+        img.setAttribute('href', b64);
+        img.removeAttribute('xlink:href');
+      } catch { /* skip unresolvable refs */ }
+    }));
+
+    // 3. Serialize & render to canvas
+    const svgStr = new XMLSerializer().serializeToString(svgClone);
+    const canvas  = document.createElement('canvas');
+    const scale   = window.devicePixelRatio || 1;
+    canvas.width  = bbox.width  * scale;
+    canvas.height = bbox.height * scale;
+    const ctx = canvas.getContext('2d')!;
+    ctx.scale(scale, scale);
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(0, 0, bbox.width, bbox.height);
+
+    const img = new Image();
+    const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      const a = document.createElement('a');
+      a.download = `graph-${this.id}.png`;
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+    };
+    img.onerror = () => URL.revokeObjectURL(url);
+    img.src = url;
+  }
+
+  toggleMinimap() {
+    this.minimapVisible = !this.minimapVisible;
+    localStorage.setItem('tree_minimap', JSON.stringify(this.minimapVisible));
+  }
+
+  toggleFullscreen() {
+    const el = document.getElementById('fixed-width-container');
+    if (!this.isFullscreen) {
+      el?.requestFullscreen().then(() => {
+        this.isFullscreen = true;
+        setTimeout(() => this.tree?.resizeAndCenter(), 200);
+      });
+    } else {
+      document.exitFullscreen().then(() => {
+        this.isFullscreen = false;
+        setTimeout(() => this.tree?.resizeAndCenter(), 200);
+      });
+    }
+  }
+
   ngAfterViewInit() {
     this._zone.runOutsideAngular(() => {
       this.resizeSubscription = fromEvent(window, 'resize').subscribe(() => {
         this._zone.run(() => {
-          if (this.tree) {
-            this.tree.resizeAndCenter()
-          }
-        })
+          if (this.tree) this.tree.resizeAndCenter();
+        });
+      });
 
+      fromEvent(document, 'fullscreenchange').subscribe(() => {
+        this._zone.run(() => {
+          this.isFullscreen = !!document.fullscreenElement;
+          setTimeout(() => this.tree?.resizeAndCenter(), 200);
+        });
       });
     });
   }

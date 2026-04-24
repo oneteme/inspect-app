@@ -3,13 +3,12 @@
   <form [formGroup]="ViewForm" class="header-filter md-2">
       <mat-form-field class="no-subscript" appearance="outline">
         <mat-label>Infos Serveurs</mat-label>
-        <mat-select [formControl]="ViewForm.controls.nodeView" >
+        <mat-select [formControl]="ViewForm.controls.nodeView">
           <mat-option value="SERVER_IDENTITY">ID</mat-option>
           <mat-option value="OS_RE">Environnement</mat-option>
           <mat-option value="IP_PORT">Adresse</mat-option>
         </mat-select>
       </mat-form-field>
-
       <mat-form-field class="no-subscript" appearance="outline">
         <mat-label>Infos Appels</mat-label>
         <mat-select [formControl]="ViewForm.controls.linkView">
@@ -20,19 +19,105 @@
           <mat-option value="STATUS_EXCEPTION">Statut</mat-option>
         </mat-select>
       </mat-form-field>
-    </form>
+  </form>
 </header-page>
 
-
-<div id="container" >
+<div id="container">
   <div id="fixed-width-container">
-    <div [hidden]="!isLoading" style="height: 100%"><div class="loading">Loading...</div></div>
-    <button class="zoom" (click)="tree.graph.zoomIn();">+</button>
-    <button class="zoom" (click)="tree.graph.zoomOut();" style="left:30px">-</button>
-    <button class="zoom" (click)="tree.resizeAndCenter()" style="left:60px">reset</button>
-    <div #outlineContainer id="outlineContainer"
-      style="z-index: 1; position: absolute; overflow: hidden; top: 0px; right: 0px; width: 160px; height: 120px;border-style: solid; border-color: lightgray; touch-action: none;">
+
+    <!-- Loading overlay -->
+    <div class="loading-overlay" *ngIf="isLoading">
+      <mat-spinner diameter="36"></mat-spinner>
+      <span class="loading-text">Chargement du graph…</span>
     </div>
-    <div #graphContainer id="graphContainer" style="background: url(assets/mxgraph/grid.gif);"></div>
+
+    <!-- Zoom controls -->
+    <div class="zoom-controls">
+      <button mat-icon-button class="zoom-btn" matTooltip="Zoom avant" (click)="tree.graph.zoomIn()">
+        <mat-icon>add</mat-icon>
+      </button>
+      <div class="zoom-divider"></div>
+      <button mat-icon-button class="zoom-btn" matTooltip="Zoom arrière" (click)="tree.graph.zoomOut()">
+        <mat-icon>remove</mat-icon>
+      </button>
+      <div class="zoom-divider"></div>
+      <button mat-icon-button class="zoom-btn" matTooltip="Réinitialiser la vue" (click)="tree.resizeAndCenter()">
+        <mat-icon>center_focus_strong</mat-icon>
+      </button>
+      <div class="zoom-divider"></div>
+      <button mat-icon-button class="zoom-btn" [matTooltip]="minimapVisible ? 'Masquer la minimap' : 'Afficher la minimap'"
+              [class.active]="minimapVisible" (click)="toggleMinimap()">
+        <mat-icon>map</mat-icon>
+      </button>
+      <div class="zoom-divider"></div>
+      <button mat-icon-button class="zoom-btn" [matTooltip]="isFullscreen ? 'Quitter le plein écran' : 'Plein écran'" (click)="toggleFullscreen()">
+        <mat-icon>{{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+      </button>
+      <div class="zoom-divider"></div>
+      <button mat-icon-button class="zoom-btn" matTooltip="Exporter en PNG" (click)="exportPNG()">
+        <mat-icon>download</mat-icon>
+      </button>
+      <div class="zoom-divider"></div>
+      <button mat-icon-button class="zoom-btn" matTooltip="Rechercher un serveur"
+              [class.active]="searchVisible" (click)="toggleSearch()">
+        <mat-icon>search</mat-icon>
+      </button>
+    </div>
+
+    <!-- Search panel — glisse depuis la card zoom -->
+    <div class="search-panel" [class.visible]="searchVisible">
+      <mat-icon class="search-icon">search</mat-icon>
+      <input #searchInput class="search-input"
+             type="text"
+             placeholder="Rechercher un serveur…"
+             [(ngModel)]="searchQuery"
+             (input)="onSearch()"
+             (keydown.enter)="navigateSearch(1)"
+             (keydown.shift.enter)="navigateSearch(-1)"/>
+      <span class="search-counter" *ngIf="searchQuery">
+        {{ searchResults.length ? (currentSearchIndex + 1) + ' / ' + searchResults.length : '0' }}
+      </span>
+      <button mat-icon-button class="search-nav-btn" *ngIf="searchResults.length > 1"
+              matTooltip="Précédent" (click)="navigateSearch(-1)">
+        <mat-icon>keyboard_arrow_up</mat-icon>
+      </button>
+      <button mat-icon-button class="search-nav-btn" *ngIf="searchResults.length > 1"
+              matTooltip="Suivant" (click)="navigateSearch(1)">
+        <mat-icon>keyboard_arrow_down</mat-icon>
+      </button>
+    </div>
+
+    <!-- Minimap -->
+    <div #outlineContainer id="outlineContainer"
+         [class.hidden]="!minimapVisible"
+         [class.shifted]="detailPanelVisible"></div>
+
+    <!-- Panel de détail -->
+    <div class="detail-panel" [class.visible]="detailPanelVisible" *ngIf="selectedCell">
+      <div class="detail-header">
+        <div class="detail-title">
+          <mat-icon class="detail-type-icon">{{ getCellDetails().type === 'Nœud' ? 'device_hub' : 'timeline' }}</mat-icon>
+          <span>{{ getCellDetails().type }}</span>
+        </div>
+        <button mat-icon-button class="detail-close" (click)="closeDetailPanel()">
+          <mat-icon>close</mat-icon>
+        </button>
+      </div>
+      <div class="detail-body">
+        <div class="detail-row" *ngFor="let row of getCellDetails().rows">
+          <mat-icon class="detail-row-icon" [style.color]="row.color">{{ row.icon }}</mat-icon>
+          <span class="detail-row-label">{{ row.label }}</span>
+          <span class="detail-row-value">{{ row.value }}</span>
+        </div>
+        <div class="detail-empty" *ngIf="!getCellDetails().rows.length">
+          <mat-icon>info_outline</mat-icon>
+          <span>Aucune information disponible</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Graph canvas -->
+    <div #graphContainer id="graphContainer"></div>
+
   </div>
 </div>
