@@ -17,16 +17,13 @@ import {SearchRestView} from "./views/search/rest/search-rest.view";
 import {DetailSessionRestView} from "./views/detail/session/rest/detail-session-rest.view";
 import {SearchMainView} from "./views/search/main/search-main.view";
 import {DetailSessionMainView} from "./views/detail/session/main/detail-session-main.view";
-import {StatisticUserView} from "./views/statistic/user/statistic-user.view";
 import {DashboardComponent} from "./views/dashboard/dashboard.component";
 import {EnvRouter} from "./service/router.service";
 import {DurationPipe} from "./shared/pipe/duration.pipe";
-import {StatisticClientView} from "./views/statistic/view/statistic-client.view";
 import {ArchitectureView} from "./views/architecture/architecture.view";
 import {NumberFormatterPipe} from './shared/pipe/number.pipe';
 import {TreeView} from './views/tree/tree.view';
 import {SizePipe} from "./shared/pipe/size.pipe";
-import {StatisticServerView} from "./views/statistic/server/statistic-server.view";
 import {DeploimentComponent} from './views/deploiment/deploiment.component';
 import {Interceptor} from "./shared/interceptor/interceptor";
 import {AnalyticView} from "./views/analytic/analytic.view";
@@ -128,33 +125,6 @@ const routes: Route[] = [
           },
           {path: '**', pathMatch: 'full', redirectTo: `/main/:type_main`}
         ]
-      },
-      {path: '**', pathMatch: 'full', redirectTo: `/session/rest`}
-    ]
-  },
-  {
-    path: 'dashboard',
-    children: [
-      {
-        path: 'server/:server_name',
-        component: StatisticServerView,
-        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          return `Dashboard > ${route.paramMap.get('server_name')}`;
-        }
-      },
-      {
-        path: 'user/:user_name',
-        component: StatisticUserView,
-        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          return `Dashboard > ${route.paramMap.get('user_name')}`;
-        }
-      },
-      {
-        path: 'client/:client_name',
-        component: StatisticClientView,
-        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          return `Dashboard > ${route.paramMap.get('client_name')}`;
-        }
       },
       {path: '**', pathMatch: 'full', redirectTo: `/session/rest`}
     ]

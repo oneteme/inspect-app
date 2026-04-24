@@ -74,7 +74,6 @@ export class TreeView implements OnDestroy {
     ]).subscribe({
       next: ([params, data, queryParams]) => {
         this.id = params['id_session'];
-        console.log("id session", queryParams.env)
         this.env = queryParams.env || app.defaultEnv;
         this.serverLbl = Label[queryParams.server_lbl] || Label.SERVER_IDENTITY
         this.linkLbl = Label[queryParams.link_lbl] || Label.ELAPSED_LATENSE

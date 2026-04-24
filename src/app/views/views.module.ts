@@ -5,7 +5,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {SharedModule} from '../shared/shared.module';
-import {ChartComponent} from "@oneteme/jquery-apexcharts";
+import {ChartComponent} from "@oneteme/jquery-echarts";
 import {SearchRestView} from "./search/rest/search-rest.view";
 import {SearchMainView} from "./search/main/search-main.view";
 import {DetailSessionRestView} from "./detail/session/rest/detail-session-rest.view";
@@ -20,30 +20,15 @@ import {DetailFtpTableComponent} from "./detail/session/_component/ftp-table/det
 import {DetailSmtpTableComponent} from "./detail/session/_component/smtp-table/detail-smtp-table.component";
 import {DetailLdapTableComponent} from "./detail/session/_component/ldap-table/detail-ldap-table.component";
 import {DetailSessionComponent} from "./detail/session/_component/detail-session.component";
-import {StatisticUserView} from "./statistic/user/statistic-user.view";
 import {TreeView} from "./tree/tree.view";
-import {
-  StatisticDependentsTableComponent
-} from "./statistic/_component/dependents-table/statistic-dependents-table.component";
 import {DashboardComponent} from "./dashboard/dashboard.component";
 import {
   ProtocolExceptionComponent
 } from './dashboard/components/protocol-exception-modal/protocol-exception-modal.component';
-import {StatisticClientView} from "./statistic/view/statistic-client.view";
 import {ArchitectureView} from "./architecture/architecture.view";
 import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
 import {NumberFormatterPipe} from '../shared/pipe/number.pipe';
 import {DeploimentComponent} from './deploiment/deploiment.component';
-import {StatisticServerView} from "./statistic/server/statistic-server.view";
-import {RestTabComponent} from "./statistic/server/_component/rest-tab/rest-tab.component";
-import {BatchTabComponent} from "./statistic/server/_component/batch-tab/batch-tab.component";
-import {DependencyTableComponent} from "./statistic/server/_component/dependency-table/dependency-table.component";
-import {EvolUserCardComponent} from "./statistic/server/_component/evol-user-card/evol-user-card.component";
-import {PerformanceCardComponent} from "./statistic/_component/performance-card/performance-card.component";
-import {DependencyCardComponent} from "./statistic/server/_component/dependency-card/dependency-card.component";
-import {
-  RepartitionTypeCardComponent as RestRepartitionTypeCardComponent
-} from "./statistic/_component/repartition-type-card/repartition-type-card.component";
 import {SearchRequestView} from "./search/request/search-request.view";
 import {AnalyticView} from "./analytic/analytic.view";
 import {DetailTimelineComponent} from "./detail/session/_component/timeline/detail-timeline.component";
@@ -111,21 +96,10 @@ import {BatchComponent} from "./kpi/session/batch/batch.component";
     DetailLocalTableComponent,
     DetailTimelineComponent,
     DetailSessionComponent,
-    StatisticUserView,
-    StatisticDependentsTableComponent,
-    StatisticClientView,
     DashboardComponent,
     ProtocolExceptionComponent,
     ArchitectureView,
     TreeView,
-    StatisticServerView,
-    RestTabComponent,
-    BatchTabComponent,
-    DependencyTableComponent,
-    RestRepartitionTypeCardComponent,
-    EvolUserCardComponent,
-    PerformanceCardComponent,
-    DependencyCardComponent,
     NumberFormatterPipe,
     DeploimentComponent,
     AnalyticView,
