@@ -46,6 +46,7 @@ export class TreeView implements OnDestroy {
   linkLbl: Label;
   LabelIsLoaded: { [key: string]: boolean } = { "METHOD_RESOURCE": false, "STATUS_EXCEPTION": false, "SIZE_COMPRESSION": false }
   minimapVisible: boolean = JSON.parse(localStorage.getItem('tree_minimap') ?? 'true');
+  legendVisible: boolean = false;
   isFullscreen: boolean = false;
   searchQuery: string = '';
   searchResults: any[] = [];
@@ -55,6 +56,7 @@ export class TreeView implements OnDestroy {
   // Évolution 6 — Detail panel
   selectedCell: any = null;
   detailPanelVisible: boolean = false;
+  private _clickedCell: any = null;
 
   @ViewChild('graphContainer') graphContainer: ElementRef;
   @ViewChild('outlineContainer') outlineContainer: ElementRef;
@@ -128,22 +130,92 @@ export class TreeView implements OnDestroy {
   }
 
   registerCellClickListener() {
-    this.tree.graph.addListener('click', (_sender: any, evt: any) => {
-      this._zone.run(() => {
-        const cell = evt.getProperty('cell');
-        if (cell) {
-          this.selectedCell = cell;
-          this.detailPanelVisible = true;
-        } else {
-          this.closeDetailPanel();
+    const graph = this.tree._graph;
+    let mouseDownX = 0;
+    let mouseDownY = 0;
+    graph.addMouseListener({
+      mouseDown: (_s: any, me: any) => {
+        mouseDownX = me.getX();
+        mouseDownY = me.getY();
+      },
+      mouseMove: (_s: any, me: any) => {
+        const cell = me.getCell();
+        this._zone.run(() => {
+          if (cell) {
+            this.selectedCell = cell;
+            this.detailPanelVisible = true;
+          } else if (!this._clickedCell) {
+            this.detailPanelVisible = false;
+            this.selectedCell = null;
+          } else {
+            // restore clicked cell when hovering empty space
+            this.selectedCell = this._clickedCell;
+            this.detailPanelVisible = true;
+          }
+        });
+      },
+      mouseUp: (_s: any, me: any) => {
+        const dx = Math.abs(me.getX() - mouseDownX);
+        const dy = Math.abs(me.getY() - mouseDownY);
+        // Only treat as click if mouse didn't move much (not a pan)
+        if (dx < 5 && dy < 5) {
+          const cell = me.getCell();
+          this._zone.run(() => {
+            if (cell) {
+              this._clickedCell = cell;
+              this.selectedCell = cell;
+              this.detailPanelVisible = true;
+              this.tree.highlightCell(cell);
+            } else {
+              this._clickedCell = null;
+              this.tree.clearHighlight();
+              this.closeDetailPanel();
+            }
+          });
         }
-      });
+      }
     });
   }
 
   closeDetailPanel() {
     this.detailPanelVisible = false;
     this.selectedCell = null;
+    this._clickedCell = null;
+  }
+
+  private resetSelection() {
+    this._clickedCell = null;
+    this.selectedCell = null;
+    this.detailPanelVisible = false;
+    this.tree?.clearHighlight();
+  }
+
+  canNavigateToDetail(): boolean {
+    const v = this.selectedCell?.value;
+    if (!v || typeof v !== 'object') return false;
+    if (v.node?.nodeObject?.id) return true;          // session REST/Main
+    if (v.requestType && v.node?.nodeObject?.id) return true;  // requête feuille
+    return false;
+  }
+
+  navigateToDetail(event: MouseEvent) {
+    const v = this.selectedCell?.value;
+    if (!v || typeof v !== 'object') return;
+    const obj = v.node?.nodeObject;
+    if (!obj?.id) return;
+
+    let commands: any[];
+    if (v.requestType) {
+      // nœud feuille : JDBC, FTP, SMTP, LDAP
+      commands = ['/request', v.requestType, obj.id];
+    } else if ('protocol' in obj) {
+      // session REST
+      commands = ['/session', 'rest', obj.id];
+    } else {
+      // session Main (batch / view / ...)
+      commands = ['/session', 'main', obj.type?.toLowerCase(), obj.id];
+    }
+    this._router.navigateOnClick(event, commands, { queryParams: { env: this.env } });
   }
 
   getCellDetails(): { type: string; rows: { icon: string; label: string; value: string; color?: string }[] } {
@@ -168,6 +240,49 @@ export class TreeView implements OnDestroy {
         rows.push({ icon: 'timeline', label: String(cell.value ?? ''), value: '', color: '#3b82f6' });
       }
       return { type: 'Lien', rows };
+    }
+
+    if (cell.isVertex() && cell.value?.requestType && cell.value?.node) {
+      const obj  = cell.value.node.nodeObject;
+      const rows: any[] = [];
+      const elapsed = obj?.end != null && obj?.start != null ? (obj.end - obj.start).toFixed(3) + ' s' : null;
+      const status  = obj?.end == null ? 'En cours' : (obj?.failed ? 'Échec' : 'Succès');
+      const statusColor = obj?.end == null ? '#f59e0b' : (obj?.failed ? '#ef4444' : '#22c55e');
+      const statusIcon  = obj?.end == null ? 'schedule' : (obj?.failed ? 'error' : 'check_circle');
+
+      // Champs communs
+      if (obj?.host)     rows.push({ icon: 'dns',      label: 'Hôte',     value: obj.port && obj.port !== -1 ? `${obj.host}:${obj.port}` : obj.host, color: '#6366f1' });
+      if (obj?.protocol) rows.push({ icon: 'lock',     label: 'Protocole',value: obj.protocol,   color: '#0ea5e9' });
+      if (elapsed)       rows.push({ icon: 'timer',    label: 'Durée',    value: elapsed,        color: '#8b5cf6' });
+                         rows.push({ icon: statusIcon, label: 'Statut',   value: status,         color: statusColor });
+      if (obj?.user)     rows.push({ icon: 'person',   label: 'Utilisateur', value: obj.user,    color: '#64748b' });
+
+      // Spécifique JDBC
+      if (cell.value.requestType === 'jdbc') {
+        if (obj?.name)        rows.push({ icon: 'storage',    label: 'Base',    value: obj.schema ? `${obj.name} / ${obj.schema}` : obj.name, color: '#059669' });
+        if (obj?.productName) rows.push({ icon: 'inventory',  label: 'Produit', value: obj.productName + (obj.productVersion ? ' ' + obj.productVersion : ''), color: '#10b981' });
+        if (obj?.command)     rows.push({ icon: 'code',       label: 'Commande',value: obj.command.length > 40 ? obj.command.substring(0, 40) + '…' : obj.command, color: '#6366f1' });
+        if (obj?.count != null) rows.push({ icon: 'format_list_numbered', label: 'Requêtes SQL', value: String(obj.count), color: '#0284c7' });
+      }
+      // Spécifique FTP
+      if (cell.value.requestType === 'ftp') {
+        if (obj?.serverVersion) rows.push({ icon: 'computer',   label: 'Serveur', value: obj.serverVersion, color: '#0e7490' });
+        if (obj?.clientVersion) rows.push({ icon: 'laptop',     label: 'Client',  value: obj.clientVersion, color: '#0891b2' });
+        if (obj?.commands?.length) rows.push({ icon: 'terminal', label: 'Commandes', value: `${obj.commands.length} cmd(s)`, color: '#0e7490' });
+      }
+      // Spécifique SMTP
+      if (cell.value.requestType === 'smtp') {
+        if (obj?.mails?.length) rows.push({ icon: 'email',  label: 'Mails',   value: `${obj.mails.length} destinataire(s)`, color: '#f59e0b' });
+        if (obj?.count != null) rows.push({ icon: 'format_list_numbered', label: 'Messages', value: String(obj.count), color: '#d97706' });
+      }
+      // Spécifique LDAP
+      if (cell.value.requestType === 'ldap') {
+        if (obj?.commands?.length) rows.push({ icon: 'manage_search', label: 'Requêtes', value: `${obj.commands.length} req(s)`, color: '#7c3aed' });
+      }
+      // Exception
+      if (obj?.exception) rows.push({ icon: 'bug_report', label: obj.exception.type ?? 'Exception', value: obj.exception.message ?? '', color: '#ef4444' });
+
+      return { type: cell.value.requestType.toUpperCase(), rows };
     }
 
     if (cell.isVertex() && cell.value?.node) {
@@ -240,14 +355,14 @@ export class TreeView implements OnDestroy {
         if (v[1].length > 1) {
           b = this.draw(treeGraph, this.mergeRestRequests(v[0], v[1]), serverlbl, linklbl);
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<RestRequestNode>(v[1], v => { return v.nodeObject.status >= 500 || v.nodeObject.status == 0 }) ? 'ERROR' : 
-                                 this.checkSome<RestRequestNode>(v[1], v => { return v.nodeObject.status >= 400 && v.nodeObject.status < 500 }) ? 'CLIENT_ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.getGroupLinkStyle(v[1])] + "strokeWidth=1.5;"
         }
         else {
           let restRequestNode = v[1][0];
           b = this.draw(treeGraph, restRequestNode.nodeObject.remoteTrace ? restRequestNode.nodeObject.remoteTrace : <RestSessionTree>{ appName: v[1][0].nodeObject.host }, serverlbl, linklbl)
           label = restRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[restRequestNode.getLinkStyle()];
+
         }
 
         treeGraph.insertLink(label, a, b, linkStyle);
@@ -259,10 +374,10 @@ export class TreeView implements OnDestroy {
       let res = this.groupBy<DatabaseRequestTree, JdbcRequestNode>(server.databaseRequests, v => v.name, JdbcRequestNode)
       Object.entries(res).forEach((v: any[]) => {
         let jdbcRequestNode = v[1][0];
-        b = treeGraph.insertServer(jdbcRequestNode.formatNode(serverlbl), "JDBC"); // demon server
+        b = treeGraph.insertServer(v[1].length === 1 ? { serverlbl, node: jdbcRequestNode, requestType: 'jdbc' } : jdbcRequestNode.formatNode(serverlbl), "JDBC"); // demon server
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<JdbcRequestNode>(v[1], v => { return v.nodeObject.failed }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.getGroupFailedStyle(v[1])] + "strokeWidth=1.5;"
         } else {
           label = jdbcRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[jdbcRequestNode.getLinkStyle()];
@@ -276,10 +391,10 @@ export class TreeView implements OnDestroy {
       let res = this.groupBy<FtpRequestTree, FtpRequestNode>(server.ftpRequests, v => v.host, FtpRequestNode)
       Object.entries(res).forEach((v: any[]) => {
         let ftpRequestNode = v[1][0];
-        b = treeGraph.insertServer(ftpRequestNode.formatNode(serverlbl), "FTP"); // demon server
+        b = treeGraph.insertServer(v[1].length === 1 ? { serverlbl, node: ftpRequestNode, requestType: 'ftp' } : ftpRequestNode.formatNode(serverlbl), "FTP"); // demon server
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<FtpRequestNode>(v[1], v => { return v.nodeObject.failed }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.getGroupFailedStyle(v[1])] + "strokeWidth=1.5;"
         } else {
           label = ftpRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[ftpRequestNode.getLinkStyle()];
@@ -293,10 +408,10 @@ export class TreeView implements OnDestroy {
       let res = this.groupBy<MailRequestTree, MailRequestNode>(server.mailRequests, v => v.host, MailRequestNode)
       Object.entries(res).forEach((v: any[]) => {
         let mailRequestNode = v[1][0];
-        b = treeGraph.insertServer(mailRequestNode.formatNode(serverlbl), "SMTP"); // demon server
+        b = treeGraph.insertServer(v[1].length === 1 ? { serverlbl, node: mailRequestNode, requestType: 'smtp' } : mailRequestNode.formatNode(serverlbl), "SMTP"); // demon server
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<MailRequestNode>(v[1], v => { return v.nodeObject.failed }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.getGroupFailedStyle(v[1])] + "strokeWidth=1.5;"
         } else {
           label = mailRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[mailRequestNode.getLinkStyle()];
@@ -310,10 +425,10 @@ export class TreeView implements OnDestroy {
       let res = this.groupBy<DirectoryRequestTree, LdapRequestNode>(server.ldapRequests, v => v.host, LdapRequestNode)
       Object.entries(res).forEach((v: any[]) => {
         let ldapRequestNode = v[1][0];
-        b = treeGraph.insertServer(ldapRequestNode.formatNode(serverlbl), "LDAP"); // demon server
+        b = treeGraph.insertServer(v[1].length === 1 ? { serverlbl, node: ldapRequestNode, requestType: 'ldap' } : ldapRequestNode.formatNode(serverlbl), "LDAP"); // demon server
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<MailRequestNode>(v[1], v => { return v.nodeObject.failed }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.getGroupFailedStyle(v[1])] + "strokeWidth=1.5;"
         } else {
           label = ldapRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[ldapRequestNode.getLinkStyle()];
@@ -337,6 +452,18 @@ export class TreeView implements OnDestroy {
       type ? acc[id].push(new type(item)) : acc[id].push(item);
       return acc;
     }, {})
+  }
+
+  getGroupLinkStyle(nodes: RestRequestNode[]): string {
+    if (nodes.some(n => n.nodeObject.end == null))                                             return 'ONGOING';
+    if (nodes.some(n => n.nodeObject.status >= 500 || n.nodeObject.status === 0))              return 'ERROR';
+    if (nodes.some(n => n.nodeObject.status >= 400 && n.nodeObject.status < 500))             return 'CLIENT_ERROR';
+    return 'SUCCES';
+  }
+
+  getGroupFailedStyle(nodes: { nodeObject: { failed: boolean; end: any } }[]): string {
+    if (nodes.some(n => n.nodeObject.end == null)) return 'ONGOING';
+    return nodes.some(n => n.nodeObject.failed) ? 'ERROR' : 'SUCCES';
   }
 
   checkSome<T>(arr: T[], fn: (o: T) => any) {
@@ -458,6 +585,10 @@ export class TreeView implements OnDestroy {
     localStorage.setItem('tree_minimap', JSON.stringify(this.minimapVisible));
   }
 
+  toggleLegend() {
+    this.legendVisible = !this.legendVisible;
+  }
+
   toggleFullscreen() {
     const el = document.getElementById('fixed-width-container');
     if (!this.isFullscreen) {
@@ -494,15 +625,18 @@ export class TreeView implements OnDestroy {
     if (this.resizeSubscription) {
       this.resizeSubscription.unsubscribe();
     }
+    this.tree?.disconnectObserver();
     this.subscriptions.forEach(s => s.unsubscribe());
   }
 
 
   viewByServerLbl(serverLbl: Label) {
+    this.resetSelection();
     this.tree.clearCells();
     this.tree.draw(() => this.dr(this.tree, this.TreeObj, this.serverLbl = serverLbl, this.linkLbl))
   }
   viewByLinklbl(linkLbl: Label) {
+    this.resetSelection();
     this.tree.clearCells();
     this.tree.draw(() => this.dr(this.tree, this.TreeObj, this.serverLbl, this.linkLbl = linkLbl))
   }
@@ -519,6 +653,7 @@ export class TreeView implements OnDestroy {
     this.subscriptions.push(forkJoin(
       reqOb
     ).pipe(finalize(() => {
+      this.resetSelection();
       this.tree.clearCells();
       this.LabelIsLoaded['METHOD_RESOURCE'] = true;
       this.tree.draw(() => this.dr(this.tree, this.TreeObj, this.serverLbl, this.linkLbl = Label.METHOD_RESOURCE))
@@ -541,6 +676,7 @@ export class TreeView implements OnDestroy {
     this.subscriptions.push(forkJoin(
       reqOb
     ).pipe(finalize(() => {
+      this.resetSelection();
       this.tree.clearCells();
       this.LabelIsLoaded['SIZE_COMPRESSION'] = true;
       this.tree.draw(() => this.dr(this.tree, this.TreeObj, this.serverLbl, this.linkLbl = Label.SIZE_COMPRESSION))
@@ -566,6 +702,7 @@ export class TreeView implements OnDestroy {
     this.subscriptions.push(forkJoin(
       reqOb
     ).pipe(finalize(() => {
+      this.resetSelection();
       this.tree.clearCells();
       this.LabelIsLoaded['STATUS_EXCEPTION'] = true;
       this.tree.draw(() => this.dr(this.tree, this.TreeObj, this.serverLbl, this.linkLbl = Label.STATUS_EXCEPTION))
@@ -605,6 +742,32 @@ export class TreeView implements OnDestroy {
     fn(treeObj);
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

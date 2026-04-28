@@ -62,6 +62,11 @@
               [class.active]="searchVisible" (click)="toggleSearch()">
         <mat-icon>search</mat-icon>
       </button>
+      <div class="zoom-divider"></div>
+      <button mat-icon-button class="zoom-btn" [matTooltip]="legendVisible ? 'Masquer la légende' : 'Afficher la légende'"
+              [class.active]="legendVisible" (click)="toggleLegend()">
+        <mat-icon>info_outline</mat-icon>
+      </button>
     </div>
 
     <!-- Search panel — glisse depuis la card zoom -->
@@ -96,12 +101,18 @@
     <div class="detail-panel" [class.visible]="detailPanelVisible" *ngIf="selectedCell">
       <div class="detail-header">
         <div class="detail-title">
-          <mat-icon class="detail-type-icon">{{ getCellDetails().type === 'Nœud' ? 'device_hub' : 'timeline' }}</mat-icon>
+          <mat-icon class="detail-type-icon">{{ getCellDetails().type === 'Nœud' ? 'device_hub' : getCellDetails().type === 'Lien' ? 'timeline' : 'electrical_services' }}</mat-icon>
           <span>{{ getCellDetails().type }}</span>
         </div>
-        <button mat-icon-button class="detail-close" (click)="closeDetailPanel()">
-          <mat-icon>close</mat-icon>
-        </button>
+        <div class="detail-header-actions">
+          <button mat-icon-button class="detail-nav-icon-btn" *ngIf="canNavigateToDetail()"
+                  matTooltip="Voir le détail" (click)="navigateToDetail($event)">
+            <mat-icon>open_in_new</mat-icon>
+          </button>
+          <button mat-icon-button class="detail-close" (click)="closeDetailPanel()">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
       </div>
       <div class="detail-body">
         <div class="detail-row" *ngFor="let row of getCellDetails().rows">
@@ -114,6 +125,25 @@
           <span>Aucune information disponible</span>
         </div>
       </div>
+    </div>
+
+    <!-- Légende -->
+    <div class="legend-panel" [class.visible]="legendVisible">
+      <div class="legend-section-title">Liens</div>
+      <div class="legend-item"><span class="legend-line" style="background:#22c55e;"></span><span>Succès</span></div>
+      <div class="legend-item"><span class="legend-line" style="background:#f9ad4e;"></span><span>Erreur client</span></div>
+      <div class="legend-item"><span class="legend-line" style="background:#ef4444;"></span><span>Erreur serveur</span></div>
+      <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:#3b82f6;"></span><span>En cours</span></div>
+      <div class="legend-divider"></div>
+      <div class="legend-section-title">Nœuds</div>
+      <div class="legend-item"><img src="assets/mxgraph/microservice.drawio.svg" class="legend-icon"/><span>REST</span></div>
+      <div class="legend-item"><img src="assets/mxgraph/database.drawio.svg" class="legend-icon"/><span>JDBC</span></div>
+      <div class="legend-item"><img src="assets/mxgraph/ftp.drawio.svg" class="legend-icon"/><span>FTP</span></div>
+      <div class="legend-item"><img src="assets/mxgraph/smtp.drawio.svg" class="legend-icon"/><span>SMTP</span></div>
+      <div class="legend-item"><img src="assets/mxgraph/ldap.drawio.svg" class="legend-icon"/><span>LDAP</span></div>
+      <div class="legend-item"><img src="assets/mxgraph/view.drawio.svg" class="legend-icon"/><span>Vue</span></div>
+      <div class="legend-item"><img src="assets/mxgraph/batch.drawio.svg" class="legend-icon"/><span>Batch</span></div>
+      <div class="legend-item"><img src="assets/mxgraph/ghost.drawio.svg" class="legend-icon"/><span>Inconnu</span></div>
     </div>
 
     <!-- Graph canvas -->

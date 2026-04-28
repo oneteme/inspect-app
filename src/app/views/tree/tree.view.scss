@@ -265,6 +265,22 @@
     color: #3b82f6;
   }
 
+  .detail-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+  }
+
+  .detail-nav-icon-btn {
+    width: 24px !important;
+    height: 24px !important;
+    line-height: 24px !important;
+    padding: 0 !important;
+    color: #3b82f6;
+
+    mat-icon { font-size: 15px; width: 15px; height: 15px; }
+  }
+
   .detail-close {
     width: 24px !important;
     height: 24px !important;
@@ -280,7 +296,7 @@
 
 .detail-body {
   padding: 8px 0;
-  max-height: 320px;
+  max-height: 260px;
   overflow-y: auto;
 
   &::-webkit-scrollbar { width: 4px; }
@@ -333,6 +349,79 @@
   font-family: 'Inter', 'Segoe UI', sans-serif;
 
   mat-icon { font-size: 20px; width: 20px; height: 20px; }
+}
+
+// ── Légende ───────────────────────────────────────────
+.legend-panel {
+  position: absolute;
+  bottom: 12px;
+  left: 8px;
+  z-index: 2;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  min-width: 110px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(6px) scale(0.97);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+
+  &.visible {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.legend-section-title {
+  font-size: 10px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  margin-bottom: 4px;
+}
+
+.legend-divider {
+  height: 1px;
+  background: #e2e8f0;
+  margin: 6px 0;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: #475569;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  margin-bottom: 3px;
+
+  &:last-child { margin-bottom: 0; }
+}
+
+.legend-line {
+  display: inline-block;
+  width: 20px;
+  height: 2.5px;
+  border-radius: 2px;
+  flex-shrink: 0;
+}
+
+.legend-dashed {
+  background: transparent !important;
+  border-top: 2.5px dashed;
+  height: 0;
+}
+
+.legend-icon {
+  width: 16px;
+  height: 16px;
+  object-fit: contain;
+  flex-shrink: 0;
 }
 
 // ── Misc ──────────────────────────────────────────────
