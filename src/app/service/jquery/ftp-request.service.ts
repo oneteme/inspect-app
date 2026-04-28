@@ -155,7 +155,7 @@ export class FtpRequestService {
         return this.getFtp(args);
     }
 
-    getFilters(filter: ChartItem, filters: {env: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], method?: string[] }) {
+    getFilters(filter: ChartItem, filters: {env: string, start: Date, end: Date, hosts: string[] }) {
         let args: any = {
             'column': `${filter.jquery.value}.distinct:${filter.jquery.buildAlias()}`,
             'instance_env': 'instance.id',

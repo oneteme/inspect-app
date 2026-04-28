@@ -89,7 +89,7 @@ export class RestComponent implements OnInit {
       });
     } else if(event.eventType === 'filter') {
       if(actualFilter) {
-        this._httpRequestService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end}).subscribe({
+        this._httpRequestService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts}).subscribe({
           next: (res: any[]) => {
             slice.data = res;
           }

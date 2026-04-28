@@ -1,14 +1,8 @@
 import {Component, inject, Input, OnInit} from "@angular/core";
 import {QueryParams} from "../../../../model/conf.model";
-import {
-  ChartConfig,
-  FTP_PERFORMANCE_CHART_CONFIG,
-  LDAP_PERFORMANCE_CHART_CONFIG,
-  LDAP_STATUS_CHART_CONFIG, SMTP_PERFORMANCE_CHART_CONFIG, SMTP_STATUS_CHART_CONFIG
-} from "../../kpi.config";
+import {ChartConfig, SMTP_PERFORMANCE_CHART_CONFIG, SMTP_STATUS_CHART_CONFIG} from "../../kpi.config";
 import {finalize} from "rxjs";
 import {periodManagement2} from "../../../../shared/util";
-import {LdapRequestService} from "../../../../service/jquery/ldap-request.service";
 import {SmtpRequestService} from "../../../../service/jquery/smtp-request.service";
 
 @Component({
@@ -66,7 +60,7 @@ export class SmtpComponent implements OnInit {
       });
     } else if(event.eventType === 'filter') {
       if(actualFilter) {
-        this._smtpRequestService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end}).subscribe({
+        this._smtpRequestService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts}).subscribe({
           next: (res: any[]) => {
             slice.data = res;
           }
