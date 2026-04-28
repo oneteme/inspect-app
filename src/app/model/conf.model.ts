@@ -23,7 +23,6 @@ export class QueryParams {
         return this._env;
     }
 
-
     set appname(appname: string[]) {
        this._appname = appname;
     }

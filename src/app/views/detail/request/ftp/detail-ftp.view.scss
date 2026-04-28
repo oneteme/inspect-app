@@ -1,6 +1,10 @@
 .header-card {
   display: flex;
   flex-direction: row;
-  gap: 0.5em;
-  margin-bottom: 2em;
+  gap: 0.75em;
+  padding: 0.75em 0.75em 0.75em;
+}
+
+.tab-panel {
+  height: calc(100vh - 56px - 7px - 200px - 1.5em);
 }

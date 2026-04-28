@@ -1,98 +1,110 @@
-<div *ngIf="!isLoading && request && instance">
-  <div  class="header-card">
-    <mat-card style="width: 60vw; min-width: 60vw;"
-              [ngClass]="{'success': request.end && !request.failed,
-                          'fail': request.end && request.failed}">
-      <mat-card-title>
-        <div style="display: flex; gap: 0.5em; align-items: center; width: 85%">
-          <mat-icon class="material-symbols-outlined">{{ REQUEST_TYPE['jdbc'].icon }}</mat-icon>
-          <div class="ellipsis"
-               [matTooltip]="'jdbc:' + (request.productName ? request.productName.toLowerCase() : 'N/A') + '://' + (request.host ?
-                            request.host : 'N/A') + (request.port == -1 ? '' : ':' + request.port) + '/' + (request.name ? request.name :
-                            'N/A')">
-            {{ 'jdbc:' + (request.productName ? request.productName.toLowerCase() : 'N/A') + '://' + (request.host ?
-              request.host : 'N/A') + (request.port == -1 ? '' : ':' + request.port) + '/' + (request.name ? request.name :
-              'N/A')}}
-          </div>
-          <mat-spinner *ngIf="!request.end" [diameter]="18"></mat-spinner>
-        </div>
-          <div class="right">
-              <button mat-icon-button [matMenuTriggerFor]="menuHost">
-                  <mat-icon>more_vert</mat-icon>
-              </button>
-          </div>
-      </mat-card-title>
+<ng-container *ngIf="request && instance else noDataTemplate">
+  <div class="header-card">
 
-      <mat-card-content>
+    <!-- ═══ CARTE DATABASE ═══ -->
+    <div class="session-card"
+         [ngClass]="{'success': request.end && !request.failed,
+                     'fail':    request.end && request.failed,
+                     'in-progress': !request.end}">
+      <div class="session-card-inner">
+
+        <div class="session-header">
+          <div class="session-title-row">
+            <div class="session-icon-wrap">
+              <mat-icon class="material-symbols-outlined session-icon">{{ REQUEST_TYPE['jdbc'].icon }}</mat-icon>
+            </div>
+            <div class="session-title-content">
+              <div class="session-name-row">
+                <span *ngIf="request.end" class="status-pill"
+                      [ngClass]="{'success': !request.failed, 'fail': request.failed}">
+                  {{ request.failed ? 'Echec' : 'Réussi' }}
+                </span>
+                <span class="session-name ellipsis"
+                      [matTooltip]="'jdbc:' + (request.productName?.toLowerCase() || 'N/A') + '://' + (request.host || 'N/A') + (request.port == -1 ? '' : ':' + request.port) + '/' + (request.name || 'N/A')">
+                  {{ 'jdbc:' + (request.productName?.toLowerCase() || 'N/A') + '://' + (request.host || 'N/A') + (request.port == -1 ? '' : ':' + request.port) + '/' + (request.name || 'N/A') }}
+                </span>
+              </div>
+            </div>
+          </div>
+          <button mat-icon-button [matMenuTriggerFor]="menuHost" class="menu-btn">
+            <mat-icon>more_vert</mat-icon>
+          </button>
+        </div>
+
         <exception-display [exception]="exception"></exception-display>
-      </mat-card-content>
-      <mat-card-footer>
-        <label-icon icon="person" [iconOutlined]="true" [size]="20">
-          {{request.user || "N/A"}} le {{( request.start*1000 ) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }} en <b [matTooltip]="((request.end * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr')">{{{ start: request.start, end: request.end } | duration}}</b>
-        </label-icon>
-      </mat-card-footer>
-    </mat-card>
-    <app-server-card style="width: 40vw"
-                     (onClick)="navigateOnStatusIndicator($event)"
-                     [menu]="menuServer"
-                     [instance]="instance"></app-server-card>
+
+        <div class="session-footer">
+          <div class="footer-section">
+            <div class="meta-chip">
+              <mat-icon class="material-symbols-outlined meta-icon">person</mat-icon>
+              <span>{{ request.user || 'N/A' }}</span>
+            </div>
+            <div class="meta-chip">
+              <mat-icon class="material-symbols-outlined meta-icon">schedule</mat-icon>
+              <span>{{ (request.start * 1000) | date: 'dd/MM/yyyy HH:mm:ss.SSS' }}</span>
+            </div>
+          </div>
+          <div class="footer-section data-stats">
+            <div class="stat-item">
+              <mat-icon class="material-symbols-outlined stat-icon">timer</mat-icon>
+              <span class="stat-value stat-duration"
+                    [matTooltip]="((request.end * 1000) | date: 'dd/MM/yyyy HH:mm:ss.SSS')">
+                {{ { start: request.start, end: request.end } | duration }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ═══ CARTE SERVEUR ═══ -->
+    <app-server-card class="server-card-host" [menu]="menuServer" [instance]="instance"></app-server-card>
   </div>
+
   <div class="tabs-container">
-    <!-- Navigation verticale des onglets -->
     <div class="vertical-tabs">
       <div *ngFor="let tab of tabs; let i = index"
-           class="tab-button"
-           [class.active]="selectedTabIndex === i"
-           [class.hidden]="!tab.visible"
+           class="tab-button" [class.active]="selectedTabIndex === i" [class.hidden]="!tab.visible"
            (click)="selectedTabIndex = i">
         <mat-icon class="material-symbols-outlined">{{ tab.icon }}</mat-icon>
         <div class="tab-label-container">
           <span class="tab-label">{{ tab.label }}</span>
-          <mat-icon *ngIf="tab.hasError && tab.errorCount > 0"
-                    class="error-indicator material-symbols-outlined"
-                    [matTooltip]="tab.errorCount + ' erreur(s)'"
-                    matTooltipPosition="right">
-            error
-          </mat-icon>
+          <mat-icon *ngIf="tab.hasError && tab.errorCount > 0" class="error-indicator material-symbols-outlined"
+                    [matTooltip]="tab.errorCount + ' erreur(s)'" matTooltipPosition="right">error</mat-icon>
         </div>
         <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
       </div>
     </div>
-
     <div class="tab-content">
       <div *ngIf="tabs[selectedTabIndex]?.type === 'stage'" class="tab-panel">
-        <request-stage-table [requests]="stages">
-        </request-stage-table>
+        <stage-table [requests]="stages"></stage-table>
       </div>
       <div *ngIf="tabs[selectedTabIndex]?.type === 'timeline'" class="tab-panel">
-        <app-timeline [options]="options"
-                      [groups]="dataGroups"
-                      [items]="dataItems"
-                      [displayHeader]="false"
+        <app-timeline [options]="options" [groups]="dataGroups" [items]="dataItems"
                       (onTimelineCreated)="onTimelineCreate($event)">
         </app-timeline>
       </div>
     </div>
   </div>
-</div>
+</ng-container>
 
-<div *ngIf="!isLoading && !request && !instance" class="noDataMessage mat-elevation-z5" style="height: calc(100vh - 50px - 1em);">
-  <h2>
-    Aucun détail disponible ..
-  </h2>
-</div>
-<div *ngIf="isLoading"
-     style="width: 100%; height: calc(100vh - 50px - 1em); display: flex; flex-direction: row; align-items: center; justify-content: center; font-style: italic; gap: 0.5em">
-  <mat-progress-spinner diameter="30" mode="indeterminate"></mat-progress-spinner>
-  Chargement en cours...
-</div>
+<ng-template #noDataTemplate>
+  <app-empty-state
+    [loading]="isLoading"
+    [icon]="REQUEST_TYPE['jdbc'].icon">
+  </app-empty-state>
+</ng-template>
 
 <mat-menu #menuHost="matMenu">
-    <a mat-menu-item (click)="navigate($event,'parent')" [disabled]="sessionParent == null"><mat-icon class="material-symbols-outlined">move_up</mat-icon>Contexte de l'Appel</a>
-    <a mat-menu-item [routerLink]="['/dashboard/request', 'jdbc', request?.host]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Request</a>
+  <a mat-menu-item (click)="navigate($event,'parent')" [disabled]="sessionParent == null">
+    <mat-icon class="material-symbols-outlined">move_up</mat-icon>Contexte de l'Appel
+  </a>
+  <a mat-menu-item [routerLink]="['/kpi/request', 'jdbc']" [queryParams]="{env: instance?.env, host: request?.host}">
+    <mat-icon class="material-symbols-outlined">finance_mode</mat-icon>{{REQUEST_TYPE['jdbc'].title}}
+  </a>
+</mat-menu>
+<mat-menu #menuServer="matMenu">
+  <a mat-menu-item (click)="onClickPulse()"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
 </mat-menu>
 
-<mat-menu #menuServer="matMenu">
-  <a mat-menu-item [routerLink]="['/session', instance?.name, 'dump']" [queryParams]="{env: instance?.env, date: getDate(request?.start * 1000).toISOString()}"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
-  <a mat-menu-item [routerLink]="['/dashboard', 'server', instance?.name]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur</a>
-</mat-menu>
