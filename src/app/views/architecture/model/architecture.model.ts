@@ -40,6 +40,8 @@ export class ArchitectureTree {
 
             return label;
         };
+        graph.setPanning(true);
+        graph.panningHandler.useLeftButtonForPanning = true;
         let parent = graph.getDefaultParent(); // Returns defaultParent or mxGraphView.currentRoot or the first child child
         let layout = new mx.mxHierarchicalLayout(graph); //Constructs a new hierarchical layout algorithm.
         let tg = new ArchitectureTree(graph, parent, layout);
@@ -58,6 +60,11 @@ export class ArchitectureTree {
             this._graph.getModel().endUpdate();
             this.resizeAndCenter();
         }
+    }
+
+    setOutline(container: HTMLElement) {
+        const outline = new mx.mxOutline(this._graph, container);
+        (this as any)._outline = outline;
     }
 
     setVertexDefaultStyle() {
@@ -88,7 +95,7 @@ export class ArchitectureTree {
         let availableWidth = document.getElementById("fixed-width-container")?.offsetWidth;
         let availableHeight = document.getElementById("fixed-width-container")?.offsetHeight;
         this._graph.doResizeContainer(availableWidth, availableHeight);
-        this._graph.fit()
+        this._graph.fit(10);;
         let margin = 10;
         let max = 3;
         let bounds = this._graph.getGraphBounds();

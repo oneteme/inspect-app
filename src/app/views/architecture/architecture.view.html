@@ -18,10 +18,105 @@
     <span class="dashboard_component_title">Synthése</span>
     <div id="fixed-width-container">
         <div [hidden]="!syntheseIsLoading" style="height: 100%"><div class="loading">Loading...</div></div>
+
+        <!-- Zoom controls -->
+        <div class="zoom-controls">
+            <button mat-icon-button class="zoom-btn" matTooltip="Zoom avant" (click)="tree._graph.zoomIn()">
+                <mat-icon>add</mat-icon>
+            </button>
+            <div class="zoom-divider"></div>
+            <button mat-icon-button class="zoom-btn" matTooltip="Zoom arrière" (click)="tree._graph.zoomOut()">
+                <mat-icon>remove</mat-icon>
+            </button>
+            <div class="zoom-divider"></div>
+            <button mat-icon-button class="zoom-btn" matTooltip="Réinitialiser la vue" (click)="tree.resizeAndCenter()">
+                <mat-icon>center_focus_strong</mat-icon>
+            </button>
+            <div class="zoom-divider"></div>
+            <button mat-icon-button class="zoom-btn" [matTooltip]="minimapVisible ? 'Masquer la minimap' : 'Afficher la minimap'"
+                    [class.active]="minimapVisible" (click)="toggleMinimap()">
+                <mat-icon>map</mat-icon>
+            </button>
+            <div class="zoom-divider"></div>
+            <button mat-icon-button class="zoom-btn" [matTooltip]="isFullscreen ? 'Quitter le plein écran' : 'Plein écran'" (click)="toggleFullscreen()">
+                <mat-icon>{{ isFullscreen ? 'fullscreen_exit' : 'fullscreen' }}</mat-icon>
+            </button>
+            <div class="zoom-divider"></div>
+            <button mat-icon-button class="zoom-btn" matTooltip="Exporter en PNG" (click)="exportPNG()">
+                <mat-icon>download</mat-icon>
+            </button>
+            <div class="zoom-divider"></div>
+            <button mat-icon-button class="zoom-btn" matTooltip="Rechercher un serveur"
+                    [class.active]="searchVisible" (click)="toggleSearch()">
+                <mat-icon>search</mat-icon>
+            </button>
+            <div class="zoom-divider"></div>
+            <button mat-icon-button class="zoom-btn" [matTooltip]="legendVisible ? 'Masquer la légende' : 'Afficher la légende'"
+                    [class.active]="legendVisible" (click)="toggleLegend()">
+                <mat-icon>info_outline</mat-icon>
+            </button>
+        </div>
+
+        <!-- Search panel -->
+        <div class="search-panel" [class.visible]="searchVisible">
+            <mat-icon class="search-icon">search</mat-icon>
+            <input #searchInput class="search-input"
+                   type="text"
+                   placeholder="Rechercher un serveur…"
+                   [(ngModel)]="searchQuery"
+                   (input)="onSearch()"
+                   (keydown.enter)="navigateSearch(1)"
+                   (keydown.shift.enter)="navigateSearch(-1)"/>
+            <span class="search-counter" *ngIf="searchQuery">
+                {{ searchResults.length ? (currentSearchIndex + 1) + ' / ' + searchResults.length : '0' }}
+            </span>
+            <button mat-icon-button class="search-nav-btn" *ngIf="searchResults.length > 1"
+                    matTooltip="Précédent" (click)="navigateSearch(-1)">
+                <mat-icon>keyboard_arrow_up</mat-icon>
+            </button>
+            <button mat-icon-button class="search-nav-btn" *ngIf="searchResults.length > 1"
+                    matTooltip="Suivant" (click)="navigateSearch(1)">
+                <mat-icon>keyboard_arrow_down</mat-icon>
+            </button>
+        </div>
+
+        <!-- Minimap -->
+        <div #outlineContainer id="outlineContainer" [class.hidden]="!minimapVisible"></div>
+
+        <!-- Légende -->
+        <div class="legend-panel" [class.visible]="legendVisible">
+            <div class="legend-section-title">Connexions</div>
+            <div class="legend-item"><span class="legend-line" style="background:#FF8C00;"></span><span>JDBC</span></div>
+            <div class="legend-item"><span class="legend-line" style="background:#0e7490;"></span><span>FTP</span></div>
+            <div class="legend-item"><span class="legend-line" style="background:#f59e0b;"></span><span>SMTP</span></div>
+            <div class="legend-item"><span class="legend-line" style="background:#7c3aed;"></span><span>LDAP</span></div>
+            <div class="legend-divider"></div>
+            <div class="legend-section-title">Nœuds</div>
+            <div class="legend-item"><img src="assets/mxgraph/microservice.drawio.svg" alt="REST" class="legend-icon"/><span>REST</span></div>
+            <div class="legend-item"><img src="assets/mxgraph/database.drawio.svg" alt="JDBC" class="legend-icon"/><span>JDBC</span></div>
+            <div class="legend-item"><img src="assets/mxgraph/ftp.drawio.svg" alt="FTP" class="legend-icon"/><span>FTP</span></div>
+            <div class="legend-item"><img src="assets/mxgraph/smtp.drawio.svg" alt="SMTP" class="legend-icon"/><span>SMTP</span></div>
+            <div class="legend-item"><img src="assets/mxgraph/ldap.drawio.svg" alt="LDAP" class="legend-icon"/><span>LDAP</span></div>
+            <div class="legend-item"><img src="assets/mxgraph/view.drawio.svg" alt="Vue" class="legend-icon"/><span>Vue</span></div>
+            <div class="legend-item"><img src="assets/mxgraph/batch.drawio.svg" alt="Batch" class="legend-icon"/><span>Batch</span></div>
+        </div>
+
+        <!-- Stats overlay -->
+        <div class="stats-overlay" *ngIf="statsCards.length">
+            <div class="stat-chip" *ngFor="let card of statsCards" [matTooltip]="card.label">
+                <div class="stat-chip-icon" [style.background]="card.color + '22'">
+                    <img [src]="card.icon" [alt]="card.type" class="stat-chip-img"/>
+                </div>
+                <span class="stat-chip-count" [style.color]="card.color">{{ card.count }}</span>
+                <span class="stat-chip-label">{{ card.label }}</span>
+            </div>
+        </div>
+
         <div #graphContainer id="graphContainer"></div>
     </div>
 
 </div>
+
 <div style="height: 80vh; display: flex; justify-content: space-between; gap: 1em; margin-bottom: 1em;">
     <div style="width: 50%; height: 100%; display: flex; flex-direction: column;" class="mat-elevation-z5">
         <div style="display: flex; justify-content: space-between;">
