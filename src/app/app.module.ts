@@ -17,16 +17,13 @@ import {SearchRestView} from "./views/search/rest/search-rest.view";
 import {DetailSessionRestView} from "./views/detail/session/rest/detail-session-rest.view";
 import {SearchMainView} from "./views/search/main/search-main.view";
 import {DetailSessionMainView} from "./views/detail/session/main/detail-session-main.view";
-import {StatisticUserView} from "./views/statistic/user/statistic-user.view";
 import {DashboardComponent} from "./views/dashboard/dashboard.component";
 import {EnvRouter} from "./service/router.service";
 import {DurationPipe} from "./shared/pipe/duration.pipe";
-import {StatisticClientView} from "./views/statistic/view/statistic-client.view";
 import {ArchitectureView} from "./views/architecture/architecture.view";
 import {NumberFormatterPipe} from './shared/pipe/number.pipe';
 import {TreeView} from './views/tree/tree.view';
 import {SizePipe} from "./shared/pipe/size.pipe";
-import {StatisticServerView} from "./views/statistic/server/statistic-server.view";
 import {DeploimentComponent} from './views/deploiment/deploiment.component';
 import {Interceptor} from "./shared/interceptor/interceptor";
 import {AnalyticView} from "./views/analytic/analytic.view";
@@ -37,7 +34,8 @@ import {InstanceComponent} from './views/detail/instance/instance.component';
 import {NavbarComponent} from './components/navbar/navbar.component';
 import {ServerSupervisionView} from "./views/supervision/_component/server/server-supervision.view";
 import {ClientSupervisionView} from "./views/supervision/_component/client/client-supervision.view";
-import {StatisticRequestView} from "./views/statistic/request/statistic-request.view";
+import {RequestKpiView} from "./views/kpi/request/request-kpi.view";
+import {SessionKpiView} from "./views/kpi/session/session-kpi.view";
 
 registerLocaleData(localeFr, 'fr-FR');
 const routes: Route[] = [
@@ -49,13 +47,13 @@ const routes: Route[] = [
           {
             path: '',
             component: SearchRequestView,
-            title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => 'Requêtes ' + Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title,
+            title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => Constants.MAPPING_TYPE['request'].title + ' ' + Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' > Recherche',
           },
           {
             path: ':id_request',
             component: DetailRequestView,
             title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-              return 'Appel d\'API > Detail ' + Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title
+              return Constants.MAPPING_TYPE['request'].title + ' ' + Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' > Detail'
             }
           }
         ]
@@ -71,7 +69,8 @@ const routes: Route[] = [
           {
             path: '',
             component: SearchRestView,
-            title: 'Appel d\'API',
+            title: Constants.MAPPING_TYPE['rest'].title + ' > Recherche'
+
           },
           {
             path: ':id_session',
@@ -79,15 +78,13 @@ const routes: Route[] = [
               {
                 path: '',
                 component: DetailSessionRestView,
-                title: `Appel d'API > Détail`
+                title: Constants.MAPPING_TYPE['rest'].title + ' > Detail'
               },
               {
                 path: 'tree',
                 data: {type: 'rest'},
                 component: TreeView,
-                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-                  return `Lancement d'appel Rest > Arbre d'Appels`;
-                }
+                title: Constants.MAPPING_TYPE['rest'].title + ` > Arbre d'Appels`
               },
               {path: '**', pathMatch: 'full', redirectTo: `/session/rest/:id_session`}
             ]
@@ -102,14 +99,7 @@ const routes: Route[] = [
             path: '',
             component: SearchMainView,
             title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-              if (route.paramMap.get('type_main') == 'batch') {
-                return 'Exécution de CRON';
-              } else if (route.paramMap.get('type_main') == 'startup') {
-                return 'Lancement de Serveur';
-              } else if (route.paramMap.get('type_main') == 'test') {
-                return 'Exécution de Test';
-              }
-              return 'Navigation';
+              return Constants.MAPPING_TYPE[route.paramMap.get('type_main')].title + ' > Recherche';
             }
           },
           {
@@ -119,15 +109,7 @@ const routes: Route[] = [
                 path: '',
                 component: DetailSessionMainView,
                 title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-                  let detail = '> Detail';
-                  if (route.paramMap.get('type_main') == 'batch') {
-                    return `Exécution de CRON ${detail}`;
-                  } else if (route.paramMap.get('type_main') == 'startup') {
-                    return `Lancement de Serveur ${detail}`;
-                  } else if (route.paramMap.get('type_main') == 'test') {
-                    return `Exécution de Test ${detail}`;
-                  }
-                  return `Navigation ${detail}`;
+                  return Constants.MAPPING_TYPE[route.paramMap.get('type_main')].title + ' > Detail';
                 }
               },
               {
@@ -135,15 +117,7 @@ const routes: Route[] = [
                 data: {type: 'main'},
                 component: TreeView,
                 title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-                  let detail = `> Arbre d'Appels`;
-                  if (route.paramMap.get('type_main') == 'batch') {
-                    return `Exécution de CRON ${detail}`;
-                  } else if (route.paramMap.get('type_main') == 'startup') {
-                    return `Lancement de Serveur ${detail}`;
-                  } else if (route.paramMap.get('type_main') == 'test') {
-                    return `Exécution de Test ${detail}`;
-                  }
-                  return `Navigation ${detail}`;
+                  return 'Arbre d\'Appels'; // TODO ajouter le type dans le titre
                 }
               },
               {path: '**', pathMatch: 'full', redirectTo: `/main/:type_main/:id_session`}
@@ -151,37 +125,6 @@ const routes: Route[] = [
           },
           {path: '**', pathMatch: 'full', redirectTo: `/main/:type_main`}
         ]
-      },
-      {path: '**', pathMatch: 'full', redirectTo: `/session/rest`}
-    ]
-  },
-  {
-    path: 'dashboard',
-    children: [
-      {
-        path: 'server/:server_name',
-        component: StatisticServerView,
-        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          return `Dashboard > ${route.paramMap.get('server_name')}`;
-        }
-      },
-      {
-        path: 'request/:request_type',
-        component: StatisticRequestView
-      },
-      {
-        path: 'user/:user_name',
-        component: StatisticUserView,
-        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          return `Dashboard > ${route.paramMap.get('user_name')}`;
-        }
-      },
-      {
-        path: 'client/:client_name',
-        component: StatisticClientView,
-        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          return `Dashboard > ${route.paramMap.get('client_name')}`;
-        }
       },
       {path: '**', pathMatch: 'full', redirectTo: `/session/rest`}
     ]
@@ -211,7 +154,7 @@ const routes: Route[] = [
   {
     path: 'deploiment',
     component: DeploimentComponent,
-    title: 'Déploiement'
+    title: 'Instances Actives'
   },
   {
     path: 'architecture',
@@ -222,6 +165,20 @@ const routes: Route[] = [
     path: 'supervision/server/:instance',
     component: ServerSupervisionView,
     title: 'Server Supervision'
+  },
+  {
+    path: 'kpi/request/:request_type',
+    component: RequestKpiView,
+    title:  (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+      return Constants.MAPPING_TYPE['request'].title + ' ' + Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('request_type')].title + ' > Tableau de bord';
+    }
+  },
+  {
+    path: 'kpi/session/:session_type',
+    component: SessionKpiView,
+    title:  (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+      return Constants.MAPPING_TYPE[route.paramMap.get('session_type')].title + ' > Tableau de bord';
+    }
   },
   {
     path: 'supervision/client/:instance',

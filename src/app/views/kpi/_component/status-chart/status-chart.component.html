@@ -1,0 +1,43 @@
+<div class="kpi-chart-header">
+  <div class="kpi-chart-title-group">
+    <span class="kpi-accent-bar orange-bar"></span>
+    <mat-icon class="kpi-chart-icon material-symbols-outlined">signal_cellular_alt</mat-icon>
+    <span class="kpi-chart-title">{{title}}</span>
+    <nav class="kpi-breadcrumb" *ngIf="actualIndicator">
+      <span class="kpi-breadcrumb-item">{{ actualIndicator.menu.label }}</span>
+      <ng-container *ngIf="actualStack">
+        <mat-icon class="kpi-breadcrumb-sep">chevron_right</mat-icon>
+        <span class="kpi-breadcrumb-item purple">{{ actualStack.menu.label }}</span>
+      </ng-container>
+      <ng-container *ngIf="actualGroup">
+        <mat-icon class="kpi-breadcrumb-sep">chevron_right</mat-icon>
+        <span class="kpi-breadcrumb-item teal">{{ actualGroup.menu.label }}</span>
+      </ng-container>
+      <ng-container *ngIf="actualFilter">
+        <mat-icon class="kpi-breadcrumb-sep">chevron_right</mat-icon>
+        <span class="kpi-breadcrumb-item orange">{{ actualFilter.menu.label }}</span>
+      </ng-container>
+    </nav>
+  </div>
+  <div class="kpi-chart-actions">
+    <chart-menu [config]="jqueryConfig" (configChange)="onMenuChange($event)"></chart-menu>
+  </div>
+</div>
+<div class="kpi-chart-subheader">
+  <span class="kpi-chart-period">{{(queryParams.period.start | date: 'd MMM') + '–' + (queryParams.period.end | date)}}</span>
+</div>
+<div class="layout">
+  <slice-panel
+          *ngIf="actualFilter"
+          [sliceConfigs]="sliceConfigs"
+          [data]="tasks"
+          [showCounts]="false"
+          [alwaysShow]="false"
+          (filterChange)="onFilterChange($event)"
+  ></slice-panel>
+  <div class="chart-area">
+    <chart type="column"
+           [config]="chartProvider"
+           [data]="_data" [isLoading]="loading"></chart>
+  </div>
+</div>

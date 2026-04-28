@@ -517,7 +517,14 @@ export class Constants {
         ldap: {title: 'LDAP', subtitle: 'Communications externes', icon: 'user_attributes'},
     }
 
-
+    static REQUEST_EXCEPTION_OPTIONS = {
+        grid: { top: 2, bottom: 2, left: 2, right: 2, containLabel: false },
+        xAxis: { show: false },
+        yAxis: { show: false, max: 100 },
+        legend: { show: false },
+        tooltip: { formatter: (p: any) => { const v = Array.isArray(p[0]?.value) ? p[0].value[1] : p[0]?.value; return `<b>${p[0].name}</b><br>${p[0].marker} ${p[0].seriesName}: <b>${(+v).toFixed(2)}%</b>`; } },
+        series: [{ showSymbol: false }]
+    }
     
     static REST_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<string, number> = {
         height: 100,
@@ -525,34 +532,7 @@ export class Constants {
         series: [
             { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions REST', color: "#ff0000" },
         ],
-        options: {
-            chart: {
-                sparkline: {
-                   enabled: true
-                },
-                toolbar: {
-                    show: false
-                }
-                
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
-            }
-        }
+        options: Constants.REQUEST_EXCEPTION_OPTIONS
     };
     
     static  DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
@@ -561,33 +541,7 @@ export class Constants {
         series: [
             { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions JDBC', color: "#ff0000" }
         ],
-        options: {
-            chart: {
-                sparkline: {
-                    enabled: true
-                },
-                toolbar: {
-                    show: false
-                }
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
-            }
-        }
+        options: Constants.REQUEST_EXCEPTION_OPTIONS
     };
 
     static  FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
@@ -596,33 +550,7 @@ export class Constants {
         series: [
             { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions FTP', color: "#ff0000"}
         ],
-        options: {
-            chart: {
-                sparkline: {
-                    enabled: true
-                },
-                toolbar: {
-                    show: false
-                }
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
-            }
-        }
+        options: Constants.REQUEST_EXCEPTION_OPTIONS
     };
 
     static  SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
@@ -631,33 +559,7 @@ export class Constants {
         series: [
             { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions SMTP', color: "#ff0000" }
         ],
-        options: {
-            chart: {
-                sparkline: {
-                    enabled: true
-                },
-                toolbar: {
-                    show: false
-                }
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
-            }
-        }
+        options: Constants.REQUEST_EXCEPTION_OPTIONS
     };
 
     static  LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
@@ -666,31 +568,7 @@ export class Constants {
         series: [
             { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions LDAP', color: "#ff0000" }
         ],
-        options: {
-            chart: {
-                sparkline: {
-                    enabled: true
-                }
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
-            }
-        }
+        options: Constants.REQUEST_EXCEPTION_OPTIONS
     };
 }
 

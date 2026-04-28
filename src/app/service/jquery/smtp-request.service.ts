@@ -6,6 +6,7 @@ import {
     SmtpSessionExceptionsByPeriodAndappname
 } from "src/app/model/jquery.model";
 import {MailRequestDto} from "../../model/request.model";
+import {ChartItem} from "../../views/kpi/kpi.config";
 
 
 @Injectable({ providedIn: 'root' })
@@ -163,6 +164,45 @@ export class SmtpRequestService {
             args[Object.keys(data.sliceFilter)[0]] = `"${Object.values(data.sliceFilter)[0]}"`;
         }
 
+        return this.getSmtp(args);
+    }
+
+    getCustom2(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
+               filters: {env: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], filters?: string[] }): Observable<any[]> {
+        let args: any = {
+            'column': `${data.series.map(d => d.jquery.value + '.' + data.indicator.jquery.value + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value}:${data.group.jquery.buildAlias()}`,
+            'instance_env': 'instance.id',
+            'instance.environement': filters.env,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString()
+        }
+        if(data.stack) {
+            args['column'] += `,${data.stack.jquery.value}:${data.stack.jquery.buildAlias()}`;
+            args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
+        }
+        if(data.group.jquery.order){
+            args['order'] = `${data.group.jquery.buildAlias()}.${data.group.jquery.order}`;
+        }
+        if(filters.filters?.length) {
+            args[`${data.filter.jquery.value}.in`] = filters.filters.map(o => `"${o}"`).join(',');
+        }
+        if(filters.hosts?.length){
+            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+        }
+        return this.getSmtp(args);
+    }
+
+    getFilters(filter: ChartItem, filters: {env: string, start: Date, end: Date, hosts?: string[] }) {
+        let args: any = {
+            'column': `${filter.jquery.value}.distinct:${filter.jquery.buildAlias()}`,
+            'instance_env': 'instance.id',
+            'instance.environement': filters.env,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString()
+        }
+        if(filters.hosts?.length){
+            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+        }
         return this.getSmtp(args);
     }
 }

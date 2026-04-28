@@ -54,7 +54,7 @@
                 *ngIf="subItem.kpiRoute"
                 class="nav-kpi-btn"
                 (click)="$event.stopPropagation(); navigateToKpi($event, subItem.kpiRoute)"
-                [matTooltip]="'KPI ' + subItem.label"
+                [matTooltip]="'KPI'"
                 matTooltipPosition="right"
               >
                 <mat-icon class="material-symbols-outlined">finance_mode</mat-icon>
@@ -64,11 +64,20 @@
 
           <button
             mat-menu-item
+            class="nav-item-with-kpi"
             *ngIf="!item.children"
             (click)="navigateTo($event, item.route)"
           >
             <mat-icon class="material-symbols-outlined">{{ item.icon }}</mat-icon>
             <span>{{ item.label }}</span>
+            <span
+              *ngIf="item.kpiRoute"
+              class="nav-kpi-btn"
+              (click)="$event.stopPropagation(); navigateToKpi($event, item.kpiRoute)"
+              [matTooltip]="'KPI'"
+              matTooltipPosition="right">
+                <mat-icon class="material-symbols-outlined">finance_mode</mat-icon>
+              </span>
           </button>
         </ng-container>
       </mat-menu>
