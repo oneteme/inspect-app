@@ -1,44 +1,82 @@
-<mat-card style="height: 100%">
-  <mat-card-title>
-    <label-icon icon="widgets">
-      <div style="display: flex; align-items: center; gap: 1.5em;">
-        <span style="cursor: pointer" (click)="navigateOnServerClick($event)">{{_instance.name}}</span>
-        <app-status-indicator *ngIf="!_isLoadingLastTrace"
-                              (onClick)="navigate($event)"
-                              [params]="{id: _instance.id, end: _instance.end, configuration: _instance.configuration, lastTrace: _lastTrace, date: date}"></app-status-indicator>
-      </div>
-    </label-icon>
-    <div class="right">
-      <button mat-icon-button [matMenuTriggerFor]="menu">
-        <mat-icon>more_vert</mat-icon>
-      </button>
-    </div>
-  </mat-card-title>
-  <mat-card-content style="margin-left: 1em; margin-bottom: 1em">
-    <div style="display: flex; flex-direction: column; gap: 0.75em">
-      <div style="display: flex; align-items: center; gap: 0.5em; flex-wrap: wrap">
-        <app-version-badge [backgroundColor]="'#22577a'"
-                           [configuration]="_instance?.configuration"
-                           [collector]="_instance?.collector"
-                           [version]="_instance?.version" />
-        <app-branch-hash-badge [branch]="_instance?.branch" [hash]="_instance?.hash"/>
-      </div>
-      <div style="display: flex; align-items: center; gap: 0.5em; flex-wrap: wrap">
-        <div class="os-badge" *ngIf="_instance?.os">
-          <mat-icon class="material-symbols-outlined">{{_instance.type == 'CLIENT' ? 'devices' : 'data_table'}}</mat-icon>
-          <div style="display: flex; flex-direction: column">
-            <span>{{ _instance.os }}</span>
-            <span style="font-style: italic; font-size: 10px;">{{ _instance.re }}</span>
+<div class="server-card">
+
+
+  <div class="server-card-inner">
+
+    <!-- En-tête -->
+    <div class="server-header">
+      <div class="server-title-row">
+        <div class="server-icon-wrap">
+          <mat-icon class="material-symbols-outlined server-icon">
+            {{ _instance.type === 'CLIENT' ? 'devices' : 'dns' }}
+          </mat-icon>
+        </div>
+        <div class="server-title-content">
+          <div class="server-name-row">
+            <div class="server-env-row">
+              <span class="env-badge">{{ _instance.env || 'N/A' }}</span>
+            </div>
+            <span class="server-name" (click)="navigateOnServerClick($event)">
+              {{ _instance.name }}
+            </span>
+            <app-status-indicator
+              [loading]="_isLoadingLastTrace"
+              (onClick)="navigate($event)"
+              [params]="{id: _instance.id, end: _instance.end, configuration: _instance.configuration, lastTrace: _lastTrace, date: date.getTime()}">
+            </app-status-indicator>
           </div>
         </div>
       </div>
+
+      <button mat-icon-button *ngIf="menu" [matMenuTriggerFor]="menu" class="menu-btn">
+        <mat-icon>more_vert</mat-icon>
+      </button>
     </div>
-  </mat-card-content>
-  <mat-card-footer>
-    <label-icon icon="person" [iconOutlined]="true" [size]="20">
-      {{_instance.user || "N/A"}}
-      le {{ (_instance.instant * 1000) | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr' }}
-      <ng-container *ngIf="_instance.end">en <span style="font-weight: bold">{{((_instance.end - _instance.instant) | duration)}}</span></ng-container>
-    </label-icon>
-  </mat-card-footer>
-</mat-card>
+
+    <!-- Infos compactes : version · branche · OS -->
+    <div class="server-content">
+      <div class="info-chips">
+
+        <!-- Version -->
+        <app-version-badge
+          [version]="_instance?.version"
+          [collector]="_instance?.collector"
+          [configuration]="_instance?.configuration"
+          [name]="_instance?.name">
+        </app-version-badge>
+
+        <!-- Branche / hash -->
+        <app-branch-chip [branch]="_instance?.branch" [hash]="_instance?.hash"/>
+
+        <!-- OS / Runtime -->
+        <div class="info-chip os-chip" *ngIf="_instance?.os"
+             [matTooltip]="_instance.re ? (_instance.os + ' · ' + _instance.re) : _instance.os">
+          <mat-icon class="material-symbols-outlined chip-icon">
+            {{ _instance.type === 'CLIENT' ? 'devices' : 'data_table' }}
+          </mat-icon>
+          <span class="chip-value ellipsis">{{ _instance.os }}</span>
+          <span class="chip-sep" *ngIf="_instance?.re">·</span>
+          <span class="chip-runtime" *ngIf="_instance?.re">{{ _instance.re }}</span>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Pied de carte -->
+    <div class="server-footer">
+      <div class="meta-chip">
+        <mat-icon class="material-symbols-outlined meta-icon">person</mat-icon>
+        <span>{{ _instance.user || 'N/A' }}</span>
+      </div>
+      <div class="meta-chip">
+        <mat-icon class="material-symbols-outlined meta-icon">schedule</mat-icon>
+        <span>{{ (_instance.instant * 1000) | date: 'dd/MM/yyyy HH:mm:ss' }}</span>
+        <ng-container *ngIf="_instance.end">
+          &nbsp;·&nbsp;<span class="duration">{{ (_instance.end - _instance.instant) | duration }}</span>
+        </ng-container>
+      </div>
+    </div>
+
+  </div>
+</div>
+

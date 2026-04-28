@@ -1,41 +1,27 @@
-<div mat-dialog-title style="background-color:#3f51b5;color:white;">{{data.exceptions.type}} Exceptions</div>
+<div class="modal">
 
-<mat-dialog-content>
-  <div class="filter-container mat-elevation-z5">
-    <table  mat-table [dataSource]="table" #sort="matSort" matSort matSortActive="date"
-    matSortDirection="desc" >
-      <ng-container matColumnDef="date">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Instant</th>
-        <td mat-cell *matCellDef="let row">
-          {{ row.stringDate }}
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="err_type">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Titre</th>
-        <td mat-cell *matCellDef="let row">
-            <span> {{ removePackage(row.errorType) }} </span>
-        </td>
-      </ng-container>
-
-      <ng-container matColumnDef="count">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Taux</th>
-        <td mat-cell *matCellDef="let row">
-            <span [matTooltip]="row.count+'/'+row.countok" style="font-weight: bold; color: #ff0000;">{{
-         (row.count*100)/row.countok | number : '1.0-2' }}%</span>        </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="protocolExceptionsDisplyedColumns;sticky: true"></tr>
-      <tr mat-row *matRowDef="let row; columns: protocolExceptionsDisplyedColumns;" [class.hidden]="row.count==0" (click)="selectedRow($event, row)"></tr>
-
-    </table>
-    
-    <div [hidden]="table?.data.length < 3">
-      <mat-paginator #paginator [length]="table?.data.length" [pageSize]="3" [hidePageSize]="true"
-        [showFirstLastButtons]="true"></mat-paginator>
+  <div class="modal-header">
+    <div class="modal-header-left">
+      <div class="modal-icon">
+        <mat-icon>warning_amber</mat-icon>
+      </div>
+      <div class="modal-info">
+        <div class="modal-title">
+          Exceptions <span class="modal-badge">{{ data.exceptions.type }}</span>
+        </div>
+        <div class="modal-subtitle">
+          {{ exceptions.length }} occurrence{{ exceptions.length !== 1 ? 's' : '' }} détectée{{ exceptions.length !== 1 ? 's' : '' }}
+        </div>
+      </div>
     </div>
+    <button class="modal-close" mat-dialog-close>
+      <mat-icon>close</mat-icon>
+    </button>
   </div>
-</mat-dialog-content>
-<mat-dialog-actions align="end">
-  <button mat-button mat-dialog-close>Close</button>
-</mat-dialog-actions>
+
+  <div class="modal-body">
+      <exceptions-table class="modal-table" [data]="exceptions" (onRowSelected)="selectedRow($event.event, $event.row)"></exceptions-table>
+  </div>
+
+</div>
+

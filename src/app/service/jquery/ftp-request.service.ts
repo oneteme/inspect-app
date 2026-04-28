@@ -3,6 +3,7 @@ import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {FtpSessionExceptionsByPeriodAndappname} from "src/app/model/jquery.model";
 import {FtpRequestDto} from "../../model/request.model";
+import {ChartItem} from "../../views/kpi/kpi.config";
 
 
 @Injectable({ providedIn: 'root' })
@@ -27,12 +28,12 @@ export class FtpRequestService {
         return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, { params: filters });
     }
 
-    getRepartitionTimeAndTypeResponseByPeriod(filters: {
+    getRepartitionTimeAndTypeResponseByPeriod(data: { column: string; order?: string }, filters: {
         start: Date;
         end: Date;
         groupedBy: string;
         env: string;
-        host: string[];
+        hosts: string[];
         command?: string[];
     }): Observable<{
         countSuccess: number;
@@ -48,57 +49,49 @@ export class FtpRequestService {
         year: number
     }[]> {
         let args: any = {
-            'column': `count_request_success:countSuccess,count_request_error:countError,count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max,start.${filters.groupedBy}:date,start.year:year`,
+            'column': `count_request_success:countSuccess,count_request_error:countError,count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max`,
             'instance_env': 'instance.id',
             'instance.environement': filters.env,
             'instance.type': 'SERVER',
-            'host':`"${filters.host}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            'order': `year.asc,date.asc`
         }
-        if(filters.command){
-            args['command'] = filters.command.toString();
+        if(data?.column){
+            args['column'] += `,${data.column}`;
+        }
+        if(data?.order){
+            args['order'] = data.order;
+        }
+        if(filters.hosts?.length){
+            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
         }
         return this.getFtp(args);
     }
 
-    getftpSessionExceptionsByHost(filters: { env: string, start: Date, end: Date, groupedBy: string, host: string[],command?: string[]  }): Observable<FtpSessionExceptionsByPeriodAndappname[]> {
+    getftpSessionExceptionsByHost(data: { column: string; order?: string },filters: { env: string, start: Date, end: Date, groupedBy: string, hosts: string[],command?: string[]  }): Observable<FtpSessionExceptionsByPeriodAndappname[]> {
         let args = {
-            'column': `start.${filters.groupedBy}:date,count.sum.over(partition(date)):countok,exception.count_exception:count,count.divide(countok).multiply(100).round(2):pct,exception.err_type.coalesce():errorType,start.year:year`,
+            'column': `exception.err_type.coalesce():errorType`,
             'join': 'exception,instance',
             'instance.environement': filters.env,
-            'host':`"${filters.host}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            'order': 'date.asc'
         }
-        if(filters.command){
-            args['command'] = filters.command.toString();
+        if(data?.column){
+            args['column'] += `,${data.column}`;
+        }
+        if(data?.order){
+            args['order'] = data.order;
+        }
+        if(filters.hosts && filters.hosts.length){
+            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(",");
         }
         return this.getFtp(args);
     }
 
-    getUsersByPeriod(filters: { env: string, start: Date, end: Date, groupedBy: string, host: string[], command?: string[]  }): Observable<{user: string, date: number, year: number}[]> {
-      let args = {
-        'column.distinct': `user,start.${filters.groupedBy}:date,start.year:year`,
-        'instance_env': 'instance.id',
-        'user.notNull': '',
-        'host':`"${filters.host}"`,
-        'instance.environement': filters.env,
-        'start.ge': filters.start.toISOString(),
-        'start.lt': filters.end.toISOString(),
-        'order': `year.asc,date.asc`
-      };
-      if(filters.command){
-        args['command'] = filters.command.toString();
-      }
-      return this.getFtp(args);
-    }
 
     getftpSessionExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<FtpSessionExceptionsByPeriodAndappname[]> {
         let args = {
-            'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
+            'column': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
             'join': 'exception,instance',
             'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),
@@ -110,21 +103,69 @@ export class FtpRequestService {
         }
         return this.getFtp(args);
     }
-    getDependentsNew(filters: { start: Date, end: Date,env: string, host: string[],command?: string[] }): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, appName: string}[]> {
+
+    getCustom(data: {base: string; column?: string; order?: string; sliceFilter?: string },
+              filters: {start: Date; end: Date; env: string; hosts: string[]; method?: string[] }): Observable<any[]> {
         let args: any = {
-            'column': `count_request_success:countSucces,count_request_error:countErrServer,instance.app_name:appName`,
-            'host':`"${filters.host}"`,
-            'join': 'instance',
-            'instance.type': 'SERVER',
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString(),
+            'column': `${data.base}`,
+            'instance_env': 'instance.id',
             'instance.environement': filters.env,
-            'order': 'count.desc'
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString()
         }
-        if(filters.command){
-            args['command'] = filters.command.toString();
+        if(data?.column){
+            args['column'] += `,${data.column}`;
+        }
+        if(data?.order){
+            args['order'] = data.order;
+        }
+        if(filters.hosts?.length){
+            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+        }
+
+        if(data?.sliceFilter){
+            args[Object.keys(data.sliceFilter)[0]] = `"${Object.values(data.sliceFilter)[0]}"`;
+        }
+
+        return this.getFtp(args);
+    }
+
+    getCustom2(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
+               filters: {env: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], filters?: string[] }): Observable<any[]> {
+        let args: any = {
+            'column': `${data.series.map(d => d.jquery.value + '.' + data.indicator.jquery.value + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value}:${data.group.jquery.buildAlias()}`,
+            'instance_env': 'instance.id',
+            'instance.environement': filters.env,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString()
+        }
+        if(data.stack) {
+            args['column'] += `,${data.stack.jquery.value}:${data.stack.jquery.buildAlias()}`;
+            args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
+        }
+        if(data.group.jquery.order){
+            args['order'] = `${data.group.jquery.buildAlias()}.${data.group.jquery.order}`;
+        }
+        if(filters.filters?.length) {
+            args[`${data.filter.jquery.value}.in`] = filters.filters.map(o => `"${o}"`).join(',');
+        }
+        if(filters.hosts?.length){
+            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
         }
         return this.getFtp(args);
     }
 
+    getFilters(filter: ChartItem, filters: {env: string, start: Date, end: Date, hosts: string[] }) {
+        let args: any = {
+            'column': `${filter.jquery.value}.distinct:${filter.jquery.buildAlias()}`,
+            'instance_env': 'instance.id',
+            'instance.environement': filters.env,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString()
+        }
+        if(filters.hosts?.length){
+            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+        }
+        return this.getFtp(args);
+    }
 }

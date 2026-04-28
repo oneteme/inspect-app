@@ -1,24 +1,12 @@
-:host {
-    display: flex; 
-    flex-direction: column;
-}
-
-.mat-mdc-menu-item.menu-active {
-    background-color: var(--mat-menu-item-hover-state-layer-color);
-    color: var(--inspect-blue);
-    font-weight: 500;
-    mat-icon {
-        color: currentColor;
-    }
-}
-
-.item-selected {
-    background-color: var(--mat-menu-item-hover-state-layer-color);
-    color: #1464dc;
+mat-drawer-container {
+    position: relative;
+    z-index: 1;
+    height: calc(100vh - 56px);
+    margin-top: 56px;
 }
 
 mat-drawer-content {
+    box-sizing: border-box;
     overflow-x: hidden;
     padding: 7px;
-    height: calc(100vh - 48px - 14px);
 }

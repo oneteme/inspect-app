@@ -1,6 +1,6 @@
 import {AfterViewInit, Component, inject, OnDestroy} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
-import {combineLatest, finalize, map, Observable, Subscription} from 'rxjs';
+import {combineLatest, finalize, forkJoin, map, Observable, Subscription} from 'rxjs';
 import {DatePipe, DecimalPipe, Location} from '@angular/common';
 import {app, makeDatePeriod} from 'src/environments/environment';
 import {EnvRouter} from "../../service/router.service";
@@ -21,7 +21,7 @@ import {
     JdbcExceptionsByPeriodAndAppname,
     LdapSessionExceptionsByPeriodAndappname,
     RestSessionExceptionsByPeriodAndappname,
-    SessionExceptionsByPeriodAndAppname,
+    ExceptionsByPeriodAndAppname,
     SmtpSessionExceptionsByPeriodAndappname
 } from 'src/app/model/jquery.model';
 import {SmtpRequestService} from 'src/app/service/jquery/smtp-request.service';
@@ -48,8 +48,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
     private _datePipe = inject(DatePipe);
     private _dialog = inject(MatDialog);
     private _decimalPipe = inject(DecimalPipe);
-    private _numberFormatter = inject(NumberFormatterPipe);
-
     sparklineTitles: {
         rest: {title: string, subtitle: string},
         jdbc: {title: string, subtitle: string},
@@ -195,6 +193,8 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         if (exceptions.observable.data?.length > 0) {
             this._dialog.open(ProtocolExceptionComponent, {
                 width: "70%",
+                height: "60vh",
+                panelClass: "exception-modal",
                 data: {
                     exceptions: exceptions,
                     serveurs: this.params.serveurs,
@@ -214,24 +214,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
         }, { emitEvent: false })
     }
 
-    setTitle(type: string, data: any[]): {title: string, subtitle: string} {
-        let title = `${type}: 0.00%`;
-        let subtitle = 'sur 0 requête(s)';
-        let arr = this.groupByProperty("stringDate", data).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } }).sort((a,b)=> a.stringDate.localeCompare(b.stringDate));
-        if (arr.length) {
-            let sumRes = this.sumcounts(arr);
-            title = `${type}: ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%`;
-            subtitle = `sur ${this._decimalPipe.transform(sumRes.countok)} requête(s)`;
-        }
-        return {title: title, subtitle: subtitle};
-    }
-
-    setChartData(data: any[]) {
-        let arr = this.groupByProperty("stringDate", data).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } }).sort((a,b)=> a.stringDate.localeCompare(b.stringDate));
-        data = data.filter((a:any)=> a.count>0)
-        return {chart : arr, data :data}
-    }
-
     groupBypropertyRest(property: string, array: any[]) {
         let helper: any = {};
         return array.reduce((acc: any, item: any) => {
@@ -243,21 +225,6 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                 if(item.errorType){
                     helper[item[property]].count += item["count"];
                 }
-            }
-            return acc;
-        }, []);
-    }
-
-    groupByProperty(property: string, array: any[]) {
-        let helper: any = {};
-        return array.reduce((acc: any, item: any) => {
-
-            if (!helper[item[property]]) {
-                helper[item[property]] = Object.assign({}, item);
-                acc.push(helper[item[property]]);
-            } else {
-                helper[item[property]].countok += item["countok"];
-                helper[item[property]].count += item["count"];
             }
             return acc;
         }, []);
@@ -275,26 +242,19 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
     TAB_REQUESTS = (env: string, start: Date, end: Date, app_name: string) => {
         this.groupedBy = periodManagement(start, end);
         return {
-            // Server start
-            serverStartTable: { observable: this._instanceService.getServerStart({ env: env, start: start, end: end, app_name: app_name }) },
-
             //   Rest-Main Sessions exceptions
-            sessionExceptionsTable: {
-                observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, server: app_name, others: {"status.ge(500).or(status.lt(400))": ""}})
-                    .pipe(map(((result: SessionExceptionsByPeriodAndAppname[]) => {
-                        formatters[this.groupedBy](result, this._datePipe, 'stringDate');
-                        return result.filter(r => r.errorType != null); // rename errorType to errType in backend
+            exceptionsTable: {
+                observable: forkJoin(
+                  [
+                    this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, server: app_name, others: {"status.ge(500).or(status.lt(400))": ""}}),
+                    this._mainService.getMainExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, app_name: app_name })
+                  ])
+                    .pipe(map(((result: [ExceptionsByPeriodAndAppname[], ExceptionsByPeriodAndAppname[]]) => {
+                        let concat = [...result[0], ...result[1]];
+                        formatters[this.groupedBy](concat, this._datePipe, 'stringDate');
+                        return concat.filter(r => r.errorType != null); // rename errorType to errType in backend
                     })))
-            },
-
-            batchExceptionTable: {
-                observable: this._mainService.getMainExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, app_name: app_name })
-                    .pipe(map(((result: SessionExceptionsByPeriodAndAppname[]) => {
-                        formatters[this.groupedBy](result, this._datePipe, 'stringDate')
-                        return result.filter(r => r.errorType != null);
-                    })))
-            },
-
+            }
         }
     }
     REQUESTS = (env: string, start: Date, end: Date, app_name: string) => {
@@ -323,66 +283,96 @@ export class DashboardComponent implements AfterViewInit, OnDestroy  {
                 observable: this._datebaseService.getJdbcRestSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map(((result: JdbcExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
-                        this.sparklineTitles.jdbc = this.setTitle('JDBC', [...result]);
-                        return this.setChartData(result)
+                        let res = this.groupBypropertyRest("stringDate", result).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } }).sort((a,b)=> a.stringDate.localeCompare(b.stringDate));
+                        let title = `JDBC: 0.00%`;
+                        let subtitle = 'sur 0 requête(s)';
+                        if (res.length) {
+                            let sumRes = this.sumcounts(res);
+                            title = `JDBC: ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%`;
+                            subtitle = `sur ${this._decimalPipe.transform(sumRes.countok)} requête(s)`;
+                        }
+                        this.sparklineTitles.jdbc = {title: title, subtitle: subtitle};
+                        return  {chart : res, data : result.filter((a:any)=> a.errorType!= null)}
                     })))
             },
             ftpRequestExceptionsTable: {
                 observable: this._ftpService.getftpSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map(((result: FtpSessionExceptionsByPeriodAndappname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
-                        this.sparklineTitles.ftp = this.setTitle('FTP', [...result]);
-                        return this.setChartData(result)
+                        let res = this.groupBypropertyRest("stringDate", result).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } }).sort((a,b)=> a.stringDate.localeCompare(b.stringDate));
+                        let title = `FTP: 0.00%`;
+                        let subtitle = 'sur 0 requête(s)';
+                        if (res.length) {
+                            let sumRes = this.sumcounts(res);
+                            title = `FTP: ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%`;
+                            subtitle = `sur ${this._decimalPipe.transform(sumRes.countok)} requête(s)`;
+                        }
+                        this.sparklineTitles.ftp = {title: title, subtitle: subtitle};
+                        return  {chart : res, data : result.filter((a:any)=> a.errorType!= null)}
                     })))
             },
             smtpRequestExceptionsTable: {
                 observable: this._smtpService.getSmtpExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map(((result: SmtpSessionExceptionsByPeriodAndappname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
-                        this.sparklineTitles.smtp = this.setTitle('SMTP', [...result]);
-                        return this.setChartData(result)
+                        let res = this.groupBypropertyRest("stringDate", result).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } }).sort((a,b)=> a.stringDate.localeCompare(b.stringDate));
+                        let title = `SMTP: 0.00%`;
+                        let subtitle = 'sur 0 requête(s)';
+                        if (res.length) {
+                            let sumRes = this.sumcounts(res);
+                            title = `SMTP: ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%`;
+                            subtitle = `sur ${this._decimalPipe.transform(sumRes.countok)} requête(s)`;
+                        }
+                        this.sparklineTitles.smtp = {title: title, subtitle: subtitle};
+                        return  {chart : res, data : result.filter((a:any)=> a.errorType!= null)}
                     })))
             },
             ldapRequestExceptionsTable: {
-                observable: this._ldapService.getLdapExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
+                observable: this._ldapService.getLdapSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map(((result: LdapSessionExceptionsByPeriodAndappname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
-                        this.sparklineTitles.ldap = this.setTitle('LDAP', [...result]);
-                        return  this.setChartData(result)
+                        let res = this.groupBypropertyRest("stringDate", result).map((d: any) => { return { ...d, perc: (d.count * 100) / d.countok } }).sort((a,b)=> a.stringDate.localeCompare(b.stringDate));
+                        let title = `LDAP: 0.00%`;
+                        let subtitle = 'sur 0 requête(s)';
+                        if (res.length) {
+                            let sumRes = this.sumcounts(res);
+                            title = `LDAP: ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%`;
+                            subtitle = `sur ${this._decimalPipe.transform(sumRes.countok)} requête(s)`;
+                        }
+                        this.sparklineTitles.ldap = {title: title, subtitle: subtitle};
+                        return  {chart : res, data : result.filter((a:any)=> a.errorType!= null)}
                     })))
             },
         }
     }
 
-    onSessionExceptionRowSelected(row:any) {
-        const result = recreateDate(this.groupedBy, row, this.params.start);
-        if(result) {
-            this._router.navigate(['/session/rest'], {
-                queryParams: {
-                    'env': this.params.env,
-                    'start': result.start.toISOString(),
-                    'end': result.end.toISOString(),
-                    'q': row.errorType,
-                    'server': this.params.serveurs,
-                    'rangestatus': ['5xx', '4xx']
-                }
-            });
-        }
-    }
+    onSessionExceptionRowSelected(event: {event: MouseEvent, row: any}) {
+        const result = recreateDate(this.groupedBy, event.row, this.params.start);
 
-    onBatchExceptionRowSelected(row: any){
-        const result = recreateDate(this.groupedBy, row, this.params.start);
-        if(result){
-            this._router.navigate(['/session/batch'], {
-                queryParams: {
-                    'env': this.params.env,
-                    'start': result.start.toISOString(),
-                    'end': result.end.toISOString(),
-                    'q' : row.errorType,
-                    'server': this.params.serveurs,
-                    'rangestatus': ['Ko']
-                }
-            });
+        if(result) {
+            if(event.row.type == 'SERVER') {
+                this._router.navigate(['/session/rest'], {
+                    queryParams: {
+                        'env': this.params.env,
+                        'start': result.start.toISOString(),
+                        'end': result.end.toISOString(),
+                        'q': event.row.errorType,
+                        'server': this.params.serveurs,
+                        'rangestatus': ['5xx', '4xx']
+                    }
+                });
+            } else if(event.row.type == 'BATCH') {
+                this._router.navigate(['/session/batch'], {
+                    queryParams: {
+                        'env': this.params.env,
+                        'start': result.start.toISOString(),
+                        'end': result.end.toISOString(),
+                        'q' : event.row.errorType,
+                        'server': this.params.serveurs,
+                        'rangestatus': ['Ko']
+                    }
+                });
+            }
         }
     }
 

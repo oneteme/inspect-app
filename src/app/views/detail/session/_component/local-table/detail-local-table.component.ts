@@ -1,9 +1,7 @@
-import {Component, Input, ViewChild} from "@angular/core";
-import {MatTableDataSource} from "@angular/material/table";
-import {MatPaginator} from "@angular/material/paginator";
-import {MatSort} from "@angular/material/sort";
+import {Component, Input} from "@angular/core";
 import {LocalRequest} from "../../../../../model/trace.model";
-import {INFINITY} from "../../../../constants";
+import {TableProvider} from '@oneteme/jquery-table';
+import {LOCAL_REQUEST_TABLE_CONFIG} from "../../../../../shared/_component/table/table.config";
 
 @Component({
   selector: 'local-table',
@@ -11,28 +9,11 @@ import {INFINITY} from "../../../../constants";
   styleUrls: ['./detail-local-table.component.scss']
 })
 export class DetailLocalTableComponent {
-  displayedColumns: string[] = ['location', 'name', 'start', 'duree', 'user'];
-  dataSource: MatTableDataSource<LocalRequest> = new MatTableDataSource();
+  tableConfig: TableProvider<LocalRequest> = LOCAL_REQUEST_TABLE_CONFIG;
 
-  @ViewChild('paginator', {static: true}) paginator: MatPaginator;
-  @ViewChild('sort', {static: true}) sort: MatSort;
+  _requests: LocalRequest[] = [];
 
   @Input() set requests(requests: LocalRequest[]) {
-    if (requests) {
-      this.dataSource = new MatTableDataSource(requests);
-      this.dataSource.paginator = this.paginator;
-      this.dataSource.sortingDataAccessor = sortingDataAccessor;
-      this.dataSource.sort = this.sort;
-    } else {
-      this.dataSource = new MatTableDataSource();
-    }
-
+    this._requests = requests;
   }
-}
-
-const sortingDataAccessor = (row: any, columnName: string) => {
-  if (columnName == "location") return row["location"] as string;
-  if (columnName == "start") return row['start'] as string;
-  if (columnName == "duree") return row['end'] ? row["end"] - row["start"] : INFINITY;
-  return row[columnName as keyof any] as string;
 }
