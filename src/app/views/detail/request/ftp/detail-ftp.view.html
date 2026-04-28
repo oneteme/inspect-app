@@ -112,6 +112,5 @@
 
 <mat-menu #menuServer="matMenu">
   <a mat-menu-item (click)="onClickPulse()"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
-  <a mat-menu-item [routerLink]="['/dashboard', 'server', instance?.name]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">finance_mode</mat-icon>Serveur</a>
 </mat-menu>
 
