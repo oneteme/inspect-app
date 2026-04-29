@@ -121,6 +121,7 @@ export class LinkRequestNode implements Link<Label> {
     this.nodeObject = nodeObject;
   }
   getLinkStyle(): string {
+    if (this.nodeObject.end == null) return 'ONGOING';
     switch(true){
       case (this.nodeObject.status >= 200 && this.nodeObject.status < 300): return "SUCCES";
       case (this.nodeObject.status >= 400 && this.nodeObject.status < 500):  return "CLIENT_ERROR"
@@ -172,6 +173,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
   }
 
   getLinkStyle(): string {
+    if (this.nodeObject.end == null) return 'ONGOING';
     return this.nodeObject.failed ? 'ERROR' : 'SUCCES'
   }
 }
@@ -206,6 +208,7 @@ export class FtpRequestNode implements Node<Label>, Link<Label> {
   }
 
   getLinkStyle(): string {
+    if (this.nodeObject.end == null) return 'ONGOING';
     return this.nodeObject.failed ? 'ERROR' : 'SUCCES';
   }
 }
@@ -239,6 +242,7 @@ export class MailRequestNode implements Node<Label>, Link<Label> {
   }
 
   getLinkStyle(): string {
+    if (this.nodeObject.end == null) return 'ONGOING';
     return this.nodeObject.failed ? 'ERROR' : 'SUCCES';
   }
 }
@@ -272,6 +276,7 @@ export class LdapRequestNode implements Node<Label>, Link<Label> {
   }
 
   getLinkStyle(): string {
+    if (this.nodeObject.end == null) return 'ONGOING';
     return this.nodeObject.failed ? 'ERROR' : 'SUCCES';
   }
 }
@@ -317,6 +322,7 @@ export class RestRequestNode implements Node<Label> {
   }
 
   getLinkStyle(): string {
+    if (this.nodeObject.end == null) return 'ONGOING';
     switch(true){
       case (this.nodeObject.status >= 200 && this.nodeObject.status < 300): return "SUCCES";
       case (this.nodeObject.status >= 400 && this.nodeObject.status < 500):  return "CLIENT_ERROR"
@@ -400,7 +406,8 @@ export class TreeGraph {
         let compare = cell.value.nodes[0].formatLink(cell.value.linkLbl)
         return tg.checkSome(cell.value.nodes, x => x.formatLink(cell.value.linkLbl) != compare) ? `... ×${cell.value.nodes.length}` : `${compare} ×${cell.value.nodes.length}`
       }else if(cell?.isVertex() && cell.value && typeof cell.value === 'object'){
-        return cell.value.node.formatNode(cell.value.serverlbl)
+        const lbl: string = cell.value.node.formatNode(cell.value.serverlbl) ?? '';
+        return lbl.length > 22 ? lbl.substring(0, 22) + '…' : lbl;
       }
       return mx.mxGraph.prototype.getLabel.apply(this, arguments);
     }
@@ -418,8 +425,13 @@ export class TreeGraph {
     graph.panningHandler.ignoreCell = true; // Specifies if panning should be active even if there is a cell under the mousepointer.
     graph.container.style.cursor = 'move'
     graph.setPanning(true);
-    new mx.mxTooltipHandler(graph, 1);
-    mx.mxGraph.prototype.getTooltipForCell = function (cell: any) { //tooltip
+
+    // Highlight vertices and edges on hover
+    const cellTracker = new mx.mxCellTracker(graph, '#dbeafe'); // blue-100 tint
+    cellTracker.highlight.opacity = 30; // subtle — 0-100
+
+    graph.setTooltips(false); // tooltip désactivée — remplacée par la detail card
+    mx.mxGraph.prototype.getTooltipForCell = function (cell: any) { //tooltip (kept for API compatibility)
 
       if (cell.isEdge()) {
         let modal;
@@ -446,7 +458,12 @@ export class TreeGraph {
                 return tg.getModal(entries, cell.value.node.nodeObject.remoteList.length);
               }
             }
-            return  cell.value.node.formatLink(cell.value.linkLbl) && `<b>${cell.value.node.formatLink(cell.value.linkLbl)}</b>`
+            const fullLbl = cell.value.node.formatNode(cell.value.serverlbl);
+            const linkLbl = cell.value.node.formatLink(cell.value.linkLbl);
+            const parts: string[] = [];
+            if (fullLbl) parts.push(`<b>${fullLbl}</b>`);
+            if (linkLbl) parts.push(`<span>${linkLbl}</span>`);
+            return parts.length ? parts.join('<br>') : '';
           }
         }
       }
@@ -538,6 +555,7 @@ export class TreeGraph {
       // Updates the display
       this.graph.getModel().endUpdate();
       this.resizeAndCenter();
+      this.animateOngoingEdges();
     }
   }
 
@@ -571,26 +589,34 @@ export class TreeGraph {
 
   setVertexDefaultStyle() {
     let style = this.graph.getStylesheet().getDefaultVertexStyle();
-    style[mx.mxConstants.STYLE_VERTICAL_LABEL_POSITION] = "bottom"
-    style[mx.mxConstants.STYLE_VERTICAL_ALIGN] = "top"
-    style[mx.mxConstants.STYLE_FONTCOLOR] = '#446299'
-    style[mx.mxConstants.STYLE_FONTSIZE] = 8
-    //style[mx.mxConstants.STYLE_IMAGE_BORDER] = "black";
+    style[mx.mxConstants.STYLE_VERTICAL_LABEL_POSITION] = 'bottom';
+    style[mx.mxConstants.STYLE_VERTICAL_ALIGN]          = 'top';
+    style[mx.mxConstants.STYLE_FONTCOLOR]               = '#1e293b';
+    style[mx.mxConstants.STYLE_FONTSIZE]                = 9;
+    style[mx.mxConstants.STYLE_FONTFAMILY]              = 'Inter, system-ui, sans-serif';
   }
 
   setEdgeDefaultStyle() {
     let style = this.graph.getStylesheet().getDefaultEdgeStyle();
-    style[mx.mxConstants.STYLE_LABEL_BACKGROUNDCOLOR] = 'white';
-    style[mx.mxConstants.EDGE_SELECTION_STROKEWIDTH] = 10;
-    style[mx.mxConstants.STYLE_STROKEWIDTH] = 0.5;
+    style[mx.mxConstants.STYLE_LABEL_BACKGROUNDCOLOR] = '#f1f5f9';     // light slate pill
+    style[mx.mxConstants.STYLE_LABEL_BORDERCOLOR]     = '#cbd5e1';     // subtle border
+    style[mx.mxConstants.STYLE_ROUNDED]       = 1;     // subtle border
+    style[mx.mxConstants.STYLE_CURVED]       = 1;     // subtle border// subtle border
+    style[mx.mxConstants.STYLE_LABEL_PADDING]         = 4;
+    style[mx.mxConstants.EDGE_SELECTION_STROKEWIDTH]  = 10;
+    style[mx.mxConstants.STYLE_STROKEWIDTH]           = 0.5;
     style[mx.mxConstants.STYLE_ENDARROW] = "none";
-    style[mx.mxConstants.STYLE_ENDSIZE] = 2;
-    style[mx.mxConstants.STYLE_ENDFILL] = 1;
+    style[mx.mxConstants.STYLE_ENDSIZE]               = 2;
+    style[mx.mxConstants.STYLE_ENDFILL]               = 1;
     style[mx.mxConstants.STYLE_SOURCE_PERIMETER_SPACING] = 12;
-    style[mx.mxConstants.STYLE_FONTSIZE] = 8
+    style[mx.mxConstants.STYLE_FONTSIZE]              = 8;
+    style[mx.mxConstants.STYLE_FONTCOLOR]             = '#334155';     // slate-700
+    style[mx.mxConstants.STYLE_FONTFAMILY]            = 'Inter, system-ui, sans-serif';
   }
 
   clearCells() {
+    this.disconnectObserver(); // clean up observer before full redraw
+    this.clearHighlight();
     const model = this.graph.getModel();
     model.beginUpdate();
     try {
@@ -623,6 +649,154 @@ export class TreeGraph {
       (margin + cw - w * s) / (2 * s) - bounds.x / this.graph.view.scale,
       (margin + ch - h * s) / (2 * s) - bounds.y / this.graph.view.scale);
   }
+
+  private _ongoingObserver: MutationObserver | null = null;
+
+  animateOngoingEdges() {
+    if (!document.getElementById('ongoing-edge-anim')) {
+      const style = document.createElement('style');
+      style.id = 'ongoing-edge-anim';
+      style.textContent = `
+        @keyframes dashFlow {
+          from { stroke-dashoffset: 0; }
+          to   { stroke-dashoffset: -18; }
+        }
+        path[stroke="#3b82f6"] {
+          stroke-dasharray: 12 6;
+          animation: dashFlow 1.2s linear infinite;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }
+
+  private _applyOngoingAnimation() {}
+
+  disconnectObserver() {
+    this._ongoingObserver?.disconnect();
+    this._ongoingObserver = null;
+  }
+
+  private _clickHighlight: any = null;
+  private _pathHighlights: any[] = [];
+
+  /** Highlight a single cell (kept for hover use) */
+  highlightCell(cell: any) {
+    if (this._clickHighlight) {
+      this._clickHighlight.destroy();
+      this._clickHighlight = null;
+    }
+    if (cell) {
+      this._injectGlowStyle();
+      this._clickHighlight = new mx.mxCellHighlight(this.graph, '#6366f1', 2.5, false);
+      this._clickHighlight.opacity = 80;
+      this._clickHighlight.highlight(this.graph.view.getState(cell));
+      const hl = this._clickHighlight as any;
+      setTimeout(() => {
+        const node: SVGElement | null = hl?.shape?.node ?? null;
+        if (node) {
+          node.style.filter = 'drop-shadow(0 0 6px #6366f1cc)';
+          node.style.animation = 'cellGlow 1.8s ease-in-out infinite';
+        }
+      }, 0);
+    }
+  }
+
+  /**
+   * Path Highlighting — highlight the full path from root to the clicked cell
+   * and all its descendants, including every traversed edge.
+   */
+  highlightPath(cell: any) {
+    this.clearHighlight();
+    if (!cell) return;
+
+    this._injectGlowStyle();
+
+    const toHighlight: any[] = [];
+
+    if (cell.isVertex()) {
+      toHighlight.push(cell);
+      this._collectAncestors(cell, toHighlight);
+      this._collectDescendants(cell, toHighlight);
+    } else if (cell.isEdge()) {
+      toHighlight.push(cell);
+      if (cell.source && !toHighlight.includes(cell.source)) {
+        toHighlight.push(cell.source);
+        this._collectAncestors(cell.source, toHighlight);
+      }
+      if (cell.target && !toHighlight.includes(cell.target)) {
+        toHighlight.push(cell.target);
+        this._collectDescendants(cell.target, toHighlight);
+      }
+    }
+
+    this._pathHighlights = toHighlight.map(c => {
+      const color  = c.isEdge() ? '#f59e0b' : '#6366f1';
+      const width  = c.isEdge() ? 2 : 2.5;
+      const hl = new mx.mxCellHighlight(this.graph, color, width, false);
+      hl.opacity = 80;
+      hl.highlight(this.graph.view.getState(c));
+      setTimeout(() => {
+        const node: SVGElement | null = (hl as any)?.shape?.node ?? null;
+        if (node) {
+          node.style.filter = `drop-shadow(0 0 5px ${color}cc)`;
+          node.style.animation = 'cellGlow 1.8s ease-in-out infinite';
+        }
+      }, 0);
+      return hl;
+    });
+  }
+
+  private _collectAncestors(cell: any, result: any[]) {
+    const incoming: any[] = this.graph.getEdges(cell, this.parent, true, false, false);
+    incoming.forEach((e: any) => {
+      if (!result.includes(e)) {
+        result.push(e);
+        const src = e.source;
+        if (src && !result.includes(src)) {
+          result.push(src);
+          this._collectAncestors(src, result);
+        }
+      }
+    });
+  }
+
+  private _collectDescendants(cell: any, result: any[]) {
+    const outgoing: any[] = this.graph.getEdges(cell, this.parent, false, true, false);
+    outgoing.forEach((e: any) => {
+      if (!result.includes(e)) {
+        result.push(e);
+        const tgt = e.target;
+        if (tgt && !result.includes(tgt)) {
+          result.push(tgt);
+          this._collectDescendants(tgt, result);
+        }
+      }
+    });
+  }
+
+  private _injectGlowStyle() {
+    if (!document.getElementById('cell-highlight-anim')) {
+      const s = document.createElement('style');
+      s.id = 'cell-highlight-anim';
+      s.textContent = `
+        @keyframes cellGlow {
+          0%,100% { opacity: 1; }
+          50%      { opacity: 0.5; }
+        }
+      `;
+      document.head.appendChild(s);
+    }
+  }
+
+  clearHighlight() {
+    if (this._clickHighlight) {
+      this._clickHighlight.destroy();
+      this._clickHighlight = null;
+    }
+    this._pathHighlights.forEach(hl => hl.destroy());
+    this._pathHighlights = [];
+  }
 }
 
 
@@ -641,8 +815,9 @@ export const ServerConfig = {
 }
 
 export const LinkConfig = {
-  SUCCES: "strokeColor=green;",
+  SUCCES:       "strokeColor=#22c55e;",
   CLIENT_ERROR: "strokeColor=#f9ad4e;",
-  ERROR: "strokeColor=red;",
-  UNREACHABLE: "strokeColor=red;"
+  ERROR:        "strokeColor=#ef4444;",
+  UNREACHABLE:  "strokeColor=#ef4444;",
+  ONGOING:      "strokeColor=#3b82f6;dashed=1;ongoing=1;"
 }

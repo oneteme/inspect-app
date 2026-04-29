@@ -1,4 +1,4 @@
-import {Component, ElementRef, inject, NgZone, OnDestroy, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, ElementRef, inject, NgZone, OnDestroy, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {combineLatest, finalize, forkJoin, fromEvent, Subscription} from 'rxjs';
 import {Location} from '@angular/common';
@@ -33,6 +33,7 @@ export class TreeView implements OnDestroy {
   private _zone = inject(NgZone);
   private _location = inject(Location);
   private _treeService = inject(TreeService);
+  private _cdr = inject(ChangeDetectorRef);
   subscriptions: Subscription[] = [];
   id: string;
   tree: any
@@ -45,8 +46,22 @@ export class TreeView implements OnDestroy {
   serverLbl: Label;
   linkLbl: Label;
   LabelIsLoaded: { [key: string]: boolean } = { "METHOD_RESOURCE": false, "STATUS_EXCEPTION": false, "SIZE_COMPRESSION": false }
+  minimapVisible: boolean = JSON.parse(localStorage.getItem('tree_minimap') ?? 'true');
+  legendVisible: boolean = false;
+  isFullscreen: boolean = false;
+  searchQuery: string = '';
+  searchResults: any[] = [];
+  currentSearchIndex: number = 0;
+  searchVisible: boolean = false;
+
+  // Évolution 6 — Detail panel
+  selectedCell: any = null;
+  detailPanelVisible: boolean = false;
+  private _clickedCell: any = null;
+
   @ViewChild('graphContainer') graphContainer: ElementRef;
   @ViewChild('outlineContainer') outlineContainer: ElementRef;
+  @ViewChild('searchInput') searchInputRef: ElementRef;
   ViewForm = new FormGroup({
     nodeView: new FormControl(),
     linkView: new FormControl(),
@@ -104,6 +119,8 @@ export class TreeView implements OnDestroy {
     this.isLoading = true;
     this.subscriptions.push(this._traceService.getTree(this.id, data['type']).pipe(finalize(() => this.isLoading = false)).subscribe((d: RestSessionTree /*| ServerMainSession*/) => {
       this.TreeObj = d;
+      this.isLoading = false;         // force à false avant d'accéder au ViewChild
+      this._cdr.detectChanges();      // force le rendu du DOM pour que graphContainer existe
       let self = this;
       this.tree = TreeGraph.setup(this.graphContainer.nativeElement, tg => {
         tg.draw(() => {})//self.dr(tg, self.TreeObj, serverlbl, linklbl)) // refacto
@@ -111,7 +128,187 @@ export class TreeView implements OnDestroy {
       });
       this.ViewEvent[linklbl](Label[linklbl])// draw
       this.tree.setOutline(this.outlineContainer.nativeElement)
+      this.registerCellClickListener();
     }))
+  }
+
+  registerCellClickListener() {
+    const graph = this.tree._graph;
+    let mouseDownX = 0;
+    let mouseDownY = 0;
+    graph.addMouseListener({
+      mouseDown: (_s: any, me: any) => {
+        mouseDownX = me.getX();
+        mouseDownY = me.getY();
+      },
+      mouseMove: (_s: any, me: any) => {
+        const cell = me.getCell();
+        this._zone.run(() => {
+          if (cell) {
+            this.selectedCell = cell;
+            this.detailPanelVisible = true;
+          } else if (!this._clickedCell) {
+            this.detailPanelVisible = false;
+            this.selectedCell = null;
+          } else {
+            // restore clicked cell when hovering empty space
+            this.selectedCell = this._clickedCell;
+            this.detailPanelVisible = true;
+          }
+        });
+      },
+      mouseUp: (_s: any, me: any) => {
+        const dx = Math.abs(me.getX() - mouseDownX);
+        const dy = Math.abs(me.getY() - mouseDownY);
+        // Only treat as click if mouse didn't move much (not a pan)
+        if (dx < 5 && dy < 5) {
+          const cell = me.getCell();
+          this._zone.run(() => {
+            if (cell) {
+              this._clickedCell = cell;
+              this.selectedCell = cell;
+              this.detailPanelVisible = true;
+              this.tree.highlightCell(cell);
+            } else {
+              this._clickedCell = null;
+              this.tree.clearHighlight();
+              this.closeDetailPanel();
+            }
+          });
+        }
+      }
+    });
+  }
+
+  closeDetailPanel() {
+    this.detailPanelVisible = false;
+    this.selectedCell = null;
+    this._clickedCell = null;
+  }
+
+  private resetSelection() {
+    this._clickedCell = null;
+    this.selectedCell = null;
+    this.detailPanelVisible = false;
+    this.tree?.clearHighlight();
+  }
+
+  canNavigateToDetail(): boolean {
+    const v = this.selectedCell?.value;
+    if (!v || typeof v !== 'object') return false;
+    if (v.node?.nodeObject?.id) return true;          // session REST/Main
+    if (v.requestType && v.node?.nodeObject?.id) return true;  // requête feuille
+    return false;
+  }
+
+  navigateToDetail(event: MouseEvent) {
+    const v = this.selectedCell?.value;
+    if (!v || typeof v !== 'object') return;
+    const obj = v.node?.nodeObject;
+    if (!obj?.id) return;
+
+    let commands: any[];
+    if (v.requestType) {
+      // nœud feuille : JDBC, FTP, SMTP, LDAP
+      commands = ['/request', v.requestType, obj.id];
+    } else if ('protocol' in obj) {
+      // session REST
+      commands = ['/session', 'rest', obj.id];
+    } else {
+      // session Main (batch / view / ...)
+      commands = ['/session', 'main', obj.type?.toLowerCase(), obj.id];
+    }
+    this._router.navigateOnClick(event, commands, { queryParams: { env: this.env } });
+  }
+
+  getCellDetails(): { type: string; rows: { icon: string; label: string; value: string; color?: string }[] } {
+    const cell = this.selectedCell;
+    if (!cell) return { type: '', rows: [] };
+
+    if (cell.isEdge()) {
+      const rows: any[] = [];
+      if (cell.value?.nodes) {
+        const grouped = this.groupBy(cell.value.nodes, (v: any) => v.formatLink(cell.value.linkLbl), undefined);
+        Object.entries(grouped).forEach(([key, nodes]: any) => {
+          const isError   = /red|error|KO|5[0-9]{2}/i.test(key);
+          const isWarning = /4[0-9]{2}/i.test(key);
+          rows.push({
+            icon: isError ? 'error' : isWarning ? 'warning' : 'check_circle',
+            label: key,
+            value: nodes.length > 1 ? `×${nodes.length}` : '',
+            color: isError ? '#ef4444' : isWarning ? '#f59e0b' : '#22c55e'
+          });
+        });
+      } else {
+        rows.push({ icon: 'timeline', label: String(cell.value ?? ''), value: '', color: '#3b82f6' });
+      }
+      return { type: 'Lien', rows };
+    }
+
+    if (cell.isVertex() && cell.value?.requestType && cell.value?.node) {
+      const obj  = cell.value.node.nodeObject;
+      const rows: any[] = [];
+      const elapsed = obj?.end != null && obj?.start != null ? (obj.end - obj.start).toFixed(3) + ' s' : null;
+      const status  = obj?.end == null ? 'En cours' : (obj?.failed ? 'Échec' : 'Succès');
+      const statusColor = obj?.end == null ? '#f59e0b' : (obj?.failed ? '#ef4444' : '#22c55e');
+      const statusIcon  = obj?.end == null ? 'schedule' : (obj?.failed ? 'error' : 'check_circle');
+
+      // Champs communs
+      if (obj?.host)     rows.push({ icon: 'dns',      label: 'Hôte',     value: obj.port && obj.port !== -1 ? `${obj.host}:${obj.port}` : obj.host, color: '#6366f1' });
+      if (obj?.protocol) rows.push({ icon: 'lock',     label: 'Protocole',value: obj.protocol,   color: '#0ea5e9' });
+      if (elapsed)       rows.push({ icon: 'timer',    label: 'Durée',    value: elapsed,        color: '#8b5cf6' });
+                         rows.push({ icon: statusIcon, label: 'Statut',   value: status,         color: statusColor });
+      if (obj?.user)     rows.push({ icon: 'person',   label: 'Utilisateur', value: obj.user,    color: '#64748b' });
+
+      // Spécifique JDBC
+      if (cell.value.requestType === 'jdbc') {
+        if (obj?.name)        rows.push({ icon: 'storage',    label: 'Base',    value: obj.schema ? `${obj.name} / ${obj.schema}` : obj.name, color: '#059669' });
+        if (obj?.productName) rows.push({ icon: 'inventory',  label: 'Produit', value: obj.productName + (obj.productVersion ? ' ' + obj.productVersion : ''), color: '#10b981' });
+        if (obj?.command)     rows.push({ icon: 'code',       label: 'Commande',value: obj.command.length > 40 ? obj.command.substring(0, 40) + '…' : obj.command, color: '#6366f1' });
+        if (obj?.count != null) rows.push({ icon: 'format_list_numbered', label: 'Requêtes SQL', value: String(obj.count), color: '#0284c7' });
+      }
+      // Spécifique FTP
+      if (cell.value.requestType === 'ftp') {
+        if (obj?.serverVersion) rows.push({ icon: 'computer',   label: 'Serveur', value: obj.serverVersion, color: '#0e7490' });
+        if (obj?.clientVersion) rows.push({ icon: 'laptop',     label: 'Client',  value: obj.clientVersion, color: '#0891b2' });
+        if (obj?.commands?.length) rows.push({ icon: 'terminal', label: 'Commandes', value: `${obj.commands.length} cmd(s)`, color: '#0e7490' });
+      }
+      // Spécifique SMTP
+      if (cell.value.requestType === 'smtp') {
+        if (obj?.mails?.length) rows.push({ icon: 'email',  label: 'Mails',   value: `${obj.mails.length} destinataire(s)`, color: '#f59e0b' });
+        if (obj?.count != null) rows.push({ icon: 'format_list_numbered', label: 'Messages', value: String(obj.count), color: '#d97706' });
+      }
+      // Spécifique LDAP
+      if (cell.value.requestType === 'ldap') {
+        if (obj?.commands?.length) rows.push({ icon: 'manage_search', label: 'Requêtes', value: `${obj.commands.length} req(s)`, color: '#7c3aed' });
+      }
+      // Exception
+      if (obj?.exception) rows.push({ icon: 'bug_report', label: obj.exception.type ?? 'Exception', value: obj.exception.message ?? '', color: '#ef4444' });
+
+      return { type: cell.value.requestType.toUpperCase(), rows };
+    }
+
+    if (cell.isVertex() && cell.value?.node) {
+      const node = cell.value.node;
+      const obj  = node.nodeObject;
+      const rows: any[] = [];
+      if (obj?.appName)   rows.push({ icon: 'label',         label: 'Application', value: obj.appName,             color: '#3b82f6' });
+      if (obj?.host)      rows.push({ icon: 'dns',           label: 'Hôte',        value: obj.host,                color: '#6366f1' });
+      if (obj?.port)      rows.push({ icon: 'settings_ethernet', label: 'Port',    value: String(obj.port),        color: '#8b5cf6' });
+      if (obj?.protocol)  rows.push({ icon: 'lock',          label: 'Protocole',   value: obj.protocol,            color: '#0ea5e9' });
+      if (obj?.type)      rows.push({ icon: 'category',      label: 'Type',        value: obj.type,                color: '#f59e0b' });
+      if (obj?.os)        rows.push({ icon: 'computer',      label: 'OS',          value: obj.os,                  color: '#64748b' });
+      if (obj?.re)        rows.push({ icon: 'layers',        label: 'Env',         value: obj.re,                  color: '#10b981' });
+      if (obj?.restRequests?.length)     rows.push({ icon: 'api',          label: 'REST',   value: `${obj.restRequests.length} appel(s)`,     color: '#6366f1' });
+      if (obj?.databaseRequests?.length) rows.push({ icon: 'storage',      label: 'DB',     value: `${obj.databaseRequests.length} requête(s)`, color: '#059669' });
+      if (obj?.ftpRequests?.length)      rows.push({ icon: 'folder',       label: 'FTP',    value: `${obj.ftpRequests.length} transfert(s)`,  color: '#0e7490' });
+      if (obj?.mailRequests?.length)     rows.push({ icon: 'email',        label: 'SMTP',   value: `${obj.mailRequests.length} mail(s)`,      color: '#f59e0b' });
+      if (obj?.ldapRequests?.length)     rows.push({ icon: 'badge',        label: 'LDAP',   value: `${obj.ldapRequests.length} requête(s)`,   color: '#7c3aed' });
+      if (!rows.length)   rows.push({ icon: 'info', label: node.formatNode?.(this.serverLbl) ?? '', value: '', color: '#94a3b8' });
+      return { type: 'Nœud', rows };
+    }
+
+      return { type: '', rows: [] };
   }
 
   dr(tg: TreeGraph, data: any, serverlbl: Label, linklbl: Label) {
@@ -161,14 +358,14 @@ export class TreeView implements OnDestroy {
         if (v[1].length > 1) {
           b = this.draw(treeGraph, this.mergeRestRequests(v[0], v[1]), serverlbl, linklbl);
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<RestRequestNode>(v[1], v => { return v.nodeObject.status >= 500 || v.nodeObject.status == 0 }) ? 'ERROR' : 
-                                 this.checkSome<RestRequestNode>(v[1], v => { return v.nodeObject.status >= 400 && v.nodeObject.status < 500 }) ? 'CLIENT_ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.getGroupLinkStyle(v[1])] + "strokeWidth=1.5;"
         }
         else {
           let restRequestNode = v[1][0];
           b = this.draw(treeGraph, restRequestNode.nodeObject.remoteTrace ? restRequestNode.nodeObject.remoteTrace : <RestSessionTree>{ appName: v[1][0].nodeObject.host }, serverlbl, linklbl)
           label = restRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[restRequestNode.getLinkStyle()];
+
         }
 
         treeGraph.insertLink(label, a, b, linkStyle);
@@ -180,10 +377,10 @@ export class TreeView implements OnDestroy {
       let res = this.groupBy<DatabaseRequestTree, JdbcRequestNode>(server.databaseRequests, v => v.name, JdbcRequestNode)
       Object.entries(res).forEach((v: any[]) => {
         let jdbcRequestNode = v[1][0];
-        b = treeGraph.insertServer(jdbcRequestNode.formatNode(serverlbl), "JDBC"); // demon server
+        b = treeGraph.insertServer(v[1].length === 1 ? { serverlbl, node: jdbcRequestNode, requestType: 'jdbc' } : jdbcRequestNode.formatNode(serverlbl), "JDBC"); // demon server
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<JdbcRequestNode>(v[1], v => { return v.nodeObject.failed }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.getGroupFailedStyle(v[1])] + "strokeWidth=1.5;"
         } else {
           label = jdbcRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[jdbcRequestNode.getLinkStyle()];
@@ -197,10 +394,10 @@ export class TreeView implements OnDestroy {
       let res = this.groupBy<FtpRequestTree, FtpRequestNode>(server.ftpRequests, v => v.host, FtpRequestNode)
       Object.entries(res).forEach((v: any[]) => {
         let ftpRequestNode = v[1][0];
-        b = treeGraph.insertServer(ftpRequestNode.formatNode(serverlbl), "FTP"); // demon server
+        b = treeGraph.insertServer(v[1].length === 1 ? { serverlbl, node: ftpRequestNode, requestType: 'ftp' } : ftpRequestNode.formatNode(serverlbl), "FTP"); // demon server
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<FtpRequestNode>(v[1], v => { return v.nodeObject.failed }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.getGroupFailedStyle(v[1])] + "strokeWidth=1.5;"
         } else {
           label = ftpRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[ftpRequestNode.getLinkStyle()];
@@ -214,10 +411,10 @@ export class TreeView implements OnDestroy {
       let res = this.groupBy<MailRequestTree, MailRequestNode>(server.mailRequests, v => v.host, MailRequestNode)
       Object.entries(res).forEach((v: any[]) => {
         let mailRequestNode = v[1][0];
-        b = treeGraph.insertServer(mailRequestNode.formatNode(serverlbl), "SMTP"); // demon server
+        b = treeGraph.insertServer(v[1].length === 1 ? { serverlbl, node: mailRequestNode, requestType: 'smtp' } : mailRequestNode.formatNode(serverlbl), "SMTP"); // demon server
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<MailRequestNode>(v[1], v => { return v.nodeObject.failed }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.getGroupFailedStyle(v[1])] + "strokeWidth=1.5;"
         } else {
           label = mailRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[mailRequestNode.getLinkStyle()];
@@ -231,10 +428,10 @@ export class TreeView implements OnDestroy {
       let res = this.groupBy<DirectoryRequestTree, LdapRequestNode>(server.ldapRequests, v => v.host, LdapRequestNode)
       Object.entries(res).forEach((v: any[]) => {
         let ldapRequestNode = v[1][0];
-        b = treeGraph.insertServer(ldapRequestNode.formatNode(serverlbl), "LDAP"); // demon server
+        b = treeGraph.insertServer(v[1].length === 1 ? { serverlbl, node: ldapRequestNode, requestType: 'ldap' } : ldapRequestNode.formatNode(serverlbl), "LDAP"); // demon server
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1] };
-          linkStyle = LinkConfig[this.checkSome<MailRequestNode>(v[1], v => { return v.nodeObject.failed }) ? 'ERROR' : 'SUCCES'] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.getGroupFailedStyle(v[1])] + "strokeWidth=1.5;"
         } else {
           label = ldapRequestNode.formatLink(linklbl);
           linkStyle = LinkConfig[ldapRequestNode.getLinkStyle()];
@@ -260,6 +457,18 @@ export class TreeView implements OnDestroy {
     }, {})
   }
 
+  getGroupLinkStyle(nodes: RestRequestNode[]): string {
+    if (nodes.some(n => n.nodeObject.end == null))                                             return 'ONGOING';
+    if (nodes.some(n => n.nodeObject.status >= 500 || n.nodeObject.status === 0))              return 'ERROR';
+    if (nodes.some(n => n.nodeObject.status >= 400 && n.nodeObject.status < 500))             return 'CLIENT_ERROR';
+    return 'SUCCES';
+  }
+
+  getGroupFailedStyle(nodes: { nodeObject: { failed: boolean; end: any } }[]): string {
+    if (nodes.some(n => n.nodeObject.end == null)) return 'ONGOING';
+    return nodes.some(n => n.nodeObject.failed) ? 'ERROR' : 'SUCCES';
+  }
+
   checkSome<T>(arr: T[], fn: (o: T) => any) {
     return arr.some(r => fn(r));
   }
@@ -271,15 +480,146 @@ export class TreeView implements OnDestroy {
     return ('id' in obj ? 'REST' : 'GHOST')
   }
 
+  // ── Évolution 3 : Recherche de nœud ────────────────────────────────────────
+  toggleSearch() {
+    this.searchVisible = !this.searchVisible;
+    if (this.searchVisible) {
+      setTimeout(() => this.searchInputRef?.nativeElement?.focus(), 320);
+    } else {
+      this.clearSearch();
+    }
+  }
+
+  onSearch() {
+    if (!this.tree || !this.searchQuery.trim()) {
+      this.clearSearch();
+      return;
+    }
+    const q = this.searchQuery.toLowerCase();
+    const vertices = this.tree.graph.getChildVertices(this.tree._parent);
+    this.searchResults = vertices.filter((v: any) => {
+      const label = this.tree.graph.getLabel(v);
+      return label && String(label).toLowerCase().includes(q);
+    });
+    this.currentSearchIndex = 0;
+    this.focusSearchResult();
+  }
+
+  navigateSearch(direction: 1 | -1) {
+    if (!this.searchResults.length) return;
+    this.currentSearchIndex = (this.currentSearchIndex + direction + this.searchResults.length) % this.searchResults.length;
+    this.focusSearchResult();
+  }
+
+  focusSearchResult() {
+    if (!this.searchResults.length) return;
+    const cell = this.searchResults[this.currentSearchIndex];
+    this.tree.graph.setSelectionCell(cell);
+    this.tree.graph.scrollCellToVisible(cell, true);
+  }
+
+  clearSearch() {
+    this.searchQuery = '';
+    this.searchResults = [];
+    this.currentSearchIndex = 0;
+    this.tree?.graph.clearSelection();
+  }
+
+  // ── Évolution 5 : Export PNG ─────────────────────────────────────────────
+  async exportPNG() {
+    const container = this.graphContainer.nativeElement as HTMLElement;
+    const svgEl = container.querySelector('svg');
+    if (!svgEl) return;
+
+    // 1. Clone the SVG
+    const svgClone = svgEl.cloneNode(true) as SVGElement;
+    const bbox = svgEl.getBoundingClientRect();
+    svgClone.setAttribute('width',  String(bbox.width));
+    svgClone.setAttribute('height', String(bbox.height));
+
+    // 2. Inline all <image> href/xlink:href as base64 so canvas can render them
+    const imageEls = Array.from(svgClone.querySelectorAll('image'));
+    await Promise.all(imageEls.map(async (img) => {
+      const href = img.getAttribute('href') || img.getAttribute('xlink:href') || '';
+      if (!href || href.startsWith('data:')) return;
+      try {
+        const response = await fetch(href);
+        const blob     = await response.blob();
+        const b64      = await new Promise<string>((resolve, reject) => {
+          const reader  = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(blob);
+        });
+        img.setAttribute('href', b64);
+        img.removeAttribute('xlink:href');
+      } catch { /* skip unresolvable refs */ }
+    }));
+
+    // 3. Serialize & render to canvas
+    const svgStr = new XMLSerializer().serializeToString(svgClone);
+    const canvas  = document.createElement('canvas');
+    const scale   = window.devicePixelRatio || 1;
+    canvas.width  = bbox.width  * scale;
+    canvas.height = bbox.height * scale;
+    const ctx = canvas.getContext('2d')!;
+    ctx.scale(scale, scale);
+    ctx.fillStyle = '#f8fafc';
+    ctx.fillRect(0, 0, bbox.width, bbox.height);
+
+    const img = new Image();
+    const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+
+    img.onload = () => {
+      ctx.drawImage(img, 0, 0);
+      URL.revokeObjectURL(url);
+      const a = document.createElement('a');
+      a.download = `graph-${this.id}.png`;
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+    };
+    img.onerror = () => URL.revokeObjectURL(url);
+    img.src = url;
+  }
+
+  toggleMinimap() {
+    this.minimapVisible = !this.minimapVisible;
+    localStorage.setItem('tree_minimap', JSON.stringify(this.minimapVisible));
+  }
+
+  toggleLegend() {
+    this.legendVisible = !this.legendVisible;
+  }
+
+  toggleFullscreen() {
+    const el = document.getElementById('fixed-width-container');
+    if (!this.isFullscreen) {
+      el?.requestFullscreen().then(() => {
+        this.isFullscreen = true;
+        setTimeout(() => this.tree?.resizeAndCenter(), 200);
+      });
+    } else {
+      document.exitFullscreen().then(() => {
+        this.isFullscreen = false;
+        setTimeout(() => this.tree?.resizeAndCenter(), 200);
+      });
+    }
+  }
+
   ngAfterViewInit() {
     this._zone.runOutsideAngular(() => {
       this.resizeSubscription = fromEvent(window, 'resize').subscribe(() => {
         this._zone.run(() => {
-          if (this.tree) {
-            this.tree.resizeAndCenter()
-          }
-        })
+          if (this.tree) this.tree.resizeAndCenter();
+        });
+      });
 
+      fromEvent(document, 'fullscreenchange').subscribe(() => {
+        this._zone.run(() => {
+          this.isFullscreen = !!document.fullscreenElement;
+          setTimeout(() => this.tree?.resizeAndCenter(), 200);
+        });
       });
     });
   }
@@ -288,15 +628,18 @@ export class TreeView implements OnDestroy {
     if (this.resizeSubscription) {
       this.resizeSubscription.unsubscribe();
     }
+    this.tree?.disconnectObserver();
     this.subscriptions.forEach(s => s.unsubscribe());
   }
 
 
   viewByServerLbl(serverLbl: Label) {
+    this.resetSelection();
     this.tree.clearCells();
     this.tree.draw(() => this.dr(this.tree, this.TreeObj, this.serverLbl = serverLbl, this.linkLbl))
   }
   viewByLinklbl(linkLbl: Label) {
+    this.resetSelection();
     this.tree.clearCells();
     this.tree.draw(() => this.dr(this.tree, this.TreeObj, this.serverLbl, this.linkLbl = linkLbl))
   }
@@ -313,6 +656,7 @@ export class TreeView implements OnDestroy {
     this.subscriptions.push(forkJoin(
       reqOb
     ).pipe(finalize(() => {
+      this.resetSelection();
       this.tree.clearCells();
       this.LabelIsLoaded['METHOD_RESOURCE'] = true;
       this.tree.draw(() => this.dr(this.tree, this.TreeObj, this.serverLbl, this.linkLbl = Label.METHOD_RESOURCE))
@@ -335,6 +679,7 @@ export class TreeView implements OnDestroy {
     this.subscriptions.push(forkJoin(
       reqOb
     ).pipe(finalize(() => {
+      this.resetSelection();
       this.tree.clearCells();
       this.LabelIsLoaded['SIZE_COMPRESSION'] = true;
       this.tree.draw(() => this.dr(this.tree, this.TreeObj, this.serverLbl, this.linkLbl = Label.SIZE_COMPRESSION))
@@ -360,6 +705,7 @@ export class TreeView implements OnDestroy {
     this.subscriptions.push(forkJoin(
       reqOb
     ).pipe(finalize(() => {
+      this.resetSelection();
       this.tree.clearCells();
       this.LabelIsLoaded['STATUS_EXCEPTION'] = true;
       this.tree.draw(() => this.dr(this.tree, this.TreeObj, this.serverLbl, this.linkLbl = Label.STATUS_EXCEPTION))
@@ -399,6 +745,32 @@ export class TreeView implements OnDestroy {
     fn(treeObj);
   }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
