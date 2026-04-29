@@ -36,12 +36,17 @@ import {ServerSupervisionView} from "./views/supervision/_component/server/serve
 import {ClientSupervisionView} from "./views/supervision/_component/client/client-supervision.view";
 import {RequestKpiView} from "./views/kpi/request/request-kpi.view";
 import {SessionKpiView} from "./views/kpi/session/session-kpi.view";
+import {AuthService} from "./auth/auth.service";
+import {authGuard} from "./auth/auth.guard";
+import {OAuthModule} from "angular-oauth2-oidc";
+import {AuthInterceptor} from "./auth/auth.interceptor";
 
 registerLocaleData(localeFr, 'fr-FR');
 
 export function initializeAuth(authService: AuthService) {
   return () => authService.init();
 }
+
 const routes: Route[] = [
   {
     path: 'request', children: [
@@ -63,7 +68,7 @@ const routes: Route[] = [
         ]
       },
       {path: '**', pathMatch: 'full', redirectTo: `/request/rest`}
-    ]
+    ], canActivate: [authGuard]
   },
   {
     path: 'session', children: [
@@ -131,7 +136,7 @@ const routes: Route[] = [
         ]
       },
       {path: '**', pathMatch: 'full', redirectTo: `/session/rest`}
-    ]
+    ], canActivate: [authGuard]
   },
   {
     path: 'instance',
@@ -143,58 +148,60 @@ const routes: Route[] = [
           return `instance > ${route.paramMap.get('id_instance')}`;
         }
       },
-    ]
+    ],
+    canActivate: [authGuard]
   },
   {
     path: 'analytic/:user',
     component: AnalyticView,
     title: 'Parcours Utilisateur',
-    canActivate: [authGuard],
+    canActivate: [authGuard]
   },
   {
     path: 'home',
     component: DashboardComponent,
     title: 'Page d\'accueil',
-    canActivate: [authGuard],
+    canActivate: [authGuard]
   },
   {
     path: 'deploiment',
     component: DeploimentComponent,
-    title: 'Déploiement',
-    canActivate: [authGuard],
-    title: 'Instances Actives'
+    title: 'Instances Actives',
+    canActivate: [authGuard]
   },
   {
     path: 'architecture',
     component: ArchitectureView,
     title: 'Architecture',
-    canActivate: [authGuard],
+    canActivate: [authGuard]
   },
   {
     path: 'supervision/server/:instance',
     component: ServerSupervisionView,
     title: 'Server Supervision',
-    canActivate: [authGuard],
+    canActivate: [authGuard]
   },
   {
     path: 'kpi/request/:request_type',
     component: RequestKpiView,
     title:  (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
       return Constants.MAPPING_TYPE['request'].title + ' ' + Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('request_type')].title + ' > Tableau de bord';
-    }
+    },
+    canActivate: [authGuard]
   },
   {
     path: 'kpi/session/:session_type',
     component: SessionKpiView,
     title:  (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
       return Constants.MAPPING_TYPE[route.paramMap.get('session_type')].title + ' > Tableau de bord';
-    }
+    },
+    canActivate: [authGuard]
   },
   {
     path: 'supervision/client/:instance',
     component: ClientSupervisionView,
     title: 'Client Supervision',
-    canActivate: [authGuard],
+    canActivate: [authGuard]
   },
   {path: '**', pathMatch: 'full', redirectTo: `/home`}
 ];

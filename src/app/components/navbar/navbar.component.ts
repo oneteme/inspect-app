@@ -1,14 +1,15 @@
-import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { FormControl } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { distinctUntilChanged, finalize, Subscription } from 'rxjs';
-import { DomSanitizer } from '@angular/platform-browser';
-import { MatIconRegistry } from '@angular/material/icon';
-import { MatMenuTrigger } from '@angular/material/menu';
-import { app } from 'src/environments/environment';
-import { Constants } from '../../views/constants';
-import { EnvRouter } from '../../service/router.service';
-import { InstanceService } from '../../service/jquery/instance.service';
+import {Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {FormControl} from '@angular/forms';
+import {ActivatedRoute} from '@angular/router';
+import {distinctUntilChanged, finalize, Subscription} from 'rxjs';
+import {DomSanitizer} from '@angular/platform-browser';
+import {MatIconRegistry} from '@angular/material/icon';
+import {MatMenuTrigger} from '@angular/material/menu';
+import {app, auth} from 'src/environments/environment';
+import {Constants} from '../../views/constants';
+import {EnvRouter} from '../../service/router.service';
+import {InstanceService} from '../../service/jquery/instance.service';
+import {AuthService} from "../../auth/auth.service";
 
 interface SubNavItem {
   label: string;
@@ -45,6 +46,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   env: FormControl<string> = new FormControl();
   isLoadingEnv = false;
   subscriptions: Subscription[] = [];
+  authEnabled = auth.enabled;
 
   readonly navItems: NavItem[] = [
     {
@@ -66,7 +68,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     { label: Constants.MAPPING_TYPE['view'].title, icon: Constants.MAPPING_TYPE['view'].icon, id: 'view', route: 'session/view' },
   ];
 
-  constructor() {
+  constructor(private authService: AuthService) {
     const iconRegistry = inject(MatIconRegistry);
     const sanitizer = inject(DomSanitizer);
     iconRegistry.addSvgIcon('github', sanitizer.bypassSecurityTrustResourceUrl('./assets/github.svg'));
@@ -139,6 +141,34 @@ export class NavbarComponent implements OnInit, OnDestroy {
   getEnvClass(env: string): string {
     const known = ['dev', 'ppd', 'prv', 'rec', 'pg', 'rcc'];
     return known.includes(env) ? env : 'other';
+  }
+
+  getUserClaims(): any {
+    return this.authService.getUserProfile() || {};
+  }
+
+  getUserInitials(): string {
+    const claims = this.getUserClaims();
+    const name: string = claims?.name || claims?.email || '';
+    if (!name) return '?';
+    const parts = name.split(/[\s.@_-]/);
+    return parts.length >= 2
+      ? (parts[0][0] + parts[1][0]).toUpperCase()
+      : name.substring(0, 2).toUpperCase();
+  }
+
+  getUserDisplayName(): string {
+    const claims = this.getUserClaims();
+    return claims?.name || claims?.preferred_username || claims?.email || 'Utilisateur';
+  }
+
+  getUserEmail(): string {
+    const claims = this.getUserClaims();
+    return claims?.email || '';
+  }
+
+  logout() {
+    this.authService.logout();
   }
 
 }

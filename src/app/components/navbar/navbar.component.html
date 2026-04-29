@@ -109,6 +109,29 @@
 
       <div class="nav-divider"></div>
 
+      <!-- BOUTON UTILISATEUR + LOGOUT -->
+      <button *ngIf="authEnabled"
+              class="user-btn"
+              [matMenuTriggerFor]="userMenu"
+              [matTooltip]="getUserDisplayName()">
+        <span class="user-avatar">{{ getUserInitials() }}</span>
+      </button>
+
+      <mat-menu #userMenu="matMenu" class="user-menu-panel" xPosition="before">
+        <div class="user-menu-header" (click)="$event.stopPropagation()">
+          <div class="user-menu-avatar">{{ getUserInitials() }}</div>
+          <div class="user-menu-info">
+            <span class="user-menu-name">{{ getUserDisplayName() }}</span>
+            <span class="user-menu-email">{{ getUserEmail() }}</span>
+          </div>
+        </div>
+        <div class="user-menu-divider"></div>
+        <button mat-menu-item class="logout-item" (click)="logout()">
+          <mat-icon class="material-symbols-outlined">logout</mat-icon>
+          <span>Se déconnecter</span>
+        </button>
+      </mat-menu>
+
       <a
         class="action-btn github-btn"
         href="https://github.com/oneteme"
