@@ -1,44 +1,27 @@
 import {Component, inject, Input} from "@angular/core";
-import {InspectCollectorConfiguration} from "../../../model/trace.model";
-import {ConfigDialogComponent} from "../../../views/supervision/_component/config-dialog/config-dialog.component";
+import {InspectCollectorConfiguration, InstanceEnvironment} from "../../../model/trace.model";
+import {ConfigDialogComponent} from "../config-dialog/config-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
 
 @Component({
   selector: 'app-version-badge',
   template: `
-    <div class="version-badge"
+    <div class="info-chip version-chip"
          *ngIf="version"
-         [ngStyle]="{'cursor': configuration ? 'pointer' : 'default'}"
+         [class.clickable]="configuration"
          (click)="configuration ? openConfig(configuration, $event) : null"
-         [style.background-color]="backgroundColor"
-         [matTooltip]="collector">
-      <mat-icon class="material-symbols-outlined" *ngIf="configuration">settings</mat-icon>
-      {{ version }}
+         [matTooltip]="collector || ''">
+      <mat-icon class="material-symbols-outlined chip-action" [style.color]="backgroundColor || null" *ngIf="configuration">settings</mat-icon>
+      <span class="chip-value" [style.color]="backgroundColor || null">{{ version }}</span>
     </div>
   `,
   styles: [`
-      .version-badge {
-          display: inline-flex;
-          align-items: center;
-          gap: 6px;
-          padding: 6px 12px;
-          border-radius: 8px;
-          font-weight: 700;
-          color: white;
-          transition: all 0.2s ease;
-          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    :host { display: contents; }
 
-          mat-icon {
-              font-size: 16px;
-              width: 16px;
-              height: 16px;
-          }
-
-          &:hover {
-              transform: translateY(-2px);
-              box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-          }
-      }
+    .version-chip {
+      border-color: #c8d8e8;
+      background: #f0f4f8;
+    }
   `]
 })
 export class VersionBadgeComponent {
@@ -47,12 +30,14 @@ export class VersionBadgeComponent {
   @Input() backgroundColor: string;
   @Input() version: string;
   @Input() collector: string;
+  @Input() name: string;
   @Input() configuration: InspectCollectorConfiguration;
+  @Input() instance: InstanceEnvironment;
 
   openConfig(config: InspectCollectorConfiguration, event: any) {
     event.stopPropagation();
     this._dialog.open(ConfigDialogComponent, {
-      data: config
+      data: { name: this.name, version: this.version, collector: this.collector, config: config }
     });
   }
 }

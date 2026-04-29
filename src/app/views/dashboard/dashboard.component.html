@@ -104,25 +104,9 @@
   </div>
 </div>
 
-<div class="card-container mat-elevation-z5" style="margin: 0 0 1em 0; height: 350px">
-  <div class="title-container"><div class="title"><label-icon icon="error">Erreur</label-icon></div></div>
-  <div style="display: flex; justify-content: space-between; height: 100%">
-    <div style="display: flex; flex-direction: column; width: 100%;">
-      <div class="title-container"><div class="sub-title">Serveur</div></div>
-      <exceptions-table-new [data]="tabRequests.sessionExceptionsTable?.data" [isLoading]="tabRequests.sessionExceptionsTable?.isLoading" (onRowSelected)="onSessionExceptionRowSelected($event)"></exceptions-table-new>
-    </div>
-    <mat-divider style="margin: 5em" [vertical]="true"></mat-divider>
-    <div style="display: flex; flex-direction: column; width: 100%">
-      <div class="title-container"><div class="sub-title">Batch</div></div>
-      <exceptions-table-new [data]="tabRequests.batchExceptionTable?.data" [isLoading]="tabRequests.batchExceptionTable?.isLoading" (onRowSelected)="onBatchExceptionRowSelected($event)"></exceptions-table-new>
-    </div>
-  </div>
-</div>
-
-<div class="card-container mat-elevation-z5" style="margin: 0 0 1em 0; height: 306px">
-  <div class="title-container">
-
-    <div class="title"><label-icon icon="deployed_code_history">Lancement de Serveur</label-icon></div>
-  </div>
-  <server-start-table [data]="tabRequests.serverStartTable?.data" [isLoading]="tabRequests.serverStartTable?.isLoading"></server-start-table>
-</div>
+<exceptions-table
+  [data]="tabRequests.exceptionsTable?.data"
+  [isLoading]="tabRequests.exceptionsTable?.isLoading"
+  [enableTypeColumn]="true"
+  (onRowSelected)="onSessionExceptionRowSelected($event)">
+</exceptions-table>
