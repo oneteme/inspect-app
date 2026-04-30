@@ -175,9 +175,14 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
 
     heatMapControl: FormControl = new FormControl<boolean>(false);
     treeMapControl: FormControl = new FormControl<boolean>(false);
+    focusControl:   FormControl = new FormControl<string | null>(null);
+    depthControl:   FormControl = new FormControl<number>(1);
+    edgeTypeFilters: { [key: string]: boolean } = { 'REST': true, 'JDBC': true, 'FTP': true, 'SMTP': true, 'LDAP': true, 'MAIN': true };
 
     subscriptions: Subscription[] = [];
     params: Partial<{ env: string, start: Date, end: Date }> = {};
+    private _architectures: Architecture[] = [];   // données brutes conservées pour le filtre
+    appNames: string[] = [];                       // liste des microservices disponibles
 
     @ViewChild('graphContainer') graphContainer: ElementRef;
     @ViewChild('outlineContainer') outlineContainer: ElementRef;
@@ -190,6 +195,10 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
     searchResults: any[] = [];
     currentSearchIndex: number = 0;
     searchVisible: boolean = false;
+
+    selectedVertex: { name: string; type: string; incomingCount: number; outgoingCount: number; incomingNames: string[]; outgoingNames: string[] } | null = null;
+    hoveredVertex: { name: string; type: string; incomingCount: number; outgoingCount: number; x: number; y: number } | null = null;
+    searchHighlightedNodes: any[] = [];  // Nodes trouvés lors de la recherche
 
     statsCards: { type: string; label: string; count: number; icon: string; color: string }[] = [];
 
@@ -248,11 +257,114 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
                 this.heatMapConfig = { ...newConfig };
             }
         }));
+
+        this.subscriptions.push(this.focusControl.valueChanges.subscribe(name => {
+            if (!this.tree || !this._architectures.length) return;
+            this.tree.clearAnimatedEdges(); // Nettoyer les animations quand le filtre change
+            this.depthControl.setValue(1, { emitEvent: false }); // reset profondeur
+            this.tree.clearCells();
+            this.tree.draw(() => this.draw(this.tree, this._architectures, name, 1));
+            if (name) {
+                setTimeout(() => this.tree.highlightFocusedNode(name), 100);
+            } else {
+                this.tree.clearHighlight();
+            }
+        }));
+
+        this.subscriptions.push(this.depthControl.valueChanges.subscribe(depth => {
+            const name = this.focusControl.value;
+            if (!this.tree || !this._architectures.length || !name) return;
+            this.tree.clearAnimatedEdges();
+            this.tree.clearCells();
+            this.tree.draw(() => this.draw(this.tree, this._architectures, name, depth));
+            setTimeout(() => this.tree.highlightFocusedNode(name), 100);
+        }));
     }
 
     ngAfterViewInit() {
         this.tree = ArchitectureTree.setup(this.graphContainer.nativeElement);
         this.tree.setOutline(this.outlineContainer.nativeElement);
+
+        // Configure l'écouteur de click sur les vertices pour animer les edges des appelants
+        this.tree.setupVertexClickListener(
+            (vertex: any) => {
+                // Single-click : afficher la card
+                const vertexName = this.tree._graph.model.getValue(vertex);
+                const architecture = this._architectures.find(a => a.name === vertexName);
+                const incomingEdges = this.tree._graph.getIncomingEdges(vertex);
+                const outgoingEdges = this.tree._graph.getOutgoingEdges(vertex);
+                
+                // Récupérer les noms des nodes appelants
+                const incomingNames = incomingEdges.map((edge: any) => {
+                    const source = edge.getTerminal(true);
+                    return this.tree._graph.model.getValue(source);
+                }).sort();
+                
+                // Récupérer les noms des nodes appelés
+                const outgoingNames = outgoingEdges.map((edge: any) => {
+                    const target = edge.getTerminal(false);
+                    return this.tree._graph.model.getValue(target);
+                }).sort();
+                
+                this.selectedVertex = {
+                    name: vertexName,
+                    type: architecture?.type ?? 'UNKNOWN',
+                    incomingCount: incomingEdges.length,
+                    outgoingCount: outgoingEdges.length,
+                    incomingNames: incomingNames,
+                    outgoingNames: outgoingNames
+                };
+                
+                // N'animer que si aucun microservice n'est sélectionné dans le filtre
+                if (this.focusControl.value === null) {
+                    this.tree.animateIncomingEdges(vertex);
+                }
+            },
+            () => {
+                // Clic sur le fond : nettoyer les animations et la card
+                this.selectedVertex = null;
+                if (this.focusControl.value === null) {
+                    this.tree.clearAnimatedEdges();
+                }
+            },
+            (vertex: any) => {
+                // Double-click : focus automatique SEULEMENT pour REST et MAIN
+                const vertexName = this.tree._graph.model.getValue(vertex);
+                const architecture = this._architectures.find(a => a.name === vertexName);
+                
+                // Vérifier que c'est un type focalisable (REST ou MAIN)
+                if (architecture && (architecture.type === 'REST' || architecture.type === 'MAIN')) {
+                    this.focusControl.setValue(vertexName);
+                    this.depthControl.setValue(1, { emitEvent: false });
+                }
+                // Sinon, le double-click n'a aucun effet sur les ressources
+            }
+        );
+
+        // Écouteurs de hover pour le tooltip
+        (this.tree as any).onVertexHover = (vertex: any, event: MouseEvent) => {
+            const vertexName = this.tree._graph.model.getValue(vertex);
+            const architecture = this._architectures.find(a => a.name === vertexName);
+            const incomingEdges = this.tree._graph.getIncomingEdges(vertex);
+            const outgoingEdges = this.tree._graph.getOutgoingEdges(vertex);
+            
+            this._zone.run(() => {
+                this.hoveredVertex = {
+                    name: vertexName,
+                    type: architecture?.type ?? 'UNKNOWN',
+                    incomingCount: incomingEdges.length,
+                    outgoingCount: outgoingEdges.length,
+                    x: event.clientX,
+                    y: event.clientY
+                };
+            });
+        };
+
+        (this.tree as any).onVertexHoverOut = () => {
+            this._zone.run(() => {
+                this.hoveredVertex = null;
+            });
+        };
 
         this._zone.runOutsideAngular(() => {
             this.resizeSubscription = fromEvent(window, 'resize').subscribe(() => {
@@ -334,6 +446,9 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
             return res.restSession;
         }), finalize(() => this.syntheseIsLoading = false)).subscribe({
             next: res => {
+                this._architectures = res;
+                this.appNames = [...new Set(res.map((a: Architecture) => a.name))].sort();
+                this.focusControl.setValue(null, { emitEvent: false }); // reset filtre
                 this.tree.clearCells();
                 this.tree.draw(() => this.draw(this.tree, res));
                 this.computeStats(res);
@@ -424,64 +539,137 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
     }
 
 
-    draw(tree: ArchitectureTree, architectures: Architecture[]) {
+    /**
+     * Calcul BFS des nœuds à inclure à partir de focusedApp sur `depth` niveaux
+     * dans les deux directions (appelants + appelés).
+     */
+    private getIncludedNodes(architectures: Architecture[], focusedApp: string, depth: number): Set<string> {
+        const included = new Set<string>([focusedApp]);
+        let frontier = new Set<string>([focusedApp]);
+
+        for (let d = 0; d < depth; d++) {
+            const next = new Set<string>();
+            frontier.forEach(node => {
+                // Appelants : apps qui ont `node` dans leurs remoteServers
+                architectures.forEach(a => {
+                    if (!included.has(a.name) && a.remoteServers?.some(r => (r.schema ?? r.name) === node)) {
+                        included.add(a.name);
+                        next.add(a.name);
+                    }
+                });
+                // Appelés : remoteServers de `node`
+                architectures.find(a => a.name === node)?.remoteServers?.forEach(r => {
+                    const key = r.schema ?? r.name;
+                    if (!included.has(key)) {
+                        included.add(key);
+                        next.add(key);
+                    }
+                });
+            });
+            frontier = next;
+            if (!frontier.size) break;
+        }
+        return included;
+    }
+
+    draw(tree: ArchitectureTree, architectures: Architecture[], focusedApp?: string | null, depth: number = 1) {
         const cfg = ServerConfig;
         const W = cfg['REST'].width, H = cfg['REST'].height;
         const nodeStyle = 'verticalLabelPosition=bottom;verticalAlign=top;fontSize=10;';
-        // Style d'arête amélioré pour éviter que les edges touchent les labels des vertex
-        const edgeStyle = 'rounded=1;orthogonalLoop=1;jettySize=auto;fontSize=9;fontColor=#555;targetPerimeterSpacing=20;';
+        const edgeStyle = 'rounded=1;curved=1;orthogonalLoop=1;jettySize=auto;fontSize=9;fontColor=#555;strokeWidth=1.5;endArrow=block;endFill=1;endSize=6;startArrow=none;sourcePerimeterSpacing=12;';
 
-        // ── Déduplication ─────────────────────────────────────────────────────
-        const appNodes:      { [k: string]: any } = {};  // REST + BATCH + VIEW + ...
-        const resourceNodes: { [k: string]: any } = {};  // JDBC + FTP + SMTP + LDAP
+        // ── Filtrage BFS selon profondeur ─────────────────────────────────────
+        let includedNodes: Set<string> | null = null;
+        if (focusedApp) {
+            includedNodes = depth >= 99
+                ? null  // ∞ = tout afficher
+                : this.getIncludedNodes(architectures, focusedApp, depth);
+        }
 
-        architectures.forEach(a => {
-            if (!appNodes[a.name] && cfg[a.type]) appNodes[a.name] = null;
+        const filtered = focusedApp && includedNodes
+            ? architectures.filter(a => includedNodes!.has(a.name))
+            : architectures;
+
+        // ── Déduplication : une seule map pour éviter tout doublon ──────────────
+        const allNodes: { [k: string]: { type: string; vertex: any } } = {};
+
+        // Calculer AVANT quels nœuds seront utilisés selon le filtre
+        const enabledTypes = this.edgeTypeFilters;
+        const usedApps = new Set<string>();
+        const usedResources = new Set<string>();
+        
+        // Parcourir les edges et tracker les apps et ressources utilisées
+        filtered.forEach(a => {
+            (a.remoteServers ?? []).forEach(r => {
+                // Vérifier si ce type est actif dans le filtre
+                if (enabledTypes[r.type]) {
+                    usedApps.add(a.name); // L'app a au moins une edge active
+                    const key = r.schema ?? r.name;
+                    usedResources.add(key); // La ressource a une edge active
+                }
+            });
+        });
+
+        // 1. Créer SEULEMENT les nœuds applicatifs qui ont des edges actives
+        filtered.forEach(a => {
+            if (usedApps.has(a.name) && !allNodes[a.name] && cfg[a.type]) {
+                allNodes[a.name] = { type: a.type, vertex: null };
+            }
+        });
+
+        // 2. Créer SEULEMENT les ressources utilisées
+        filtered.forEach(a => {
             (a.remoteServers ?? []).forEach(r => {
                 const key = r.schema ?? r.name;
-                if (!resourceNodes[key] && cfg[r.type]) resourceNodes[key] = null;
+                if (!focusedApp || !includedNodes || includedNodes.has(key)) {
+                    if (usedResources.has(key) && !allNodes[key] && cfg[r.type]) {
+                        allNodes[key] = { type: r.type, vertex: null };
+                    }
+                }
             });
         });
 
         // ── Insertion des nœuds (sans coords — laissées au layout) ───────────
-        Object.keys(appNodes).forEach(k => {
-            const a = architectures.find(x => x.name === k);
-            const icon = cfg[a?.type]?.icon ?? cfg['REST'].icon;
-            appNodes[k] = tree._graph.insertVertex(tree._parent, null, k, 0, 0, W, H, icon + nodeStyle);
+        const focusedStyle = 'verticalLabelPosition=bottom;verticalAlign=top;fontSize=10;strokeColor=#f97316;strokeWidth=3;fillColor=#fff7ed;';
+        const cycleStyle = 'verticalLabelPosition=bottom;verticalAlign=top;fontSize=10;strokeColor=#ef4444;strokeWidth=3;fillColor=#fee2e2;'; // Rouge pour les cycles
+        Object.entries(allNodes).forEach(([k, info]) => {
+            const icon = cfg[info.type]?.icon ?? cfg['REST'].icon;
+            const style = (focusedApp && k === focusedApp) ? icon + focusedStyle : icon + nodeStyle;
+            info.vertex = tree._graph.insertVertex(tree._parent, null, k, 0, 0, W, H, style);
         });
 
-        Object.keys(resourceNodes).forEach(k => {
-            const r = architectures.flatMap(a => a.remoteServers ?? []).find(r => (r.schema ?? r.name) === k);
-            const icon = r && cfg[r.type] ? cfg[r.type].icon : cfg['JDBC'].icon;
-            resourceNodes[k] = tree._graph.insertVertex(tree._parent, null, k, 0, 0, W, H, icon + nodeStyle);
-        });
-
-        // ── Edges app → ressource (dédupliqués) ───────────────────────────────
-        architectures.forEach(a => {
-            const src = appNodes[a.name];
+        // ── Edges : tous les liens entre nœuds inclus ─────────────────────────
+        filtered.forEach(a => {
+            const src = allNodes[a.name]?.vertex;
             if (!src || !a.remoteServers) return;
             a.remoteServers.forEach(r => {
+                // Filtrer par type d'edge
+                if (!enabledTypes[r.type]) return;
+                
                 const key = r.schema ?? r.name;
-                const tgt = resourceNodes[key];
-                if (!tgt) return;
+                if (!allNodes[key]) return; // cible non incluse
+                const tgt = allNodes[key]?.vertex;
+                if (!tgt || src === tgt) return;
                 if (tree._graph.getEdgesBetween(src, tgt).length === 0) {
-                    const edgeColor = r.type === 'JDBC' ? 'strokeColor=#FF8C00;'
-                                    : r.type === 'FTP'  ? 'strokeColor=#0e7490;'
-                                    : r.type === 'SMTP' ? 'strokeColor=#f59e0b;'
-                                    : r.type === 'LDAP' ? 'strokeColor=#7c3aed;'
-                                    : 'strokeColor=#aab;';
-                    tree._graph.insertEdge(tree._parent, null, r.schema ?? r.name ?? '', src, tgt, edgeStyle + edgeColor);
+                    const edgeColor = r.type === 'JDBC' ? 'strokeColor=#FF7F00;'
+                                    : r.type === 'FTP'  ? 'strokeColor=#0d9488;'
+                                    : r.type === 'SMTP' ? 'strokeColor=#f97316;'
+                                    : r.type === 'LDAP' ? 'strokeColor=#8b5cf6;'
+                                    : r.type === 'REST' ? 'strokeColor=#2563eb;'
+                                    : r.type === 'MAIN' ? 'strokeColor=#16a34a;'
+                                    : 'strokeColor=#78716c;';
+                    tree._graph.insertEdge(tree._parent, null, '', src, tgt, edgeStyle + edgeColor);
                 }
             });
         });
 
         // ── Layout hiérarchique automatique (minimise les croisements) ────────
         const layout = new mx.mxHierarchicalLayout(tree._graph);
-        (layout as any).orientation        = mx.mxConstants.DIRECTION_SOUTH;
-        (layout as any).intraCellSpacing   = 40;
-        (layout as any).interRanksSpacing  = 80;
-        (layout as any).interHierarchySpacing = 60;
-        (layout as any).disableEdgeStyle   = false;
+        (layout as any).orientation           = mx.mxConstants.DIRECTION_NORTH;
+        (layout as any).intraCellSpacing      = 40;
+        (layout as any).interRankCellSpacing  = 100;
+        (layout as any).interHierarchySpacing = 40;
+        (layout as any).disableEdgeStyle      = false;
         layout.execute(tree._parent);
     }
 
@@ -577,12 +765,15 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
             return label && String(label).toLowerCase().includes(q);
         });
         this.currentSearchIndex = 0;
+        this.searchHighlightedNodes = this.searchResults;
+        this.applySearchHighlight();
         this.focusSearchResult();
     }
 
     navigateSearch(direction: 1 | -1) {
         if (!this.searchResults.length) return;
         this.currentSearchIndex = (this.currentSearchIndex + direction + this.searchResults.length) % this.searchResults.length;
+        this.applySearchHighlight();
         this.focusSearchResult();
     }
 
@@ -596,7 +787,9 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
     clearSearch() {
         this.searchQuery = '';
         this.searchResults = [];
+        this.searchHighlightedNodes = [];
         this.currentSearchIndex = 0;
+        this.clearSearchHighlight();
         this.tree?._graph.clearSelection();
     }
 
@@ -605,6 +798,93 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
             set.add(mapper(cur));
             return set;
         }, new Set<U>());
+    }
+
+    toggleEdgeTypeFilter(type: string) {
+        this.edgeTypeFilters[type] = !this.edgeTypeFilters[type];
+        if (!this.tree || !this._architectures.length) return;
+        const name = this.focusControl.value;
+        const depth = this.depthControl.value;
+        this.tree.clearAnimatedEdges();
+        this.tree.clearCells();
+        this.tree.draw(() => this.draw(this.tree, this._architectures, name, depth));
+        if (name) {
+            setTimeout(() => this.tree.highlightFocusedNode(name), 100);
+        }
+    }
+
+    /**
+     * Applique le highlighting pour la recherche
+     */
+    applySearchHighlight() {
+        this.clearSearchHighlight();
+        if (!this.tree || this.searchResults.length === 0) return;
+
+        const allVertices = this.tree._graph.getChildVertices(this.tree._parent);
+
+        // Appliquer le style à tous les vertices
+        allVertices.forEach((v: any) => {
+            const state = this.tree._graph.view.getState(v);
+            if (!state || !state.shape || !state.shape.node) return;
+
+            const node: SVGElement = state.shape.node;
+            const isHighlighted = this.searchResults.includes(v);
+            const isCurrent = v === this.searchResults[this.currentSearchIndex];
+
+            if (isCurrent) {
+                // Node courant: glow vert intensif
+                node.style.filter = 'drop-shadow(0 0 12px rgba(34, 197, 94, 0.8))';
+                node.style.opacity = '1';
+            } else if (isHighlighted) {
+                // Autres résultats: glow vert léger
+                node.style.filter = 'drop-shadow(0 0 6px rgba(34, 197, 94, 0.5))';
+                node.style.opacity = '0.9';
+            } else {
+                // Non trouvés: estompés
+                node.style.opacity = '0.2';
+                node.style.filter = 'grayscale(100%)';
+            }
+        });
+
+        // Estomper aussi les edges
+        const allEdges = this.tree._graph.getEdges(this.tree._parent);
+        allEdges.forEach((e: any) => {
+            const state = this.tree._graph.view.getState(e);
+            if (!state || !state.shape || !state.shape.node) return;
+            const node: SVGElement = state.shape.node;
+            const paths = node.querySelectorAll('path');
+            paths.forEach((p: SVGPathElement) => {
+                p.style.opacity = '0.1';
+            });
+        });
+    }
+
+    /**
+     * Nettoie le highlighting de la recherche
+     */
+    clearSearchHighlight() {
+        if (!this.tree) return;
+
+        const allVertices = this.tree._graph.getChildVertices(this.tree._parent);
+        allVertices.forEach((v: any) => {
+            const state = this.tree._graph.view.getState(v);
+            if (!state || !state.shape || !state.shape.node) return;
+            const node: SVGElement = state.shape.node;
+            node.style.filter = '';
+            node.style.opacity = '';
+        });
+
+        // Restaurer les edges
+        const allEdges = this.tree._graph.getEdges(this.tree._parent);
+        allEdges.forEach((e: any) => {
+            const state = this.tree._graph.view.getState(e);
+            if (!state || !state.shape || !state.shape.node) return;
+            const node: SVGElement = state.shape.node;
+            const paths = node.querySelectorAll('path');
+            paths.forEach((p: SVGPathElement) => {
+                p.style.opacity = '';
+            });
+        });
     }
 }
 

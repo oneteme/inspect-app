@@ -51,7 +51,8 @@
   border-radius: 10px;
   padding: 4px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.10);
-  width: 40px;
+  width: auto;
+  min-width: 40px;
 }
 .zoom-btn {
   width: 32px !important;
@@ -84,6 +85,25 @@
   height: 1px;
   background: #e2e8f0;
   margin: 2px 0;
+}
+
+// Filtre microservice dans la toolbar
+.focus-select {
+  font-size: 12px;
+  height: 28px;
+  line-height: 28px;
+  padding: 0 8px;
+  border-radius: 6px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  color: #334155;
+  min-width: 160px;
+  max-width: 220px;
+
+  .mat-mdc-select-trigger {
+    height: 28px;
+    line-height: 28px;
+  }
 }
 
 // ── Search panel ─────────────────────────────────────
@@ -239,6 +259,347 @@
   white-space: nowrap;
 }
 
+.edge-animate {
+  stroke: #6366f1 !important;
+  stroke-width: 4px !important;
+  filter: drop-shadow(0 0 6px #6366f1cc);
+  animation: edgeGlow 1.2s ease-in-out;
+}
+
+@keyframes edgeGlow {
+  0%,100% { opacity:1; }
+  50% { opacity:0.5; }
+}
+
+// ── Depth control ─────────────────────────────────────
+.depth-control {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.depth-label {
+  font-size: 12px;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.depth-toggle {
+  height: 32px;
+
+  .mat-button-toggle {
+    font-size: 12px;
+    min-width: 32px;
+    height: 32px;
+    line-height: 32px;
+  }
+
+  .mat-button-toggle-checked {
+    background: #3b82f6;
+    color: #fff;
+  }
+}
+
+// ── Vertex Hover Tooltip ──────────────────────────────
+.vertex-tooltip {
+  position: fixed;
+  z-index: 100;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 8px 10px;
+  font-size: 12px;
+  pointer-events: none;
+  animation: tooltipFadeIn 0.2s ease-out;
+  max-width: 200px;
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+.tooltip-header {
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 6px;
+  word-break: break-word;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e2e8f0;
+
+  &[data-type="REST"] { color: #2563eb; }
+  &[data-type="BATCH"] { color: #8b5cf6; }
+  &[data-type="JDBC"] { color: #FF7F00; }
+  &[data-type="FTP"] { color: #0d9488; }
+  &[data-type="SMTP"] { color: #f97316; }
+  &[data-type="LDAP"] { color: #8b5cf6; }
+  &[data-type="VIEW"] { color: #06b6d4; }
+  &[data-type="MAIN"] { color: #16a34a; }
+}
+
+.tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+
+.tooltip-label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.tooltip-value {
+  color: #1e293b;
+  font-weight: 600;
+}
+
+.tooltip-count {
+  background: #f1f5f9;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-weight: 700;
+  color: #2563eb;
+  min-width: 24px;
+  text-align: center;
+}
+
+.edge-type-filter {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.filter-label {
+  font-size: 12px;
+  color: #64748b;
+  white-space: nowrap;
+  font-weight: 500;
+}
+
+.edge-filter-buttons {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+}
+
+.edge-filter-btn {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 6px !important;
+  color: #94a3b8 !important;
+  transition: all 0.2s ease !important;
+
+  .mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    line-height: 20px;
+  }
+
+  &:hover {
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6 !important;
+  }
+
+  &.active {
+    background: #3b82f6 !important;
+    color: #fff !important;
+  }
+}
+
+// ── Selected Vertex Card ───────────────────────────────
+.selected-vertex-card {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  min-width: 280px;
+  max-width: 360px;
+  max-height: 60vh;
+  overflow-y: auto;
+  animation: slideInUp 0.3s ease-out;
+}
+
+@keyframes slideInUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  border-radius: 12px 12px 0 0;
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+  word-break: break-word;
+  flex: 1;
+}
+
+.card-close {
+  width: 28px !important;
+  height: 28px !important;
+  min-width: 28px !important;
+  color: #94a3b8;
+  flex-shrink: 0;
+  margin-left: 8px;
+
+  &:hover {
+    color: #475569;
+    background: rgba(0, 0, 0, 0.05);
+  }
+}
+
+.card-content {
+  padding: 12px 16px;
+}
+
+.card-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 0;
+  font-size: 13px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.card-label {
+  color: #64748b;
+  font-weight: 500;
+  min-width: 80px;
+}
+
+.card-value {
+  color: #1e293b;
+  font-weight: 600;
+  text-align: right;
+
+  &[data-type="REST"] { color: #2563eb; }
+  &[data-type="BATCH"] { color: #8b5cf6; }
+  &[data-type="JDBC"] { color: #FF7F00; }
+  &[data-type="FTP"] { color: #0d9488; }
+  &[data-type="SMTP"] { color: #f97316; }
+  &[data-type="LDAP"] { color: #8b5cf6; }
+  &[data-type="VIEW"] { color: #06b6d4; }
+  &[data-type="MAIN"] { color: #16a34a; }
+}
+
+.card-section {
+  padding-top: 12px;
+
+  &:first-of-type {
+    padding-top: 4px;
+  }
+}
+
+.card-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  padding-bottom: 6px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 150px;
+  overflow-y: auto;
+
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 2px;
+
+    &:hover {
+      background: #94a3b8;
+    }
+  }
+}
+
+.card-list-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #334155;
+  padding: 4px 6px;
+  border-radius: 4px;
+  background: #f8fafc;
+  word-break: break-word;
+
+  &:hover {
+    background: #f1f5f9;
+    color: #1e293b;
+  }
+}
+
+.list-icon {
+  font-size: 14px !important;
+  width: 14px !important;
+  height: 14px !important;
+  line-height: 14px !important;
+  color: #64748b;
+  flex-shrink: 0;
+}
+
+.card-empty {
+  font-size: 12px;
+  color: #cbd5e1;
+  font-style: italic;
+  padding: 6px;
+  text-align: center;
+}
 
 
 

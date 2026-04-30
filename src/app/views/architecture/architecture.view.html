@@ -9,13 +9,51 @@
             <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
             <mat-date-range-picker #picker></mat-date-range-picker>
         </mat-form-field>
+        <!-- Filtre focus microservice -->
+        <mat-form-field appearance="outline" class="no-subscript header-filter" style="min-width:200px">
+            <mat-label>Focus microservice</mat-label>
+            <mat-select [formControl]="focusControl">
+                <mat-option [value]="null">Tous les services</mat-option>
+                <mat-option *ngFor="let name of appNames" [value]="name">{{ name }}</mat-option>
+            </mat-select>
+            <mat-icon matSuffix *ngIf="focusControl.value" style="cursor:pointer;color:#ef4444"
+                      (click)="focusControl.setValue(null); $event.stopPropagation()">close</mat-icon>
+        </mat-form-field>
+        <!-- Slider de profondeur — visible uniquement si un microservice est sélectionné -->
+        <div *ngIf="focusControl.value" class="depth-control">
+            <span class="depth-label">Profondeur</span>
+            <mat-button-toggle-group [formControl]="depthControl" class="depth-toggle">
+                <mat-button-toggle [value]="1">1</mat-button-toggle>
+                <mat-button-toggle [value]="2">2</mat-button-toggle>
+                <mat-button-toggle [value]="3">3</mat-button-toggle>
+                <mat-button-toggle [value]="99">∞</mat-button-toggle>
+            </mat-button-toggle-group>
+        </div>
+        <!-- Filtre par type d'edge -->
+        <div class="edge-type-filter">
+            <span class="filter-label">Edges :</span>
+            <div class="edge-filter-buttons">
+                <button mat-icon-button
+                    *ngFor="let type of ['REST', 'MAIN', 'JDBC', 'FTP', 'SMTP', 'LDAP']"
+                    [class.active]="edgeTypeFilters[type]"
+                    (click)="toggleEdgeTypeFilter(type)"
+                    [attr.title]="type"
+                    class="edge-filter-btn">
+                    <mat-icon *ngIf="type === 'REST'">language</mat-icon>
+                    <mat-icon *ngIf="type === 'MAIN'">hub</mat-icon>
+                    <mat-icon *ngIf="type === 'JDBC'">storage</mat-icon>
+                    <mat-icon *ngIf="type === 'FTP'">cloud_upload</mat-icon>
+                    <mat-icon *ngIf="type === 'SMTP'">mail</mat-icon>
+                    <mat-icon *ngIf="type === 'LDAP'">security</mat-icon>
+                </button>
+            </div>
+        </div>
         <button mat-mini-fab color="primary" (click)="search()">
             <mat-icon matSuffix>search</mat-icon>
         </button>
     </form>
 </header-page>
 <div id="container" class="mat-elevation-z5" style="margin-bottom: 1em">
-    <span class="dashboard_component_title">Synthése</span>
     <div id="fixed-width-container">
         <div [hidden]="!syntheseIsLoading" style="height: 100%"><div class="loading">Loading...</div></div>
 
@@ -86,10 +124,12 @@
         <!-- Légende -->
         <div class="legend-panel" [class.visible]="legendVisible">
             <div class="legend-section-title">Connexions</div>
-            <div class="legend-item"><span class="legend-line" style="background:#FF8C00;"></span><span>JDBC</span></div>
-            <div class="legend-item"><span class="legend-line" style="background:#0e7490;"></span><span>FTP</span></div>
-            <div class="legend-item"><span class="legend-line" style="background:#f59e0b;"></span><span>SMTP</span></div>
-            <div class="legend-item"><span class="legend-line" style="background:#7c3aed;"></span><span>LDAP</span></div>
+            <div class="legend-item"><span class="legend-line" style="background:#2563eb;"></span><span>REST</span></div>
+            <div class="legend-item"><span class="legend-line" style="background:#16a34a;"></span><span>MAIN</span></div>
+            <div class="legend-item"><span class="legend-line" style="background:#FF7F00;"></span><span>JDBC</span></div>
+            <div class="legend-item"><span class="legend-line" style="background:#0d9488;"></span><span>FTP</span></div>
+            <div class="legend-item"><span class="legend-line" style="background:#f97316;"></span><span>SMTP</span></div>
+            <div class="legend-item"><span class="legend-line" style="background:#8b5cf6;"></span><span>LDAP</span></div>
             <div class="legend-divider"></div>
             <div class="legend-section-title">Nœuds</div>
             <div class="legend-item"><img src="assets/mxgraph/microservice.drawio.svg" alt="REST" class="legend-icon"/><span>REST</span></div>
@@ -113,6 +153,69 @@
         </div>
 
         <div #graphContainer id="graphContainer"></div>
+
+        <!-- Hover Tooltip -->
+        <div class="vertex-tooltip" *ngIf="hoveredVertex" [style.left.px]="hoveredVertex.x + 10" [style.top.px]="hoveredVertex.y + 10">
+            <div class="tooltip-header" [attr.data-type]="hoveredVertex.type">{{ hoveredVertex.name }}</div>
+            <div class="tooltip-content">
+                <div class="tooltip-row">
+                    <span class="tooltip-label">Type :</span>
+                    <span class="tooltip-value">{{ hoveredVertex.type }}</span>
+                </div>
+                <div class="tooltip-row">
+                    <span class="tooltip-label">Appelants :</span>
+                    <span class="tooltip-count">{{ hoveredVertex.incomingCount }}</span>
+                </div>
+                <div class="tooltip-row">
+                    <span class="tooltip-label">Appelés :</span>
+                    <span class="tooltip-count">{{ hoveredVertex.outgoingCount }}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Card de récapitulatif du vertex sélectionné -->
+        <div class="selected-vertex-card" *ngIf="selectedVertex">
+            <div class="card-header">
+                <div class="card-title">{{ selectedVertex.name }}</div>
+                <button mat-icon-button class="card-close" (click)="selectedVertex = null">
+                    <mat-icon>close</mat-icon>
+                </button>
+            </div>
+            <div class="card-content">
+                <div class="card-row">
+                    <span class="card-label">Type :</span>
+                    <span class="card-value" [attr.data-type]="selectedVertex.type">{{ selectedVertex.type }}</span>
+                </div>
+
+                <!-- Appelants -->
+                <div class="card-section">
+                    <div class="card-section-title">Appelants ({{ selectedVertex.incomingCount }})</div>
+                    <div class="card-list" *ngIf="selectedVertex.incomingNames.length > 0; else noIncoming">
+                        <div class="card-list-item" *ngFor="let name of selectedVertex.incomingNames">
+                            <mat-icon class="list-icon">arrow_forward</mat-icon>
+                            <span>{{ name }}</span>
+                        </div>
+                    </div>
+                    <ng-template #noIncoming>
+                        <div class="card-empty">Aucun appelant</div>
+                    </ng-template>
+                </div>
+
+                <!-- Appelés -->
+                <div class="card-section">
+                    <div class="card-section-title">Appelés ({{ selectedVertex.outgoingCount }})</div>
+                    <div class="card-list" *ngIf="selectedVertex.outgoingNames.length > 0; else noOutgoing">
+                        <div class="card-list-item" *ngFor="let name of selectedVertex.outgoingNames">
+                            <mat-icon class="list-icon">arrow_forward</mat-icon>
+                            <span>{{ name }}</span>
+                        </div>
+                    </div>
+                    <ng-template #noOutgoing>
+                        <div class="card-empty">Aucun appelé</div>
+                    </ng-template>
+                </div>
+            </div>
+        </div>
     </div>
 
 </div>
