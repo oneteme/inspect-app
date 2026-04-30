@@ -25,6 +25,11 @@
   width: 100%;
   height: 100%;
   background-color: #f8fafc;
+
+  // ✨ GPU acceleration pour meilleure performance
+  will-change: transform;
+  transform: translateZ(0);
+  backface-visibility: hidden;
 }
 
 .loading {
@@ -182,6 +187,7 @@
   pointer-events: none;
   transform: translateY(6px) scale(0.97);
   transition: opacity 0.2s ease, transform 0.2s ease;
+  display: none; /* Masquée, utiliser le menu à la place */
 
   &.visible { opacity: 1; pointer-events: all; transform: translateY(0) scale(1); }
 }
@@ -207,7 +213,7 @@
 // ── Stats overlay (inside graph) ──────────────────────
 .stats-overlay {
   position: absolute;
-  top: 12px;
+  bottom: 12px;
   left: 50%;
   transform: translateX(-50%);
   z-index: 2;
@@ -215,6 +221,9 @@
   flex-direction: row;
   gap: 6px;
   pointer-events: none;
+  flex-wrap: wrap;
+  max-width: 90%;
+  justify-content: center;
 }
 
 .stat-chip {
@@ -257,6 +266,7 @@
   font-size: 11px;
   color: #64748b;
   white-space: nowrap;
+  display: none; /* Masquer le label pour gagner de la place */
 }
 
 .edge-animate {
@@ -482,10 +492,21 @@
   color: #94a3b8;
   flex-shrink: 0;
   margin-left: 8px;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  line-height: 28px !important;
 
   &:hover {
     color: #475569;
     background: rgba(0, 0, 0, 0.05);
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
   }
 }
 
@@ -601,5 +622,15 @@
   text-align: center;
 }
 
+// ── Legend Menu ────────────────────────────────────────
+::ng-deep .legend-menu {
+  .mat-mdc-menu-content {
+    padding: 8px 0 !important;
+  }
+}
 
-
+.legend-menu-content {
+  padding: 8px 12px;
+  min-width: 200px;
+  max-width: 280px;
+}

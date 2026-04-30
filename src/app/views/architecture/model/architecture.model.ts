@@ -19,7 +19,7 @@ export class ArchitectureTree {
         let graph = new mx.mxGraph(elem); // create a graph inside a DOM node with an id of graph
         graph.setCellsLocked(true);
         graph.setCellsSelectable(false);
-        graph.setTooltips(true);
+        graph.setTooltips(false); // Désactiver la tooltip par défaut de mxGraph
         graph.getLabel = function(cell: any)
         {
             var label: string = (this.labelsVisible) ? this.convertValueToString(cell) : '';
@@ -42,6 +42,7 @@ export class ArchitectureTree {
         };
         graph.setPanning(true);
         graph.panningHandler.useLeftButtonForPanning = true;
+        graph.container.style.cursor = 'move';  // Indiquer qu'on peut paner
         let parent = graph.getDefaultParent(); // Returns defaultParent or mxGraphView.currentRoot or the first child child
         let layout = new mx.mxHierarchicalLayout(graph); //Constructs a new hierarchical layout algorithm.
         let tg = new ArchitectureTree(graph, parent, layout);

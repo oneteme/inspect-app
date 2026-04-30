@@ -62,13 +62,13 @@
       <button mat-icon-button class="zoom-btn" matTooltip="Rechercher un serveur"
               [class.active]="searchVisible" (click)="toggleSearch()">
         <mat-icon>search</mat-icon>
-      </button>
-      <div class="zoom-divider"></div>
-      <button mat-icon-button class="zoom-btn" [matTooltip]="legendVisible ? 'Masquer la légende' : 'Afficher la légende'"
-              [class.active]="legendVisible" (click)="toggleLegend()">
-        <mat-icon>info_outline</mat-icon>
-      </button>
-    </div>
+       </button>
+       <div class="zoom-divider"></div>
+       <button mat-icon-button class="zoom-btn" matTooltip="Légende"
+               #legendMenuTrigger="matMenuTrigger" [matMenuTriggerFor]="legendMenu">
+         <mat-icon>info_outline</mat-icon>
+       </button>
+     </div>
 
     <!-- Search panel — glisse depuis la card zoom -->
     <div class="search-panel" [class.visible]="searchVisible">
@@ -93,10 +93,9 @@
       </button>
     </div>
 
-    <!-- Minimap -->
-    <div #outlineContainer id="outlineContainer"
-         [class.hidden]="!minimapVisible"
-         [class.shifted]="detailPanelVisible"></div>
+     <!-- Minimap -->
+     <div #outlineContainer id="outlineContainer"
+          [class.hidden]="!minimapVisible"></div>
 
     <!-- Panel de détail -->
     <div class="detail-panel" [class.visible]="detailPanelVisible" *ngIf="selectedCell">
@@ -160,3 +159,25 @@
             icon="call_received">
     </app-empty-state>
 </ng-template>
+
+<!-- Menu contextuel pour la légende -->
+<mat-menu #legendMenu="matMenu" class="legend-menu">
+  <div class="legend-menu-content">
+    <div class="legend-section-title">Liens</div>
+    <div class="legend-item"><span class="legend-line" style="background:#22c55e;"></span><span>Succès</span></div>
+    <div class="legend-item"><span class="legend-line" style="background:#f9ad4e;"></span><span>Erreur client</span></div>
+    <div class="legend-item"><span class="legend-line" style="background:#ef4444;"></span><span>Erreur serveur</span></div>
+    <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:#3b82f6;"></span><span>En cours</span></div>
+    <div class="legend-divider"></div>
+    <div class="legend-section-title">Nœuds</div>
+    <div class="legend-item"><img src="assets/mxgraph/microservice.drawio.svg" class="legend-icon"/><span>REST</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/database.drawio.svg" class="legend-icon"/><span>JDBC</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/ftp.drawio.svg" class="legend-icon"/><span>FTP</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/smtp.drawio.svg" class="legend-icon"/><span>SMTP</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/ldap.drawio.svg" class="legend-icon"/><span>LDAP</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/view.drawio.svg" class="legend-icon"/><span>Vue</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/batch.drawio.svg" class="legend-icon"/><span>Batch</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/ghost.drawio.svg" class="legend-icon"/><span>Inconnu</span></div>
+  </div>
+</mat-menu>
+

@@ -47,7 +47,6 @@ export class TreeView implements OnDestroy {
   linkLbl: Label;
   LabelIsLoaded: { [key: string]: boolean } = { "METHOD_RESOURCE": false, "STATUS_EXCEPTION": false, "SIZE_COMPRESSION": false }
   minimapVisible: boolean = JSON.parse(localStorage.getItem('tree_minimap') ?? 'true');
-  legendVisible: boolean = false;
   isFullscreen: boolean = false;
   searchQuery: string = '';
   searchResults: any[] = [];
@@ -480,50 +479,127 @@ export class TreeView implements OnDestroy {
     return ('id' in obj ? 'REST' : 'GHOST')
   }
 
-  // ── Évolution 3 : Recherche de nœud ────────────────────────────────────────
-  toggleSearch() {
-    this.searchVisible = !this.searchVisible;
-    if (this.searchVisible) {
-      setTimeout(() => this.searchInputRef?.nativeElement?.focus(), 320);
-    } else {
-      this.clearSearch();
-    }
-  }
+   // ── Évolution 3 : Recherche de nœud ────────────────────────────────────────
+   toggleSearch() {
+     this.searchVisible = !this.searchVisible;
+     if (this.searchVisible) {
+       setTimeout(() => this.searchInputRef?.nativeElement?.focus(), 320);
+     } else {
+       this.clearSearch();
+     }
+   }
 
-  onSearch() {
-    if (!this.tree || !this.searchQuery.trim()) {
-      this.clearSearch();
-      return;
-    }
-    const q = this.searchQuery.toLowerCase();
-    const vertices = this.tree.graph.getChildVertices(this.tree._parent);
-    this.searchResults = vertices.filter((v: any) => {
-      const label = this.tree.graph.getLabel(v);
-      return label && String(label).toLowerCase().includes(q);
-    });
-    this.currentSearchIndex = 0;
-    this.focusSearchResult();
-  }
+   onSearch() {
+     if (!this.tree || !this.searchQuery.trim()) {
+       this.clearSearch();
+       return;
+     }
+     const q = this.searchQuery.toLowerCase();
+     const vertices = this.tree.graph.getChildVertices(this.tree._parent);
+     this.searchResults = vertices.filter((v: any) => {
+       const label = this.tree.graph.getLabel(v);
+       return label && String(label).toLowerCase().includes(q);
+     });
+     this.currentSearchIndex = 0;
+     this.applySearchHighlight();
+     this.focusSearchResult();
+   }
 
-  navigateSearch(direction: 1 | -1) {
-    if (!this.searchResults.length) return;
-    this.currentSearchIndex = (this.currentSearchIndex + direction + this.searchResults.length) % this.searchResults.length;
-    this.focusSearchResult();
-  }
+   navigateSearch(direction: 1 | -1) {
+     if (!this.searchResults.length) return;
+     this.currentSearchIndex = (this.currentSearchIndex + direction + this.searchResults.length) % this.searchResults.length;
+     this.applySearchHighlight();
+     this.focusSearchResult();
+   }
 
-  focusSearchResult() {
-    if (!this.searchResults.length) return;
-    const cell = this.searchResults[this.currentSearchIndex];
-    this.tree.graph.setSelectionCell(cell);
-    this.tree.graph.scrollCellToVisible(cell, true);
-  }
+   focusSearchResult() {
+     if (!this.searchResults.length) return;
+     const cell = this.searchResults[this.currentSearchIndex];
+     this.tree.graph.setSelectionCell(cell);
+     this.tree.graph.scrollCellToVisible(cell, true);
+   }
 
-  clearSearch() {
-    this.searchQuery = '';
-    this.searchResults = [];
-    this.currentSearchIndex = 0;
-    this.tree?.graph.clearSelection();
-  }
+   clearSearch() {
+     this.searchQuery = '';
+     this.searchResults = [];
+     this.currentSearchIndex = 0;
+     this.clearSearchHighlight();
+     this.tree?.graph.clearSelection();
+   }
+
+   /**
+    * Applique le highlighting pour la recherche
+    */
+   applySearchHighlight() {
+     this.clearSearchHighlight();
+     if (!this.tree || this.searchResults.length === 0) return;
+
+     const allVertices = this.tree.graph.getChildVertices(this.tree._parent);
+
+     // Appliquer le style à tous les vertices
+     allVertices.forEach((v: any) => {
+       const state = this.tree.graph.view.getState(v);
+       if (!state || !state.shape || !state.shape.node) return;
+
+       const node: SVGElement = state.shape.node;
+       const isHighlighted = this.searchResults.includes(v);
+       const isCurrent = v === this.searchResults[this.currentSearchIndex];
+
+       if (isCurrent) {
+         // Node courant: glow vert intensif
+         node.style.filter = 'drop-shadow(0 0 12px rgba(34, 197, 94, 0.8))';
+         node.style.opacity = '1';
+       } else if (isHighlighted) {
+         // Autres résultats: glow vert léger
+         node.style.filter = 'drop-shadow(0 0 6px rgba(34, 197, 94, 0.5))';
+         node.style.opacity = '0.9';
+       } else {
+         // Non trouvés: estompés
+         node.style.opacity = '0.2';
+         node.style.filter = 'grayscale(100%)';
+       }
+     });
+
+     // Estomper aussi les edges
+     const allEdges = this.tree.graph.getEdges(this.tree._parent);
+     allEdges.forEach((e: any) => {
+       const state = this.tree.graph.view.getState(e);
+       if (!state || !state.shape || !state.shape.node) return;
+       const node: SVGElement = state.shape.node;
+       const paths = node.querySelectorAll('path');
+       paths.forEach((p: SVGPathElement) => {
+         p.style.opacity = '0.1';
+       });
+     });
+   }
+
+   /**
+    * Nettoie le highlighting de la recherche
+    */
+   clearSearchHighlight() {
+     if (!this.tree) return;
+
+     const allVertices = this.tree.graph.getChildVertices(this.tree._parent);
+     allVertices.forEach((v: any) => {
+       const state = this.tree.graph.view.getState(v);
+       if (!state || !state.shape || !state.shape.node) return;
+       const node: SVGElement = state.shape.node;
+       node.style.filter = '';
+       node.style.opacity = '';
+     });
+
+     // Restaurer les edges
+     const allEdges = this.tree.graph.getEdges(this.tree._parent);
+     allEdges.forEach((e: any) => {
+       const state = this.tree.graph.view.getState(e);
+       if (!state || !state.shape || !state.shape.node) return;
+       const node: SVGElement = state.shape.node;
+       const paths = node.querySelectorAll('path');
+       paths.forEach((p: SVGPathElement) => {
+         p.style.opacity = '';
+       });
+     });
+   }
 
   // ── Évolution 5 : Export PNG ─────────────────────────────────────────────
   async exportPNG() {
@@ -588,9 +664,6 @@ export class TreeView implements OnDestroy {
     localStorage.setItem('tree_minimap', JSON.stringify(this.minimapVisible));
   }
 
-  toggleLegend() {
-    this.legendVisible = !this.legendVisible;
-  }
 
   toggleFullscreen() {
     const el = document.getElementById('fixed-width-container');

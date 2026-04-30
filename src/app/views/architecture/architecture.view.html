@@ -89,8 +89,8 @@
                 <mat-icon>search</mat-icon>
             </button>
             <div class="zoom-divider"></div>
-            <button mat-icon-button class="zoom-btn" [matTooltip]="legendVisible ? 'Masquer la légende' : 'Afficher la légende'"
-                    [class.active]="legendVisible" (click)="toggleLegend()">
+            <button mat-icon-button class="zoom-btn" matTooltip="Légende"
+                    #legendMenuTrigger="matMenuTrigger" [matMenuTriggerFor]="legendMenu">
                 <mat-icon>info_outline</mat-icon>
             </button>
         </div>
@@ -121,25 +121,6 @@
         <!-- Minimap -->
         <div #outlineContainer id="outlineContainer" [class.hidden]="!minimapVisible"></div>
 
-        <!-- Légende -->
-        <div class="legend-panel" [class.visible]="legendVisible">
-            <div class="legend-section-title">Connexions</div>
-            <div class="legend-item"><span class="legend-line" style="background:#2563eb;"></span><span>REST</span></div>
-            <div class="legend-item"><span class="legend-line" style="background:#16a34a;"></span><span>MAIN</span></div>
-            <div class="legend-item"><span class="legend-line" style="background:#FF7F00;"></span><span>JDBC</span></div>
-            <div class="legend-item"><span class="legend-line" style="background:#0d9488;"></span><span>FTP</span></div>
-            <div class="legend-item"><span class="legend-line" style="background:#f97316;"></span><span>SMTP</span></div>
-            <div class="legend-item"><span class="legend-line" style="background:#8b5cf6;"></span><span>LDAP</span></div>
-            <div class="legend-divider"></div>
-            <div class="legend-section-title">Nœuds</div>
-            <div class="legend-item"><img src="assets/mxgraph/microservice.drawio.svg" alt="REST" class="legend-icon"/><span>REST</span></div>
-            <div class="legend-item"><img src="assets/mxgraph/database.drawio.svg" alt="JDBC" class="legend-icon"/><span>JDBC</span></div>
-            <div class="legend-item"><img src="assets/mxgraph/ftp.drawio.svg" alt="FTP" class="legend-icon"/><span>FTP</span></div>
-            <div class="legend-item"><img src="assets/mxgraph/smtp.drawio.svg" alt="SMTP" class="legend-icon"/><span>SMTP</span></div>
-            <div class="legend-item"><img src="assets/mxgraph/ldap.drawio.svg" alt="LDAP" class="legend-icon"/><span>LDAP</span></div>
-            <div class="legend-item"><img src="assets/mxgraph/view.drawio.svg" alt="Vue" class="legend-icon"/><span>Vue</span></div>
-            <div class="legend-item"><img src="assets/mxgraph/batch.drawio.svg" alt="Batch" class="legend-icon"/><span>Batch</span></div>
-        </div>
 
         <!-- Stats overlay -->
         <div class="stats-overlay" *ngIf="statsCards.length">
@@ -249,3 +230,26 @@
     </div>
 
 </div>
+
+<!-- Menu contextuel pour la légende -->
+<mat-menu #legendMenu="matMenu" class="legend-menu">
+  <div class="legend-menu-content">
+    <div class="legend-section-title">Connexions</div>
+    <div class="legend-item"><span class="legend-line" style="background:#2563eb;"></span><span>REST</span></div>
+    <div class="legend-item"><span class="legend-line" style="background:#16a34a;"></span><span>MAIN</span></div>
+    <div class="legend-item"><span class="legend-line" style="background:#FF7F00;"></span><span>JDBC</span></div>
+    <div class="legend-item"><span class="legend-line" style="background:#0d9488;"></span><span>FTP</span></div>
+    <div class="legend-item"><span class="legend-line" style="background:#f97316;"></span><span>SMTP</span></div>
+    <div class="legend-item"><span class="legend-line" style="background:#8b5cf6;"></span><span>LDAP</span></div>
+    <div class="legend-divider"></div>
+    <div class="legend-section-title">Nœuds</div>
+    <div class="legend-item"><img src="assets/mxgraph/microservice.drawio.svg" alt="REST" class="legend-icon"/><span>REST</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/database.drawio.svg" alt="JDBC" class="legend-icon"/><span>JDBC</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/ftp.drawio.svg" alt="FTP" class="legend-icon"/><span>FTP</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/smtp.drawio.svg" alt="SMTP" class="legend-icon"/><span>SMTP</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/ldap.drawio.svg" alt="LDAP" class="legend-icon"/><span>LDAP</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/view.drawio.svg" alt="Vue" class="legend-icon"/><span>Vue</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/batch.drawio.svg" alt="Batch" class="legend-icon"/><span>Batch</span></div>
+  </div>
+</mat-menu>
+

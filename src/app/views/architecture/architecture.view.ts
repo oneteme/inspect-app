@@ -189,7 +189,6 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
     @ViewChild('searchInput') searchInputRef: ElementRef;
 
     minimapVisible: boolean = JSON.parse(localStorage.getItem('arch_minimap') ?? 'true');
-    legendVisible: boolean = false;
     isFullscreen: boolean = false;
     searchQuery: string = '';
     searchResults: any[] = [];
@@ -679,9 +678,6 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
         localStorage.setItem('arch_minimap', JSON.stringify(this.minimapVisible));
     }
 
-    toggleLegend() {
-        this.legendVisible = !this.legendVisible;
-    }
 
     toggleFullscreen() {
         const el = document.getElementById('fixed-width-container');
