@@ -49,6 +49,7 @@
   <ng-template jqtCellDef="appName" let-row>
     <div class="server-cell-content">
       <app-status-indicator (onClick)="navigateOnStatusIndicator($event, row)"
+                            [loading]="isLoading"
                             [params]="{id: row.id, end: row.end, configuration: row.configuration, lastTrace: row.lastTrace, date: today.getTime()}">
       </app-status-indicator>
       <div (click)="navigateOnServerClick($event, row)" class="uptime-link server-name">{{ row.appName || 'N/A' }}</div>

@@ -7,6 +7,7 @@ import {
     RepartitionTimeAndTypeResponse,
     RepartitionTimeAndTypeResponseByPeriod
 } from "../../model/jquery.model";
+import {ChartItem} from "../../views/kpi/kpi.config";
 
 @Injectable({ providedIn: 'root' })
 export class RestSessionService {
@@ -17,6 +18,20 @@ export class RestSessionService {
     getRestSession<T>(params: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/session/rest`;
         return this.http.get<T>(url, { params: params });
+    }
+
+    getHosts(filters: {start: Date, end: Date , env: string}): Observable<{ host: string }[]> {
+        var args: any = {
+            'column': `instance.app_name.distinct:host`,
+            'instance_env': 'instance.id',
+            'instance.environement': filters.env,
+            'instance.type': 'SERVER',
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'order': 'instance.app_name.asc',
+        };
+
+        return this.getRestSession(args);
     }
 
     getRepartitionTimeAndTypeResponse(filters: {start: Date, end: Date , ids: string }): Observable<RepartitionTimeAndTypeResponse>;
@@ -180,7 +195,7 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getDependenciesNew(filters: {server: string, env: string, start: Date, end: Date, apiNames: string, users: string, versions: string }): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, appName: string, type: string}[]> {
+    getDependencies(filters: {server: string, env: string, start: Date, end: Date, apiNames: string, users: string, versions: string }): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, appName: string, type: string}[]> {
         let args: any = {
             'column': `count:count,count_succes:countSucces,count_error_client:countErrClient,count_error_server:countErrServer,instance.app_name,instance.type`,
             'instance.id': 'instance_env',
@@ -210,7 +225,30 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getDependentsNew(filters: {server: string, env: string, start: Date, end: Date, apiNames: string, users: string, versions: string }): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, appName: string}[]> {
+    getDependenciesNew(filters: {env: string, start: Date, end: Date, servers: string[] }): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, dep: string, actual: string, type: string}[]> {
+        let args: any = {
+            'column': `count:count,count_succes:countSucces,count_error_client:countErrClient,count_error_server:countErrServer,instance.app_name:dep,instance.type,instance_join.app_name:actual`,
+            'instance.id': 'instance_env',
+            'id': 'rest_request.parent',
+            'rest_request.id': 'rest_session_join.id',
+            'rest_request.start.ge': filters.start.toISOString(),
+            'rest_request.start.lt': filters.end.toISOString(),
+            'rest_session_join.start.ge': filters.start.toISOString(),
+            'rest_session_join.start.lt': filters.end.toISOString(),
+            'rest_session_join.instance_env': 'instance_join.id',
+            'instance_join.environement': filters.env,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'view': 'rest_session:rest_session_join,instance:instance_join',
+            'order': 'count.desc'
+        }
+        if(filters.servers) {
+            args['instance_join.app_name.in'] = filters.servers.map(o => `"${o}"`).join(',');
+        }
+        return this.getRestSession(args);
+    }
+
+    getDependents(filters: {server: string, env: string, start: Date, end: Date, apiNames: string, users: string, versions: string }): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, appName: string}[]> {
         let args: any = {
             'column': `rest_session_join.count:count,rest_session_join.count_succes:countSucces,rest_session_join.count_error_client:countErrClient,rest_session_join.count_error_server:countErrServer,instance_join.app_name`,
             'id': 'rest_request.parent',
@@ -236,6 +274,29 @@ export class RestSessionService {
         }
         if (filters.users) {
             args['user.in'] = filters.users;
+        }
+        return this.getRestSession(args);
+    }
+
+    getDependentsNew(filters: {env: string, start: Date, end: Date, servers: string[] }): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, dep: string, actual: string }[]> {
+        let args: any = {
+            'column': `rest_session_join.count:count,rest_session_join.count_succes:countSucces,rest_session_join.count_error_client:countErrClient,rest_session_join.count_error_server:countErrServer,instance_join.app_name:dep,instance.app_name:actual`,
+            'id': 'rest_request.parent',
+            'rest_request.id': 'rest_session_join.id',
+            'rest_request.start.ge': filters.start.toISOString(),
+            'rest_request.start.lt': filters.end.toISOString(),
+            'rest_session_join.instance_env': 'instance_join.id',
+            'rest_session_join.start.ge': filters.start.toISOString(),
+            'rest_session_join.start.lt': filters.end.toISOString(),
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'instance_env': 'instance.id',
+            'instance.environement': filters.env,
+            'view': 'rest_session:rest_session_join,instance:instance_join',
+            'order': 'count.desc'
+        }
+        if(filters.servers) {
+            args['instance.app_name.in'] = filters.servers.map(o => `"${o}"`).join(',');
         }
         return this.getRestSession(args);
     }
@@ -360,6 +421,45 @@ export class RestSessionService {
         }
         if (filters.users) {
             args['user.in'] = filters.users;
+        }
+        return this.getRestSession(args);
+    }
+
+    getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
+              filters: {env: string, start: Date, end: Date, hosts?: string[], filters?: string[] }): Observable<any[]> {
+        let args: any = {
+            'column': `${data.series.map(d => d.jquery.value + '.' + data.indicator.jquery.value + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value}:${data.group.jquery.buildAlias()}`,
+            'instance_env': 'instance.id',
+            'instance.environement': filters.env,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString()
+        }
+        if(data.stack) {
+            args['column'] += `,${data.stack.jquery.value}:${data.stack.jquery.buildAlias()}`;
+            args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
+        }
+        if(data.group.jquery.order){
+            args['order'] = `${data.group.jquery.buildAlias()}.${data.group.jquery.order}`;
+        }
+        if(filters.filters?.length) {
+            args[`${data.filter.jquery.value}.in`] = filters.filters.map(o => `"${o}"`).join(',');
+        }
+        if(filters.hosts?.length){
+            args['instance.app_name.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+        }
+        return this.getRestSession(args);
+    }
+
+    getFilters(filter: ChartItem, filters: {env: string, start: Date, end: Date, hosts: string[] }) {
+        let args: any = {
+            'column': `${filter.jquery.value}.distinct:${filter.jquery.buildAlias()}`,
+            'instance_env': 'instance.id',
+            'instance.environement': filters.env,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString()
+        }
+        if(filters.hosts?.length){
+            args['instance.app_name.in'] = filters.hosts.map(o => `"${o}"`).join(',');
         }
         return this.getRestSession(args);
     }

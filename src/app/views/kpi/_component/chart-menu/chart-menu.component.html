@@ -1,0 +1,128 @@
+<button mat-icon-button [matMenuTriggerFor]="mainMenu" matTooltip="Options du graphique" class="kpi-action-btn">
+  <mat-icon>tune</mat-icon>
+</button>
+
+<!-- ─── Menu principal ─────────────────────────────────────────────────────── -->
+<mat-menu #mainMenu="matMenu" class="kpi-menu">
+
+  <div class="kpi-menu-title">Options du graphique</div>
+
+  <!-- Indicateurs -->
+  <a mat-menu-item [matMenuTriggerFor]="indicatorMenu">
+    <div class="kpi-menu-item">
+      <mat-icon class="material-symbols-outlined">insights</mat-icon>
+      <span class="kpi-menu-label-wrap">
+        <span class="kpi-menu-label">Indicateur</span>
+        <span class="kpi-menu-hint" *ngIf="actualIndicator">
+          {{ actualIndicator.menu.label }}<ng-container *ngIf="actualStack"> · {{ actualStack.menu.label }}</ng-container>
+        </span>
+      </span>
+    </div>
+  </a>
+
+  <!-- Regrouper par -->
+  <a mat-menu-item [matMenuTriggerFor]="groupMenu">
+    <div class="kpi-menu-item">
+      <mat-icon class="material-symbols-outlined">groups</mat-icon>
+      <span class="kpi-menu-label-wrap">
+        <span class="kpi-menu-label">Regrouper par</span>
+        <span class="kpi-menu-hint" *ngIf="actualGroup">{{ actualGroup.menu.label }}</span>
+      </span>
+    </div>
+  </a>
+
+  <!-- Filtrer par (section optionnelle) -->
+  <a mat-menu-item *ngIf="config?.filters?.items?.length" [matMenuTriggerFor]="filterMenu">
+    <div class="kpi-menu-item">
+      <mat-icon class="material-symbols-outlined">filter_alt</mat-icon>
+      <span class="kpi-menu-label-wrap">
+        <span class="kpi-menu-label">Filtrer par</span>
+        <span class="kpi-menu-hint" *ngIf="actualFilter">{{ actualFilter.menu.label }}</span>
+      </span>
+    </div>
+  </a>
+
+</mat-menu>
+
+<!-- ─── Sous-menu : Indicateurs ───────────────────────────────────────────── -->
+<mat-menu #indicatorMenu="matMenu" class="kpi-menu">
+  <div class="kpi-menu-section-label">Indicateur</div>
+  <ng-container *ngFor="let ind of config?.indicators?.items">
+
+    <!-- Indicateur avec stacks → ouvre le sous-menu stack -->
+    <a mat-menu-item
+       *ngIf="ind.extra?.stacks?.items?.length; else noStack"
+       [matMenuTriggerFor]="stackMenu"
+       [matMenuTriggerData]="{ indicator: ind }"
+       [class.kpi-menu-item--selected]="ind.selected">
+      <mat-icon *ngIf="ind.menu.icon" class="material-symbols-outlined kpi-menu-item-leading-icon">{{ ind.menu.icon }}</mat-icon>
+      <span class="kpi-menu-label-wrap">
+        <span class="kpi-menu-label">{{ ind.menu.label }}</span>
+        <span class="kpi-menu-hint" *ngIf="ind.selected && actualStack">{{ actualStack.menu.label }}</span>
+      </span>
+    </a>
+
+    <!-- Indicateur sans stacks → sélection directe -->
+    <ng-template #noStack>
+      <a mat-menu-item (click)="selectIndicator(ind)" [class.kpi-menu-item--selected]="ind.selected">
+        <div class="kpi-menu-row">
+          <mat-icon *ngIf="ind.menu.icon" class="material-symbols-outlined kpi-menu-item-leading-icon">{{ ind.menu.icon }}</mat-icon>
+          <span>{{ ind.menu.label }}</span>
+          <mat-icon *ngIf="ind.selected" class="kpi-menu-check">check_circle</mat-icon>
+        </div>
+      </a>
+    </ng-template>
+
+  </ng-container>
+</mat-menu>
+
+<!-- ─── Sous-menu : Groupes ───────────────────────────────────────────────── -->
+<mat-menu #groupMenu="matMenu" class="kpi-menu">
+  <div class="kpi-menu-section-label">Grouper par</div>
+  <div class="kpi-menu-scroll">
+    <a mat-menu-item *ngFor="let g of config?.groups?.items"
+       (click)="selectGroup(g)"
+       [class.kpi-menu-item--selected]="g.selected">
+      <div class="kpi-menu-row">
+        <mat-icon *ngIf="g.menu.icon" class="material-symbols-outlined kpi-menu-item-leading-icon">{{ g.menu.icon }}</mat-icon>
+        <span>{{ g.menu.label }}</span>
+        <mat-icon *ngIf="g.selected" class="kpi-menu-check">check_circle</mat-icon>
+      </div>
+    </a>
+  </div>
+</mat-menu>
+
+<!-- ─── Sous-menu : Stacks (dynamique via matMenuTriggerData) ─────────────── -->
+<mat-menu #stackMenu="matMenu" class="kpi-menu">
+  <ng-template matMenuContent let-indicator="indicator">
+    <div class="kpi-menu-section-label">Découper par</div>
+    <div class="kpi-menu-scroll">
+      <a mat-menu-item *ngFor="let s of indicator.extra.stacks.items"
+         (click)="toggleStack(indicator, s)"
+         [class.kpi-menu-item--selected]="s.selected">
+        <div class="kpi-menu-row">
+          <mat-icon *ngIf="s.menu.icon" class="material-symbols-outlined kpi-menu-item-leading-icon">{{ s.menu.icon }}</mat-icon>
+          <span>{{ s.menu.label }}</span>
+          <mat-icon *ngIf="s.selected" class="kpi-menu-check">check_circle</mat-icon>
+        </div>
+      </a>
+    </div>
+  </ng-template>
+</mat-menu>
+
+<!-- ─── Sous-menu : Filtres ───────────────────────────────────────────────── -->
+<mat-menu #filterMenu="matMenu" class="kpi-menu">
+  <div class="kpi-menu-section-label">Filtrer par</div>
+  <div class="kpi-menu-scroll">
+    <a mat-menu-item *ngFor="let f of config?.filters?.items"
+       (click)="selectFilter(f)"
+       [class.kpi-menu-item--selected]="f.selected">
+      <div class="kpi-menu-row">
+        <mat-icon *ngIf="f.menu.icon" class="material-symbols-outlined kpi-menu-item-leading-icon">{{ f.menu.icon }}</mat-icon>
+        <span>{{ f.menu.label }}</span>
+        <mat-icon *ngIf="f.selected" class="kpi-menu-check">check_circle</mat-icon>
+      </div>
+    </a>
+  </div>
+</mat-menu>
+

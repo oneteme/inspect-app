@@ -1,3 +1,4 @@
+<ng-container *ngIf="!isLoading && TreeObj else noDataTemplate">
 <header-page style="height: 56px;" titleIcon="lan" [iconOutlined]="true" [ui-title]="'Arbre d\'Appels'" [ui-subtitle]="MAPPING_TYPE['tree'].subtitle">
   <div class="header-filter"></div>
   <form [formGroup]="ViewForm" class="header-filter md-2">
@@ -151,3 +152,11 @@
 
   </div>
 </div>
+</ng-container>
+
+<ng-template #noDataTemplate>
+    <app-empty-state
+            [loading]="isLoading"
+            icon="call_received">
+    </app-empty-state>
+</ng-template>

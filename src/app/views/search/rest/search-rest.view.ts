@@ -173,32 +173,11 @@ export class SearchRestView implements OnInit, OnDestroy {
 
     this.isLoading = true;
 
-    performance.mark('rest-request-start');
-
     this._traceService.getRestSessions(params)
       .pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false))
       .subscribe({
         next: d => {
-          performance.mark('rest-data-received');
           this.sessions = d;
-
-          // Laisser un tick pour que le DOM se mette à jour avant de mesurer
-          setTimeout(() => {
-            performance.mark('rest-render-done');
-            performance.measure('⏱ BACK → données reçues (réseau+SQL)',  'rest-request-start',  'rest-data-received');
-            performance.measure('⏱ FRONT → traitement JS (map+filter)',  'rest-data-received',  'rest-render-done');
-            performance.measure('⏱ TOTAL bout-en-bout',                  'rest-request-start',  'rest-render-done');
-            const entries = performance.getEntriesByType('measure')
-              .filter(e => e.name.startsWith('⏱'));
-            console.group('%c[SearchRest] Mesures de performance', 'color:#2196F3;font-weight:bold');
-            entries.forEach(e =>
-              console.log(`${e.name.padEnd(45)} ${Math.round(e.duration).toString().padStart(6)} ms`)
-            );
-            console.groupEnd();
-            performance.clearMarks();
-            performance.clearMeasures();
-          }, 0);
-
         }
       });
   }

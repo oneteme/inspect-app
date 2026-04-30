@@ -7,7 +7,7 @@ export const DEFAULT_TABLE_CONFIG: TableProvider = {
   search: { enabled: true },
   view: { enabled: true, enableColumnRemoval: true },
   pagination: { enabled: true, pageSize: 10, pageSizeOptions: [5, 10, 15, 20, 100], pageSizeOptionsGroupBy: [20, 50, 100, 200] },
-  labels: { empty: 'Aucun résultat', loading: 'Chargement des requêtes...' }
+  labels: { empty: 'Aucun résultat', loading: 'Chargement des requêtes...' },
 };
 
 export const DEFAULT_SORT_CONFIG: { active: string; direction: 'asc' | 'desc'; } = { active: 'start', direction: 'desc' };
@@ -86,6 +86,7 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
     },
     { key: 'user', header: 'Utilisateur', icon: 'person',  width: '13%' },
+    { key: 'address', header: 'Adresse', icon: 'fingerprint',  width: '13%', optional: true },
     { key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
       value: (row: MainSessionDto) => {
         if(!row.end) return 'En cours...';
@@ -125,7 +126,7 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
-    { key: 'resource', header: 'Ressource', icon: 'category' },
+    { key: 'resource', header: 'Ressource', icon: 'category', groupable: false },
     { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
     { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
@@ -162,7 +163,7 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
-    { key: 'resource', header: 'Ressource', icon: 'category' },
+    { key: 'resource', header: 'Ressource', icon: 'category', groupable: false, sliceable: false },
     { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
     { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
@@ -203,7 +204,7 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
-    { key: 'resource', header: 'Ressource', icon: 'category' },
+    { key: 'resource', header: 'Ressource', icon: 'category', groupable: false },
     { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
     { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
@@ -238,7 +239,7 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
-    { key: 'resource', header: 'Ressource', icon: 'category' },
+    { key: 'resource', header: 'Ressource', icon: 'category', groupable: false },
     { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
     { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
@@ -271,7 +272,7 @@ export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
-    { key: 'resource', header: 'Ressource', icon: 'category' },
+    { key: 'resource', header: 'Ressource', icon: 'category', groupable: false },
     { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
     { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
@@ -304,7 +305,7 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
-    { key: 'resource', header: 'Ressource', icon: 'category' },
+    { key: 'resource', header: 'Ressource', icon: 'category', groupable: false },
     { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
     { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
@@ -387,7 +388,10 @@ export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTra
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'appName', header: 'Hôte', icon: 'dns', groupable: false, sliceable: false, width: '20%' },
-    { key: 'duration', header: 'Depuis', icon: 'schedule', groupable: false, width: '15%' },
+    { key: 'duration', header: 'Depuis', icon: 'schedule',
+      sortValue: (row) => {
+        return new Date().getTime() - row.start;
+      }, groupable: false, width: '15%' },
     { key: 'version', header: 'Version', icon: 'label', width: '15%' },
     { key: 'branch',  header: 'Branche', icon: 'fork_right', width: '20%' },
     { key: 'restart', header: 'Démarrage', icon: 'restart_alt', groupable: false, sliceable: false },

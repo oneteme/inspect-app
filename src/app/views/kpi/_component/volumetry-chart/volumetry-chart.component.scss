@@ -1,0 +1,21 @@
+:host {
+  height: 100%;
+}
+
+.layout {
+  display: flex;
+  flex: 1 1 0;
+  height: calc(100% - 100px);
+}
+
+slice-panel {
+  flex: 0 0 200px;
+  height: 100%;
+  border-right: 1px solid #e2e8f0;
+}
+
+.chart-area {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 100%;
+}

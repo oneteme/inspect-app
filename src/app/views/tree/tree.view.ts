@@ -1,4 +1,4 @@
-import {Component, ElementRef, inject, NgZone, OnDestroy, ViewChild} from '@angular/core';
+import {ChangeDetectorRef, Component, ElementRef, inject, NgZone, OnDestroy, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {combineLatest, finalize, forkJoin, fromEvent, Subscription} from 'rxjs';
 import {Location} from '@angular/common';
@@ -33,6 +33,7 @@ export class TreeView implements OnDestroy {
   private _zone = inject(NgZone);
   private _location = inject(Location);
   private _treeService = inject(TreeService);
+  private _cdr = inject(ChangeDetectorRef);
   subscriptions: Subscription[] = [];
   id: string;
   tree: any
@@ -118,6 +119,8 @@ export class TreeView implements OnDestroy {
     this.isLoading = true;
     this.subscriptions.push(this._traceService.getTree(this.id, data['type']).pipe(finalize(() => this.isLoading = false)).subscribe((d: RestSessionTree /*| ServerMainSession*/) => {
       this.TreeObj = d;
+      this.isLoading = false;         // force à false avant d'accéder au ViewChild
+      this._cdr.detectChanges();      // force le rendu du DOM pour que graphContainer existe
       let self = this;
       this.tree = TreeGraph.setup(this.graphContainer.nativeElement, tg => {
         tg.draw(() => {})//self.dr(tg, self.TreeObj, serverlbl, linklbl)) // refacto

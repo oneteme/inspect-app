@@ -1,5 +1,5 @@
 import { DatePipe } from "@angular/common";
-import { ChartGroup } from "../model/chart.model";
+import {ChartGroup, ChartGroup2} from "../model/chart.model";
 import { Filter, FilterMap, Operation } from "../views/constants";
 import { makeDateTimePeriod, makeDateTimePeriodFrom } from "src/environments/environment";
 
@@ -197,6 +197,24 @@ export function periodManagement(start: Date, end: Date): string {
         return ChartGroup.byMonth;
     }
     return ChartGroup.byYear;
+}
+
+export function periodManagement2(start: Date, end: Date): string {
+    var dayDiff = (end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000);
+
+    if (dayDiff <= 1) { // 24 heures
+        return ChartGroup2.byHour;
+    }
+    if (dayDiff <= 24) {
+        return ChartGroup2.monthDay;
+    }
+    if (Math.round(dayDiff / 7) <= 24) {
+        return ChartGroup2.yearWeek;
+    }
+    if (Math.round(dayDiff / 30) <= 24) {
+        return ChartGroup2.yearMonth;
+    }
+    return ChartGroup2.byYear;
 }
 
 export const formatters: any = {

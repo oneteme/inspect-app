@@ -25,9 +25,6 @@ import {StacktraceDialogComponent} from './_component/exception-display/stacktra
 import {VersionBadgeComponent} from "./_component/version-badge/version-badge.component";
 import {StatusIndicatorComponent} from "./_component/status-indicator/status-indicator.component";
 import {ServerCardComponent} from "./_component/server-card/server-card.component";
-import {
-  OverlayContainerFilterComponent
-} from "./_component/overlay-container-filter/overlay-container-filter.component";
 import {BranchChipComponent} from "./_component/branch-hash-badge/branch-chip.component";
 import {LogTableComponent} from "./_component/table/log-table/log-table.component";
 import {JqtCellDefDirective, TableComponent} from "@oneteme/jquery-table";
@@ -81,7 +78,6 @@ export const MY_DATE_FORMATS = {
     BranchChipComponent,
     StatusIndicatorComponent,
     ServerCardComponent,
-    OverlayContainerFilterComponent,
     LogTableComponent,
     StageTableComponent,
     PulseComponent,
@@ -108,7 +104,6 @@ export const MY_DATE_FORMATS = {
     BranchChipComponent,
     StatusIndicatorComponent,
     ServerCardComponent,
-    OverlayContainerFilterComponent,
     LogTableComponent,
     TableComponent,
     JqtCellDefDirective,
