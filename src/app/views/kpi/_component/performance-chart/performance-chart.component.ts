@@ -25,6 +25,14 @@ export class PerformanceChartComponent {
           overflow: 'truncate', // tronquer si trop long
           width: 120         // largeur max avant troncature (ajuste selon ta résolution)
         }
+      },
+      yAxis: {
+        axisLabel: {
+          formatter: (value: number) => value?.toLocaleString('fr-FR')
+        }
+      },
+      tooltip: {
+        valueFormatter: (value: number) => value?.toLocaleString('fr-FR')
       }
     }
   }

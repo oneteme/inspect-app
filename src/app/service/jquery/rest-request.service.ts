@@ -94,7 +94,7 @@ export class RestRequestService {
         if(data.group.jquery.order){
             args['order'] = `${data.group.jquery.buildAlias()}.${data.group.jquery.order}`;
         }
-        if(filters.filters?.length) {
+        if(data.filter && filters.filters?.length) {
             args[`${data.filter.jquery.value}.in`] = filters.filters.map(o => `"${o}"`).join(',');
         }
         if(filters.hosts?.length){
@@ -118,7 +118,7 @@ export class RestRequestService {
         if(data.group.jquery.order){
             args['order'] = `${data.group.jquery.buildAlias()}.${data.group.jquery.order}`;
         }
-        if(filters.filters?.length) {
+        if(data.filter && filters.filters?.length) {
             args[`${data.filter.jquery.buildAlias()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
         }
         if(filters.hosts?.length){
