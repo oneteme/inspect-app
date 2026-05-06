@@ -50,11 +50,13 @@ export interface DirectoryRequestTree extends DirectoryRequestDto {
 
 export interface Node<T> {
   formatNode(field: T): string;
+  nodeInfo(): { icon: string; label: string; value: string; color?: string }[]
 }
 
 export interface Link<T> {
   formatLink(field: T): string;
   getLinkStyle(): string;
+  linkInfo(): { icon: string; label: string; value: string; color?: string }[]
 }
 
 export class RestServerNode implements Node<Label> {
@@ -64,6 +66,19 @@ export class RestServerNode implements Node<Label> {
   constructor(nodeObject: RestSessionTree) {
     this.nodeObject = nodeObject;
   }
+
+  nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
+      const rows: any[] = [];
+      if (this.nodeObject?.appName)   rows.push({ icon: 'label',         label: 'Application', value: this.nodeObject.appName,             color: '#3b82f6' });
+      if (this.nodeObject?.host)      rows.push({ icon: 'dns',           label: 'Hôte',        value: this.nodeObject.host,                color: '#6366f1' });
+      if (this.nodeObject?.port)      rows.push({ icon: 'settings_ethernet', label: 'Port',    value: String(this.nodeObject.port),        color: '#8b5cf6' });
+      //if (obj?.protocol)  rows.push({ icon: 'lock',          label: 'Protocole',   value: obj.protocol,            color: '#0ea5e9' });
+      //if (obj?.type)      rows.push({ icon: 'category',      label: 'Type',        value: obj.type,                color: '#f59e0b' });
+      if (this.nodeObject?.os)        rows.push({ icon: 'computer',      label: 'OS',          value: this.nodeObject.os,                  color: '#64748b' });
+      if (this.nodeObject?.re)        rows.push({ icon: 'layers',        label: 'Env',         value: this.nodeObject.re,                  color: '#10b981' });
+      if (this.nodeObject?.address)   rows.push({ icon: 'location_on',   label: 'Adresse',         value: this.nodeObject.address,                  color: '#f97316' });
+        return rows;
+    }
 
   formatNode(field: Label): string {
     switch (field) {
@@ -89,6 +104,17 @@ export class MainServerNode implements Node<Label> {
   constructor(nodeObject: MainSessionTree) {
     this.nodeObject = nodeObject;
   }
+
+  nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
+    const rows: any[] = [];
+    if (this.nodeObject?.appName)   rows.push({ icon: 'label',         label: 'Application', value: this.nodeObject.appName,             color: '#3b82f6' });
+    //if (obj?.protocol)  rows.push({ icon: 'lock',          label: 'Protocole',   value: obj.protocol,            color: '#0ea5e9' });
+    //if (obj?.type)      rows.push({ icon: 'category',      label: 'Type',        value: obj.type,                color: '#f59e0b' });
+    if (this.nodeObject?.os)        rows.push({ icon: 'computer',      label: 'OS',          value: this.nodeObject.os,                  color: '#64748b' });
+    if (this.nodeObject?.re)        rows.push({ icon: 'layers',        label: 'Env',         value: this.nodeObject.re,                  color: '#10b981' });
+    if (this.nodeObject?.address)   rows.push({ icon: 'location_on',   label: 'Adresse',         value: this.nodeObject.address,                  color: '#f97316' });
+    return rows;
+    }
 
   formatNode(field: Label): string {
     switch (field) {
@@ -120,6 +146,10 @@ export class LinkRequestNode implements Link<Label> {
   constructor(nodeObject: RestSessionTree) {
     this.nodeObject = nodeObject;
   }
+
+  linkInfo(): { icon: string; label: string; value: string; color?: string; }[] {
+        throw new Error("Method not implemented.");
+    }
   getLinkStyle(): string {
     if (this.nodeObject.end == null) return 'ONGOING';
     switch(true){
@@ -150,6 +180,8 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
     this.nodeObject = nodeObject;
   }
 
+
+
   formatNode(field: Label): string {
     switch (field) {
       case Label.SERVER_IDENTITY: return this.nodeObject.schema || this.nodeObject.name || '?'/*+ this.nodeObject.version*/ //version
@@ -172,6 +204,17 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
     }
   }
 
+  nodeInfo(){
+    const rows: any[] = [];
+    if (this.nodeObject?.host)     rows.push({ icon: 'dns',      label: 'Hôte',     value: this.nodeObject.port && this.nodeObject.port !== -1 ? `${this.nodeObject.host}:${this.nodeObject.port}` : this.nodeObject.host, color: '#6366f1' });
+    if (this.nodeObject?.productName) rows.push({ icon: 'inventory',  label: 'Produit', value: this.nodeObject.productName + (this.nodeObject.productVersion ? ' ' + this.nodeObject.productVersion : ''), color: '#10b981' });
+    return rows
+  }
+
+  linkInfo(): { icon: string; label: string; value: string; color?: string; }[] {
+    throw new Error("Method not implemented.");
+  }
+
   getLinkStyle(): string {
     if (this.nodeObject.end == null) return 'ONGOING';
     return this.nodeObject.failed ? 'ERROR' : 'SUCCES'
@@ -185,6 +228,19 @@ export class FtpRequestNode implements Node<Label>, Link<Label> {
   constructor(nodeObject: FtpRequestTree) {
     this.nodeObject = nodeObject;
   }
+
+  linkInfo(): { icon: string; label: string; value: string; color?: string; }[] {
+        throw new Error("Method not implemented.");
+    }
+
+  nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
+    const rows: any[] = [];
+    if (this.nodeObject?.host)     rows.push({ icon: 'dns',      label: 'Hôte',     value: this.nodeObject.port && this.nodeObject.port !== -1 ? `${this.nodeObject.host}:${this.nodeObject.port}` : this.nodeObject.host, color: '#6366f1' });
+    if (this.nodeObject?.serverVersion) rows.push({ icon: 'computer',   label: 'Serveur', value: this.nodeObject.serverVersion, color: '#0e7490' });
+    if (this.nodeObject?.clientVersion) rows.push({ icon: 'laptop',     label: 'Client',  value: this.nodeObject.clientVersion, color: '#0891b2' });
+    if (this.nodeObject?.commands?.length) rows.push({ icon: 'terminal', label: 'Commandes', value: `${this.nodeObject.commands.length} cmd(s)`, color: '#0e7490' }); // todo get
+    return rows
+    }
 
   formatNode(field: Label): string {
     switch (field) {
@@ -220,6 +276,17 @@ export class MailRequestNode implements Node<Label>, Link<Label> {
     this.nodeObject = nodeObject;
   }
 
+  linkInfo(): { icon: string; label: string; value: string; color?: string; }[] {
+        throw new Error("Method not implemented.");
+    }
+
+  nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
+    const rows: any[] = [];
+    if (this.nodeObject?.host)     rows.push({ icon: 'dns',      label: 'Hôte',     value: this.nodeObject.port && this.nodeObject.port !== -1 ? `${this.nodeObject.host}:${this.nodeObject.port}` : this.nodeObject.host, color: '#6366f1' });
+    if (this.nodeObject?.mails?.length) rows.push({ icon: 'email',  label: 'Mails',   value: `${this.nodeObject.mails.length} destinataire(s)`, color: '#f59e0b' }); // todo get ?
+    return rows
+    }
+
   formatNode(field: Label): string {
     switch (field) {
       case Label.SERVER_IDENTITY: return this.nodeObject.host || '?' //version
@@ -254,6 +321,16 @@ export class LdapRequestNode implements Node<Label>, Link<Label> {
     this.nodeObject = nodeObject;
   }
 
+  linkInfo(): { icon: string; label: string; value: string; color?: string; }[] {
+        throw new Error("Method not implemented.");
+    }
+
+  nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
+    const rows: any[] = [];
+    if (this.nodeObject?.host)     rows.push({ icon: 'dns',      label: 'Hôte',     value: this.nodeObject.port && this.nodeObject.port !== -1 ? `${this.nodeObject.host}:${this.nodeObject.port}` : this.nodeObject.host, color: '#6366f1' });
+    return rows
+    }
+
   formatNode(field: Label): string {
     switch (field) {
       case Label.SERVER_IDENTITY: return this.nodeObject.host || '?'/*+ this.nodeObject.version*/ //version
@@ -286,6 +363,10 @@ export class RestRequestNode implements Node<Label> {
   constructor(nodeObject: RestRequestTree) {
     this.nodeObject = nodeObject;
   }
+
+  nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
+        throw new Error("Method not implemented.");
+    }
 
   formatNode(field: Label): string {
     switch (field) {
@@ -559,7 +640,7 @@ export class TreeGraph {
     }
   }
 
-  insertServer(name: string, serverType: ServerType) {
+  insertServer(name: any, serverType: ServerType) {
     return this.insertVertex(name, ServerConfig[serverType].width, ServerConfig[serverType].height, ServerConfig[serverType].icon);
   }
 

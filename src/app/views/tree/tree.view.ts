@@ -47,7 +47,6 @@ export class TreeView implements OnDestroy {
   linkLbl: Label;
   LabelIsLoaded: { [key: string]: boolean } = { "METHOD_RESOURCE": false, "STATUS_EXCEPTION": false, "SIZE_COMPRESSION": false }
   minimapVisible: boolean = JSON.parse(localStorage.getItem('tree_minimap') ?? 'true');
-  legendVisible: boolean = false;
   isFullscreen: boolean = false;
   searchQuery: string = '';
   searchResults: any[] = [];
@@ -230,17 +229,13 @@ export class TreeView implements OnDestroy {
       if (cell.value?.nodes) {
         const grouped = this.groupBy(cell.value.nodes, (v: any) => v.formatLink(cell.value.linkLbl), undefined);
         Object.entries(grouped).forEach(([key, nodes]: any) => {
-          const isError   = /red|error|KO|5[0-9]{2}/i.test(key);
-          const isWarning = /4[0-9]{2}/i.test(key);
           rows.push({
-            icon: isError ? 'error' : isWarning ? 'warning' : 'check_circle',
             label: key,
             value: nodes.length > 1 ? `×${nodes.length}` : '',
-            color: isError ? '#ef4444' : isWarning ? '#f59e0b' : '#22c55e'
           });
         });
       } else {
-        rows.push({ icon: 'timeline', label: String(cell.value ?? ''), value: '', color: '#3b82f6' });
+        rows.push({ label: String(cell.value ?? ''), value: '', color: '#3b82f6' });
       }
       return { type: 'Lien', rows };
     }
@@ -248,35 +243,35 @@ export class TreeView implements OnDestroy {
     if (cell.isVertex() && cell.value?.requestType && cell.value?.node) {
       const obj  = cell.value.node.nodeObject;
       const rows: any[] = [];
-      const elapsed = obj?.end != null && obj?.start != null ? (obj.end - obj.start).toFixed(3) + ' s' : null;
-      const status  = obj?.end == null ? 'En cours' : (obj?.failed ? 'Échec' : 'Succès');
-      const statusColor = obj?.end == null ? '#f59e0b' : (obj?.failed ? '#ef4444' : '#22c55e');
-      const statusIcon  = obj?.end == null ? 'schedule' : (obj?.failed ? 'error' : 'check_circle');
+     // const elapsed = obj?.end != null && obj?.start != null ? (obj.end - obj.start).toFixed(3) + ' s' : null;
+      //const status  = obj?.end == null ? 'En cours' : (obj?.failed ? 'Échec' : 'Succès');
+     // const statusColor = obj?.end == null ? '#f59e0b' : (obj?.failed ? '#ef4444' : '#22c55e');
+      //const statusIcon  = obj?.end == null ? 'schedule' : (obj?.failed ? 'error' : 'check_circle');
 
       // Champs communs
       if (obj?.host)     rows.push({ icon: 'dns',      label: 'Hôte',     value: obj.port && obj.port !== -1 ? `${obj.host}:${obj.port}` : obj.host, color: '#6366f1' });
-      if (obj?.protocol) rows.push({ icon: 'lock',     label: 'Protocole',value: obj.protocol,   color: '#0ea5e9' });
-      if (elapsed)       rows.push({ icon: 'timer',    label: 'Durée',    value: elapsed,        color: '#8b5cf6' });
-                         rows.push({ icon: statusIcon, label: 'Statut',   value: status,         color: statusColor });
-      if (obj?.user)     rows.push({ icon: 'person',   label: 'Utilisateur', value: obj.user,    color: '#64748b' });
+      //if (obj?.protocol) rows.push({ icon: 'lock',     label: 'Protocole',value: obj.protocol,   color: '#0ea5e9' });
+     // if (elapsed)       rows.push({ icon: 'timer',    label: 'Durée',    value: elapsed,        color: '#8b5cf6' });
+     //                    rows.push({ icon: statusIcon, label: 'Statut',   value: status,         color: statusColor });
+    //  if (obj?.user)     rows.push({ icon: 'person',   label: 'Utilisateur', value: obj.user,    color: '#64748b' });
 
       // Spécifique JDBC
       if (cell.value.requestType === 'jdbc') {
-        if (obj?.name)        rows.push({ icon: 'storage',    label: 'Base',    value: obj.schema ? `${obj.name} / ${obj.schema}` : obj.name, color: '#059669' });
+       // if (obj?.name)        rows.push({ icon: 'storage',    label: 'Base',    value: obj.schema ? `${obj.name} / ${obj.schema}` : obj.name, color: '#059669' });
         if (obj?.productName) rows.push({ icon: 'inventory',  label: 'Produit', value: obj.productName + (obj.productVersion ? ' ' + obj.productVersion : ''), color: '#10b981' });
-        if (obj?.command)     rows.push({ icon: 'code',       label: 'Commande',value: obj.command.length > 40 ? obj.command.substring(0, 40) + '…' : obj.command, color: '#6366f1' });
-        if (obj?.count != null) rows.push({ icon: 'format_list_numbered', label: 'Requêtes SQL', value: String(obj.count), color: '#0284c7' });
+        //if (obj?.command)     rows.push({ icon: 'code',       label: 'Commande',value: obj.command.length > 40 ? obj.command.substring(0, 40) + '…' : obj.command, color: '#6366f1' });
+       // if (obj?.count != null) rows.push({ icon: 'format_list_numbered', label: 'Requêtes SQL', value: String(obj.count), color: '#0284c7' });
       }
       // Spécifique FTP
       if (cell.value.requestType === 'ftp') {
         if (obj?.serverVersion) rows.push({ icon: 'computer',   label: 'Serveur', value: obj.serverVersion, color: '#0e7490' });
         if (obj?.clientVersion) rows.push({ icon: 'laptop',     label: 'Client',  value: obj.clientVersion, color: '#0891b2' });
-        if (obj?.commands?.length) rows.push({ icon: 'terminal', label: 'Commandes', value: `${obj.commands.length} cmd(s)`, color: '#0e7490' });
+        if (obj?.commands?.length) rows.push({ icon: 'terminal', label: 'Commandes', value: `${obj.commands.length} cmd(s)`, color: '#0e7490' }); // todo get
       }
       // Spécifique SMTP
       if (cell.value.requestType === 'smtp') {
-        if (obj?.mails?.length) rows.push({ icon: 'email',  label: 'Mails',   value: `${obj.mails.length} destinataire(s)`, color: '#f59e0b' });
-        if (obj?.count != null) rows.push({ icon: 'format_list_numbered', label: 'Messages', value: String(obj.count), color: '#d97706' });
+        if (obj?.mails?.length) rows.push({ icon: 'email',  label: 'Mails',   value: `${obj.mails.length} destinataire(s)`, color: '#f59e0b' }); // todo get ?
+        if (obj?.port)      rows.push({ icon: 'settings_ethernet', label: 'Port',    value: String(obj.port),        color: '#8b5cf6' });
       }
       // Spécifique LDAP
       if (cell.value.requestType === 'ldap') {
@@ -295,15 +290,11 @@ export class TreeView implements OnDestroy {
       if (obj?.appName)   rows.push({ icon: 'label',         label: 'Application', value: obj.appName,             color: '#3b82f6' });
       if (obj?.host)      rows.push({ icon: 'dns',           label: 'Hôte',        value: obj.host,                color: '#6366f1' });
       if (obj?.port)      rows.push({ icon: 'settings_ethernet', label: 'Port',    value: String(obj.port),        color: '#8b5cf6' });
-      if (obj?.protocol)  rows.push({ icon: 'lock',          label: 'Protocole',   value: obj.protocol,            color: '#0ea5e9' });
-      if (obj?.type)      rows.push({ icon: 'category',      label: 'Type',        value: obj.type,                color: '#f59e0b' });
+      //if (obj?.protocol)  rows.push({ icon: 'lock',          label: 'Protocole',   value: obj.protocol,            color: '#0ea5e9' });
+      //if (obj?.type)      rows.push({ icon: 'category',      label: 'Type',        value: obj.type,                color: '#f59e0b' });
       if (obj?.os)        rows.push({ icon: 'computer',      label: 'OS',          value: obj.os,                  color: '#64748b' });
       if (obj?.re)        rows.push({ icon: 'layers',        label: 'Env',         value: obj.re,                  color: '#10b981' });
-      if (obj?.restRequests?.length)     rows.push({ icon: 'api',          label: 'REST',   value: `${obj.restRequests.length} appel(s)`,     color: '#6366f1' });
-      if (obj?.databaseRequests?.length) rows.push({ icon: 'storage',      label: 'DB',     value: `${obj.databaseRequests.length} requête(s)`, color: '#059669' });
-      if (obj?.ftpRequests?.length)      rows.push({ icon: 'folder',       label: 'FTP',    value: `${obj.ftpRequests.length} transfert(s)`,  color: '#0e7490' });
-      if (obj?.mailRequests?.length)     rows.push({ icon: 'email',        label: 'SMTP',   value: `${obj.mailRequests.length} mail(s)`,      color: '#f59e0b' });
-      if (obj?.ldapRequests?.length)     rows.push({ icon: 'badge',        label: 'LDAP',   value: `${obj.ldapRequests.length} requête(s)`,   color: '#7c3aed' });
+      if (obj?.address)   rows.push({ icon: 'location_on',   label: 'Adresse',         value: obj.address,                  color: '#f97316' });
       if (!rows.length)   rows.push({ icon: 'info', label: node.formatNode?.(this.serverLbl) ?? '', value: '', color: '#94a3b8' });
       return { type: 'Nœud', rows };
     }
@@ -480,50 +471,127 @@ export class TreeView implements OnDestroy {
     return ('id' in obj ? 'REST' : 'GHOST')
   }
 
-  // ── Évolution 3 : Recherche de nœud ────────────────────────────────────────
-  toggleSearch() {
-    this.searchVisible = !this.searchVisible;
-    if (this.searchVisible) {
-      setTimeout(() => this.searchInputRef?.nativeElement?.focus(), 320);
-    } else {
-      this.clearSearch();
-    }
-  }
+   // ── Évolution 3 : Recherche de nœud ────────────────────────────────────────
+   toggleSearch() {
+     this.searchVisible = !this.searchVisible;
+     if (this.searchVisible) {
+       setTimeout(() => this.searchInputRef?.nativeElement?.focus(), 320);
+     } else {
+       this.clearSearch();
+     }
+   }
 
-  onSearch() {
-    if (!this.tree || !this.searchQuery.trim()) {
-      this.clearSearch();
-      return;
-    }
-    const q = this.searchQuery.toLowerCase();
-    const vertices = this.tree.graph.getChildVertices(this.tree._parent);
-    this.searchResults = vertices.filter((v: any) => {
-      const label = this.tree.graph.getLabel(v);
-      return label && String(label).toLowerCase().includes(q);
-    });
-    this.currentSearchIndex = 0;
-    this.focusSearchResult();
-  }
+   onSearch() {
+     if (!this.tree || !this.searchQuery.trim()) {
+       this.clearSearch();
+       return;
+     }
+     const q = this.searchQuery.toLowerCase();
+     const vertices = this.tree.graph.getChildVertices(this.tree._parent);
+     this.searchResults = vertices.filter((v: any) => {
+       const label = this.tree.graph.getLabel(v);
+       return label && String(label).toLowerCase().includes(q);
+     });
+     this.currentSearchIndex = 0;
+     this.applySearchHighlight();
+     this.focusSearchResult();
+   }
 
-  navigateSearch(direction: 1 | -1) {
-    if (!this.searchResults.length) return;
-    this.currentSearchIndex = (this.currentSearchIndex + direction + this.searchResults.length) % this.searchResults.length;
-    this.focusSearchResult();
-  }
+   navigateSearch(direction: 1 | -1) {
+     if (!this.searchResults.length) return;
+     this.currentSearchIndex = (this.currentSearchIndex + direction + this.searchResults.length) % this.searchResults.length;
+     this.applySearchHighlight();
+     this.focusSearchResult();
+   }
 
-  focusSearchResult() {
-    if (!this.searchResults.length) return;
-    const cell = this.searchResults[this.currentSearchIndex];
-    this.tree.graph.setSelectionCell(cell);
-    this.tree.graph.scrollCellToVisible(cell, true);
-  }
+   focusSearchResult() {
+     if (!this.searchResults.length) return;
+     const cell = this.searchResults[this.currentSearchIndex];
+     this.tree.graph.setSelectionCell(cell);
+     this.tree.graph.scrollCellToVisible(cell, true);
+   }
 
-  clearSearch() {
-    this.searchQuery = '';
-    this.searchResults = [];
-    this.currentSearchIndex = 0;
-    this.tree?.graph.clearSelection();
-  }
+   clearSearch() {
+     this.searchQuery = '';
+     this.searchResults = [];
+     this.currentSearchIndex = 0;
+     this.clearSearchHighlight();
+     this.tree?.graph.clearSelection();
+   }
+
+   /**
+    * Applique le highlighting pour la recherche
+    */
+   applySearchHighlight() {
+     this.clearSearchHighlight();
+     if (!this.tree || this.searchResults.length === 0) return;
+
+     const allVertices = this.tree.graph.getChildVertices(this.tree._parent);
+
+     // Appliquer le style à tous les vertices
+     allVertices.forEach((v: any) => {
+       const state = this.tree.graph.view.getState(v);
+       if (!state || !state.shape || !state.shape.node) return;
+
+       const node: SVGElement = state.shape.node;
+       const isHighlighted = this.searchResults.includes(v);
+       const isCurrent = v === this.searchResults[this.currentSearchIndex];
+
+       if (isCurrent) {
+         // Node courant: glow vert intensif
+         node.style.filter = 'drop-shadow(0 0 12px rgba(34, 197, 94, 0.8))';
+         node.style.opacity = '1';
+       } else if (isHighlighted) {
+         // Autres résultats: glow vert léger
+         node.style.filter = 'drop-shadow(0 0 6px rgba(34, 197, 94, 0.5))';
+         node.style.opacity = '0.9';
+       } else {
+         // Non trouvés: estompés
+         node.style.opacity = '0.2';
+         node.style.filter = 'grayscale(100%)';
+       }
+     });
+
+     // Estomper aussi les edges
+     const allEdges = this.tree.graph.getEdges(this.tree._parent);
+     allEdges.forEach((e: any) => {
+       const state = this.tree.graph.view.getState(e);
+       if (!state || !state.shape || !state.shape.node) return;
+       const node: SVGElement = state.shape.node;
+       const paths = node.querySelectorAll('path');
+       paths.forEach((p: SVGPathElement) => {
+         p.style.opacity = '0.1';
+       });
+     });
+   }
+
+   /**
+    * Nettoie le highlighting de la recherche
+    */
+   clearSearchHighlight() {
+     if (!this.tree) return;
+
+     const allVertices = this.tree.graph.getChildVertices(this.tree._parent);
+     allVertices.forEach((v: any) => {
+       const state = this.tree.graph.view.getState(v);
+       if (!state || !state.shape || !state.shape.node) return;
+       const node: SVGElement = state.shape.node;
+       node.style.filter = '';
+       node.style.opacity = '';
+     });
+
+     // Restaurer les edges
+     const allEdges = this.tree.graph.getEdges(this.tree._parent);
+     allEdges.forEach((e: any) => {
+       const state = this.tree.graph.view.getState(e);
+       if (!state || !state.shape || !state.shape.node) return;
+       const node: SVGElement = state.shape.node;
+       const paths = node.querySelectorAll('path');
+       paths.forEach((p: SVGPathElement) => {
+         p.style.opacity = '';
+       });
+     });
+   }
 
   // ── Évolution 5 : Export PNG ─────────────────────────────────────────────
   async exportPNG() {
@@ -573,11 +641,104 @@ export class TreeView implements OnDestroy {
 
     img.onload = () => {
       ctx.drawImage(img, 0, 0);
-      URL.revokeObjectURL(url);
-      const a = document.createElement('a');
-      a.download = `graph-${this.id}.png`;
-      a.href = canvas.toDataURL('image/png');
-      a.click();
+
+      // ── Badge "INSPECT by @ONETEME/JARVIS" + logo GitHub en bas à droite ─────
+      const badgeText  = 'INSPECT';
+      const badgeSubtext = '@ONETEME/JARVIS';
+      const fontSize   = 12;
+      const fontSizeSmall = 10;
+      const padding    = 12;
+      const iconSize   = 20;
+      const gap        = 8;
+      const borderRadius = 10;
+      const borderWidth = 1.5;
+      
+      ctx.font = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+      const textW = ctx.measureText(badgeText).width;
+      ctx.font = `500 ${fontSizeSmall}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+      const subtextW = ctx.measureText(badgeSubtext).width;
+      const maxTextW = Math.max(textW, subtextW);
+      
+      const badgeW = iconSize + gap + maxTextW + padding * 2;
+      const badgeH = fontSize + fontSizeSmall + gap + padding * 2;
+      const bx = bbox.width  - badgeW - 12;
+      const by = bbox.height - badgeH - 12;
+
+      ctx.save();
+      
+      // Ombre du badge
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      ctx.shadowBlur = 12;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 4;
+      
+      // Fond avec gradient
+      const gradient = ctx.createLinearGradient(bx, by, bx, by + badgeH);
+      gradient.addColorStop(0, 'rgba(15, 23, 42, 0.95)');
+      gradient.addColorStop(1, 'rgba(30, 41, 59, 0.95)');
+      ctx.fillStyle = gradient;
+      
+      ctx.beginPath();
+      (ctx as any).roundRect?.(bx, by, badgeW, badgeH, borderRadius) ?? ctx.rect(bx, by, badgeW, badgeH);
+      ctx.fill();
+      
+      // Bordure avec gradient
+      const borderGradient = ctx.createLinearGradient(bx, by, bx, by + badgeH);
+      borderGradient.addColorStop(0, 'rgba(148, 163, 184, 0.5)');
+      borderGradient.addColorStop(1, 'rgba(100, 116, 139, 0.3)');
+      ctx.strokeStyle = borderGradient;
+      ctx.lineWidth = borderWidth;
+      ctx.shadowColor = 'transparent';
+      ctx.beginPath();
+      (ctx as any).roundRect?.(bx, by, badgeW, badgeH, borderRadius) ?? ctx.rect(bx, by, badgeW, badgeH);
+      ctx.stroke();
+
+      // Logo GitHub
+      const ghImg = new Image();
+      ghImg.onload = () => {
+        const iy = by + (badgeH - iconSize) / 2;
+        ctx.drawImage(ghImg, bx + padding, iy, iconSize, iconSize);
+        
+        // Texte principal (INSPECT)
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+        ctx.textBaseline = 'top';
+        ctx.fillText(badgeText, bx + padding + iconSize + gap, by + padding - 1);
+        
+        // Texte secondaire (@ONETEME/JARVIS)
+        ctx.fillStyle = 'rgba(226, 232, 240, 0.8)';
+        ctx.font = `500 ${fontSizeSmall}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+        ctx.fillText(badgeSubtext, bx + padding + iconSize + gap, by + padding + fontSize + 2);
+        
+        ctx.restore();
+
+        // Télécharger l'image
+        URL.revokeObjectURL(url);
+        const a = document.createElement('a');
+        a.download = `graph-${this.id}.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      };
+      ghImg.onerror = () => {
+        // Si le logo ne charge pas, continuer sans lui
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+        ctx.textBaseline = 'top';
+        ctx.fillText(badgeText, bx + padding + iconSize + gap, by + padding - 1);
+        
+        ctx.fillStyle = 'rgba(226, 232, 240, 0.8)';
+        ctx.font = `500 ${fontSizeSmall}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+        ctx.fillText(badgeSubtext, bx + padding + iconSize + gap, by + padding + fontSize + 2);
+        
+        ctx.restore();
+
+        URL.revokeObjectURL(url);
+        const a = document.createElement('a');
+        a.download = `graph-${this.id}.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      };
+      ghImg.src = 'assets/github.svg';
     };
     img.onerror = () => URL.revokeObjectURL(url);
     img.src = url;
@@ -588,9 +749,6 @@ export class TreeView implements OnDestroy {
     localStorage.setItem('tree_minimap', JSON.stringify(this.minimapVisible));
   }
 
-  toggleLegend() {
-    this.legendVisible = !this.legendVisible;
-  }
 
   toggleFullscreen() {
     const el = document.getElementById('fixed-width-container');

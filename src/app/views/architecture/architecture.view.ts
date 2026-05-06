@@ -8,7 +8,6 @@ import {combineLatest, finalize, forkJoin, fromEvent, map, Subscription} from "r
 import {app, makeDatePeriod} from "../../../environments/environment";
 import {Location} from "@angular/common";
 import {TreeService} from "../../service/tree.service";
-import {mxCell} from "mxgraph";
 import {ArchitectureTree} from "./model/architecture.model";
 import mx from "../../../mxgraph";
 import {InstanceService} from "../../service/jquery/instance.service";
@@ -175,11 +174,30 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
 
     heatMapControl: FormControl = new FormControl<boolean>(false);
     treeMapControl: FormControl = new FormControl<boolean>(false);
+    focusControl:   FormControl = new FormControl<string | null>(null);
+    edgeTypeFilters: { [key: string]: boolean } = { 'REST': true, 'VIEW': true, 'JDBC': true, 'FTP': true, 'SMTP': true, 'LDAP': true };
 
     subscriptions: Subscription[] = [];
     params: Partial<{ env: string, start: Date, end: Date }> = {};
+    private _architectures: Architecture[] = [];   // données brutes conservées pour le filtre
+    appNames: string[] = [];                       // liste des microservices disponibles
 
     @ViewChild('graphContainer') graphContainer: ElementRef;
+    @ViewChild('outlineContainer') outlineContainer: ElementRef;
+    @ViewChild('searchInput') searchInputRef: ElementRef;
+
+    minimapVisible: boolean = JSON.parse(localStorage.getItem('arch_minimap') ?? 'true');
+    isFullscreen: boolean = false;
+    searchQuery: string = '';
+    searchResults: any[] = [];
+    currentSearchIndex: number = 0;
+    searchVisible: boolean = false;
+
+    selectedVertex: { name: string; type: string; incomingCount: number; outgoingCount: number; incomingNames: string[]; outgoingNames: string[] } | null = null;
+    hoveredVertex: { name: string; type: string; incomingCount: number; outgoingCount: number; x: number; y: number } | null = null;
+    searchHighlightedNodes: any[] = [];  // Nodes trouvés lors de la recherche
+
+    statsCards: { type: string; label: string; count: number; icon: string; color: string }[] = [];
 
     ngOnInit() {
         this.subscriptions.push(combineLatest({
@@ -236,10 +254,117 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
                 this.heatMapConfig = { ...newConfig };
             }
         }));
+
+        this.subscriptions.push(this.focusControl.valueChanges.subscribe(name => {
+            if (!this.tree || !this._architectures.length) return;
+            this.tree.clearAnimatedEdges();
+            this.tree.clearCells();
+            this.tree.draw(() => this.draw(this.tree, this._architectures, name));
+            if (name) {
+                setTimeout(() => this.tree.highlightFocusedNode(name), 100);
+            } else {
+                this.tree.clearHighlight();
+            }
+        }));
     }
 
     ngAfterViewInit() {
         this.tree = ArchitectureTree.setup(this.graphContainer.nativeElement);
+        this.tree.setOutline(this.outlineContainer.nativeElement);
+
+        // Configure l'écouteur de click sur les vertices pour animer les edges des appelants
+        this.tree.setupVertexClickListener(
+            (vertex: any) => {
+                // Single-click : afficher la card
+                const vertexName = this.tree._graph.model.getValue(vertex);
+                const architecture = this._architectures.find(a => a.name === vertexName);
+                let nodeType = architecture?.type;
+                if (!nodeType) {
+                    for (const arch of this._architectures) {
+                        const rs = arch.remoteServers?.find(r => (r.schema ?? r.name) === vertexName);
+                        if (rs) { nodeType = rs.type === 'MAIN' ? (arch.type) : rs.type; break; }
+                    }
+                }
+                const incomingEdges = this.tree._graph.getIncomingEdges(vertex, null);
+                const outgoingEdges = this.tree._graph.getOutgoingEdges(vertex);
+
+                // Récupérer les noms des nodes appelants
+                const incomingNames = incomingEdges.map((edge: any) => {
+                    const source = edge.getTerminal(true);
+                    return this.tree._graph.model.getValue(source);
+                }).sort();
+
+                // Récupérer les noms des nodes appelés
+                const outgoingNames = outgoingEdges.map((edge: any) => {
+                    const target = edge.getTerminal(false);
+                    return this.tree._graph.model.getValue(target);
+                }).sort();
+
+                this.selectedVertex = {
+                    name: vertexName,
+                    type: nodeType ?? 'UNKNOWN',
+                    incomingCount: incomingEdges.length,
+                    outgoingCount: outgoingEdges.length,
+                    incomingNames: incomingNames,
+                    outgoingNames: outgoingNames
+                };
+
+                // N'animer que si aucun microservice n'est sélectionné dans le filtre
+                if (this.focusControl.value === null) {
+                    this.tree.animateIncomingEdges(vertex);
+                }
+            },
+            () => {
+                // Clic sur le fond : nettoyer les animations et la card
+                this.selectedVertex = null;
+                if (this.focusControl.value === null) {
+                    this.tree.clearAnimatedEdges();
+                }
+            },
+            (vertex: any) => {
+                // Double-click : focus automatique SEULEMENT pour REST et MAIN
+                const vertexName = this.tree._graph.model.getValue(vertex);
+                const architecture = this._architectures.find(a => a.name === vertexName);
+
+                // Vérifier que c'est un type focalisable (REST ou MAIN)
+                if (architecture && (architecture.type === 'REST' || architecture.type === 'MAIN')) {
+                    this.focusControl.setValue(vertexName);
+                }
+                // Sinon, le double-click n'a aucun effet sur les ressources
+            }
+        );
+
+        // Écouteurs de hover pour le tooltip
+        (this.tree as any).onVertexHover = (vertex: any, event: MouseEvent) => {
+            const vertexName = this.tree._graph.model.getValue(vertex);
+            const architecture = this._architectures.find(a => a.name === vertexName);
+            let nodeType = architecture?.type;
+            if (!nodeType) {
+                for (const arch of this._architectures) {
+                    const rs = arch.remoteServers?.find(r => (r.schema ?? r.name) === vertexName);
+                    if (rs) { nodeType = rs.type === 'MAIN' ? arch.type : rs.type; break; }
+                }
+            }
+            const incomingEdges = this.tree._graph.getIncomingEdges(vertex, null);
+            const outgoingEdges = this.tree._graph.getOutgoingEdges(vertex);
+            
+            this._zone.run(() => {
+                this.hoveredVertex = {
+                    name: vertexName,
+                    type: nodeType ?? 'UNKNOWN',
+                    incomingCount: incomingEdges.length,
+                    outgoingCount: outgoingEdges.length,
+                    x: event.clientX,
+                    y: event.clientY
+                };
+            });
+        };
+
+        (this.tree as any).onVertexHoverOut = () => {
+            this._zone.run(() => {
+                this.hoveredVertex = null;
+            });
+        };
 
         this._zone.runOutsideAngular(() => {
             this.resizeSubscription = fromEvent(window, 'resize').subscribe(() => {
@@ -249,6 +374,13 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
                     }
                 })
 
+            });
+
+            fromEvent(document, 'fullscreenchange').subscribe(() => {
+                this._zone.run(() => {
+                    this.isFullscreen = !!document.fullscreenElement;
+                    setTimeout(() => this.tree?.resizeAndCenter(), 200);
+                });
             });
         });
 
@@ -310,14 +442,53 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
             mainSession: this._instanceService.getMainSessionApplication(this.params.start, this.params.end, this.params.env),
             restSession: this._treeService.getArchitecture(this.params.start, this.params.end, this.params.env)
         }).pipe(map(res => {
-            res.restSession.push(...res.mainSession.map(m => ({name: m.appName, schema: null, type: m.type, remoteServers: null})));
+            res.restSession.push(...res.mainSession.map(m => ({name: m.appName, type: m.type, remoteServers: undefined})));
             return res.restSession;
         }), finalize(() => this.syntheseIsLoading = false)).subscribe({
             next: res => {
+                this._architectures = res;
+                this.appNames = [...new Set(res.map((a: Architecture) => a.name))].sort();
+                this.focusControl.setValue(null, { emitEvent: false }); // reset filtre
                 this.tree.clearCells();
                 this.tree.draw(() => this.draw(this.tree, res));
+                this.computeStats(res);
             }
         }));
+    }
+
+    computeStats(architectures: Architecture[]) {
+        const appCounts: { [type: string]: Set<string> } = {};
+        const resCounts: { [type: string]: Set<string> } = {};
+
+        architectures.forEach(a => {
+            if (!appCounts[a.type]) appCounts[a.type] = new Set();
+            appCounts[a.type].add(a.name);
+            (a.remoteServers ?? []).forEach(r => {
+                if (!resCounts[r.type]) resCounts[r.type] = new Set();
+                resCounts[r.type].add(r.schema ?? r.name);
+            });
+        });
+
+        const typeConfig: { [t: string]: { label: string; icon: string; color: string } } = {
+            REST:  { label: 'Microservices',  icon: 'assets/mxgraph/microservice.drawio.svg', color: '#3b82f6' },
+            VIEW:  { label: 'Vues',           icon: 'assets/mxgraph/view.drawio.svg',         color: '#06b6d4' },
+            JDBC:  { label: 'Bases de données', icon: 'assets/mxgraph/database.drawio.svg',   color: '#f97316' },
+            FTP:   { label: 'Serveurs FTP',   icon: 'assets/mxgraph/ftp.drawio.svg',          color: '#0e7490' },
+            SMTP:  { label: 'Serveurs SMTP',  icon: 'assets/mxgraph/smtp.drawio.svg',         color: '#f59e0b' },
+            LDAP:  { label: 'Annuaires LDAP', icon: 'assets/mxgraph/ldap.drawio.svg',         color: '#7c3aed' },
+        };
+
+        const cards: typeof this.statsCards = [];
+        [...Object.entries(appCounts), ...Object.entries(resCounts)].forEach(([type, set]) => {
+            const existing = cards.find(c => c.type === type);
+            if (existing) { existing.count = set.size; return; }
+            const tc = typeConfig[type];
+            if (tc) cards.push({ type, label: tc.label, count: set.size, icon: tc.icon, color: tc.color });
+        });
+
+        // Ordre d'affichage
+        const order = ['REST', 'VIEW', 'JDBC', 'FTP', 'SMTP', 'LDAP'];
+        this.statsCards = cards.sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
     }
 
     buildHeatMapCharts(res: {count: number, sum: number, origin: string, target: string}[]) {
@@ -367,127 +538,465 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
     }
 
 
-    draw(tree: ArchitectureTree, architectures: Architecture[]) {
+    /**
+     * Calcul BFS des nœuds à inclure à partir de focusedApp
+     * dans les deux directions (appelants + appelés).
+     * Seuls les edges dont le type est actif dans edgeTypeFilters sont traversés.
+     */
+    private getIncludedNodes(architectures: Architecture[], focusedApp: string, enabledTypes: { [key: string]: boolean } = {}): Set<string> {
+        const included = new Set<string>([focusedApp]);
+        let frontier = new Set<string>([focusedApp]);
 
-        let layout = new mx.mxHierarchicalLayout(tree._graph, mx.mxConstants.DIRECTION_WEST);
+        const isEdgeEnabled = (a: Architecture, r: RemoteServer): boolean =>
+            !!enabledTypes[this.effectiveType(a, r, architectures)];
 
-        let widthServerSl = architectures.reduce((acc, cur, index) => {
-            if(index != architectures.length - 1) {
-                return (acc + ServerConfig['REST'].width) - 30;
-            } else {
-                return acc + ServerConfig['REST'].width;
-            }
-        }, 38);
-        let launchSwimlane = tree._graph.insertVertex(tree._parent, null, 'Clients', 0, 0, widthServerSl, 110, 'swimlane;fillColor=#ECB390;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=3');
-
-        let serverSwimlane = tree._graph.insertVertex(tree._parent, null, 'Serveurs', 0, 190, widthServerSl, 110, 'swimlane;fillColor=#7FC7D9;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=3');
-        //let testServ = tg._graph.insertVertex(serverSwimlane, null, 'TestServer', 50, 25, 100, 50);
-        let databaseSwimlane = tree._graph.insertVertex(tree._parent, null, 'BDD', 0, 400, widthServerSl, 110, 'swimlane;fillColor=#FFB200;gradientColor=white;gradientDirection=east;dashed=1;rounded=1;startSize=38;horizontal=0;fontStyle=3');
-        //let testDb = tg._graph.insertVertex(DatabaseSwimlane, null, 'TestDb', 50, 25, 100, 50);
-        let ftpSwimlane = tree._graph.insertVertex(tree._parent, null, 'FTP', widthServerSl + 100, 0, 80, 150, 'swimlane;fillColor=#BFEA7C;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontStyle=3');
-        let smtpSwimlane = tree._graph.insertVertex(tree._parent, null, 'SMTP', widthServerSl + 100, 190, 80, 150, 'swimlane;fillColor=#BFEA7C;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontStyle=3');
-        let ldapSwimlane = tree._graph.insertVertex(tree._parent, null, 'LDAP', widthServerSl + 100, 300, 80, 150, 'swimlane;fillColor=#BFEA7C;gradientColor=white;gradientDirection=south;dashed=1;rounded=1;startSize=38;horizontal=1;fontStyle=3');
-
-        tree._graph.insertEdge(tree._parent, null, null, launchSwimlane, serverSwimlane); // 'perimeterSpacing=10;strokeWidth=10;endArrow=block;endSize=2;endFill=1;strokeColor=#66B922;rounded=1;'
-
-
-        tree._graph.insertEdge(tree._parent, null, null, serverSwimlane, ftpSwimlane);
-        tree._graph.insertEdge(tree._parent, null, null, serverSwimlane, smtpSwimlane);
-        tree._graph.insertEdge(tree._parent, null, null, serverSwimlane, ldapSwimlane);
-
-        let initialX = 38;
-        let initialY = 10;
-        let x = initialX;
-        let y = initialY;
-        let height = ServerConfig['REST'].height;
-        let width = ServerConfig['REST'].width;
-        let heightDb = ServerConfig['JDBC'].height;
-        let widthDb = ServerConfig['JDBC'].width;
-        let xDb = initialX;
-        let yDb = initialY;
-        let xMain = initialX;
-        let yMain = initialY;
-
-        let mains: {[key: string]: mxCell} = {};
-        let servers: {[key: string]: mxCell} = {};
-        let databases: {[key: string]: mxCell} = {};
-        let ftp: {[key: string]: mxCell} = {};
-        let smtp: {[key: string]: mxCell} = {};
-        let ldap: {[key: string]: mxCell} = {};
-        architectures.forEach(a => {
-            if(a.type == 'REST') {
-                servers[a.name] = tree._graph.insertVertex(serverSwimlane, null, a.name, x, y, width, height, ServerConfig['REST'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
-                x += width - 30;
-                if(y == initialY) {
-                    y += 50;
-                } else {
-                    y = initialY;
+        // Un seul niveau : appelants et appelés directs
+        const next = new Set<string>();
+        frontier.forEach(node => {
+            architectures.forEach(a => {
+                if (!included.has(a.name) && a.remoteServers?.some(r => (r.schema ?? r.name) === node && isEdgeEnabled(a, r))) {
+                    included.add(a.name);
+                    next.add(a.name);
                 }
-            } else {
-
-                mains[a.name] = tree._graph.insertVertex(launchSwimlane, null, a.name, xMain, yMain, width, height, ServerConfig[a.type].icon + "verticalLabelPosition=bottom;verticalAlign=top");
-                xMain += width - 30;
-                if(yMain == initialY) {
-                    yMain += 50;
-                } else {
-                    yMain = initialY;
+            });
+            const currentArch = architectures.find(a => a.name === node);
+            currentArch?.remoteServers?.forEach(r => {
+                if (!isEdgeEnabled(currentArch, r)) return;
+                const key = r.schema ?? r.name;
+                if (!included.has(key)) {
+                    included.add(key);
+                    next.add(key);
                 }
-            }
-            if(a.remoteServers != null) {
-                a.remoteServers.forEach(r => {
-                    let name = r.schema ? r.schema : r.name;
-                    if(r.type == 'JDBC' && !databases[name]) {
-                        databases[name] = tree._graph.insertVertex(databaseSwimlane, null, name, xDb, yDb, widthDb, heightDb, ServerConfig['JDBC'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
-                        xDb += widthDb - 30;
-                        if(yDb == initialY) {
-                            yDb += 50;
-                        } else {
-                            yDb = initialY;
-                        }
-                    }
-                    if(r.type == 'FTP' && !ftp[name]) {
-                        ftp[name] = tree._graph.insertVertex(ftpSwimlane, null, name, 0, 0, widthDb, heightDb, ServerConfig['FTP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
-                    }
-                    if(r.type == 'SMTP' && !smtp[name]) {
-                        smtp[name] = tree._graph.insertVertex(smtpSwimlane, null, name, 0, 0, widthDb, heightDb, ServerConfig['SMTP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
-                    }
-                    if(r.type == 'LDAP' && !ldap[name]) {
-                        ldap[name] = tree._graph.insertVertex(ldapSwimlane, null, name, 0, 0, widthDb, heightDb, ServerConfig['LDAP'].icon + "verticalLabelPosition=bottom;verticalAlign=top;");
-                    }
-                    //tg._graph.insertEdge(serverSwimlane, null, null, servers[a.name], databases[r.name]);
-                });
-            }
-
-
+            });
         });
-        layout.execute(tree._parent, [serverSwimlane]);
-        tree._graph.insertEdge(tree._parent, null, null, serverSwimlane, databaseSwimlane);
+        return included;
     }
 
-    distinct<T, U>(arr: Array<T>, mapper: (o: T) => U): Set<U> {
-        return arr.reduce((set: Set<U>, cur) => {
-            set.add(mapper(cur));
-            return set;
-        }, new Set<U>());
+    draw(tree: ArchitectureTree, architectures: Architecture[], focusedApp?: string | null) {
+        const cfg = ServerConfig;
+        const W = cfg['REST'].width, H = cfg['REST'].height;
+        const nodeStyle = 'verticalLabelPosition=bottom;verticalAlign=top;fontSize=10;labelWidth=200;overflow=visible;whiteSpace=nowrap;';
+        const edgeStyle = 'rounded=1;curved=1;orthogonalLoop=1;jettySize=auto;fontSize=9;fontColor=#555;strokeWidth=1.5;endArrow=block;endFill=1;endSize=6;startArrow=none;sourcePerimeterSpacing=12;';
+
+        const enabledTypes = this.edgeTypeFilters;
+
+        // ── Filtrage BFS selon profondeur ─────────────────────────────────────
+        let includedNodes: Set<string> | null = null;
+        if (focusedApp) {
+            includedNodes = this.getIncludedNodes(architectures, focusedApp, enabledTypes);
+        }
+
+        const filtered = focusedApp && includedNodes
+            ? architectures.filter(a => includedNodes!.has(a.name))
+            : architectures;
+
+        const allNodes: { [k: string]: { type: string; vertex: any } } = {};
+
+        // Collecter tous les nœuds (sources ET cibles) qui participent à au moins un edge actif
+        const usedNodes = new Set<string>();
+        filtered.forEach(a => {
+            (a.remoteServers ?? []).forEach(r => {
+                const rawKey = r.schema ?? r.name;
+                if (enabledTypes[this.effectiveType(a, r, architectures)]) {
+                    usedNodes.add(a.name);
+                    usedNodes.add(rawKey);
+                }
+            });
+        });
+
+        // 1. Créer uniquement les nœuds applicatifs qui participent à au moins un edge actif
+        filtered.forEach(a => {
+            if (usedNodes.has(a.name) && !allNodes[a.name] && cfg[a.type]) {
+                allNodes[a.name] = { type: a.type, vertex: null };
+            }
+        });
+
+        // 2. Créer SEULEMENT les ressources utilisées (via des edges actives uniquement)
+        filtered.forEach(a => {
+            if (!allNodes[a.name]) return;
+            (a.remoteServers ?? []).forEach(r => {
+                const rawKey = r.schema ?? r.name;
+                const effType = this.effectiveType(a, r, architectures);
+                if (!enabledTypes[effType]) return;
+                if (!focusedApp || !includedNodes || includedNodes.has(rawKey)) {
+                    if (['REST', 'VIEW'].includes(effType)) {
+                        const targetArch = architectures.find(arch => arch.name === r.name);
+                        const targetType = targetArch?.type ?? effType;
+                        if (usedNodes.has(rawKey) && !allNodes[rawKey] && cfg[targetType]) {
+                            allNodes[rawKey] = { type: targetType, vertex: null };
+                        }
+                    } else if (effType !== 'MAIN' && usedNodes.has(rawKey) && !allNodes[rawKey] && cfg[effType]) {
+                        allNodes[rawKey] = { type: effType, vertex: null };
+                    }
+                }
+            });
+        });
+
+        // ── Insertion des nœuds (sans coords — laissées au layout) ───────────
+        const focusedStyle = 'verticalLabelPosition=bottom;verticalAlign=top;fontSize=10;labelWidth=200;overflow=visible;whiteSpace=nowrap;strokeColor=#f97316;strokeWidth=3;fillColor=#fff7ed;';
+        Object.entries(allNodes).forEach(([k, info]) => {
+            const icon = cfg[info.type]?.icon ?? cfg['REST'].icon;
+            const style = (focusedApp && k === focusedApp) ? icon + focusedStyle : icon + nodeStyle;
+            info.vertex = tree._graph.insertVertex(tree._parent, null, k, 0, 0, W, H, style);
+        });
+
+        // ── Edges ─────────────────────────────────────────────────────────────
+        filtered.forEach(a => {
+            const src = allNodes[a.name]?.vertex;
+            if (!src || !a.remoteServers) return;
+            a.remoteServers.forEach(r => {
+                const rawKey = r.schema ?? r.name;
+                const effType = this.effectiveType(a, r, architectures);
+                if (!enabledTypes[effType]) return;
+                const tgt = allNodes[rawKey]?.vertex;
+                if (!tgt || src === tgt) return;
+                if (tree._graph.getEdgesBetween(src, tgt).length > 0) return;
+                const edgeColor = effType === 'JDBC'  ? 'strokeColor=#FF7F00;'
+                                : effType === 'FTP'   ? 'strokeColor=#0d9488;'
+                                : effType === 'SMTP'  ? 'strokeColor=#f97316;'
+                                : effType === 'LDAP'  ? 'strokeColor=#8b5cf6;'
+                                : effType === 'REST'  ? 'strokeColor=#2563eb;'
+                                : effType === 'VIEW'  ? 'strokeColor=#06b6d4;'
+                                : effType === 'MAIN'  ? 'strokeColor=#16a34a;'
+                                : 'strokeColor=#78716c;';
+                tree._graph.insertEdge(tree._parent, null, '', src, tgt, edgeStyle + edgeColor);
+            });
+        });
+
+        // ── Layout hiérarchique automatique ────────────────────────────────────
+        const layout = new mx.mxHierarchicalLayout(tree._graph);
+        (layout as any).orientation           = mx.mxConstants.DIRECTION_NORTH;
+        (layout as any).intraCellSpacing      = 40;
+        (layout as any).interRankCellSpacing  = 100;
+        (layout as any).interHierarchySpacing = 40;
+        (layout as any).disableEdgeStyle      = false;
+        layout.execute(tree._parent);
+    }
+
+    // ── Toolbar controls ─────────────────────────────────────────────────────
+    toggleMinimap() {
+        this.minimapVisible = !this.minimapVisible;
+        localStorage.setItem('arch_minimap', JSON.stringify(this.minimapVisible));
+    }
+
+
+    toggleFullscreen() {
+        const el = document.getElementById('fixed-width-container');
+        if (!this.isFullscreen) {
+            el?.requestFullscreen().then(() => {
+                this.isFullscreen = true;
+                setTimeout(() => this.tree?.resizeAndCenter(), 200);
+            });
+        } else {
+            document.exitFullscreen().then(() => {
+                this.isFullscreen = false;
+                setTimeout(() => this.tree?.resizeAndCenter(), 200);
+            });
+        }
+    }
+
+    async exportPNG() {
+        const container = this.graphContainer.nativeElement as HTMLElement;
+        const svgEl = container.querySelector('svg');
+        if (!svgEl) return;
+        const svgClone = svgEl.cloneNode(true) as SVGElement;
+        const bbox = svgEl.getBoundingClientRect();
+        svgClone.setAttribute('width', String(bbox.width));
+        svgClone.setAttribute('height', String(bbox.height));
+        const imageEls = Array.from(svgClone.querySelectorAll('image'));
+        await Promise.all(imageEls.map(async (img) => {
+            const href = img.getAttribute('href') || img.getAttribute('xlink:href') || '';
+            if (!href || href.startsWith('data:')) return;
+            try {
+                const response = await fetch(href);
+                const blob = await response.blob();
+                const b64 = await new Promise<string>((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.onload = () => resolve(reader.result as string);
+                    reader.onerror = reject;
+                    reader.readAsDataURL(blob);
+                });
+                img.setAttribute('href', b64);
+                img.removeAttribute('xlink:href');
+            } catch { }
+        }));
+        const svgStr = new XMLSerializer().serializeToString(svgClone);
+        const canvas = document.createElement('canvas');
+        const scale = window.devicePixelRatio || 1;
+        canvas.width = bbox.width * scale;
+        canvas.height = bbox.height * scale;
+        const ctx = canvas.getContext('2d')!;
+        ctx.scale(scale, scale);
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(0, 0, bbox.width, bbox.height);
+        const img = new Image();
+        const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
+        const url = URL.createObjectURL(svgBlob);
+        img.onload = async () => {
+            ctx.drawImage(img, 0, 0);
+
+            // ── Badge "INSPECT by @ONETEME/JARVIS" + logo GitHub en bas à droite ─────
+            const badgeText  = 'INSPECT';
+            const badgeSubtext = '@ONETEME/JARVIS';
+            const fontSize   = 12;
+            const fontSizeSmall = 10;
+            const padding    = 12;
+            const iconSize   = 20;
+            const gap        = 8;
+            const borderRadius = 10;
+            const borderWidth = 1.5;
+            
+            ctx.font = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+            const textW = ctx.measureText(badgeText).width;
+            ctx.font = `500 ${fontSizeSmall}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+            const subtextW = ctx.measureText(badgeSubtext).width;
+            const maxTextW = Math.max(textW, subtextW);
+            
+            const badgeW = iconSize + gap + maxTextW + padding * 2;
+            const badgeH = fontSize + fontSizeSmall + gap + padding * 2;
+            const bx = bbox.width  - badgeW - 12;
+            const by = bbox.height - badgeH - 12;
+
+            ctx.save();
+            
+            // Ombre du badge
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = 12;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 4;
+            
+            // Fond avec gradient
+            const gradient = ctx.createLinearGradient(bx, by, bx, by + badgeH);
+            gradient.addColorStop(0, 'rgba(15, 23, 42, 0.95)');
+            gradient.addColorStop(1, 'rgba(30, 41, 59, 0.95)');
+            ctx.fillStyle = gradient;
+            
+            ctx.beginPath();
+            (ctx as any).roundRect?.(bx, by, badgeW, badgeH, borderRadius) ?? ctx.rect(bx, by, badgeW, badgeH);
+            ctx.fill();
+            
+            // Bordure avec gradient
+            const borderGradient = ctx.createLinearGradient(bx, by, bx, by + badgeH);
+            borderGradient.addColorStop(0, 'rgba(148, 163, 184, 0.5)');
+            borderGradient.addColorStop(1, 'rgba(100, 116, 139, 0.3)');
+            ctx.strokeStyle = borderGradient;
+            ctx.lineWidth = borderWidth;
+            ctx.shadowColor = 'transparent';
+            ctx.beginPath();
+            (ctx as any).roundRect?.(bx, by, badgeW, badgeH, borderRadius) ?? ctx.rect(bx, by, badgeW, badgeH);
+            ctx.stroke();
+
+            // Logo GitHub
+            try {
+                const ghImg = await new Promise<HTMLImageElement>((res, rej) => {
+                    const i = new Image();
+                    i.onload = () => res(i);
+                    i.onerror = rej;
+                    i.src = 'assets/github.svg';
+                });
+                const iy = by + (badgeH - iconSize) / 2;
+                ctx.drawImage(ghImg, bx + padding, iy, iconSize, iconSize);
+            } catch { /* logo indisponible */ }
+
+            // Texte principal (INSPECT)
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+            ctx.textBaseline = 'top';
+            ctx.fillText(badgeText, bx + padding + iconSize + gap, by + padding - 1);
+            
+            // Texte secondaire (@ONETEME/JARVIS)
+            ctx.fillStyle = 'rgba(226, 232, 240, 0.8)';
+            ctx.font = `500 ${fontSizeSmall}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+            ctx.fillText(badgeSubtext, bx + padding + iconSize + gap, by + padding + fontSize + 2);
+            
+            ctx.restore();
+            // ──────────────────────────────────────────────────────────────────
+
+            URL.revokeObjectURL(url);
+            const a = document.createElement('a');
+            a.download = `architecture.png`;
+            a.href = canvas.toDataURL('image/png');
+            a.click();
+        };
+        img.onerror = () => URL.revokeObjectURL(url);
+        img.src = url;
+    }
+
+    toggleSearch() {
+        this.searchVisible = !this.searchVisible;
+        if (this.searchVisible) {
+            setTimeout(() => this.searchInputRef?.nativeElement?.focus(), 320);
+        } else {
+            this.clearSearch();
+        }
+    }
+
+    onSearch() {
+        if (!this.tree || !this.searchQuery.trim()) { this.clearSearch(); return; }
+        const q = this.searchQuery.toLowerCase();
+        const vertices = this.tree._graph.getChildVertices(this.tree._parent);
+        this.searchResults = vertices.filter((v: any) => {
+            const label = this.tree._graph.getLabel(v);
+            return label && String(label).toLowerCase().includes(q);
+        });
+        this.currentSearchIndex = 0;
+        this.searchHighlightedNodes = this.searchResults;
+        this.applySearchHighlight();
+        this.focusSearchResult();
+    }
+
+    navigateSearch(direction: 1 | -1) {
+        if (!this.searchResults.length) return;
+        this.currentSearchIndex = (this.currentSearchIndex + direction + this.searchResults.length) % this.searchResults.length;
+        this.applySearchHighlight();
+        this.focusSearchResult();
+    }
+
+    focusSearchResult() {
+        if (!this.searchResults.length) return;
+        const cell = this.searchResults[this.currentSearchIndex];
+        this.tree._graph.setSelectionCell(cell);
+        this.tree._graph.scrollCellToVisible(cell, true);
+    }
+
+    clearSearch() {
+        this.searchQuery = '';
+        this.searchResults = [];
+        this.searchHighlightedNodes = [];
+        this.currentSearchIndex = 0;
+        this.clearSearchHighlight();
+        this.tree?._graph.clearSelection();
+    }
+
+    toggleEdgeTypeFilter(type: string) {
+        this.edgeTypeFilters[type] = !this.edgeTypeFilters[type];
+        if (!this.tree || !this._architectures.length) return;
+        const name = this.focusControl.value;
+        this.tree.clearAnimatedEdges();
+        this.tree.clearCells();
+        this.tree.draw(() => this.draw(this.tree, this._architectures, name));
+        if (name) {
+            setTimeout(() => this.tree.highlightFocusedNode(name), 100);
+        }
+    }
+
+    private effectiveType(a: Architecture, r: RemoteServer, architectures: Architecture[]): string {
+        if (r.type !== 'MAIN') return r.type;
+        if (a.type === 'VIEW') return 'VIEW';
+        const targetArch = architectures.find(arch => arch.name === r.name);
+        if (targetArch?.type === 'VIEW') return 'VIEW';
+        return 'REST';
+    }
+
+    /**
+     * Retourne l'URL de l'icône pour un type donné
+     */
+    getIconForType(type: string): string {
+        const icons: { [key: string]: string } = {
+            'REST': 'assets/mxgraph/microservice.drawio.svg',
+            'VIEW': 'assets/mxgraph/view.drawio.svg',
+            'JDBC': 'assets/mxgraph/database.drawio.svg',
+            'FTP': 'assets/mxgraph/ftp.drawio.svg',
+            'SMTP': 'assets/mxgraph/smtp.drawio.svg',
+            'LDAP': 'assets/mxgraph/ldap.drawio.svg',
+        };
+        return icons[type] || '';
+    }
+
+    /**
+     * Applique le highlighting pour la recherche
+     */
+    applySearchHighlight() {
+        this.clearSearchHighlight();
+        if (!this.tree || this.searchResults.length === 0) return;
+
+        const allVertices = this.tree._graph.getChildVertices(this.tree._parent);
+
+        // Appliquer le style à tous les vertices
+        allVertices.forEach((v: any) => {
+            const state = this.tree._graph.view.getState(v);
+            if (!state || !state.shape || !state.shape.node) return;
+
+            const node: HTMLElement = state.shape.node;
+            const isHighlighted = this.searchResults.includes(v);
+            const isCurrent = v === this.searchResults[this.currentSearchIndex];
+
+            if (isCurrent) {
+                // Node courant: glow vert intensif
+                node.style.filter = 'drop-shadow(0 0 12px rgba(34, 197, 94, 0.8))';
+                node.style.opacity = '1';
+            } else if (isHighlighted) {
+                // Autres résultats: glow vert léger
+                node.style.filter = 'drop-shadow(0 0 6px rgba(34, 197, 94, 0.5))';
+                node.style.opacity = '0.9';
+            } else {
+                // Non trouvés: estompés
+                node.style.opacity = '0.2';
+                node.style.filter = 'grayscale(100%)';
+            }
+        });
+
+        // Estomper aussi les edges
+        const allEdges = this.tree._graph.getEdges(this.tree._parent);
+        allEdges.forEach((e: any) => {
+            const state = this.tree._graph.view.getState(e);
+            if (!state || !state.shape || !state.shape.node) return;
+            const node: HTMLElement = state.shape.node;
+            const paths = node.querySelectorAll('path');
+            paths.forEach((p: SVGPathElement) => {
+                p.style.opacity = '0.1';
+            });
+        });
+    }
+
+    /**
+     * Nettoie le highlighting de la recherche
+     */
+    clearSearchHighlight() {
+        if (!this.tree) return;
+
+        const allVertices = this.tree._graph.getChildVertices(this.tree._parent);
+        allVertices.forEach((v: any) => {
+            const state = this.tree._graph.view.getState(v);
+            if (!state || !state.shape || !state.shape.node) return;
+            const node: HTMLElement = state.shape.node;
+            node.style.filter = '';
+            node.style.opacity = '';
+        });
+
+        // Restaurer les edges
+        const allEdges = this.tree._graph.getEdges(this.tree._parent);
+        allEdges.forEach((e: any) => {
+            const state = this.tree._graph.view.getState(e);
+            if (!state || !state.shape || !state.shape.node) return;
+            const node: HTMLElement = state.shape.node;
+            const paths = node.querySelectorAll('path');
+            paths.forEach((p: SVGPathElement) => {
+                p.style.opacity = '';
+            });
+        });
     }
 }
 
 export class Architecture {
     name: string;
-    schema: string;
     type: string;
-    remoteServers: Architecture[];
+    remoteServers?: RemoteServer[];
+}
+
+export class RemoteServer {
+    name: string;
+    type: string;
+    schema?: string;
 }
 
 export const ServerConfig = {
     JDBC: { icon: "shape=image;image=assets/mxgraph/database.drawio.svg;", width: 80, height: 30 },
     REST: { icon: "shape=image;image=assets/mxgraph/microservice.drawio.svg;", width: 80, height: 30 },
     SMTP: { icon: "shape=image;image=assets/mxgraph/smtp.drawio.svg;", width: 80, height: 30 },
-    FTP: { icon: "shape=image;image=assets/mxgraph/ftp.drawio.svg;", width: 80, height: 30 },
+    FTP:  { icon: "shape=image;image=assets/mxgraph/ftp.drawio.svg;",  width: 80, height: 30 },
     LDAP: { icon: "shape=image;image=assets/mxgraph/ldap.drawio.svg;", width: 80, height: 30 },
-    VIEW: { icon: "shape=image;image=assets/mxgraph/view.drawio.svg;", width: 80, height: 30 },
-    BATCH: { icon: "shape=image;image=assets/mxgraph/batch.drawio.svg;", width: 80, height: 30 },
     LINK: { icon: "shape=image;image=assets/mxgraph/parent.drawio.svg;", width: 30, height: 30 },
+    VIEW: { icon: "shape=image;image=assets/mxgraph/view.drawio.svg;", width: 80, height: 30 },
     GHOST: { icon: "shape=image;image=assets/mxgraph/ghost.drawio.svg;", width: 30, height: 30 }
 }
-
