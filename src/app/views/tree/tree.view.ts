@@ -227,87 +227,29 @@ export class TreeView implements OnDestroy {
     if (cell.isEdge()) {
       const rows: any[] = [];
       if (cell.value?.nodes) {
+        console.log(cell.value?.nodes)
         const grouped = this.groupBy(cell.value.nodes, (v: any) => v.formatLink(cell.value.linkLbl), undefined);
         Object.entries(grouped).forEach(([key, nodes]: any) => {
-          const isError   = /red|error|KO|5[0-9]{2}/i.test(key);
-          const isWarning = /4[0-9]{2}/i.test(key);
           rows.push({
-            icon: isError ? 'error' : isWarning ? 'warning' : 'check_circle',
             label: key,
             value: nodes.length > 1 ? `×${nodes.length}` : '',
-            color: isError ? '#ef4444' : isWarning ? '#f59e0b' : '#22c55e'
           });
         });
       } else {
-        rows.push({ icon: 'timeline', label: String(cell.value ?? ''), value: '', color: '#3b82f6' });
+        rows.push({ label: String(cell.value ?? ''), value: '', color: '#3b82f6' });
       }
       return { type: 'Lien', rows };
     }
 
     if (cell.isVertex() && cell.value?.requestType && cell.value?.node) {
-      const obj  = cell.value.node.nodeObject;
-      const rows: any[] = [];
-      const elapsed = obj?.end != null && obj?.start != null ? (obj.end - obj.start).toFixed(3) + ' s' : null;
-      const status  = obj?.end == null ? 'En cours' : (obj?.failed ? 'Échec' : 'Succès');
-      const statusColor = obj?.end == null ? '#f59e0b' : (obj?.failed ? '#ef4444' : '#22c55e');
-      const statusIcon  = obj?.end == null ? 'schedule' : (obj?.failed ? 'error' : 'check_circle');
-
-      // Champs communs
-      if (obj?.host)     rows.push({ icon: 'dns',      label: 'Hôte',     value: obj.port && obj.port !== -1 ? `${obj.host}:${obj.port}` : obj.host, color: '#6366f1' });
-      if (obj?.protocol) rows.push({ icon: 'lock',     label: 'Protocole',value: obj.protocol,   color: '#0ea5e9' });
-      if (elapsed)       rows.push({ icon: 'timer',    label: 'Durée',    value: elapsed,        color: '#8b5cf6' });
-                         rows.push({ icon: statusIcon, label: 'Statut',   value: status,         color: statusColor });
-      if (obj?.user)     rows.push({ icon: 'person',   label: 'Utilisateur', value: obj.user,    color: '#64748b' });
-
-      // Spécifique JDBC
-      if (cell.value.requestType === 'jdbc') {
-        if (obj?.name)        rows.push({ icon: 'storage',    label: 'Base',    value: obj.schema ? `${obj.name} / ${obj.schema}` : obj.name, color: '#059669' });
-        if (obj?.productName) rows.push({ icon: 'inventory',  label: 'Produit', value: obj.productName + (obj.productVersion ? ' ' + obj.productVersion : ''), color: '#10b981' });
-        if (obj?.command)     rows.push({ icon: 'code',       label: 'Commande',value: obj.command.length > 40 ? obj.command.substring(0, 40) + '…' : obj.command, color: '#6366f1' });
-        if (obj?.count != null) rows.push({ icon: 'format_list_numbered', label: 'Requêtes SQL', value: String(obj.count), color: '#0284c7' });
-      }
-      // Spécifique FTP
-      if (cell.value.requestType === 'ftp') {
-        if (obj?.serverVersion) rows.push({ icon: 'computer',   label: 'Serveur', value: obj.serverVersion, color: '#0e7490' });
-        if (obj?.clientVersion) rows.push({ icon: 'laptop',     label: 'Client',  value: obj.clientVersion, color: '#0891b2' });
-        if (obj?.commands?.length) rows.push({ icon: 'terminal', label: 'Commandes', value: `${obj.commands.length} cmd(s)`, color: '#0e7490' });
-      }
-      // Spécifique SMTP
-      if (cell.value.requestType === 'smtp') {
-        if (obj?.mails?.length) rows.push({ icon: 'email',  label: 'Mails',   value: `${obj.mails.length} destinataire(s)`, color: '#f59e0b' });
-        if (obj?.count != null) rows.push({ icon: 'format_list_numbered', label: 'Messages', value: String(obj.count), color: '#d97706' });
-      }
-      // Spécifique LDAP
-      if (cell.value.requestType === 'ldap') {
-        if (obj?.commands?.length) rows.push({ icon: 'manage_search', label: 'Requêtes', value: `${obj.commands.length} req(s)`, color: '#7c3aed' });
-      }
       // Exception
-      if (obj?.exception) rows.push({ icon: 'bug_report', label: obj.exception.type ?? 'Exception', value: obj.exception.message ?? '', color: '#ef4444' });
-
-      return { type: cell.value.requestType.toUpperCase(), rows };
+    //  if (obj?.exception) rows.push({ icon: 'bug_report', label: obj.exception.type ?? 'Exception', value: obj.exception.message ?? '', color: '#ef4444' });
+      return { type: cell.value.requestType.toUpperCase(), rows: cell.value.node.nodeInfo()  };
     }
-
     if (cell.isVertex() && cell.value?.node) {
-      const node = cell.value.node;
-      const obj  = node.nodeObject;
-      const rows: any[] = [];
-      if (obj?.appName)   rows.push({ icon: 'label',         label: 'Application', value: obj.appName,             color: '#3b82f6' });
-      if (obj?.host)      rows.push({ icon: 'dns',           label: 'Hôte',        value: obj.host,                color: '#6366f1' });
-      if (obj?.port)      rows.push({ icon: 'settings_ethernet', label: 'Port',    value: String(obj.port),        color: '#8b5cf6' });
-      if (obj?.protocol)  rows.push({ icon: 'lock',          label: 'Protocole',   value: obj.protocol,            color: '#0ea5e9' });
-      if (obj?.type)      rows.push({ icon: 'category',      label: 'Type',        value: obj.type,                color: '#f59e0b' });
-      if (obj?.os)        rows.push({ icon: 'computer',      label: 'OS',          value: obj.os,                  color: '#64748b' });
-      if (obj?.re)        rows.push({ icon: 'layers',        label: 'Env',         value: obj.re,                  color: '#10b981' });
-      if (obj?.restRequests?.length)     rows.push({ icon: 'api',          label: 'REST',   value: `${obj.restRequests.length} appel(s)`,     color: '#6366f1' });
-      if (obj?.databaseRequests?.length) rows.push({ icon: 'storage',      label: 'DB',     value: `${obj.databaseRequests.length} requête(s)`, color: '#059669' });
-      if (obj?.ftpRequests?.length)      rows.push({ icon: 'folder',       label: 'FTP',    value: `${obj.ftpRequests.length} transfert(s)`,  color: '#0e7490' });
-      if (obj?.mailRequests?.length)     rows.push({ icon: 'email',        label: 'SMTP',   value: `${obj.mailRequests.length} mail(s)`,      color: '#f59e0b' });
-      if (obj?.ldapRequests?.length)     rows.push({ icon: 'badge',        label: 'LDAP',   value: `${obj.ldapRequests.length} requête(s)`,   color: '#7c3aed' });
-      if (!rows.length)   rows.push({ icon: 'info', label: node.formatNode?.(this.serverLbl) ?? '', value: '', color: '#94a3b8' });
-      return { type: 'Nœud', rows };
+      return { type: 'Nœud', rows: cell.value.node.nodeInfo()  };
     }
-
-      return { type: '', rows: [] };
+    return { type: '', rows: [] };
   }
 
   dr(tg: TreeGraph, data: any, serverlbl: Label, linklbl: Label) {
@@ -376,7 +318,7 @@ export class TreeView implements OnDestroy {
       let res = this.groupBy<DatabaseRequestTree, JdbcRequestNode>(server.databaseRequests, v => v.name, JdbcRequestNode)
       Object.entries(res).forEach((v: any[]) => {
         let jdbcRequestNode = v[1][0];
-        b = treeGraph.insertServer(v[1].length === 1 ? { serverlbl, node: jdbcRequestNode, requestType: 'jdbc' } : jdbcRequestNode.formatNode(serverlbl), "JDBC"); // demon server
+        b = treeGraph.insertServer({ serverlbl, node: v[1].length === 1 ? v[1][0]: v[1], requestType: 'jdbc' },"JDBC");
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1] };
           linkStyle = LinkConfig[this.getGroupFailedStyle(v[1])] + "strokeWidth=1.5;"
@@ -649,11 +591,104 @@ export class TreeView implements OnDestroy {
 
     img.onload = () => {
       ctx.drawImage(img, 0, 0);
-      URL.revokeObjectURL(url);
-      const a = document.createElement('a');
-      a.download = `graph-${this.id}.png`;
-      a.href = canvas.toDataURL('image/png');
-      a.click();
+
+      // ── Badge "INSPECT by @ONETEME/JARVIS" + logo GitHub en bas à droite ─────
+      const badgeText  = 'INSPECT';
+      const badgeSubtext = '@ONETEME/JARVIS';
+      const fontSize   = 12;
+      const fontSizeSmall = 10;
+      const padding    = 12;
+      const iconSize   = 20;
+      const gap        = 8;
+      const borderRadius = 10;
+      const borderWidth = 1.5;
+      
+      ctx.font = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+      const textW = ctx.measureText(badgeText).width;
+      ctx.font = `500 ${fontSizeSmall}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+      const subtextW = ctx.measureText(badgeSubtext).width;
+      const maxTextW = Math.max(textW, subtextW);
+      
+      const badgeW = iconSize + gap + maxTextW + padding * 2;
+      const badgeH = fontSize + fontSizeSmall + gap + padding * 2;
+      const bx = bbox.width  - badgeW - 12;
+      const by = bbox.height - badgeH - 12;
+
+      ctx.save();
+      
+      // Ombre du badge
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      ctx.shadowBlur = 12;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 4;
+      
+      // Fond avec gradient
+      const gradient = ctx.createLinearGradient(bx, by, bx, by + badgeH);
+      gradient.addColorStop(0, 'rgba(15, 23, 42, 0.95)');
+      gradient.addColorStop(1, 'rgba(30, 41, 59, 0.95)');
+      ctx.fillStyle = gradient;
+      
+      ctx.beginPath();
+      (ctx as any).roundRect?.(bx, by, badgeW, badgeH, borderRadius) ?? ctx.rect(bx, by, badgeW, badgeH);
+      ctx.fill();
+      
+      // Bordure avec gradient
+      const borderGradient = ctx.createLinearGradient(bx, by, bx, by + badgeH);
+      borderGradient.addColorStop(0, 'rgba(148, 163, 184, 0.5)');
+      borderGradient.addColorStop(1, 'rgba(100, 116, 139, 0.3)');
+      ctx.strokeStyle = borderGradient;
+      ctx.lineWidth = borderWidth;
+      ctx.shadowColor = 'transparent';
+      ctx.beginPath();
+      (ctx as any).roundRect?.(bx, by, badgeW, badgeH, borderRadius) ?? ctx.rect(bx, by, badgeW, badgeH);
+      ctx.stroke();
+
+      // Logo GitHub
+      const ghImg = new Image();
+      ghImg.onload = () => {
+        const iy = by + (badgeH - iconSize) / 2;
+        ctx.drawImage(ghImg, bx + padding, iy, iconSize, iconSize);
+        
+        // Texte principal (INSPECT)
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+        ctx.textBaseline = 'top';
+        ctx.fillText(badgeText, bx + padding + iconSize + gap, by + padding - 1);
+        
+        // Texte secondaire (@ONETEME/JARVIS)
+        ctx.fillStyle = 'rgba(226, 232, 240, 0.8)';
+        ctx.font = `500 ${fontSizeSmall}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+        ctx.fillText(badgeSubtext, bx + padding + iconSize + gap, by + padding + fontSize + 2);
+        
+        ctx.restore();
+
+        // Télécharger l'image
+        URL.revokeObjectURL(url);
+        const a = document.createElement('a');
+        a.download = `graph-${this.id}.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      };
+      ghImg.onerror = () => {
+        // Si le logo ne charge pas, continuer sans lui
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+        ctx.textBaseline = 'top';
+        ctx.fillText(badgeText, bx + padding + iconSize + gap, by + padding - 1);
+        
+        ctx.fillStyle = 'rgba(226, 232, 240, 0.8)';
+        ctx.font = `500 ${fontSizeSmall}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+        ctx.fillText(badgeSubtext, bx + padding + iconSize + gap, by + padding + fontSize + 2);
+        
+        ctx.restore();
+
+        URL.revokeObjectURL(url);
+        const a = document.createElement('a');
+        a.download = `graph-${this.id}.png`;
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+      };
+      ghImg.src = 'assets/github.svg';
     };
     img.onerror = () => URL.revokeObjectURL(url);
     img.src = url;

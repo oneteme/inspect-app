@@ -8,7 +8,6 @@ import {combineLatest, finalize, forkJoin, fromEvent, map, Subscription} from "r
 import {app, makeDatePeriod} from "../../../environments/environment";
 import {Location} from "@angular/common";
 import {TreeService} from "../../service/tree.service";
-import {mxGraph, mxHierarchicalLayout, mxUtils, mxConstants} from "mxgraph";
 import {ArchitectureTree} from "./model/architecture.model";
 import mx from "../../../mxgraph";
 import {InstanceService} from "../../service/jquery/instance.service";
@@ -176,8 +175,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
     heatMapControl: FormControl = new FormControl<boolean>(false);
     treeMapControl: FormControl = new FormControl<boolean>(false);
     focusControl:   FormControl = new FormControl<string | null>(null);
-    depthControl:   FormControl = new FormControl<number>(1);
-    edgeTypeFilters: { [key: string]: boolean } = { 'REST': true, 'JDBC': true, 'FTP': true, 'SMTP': true, 'LDAP': true, 'MAIN': true };
+    edgeTypeFilters: { [key: string]: boolean } = { 'REST': true, 'VIEW': true, 'JDBC': true, 'FTP': true, 'SMTP': true, 'LDAP': true };
 
     subscriptions: Subscription[] = [];
     params: Partial<{ env: string, start: Date, end: Date }> = {};
@@ -259,24 +257,14 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
 
         this.subscriptions.push(this.focusControl.valueChanges.subscribe(name => {
             if (!this.tree || !this._architectures.length) return;
-            this.tree.clearAnimatedEdges(); // Nettoyer les animations quand le filtre change
-            this.depthControl.setValue(1, { emitEvent: false }); // reset profondeur
+            this.tree.clearAnimatedEdges();
             this.tree.clearCells();
-            this.tree.draw(() => this.draw(this.tree, this._architectures, name, 1));
+            this.tree.draw(() => this.draw(this.tree, this._architectures, name));
             if (name) {
                 setTimeout(() => this.tree.highlightFocusedNode(name), 100);
             } else {
                 this.tree.clearHighlight();
             }
-        }));
-
-        this.subscriptions.push(this.depthControl.valueChanges.subscribe(depth => {
-            const name = this.focusControl.value;
-            if (!this.tree || !this._architectures.length || !name) return;
-            this.tree.clearAnimatedEdges();
-            this.tree.clearCells();
-            this.tree.draw(() => this.draw(this.tree, this._architectures, name, depth));
-            setTimeout(() => this.tree.highlightFocusedNode(name), 100);
         }));
     }
 
@@ -290,30 +278,37 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
                 // Single-click : afficher la card
                 const vertexName = this.tree._graph.model.getValue(vertex);
                 const architecture = this._architectures.find(a => a.name === vertexName);
-                const incomingEdges = this.tree._graph.getIncomingEdges(vertex);
+                let nodeType = architecture?.type;
+                if (!nodeType) {
+                    for (const arch of this._architectures) {
+                        const rs = arch.remoteServers?.find(r => (r.schema ?? r.name) === vertexName);
+                        if (rs) { nodeType = rs.type === 'MAIN' ? (arch.type) : rs.type; break; }
+                    }
+                }
+                const incomingEdges = this.tree._graph.getIncomingEdges(vertex, null);
                 const outgoingEdges = this.tree._graph.getOutgoingEdges(vertex);
-                
+
                 // Récupérer les noms des nodes appelants
                 const incomingNames = incomingEdges.map((edge: any) => {
                     const source = edge.getTerminal(true);
                     return this.tree._graph.model.getValue(source);
                 }).sort();
-                
+
                 // Récupérer les noms des nodes appelés
                 const outgoingNames = outgoingEdges.map((edge: any) => {
                     const target = edge.getTerminal(false);
                     return this.tree._graph.model.getValue(target);
                 }).sort();
-                
+
                 this.selectedVertex = {
                     name: vertexName,
-                    type: architecture?.type ?? 'UNKNOWN',
+                    type: nodeType ?? 'UNKNOWN',
                     incomingCount: incomingEdges.length,
                     outgoingCount: outgoingEdges.length,
                     incomingNames: incomingNames,
                     outgoingNames: outgoingNames
                 };
-                
+
                 // N'animer que si aucun microservice n'est sélectionné dans le filtre
                 if (this.focusControl.value === null) {
                     this.tree.animateIncomingEdges(vertex);
@@ -330,11 +325,10 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
                 // Double-click : focus automatique SEULEMENT pour REST et MAIN
                 const vertexName = this.tree._graph.model.getValue(vertex);
                 const architecture = this._architectures.find(a => a.name === vertexName);
-                
+
                 // Vérifier que c'est un type focalisable (REST ou MAIN)
                 if (architecture && (architecture.type === 'REST' || architecture.type === 'MAIN')) {
                     this.focusControl.setValue(vertexName);
-                    this.depthControl.setValue(1, { emitEvent: false });
                 }
                 // Sinon, le double-click n'a aucun effet sur les ressources
             }
@@ -344,13 +338,20 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
         (this.tree as any).onVertexHover = (vertex: any, event: MouseEvent) => {
             const vertexName = this.tree._graph.model.getValue(vertex);
             const architecture = this._architectures.find(a => a.name === vertexName);
-            const incomingEdges = this.tree._graph.getIncomingEdges(vertex);
+            let nodeType = architecture?.type;
+            if (!nodeType) {
+                for (const arch of this._architectures) {
+                    const rs = arch.remoteServers?.find(r => (r.schema ?? r.name) === vertexName);
+                    if (rs) { nodeType = rs.type === 'MAIN' ? arch.type : rs.type; break; }
+                }
+            }
+            const incomingEdges = this.tree._graph.getIncomingEdges(vertex, null);
             const outgoingEdges = this.tree._graph.getOutgoingEdges(vertex);
             
             this._zone.run(() => {
                 this.hoveredVertex = {
                     name: vertexName,
-                    type: architecture?.type ?? 'UNKNOWN',
+                    type: nodeType ?? 'UNKNOWN',
                     incomingCount: incomingEdges.length,
                     outgoingCount: outgoingEdges.length,
                     x: event.clientX,
@@ -441,7 +442,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
             mainSession: this._instanceService.getMainSessionApplication(this.params.start, this.params.end, this.params.env),
             restSession: this._treeService.getArchitecture(this.params.start, this.params.end, this.params.env)
         }).pipe(map(res => {
-            res.restSession.push(...res.mainSession.map(m => ({name: m.appName, schema: null, type: m.type, remoteServers: null})));
+            res.restSession.push(...res.mainSession.map(m => ({name: m.appName, type: m.type, remoteServers: undefined})));
             return res.restSession;
         }), finalize(() => this.syntheseIsLoading = false)).subscribe({
             next: res => {
@@ -470,7 +471,6 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
 
         const typeConfig: { [t: string]: { label: string; icon: string; color: string } } = {
             REST:  { label: 'Microservices',  icon: 'assets/mxgraph/microservice.drawio.svg', color: '#3b82f6' },
-            BATCH: { label: 'Batchs',         icon: 'assets/mxgraph/batch.drawio.svg',        color: '#8b5cf6' },
             VIEW:  { label: 'Vues',           icon: 'assets/mxgraph/view.drawio.svg',         color: '#06b6d4' },
             JDBC:  { label: 'Bases de données', icon: 'assets/mxgraph/database.drawio.svg',   color: '#f97316' },
             FTP:   { label: 'Serveurs FTP',   icon: 'assets/mxgraph/ftp.drawio.svg',          color: '#0e7490' },
@@ -487,7 +487,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
         });
 
         // Ordre d'affichage
-        const order = ['REST', 'BATCH', 'VIEW', 'JDBC', 'FTP', 'SMTP', 'LDAP'];
+        const order = ['REST', 'VIEW', 'JDBC', 'FTP', 'SMTP', 'LDAP'];
         this.statsCards = cards.sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
     }
 
@@ -539,130 +539,131 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
 
 
     /**
-     * Calcul BFS des nœuds à inclure à partir de focusedApp sur `depth` niveaux
+     * Calcul BFS des nœuds à inclure à partir de focusedApp
      * dans les deux directions (appelants + appelés).
+     * Seuls les edges dont le type est actif dans edgeTypeFilters sont traversés.
      */
-    private getIncludedNodes(architectures: Architecture[], focusedApp: string, depth: number): Set<string> {
+    private getIncludedNodes(architectures: Architecture[], focusedApp: string, enabledTypes: { [key: string]: boolean } = {}): Set<string> {
         const included = new Set<string>([focusedApp]);
         let frontier = new Set<string>([focusedApp]);
 
-        for (let d = 0; d < depth; d++) {
-            const next = new Set<string>();
-            frontier.forEach(node => {
-                // Appelants : apps qui ont `node` dans leurs remoteServers
-                architectures.forEach(a => {
-                    if (!included.has(a.name) && a.remoteServers?.some(r => (r.schema ?? r.name) === node)) {
-                        included.add(a.name);
-                        next.add(a.name);
-                    }
-                });
-                // Appelés : remoteServers de `node`
-                architectures.find(a => a.name === node)?.remoteServers?.forEach(r => {
-                    const key = r.schema ?? r.name;
-                    if (!included.has(key)) {
-                        included.add(key);
-                        next.add(key);
-                    }
-                });
+        const isEdgeEnabled = (a: Architecture, r: RemoteServer): boolean =>
+            !!enabledTypes[this.effectiveType(a, r, architectures)];
+
+        // Un seul niveau : appelants et appelés directs
+        const next = new Set<string>();
+        frontier.forEach(node => {
+            architectures.forEach(a => {
+                if (!included.has(a.name) && a.remoteServers?.some(r => (r.schema ?? r.name) === node && isEdgeEnabled(a, r))) {
+                    included.add(a.name);
+                    next.add(a.name);
+                }
             });
-            frontier = next;
-            if (!frontier.size) break;
-        }
+            const currentArch = architectures.find(a => a.name === node);
+            currentArch?.remoteServers?.forEach(r => {
+                if (!isEdgeEnabled(currentArch, r)) return;
+                const key = r.schema ?? r.name;
+                if (!included.has(key)) {
+                    included.add(key);
+                    next.add(key);
+                }
+            });
+        });
         return included;
     }
 
-    draw(tree: ArchitectureTree, architectures: Architecture[], focusedApp?: string | null, depth: number = 1) {
+    draw(tree: ArchitectureTree, architectures: Architecture[], focusedApp?: string | null) {
         const cfg = ServerConfig;
         const W = cfg['REST'].width, H = cfg['REST'].height;
-        const nodeStyle = 'verticalLabelPosition=bottom;verticalAlign=top;fontSize=10;';
+        const nodeStyle = 'verticalLabelPosition=bottom;verticalAlign=top;fontSize=10;labelWidth=200;overflow=visible;whiteSpace=nowrap;';
         const edgeStyle = 'rounded=1;curved=1;orthogonalLoop=1;jettySize=auto;fontSize=9;fontColor=#555;strokeWidth=1.5;endArrow=block;endFill=1;endSize=6;startArrow=none;sourcePerimeterSpacing=12;';
+
+        const enabledTypes = this.edgeTypeFilters;
 
         // ── Filtrage BFS selon profondeur ─────────────────────────────────────
         let includedNodes: Set<string> | null = null;
         if (focusedApp) {
-            includedNodes = depth >= 99
-                ? null  // ∞ = tout afficher
-                : this.getIncludedNodes(architectures, focusedApp, depth);
+            includedNodes = this.getIncludedNodes(architectures, focusedApp, enabledTypes);
         }
 
         const filtered = focusedApp && includedNodes
             ? architectures.filter(a => includedNodes!.has(a.name))
             : architectures;
 
-        // ── Déduplication : une seule map pour éviter tout doublon ──────────────
         const allNodes: { [k: string]: { type: string; vertex: any } } = {};
 
-        // Calculer AVANT quels nœuds seront utilisés selon le filtre
-        const enabledTypes = this.edgeTypeFilters;
-        const usedApps = new Set<string>();
-        const usedResources = new Set<string>();
-        
-        // Parcourir les edges et tracker les apps et ressources utilisées
+        // Collecter tous les nœuds (sources ET cibles) qui participent à au moins un edge actif
+        const usedNodes = new Set<string>();
         filtered.forEach(a => {
             (a.remoteServers ?? []).forEach(r => {
-                // Vérifier si ce type est actif dans le filtre
-                if (enabledTypes[r.type]) {
-                    usedApps.add(a.name); // L'app a au moins une edge active
-                    const key = r.schema ?? r.name;
-                    usedResources.add(key); // La ressource a une edge active
+                const rawKey = r.schema ?? r.name;
+                if (enabledTypes[this.effectiveType(a, r, architectures)]) {
+                    usedNodes.add(a.name);
+                    usedNodes.add(rawKey);
                 }
             });
         });
 
-        // 1. Créer SEULEMENT les nœuds applicatifs qui ont des edges actives
+        // 1. Créer uniquement les nœuds applicatifs qui participent à au moins un edge actif
         filtered.forEach(a => {
-            if (usedApps.has(a.name) && !allNodes[a.name] && cfg[a.type]) {
+            if (usedNodes.has(a.name) && !allNodes[a.name] && cfg[a.type]) {
                 allNodes[a.name] = { type: a.type, vertex: null };
             }
         });
 
-        // 2. Créer SEULEMENT les ressources utilisées
+        // 2. Créer SEULEMENT les ressources utilisées (via des edges actives uniquement)
         filtered.forEach(a => {
+            if (!allNodes[a.name]) return;
             (a.remoteServers ?? []).forEach(r => {
-                const key = r.schema ?? r.name;
-                if (!focusedApp || !includedNodes || includedNodes.has(key)) {
-                    if (usedResources.has(key) && !allNodes[key] && cfg[r.type]) {
-                        allNodes[key] = { type: r.type, vertex: null };
+                const rawKey = r.schema ?? r.name;
+                const effType = this.effectiveType(a, r, architectures);
+                if (!enabledTypes[effType]) return;
+                if (!focusedApp || !includedNodes || includedNodes.has(rawKey)) {
+                    if (['REST', 'VIEW'].includes(effType)) {
+                        const targetArch = architectures.find(arch => arch.name === r.name);
+                        const targetType = targetArch?.type ?? effType;
+                        if (usedNodes.has(rawKey) && !allNodes[rawKey] && cfg[targetType]) {
+                            allNodes[rawKey] = { type: targetType, vertex: null };
+                        }
+                    } else if (effType !== 'MAIN' && usedNodes.has(rawKey) && !allNodes[rawKey] && cfg[effType]) {
+                        allNodes[rawKey] = { type: effType, vertex: null };
                     }
                 }
             });
         });
 
         // ── Insertion des nœuds (sans coords — laissées au layout) ───────────
-        const focusedStyle = 'verticalLabelPosition=bottom;verticalAlign=top;fontSize=10;strokeColor=#f97316;strokeWidth=3;fillColor=#fff7ed;';
-        const cycleStyle = 'verticalLabelPosition=bottom;verticalAlign=top;fontSize=10;strokeColor=#ef4444;strokeWidth=3;fillColor=#fee2e2;'; // Rouge pour les cycles
+        const focusedStyle = 'verticalLabelPosition=bottom;verticalAlign=top;fontSize=10;labelWidth=200;overflow=visible;whiteSpace=nowrap;strokeColor=#f97316;strokeWidth=3;fillColor=#fff7ed;';
         Object.entries(allNodes).forEach(([k, info]) => {
             const icon = cfg[info.type]?.icon ?? cfg['REST'].icon;
             const style = (focusedApp && k === focusedApp) ? icon + focusedStyle : icon + nodeStyle;
             info.vertex = tree._graph.insertVertex(tree._parent, null, k, 0, 0, W, H, style);
         });
 
-        // ── Edges : tous les liens entre nœuds inclus ─────────────────────────
+        // ── Edges ─────────────────────────────────────────────────────────────
         filtered.forEach(a => {
             const src = allNodes[a.name]?.vertex;
             if (!src || !a.remoteServers) return;
             a.remoteServers.forEach(r => {
-                // Filtrer par type d'edge
-                if (!enabledTypes[r.type]) return;
-                
-                const key = r.schema ?? r.name;
-                if (!allNodes[key]) return; // cible non incluse
-                const tgt = allNodes[key]?.vertex;
+                const rawKey = r.schema ?? r.name;
+                const effType = this.effectiveType(a, r, architectures);
+                if (!enabledTypes[effType]) return;
+                const tgt = allNodes[rawKey]?.vertex;
                 if (!tgt || src === tgt) return;
-                if (tree._graph.getEdgesBetween(src, tgt).length === 0) {
-                    const edgeColor = r.type === 'JDBC' ? 'strokeColor=#FF7F00;'
-                                    : r.type === 'FTP'  ? 'strokeColor=#0d9488;'
-                                    : r.type === 'SMTP' ? 'strokeColor=#f97316;'
-                                    : r.type === 'LDAP' ? 'strokeColor=#8b5cf6;'
-                                    : r.type === 'REST' ? 'strokeColor=#2563eb;'
-                                    : r.type === 'MAIN' ? 'strokeColor=#16a34a;'
-                                    : 'strokeColor=#78716c;';
-                    tree._graph.insertEdge(tree._parent, null, '', src, tgt, edgeStyle + edgeColor);
-                }
+                if (tree._graph.getEdgesBetween(src, tgt).length > 0) return;
+                const edgeColor = effType === 'JDBC'  ? 'strokeColor=#FF7F00;'
+                                : effType === 'FTP'   ? 'strokeColor=#0d9488;'
+                                : effType === 'SMTP'  ? 'strokeColor=#f97316;'
+                                : effType === 'LDAP'  ? 'strokeColor=#8b5cf6;'
+                                : effType === 'REST'  ? 'strokeColor=#2563eb;'
+                                : effType === 'VIEW'  ? 'strokeColor=#06b6d4;'
+                                : effType === 'MAIN'  ? 'strokeColor=#16a34a;'
+                                : 'strokeColor=#78716c;';
+                tree._graph.insertEdge(tree._parent, null, '', src, tgt, edgeStyle + edgeColor);
             });
         });
 
-        // ── Layout hiérarchique automatique (minimise les croisements) ────────
+        // ── Layout hiérarchique automatique ────────────────────────────────────
         const layout = new mx.mxHierarchicalLayout(tree._graph);
         (layout as any).orientation           = mx.mxConstants.DIRECTION_NORTH;
         (layout as any).intraCellSpacing      = 40;
@@ -731,8 +732,86 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
         const img = new Image();
         const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
         const url = URL.createObjectURL(svgBlob);
-        img.onload = () => {
+        img.onload = async () => {
             ctx.drawImage(img, 0, 0);
+
+            // ── Badge "INSPECT by @ONETEME/JARVIS" + logo GitHub en bas à droite ─────
+            const badgeText  = 'INSPECT';
+            const badgeSubtext = '@ONETEME/JARVIS';
+            const fontSize   = 12;
+            const fontSizeSmall = 10;
+            const padding    = 12;
+            const iconSize   = 20;
+            const gap        = 8;
+            const borderRadius = 10;
+            const borderWidth = 1.5;
+            
+            ctx.font = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+            const textW = ctx.measureText(badgeText).width;
+            ctx.font = `500 ${fontSizeSmall}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+            const subtextW = ctx.measureText(badgeSubtext).width;
+            const maxTextW = Math.max(textW, subtextW);
+            
+            const badgeW = iconSize + gap + maxTextW + padding * 2;
+            const badgeH = fontSize + fontSizeSmall + gap + padding * 2;
+            const bx = bbox.width  - badgeW - 12;
+            const by = bbox.height - badgeH - 12;
+
+            ctx.save();
+            
+            // Ombre du badge
+            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+            ctx.shadowBlur = 12;
+            ctx.shadowOffsetX = 0;
+            ctx.shadowOffsetY = 4;
+            
+            // Fond avec gradient
+            const gradient = ctx.createLinearGradient(bx, by, bx, by + badgeH);
+            gradient.addColorStop(0, 'rgba(15, 23, 42, 0.95)');
+            gradient.addColorStop(1, 'rgba(30, 41, 59, 0.95)');
+            ctx.fillStyle = gradient;
+            
+            ctx.beginPath();
+            (ctx as any).roundRect?.(bx, by, badgeW, badgeH, borderRadius) ?? ctx.rect(bx, by, badgeW, badgeH);
+            ctx.fill();
+            
+            // Bordure avec gradient
+            const borderGradient = ctx.createLinearGradient(bx, by, bx, by + badgeH);
+            borderGradient.addColorStop(0, 'rgba(148, 163, 184, 0.5)');
+            borderGradient.addColorStop(1, 'rgba(100, 116, 139, 0.3)');
+            ctx.strokeStyle = borderGradient;
+            ctx.lineWidth = borderWidth;
+            ctx.shadowColor = 'transparent';
+            ctx.beginPath();
+            (ctx as any).roundRect?.(bx, by, badgeW, badgeH, borderRadius) ?? ctx.rect(bx, by, badgeW, badgeH);
+            ctx.stroke();
+
+            // Logo GitHub
+            try {
+                const ghImg = await new Promise<HTMLImageElement>((res, rej) => {
+                    const i = new Image();
+                    i.onload = () => res(i);
+                    i.onerror = rej;
+                    i.src = 'assets/github.svg';
+                });
+                const iy = by + (badgeH - iconSize) / 2;
+                ctx.drawImage(ghImg, bx + padding, iy, iconSize, iconSize);
+            } catch { /* logo indisponible */ }
+
+            // Texte principal (INSPECT)
+            ctx.fillStyle = '#ffffff';
+            ctx.font = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+            ctx.textBaseline = 'top';
+            ctx.fillText(badgeText, bx + padding + iconSize + gap, by + padding - 1);
+            
+            // Texte secondaire (@ONETEME/JARVIS)
+            ctx.fillStyle = 'rgba(226, 232, 240, 0.8)';
+            ctx.font = `500 ${fontSizeSmall}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+            ctx.fillText(badgeSubtext, bx + padding + iconSize + gap, by + padding + fontSize + 2);
+            
+            ctx.restore();
+            // ──────────────────────────────────────────────────────────────────
+
             URL.revokeObjectURL(url);
             const a = document.createElement('a');
             a.download = `architecture.png`;
@@ -789,24 +868,39 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
         this.tree?._graph.clearSelection();
     }
 
-    distinct<T, U>(arr: Array<T>, mapper: (o: T) => U): Set<U> {
-        return arr.reduce((set: Set<U>, cur) => {
-            set.add(mapper(cur));
-            return set;
-        }, new Set<U>());
-    }
-
     toggleEdgeTypeFilter(type: string) {
         this.edgeTypeFilters[type] = !this.edgeTypeFilters[type];
         if (!this.tree || !this._architectures.length) return;
         const name = this.focusControl.value;
-        const depth = this.depthControl.value;
         this.tree.clearAnimatedEdges();
         this.tree.clearCells();
-        this.tree.draw(() => this.draw(this.tree, this._architectures, name, depth));
+        this.tree.draw(() => this.draw(this.tree, this._architectures, name));
         if (name) {
             setTimeout(() => this.tree.highlightFocusedNode(name), 100);
         }
+    }
+
+    private effectiveType(a: Architecture, r: RemoteServer, architectures: Architecture[]): string {
+        if (r.type !== 'MAIN') return r.type;
+        if (a.type === 'VIEW') return 'VIEW';
+        const targetArch = architectures.find(arch => arch.name === r.name);
+        if (targetArch?.type === 'VIEW') return 'VIEW';
+        return 'REST';
+    }
+
+    /**
+     * Retourne l'URL de l'icône pour un type donné
+     */
+    getIconForType(type: string): string {
+        const icons: { [key: string]: string } = {
+            'REST': 'assets/mxgraph/microservice.drawio.svg',
+            'VIEW': 'assets/mxgraph/view.drawio.svg',
+            'JDBC': 'assets/mxgraph/database.drawio.svg',
+            'FTP': 'assets/mxgraph/ftp.drawio.svg',
+            'SMTP': 'assets/mxgraph/smtp.drawio.svg',
+            'LDAP': 'assets/mxgraph/ldap.drawio.svg',
+        };
+        return icons[type] || '';
     }
 
     /**
@@ -823,7 +917,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
             const state = this.tree._graph.view.getState(v);
             if (!state || !state.shape || !state.shape.node) return;
 
-            const node: SVGElement = state.shape.node;
+            const node: HTMLElement = state.shape.node;
             const isHighlighted = this.searchResults.includes(v);
             const isCurrent = v === this.searchResults[this.currentSearchIndex];
 
@@ -847,7 +941,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
         allEdges.forEach((e: any) => {
             const state = this.tree._graph.view.getState(e);
             if (!state || !state.shape || !state.shape.node) return;
-            const node: SVGElement = state.shape.node;
+            const node: HTMLElement = state.shape.node;
             const paths = node.querySelectorAll('path');
             paths.forEach((p: SVGPathElement) => {
                 p.style.opacity = '0.1';
@@ -865,7 +959,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
         allVertices.forEach((v: any) => {
             const state = this.tree._graph.view.getState(v);
             if (!state || !state.shape || !state.shape.node) return;
-            const node: SVGElement = state.shape.node;
+            const node: HTMLElement = state.shape.node;
             node.style.filter = '';
             node.style.opacity = '';
         });
@@ -875,7 +969,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
         allEdges.forEach((e: any) => {
             const state = this.tree._graph.view.getState(e);
             if (!state || !state.shape || !state.shape.node) return;
-            const node: SVGElement = state.shape.node;
+            const node: HTMLElement = state.shape.node;
             const paths = node.querySelectorAll('path');
             paths.forEach((p: SVGPathElement) => {
                 p.style.opacity = '';
@@ -886,20 +980,23 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
 
 export class Architecture {
     name: string;
-    schema: string;
     type: string;
-    remoteServers: Architecture[];
+    remoteServers?: RemoteServer[];
+}
+
+export class RemoteServer {
+    name: string;
+    type: string;
+    schema?: string;
 }
 
 export const ServerConfig = {
     JDBC: { icon: "shape=image;image=assets/mxgraph/database.drawio.svg;", width: 80, height: 30 },
     REST: { icon: "shape=image;image=assets/mxgraph/microservice.drawio.svg;", width: 80, height: 30 },
     SMTP: { icon: "shape=image;image=assets/mxgraph/smtp.drawio.svg;", width: 80, height: 30 },
-    FTP: { icon: "shape=image;image=assets/mxgraph/ftp.drawio.svg;", width: 80, height: 30 },
+    FTP:  { icon: "shape=image;image=assets/mxgraph/ftp.drawio.svg;",  width: 80, height: 30 },
     LDAP: { icon: "shape=image;image=assets/mxgraph/ldap.drawio.svg;", width: 80, height: 30 },
-    VIEW: { icon: "shape=image;image=assets/mxgraph/view.drawio.svg;", width: 80, height: 30 },
-    BATCH: { icon: "shape=image;image=assets/mxgraph/batch.drawio.svg;", width: 80, height: 30 },
     LINK: { icon: "shape=image;image=assets/mxgraph/parent.drawio.svg;", width: 30, height: 30 },
+    VIEW: { icon: "shape=image;image=assets/mxgraph/view.drawio.svg;", width: 80, height: 30 },
     GHOST: { icon: "shape=image;image=assets/mxgraph/ghost.drawio.svg;", width: 30, height: 30 }
 }
-

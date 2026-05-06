@@ -22,23 +22,7 @@ export class ArchitectureTree {
         graph.setTooltips(false); // Désactiver la tooltip par défaut de mxGraph
         graph.getLabel = function(cell: any)
         {
-            var label: string = (this.labelsVisible) ? this.convertValueToString(cell) : '';
-            var geometry = this.model.getGeometry(cell);
-
-            if (!this.model.isCollapsed(cell) && geometry != null && (geometry.offset == null ||
-                    (geometry.offset.x == 0 && geometry.offset.y == 0)) && this.model.isVertex(cell) &&
-                geometry.width >= 2)
-            {
-                var style = this.getCellStyle(cell);
-                var fontSize = style[mx.mxConstants.STYLE_FONTSIZE] || mx.mxConstants.DEFAULT_FONTSIZE;
-                var max = geometry.width / (fontSize * 0.625);
-                if (max < label.length)
-                {
-                    return label.substring(0, max / 2) + '...' + label.substring(label.length - max / 2);
-                }
-            }
-
-            return label;
+            return (this.labelsVisible) ? this.convertValueToString(cell) : '';
         };
         graph.setPanning(true);
         graph.panningHandler.useLeftButtonForPanning = true;
