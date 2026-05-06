@@ -485,10 +485,8 @@ export class TreeGraph {
     graph.getLabel = function (cell: any) {
       if (cell?.isEdge() && cell.value && typeof cell.value === 'object' && cell.value.hasOwnProperty('linkLbl')) {
         let compare = cell.value.nodes[0].formatLink(cell.value.linkLbl)
-        console.log(compare)
         return tg.checkSome(cell.value.nodes, x => x.formatLink(cell.value.linkLbl) != compare) ? `... ×${cell.value.nodes.length}` : `${compare} ×${cell.value.nodes.length}`
       }else if(cell?.isVertex() && cell.value && typeof cell.value === 'object'){
-       // console.log(cell.value.node) im here
         if(cell.value.node?.length != 1) return "ef"
         const lbl: string = cell.value.node.formatNode(cell.value.serverlbl) ?? '';
         return lbl.length > 22 ? lbl.substring(0, 22) + '…' : lbl;

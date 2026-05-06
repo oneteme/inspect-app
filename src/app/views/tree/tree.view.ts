@@ -227,7 +227,6 @@ export class TreeView implements OnDestroy {
     if (cell.isEdge()) {
       const rows: any[] = [];
       if (cell.value?.nodes) {
-        console.log(cell.value?.nodes)
         const grouped = this.groupBy(cell.value.nodes, (v: any) => v.formatLink(cell.value.linkLbl), undefined);
         Object.entries(grouped).forEach(([key, nodes]: any) => {
           rows.push({
@@ -242,14 +241,65 @@ export class TreeView implements OnDestroy {
     }
 
     if (cell.isVertex() && cell.value?.requestType && cell.value?.node) {
+      const obj  = cell.value.node.nodeObject;
+      const rows: any[] = [];
+     // const elapsed = obj?.end != null && obj?.start != null ? (obj.end - obj.start).toFixed(3) + ' s' : null;
+      //const status  = obj?.end == null ? 'En cours' : (obj?.failed ? 'Échec' : 'Succès');
+     // const statusColor = obj?.end == null ? '#f59e0b' : (obj?.failed ? '#ef4444' : '#22c55e');
+      //const statusIcon  = obj?.end == null ? 'schedule' : (obj?.failed ? 'error' : 'check_circle');
+
+      // Champs communs
+      if (obj?.host)     rows.push({ icon: 'dns',      label: 'Hôte',     value: obj.port && obj.port !== -1 ? `${obj.host}:${obj.port}` : obj.host, color: '#6366f1' });
+      //if (obj?.protocol) rows.push({ icon: 'lock',     label: 'Protocole',value: obj.protocol,   color: '#0ea5e9' });
+     // if (elapsed)       rows.push({ icon: 'timer',    label: 'Durée',    value: elapsed,        color: '#8b5cf6' });
+     //                    rows.push({ icon: statusIcon, label: 'Statut',   value: status,         color: statusColor });
+    //  if (obj?.user)     rows.push({ icon: 'person',   label: 'Utilisateur', value: obj.user,    color: '#64748b' });
+
+      // Spécifique JDBC
+      if (cell.value.requestType === 'jdbc') {
+       // if (obj?.name)        rows.push({ icon: 'storage',    label: 'Base',    value: obj.schema ? `${obj.name} / ${obj.schema}` : obj.name, color: '#059669' });
+        if (obj?.productName) rows.push({ icon: 'inventory',  label: 'Produit', value: obj.productName + (obj.productVersion ? ' ' + obj.productVersion : ''), color: '#10b981' });
+        //if (obj?.command)     rows.push({ icon: 'code',       label: 'Commande',value: obj.command.length > 40 ? obj.command.substring(0, 40) + '…' : obj.command, color: '#6366f1' });
+       // if (obj?.count != null) rows.push({ icon: 'format_list_numbered', label: 'Requêtes SQL', value: String(obj.count), color: '#0284c7' });
+      }
+      // Spécifique FTP
+      if (cell.value.requestType === 'ftp') {
+        if (obj?.serverVersion) rows.push({ icon: 'computer',   label: 'Serveur', value: obj.serverVersion, color: '#0e7490' });
+        if (obj?.clientVersion) rows.push({ icon: 'laptop',     label: 'Client',  value: obj.clientVersion, color: '#0891b2' });
+        if (obj?.commands?.length) rows.push({ icon: 'terminal', label: 'Commandes', value: `${obj.commands.length} cmd(s)`, color: '#0e7490' }); // todo get
+      }
+      // Spécifique SMTP
+      if (cell.value.requestType === 'smtp') {
+        if (obj?.mails?.length) rows.push({ icon: 'email',  label: 'Mails',   value: `${obj.mails.length} destinataire(s)`, color: '#f59e0b' }); // todo get ?
+        if (obj?.port)      rows.push({ icon: 'settings_ethernet', label: 'Port',    value: String(obj.port),        color: '#8b5cf6' });
+      }
+      // Spécifique LDAP
+      if (cell.value.requestType === 'ldap') {
+        if (obj?.commands?.length) rows.push({ icon: 'manage_search', label: 'Requêtes', value: `${obj.commands.length} req(s)`, color: '#7c3aed' });
+      }
       // Exception
-    //  if (obj?.exception) rows.push({ icon: 'bug_report', label: obj.exception.type ?? 'Exception', value: obj.exception.message ?? '', color: '#ef4444' });
-      return { type: cell.value.requestType.toUpperCase(), rows: cell.value.node.nodeInfo()  };
+      if (obj?.exception) rows.push({ icon: 'bug_report', label: obj.exception.type ?? 'Exception', value: obj.exception.message ?? '', color: '#ef4444' });
+
+      return { type: cell.value.requestType.toUpperCase(), rows };
     }
+
     if (cell.isVertex() && cell.value?.node) {
-      return { type: 'Nœud', rows: cell.value.node.nodeInfo()  };
+      const node = cell.value.node;
+      const obj  = node.nodeObject;
+      const rows: any[] = [];
+      if (obj?.appName)   rows.push({ icon: 'label',         label: 'Application', value: obj.appName,             color: '#3b82f6' });
+      if (obj?.host)      rows.push({ icon: 'dns',           label: 'Hôte',        value: obj.host,                color: '#6366f1' });
+      if (obj?.port)      rows.push({ icon: 'settings_ethernet', label: 'Port',    value: String(obj.port),        color: '#8b5cf6' });
+      //if (obj?.protocol)  rows.push({ icon: 'lock',          label: 'Protocole',   value: obj.protocol,            color: '#0ea5e9' });
+      //if (obj?.type)      rows.push({ icon: 'category',      label: 'Type',        value: obj.type,                color: '#f59e0b' });
+      if (obj?.os)        rows.push({ icon: 'computer',      label: 'OS',          value: obj.os,                  color: '#64748b' });
+      if (obj?.re)        rows.push({ icon: 'layers',        label: 'Env',         value: obj.re,                  color: '#10b981' });
+      if (obj?.address)   rows.push({ icon: 'location_on',   label: 'Adresse',         value: obj.address,                  color: '#f97316' });
+      if (!rows.length)   rows.push({ icon: 'info', label: node.formatNode?.(this.serverLbl) ?? '', value: '', color: '#94a3b8' });
+      return { type: 'Nœud', rows };
     }
-    return { type: '', rows: [] };
+
+      return { type: '', rows: [] };
   }
 
   dr(tg: TreeGraph, data: any, serverlbl: Label, linklbl: Label) {
@@ -318,7 +368,7 @@ export class TreeView implements OnDestroy {
       let res = this.groupBy<DatabaseRequestTree, JdbcRequestNode>(server.databaseRequests, v => v.name, JdbcRequestNode)
       Object.entries(res).forEach((v: any[]) => {
         let jdbcRequestNode = v[1][0];
-        b = treeGraph.insertServer({ serverlbl, node: v[1].length === 1 ? v[1][0]: v[1], requestType: 'jdbc' },"JDBC");
+        b = treeGraph.insertServer(v[1].length === 1 ? { serverlbl, node: jdbcRequestNode, requestType: 'jdbc' } : jdbcRequestNode.formatNode(serverlbl), "JDBC"); // demon server
         if (v[1].length > 1) {
           label = { linkLbl: linklbl, nodes: v[1] };
           linkStyle = LinkConfig[this.getGroupFailedStyle(v[1])] + "strokeWidth=1.5;"
