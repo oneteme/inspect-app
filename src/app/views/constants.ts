@@ -623,7 +623,14 @@ export class Constants {
         ldap: {title: 'LDAP', subtitle: 'Communications externes', icon: 'user_attributes'},
     }
 
-
+    static REQUEST_EXCEPTION_OPTIONS = {
+        grid: { top: 2, bottom: 2, left: 2, right: 2, containLabel: false },
+        xAxis: { show: false },
+        yAxis: { show: false, max: 100 },
+        legend: { show: false },
+        tooltip: { formatter: (p: any) => { const v = Array.isArray(p[0]?.value) ? p[0].value[1] : p[0]?.value; return `<b>${p[0].name}</b><br>${p[0].marker} ${p[0].seriesName}: <b>${(+v).toFixed(2)}%</b>`; } },
+        series: [{ showSymbol: false }]
+    }
     
     static REST_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<string, number> = {
         continue: true,
@@ -767,6 +774,9 @@ export class Constants {
             },
             grid: { yaxis: { lines: { show: false } }, xaxis: { lines: { show: false } } }
         }
+=======
+        options: Constants.REQUEST_EXCEPTION_OPTIONS
+>>>>>>> origin/develop
     };
 }
 

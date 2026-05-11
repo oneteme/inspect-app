@@ -31,11 +31,16 @@
                 "input": "./node_modules/mxgraph/javascript/src",
                 "output": "./assets/mxgraph"
               },
+              {
+                "glob": "**/*",
+                "input": "./node_modules/@oneteme/jquery-echarts/src/assets",
+                "output": "./assets/icons"
+              }
             ],
             "styles": [
               "node_modules/vis-timeline/styles/vis-timeline-graph2d.min.css",
               "src/styles/theme.scss",
-              "node_modules/@fortawesome/fontawesome-free/css/all.css",
+              "node_modules/@fortawesome/fontawesome-free/css/all.css"
             ],
             "scripts": [
               "node_modules/vis-timeline/standalone/umd/vis-timeline-graph2d.min.js"

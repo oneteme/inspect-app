@@ -86,7 +86,7 @@
 
 
 <mat-menu #menuEndPoint="matMenu" xPosition="after">
-  <a mat-menu-item [routerLink]="['/session', session?.type, session?.id, 'tree']">
+  <a mat-menu-item [routerLink]="['/session', session?.type, session?.id, 'tree']" [queryParams]="{env: instance?.env}">
     <mat-icon class="material-symbols-outlined">lan</mat-icon>Arbre d'appels
   </a>
   <a mat-menu-item *ngIf="session?.type == 'VIEW'"
@@ -96,8 +96,8 @@
      [disabled]="!session?.user">
     <mat-icon class="material-symbols-outlined">web_traffic</mat-icon>Parcours Utilisateur
   </a>
-  <a mat-menu-item *ngIf="session?.type == 'BATCH'" [routerLink]="['/dashboard', 'server', instance?.name]"
-     [queryParams]="{tab: 1, batch_name: session?.name, env: instance?.env}">
+  <a mat-menu-item *ngIf="session?.type == 'BATCH'" [routerLink]="['/kpi/session', 'batch']"
+     [queryParams]="{host: instance?.name, env: instance?.env}">
     <mat-icon class="material-symbols-outlined">finance_mode</mat-icon>{{MAPPING_TYPE['batch'].title}}
   </a>
 </mat-menu>

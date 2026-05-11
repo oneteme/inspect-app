@@ -102,7 +102,7 @@
   <a mat-menu-item (click)="navigate($event,'parent')" [disabled]="sessionParent == null">
     <mat-icon class="material-symbols-outlined">move_up</mat-icon>Contexte de l'Appel
   </a>
-  <a mat-menu-item [routerLink]="['/dashboard/request', 'ldap']" [queryParams]="{env: instance?.env, host: request?.host}">
+  <a mat-menu-item [routerLink]="['/kpi/request', 'ldap']" [queryParams]="{env: instance?.env, host: request?.host}">
     <mat-icon class="material-symbols-outlined">finance_mode</mat-icon>{{REQUEST_TYPE['ldap'].title}}
   </a>
 </mat-menu>

@@ -1,0 +1,109 @@
+<div class="kpi-page">
+
+  <!-- ── Barre de résumé ── -->
+  <div class="kpi-summary-row">
+    <div class="kpi-stat-card">
+      <div class="kpi-stat-icon blue">
+        <mat-icon class="material-symbols-outlined">swap_horiz</mat-icon>
+      </div>
+      <div class="kpi-stat-content">
+        <span class="kpi-stat-value">{{$globalStatistic.totalRequest | number}}</span>
+        <span class="kpi-stat-label">Requêtes totales</span>
+      </div>
+    </div>
+    <div class="kpi-stat-card">
+      <div class="kpi-stat-icon green">
+        <mat-icon class="material-symbols-outlined">check_circle</mat-icon>
+      </div>
+      <div class="kpi-stat-content">
+        <span class="kpi-stat-value">{{$globalStatistic.percentSuccess | number: '1.0-2'}} %</span>
+        <span class="kpi-stat-label">Taux de succès</span>
+      </div>
+    </div>
+    <div class="kpi-stat-card">
+      <div class="kpi-stat-icon red">
+        <mat-icon class="material-symbols-outlined">error_outline</mat-icon>
+      </div>
+      <div class="kpi-stat-content">
+        <span class="kpi-stat-value">{{$globalStatistic.totalRequestError | number}}</span>
+        <span class="kpi-stat-label">Erreurs détectées</span>
+      </div>
+    </div>
+    <div class="kpi-stat-card">
+      <div class="kpi-stat-icon purple">
+        <mat-icon class="material-symbols-outlined">devices</mat-icon>
+      </div>
+      <div class="kpi-stat-content">
+        <span class="kpi-stat-value">{{$globalStatistic.totalHost | number}}</span>
+        <span class="kpi-stat-label">Hôtes</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Grille des charts ── -->
+  <div class="kpi-grid">
+    <div class="kpi-chart-card">
+      <div class="kpi-chart-header">
+        <div class="kpi-chart-title-group">
+          <span class="kpi-accent-bar purple-bar"></span>
+          <mat-icon class="kpi-chart-icon material-symbols-outlined">donut_large</mat-icon>
+          <span class="kpi-chart-title">Méthodes HTTP</span>
+        </div>
+      </div>
+      <div class="kpi-chart-subheader">
+        <span class="kpi-chart-period">{{(params.period.start | date: 'd MMM') + '–' + (params.period.end | date)}}</span>
+      </div>
+      <div class="kpi-chart-body">
+        <chart type="donut"
+               [config]="METHOD_PIE_CONFIG"
+               [data]="$methodRepartition.data"
+               [isLoading]="$methodRepartition.loading"></chart>
+      </div>
+
+    </div>
+
+    <div class="kpi-chart-card span-3">
+      <status-chart
+              [chartConfig]="$statusRepartition.chartConfig"
+              [data]="$statusRepartition.data"
+              [loading]="$statusRepartition.loading"
+              [sliceData]="$statusRepartitionSlice.data"
+              [queryParams]="params"
+              (onChartChange)="onStatusChartChange($event)">
+      </status-chart>
+    </div>
+
+    <!-- Chart 4 – Temps de réponse moyen -->
+    <div class="kpi-chart-card span-4">
+      <performance-chart
+              [chartConfig]="$performanceRepartition.chartConfig"
+              [data]="$performanceRepartition.data"
+              [loading]="$performanceRepartition.loading"
+              [sliceData]="$performanceRepartitionSlice.data"
+              [queryParams]="params"
+              (onChartChange)="onPerformanceChartChange($event)">
+      </performance-chart>
+    </div>
+
+    <div class="kpi-chart-card span-4">
+      <volumetry-chart
+              [chartConfig]="$volumetryRepartition.chartConfig"
+              [data]="$volumetryRepartition.data"
+              [loading]="$volumetryRepartition.loading"
+              [sliceData]="$volumetryRepartitionSlice.data"
+              [queryParams]="params"
+              (onChartChange)="onVolumetryChartChange($event)"></volumetry-chart>
+    </div>
+
+    <div class="kpi-chart-card span-4">
+      <latency-chart
+              [chartConfig]="$latencyRepartition.chartConfig"
+              [data]="$latencyRepartition.data"
+              [loading]="$latencyRepartition.loading"
+              [sliceData]="$latencyRepartitionSlice.data"
+              [queryParams]="params"
+              (onChartChange)="onLatencyChartChange($event)"></latency-chart>
+    </div>
+  </div>
+</div>
+

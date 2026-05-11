@@ -29,7 +29,7 @@ export const DEFAULT_TABLE_CONFIG: TableProvider = {
   search: { enabled: true },
   view: { enabled: true, enableColumnRemoval: true },
   pagination: { enabled: true, pageSize: 10, pageSizeOptions: [5, 10, 15, 20, 100], pageSizeOptionsGroupBy: [20, 50, 100, 200] },
-  labels: { empty: 'Aucun résultat', loading: 'Chargement des requêtes...' }
+  labels: { empty: 'Aucun résultat', loading: 'Chargement des requêtes...' },
 };
 
 export const DEFAULT_SORT_CONFIG: { active: string; direction: 'asc' | 'desc'; } = { active: 'start', direction: 'desc' };
@@ -111,6 +111,7 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
     },
     { key: 'user', header: 'Utilisateur', icon: 'person',  width: '13%' },
+    { key: 'address', header: 'Adresse', icon: 'fingerprint',  width: '13%', optional: true },
     { key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
       value: (row: MainSessionDto) => {
         if(!row.end) return 'En cours...';

@@ -1,0 +1,22 @@
+<header-page titleIcon="finance_mode" [iconOutlined]="true" [ui-title]="MAPPING_TYPE[params.type].title" ui-subtitle="Tableau de bord">
+  <form class="filter-container" [formGroup]="filterForm">
+    <mat-form-field style="width: 240px" class="no-subscript md-3" appearance="outline">
+      <mat-label>Période</mat-label>
+      <mat-date-range-input [formGroup]="filterForm.controls.dateRange" [rangePicker]="picker">
+        <input matStartDate formControlName="start" placeholder="Start date" readonly>
+        <input matEndDate formControlName="end" placeholder="End date" (dateChange)="onChangeEnd()" readonly>
+      </mat-date-range-input>
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-date-range-picker #picker></mat-date-range-picker>
+    </mat-form-field>
+   <mat-form-field  style="width: 240px" class="no-subscript md-3" appearance="outline" [class.loading]="serverNameIsLoading" >
+       <mat-label>Hôte</mat-label>
+       <mat-select [formControl]="filterForm.controls.host" multiple (openedChange)="onHostopenedChange()" (selectionChange)="onChangeHost()">
+           <span *ngIf="filterForm && params.queryParams.appname && params.queryParams.appname[0]!=''"><mat-option *ngFor="let s of params.queryParams.appname">{{s}}</mat-option></span>
+           <mat-option *ngFor="let d of nameDataList" [value]="d" >{{d}}</mat-option>
+       </mat-select>
+       <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>
+   </mat-form-field>
+</form>
+</header-page>
+<ng-container #container></ng-container>

@@ -107,7 +107,7 @@
 
 <mat-menu #menuHost="matMenu">
     <div mat-menu-item (click)="navigate($event,'parent')" [disabled]="sessionParent == null"><mat-icon class="material-symbols-outlined">move_up</mat-icon>Contexte de l'Appel</div>
-    <a mat-menu-item [routerLink]="['/dashboard/request', 'ftp']" [queryParams]="{env: instance?.env, host: request?.host}"><mat-icon class="material-symbols-outlined">finance_mode</mat-icon>{{REQUEST_TYPE['ftp'].title}}</a>
+    <a mat-menu-item [routerLink]="['/kpi/request', 'ftp']" [queryParams]="{env: instance?.env, host: request?.host}"><mat-icon class="material-symbols-outlined">finance_mode</mat-icon>{{REQUEST_TYPE['ftp'].title}}</a>
 </mat-menu>
 
 <mat-menu #menuServer="matMenu">

@@ -1,0 +1,70 @@
+<div class="kpi-page">
+
+  <!-- ── Barre de résumé ── -->
+  <div class="kpi-summary-row">
+    <div class="kpi-stat-card">
+      <div class="kpi-stat-icon blue">
+        <mat-icon class="material-symbols-outlined">swap_horiz</mat-icon>
+      </div>
+      <div class="kpi-stat-content">
+        <span class="kpi-stat-value">{{$globalStatistic.totalRequest | number}}</span>
+        <span class="kpi-stat-label">Requêtes totales</span>
+      </div>
+    </div>
+    <div class="kpi-stat-card">
+      <div class="kpi-stat-icon green">
+        <mat-icon class="material-symbols-outlined">check_circle</mat-icon>
+      </div>
+      <div class="kpi-stat-content">
+        <span class="kpi-stat-value">{{$globalStatistic.percentSuccess | number: '1.0-2'}} %</span>
+        <span class="kpi-stat-label">Taux de succès</span>
+      </div>
+    </div>
+    <div class="kpi-stat-card">
+      <div class="kpi-stat-icon red">
+        <mat-icon class="material-symbols-outlined">error_outline</mat-icon>
+      </div>
+      <div class="kpi-stat-content">
+        <span class="kpi-stat-value">{{$globalStatistic.totalRequestError | number}}</span>
+        <span class="kpi-stat-label">Erreurs détectées</span>
+      </div>
+    </div>
+    <div class="kpi-stat-card">
+      <div class="kpi-stat-icon purple">
+        <mat-icon class="material-symbols-outlined">devices</mat-icon>
+      </div>
+      <div class="kpi-stat-content">
+        <span class="kpi-stat-value">{{$globalStatistic.totalHost | number}}</span>
+        <span class="kpi-stat-label">Hôtes</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Grille des charts ── -->
+  <div class="kpi-grid">
+
+    <!-- Chart 1 – Répartition par statut -->
+    <div class="kpi-chart-card span-4">
+      <status-chart
+              [chartConfig]="$statusRepartition.chartConfig"
+              [data]="$statusRepartition.data"
+              [loading]="$statusRepartition.loading"
+              [sliceData]="$statusRepartitionSlice.data"
+              [queryParams]="params"
+              (onChartChange)="onStatusChartChange($event)">
+      </status-chart>
+    </div>
+
+    <div class="kpi-chart-card span-4">
+      <performance-chart
+              [chartConfig]="$performanceRepartition.chartConfig"
+              [data]="$performanceRepartition.data"
+              [loading]="$performanceRepartition.loading"
+              [sliceData]="$performanceRepartitionSlice.data"
+              [queryParams]="params"
+              (onChartChange)="onPerformanceChartChange($event)">
+      </performance-chart>
+    </div>
+  </div>
+</div>
+

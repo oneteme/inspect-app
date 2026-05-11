@@ -20,19 +20,11 @@ import {DetailFtpTableComponent} from "./detail/session/_component/ftp-table/det
 import {DetailSmtpTableComponent} from "./detail/session/_component/smtp-table/detail-smtp-table.component";
 import {DetailLdapTableComponent} from "./detail/session/_component/ldap-table/detail-ldap-table.component";
 import {DetailSessionComponent} from "./detail/session/_component/detail-session.component";
-import {StatisticUserView} from "./statistic/user/statistic-user.view";
 import {TreeView} from "./tree/tree.view";
-import {
-  StatisticDependentsTableComponent
-} from "./statistic/_component/dependents-table/statistic-dependents-table.component";
-import {
-  StatisticDependenciesTableComponent
-} from "./statistic/_component/dependencies-table/statistic-dependencies-table.component";
 import {DashboardComponent} from "./dashboard/dashboard.component";
 import {
   ProtocolExceptionComponent
 } from './dashboard/components/protocol-exception-modal/protocol-exception-modal.component';
-import {StatisticClientView} from "./statistic/view/statistic-client.view";
 import {ArchitectureView} from "./architecture/architecture.view";
 import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
 import {NumberFormatterPipe, CompactNumberPipe} from '../shared/pipe/number.pipe';
@@ -46,18 +38,13 @@ import {DependencyCardComponent} from "./statistic/server/_component/dependency-
 import {
   RepartitionTypeCardComponent as RestRepartitionTypeCardComponent
 } from "./statistic/_component/repartition-type-card/repartition-type-card.component";
+import {DeploimentComponent} from './deploiment/deploiment.component';
 import {SearchRequestView} from "./search/request/search-request.view";
 import {AnalyticView} from "./analytic/analytic.view";
 import {DetailTimelineComponent} from "./detail/session/_component/timeline/detail-timeline.component";
 import {ActionTableComponent} from "./detail/session/_component/action-table/action-table.component";
 import {DetailRequestView} from "./detail/request/detail-request.view";
 import {DetailRestView} from "./detail/request/rest/detail-rest.view";
-import {StatisticRequestView} from "./statistic/request/statistic-request.view";
-import {StatisticRequestJdbcComponent} from "./statistic/request/jdbc/statistic-request-jdbc.component";
-import {StatisticRequestFtpComponent} from "./statistic/request/ftp/statistic-request-ftp.component";
-import {StatisticRequestSmtpComponent} from "./statistic/request/smtp/statistic-request-smtp.component";
-import {StatisticRequestLdapComponent} from "./statistic/request/ldap/statistic-request-ldap.component";
-import {StatisticRequestHttpComponent} from "./statistic/request/http/statistic-request-http.component";
 import {MailTableComponent} from "./detail/request/smtp/_component/mail-table/mail-table.component";
 import {
   ServerInstanceSelectorDialogComponent
@@ -88,6 +75,23 @@ import {DynamicChartComponent} from "./statistic/_component/dynamic-chart/dynami
 import {DashboardInstancesTableComponent} from './dashboard/components/instances-table/instances-table.component';
 import {DashboardCarouselComponent} from './dashboard/components/carousel/carousel.component';
 import {DashboardDetailViewComponent} from './dashboard/components/detail-view/detail-view.component';
+import {RequestKpiView} from "./kpi/request/request-kpi.view";
+import {RestComponent as RequestRestComponent} from "./kpi/request/rest/rest.component";
+import {RestComponent as SessionRestComponent} from "./kpi/session/rest/rest.component";
+import {StatusChartComponent} from "./kpi/_component/status-chart/status-chart.component";
+import {PerformanceChartComponent} from "./kpi/_component/performance-chart/performance-chart.component";
+import {VolumetryChartComponent} from "./kpi/_component/volumetry-chart/volumetry-chart.component";
+import {ChartMenuComponent} from "./kpi/_component/chart-menu/chart-menu.component";
+import {LatencyChartComponent} from "./kpi/_component/latency-chart/latency-chart.component";
+import {SlicePanelComponent} from "@oneteme/jquery-table";
+import {JdbcComponent} from "./kpi/request/jdbc/jdbc.component";
+import {FtpComponent} from "./kpi/request/ftp/ftp.component";
+import {LdapComponent} from "./kpi/request/ldap/ldap.component";
+import {SmtpComponent} from "./kpi/request/smtp/smtp.component";
+import {SessionKpiView} from "./kpi/session/session-kpi.view";
+import {DependencyNewTableComponent} from "./kpi/_component/dependency-table/dependency-table.component";
+import {DependentNewTableComponent} from "./kpi/_component/dependent-table/dependent-table.component";
+import {BatchComponent} from "./kpi/session/batch/batch.component";
 
 @NgModule({
   imports: [
@@ -98,7 +102,8 @@ import {DashboardDetailViewComponent} from './dashboard/components/detail-view/d
     BrowserModule,
     BrowserAnimationsModule,
     SharedModule,
-    ChartComponent
+    ChartComponent,
+    SlicePanelComponent
   ],
   declarations: [
     SearchRestView,
@@ -119,28 +124,10 @@ import {DashboardDetailViewComponent} from './dashboard/components/detail-view/d
     DetailLocalTableComponent,
     DetailTimelineComponent,
     DetailSessionComponent,
-    StatisticUserView,
-    StatisticDependentsTableComponent,
-    StatisticDependenciesTableComponent,
-    StatisticClientView,
     DashboardComponent,
     ProtocolExceptionComponent,
     ArchitectureView,
     TreeView,
-    StatisticServerView,
-    StatisticRequestView,
-    StatisticRequestJdbcComponent,
-    StatisticRequestFtpComponent,
-    StatisticRequestSmtpComponent,
-    StatisticRequestLdapComponent,
-    StatisticRequestHttpComponent,
-    RestTabComponent,
-    BatchTabComponent,
-    DependencyTableComponent,
-    RestRepartitionTypeCardComponent,
-    EvolUserCardComponent,
-    PerformanceCardComponent,
-    DependencyCardComponent,
     NumberFormatterPipe,
     CompactNumberPipe,
     AnalyticView,
@@ -163,7 +150,26 @@ import {DashboardDetailViewComponent} from './dashboard/components/detail-view/d
     DynamicChartComponent,
     DashboardInstancesTableComponent,
     DashboardCarouselComponent,
-    DashboardDetailViewComponent
+    DashboardDetailViewComponent,
+    DeploimentComponent,
+
+    // New
+    RequestKpiView,
+    RequestRestComponent,
+    SessionRestComponent,
+    BatchComponent,
+    JdbcComponent,
+    FtpComponent,
+    LdapComponent,
+    SmtpComponent,
+    StatusChartComponent,
+    PerformanceChartComponent,
+    VolumetryChartComponent,
+    LatencyChartComponent,
+    ChartMenuComponent,
+    SessionKpiView,
+    DependencyNewTableComponent,
+    DependentNewTableComponent
   ]
 })
 export class ViewsModule { }
