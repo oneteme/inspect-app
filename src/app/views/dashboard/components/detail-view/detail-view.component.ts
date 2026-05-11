@@ -8,29 +8,28 @@ import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angu
 })
 export class DashboardDetailViewComponent {
 
-    // ── User agent ──────────────────────────────────────────────
-    @Input() userAgentData: any[] = [];
-    @Input() userAgentLoading = true;
-    @Input() uaGroups: any[] = [];
-    @Input() uaChartData: any[] = [];
-    @Input() uaPieConfig: any;
-    @Input() hiddenAgents: Set<string> = new Set();
-
     // ── Insights ────────────────────────────────────────────────
     @Input() selectedInsights: Set<string> = new Set();
     @Input() protocolDefs: any[] = [];
     @Input() topErrors: Record<string, { type: string; count: number }[]> = {};
     @Input() kpiLoading = true;
     @Input() serverHealthLoading = true;
-    @Input() stoppedServers: any[] = [];
     @Input() tabRequests: Record<string, any> = {};
     @Input() topSessionErrors: any[] = [];
     @Input() topBatchErrors: any[] = [];
+    @Input() topViewErrors: any[] = [];
+    @Input() sessionExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
+    @Input() batchExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
+    @Input() viewExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
+    @Input() startupExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
+    @Input() sessExcLineConfig: any;
     @Input() sessionCountLoading = true;
     @Input() sessionInitErrors = 0;
+    @Input() startupErrorsByServer: { appName: string; errors: number }[] = [];
     @Input() sessionWebErrors = 0;
     @Input() sessionTestErrors = 0;
     @Input() insightsAllClear = false;
+    @Input() divergentBranches: { branch: string; count: number; servers: string[] }[] = [];
 
     // ── Protocol activity ────────────────────────────────────────
     @Input() chartRequests: Record<string, any> = {};
@@ -38,12 +37,11 @@ export class DashboardDetailViewComponent {
     @Input() sparklineTitles: Record<string, { title: string; subtitle: string }> = {};
 
     // ── Outputs ─────────────────────────────────────────────────
-    @Output() agentToggle = new EventEmitter<string>();
     @Output() requestProtocolNav = new EventEmitter<{ key: string; errorType: string }>();
-    @Output() sessionTypeNav = new EventEmitter<string>();
-    @Output() exceptionNav = new EventEmitter<{ type: string; tab: 'rest' | 'batch' }>();
-    @Output() supervisionNav = new EventEmitter<any>();
+    @Output() sessionTypeNav = new EventEmitter<{ type: string; server?: string }>();
+    @Output() exceptionNav = new EventEmitter<{ type: string; tab: 'rest' | 'batch' | 'view' }>();
     @Output() protocolDialogOpen = new EventEmitter<{ observable: any; type: string }>();
+    @Output() instanceFilter = new EventEmitter<string>();
 
     // ── Helpers ──────────────────────────────────────────────────
     getErrBarWidth(list: { count: number }[], count: number): number {
@@ -93,6 +91,26 @@ export class DashboardDetailViewComponent {
         return !!this.selectedKey && sessionKeys.has(this.selectedKey);
     }
 
+    get isFluxInsight(): boolean {
+        return !!this.selectedKey && !this.isSessionInsight;
+    }
+
+    get sessionChartData(): { stringDate: string; count: number }[] {
+        if (this.selectedKey === 'BATCH')   return this.batchExceptionChart;
+        if (this.selectedKey === 'VIEW')    return this.viewExceptionChart;
+        if (this.selectedKey === 'STARTUP') return this.startupExceptionChart;
+        return this.sessionExceptionChart;
+    }
+
+    get sessionChartSubtitle(): string {
+        switch (this.selectedKey) {
+            case 'BATCH':   return 'Batch — nombre d\'exceptions par période';
+            case 'VIEW':    return 'UI — nombre d\'exceptions par période';
+            case 'STARTUP': return 'Démarrage — nombre d\'exceptions par période';
+            default:        return 'Service — nombre d\'exceptions par période';
+        }
+    }
+
     get selectedLabel(): string {
         if (!this.selectedKey) return 'Clients';
         const label = this.protocolDefs.find(p => p.key === this.selectedKey)?.label ?? this.selectedKey;
@@ -100,26 +118,32 @@ export class DashboardDetailViewComponent {
         return `${prefix} — ${label}`;
     }
 
-    get totalUaClients(): number {
-        return this.uaGroups.reduce(
-            (sum, g) => sum + g.items.reduce((s: number, i: any) => s + (i.count || 0), 0), 0
-        );
+    /** Loading du graphique selon le type de session sélectionné */
+    get sessionChartLoading(): boolean {
+        if (this.selectedKey === 'BATCH')   return this.tabRequests['batchExceptionTable']?.isLoading || this.tabRequests['batchTopJobsTable']?.isLoading;
+        if (this.selectedKey === 'VIEW')    return this.tabRequests['viewExceptionTable']?.isLoading;
+        if (this.selectedKey === 'STARTUP') return this.tabRequests['startupExceptionTable']?.isLoading;
+        return this.tabRequests['sessionExceptionsTable']?.isLoading;
     }
 
-    getProtoTotalErrors(key: string): number {
-        if (key === 'SERVICE') return this.topSessionErrors.reduce((s, e) => s + e.count, 0);
-        if (key === 'BATCH')   return this.topBatchErrors.reduce((s, e) => s + e.count, 0);
-        if (key === 'STARTUP') return this.sessionInitErrors;
-        if (key === 'VIEW')    return this.sessionWebErrors;
-        if (key === 'TEST')    return this.sessionTestErrors;
-        return (this.topErrors[key] || []).reduce((s, e) => s + e.count, 0);
-    }
-
-    getProtoTotalCalls(key: string): number {
-        const def = this.protocolDefs.find(p => p.key === key);
-        if (!def) return 0;
-        const chart: any[] = this.chartRequests[def.reqKey]?.chart ?? [];
-        return chart.reduce((acc, obj) => acc + (obj.count ?? obj.countok ?? 0), 0);
+    /** Aucun incident détecté sur la période pour l'insight actif */
+    get isNoIncidents(): boolean {
+        const key = this.selectedKey;
+        if (!key) return false;
+        switch (key) {
+            case 'SERVICE':
+                return this.tabRequests['sessionExceptionsTable']?.isLoading === false && !this.topSessionErrors.length;
+            case 'BATCH':
+                return this.tabRequests['batchExceptionTable']?.isLoading === false && !this.topBatchErrors.length;
+            case 'VIEW':
+                return this.tabRequests['viewExceptionTable']?.isLoading === false && !this.topViewErrors.length && !this.sessionWebErrors;
+            case 'STARTUP':
+                return !this.sessionCountLoading && !this.sessionInitErrors && !this.divergentBranches.length;
+            case 'TEST':
+                return !this.sessionCountLoading && !this.sessionTestErrors;
+            default:
+                return !this.kpiLoading && !this.topErrors[key]?.length;
+        }
     }
 
     trackByType(_: number, item: { type: string }): string { return item.type; }

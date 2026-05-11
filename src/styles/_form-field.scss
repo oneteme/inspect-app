@@ -1,0 +1,200 @@
+// ── Mat Form Field — Redesign global ────────────────────────────
+// Angular Material 16 (MDC) — appearance="outline"
+// Ciblage direct des classes MDC rendues dans le DOM
+
+// ── Contour (les 3 pièces de la bordure) ─────────────────────
+.mdc-text-field--outlined .mdc-notched-outline__leading,
+.mdc-text-field--outlined .mdc-notched-outline__notch,
+.mdc-text-field--outlined .mdc-notched-outline__trailing {
+  border-color: rgba(34, 36, 38, .2) !important;
+  border-width: 1px !important;
+  transition: border-color .18s ease, border-width .1s ease;
+}
+
+.mdc-text-field--outlined .mdc-notched-outline__leading {
+  border-radius: 10px 0 0 10px !important;
+  min-width: 10px !important;
+}
+
+.mdc-text-field--outlined .mdc-notched-outline__trailing {
+  border-radius: 0 10px 10px 0 !important;
+}
+
+// ── Fond du champ ─────────────────────────────────────────────
+.mdc-text-field--outlined {
+  background: rgba(34, 36, 38, .03) !important;
+  border-radius: 10px !important;
+  transition: background .18s ease;
+}
+
+// ── Hover ─────────────────────────────────────────────────────
+.mdc-text-field--outlined:not(.mdc-text-field--disabled):hover {
+  background: rgba(34, 36, 38, .055) !important;
+
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: rgba(34, 36, 38, .42) !important;
+  }
+}
+
+// ── Focus ─────────────────────────────────────────────────────
+.mdc-text-field--outlined.mdc-text-field--focused {
+  background: rgba(20, 100, 220, .035) !important;
+
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: #1464dc !important;
+  }
+}
+
+// ── Label flottant ────────────────────────────────────────────
+.mdc-text-field--outlined .mdc-floating-label {
+  font-size: 13px !important;
+  font-weight: 500 !important;
+  color: rgba(0, 0, 0, .45) !important;
+  letter-spacing: .01em !important;
+}
+
+.mdc-text-field--outlined.mdc-text-field--focused .mdc-floating-label {
+  color: #1464dc !important;
+}
+
+// ── Texte saisi ───────────────────────────────────────────────
+.mdc-text-field--outlined .mdc-text-field__input {
+  font-size: 13px !important;
+  color: rgba(0, 0, 0, .82) !important;
+  caret-color: #1464dc;
+}
+
+// ── Icônes suffix / prefix ────────────────────────────────────
+.mat-mdc-form-field-icon-suffix,
+.mat-mdc-form-field-icon-prefix {
+  color: rgba(0, 0, 0, .32) !important;
+  transition: color .15s;
+}
+
+.mat-mdc-form-field.mat-focused {
+  .mat-mdc-form-field-icon-suffix,
+  .mat-mdc-form-field-icon-prefix {
+    color: #1464dc !important;
+  }
+}
+
+// ── Mat-select : valeur + placeholder + flèche ────────────────
+.mat-mdc-select-value-text {
+  font-size: 13px;
+  color: rgba(0, 0, 0, .82);
+}
+
+.mat-mdc-select-placeholder {
+  font-size: 13px;
+  color: rgba(0, 0, 0, .35) !important;
+}
+
+.mat-mdc-select-arrow svg {
+  fill: rgba(0, 0, 0, .35);
+  transition: fill .18s;
+}
+
+.mat-focused .mat-mdc-select-arrow svg {
+  fill: #1464dc !important;
+}
+
+// ── Panel dropdown ────────────────────────────────────────────
+.mat-mdc-select-panel {
+  border-radius: 10px !important;
+  border: 1px solid rgba(34, 36, 38, .12) !important;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, .11), 0 2px 6px rgba(0, 0, 0, .06) !important;
+  padding: 4px 0 !important;
+}
+
+.mat-mdc-option {
+  font-size: 13px !important;
+  min-height: 38px !important;
+  padding: 0 14px !important;
+  color: rgba(0, 0, 0, .78) !important;
+  transition: background .1s;
+
+  &:hover:not(.mdc-list-item--disabled) {
+    background: rgba(20, 100, 220, .06) !important;
+  }
+
+  &.mdc-list-item--selected:not(.mat-mdc-option-multiple) {
+    background: rgba(20, 100, 220, .09) !important;
+
+    .mdc-list-item__primary-text {
+      color: #1464dc !important;
+      font-weight: 600 !important;
+    }
+  }
+}
+
+// ── Datepicker toggle ─────────────────────────────────────────
+.mat-datepicker-toggle .mat-mdc-icon-button {
+  color: rgba(0, 0, 0, .35) !important;
+  transition: color .15s;
+  margin-right: 4px;
+
+  &:hover {
+    color: rgba(0, 0, 0, .65) !important;
+  }
+}
+
+.mat-mdc-form-field.mat-focused .mat-datepicker-toggle .mat-mdc-icon-button {
+  color: #1464dc !important;
+}
+
+// ── Suppression des indicateurs visuels internes ──────────────
+
+// focus-overlay (fond teinté MDC)
+.mat-mdc-form-field .mat-mdc-form-field-focus-overlay {
+  display: none !important;
+}
+
+// line-ripple (trait animé bas de champ, présent même en outlined)
+.mdc-text-field .mdc-line-ripple,
+.mdc-text-field .mdc-line-ripple::before,
+.mdc-text-field .mdc-line-ripple::after {
+  display: none !important;
+}
+
+// focus-indicator (anneau interne sur mat-select trigger)
+.mat-mdc-form-field .mat-mdc-focus-indicator,
+.mat-mdc-select-trigger .mat-mdc-focus-indicator {
+  display: none !important;
+}
+
+// ── Fix ligne bleue parasite dans le select focalisé ──────────
+// State-layer MDC sur le trigger du select (::before) + notch droit
+.mat-mdc-select-trigger::before {
+  display: none !important;
+}
+
+.mdc-text-field--outlined .mdc-notched-outline__notch {
+  border-right: none !important;
+}
+
+// ── Focus natif navigateur — éléments host ────────────────────
+mat-select,
+.mat-mdc-select {
+  outline: none !important;
+  box-shadow: none !important;
+
+  &:focus,
+  &:focus-visible {
+    outline: none !important;
+    box-shadow: none !important;
+  }
+}
+
+// ── Outline natif navigateur sur les inputs date-range ────────
+.mat-date-range-input-container input,
+.mat-date-range-input-start-wrapper input,
+.mat-date-range-input-end-wrapper input {
+  &:focus,
+  &:focus-visible {
+    outline: none !important;
+  }
+}

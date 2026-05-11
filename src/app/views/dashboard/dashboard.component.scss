@@ -1,8 +1,4 @@
-﻿// ============================================================
-// Dashboard component — Professional layout
-// ============================================================
-
-// ── Semantic colours ─────────────────────────────────────────
+﻿﻿// utilities
 .c-ok   { color: #21ba45; }
 .c-na   { color: rgba(0,0,0,.25); }
 .c-warn { color: #f59e0b; }
@@ -17,7 +13,7 @@
 
 .inline-spin { display: inline-flex; }
 
-// ── All-protocols-OK banner ───────────────────────────────────
+// banner
 .db-all-ok {
   display: flex;
   align-items: center;
@@ -60,13 +56,13 @@
   }
 }
 
-// ── Main grid ─────────────────────────────────────────────────
+// layout
 .db-grid {
   display: grid;
   grid-template-columns: 360px 1fr;
   gap: 1em;
   align-items: start;
-  margin-bottom: .85em;
+  // margin-bottom: .85em;
 
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
@@ -74,12 +70,16 @@
   }
 }
 
-// ── Main column ───────────────────────────────────────────────
+// main column
 .db-main {
   min-width: 0;
   display: flex;
   flex-direction: column;
   gap: .5em;
+
+  &:not(:has(dashboard-instances-table)) {
+    padding-top: 2px;
+  }
 }
 
 .dmp-header {
@@ -115,10 +115,7 @@
   mat-icon { font-size: 14px; width: 14px; height: 14px; }
 }
 
-// ── Protocol list ─────────────────────────────────────────────
-// (styles moved to dashboard-detail-view.component.scss)
-
-// ── Distributions Request + Session en ligne ─────────────────────────────
+// distributions
 .db-dist-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -130,8 +127,6 @@
     background: var(--mat-sidenav-content-background-color, #fff);
   }
 }
-
-// (styles .db-insights-wrap, .dbi-*, .dbi-all-clear moved to dashboard-detail-view.component.scss)
 
 .proto-row {
   display: grid;
@@ -216,7 +211,7 @@
 }
 
 
-// ── Volume summary (slot chart quand 0 erreur) ─────────────────────────────
+// volume summary (slot chart quand 0 erreur)
 .pr-volume-summary {
   display: flex;
   flex-direction: column;
@@ -311,7 +306,7 @@
   mat-icon { font-size: 14px; width: 14px; height: 14px; color: #21ba45; }
 }
 
-// ── Sparkline chart column ────────────────────────────────────
+// sparkline chart
 .pr-chart {
   overflow: visible;
   display: flex;
@@ -324,7 +319,7 @@
   }
 }
 
-// ── Detail button ─────────────────────────────────────────────
+// detail button
 .pr-detail-btn {
   display: flex;
   align-items: center;
@@ -361,7 +356,7 @@
   50%       { opacity: .5; transform: scale(.88); }
 }
 
-// ── Sidebar ───────────────────────────────────────────────────
+// sidebar────
 .db-sidebar {
   display: flex;
   flex-direction: column;
@@ -377,11 +372,7 @@
   overflow: hidden;
 }
 
-// (styles .db-ua-block moved to dashboard-detail-view.component.scss)
-
-// KPI 2x2 grid — SUPPRIMÉ
-
-// Distribution
+// distribution
 .sb-distribution-block {
   border-radius: 6px;
   border: 1px solid rgba(34, 36, 38, .11);
@@ -416,10 +407,6 @@
   padding-bottom: 5px;
   border-bottom: 1px solid rgba(34, 36, 38, .08);
   margin-bottom: 3px;
-}
-
-.sbd-all-btn {
-  display: none; // supprimé — sélection unique (radio)
 }
 
 .sbd-empty {
@@ -501,14 +488,11 @@
   align-self: center;
   justify-self: end;
   white-space: nowrap;
+  &.c-ok  { color: #21ba45; }
+  &.c-err { color: #db2828; }
 }
 
-// (styles .ua-body, .ua-* moved to dashboard-detail-view.component.scss)
-// (styles .ts-sep, .carousel-section, .ts-* moved to dashboard-carousel.component.scss)
-
-// (remaining .ua-*, .ts-* styles moved to child components)
-
-// Nav actions
+// nav actions
 .sb-nav {
   padding: .4em .55em;
   display: flex;
@@ -588,45 +572,13 @@
   mat-icon { font-size: 13px; width: 13px; height: 13px; }
 }
 
-// ── Exceptions section ────────────────────────────────────────
-.db-exceptions {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-}
-
-.db-exc-empty {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  padding: .6em .9em;
-  border-radius: 6px;
-  border: 1px solid rgba(33, 186, 69, .2);
-  background: rgba(33, 186, 69, .03);
-  font-size: .82em;
-  opacity: .8;
-  mat-icon {
-    font-size: 16px;
-    width: 16px;
-    height: 16px;
-    color: #21ba45;
-    flex-shrink: 0;
-  }
-}
-
-.tab-panel {
-  height: calc(100vh - 56px - 75px - 460px - 1em);
-  min-height: 260px;
-}
-
-// ── Shimmer ───────────────────────────────────────────────────
+// shimmer
 @keyframes db-shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
-// ── Bouton Vue d'ensemble (sidebar) ──────────────────────────
+// bouton vue d'ensemble
 .sb-overview-btn {
   display: flex;
   align-items: center;
@@ -663,13 +615,7 @@
   }
 }
 
-// (styles .db-detail-view, .db-detail-top, .db-ua-block moved to dashboard-detail-view.component.scss)
-
-// (styles .db-overview, .dov-* moved to dashboard-instances-table.component.scss)
-
-// .dov-stats + .dov-stat-divider — supprimés (remplacés par dov-stats-sidebar)
-
-// ── Skeleton shimmer ──────────────────────────────────────────
+// skeleton shimmer
 @keyframes sb-shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
@@ -757,6 +703,7 @@
   gap: 3px;
   padding: 9px 4px 8px;
   border-radius: 5px;
+  cursor: pointer;
 
   .dov-stat-sb-val {
     font-size: 1.05em;

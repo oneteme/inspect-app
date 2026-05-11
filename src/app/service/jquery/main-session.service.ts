@@ -49,6 +49,22 @@ export class MainSessionService {
         return this.getMainSession(args);
     }
 
+    getStartupExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<ExceptionsByPeriodAndAppname[]> {
+        const args: any = {
+            'column': `start.${filters.groupedBy}:date,err_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`,
+            'join': 'instance',
+            'instance.environement': filters.env,
+            'type': 'STARTUP',
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'order': 'date.desc,count.desc'
+        };
+        if (filters.app_name) {
+            args['instance.app_name.in'] = filters.app_name;
+        }
+        return this.getMainSession(args);
+    }
+
     getDependents(filters: {env: string, start: Date, end: Date, appName: string}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, name: string}[]> {
         return this.getMainSession({
             'column': 'rest_request.count:count,rest_request.count_succes:countSucces,rest_request.count_error_client:countErrClient,rest_request.count_error_server:countErrServer,instance_join.app_name:name',
@@ -175,6 +191,24 @@ export class MainSessionService {
         return this.getMainSession(args);
     }
 
+    getTopBatchJobErrors(filters: { env: string, start: Date, end: Date, app_name: string }): Observable<{ name: string; count: number }[]> {
+        const args: any = {
+            'column': 'name,count:count',
+            'join': 'instance',
+            'type': 'BATCH',
+            'err_type.notNull': '',
+            'instance.environement': filters.env,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'order': 'count.desc',
+            'limit': '6'
+        };
+        if (filters.app_name) {
+            args['instance.app_name.in'] = filters.app_name;
+        }
+        return this.getMainSession(args);
+    }
+
     getBatchNames(filters: {env: string, appName: string, start: Date, end: Date}): Observable<string[]> {
         return this.getMainSession({
             'column.distinct': 'name',
@@ -233,6 +267,22 @@ export class MainSessionService {
         return this.getMainSession(args);
     }
 
+    getViewExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<ExceptionsByPeriodAndAppname[]> {
+        const args: any = {
+            'column': `start.${filters.groupedBy}:date,err_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`,
+            'join': 'instance',
+            'instance.environement': filters.env,
+            'type': 'VIEW',
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'order': 'date.desc,count.desc'
+        };
+        if (filters.app_name) {
+            args['instance.app_name.in'] = filters.app_name;
+        }
+        return this.getMainSession(args);
+    }
+
     getUsers(filters: {env: string, appName: string, start: Date, end: Date}): Observable<string[]> {
         return this.getMainSession({
             'column.distinct': 'user',
@@ -257,6 +307,33 @@ export class MainSessionService {
             'instance.environement': filters.env,
             'instance.type': 'CLIENT'
         }).pipe(map((data: {user: string}[]) => (data.map(d => d.user))));
+    }
+
+    getStartupErrorsByServer(filters: {env: string, start: Date, end: Date}): Observable<{appName: string; errors: number}[]> {
+        return this.getMainSession<{appName: string; count: number}[]>({
+            'column': 'instance.app_name:appName,count:count',
+            'join': 'instance',
+            'instance.environement': filters.env,
+            'type': 'STARTUP',
+            'err_type.notNull': '',
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'order': 'count.desc'
+        }).pipe(map(rows => rows.map(r => ({ appName: r.appName, errors: r.count }))));
+    }
+
+    getCountByUser(filters: { env: string, start: Date, end: Date }): Observable<{ count: number, user: string }[]> {
+        return this.getMainSession({
+            'column': 'count:count,user',
+            'join': 'instance',
+            'instance.environement': filters.env,
+            'instance.type': 'CLIENT',
+            'type': 'VIEW',
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'order': 'count.desc',
+            'limit': 10
+        });
     }
 
     getCountByType(filters: {env: string, start: Date, end: Date}): Observable<{type: string, total: number, errors: number}[]> {

@@ -117,34 +117,38 @@ export const UA_CATEGORY_DEFS: Record<string, UaCategoryDef> = {
     'Inconnu': { color: '#d1d5db', group: 'unknown', keywords: [] },
 };
 
-/** Config de base du donut User-Agent (sans les couleurs dynamiques). */
-export const UA_PIE_BASE: ChartProvider<string, number> = {
-    height: 210,
+/** Config de base du treemap User-Agent (sans les couleurs dynamiques). */
+export const UA_BAR_BASE: ChartProvider<string, number> = {
+    height: 180,
     series: [{ data: { x: field('label'), y: field('count') } }],
     options: {
-        chart: { toolbar: { show: false } },
+        chart: { toolbar: { show: false }, animations: { enabled: false } },
         legend: { show: false },
         dataLabels: { enabled: false },
-        tooltip: { enabled: false },
-        plotOptions: {
-            pie: {
-                donut: {
-                    labels: {
-                        show: true,
-                        name: { show: true, fontSize: '11px', color: 'rgba(0,0,0,0.55)', offsetY: -4 },
-                        value: {
-                            show: true,
-                            fontSize: '15px',
-                            fontWeight: 700,
-                            color: 'rgba(0,0,0,0.8)',
-                            offsetY: 4,
-                            formatter: (val: string) => Number(val).toLocaleString('fr-FR') + ' req.'
-                        },
-                        total: { show: true, label: 'Total', fontSize: '11px', color: 'rgba(0,0,0,0.45)' }
-                    }
-                }
-            }
-        }
+        tooltip: {
+            enabled: true,
+            y: { formatter: (val: number) => val.toLocaleString('fr-FR') + ' req.' }
+        },
+        plotOptions: { bar: { horizontal: true, barHeight: '65%', borderRadius: 3 } },
+        xaxis: { labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false } },
+        yaxis: { labels: { style: { fontSize: '11px' } } },
+        grid: { show: false }
+    }
+};
+
+/** Config de base pie pour les erreurs par type (flux). Couleurs et tooltip fournis dynamiquement. */
+export const UA_ERR_DONUT_BASE: ChartProvider<string, number> = {
+    series: [{ data: { x: field('label'), y: field('count') } }],
+    options: {
+        legend: { show: false }
+    }
+};
+
+/** Config de base pie User-Agent (sans les couleurs dynamiques). */
+export const UA_PIE_BASE: ChartProvider<string, number> = {
+    series: [{ data: { x: field('label'), y: field('count') } }],
+    options: {
+        legend: { show: false }
     }
 };
 
@@ -622,175 +626,115 @@ export class Constants {
 
     
     static REST_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<string, number> = {
-        height: 100,
         continue: true,
         series: [
             { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions REST', color: "#ff0000" },
         ],
         options: {
-            chart: {
-                sparkline: {
-                   enabled: true
-                },
-                toolbar: {
-                    show: false
+            legend: { show: false },
+            yAxis: { show: false, min: 0, max: 100 },
+            series: [{ smooth: true }],
+            tooltip: {
+                formatter: (params: any[]) => {
+                    const p = params[0];
+                    const val = Array.isArray(p.value) ? p.value[1] : p.value;
+                    return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName}&nbsp;&nbsp;<b>${(val ?? 0).toFixed(2)}%</b>`;
                 }
-                
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
             }
         }
     };
     
     static  DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        height: 100,
         continue: true,
         series: [
             { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions JDBC', color: "#ff0000" }
         ],
         options: {
-            chart: {
-                sparkline: {
-                    enabled: true
-                },
-                toolbar: {
-                    show: false
+            legend: { show: false },
+            yAxis: { show: false, min: 0, max: 100 },
+            series: [{ smooth: true }],
+            tooltip: {
+                formatter: (params: any[]) => {
+                    const p = params[0];
+                    const val = Array.isArray(p.value) ? p.value[1] : p.value;
+                    return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName}&nbsp;&nbsp;<b>${(val ?? 0).toFixed(2)}%</b>`;
                 }
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
             }
         }
     };
 
     static  FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        height: 100,
         continue: true,
         series: [
             { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions FTP', color: "#ff0000"}
         ],
         options: {
-            chart: {
-                sparkline: {
-                    enabled: true
-                },
-                toolbar: {
-                    show: false
+            legend: { show: false },
+            yAxis: { show: false, min: 0, max: 100 },
+            series: [{ smooth: true }],
+            tooltip: {
+                formatter: (params: any[]) => {
+                    const p = params[0];
+                    const val = Array.isArray(p.value) ? p.value[1] : p.value;
+                    return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName}&nbsp;&nbsp;<b>${(val ?? 0).toFixed(2)}%</b>`;
                 }
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
             }
         }
     };
 
     static  SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        height: 100,
         continue: true,
         series: [
             { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions SMTP', color: "#ff0000" }
         ],
         options: {
-            chart: {
-                sparkline: {
-                    enabled: true
-                },
-                toolbar: {
-                    show: false
+            legend: { show: false },
+            yAxis: { show: false, min: 0, max: 100 },
+            series: [{ smooth: true }],
+            tooltip: {
+                formatter: (params: any[]) => {
+                    const p = params[0];
+                    const val = Array.isArray(p.value) ? p.value[1] : p.value;
+                    return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName}&nbsp;&nbsp;<b>${(val ?? 0).toFixed(2)}%</b>`;
                 }
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
             }
         }
     };
 
     static  LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        height: 100,
         continue: true,
         series: [
             { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions LDAP', color: "#ff0000" }
         ],
         options: {
-            chart: {
-                sparkline: {
-                    enabled: true
+            legend: { show: false },
+            yAxis: { show: false, min: 0, max: 100 },
+            series: [{ smooth: true }],
+            tooltip: {
+                formatter: (params: any[]) => {
+                    const p = params[0];
+                    const val = Array.isArray(p.value) ? p.value[1] : p.value;
+                    return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName}&nbsp;&nbsp;<b>${(val ?? 0).toFixed(2)}%</b>`;
                 }
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
+            }
+        }
+    };
 
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
+    static readonly SESSION_EXCEPTION_LINE: ChartProvider<string, number> = {
+        continue: true,
+        series: [
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: '#ff0000' }
+        ],
+        options: {
+            legend: { show: false },
+            yAxis: { show: false, min: 0, max: 100 },
+            series: [{ smooth: true }],
+            tooltip: {
+                formatter: (params: any[]) => {
+                    const p = params[0];
+                    const val = Array.isArray(p.value) ? p.value[1] : p.value;
+                    return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName}&nbsp;&nbsp;<b>${(val ?? 0).toFixed(2)}%</b>`;
+                }
             }
         }
     };

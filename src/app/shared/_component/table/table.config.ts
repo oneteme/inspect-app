@@ -380,7 +380,8 @@ export const STAGE_TABLE_CONFIG: TableProvider<AbstractStage> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'name', header: 'Evènement', icon: 'event_list' },
-    { key: 'resource', header: 'Ressource', icon: 'category' },
+    { key: 'resource', header: 'Ressource', icon: 'category',
+      searchValue: (row: AbstractStage) => fmtMethod(row.command) + ' ' + ((row as any).args ?? row.arg ?? '') },
     { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
     { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
@@ -429,16 +430,16 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
 export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTrace?: number }> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'Hôte', icon: 'dns', groupable: false, sliceable: false, width: '20%' },
-    { key: 'duration', header: 'Depuis', icon: 'schedule', groupable: false, width: '15%' },
-    { key: 'version', header: 'Version', icon: 'label', width: '15%' },
-    { key: 'branch',  header: 'Branche', icon: 'fork_right', width: '20%' },
+    { key: 'appName', header: 'Hôte', icon: 'dns', sliceable: false, groupable: false, width: '25%' },
+    { key: 'duration', header: 'Depuis', icon: 'schedule', groupable: false, width: '12%', sortValue: (row) => row.start },
+    { key: 'version', header: 'Version', icon: 'label', width: '18%' },
+    { key: 'branch',  header: 'Branche', icon: 'fork_right', width: '27%' },
     { key: 'restart', header: 'Démarrage', icon: 'restart_alt', groupable: false, sliceable: false },
-    { key: 'os', header: 'OS', icon: 'computer', optional: true },
-    { key: 're', header: 'RE', icon: 'sdk', optional: true },
-    { key: 'user', header: 'Utilisateur', icon: 'person', optional: true }
+    { key: 'os', header: 'OS', icon: 'computer', optional: true, width: '8%' },
+    { key: 're', header: 'RE', icon: 'sdk', optional: true, width: '8%' },
+    { key: 'user', header: 'Utilisateur', icon: 'person', optional: true, width: '10%' }
   ],
-  defaultSort: { active: 'duration', direction: 'asc' },
+  defaultSort: { active: 'duration', direction: 'desc' },
   slices: [
     {
       title: 'Depuis',

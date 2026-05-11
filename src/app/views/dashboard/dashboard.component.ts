@@ -1,12 +1,12 @@
-import {Component, inject, OnDestroy} from '@angular/core';
+import {Component, inject, NgZone, OnDestroy} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
-import {catchError, combineLatest, EMPTY, finalize, forkJoin, map, Observable, of, Subscription, switchMap} from 'rxjs';
+import {combineLatest, finalize, forkJoin, map, Observable, of, Subscription, switchMap} from 'rxjs';
 import {DatePipe, DecimalPipe, Location} from '@angular/common';
 import {app, makeDatePeriod} from 'src/environments/environment';
 import {EnvRouter} from "../../service/router.service";
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {Constants, UA_CATEGORY_DEFS, UA_PIE_BASE, UaGroup} from '../constants';
-import {formatters, groupByColor, periodManagement, recreateDate} from 'src/app/shared/util';
+import {Constants} from '../constants';
+import {formatters, groupByColor, periodManagement} from 'src/app/shared/util';
 import {MatDialog} from '@angular/material/dialog';
 import {ProtocolExceptionComponent} from './components/protocol-exception-modal/protocol-exception-modal.component';
 import {InstanceService} from 'src/app/service/jquery/instance.service';
@@ -22,13 +22,11 @@ import {
 } from 'src/app/model/jquery.model';
 import {SmtpRequestService} from 'src/app/service/jquery/smtp-request.service';
 import {NumberFormatterPipe} from 'src/app/shared/pipe/number.pipe';
-import {ChartProvider} from '@oneteme/jquery-core';
 import {InstanceTraceService} from 'src/app/service/jquery/instance-trace.service';
 
 @Component({
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
-
 })
 export class DashboardComponent implements OnDestroy {
     constants = Constants;
@@ -57,6 +55,7 @@ export class DashboardComponent implements OnDestroy {
     private _decimalPipe = inject(DecimalPipe);
     private _numberFormatter = inject(NumberFormatterPipe);
     private _instanceTraceService = inject(InstanceTraceService);
+    private _zone = inject(NgZone);
 
     sparklineTitles: {
         rest: {title: string, subtitle: string},
@@ -76,6 +75,7 @@ export class DashboardComponent implements OnDestroy {
     subscriptions: Subscription[] = [];
     chartSubscriptions: Subscription[] = [];
     tabSubscriptions: Subscription[] = [];
+    sessionSubscriptions: Subscription[] = [];
     tabRequests: { [key: string]: { observable?: Observable<Object>, data?: any[], isLoading?: boolean, key?: string } } = {};
     chartRequests: { [key: string]: { observable?: Observable<Object>, data?: any[], chart?:any[], isLoading?: boolean, key?: string, title?: string, subtitle?: string } } = {};
     serverFilterForm = new FormGroup({
@@ -113,53 +113,37 @@ export class DashboardComponent implements OnDestroy {
     topErrors: Record<string, { type: string; count: number }[]> = {};
     showInactiveProtocols = false;
     selectedInsights = new Set<string>();
-    userAgentData: { label: string; count: number; pct: number; color: string; group: UaGroup }[] = [];
-    userAgentLoading = true;
-    hiddenAgents = new Set<string>();
-    uaPieConfig: ChartProvider<string, number> = UA_PIE_BASE as ChartProvider<string, number>;
-    uaChartData: { label: string; count: number; pct: number; color: string; group: UaGroup }[] = [];
+    sessExcLineConfig = Constants.SESSION_EXCEPTION_LINE;
 
-    toggleAgent(label: string): void {
-        if (this.hiddenAgents.has(label)) {
-            this.hiddenAgents.delete(label);
-        } else {
-            this.hiddenAgents.add(label);
-        }
-        this.hiddenAgents = new Set(this.hiddenAgents);
-        this.uaChartData = this.userAgentData.filter(d => !this.hiddenAgents.has(d.label));
-        this._rebuildUaGroups();
-        this._rebuildUaPieConfig();
-    }
+    // server health
+    inactiveProtocolsCount = 0;
+    quietProtocols: typeof this.protocolDefs = [];
+    stoppedServers: LastServerStart[] = [];
+    unstableServers: LastServerStart[] = [];
+    divergentBranches: { branch: string; count: number; servers: string[] }[] = [];
 
-    readonly uaGroupDefs: { key: UaGroup; label: string; icon: string }[] = [
-        { key: 'service', label: 'Technologies',   icon: 'hub'          },
-        { key: 'user',    label: 'Navigateurs',        icon: 'public'       },
-        { key: 'tool',    label: 'Outils',               icon: 'terminal'     },
-        { key: 'unknown', label: 'Non identifiés',       icon: 'help_outline' },
-    ];
+    // exception charts par type de session
+    topSessionErrors: { type: string; count: number }[] = [];
+    topBatchErrors: { type: string; count: number }[] = [];
+    topViewErrors: { type: string; count: number }[] = [];
+    sessionExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
+    batchExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
+    viewExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
+    startupExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
 
-    uaGroups: { key: UaGroup; label: string; icon: string; items: typeof this.userAgentData }[] = [];
+    // état des insights (tout clair / erreurs par catégorie)
+    insightsAllClear = false;
+    hasRequestErrors = false;
+    sessionInitErrors = 0;
+    startupErrorsByServer: { appName: string; errors: number }[] = [];
+    sessionWebErrors = 0;
+    sessionTestErrors = 0;
+    instanceSearchQuery = '';
 
-    private _rebuildUaGroups(): void {
-        this.uaGroups = this.uaGroupDefs.map(g => ({
-            ...g,
-            items: this.userAgentData.filter(d => d.group === g.key)
-        }));
-    }
-
-    private _rebuildUaPieConfig(): void {
-        const visible = this.uaChartData;
-        const total = visible.reduce((s, d) => s + d.count, 0);
-        const baseDonutLabels = (UA_PIE_BASE.options?.plotOptions as any)?.pie?.donut?.labels ?? {};
-        this.uaPieConfig = {
-            ...UA_PIE_BASE,
-            options: {
-                ...UA_PIE_BASE.options,
-                colors: visible.map(d => d.color),
-                plotOptions: { pie: { donut: { labels: { ...baseDonutLabels, total: { ...baseDonutLabels.total, formatter: () => total.toLocaleString('fr-FR') + ' req.' } } } } }
-            }
-        };
-    }
+    // résumés calculés après chargement
+    protocolSummaries: { key: string; label: string; rate: number; count: number; total: number }[] = [];
+    sessionSummaries: { key: string; label: string; errors: number; total: number; rate: number; barPct: number }[] = [];
+    sessionTotal = 0;
 
     private _chartsResolved = 0;
     constructor() {
@@ -171,12 +155,14 @@ export class DashboardComponent implements OnDestroy {
                 this.params.env = v.queryParams.env || app.defaultEnv;
                 this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(0, 1).start;
                 this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(0, 1).end;
+                const _diffMs = this.params.end.getTime() - this.params.start.getTime();
+                this.groupedBy = periodManagement(this.params.start, this.params.end);
                 this.params.serveurs = Array.isArray(v.queryParams['appname']) ? v.queryParams['appname'] : v.queryParams['appname'] ? [v.queryParams['appname']] : []
                 if (this.params.serveurs.length > 0) {
                     this.patchServerValue(this.params.serveurs);
                 }
                 this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
-                this.subscriptions.push(this._instanceService.getApplications('SERVER', this.params.env)
+        this.subscriptions.push(this._instanceService.getApplications('SERVER', this.params.env)
                     .pipe(finalize(() => this.serverNameIsLoading = false))
                     .subscribe({
                         next: (appNames: { appName: string }[]) => {
@@ -188,34 +174,58 @@ export class DashboardComponent implements OnDestroy {
                     }));
 
                 let serverParam = this.createServerFilter();
-                this.chartRequests = this.REQUESTS(this.params.env, this.params.start, this.params.end, serverParam.app_name);
-                this.tabRequests   = this.TAB_REQUESTS(this.params.env, this.params.start, this.params.end, serverParam.app_name);
+                const effectiveEnd = this.params.end > new Date() ? new Date() : this.params.end;
+                this.chartRequests = this.REQUESTS(this.params.env, this.params.start, effectiveEnd, serverParam.app_name);
+                this.tabRequests   = this.TAB_REQUESTS(this.params.env, this.params.start, effectiveEnd, serverParam.app_name);
+                this.sessionSubscriptions.forEach(s => s.unsubscribe());
+                this.sessionSubscriptions = [];
                 this.showInactiveProtocols = false;
-                this.initTab();
-                this.initCharts();
-                this.loadServerHealth(this.params.env);
-                this.loadUserAgentData();
+                this.sessionSummaries = [];
+                this.protocolSummaries = [];
                 this.sessionCountData = [];
                 this.sessionCountLoading = true;
                 this.restSessionCount = { total: 0, errors: 0 };
-                this.subscriptions.push(this._sessionService.getCountByEnv({ env: this.params.env, start: this.params.start, end: this.params.end })
+                this.startupErrorsByServer = [];
+                this.deployTableRows = [];
+                this.filteredDeployRows = [];
+                this.initTab();
+                this.initCharts();
+                this.loadServerHealth(this.params.env);
+                this.sessionSubscriptions.push(this._sessionService.getCountByEnv({ env: this.params.env, start: this.params.start, end: this.params.end })
                     .subscribe({ next: (data) => { this.restSessionCount = data; this._rebuildSessionSummaries(); } }));
-                this.subscriptions.push(this._mainService.getCountByType({ env: this.params.env, start: this.params.start, end: this.params.end })
+                this.sessionSubscriptions.push(this._mainService.getCountByType({ env: this.params.env, start: this.params.start, end: this.params.end })
                     .pipe(finalize(() => this.sessionCountLoading = false))
                     .subscribe({ next: (data) => { this.sessionCountData = data; this._rebuildSessionSummaries(); } }));
+                this.sessionSubscriptions.push(this._mainService.getStartupErrorsByServer({ env: this.params.env, start: this.params.start, end: this.params.end })
+                    .subscribe({ next: (data) => { this.startupErrorsByServer = data; } }));
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${this.params.serveurs.length > 0 ? '&' + this.params.serveurs.map(name => `appname=${name}`).join('&') : ''}`)
             }
         }));
     }
     initCharts() {
-        this._chartsResolved = 0;
         this.globalKpi = null;
         this.kpiLoading = true;
+        this.sparklinePercs = { rest: 0, jdbc: 0, ftp: 0, smtp: 0, ldap: 0 };
+        this.sparklineTitles = {
+            rest:  { title: 'REST: 0.00%',  subtitle: 'sur 0 requête' },
+            jdbc:  { title: 'JDBC: 0.00%',  subtitle: 'sur 0 requête' },
+            ftp:   { title: 'FTP: 0.00%',   subtitle: 'sur 0 requête' },
+            smtp:  { title: 'SMTP: 0.00%',  subtitle: 'sur 0 requête' },
+            ldap:  { title: 'LDAP: 0.00%',  subtitle: 'sur 0 requête' }
+        };
+        // Annule les requêtes précédentes en vol (unsubscribe ne déclenche PAS next/error)
         this.chartSubscriptions.forEach(t => t.unsubscribe());
-        const totalCharts = Object.keys(this.chartRequests).length;
-        Object.keys(this.chartRequests).forEach(k => {
+        this.chartSubscriptions = [];
+
+        const keys = Object.keys(this.chartRequests);
+        keys.forEach(k => {
             this.chartRequests[k].chart = [];
             this.chartRequests[k].isLoading = true;
+        });
+
+        this._chartsResolved = 0;
+        const totalCharts = keys.length;
+        keys.forEach(k => {
             this.chartSubscriptions.push(this.chartRequests[k].observable
                 .pipe(finalize(() => {
                     this.chartRequests[k].isLoading = false;
@@ -234,9 +244,15 @@ export class DashboardComponent implements OnDestroy {
 
 
     initTab() {
-        this.exceptionsAllEmpty = false;
+        this.sessionExceptionChart = [];
+        this.batchExceptionChart = [];
+        this.viewExceptionChart = [];
+        this.startupExceptionChart = [];
+        this.topSessionErrors = [];
+        this.topBatchErrors = [];
+        this.topViewErrors = [];
         this.tabSubscriptions.forEach(t => t.unsubscribe());
-        this.selectedExceptionTab = 0;
+        this.tabSubscriptions = [];
         Object.keys(this.tabRequests).forEach(i => {
             this.tabRequests[i].data = [];
             this.tabRequests[i].isLoading = true;
@@ -256,11 +272,6 @@ export class DashboardComponent implements OnDestroy {
 
     private _autoSelectTab(): void {
         if (this.tabRequests.sessionExceptionsTable?.isLoading || this.tabRequests.batchExceptionTable?.isLoading) return;
-        if (!this.tabRequests.sessionExceptionsTable?.data?.length && this.tabRequests.batchExceptionTable?.data?.length > 0) {
-            this.selectedExceptionTab = 1;
-        } else {
-            this.selectedExceptionTab = 0;
-        }
     }
 
     search() {
@@ -350,6 +361,9 @@ export class DashboardComponent implements OnDestroy {
         this.serverHealthLoading = true;
         this.serverHealthData = [];
         this.deployTableRows = [];
+        this.stoppedServers = [];
+        this.unstableServers = [];
+        this.divergentBranches = [];
         this.subscriptions.push(
             this._instanceService.getLastServerStart({ env })
                 .pipe(
@@ -359,7 +373,7 @@ export class DashboardComponent implements OnDestroy {
                             ? this._instanceTraceService.getLastInstanceTrace({ instance: servers.map(s => s.id) })
                             : of([])
                     })),
-                    finalize(() => this.serverHealthLoading = false)
+                    finalize(() => { this.serverHealthLoading = false; })
                 )
                 .subscribe({ next: ({ servers, traces }) => {
                     this.serverHealthData = servers;
@@ -404,76 +418,9 @@ export class DashboardComponent implements OnDestroy {
         }
     }
 
-    loadUserAgentData(): void {
-        this.userAgentLoading = true;
-        this.userAgentData = [];
-        const serverFilter = this.createServerFilter();
-        this.subscriptions.push(
-            this._sessionService.getCountByUserAgent({
-                env: this.params.env,
-                start: this.params.start,
-                end: this.params.end,
-                app_name: serverFilter.app_name
-            })
-            .pipe(
-                catchError(() => { this.userAgentLoading = false; return EMPTY; }),
-                finalize(() => this.userAgentLoading = false)
-            )
-            .subscribe({
-                next: (data: { count: number, userAgent: string }[]) => {
-                    const categorized: Record<string, number> = {};
-                    data.forEach(d => {
-                        const label = this._categorizeUserAgent(d.userAgent ?? '');
-                        categorized[label] = (categorized[label] ?? 0) + d.count;
-                    });
-                    const total = Object.values(categorized).reduce((s, n) => s + n, 0);
-                    this.userAgentData = Object.entries(categorized)
-                        .map(([label, count]) => ({
-                            label,
-                            count,
-                            pct: total > 0 ? Math.round((count * 10000) / total) / 100 : 0,
-                            color: UA_CATEGORY_DEFS[label]?.color ?? '#94a3b8',
-                            group: UA_CATEGORY_DEFS[label]?.group ?? 'unknown'
-                        }))
-                        .sort((a, b) => b.count - a.count);
-                    this.uaChartData = [...this.userAgentData];
-                    this._rebuildUaGroups();
-                    this._rebuildUaPieConfig();
-                }
-            })
-        );
-    }
-
-    private _categorizeUserAgent(ua: string): string {
-        const u = (ua ?? '').toLowerCase().trim();
-        if (!u || u === 'null') return 'Inconnu';
-        for (const [label, def] of Object.entries(UA_CATEGORY_DEFS)) {
-            if (def.keywords.some(kw => u.includes(kw))) return label;
-        }
-        return 'Autre';
-    }
-
-    navigateToSessionRest() {
-        this._router.navigate(['/session/rest'], {
-            queryParams: {
-                env: this.params.env,
-                start: this.params.start?.toISOString(),
-                end: this.params.end?.toISOString(),
-                rangestatus: ['5xx', '4xx']
-            }
-        });
-    }
-
-    inactiveProtocolsCount = 0;
-
     get hasNoData(): boolean {
         return !this.serverHealthLoading && !this.kpiLoading && this.deployTableRows.length === 0;
     }
-    quietProtocols: typeof this.protocolDefs = [];
-    unstableServers: LastServerStart[] = [];
-    versionSummary: { version: string; count: number }[] = [];
-    stoppedServers: LastServerStart[] = [];
-    divergentBranches: { branch: string; count: number; servers: string[] }[] = [];
 
     private _rebuildServerHealth(): void {
         const keys = ['restRequestExceptionsTable', 'databaseRequestExceptionsTable', 'ftpRequestExceptionsTable', 'smtpRequestExceptionsTable', 'ldapRequestExceptionsTable'];
@@ -491,30 +438,17 @@ export class DashboardComponent implements OnDestroy {
             .sort((a, b) => b.end - a.end)
             .slice(0, 5);
         if (!this.serverHealthData.length) {
-            this.versionSummary = [];
             this.divergentBranches = [];
             return;
         }
-        const vmap: Record<string, number> = {};
-        this.serverHealthData.forEach(s => { const v = s.version ?? '?'; vmap[v] = (vmap[v] ?? 0) + 1; });
-        this.versionSummary = Object.entries(vmap).map(([version, count]) => ({ version, count })).sort((a, b) => b.count - a.count);
         const bmap: Record<string, string[]> = {};
         this.serverHealthData.forEach(s => {
-            const b = s.branch ?? '?';
-            if (b === 'main' || b === 'master') return;
+            const b = s.branch?.trim();
+            if (!b || b === 'main' || b === 'master') return;
             if (!bmap[b]) bmap[b] = [];
             bmap[b].push(s.appName);
         });
         this.divergentBranches = Object.entries(bmap).map(([branch, servers]) => ({ branch, count: servers.length, servers })).sort((a, b) => b.count - a.count);
-    }
-
-    exceptionsAllEmpty = false;
-
-    private _rebuildExceptionsAllEmpty(): void {
-        this.exceptionsAllEmpty = !this.tabRequests.sessionExceptionsTable?.isLoading
-            && !this.tabRequests.batchExceptionTable?.isLoading
-            && !this.tabRequests.sessionExceptionsTable?.data?.length
-            && !this.tabRequests.batchExceptionTable?.data?.length;
     }
 
     getTrend(key: string): 'up' | 'down' | 'stable' {
@@ -530,22 +464,90 @@ export class DashboardComponent implements OnDestroy {
         return 'stable';
     }
 
-    topSessionErrors: { type: string; count: number }[] = [];
-    topBatchErrors: { type: string; count: number }[] = [];
-
-    private _rebuildTabErrors(): void {
-        const sessionData: any[] = this.tabRequests['sessionExceptionsTable']?.data ?? [];
-        const sm: Record<string, number> = {};
-        sessionData.forEach(d => { if (d.errorType) sm[d.errorType] = (sm[d.errorType] ?? 0) + d.count; });
-        this.topSessionErrors = Object.entries(sm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
-        const batchData: any[] = this.tabRequests['batchExceptionTable']?.data ?? [];
-        const bm: Record<string, number> = {};
-        batchData.forEach(d => { if (d.errorType) bm[d.errorType] = (bm[d.errorType] ?? 0) + d.count; });
-        this.topBatchErrors = Object.entries(bm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
-        this._rebuildExceptionsAllEmpty();
-        this._rebuildInsightsAllClear();
+    private _fillHourGaps(map: Record<string, number>, start: Date, end: Date): { stringDate: string; count: number }[] {
+        const now = new Date();
+        if (this.groupedBy === 'hour') {
+            const result: { stringDate: string; count: number }[] = [];
+            const startH = start.getHours();
+            const isToday = start.toDateString() === now.toDateString();
+            const endH = isToday ? now.getHours() : 23;
+            for (let h = startH; h <= endH; h++) {
+                const label = this._datePipe.transform(new Date(2000, 1, 1, h), 'shortTime');
+                result.push({ stringDate: label, count: map[label] ?? 0 });
+            }
+            return result;
+        }
+        if (this.groupedBy === 'date') {
+            const result: { stringDate: string; count: number }[] = [];
+            const effectiveEnd = end > now ? now : end;
+            const d = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+            while (d < effectiveEnd) {
+                const label = this._datePipe.transform(d, 'd MMM yy');
+                result.push({ stringDate: label, count: map[label] ?? 0 });
+                d.setDate(d.getDate() + 1);
+            }
+            return result;
+        }
+        return Object.entries(map).map(([stringDate, count]) => ({ stringDate, count })).sort((a, b) => a.stringDate.localeCompare(b.stringDate));
     }
 
+    private _addPerc(filled: { stringDate: string; count: number }[], countokMap: Record<string, number>): { stringDate: string; count: number; perc: number }[] {
+        return filled.map(p => ({ ...p, perc: countokMap[p.stringDate] ? (p.count * 100) / countokMap[p.stringDate] : 0 }));
+    }
+
+    private _rebuildTabErrors(): void {
+        const effectiveEnd = this.params.end > new Date() ? new Date() : this.params.end;
+        const sessionData: any[] = this.tabRequests['sessionExceptionsTable']?.data ?? [];
+        const sm: Record<string, number> = {};
+        const sd: Record<string, number> = {};
+        const sc: Record<string, number> = {};
+        sessionData.forEach(d => {
+            if (d.errorType) sm[d.errorType] = (sm[d.errorType] ?? 0) + d.count;
+            if (d.stringDate) {
+                sd[d.stringDate] = (sd[d.stringDate] ?? 0) + d.count;
+                if (d.countok && !sc[d.stringDate]) sc[d.stringDate] = d.countok;
+            }
+        });
+        this.topSessionErrors = Object.entries(sm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
+        this.sessionExceptionChart = this._addPerc(this._fillHourGaps(sd, this.params.start, effectiveEnd), sc);
+        const batchData: any[] = this.tabRequests['batchExceptionTable']?.data ?? [];
+        const bm: Record<string, number> = {};
+        const bd: Record<string, number> = {};
+        const bc: Record<string, number> = {};
+        batchData.forEach(d => {
+            if (d.errorType) bm[d.errorType] = (bm[d.errorType] ?? 0) + d.count;
+            if (d.stringDate) {
+                bd[d.stringDate] = (bd[d.stringDate] ?? 0) + d.count;
+                if (d.countok && !bc[d.stringDate]) bc[d.stringDate] = d.countok;
+            }
+        });
+        this.topBatchErrors = Object.entries(bm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
+        this.batchExceptionChart = this._addPerc(this._fillHourGaps(bd, this.params.start, effectiveEnd), bc);
+        const viewData: any[] = this.tabRequests['viewExceptionTable']?.data ?? [];
+        const vm: Record<string, number> = {};
+        const vd: Record<string, number> = {};
+        const vc: Record<string, number> = {};
+        viewData.forEach(d => {
+            if (d.errorType) vm[d.errorType] = (vm[d.errorType] ?? 0) + d.count;
+            if (d.stringDate) {
+                vd[d.stringDate] = (vd[d.stringDate] ?? 0) + d.count;
+                if (d.countok && !vc[d.stringDate]) vc[d.stringDate] = d.countok;
+            }
+        });
+        this.topViewErrors = Object.entries(vm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
+        this.viewExceptionChart = this._addPerc(this._fillHourGaps(vd, this.params.start, effectiveEnd), vc);
+        const startupData: any[] = this.tabRequests['startupExceptionTable']?.data ?? [];
+        const stud: Record<string, number> = {};
+        const stuc: Record<string, number> = {};
+        startupData.forEach(d => {
+            if (d.stringDate) {
+                stud[d.stringDate] = (stud[d.stringDate] ?? 0) + d.count;
+                if (d.countok && !stuc[d.stringDate]) stuc[d.stringDate] = d.countok;
+            }
+        });
+        this.startupExceptionChart = this._addPerc(this._fillHourGaps(stud, this.params.start, effectiveEnd), stuc);
+        this._rebuildInsightsAllClear();
+    }
 
     getProtoBarWidth(count: number): number {
         if (!this.globalKpi?.totalSessions) return 0;
@@ -560,12 +562,6 @@ export class DashboardComponent implements OnDestroy {
         if (!server.lastStart || server.end) return false;
         return (Date.now() - new Date(server.lastStart).getTime()) < 3_600_000;
     }
-
-    insightsAllClear = false;
-    hasRequestErrors = false;
-    sessionInitErrors = 0;
-    sessionWebErrors = 0;
-    sessionTestErrors = 0;
 
     private _rebuildInsightsAllClear(): void {
         this.hasRequestErrors = Object.values(this.topErrors).some(e => e?.length > 0);
@@ -594,18 +590,30 @@ export class DashboardComponent implements OnDestroy {
         };
         const target = routes[key];
         if (!target) return;
+        const rangestatusMap: Record<string, string> = {
+            ServerError: '5xx',
+            ClientError: '4xx',
+        };
+        const rangestatus = key === 'rest' ? (rangestatusMap[errorType] ?? '0xx') : 'Ko';
         this._router.navigate([target], {
             queryParams: {
                 env: this.params.env,
                 start: this.params.start?.toISOString(),
                 end: this.params.end?.toISOString(),
-                q: errorType,
+                rangestatus,
+                ...(key !== 'rest' || !rangestatusMap[errorType] ? { q: errorType } : {}),
                 server: this.params.serveurs,
             }
         });
     }
 
-    navigateToSessionByType(sessionType: string, errorType?: string): void {
+    navigateToInstancesWithFilter(term: string): void {
+        this.instanceSearchQuery = term;
+        this.selectedInsights = new Set();
+        this.showOverview = true;
+    }
+
+    navigateToSessionByType(sessionType: string, errorType?: string, serverOverride?: string): void {
         const routes: Record<string, string> = {
             STARTUP: '/session/startup',
             VIEW: '/session/view',
@@ -618,14 +626,18 @@ export class DashboardComponent implements OnDestroy {
                 env: this.params.env,
                 start: this.params.start?.toISOString(),
                 end: this.params.end?.toISOString(),
-                server: this.params.serveurs,
+                server: serverOverride ?? this.params.serveurs,
                 rangestatus: ['Ko'],
                 ...(errorType ? { q: errorType } : {}),
             }
         });
     }
 
-    navigateToException(type: string, tab: 'rest' | 'batch') {
+    navigateToException(type: string, tab: 'rest' | 'batch' | 'view') {
+        if (tab === 'view') {
+            this.navigateToSessionByType('VIEW', type);
+            return;
+        }
         const target = tab === 'rest' ? '/session/rest' : '/session/batch';
         const rangestatus = tab === 'rest' ? ['5xx', '4xx'] : ['Ko'];
         this._router.navigate([target], {
@@ -643,9 +655,11 @@ export class DashboardComponent implements OnDestroy {
     toggleInsight(key: string): void {
         if (this.selectedInsights.has(key)) {
             this.selectedInsights = new Set();
+            this.showOverview = true;
         } else {
             this.selectedInsights = new Set([key]);
             this.showOverview = false;
+            this.instanceSearchQuery = '';
         }
     }
 
@@ -730,10 +744,6 @@ export class DashboardComponent implements OnDestroy {
         });
     }
 
-    protocolSummaries: { key: string; label: string; rate: number; count: number; total: number }[] = [];
-    sessionSummaries: { key: string; label: string; errors: number; total: number; rate: number; barPct: number }[] = [];
-    sessionTotal = 0;
-
     private _rebuildProtocolSummaries(): void {
         const entries = [
             { key: 'rest', label: 'REST', reqKey: 'restRequestExceptionsTable', rate: this.sparklinePercs.rest },
@@ -800,6 +810,20 @@ export class DashboardComponent implements OnDestroy {
         return {chart : arr, data :data}
     }
 
+    groupByProperty(property: string, array: any[]) {
+        let helper: any = {};
+        return array.reduce((acc: any, item: any) => {
+            if (!helper[item[property]]) {
+                helper[item[property]] = Object.assign({}, item);
+                acc.push(helper[item[property]]);
+            } else {
+                helper[item[property]].countok += item["countok"];
+                helper[item[property]].count += item["count"];
+            }
+            return acc;
+        }, []);
+    }
+
     groupBypropertyRest(property: string, array: any[]) {
         let helper: any = {};
         return array.reduce((acc: any, item: any) => {
@@ -847,20 +871,38 @@ export class DashboardComponent implements OnDestroy {
     }
 
     TAB_REQUESTS = (env: string, start: Date, end: Date, app_name: string) => {
-        this.groupedBy = periodManagement(start, end);
+        const groupedBy = periodManagement(start, end);
         return {
-            //   Rest-Main Sessions exceptions
-            exceptionsTable: {
-                observable: forkJoin(
-                  [
-                    this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, server: app_name, others: {"status.ge(500).or(status.lt(400))": ""}}),
-                    this._mainService.getMainExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, app_name: app_name })
-                  ])
-                    .pipe(map(((result: [ExceptionsByPeriodAndAppname[], ExceptionsByPeriodAndAppname[]]) => {
-                        let concat = [...result[0], ...result[1]];
-                        formatters[this.groupedBy](concat, this._datePipe, 'stringDate');
-                        return concat.filter(r => r.errorType != null); // rename errorType to errType in backend
-                    })))
+            sessionExceptionsTable: {
+                observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, server: app_name, others: {"status.ge(500).or(status.lt(400))": ""}})
+                    .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
+                        formatters[this.groupedBy](result, this._datePipe, 'stringDate');
+                        return result.filter(r => r.errorType != null);
+                    }))
+            },
+            batchExceptionTable: {
+                observable: this._mainService.getMainExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, app_name: app_name })
+                    .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
+                        formatters[this.groupedBy](result, this._datePipe, 'stringDate');
+                        return result.filter(r => r.errorType != null);
+                    }))
+            },
+            batchTopJobsTable: {
+                observable: this._mainService.getTopBatchJobErrors({ env: env, start: start, end: end, app_name: app_name })
+            },
+            viewExceptionTable: {
+                observable: this._mainService.getViewExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, app_name: app_name })
+                    .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
+                        formatters[this.groupedBy](result, this._datePipe, 'stringDate');
+                        return result.filter(r => r.errorType != null);
+                    }))
+            },
+            startupExceptionTable: {
+                observable: this._mainService.getStartupExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, app_name: app_name })
+                    .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
+                        formatters[this.groupedBy](result, this._datePipe, 'stringDate');
+                        return result.filter(r => r.errorType != null);
+                    }))
             }
         }
     }
@@ -874,36 +916,6 @@ export class DashboardComponent implements OnDestroy {
             smtpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._smtpService.getSmtpExceptions(p), groupedBy, 'SMTP', 'smtp') },
             ldapRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ldapService.getLdapSessionExceptions(p), groupedBy, 'LDAP', 'ldap') },
         };
-    }
-
-    onSessionExceptionRowSelected(event: {event: MouseEvent, row: any}) {
-        const result = recreateDate(this.groupedBy, event.row, this.params.start);
-
-        if(result) {
-            if(event.row.type == 'SERVER') {
-                this._router.navigate(['/session/rest'], {
-                    queryParams: {
-                        'env': this.params.env,
-                        'start': result.start.toISOString(),
-                        'end': result.end.toISOString(),
-                        'q': event.row.errorType,
-                        'server': this.params.serveurs,
-                        'rangestatus': ['5xx', '4xx']
-                    }
-                });
-            } else if(event.row.type == 'BATCH') {
-                this._router.navigate(['/session/batch'], {
-                    queryParams: {
-                        'env': this.params.env,
-                        'start': result.start.toISOString(),
-                        'end': result.end.toISOString(),
-                        'q' : event.row.errorType,
-                        'server': this.params.serveurs,
-                        'rangestatus': ['Ko']
-                    }
-                });
-            }
-        }
     }
 
     ngOnDestroy(): void {

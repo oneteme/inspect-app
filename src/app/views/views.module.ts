@@ -5,7 +5,7 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {SharedModule} from '../shared/shared.module';
-import {ChartComponent} from "@oneteme/jquery-apexcharts";
+import {ChartComponent} from "@oneteme/jquery-echarts";
 import {SearchRestView} from "./search/rest/search-rest.view";
 import {SearchMainView} from "./search/main/search-main.view";
 import {DetailSessionRestView} from "./detail/session/rest/detail-session-rest.view";

@@ -12,15 +12,14 @@ import { DEPLOIEMENT_TABLE_CONFIG } from 'src/app/shared/_component/table/table.
 export class DashboardInstancesTableComponent implements OnChanges {
 
     tableConfig: TableProvider<any> = {
-        ...DEPLOIEMENT_TABLE_CONFIG,
-        export: { enabled: true, filename: 'posts' },
-        preferences: { enabled: true, tableId: 'instances-table' }
+        ...DEPLOIEMENT_TABLE_CONFIG
     };
 
     @Input() rows: any[] = [];
     @Input() isLoading = true;
     @Input() today: Date = new Date();
     @Input() versionColor: Record<string, string> = {};
+    @Input() instanceSearchQuery = '';
 
     @Output() statusIndicatorClick = new EventEmitter<{ event: MouseEvent; row: any }>();
     @Output() serverClick = new EventEmitter<{ event: MouseEvent; row: any }>();
@@ -28,12 +27,11 @@ export class DashboardInstancesTableComponent implements OnChanges {
     @Output() restartClick = new EventEmitter<{ event: MouseEvent; minStart: any; appName: string }>();
 
     ngOnChanges(changes: SimpleChanges): void {
-        if (changes['today']) {
+        if (changes['today'] || changes['instanceSearchQuery']) {
             const nowMs = this.today.getTime();
             this.tableConfig = {
                 ...DEPLOIEMENT_TABLE_CONFIG,
-                export: { enabled: true, filename: 'posts' },
-                preferences: { enabled: true, tableId: 'instances-table' },
+                search: { enabled: true, initialQuery: this.instanceSearchQuery || undefined },
                 columns: DEPLOIEMENT_TABLE_CONFIG.columns?.map(col =>
                     col.key === 'duration'
                         ? { ...col, searchValue: (row: any) => formatDuration((nowMs - row.start) / 1000) }

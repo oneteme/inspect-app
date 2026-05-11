@@ -11,14 +11,14 @@
       <mat-date-range-picker #picker></mat-date-range-picker>
     </mat-form-field>
 
-    <mat-form-field class="no-subscript" [class.loading]="serverNameIsLoading" appearance="outline">
+    <!-- <mat-form-field class="no-subscript" [class.loading]="serverNameIsLoading" appearance="outline">
       <mat-label>Serveur</mat-label>
       <mat-select [formControl]="serverFilterForm.controls.appname" multiple>
         <span *ngIf="serverNameIsLoading && params.serveurs[0]!=''"><mat-option *ngFor="let s of params.serveurs" [value]="s">{{s}}</mat-option></span>
         <mat-option *ngFor="let d of nameDataList" [value]="d">{{d}}</mat-option>
       </mat-select>
       <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>
-    </mat-form-field>
+    </mat-form-field> -->
 
     <button mat-mini-fab color="primary" (click)="search()">
       <mat-icon matSuffix>search</mat-icon>
@@ -34,7 +34,7 @@
 </div>
 
 <!-- Banner : tous protocoles OK -->
-<div class="db-all-ok" *ngIf="!hasNoData && !kpiLoading && inactiveProtocolsCount === 5 && !showInactiveProtocols">
+<div class="db-all-ok" *ngIf="!hasNoData && !kpiLoading && inactiveProtocolsCount === protocolDefs.length && !showInactiveProtocols">
   <mat-icon class="material-symbols-outlined">check_circle</mat-icon>
   <span>Aucun incident protocole sur la période sélectionnée</span>
   <button (click)="showInactiveProtocols = true">Afficher l'activité</button>
@@ -51,6 +51,7 @@
       [isLoading]="serverHealthLoading"
       [today]="deployTableToday"
       [versionColor]="versionColor"
+      [instanceSearchQuery]="instanceSearchQuery"
       (statusIndicatorClick)="navigateOnStatusIndicator($event.event, $event.row)"
       (serverClick)="navigateOnServerClick($event.event, $event.row)"
       (sinceClick)="navigateOnSinceClick($event.event, $event.row)"
@@ -60,34 +61,34 @@
     <!-- Vue détail : affiché au clic sur une ligne Request ou Session -->
     <dashboard-detail-view
       *ngIf="hasSelectedInsights"
-      [userAgentData]="userAgentData"
-      [userAgentLoading]="userAgentLoading"
-      [uaGroups]="uaGroups"
-      [uaChartData]="uaChartData"
-      [uaPieConfig]="uaPieConfig"
-      [hiddenAgents]="hiddenAgents"
       [selectedInsights]="selectedInsights"
       [protocolDefs]="protocolDefs"
       [topErrors]="topErrors"
       [kpiLoading]="kpiLoading"
       [serverHealthLoading]="serverHealthLoading"
-      [stoppedServers]="stoppedServers"
       [tabRequests]="tabRequests"
       [topSessionErrors]="topSessionErrors"
       [topBatchErrors]="topBatchErrors"
+      [topViewErrors]="topViewErrors"
+      [sessionExceptionChart]="sessionExceptionChart"
+      [batchExceptionChart]="batchExceptionChart"
+      [viewExceptionChart]="viewExceptionChart"
+      [startupExceptionChart]="startupExceptionChart"
+      [sessExcLineConfig]="sessExcLineConfig"
       [sessionCountLoading]="sessionCountLoading"
       [sessionInitErrors]="sessionInitErrors"
+      [startupErrorsByServer]="startupErrorsByServer"
       [sessionWebErrors]="sessionWebErrors"
       [sessionTestErrors]="sessionTestErrors"
       [insightsAllClear]="insightsAllClear"
+      [divergentBranches]="divergentBranches"
       [chartRequests]="chartRequests"
       [sparklinePercs]="sparklinePercs"
       [sparklineTitles]="sparklineTitles"
-      (agentToggle)="toggleAgent($event)"
       (requestProtocolNav)="navigateToRequestProtocol($event.key, $event.errorType)"
-      (sessionTypeNav)="navigateToSessionByType($event)"
+      (sessionTypeNav)="navigateToSessionByType($event.type, undefined, $event.server)"
       (exceptionNav)="navigateToException($event.type, $event.tab)"
-      (supervisionNav)="navigateToSupervision($event)"
+      (instanceFilter)="navigateToInstancesWithFilter($event)"
       (protocolDialogOpen)="openProtocolDialog($event)">
     </dashboard-detail-view>
 
@@ -106,22 +107,22 @@
       </div>
     </ng-container>
     <ng-template #instancesBlock>
-    <div class="dov-stats-wrap" *ngIf="!serverHealthLoading">
+    <div class="dov-stats-wrap">
       <div class="dov-stats-lbl">Instances actives</div>
     <div class="dov-stats-sidebar">
-      <div class="dov-stat-sb sb-online" (click)="selectServerStatus('online')" [class.dov-stat-sb-active]="serverStatusFilter === 'online' && showOverview" style="cursor:pointer">
+      <div class="dov-stat-sb sb-online" (click)="selectServerStatus('online')" [class.dov-stat-sb-active]="serverStatusFilter === 'online' && showOverview">
         <span class="dov-stat-sb-val">{{ hasNoData ? '--' : onlineServerStat }}</span>
         <span class="dov-stat-sb-lbl">En ligne</span>
       </div>
-      <div class="dov-stat-sb sb-pending" (click)="selectServerStatus('pending')" [class.dov-stat-sb-active]="serverStatusFilter === 'pending' && showOverview" style="cursor:pointer">
+      <div class="dov-stat-sb sb-pending" (click)="selectServerStatus('pending')" [class.dov-stat-sb-active]="serverStatusFilter === 'pending' && showOverview">
         <span class="dov-stat-sb-val">{{ hasNoData ? '--' : pendingServerStat }}</span>
         <span class="dov-stat-sb-lbl">En attente</span>
       </div>
-      <div class="dov-stat-sb sb-offline" (click)="selectServerStatus('offline')" [class.dov-stat-sb-active]="serverStatusFilter === 'offline' && showOverview" style="cursor:pointer">
+      <div class="dov-stat-sb sb-offline" (click)="selectServerStatus('offline')" [class.dov-stat-sb-active]="serverStatusFilter === 'offline' && showOverview">
         <span class="dov-stat-sb-val">{{ hasNoData ? '--' : offlineServerStat }}</span>
         <span class="dov-stat-sb-lbl">Hors ligne</span>
       </div>
-      <div class="dov-stat-sb sb-total" (click)="selectServerStatus('all')" [class.dov-stat-sb-active]="serverStatusFilter === 'all' && showOverview" style="cursor:pointer">
+      <div class="dov-stat-sb sb-total" (click)="selectServerStatus('all')" [class.dov-stat-sb-active]="serverStatusFilter === 'all' && showOverview">
         <span class="dov-stat-sb-val">{{ hasNoData ? '--' : deployTableRows.length }}</span>
         <span class="dov-stat-sb-lbl">Total</span>
       </div>
@@ -142,24 +143,32 @@
       </div>
     </ng-container>
     <ng-template #sessionBlock>
-    <div class="sb-block sb-distribution-block" *ngIf="!sessionCountLoading">
+    <div class="sb-block sb-distribution-block">
       <div class="sbd-title">Session</div>
-      <div class="sbd-empty" *ngIf="sessionSummaries.length === 0">
+      <div class="sbd-empty" *ngIf="sessionSummaries.length === 0 && !restSessionCountLoading">
         <mat-icon>info_outline</mat-icon>
         <span>Aucune session sur la période</span>
       </div>
-      <div class="sbd-row" *ngFor="let s of sessionSummaries"
-        [class.sbd-row-selected]="selectedInsights.has(s.key)"
-        [class.sbd-row-clickable]="s.rate > 0"
-        [title]="(s.total | number:'1.0-0') + ' sessions · ' + (s.errors | number:'1.0-0') + ' erreurs'"
-        (click)="s.rate > 0 && toggleInsight(s.key)">
-        <span class="sbd-label">{{ s.label }}</span>
-        <div class="sbd-track" [class.track-active]="s.total > 0">
-          <div class="sbd-fill" [style.width.%]="s.total > 0 ? (100 - s.rate) : 0"></div>
+      <ng-container *ngFor="let s of sessionSummaries">
+        <ng-container *ngIf="s.loading">
+          <div class="sbd-skel-label"></div>
+          <div class="sbd-skel-track"></div>
+          <div class="sbd-skel-rate"></div>
+          <div class="sbd-skel-count"></div>
+        </ng-container>
+        <div class="sbd-row" *ngIf="!s.loading"
+          [class.sbd-row-selected]="selectedInsights.has(s.key)"
+          [class.sbd-row-clickable]="s.rate > 0"
+          [title]="(s.total | number:'1.0-0') + ' sessions · ' + (s.errors | number:'1.0-0') + ' erreurs'"
+          (click)="s.rate > 0 ? toggleInsight(s.key) : null">
+          <span class="sbd-label">{{ s.label }}</span>
+          <div class="sbd-track" [class.track-active]="s.total > 0">
+            <div class="sbd-fill" [style.width.%]="s.total > 0 ? (100 - s.rate) : 0"></div>
+          </div>
+          <span class="sbd-rate" [class.c-ok]="s.total > 0 && s.rate === 0" [class.c-err]="s.rate > 0">{{ s.rate === 0 ? '100%' : (s.rate | number:'1.2-2') + '%' }}</span>
+          <span class="sbd-count">{{ s.total | compact }}</span>
         </div>
-        <span class="sbd-rate" [class.c-ok]="s.total > 0 && s.rate === 0" [class.c-err]="s.rate > 0">{{ s.rate === 0 ? '100%' : (s.rate | number:'1.2-2') + '%' }}</span>
-        <span class="sbd-count">{{ s.total | compact }}</span>
-      </div>
+      </ng-container>
     </div>
     </ng-template>
 
@@ -176,7 +185,7 @@
       </div>
     </ng-container>
     <ng-template #fluxBlock>
-    <div class="sb-block sb-distribution-block" *ngIf="!kpiLoading">
+    <div class="sb-block sb-distribution-block">
       <div class="sbd-title">Flux</div>
       <div class="sbd-empty" *ngIf="protocolSummaries.length === 0">
         <mat-icon>info_outline</mat-icon>
@@ -186,12 +195,12 @@
         [class.sbd-row-selected]="selectedInsights.has(p.key)"
         [class.sbd-row-clickable]="p.rate > 0"
         [title]="(p.total | number:'1.0-0') + ' requêtes · ' + (p.count | number:'1.0-0') + ' erreurs'"
-        (click)="p.rate > 0 && toggleInsight(p.key)">
+        (click)="p.rate > 0 ? toggleInsight(p.key) : null">
         <span class="sbd-label">{{ p.label }}</span>
         <div class="sbd-track" [class.track-active]="p.total > 0">
           <div class="sbd-fill" [style.width.%]="p.total > 0 ? (100 - p.rate) : 0"></div>
         </div>
-        <span class="sbd-rate" [class.c-ok]="p.rate === 0" [class.c-err]="p.rate > 0">{{ p.rate === 0 ? '100' : (p.rate | number:'1.2-2') }}%</span>
+        <span class="sbd-rate" [class.c-ok]="p.rate === 0" [class.c-err]="p.rate > 0">{{ p.rate === 0 ? '100%' : (p.rate | number:'1.2-2') + '%' }}</span>
         <span class="sbd-count">{{ p.total | compact }}</span>
       </div>
     </div>
@@ -201,37 +210,5 @@
     <dashboard-carousel></dashboard-carousel>
 
   </aside>
-
-</div>
-<!-- Exceptions (pleine largeur) -->
-<div class="db-exceptions">
-
-  <div class="db-exc-empty" *ngIf="exceptionsAllEmpty">
-    <mat-icon class="material-symbols-outlined">check_circle</mat-icon>
-    <span>Aucune exception serveur ni batch sur la période</span>
-  </div>
-
-  <div class="tabs-container" *ngIf="!exceptionsAllEmpty" style="flex: 1; min-height: 0;">
-    <div class="vertical-tabs">
-      <div class="tab-button" [class.active]="selectedExceptionTab === 0" (click)="selectedExceptionTab = 0">
-        <mat-icon class="material-symbols-outlined">dns</mat-icon>
-        <div class="tab-label-container"><span class="tab-label">Erreur Serveur</span></div>
-        <span class="tab-count" *ngIf="tabRequests.sessionExceptionsTable?.data?.length">{{ tabRequests.sessionExceptionsTable.data.length }}</span>
-      </div>
-      <div class="tab-button" [class.active]="selectedExceptionTab === 1" (click)="selectedExceptionTab = 1">
-        <mat-icon class="material-symbols-outlined">terminal</mat-icon>
-        <div class="tab-label-container"><span class="tab-label">Erreur Batch</span></div>
-        <span class="tab-count" *ngIf="tabRequests.batchExceptionTable?.data?.length">{{ tabRequests.batchExceptionTable.data.length }}</span>
-      </div>
-    </div>
-    <div class="tab-content">
-      <div class="tab-panel" [class.hidden]="selectedExceptionTab !== 0">
-        <exceptions-table [data]="tabRequests.sessionExceptionsTable?.data" [isLoading]="tabRequests.sessionExceptionsTable?.isLoading" (onRowSelected)="onSessionExceptionRowSelected($event)"></exceptions-table>
-      </div>
-      <div class="tab-panel" [class.hidden]="selectedExceptionTab !== 1">
-        <exceptions-table [data]="tabRequests.batchExceptionTable?.data" [isLoading]="tabRequests.batchExceptionTable?.isLoading" (onRowSelected)="onBatchExceptionRowSelected($event)"></exceptions-table>
-      </div>
-    </div>
-  </div>
 
 </div>
