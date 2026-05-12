@@ -22,7 +22,26 @@ export class RestComponent implements OnInit {
   readonly METHOD_PIE_CONFIG: ChartProvider<string, number> = {
     series: [
       { data: { x: field('method'), y: field('count') } }
-    ]
+    ],
+    options: {
+      legend: {
+        orient: 'horizontal',
+        bottom: 0,
+        left: 'center'
+      },
+      series: [{
+        label: {
+          show: false             // pas de datalabels sur les slices
+        },
+        labelLine: {
+          show: false             // pas de lignes de labels non plus
+        }
+      }],
+      tooltip: {
+        formatter: (params: any) =>
+          `${params.name} : <b>${params.value.toLocaleString('fr-FR')}</b> (${params.percent}%)`
+      }
+    }
   }
 
   $statusRepartition: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig}> = { data: [], loading: true};
