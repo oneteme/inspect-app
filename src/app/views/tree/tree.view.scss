@@ -72,7 +72,134 @@
   }
 }
 
-// ── Zoom controls ────────────────────────────────────
+// ── View controls (filtres nœuds / liens) ────────────
+.view-controls {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 4px 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.view-controls-separator {
+  width: 1px;
+  height: 28px;
+  background: #e2e8f0;
+  flex-shrink: 0;
+  margin: 0 4px;
+}
+
+.view-control-group {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 6px;
+  border-radius: 8px;
+
+  &--node {
+    background: rgba(239, 246, 255, 0.8); // indigo-50
+    border: 1px solid rgba(191, 219, 254, 0.7); // indigo-200
+  }
+
+  &--link {
+    background: rgba(245, 243, 255, 0.8); // violet-50
+    border: 1px solid rgba(221, 214, 254, 0.7); // violet-200
+  }
+}
+
+.view-group-btns {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.view-group-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding-right: 4px;
+  border-right: 1px solid rgba(0, 0, 0, 0.08);
+  margin-right: 2px;
+}
+
+.view-group-text {
+  font-size: 10px;
+  font-weight: 600;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+
+  .view-control-group--node & { color: #3b82f6; }
+  .view-control-group--link & { color: #7c3aed; }
+}
+
+.view-group-icon {
+  font-size: 13px;
+  width: 13px;
+  height: 13px;
+  line-height: 13px;
+
+  .view-control-group--node & { color: #3b82f6; }
+  .view-control-group--link & { color: #7c3aed; }
+}
+
+.view-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  height: 24px;
+  padding: 0 8px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: #64748b;
+  font-size: 11px;
+  font-weight: 500;
+  font-family: 'Inter', 'Segoe UI', sans-serif;
+  cursor: pointer;
+  transition: background 0.12s ease, color 0.12s ease;
+  min-width: 26px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.9);
+    color: #1e293b;
+  }
+
+  &--node.active {
+    background: #2563eb;
+    color: #ffffff;
+    font-weight: 600;
+  }
+
+  &--link.active {
+    background: #7c3aed;
+    color: #ffffff;
+    font-weight: 600;
+  }
+}
+
+.view-btn-icon {
+  font-size: 13px;
+  width: 13px;
+  height: 13px;
+  line-height: 13px;
+}
+
 .zoom-controls {
   position: absolute;
   top: 8px;
@@ -88,6 +215,25 @@
   padding: 4px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.10);
   width: 40px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+// ── Afficher les menus au survol du graphe ──────────
+#fixed-width-container:hover {
+  .view-controls {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(-50%) translateY(0);
+  }
+
+  .zoom-controls {
+    opacity: 1;
+    pointer-events: all;
+    transform: translateX(0);
+  }
 }
 .zoom-btn {
   width: 32px !important;
@@ -231,7 +377,7 @@
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
   max-height: 60vh;
-  overflow-y: auto;
+  overflow: hidden;
   animation: slideInUp 0.3s ease-out;
   opacity: 0;
   transition: opacity 0.25s ease, transform 0.25s ease;
@@ -269,12 +415,51 @@
   .detail-title {
     display: flex;
     align-items: center;
-    gap: 6px;
-    font-size: 15px;
+    gap: 8px;
+    font-size: 13px;
     font-weight: 600;
     color: #1e293b;
     font-family: 'Inter', 'Segoe UI', sans-serif;
     flex: 1;
+    overflow: hidden;
+  }
+
+  .detail-type-svg {
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    object-fit: contain;
+  }
+
+  .detail-type-mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    line-height: 20px;
+  }
+
+  .detail-type-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    padding: 2px 6px;
+    flex-shrink: 0;
+  }
+
+  .detail-type-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 0;
   }
 
   .detail-type-icon {
@@ -290,15 +475,6 @@
     gap: 2px;
   }
 
-  .detail-nav-icon-btn {
-    width: 24px !important;
-    height: 24px !important;
-    line-height: 24px !important;
-    padding: 0 !important;
-    color: #3b82f6;
-
-    mat-icon { font-size: 15px; width: 15px; height: 15px; }
-  }
 
   .detail-close {
     width: 28px !important;
@@ -317,7 +493,7 @@
 
 .detail-body {
   padding: 12px 16px;
-  max-height: 60vh;
+  max-height: calc(60vh - 58px);
   overflow-y: auto;
 
   &::-webkit-scrollbar { width: 4px; }
@@ -329,12 +505,12 @@
 
 .detail-row {
   display: flex;
-  align-items: flex-start;
+  flex-direction: row;
   gap: 8px;
   padding: 8px 0;
   font-size: 13px;
   border-bottom: 1px solid #f1f5f9;
-  transition: background 0.1s;
+  align-items: center;
 
   .detail-row-icon {
     font-size: 14px;
@@ -364,6 +540,213 @@
     overflow-wrap: break-word;
     white-space: normal;
   }
+
+  // ── Multiple items per row (legacy) ─────────────────
+  .detail-row-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    flex: 1;
+  }
+
+  // ── Carte pour format keyed (wrapper) ──
+  .detail-keyed-card {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 10px 12px;
+    background: rgba(248, 250, 252, 0.5);
+    border: 1px solid rgba(203, 213, 225, 0.4);
+    border-radius: 8px;
+    width: 100%;
+  }
+
+  // ── Conteneur pour deux lignes de format keyed ──
+  .detail-keyed-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    flex: 1;
+    width: 100%;
+  }
+
+  // ── Ligne unique pour format keyed (status / elapsed / resource / id) ──
+  .detail-keyed-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+    flex: 1;
+    overflow: hidden;
+
+    &--line1 {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 5px;
+      width: 100%;
+    }
+
+    &--line2 {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 5px;
+      width: 100%;
+    }
+  }
+
+  // ── Bouton navigation (supprimé l'ancienne classe nav-full) ──
+
+  .detail-keyed-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 7px;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    min-width: 0;
+
+    &--flex {
+      display: flex;
+      flex: 1;
+      min-width: 0;
+    }
+
+    &--status {
+      border-left-width: 3px;
+      border-left-style: solid;
+      flex-shrink: 0;
+    }
+
+    &--nav {
+      cursor: pointer;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      padding: 0;
+      flex-shrink: 0;
+      background: rgba(238, 242, 255, 0.9);
+      border: 1px solid rgba(99, 102, 241, 0.35);
+      border-radius: 50%;
+      transition: box-shadow 0.12s ease, border-color 0.12s ease;
+
+      &:hover {
+        border-color: rgba(99, 102, 241, 0.65);
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.18);
+      }
+    }
+  }
+
+  .detail-row-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    background: rgba(248, 250, 252, 0.8);
+    border: 1px solid rgba(203, 213, 225, 0.5);
+    border-radius: 6px;
+    font-size: 11px;
+
+    &.detail-row-item--nav {
+      cursor: pointer;
+      border-color: rgba(99, 102, 241, 0.35);
+      background: rgba(238, 242, 255, 0.9);
+      transition: box-shadow 0.12s ease, border-color 0.12s ease;
+
+      &:hover {
+        border-color: rgba(99, 102, 241, 0.65);
+        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
+      }
+    }
+  }
+
+  .detail-item-icon {
+    font-size: 13px;
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.85;
+  }
+
+  .detail-item-value {
+    font-weight: 500;
+    color: #334155;
+    white-space: nowrap;
+    font-size: 11px;
+    letter-spacing: 0.3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    &--bold {
+      font-weight: 700;
+    }
+  }
+}
+
+// ── Badge "+X more" / "Afficher moins" ──────────────
+.detail-more-badge-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 6px 0;
+  margin-top: 6px;
+  border-top: 1px solid rgba(203, 213, 225, 0.3);
+}
+
+.detail-more-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-width: 80px;
+  height: 28px;
+  padding: 0 12px;
+  margin: 0;
+  background: #ffffff;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  font-family: inherit;
+  white-space: nowrap;
+
+  &:hover {
+    background: #f8fafc;
+    border-color: rgba(148, 163, 184, 0.6);
+    box-shadow: 0 2px 4px rgba(15, 23, 42, 0.06);
+  }
+
+  &:active {
+    background: #f1f5f9;
+    border-color: rgba(148, 163, 184, 0.5);
+  }
+
+  span {
+    display: inline;
+    white-space: nowrap;
+  }
+}
+
+.detail-more-badge-icon {
+  font-size: 14px;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  opacity: 0.8;
+  flex-shrink: 0;
 }
 
 .detail-empty {
