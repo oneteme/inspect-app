@@ -59,7 +59,7 @@ export interface Link<T> {
   linkInfo(): { icon: string; label: string; value: string; color?: string }[]
 }
 
-export class RestServerNode implements Node<Label> {
+export class RestServerNode implements Node<Label>{
 
   nodeObject: RestSessionTree;
 
@@ -119,7 +119,7 @@ export class MainServerNode implements Node<Label> {
   formatNode(field: Label): string {
     switch (field) {
       case Label.SERVER_IDENTITY: return this.nodeObject.appName || '?'/*+ this.nodeObject.version*/ //version
-      case Label.OS_RE: return (this.nodeObject.os || "?") + " " + (this.nodeObject.re || '?');
+      case Label.OS_RE: return (this.nodeObject.os || "?") + " " + (this.nodeObject.re || '');
       case Label.IP_PORT: return (this.nodeObject.address || "?")
       case Label.BRANCH_COMMIT: return "?"  // soon
       default: return '?';
@@ -147,9 +147,22 @@ export class LinkRequestNode implements Link<Label> {
     this.nodeObject = nodeObject;
   }
 
-  linkInfo(): { icon: string; label: string; value: string; color?: string; }[] {
-        throw new Error("Method not implemented.");
+  linkInfo(): any {
+    const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+    const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
+    const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
+    const isError   = this.nodeObject.exception != null
+    const isOngoing = this.nodeObject?.end == null;
+    const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
+    const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
+    return {
+      status:   { icon: statusIcon, value: status, color: statusColor },
+      elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
+      resource: { icon: 'code', value: resource, color: '#3b82f6' },
+      //id:       { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type: ""},
+  //    ...(this.nodeObject.remoteTrace ? { session: { icon: 'link', value: this.nodeObject.id, color: '#3b82f6', type:'rest' } } : {}),
     }
+  }
   getLinkStyle(): string {
     if (this.nodeObject.end == null) return 'ONGOING';
     switch(true){
@@ -184,7 +197,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
 
   formatNode(field: Label): string {
     switch (field) {
-      case Label.SERVER_IDENTITY: return this.nodeObject.schema || this.nodeObject.name || '?'/*+ this.nodeObject.version*/ //version
+      case Label.SERVER_IDENTITY: return this.nodeObject.name || '?'/*+ this.nodeObject.version*/ //version
       case Label.OS_RE: return this.nodeObject.productName || '?';
       case Label.IP_PORT: return (this.nodeObject.name || '?') + (this.nodeObject?.port != -1 ?   ":"+ this.nodeObject?.port.toString() : '')
       case Label.BRANCH_COMMIT: return "?" // soon
@@ -198,7 +211,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
       case Label.METHOD_RESOURCE: return `${this.nodeObject?.command || '?'}`;
       case Label.SIZE_COMPRESSION: return this.nodeObject?.count < 0 ? '0': this.nodeObject?.count!= undefined? this.nodeObject?.count.toString() : '?'; // remove undefined condition
       case Label.PROTOCOL_SCHEME: return "JDBC/Basic"
-      case Label.STATUS_EXCEPTION: return this.nodeObject.exception && 'KO:' + this.nodeObject.exception?.type || 'OK'
+      case Label.STATUS_EXCEPTION: return this.nodeObject.failed && 'KO' || 'OK'
       case Label.USER: return `${this.nodeObject.user || '?'}`;
       default: return '?';
     }
@@ -211,27 +224,53 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
     return rows
   }
 
-  linkInfo(): { icon: string; label: string; value: string; color?: string; }[] {
-    throw new Error("Method not implemented.");
-  }
+  linkInfo(): any {
+    const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+    const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
+    const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
+    const isError   = this.nodeObject.failed
+    const isOngoing = this.nodeObject?.end == null;
+    const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
+    const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
+    return {
+      status:   { icon: statusIcon, value: status, color: statusColor },
+      elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
+      resource: { icon: resourceConfig[resource]?.icon ?? 'storage', value: resource, color: resourceConfig[resource]?.color ?? '#6366f1' },
+      request:  { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type:'jdbc'},
 
-  getLinkStyle(): string {
-    if (this.nodeObject.end == null) return 'ONGOING';
-    return this.nodeObject.failed ? 'ERROR' : 'SUCCES'
-  }
-}
+     }
+   }
 
-export class FtpRequestNode implements Node<Label>, Link<Label> {
+   getLinkStyle(): string {
+     if (this.nodeObject.end == null) return 'ONGOING';
+     return this.nodeObject.failed ? 'ERROR' : 'SUCCES'
+   }
+ }
 
-  nodeObject: FtpRequestTree;
+ export class FtpRequestNode implements Node<Label>, Link<Label> {
+
+   nodeObject: FtpRequestTree;
 
   constructor(nodeObject: FtpRequestTree) {
     this.nodeObject = nodeObject;
   }
 
-  linkInfo(): { icon: string; label: string; value: string; color?: string; }[] {
-        throw new Error("Method not implemented.");
-    }
+  linkInfo(): any {
+    const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+    const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
+    const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
+    const isError   = this.nodeObject.failed
+    const isOngoing = this.nodeObject?.end == null;
+    const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
+    const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
+
+    return {
+      status:   { icon: statusIcon, value: status, color: statusColor },
+      elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
+      resource: { icon: 'terminal', value: resource, color: '#0e7490' },
+      request:  { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type:'ftp'},
+     }
+  }
 
   nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
     const rows: any[] = [];
@@ -254,7 +293,7 @@ export class FtpRequestNode implements Node<Label>, Link<Label> {
   formatLink(field: Label): string {
     switch (field) {
       case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
-      case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands, "SCRIPT")
+      case Label.METHOD_RESOURCE: return this.nodeObject?.command || '?'
       case Label.SIZE_COMPRESSION: return "?"
       case Label.PROTOCOL_SCHEME: return this.nodeObject.protocol + '/Basic'
       case Label.STATUS_EXCEPTION: return this.nodeObject.exception && 'KO:' + this.nodeObject.exception?.type || 'OK'
@@ -276,11 +315,23 @@ export class MailRequestNode implements Node<Label>, Link<Label> {
     this.nodeObject = nodeObject;
   }
 
-  linkInfo(): { icon: string; label: string; value: string; color?: string; }[] {
-        throw new Error("Method not implemented.");
-    }
+  linkInfo(): any {
+    const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+    const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
+    const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
+    const isError   = this.nodeObject.failed
+    const isOngoing = this.nodeObject?.end == null;
+    const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
+    const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
+     return {
+       status:   { icon: statusIcon, value: status, color: statusColor },
+       elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
+       resource: { icon: 'email', value: resource, color: '#f59e0b' },
+       request:  { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type:'smtp'},
+     }
+   }
 
-  nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
+   nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
     const rows: any[] = [];
     if (this.nodeObject?.host)     rows.push({ icon: 'dns',      label: 'Hôte',     value: this.nodeObject.port && this.nodeObject.port !== -1 ? `${this.nodeObject.host}:${this.nodeObject.port}` : this.nodeObject.host, color: '#6366f1' });
     if (this.nodeObject?.mails?.length) rows.push({ icon: 'email',  label: 'Mails',   value: `${this.nodeObject.mails.length} destinataire(s)`, color: '#f59e0b' }); // todo get ?
@@ -299,7 +350,7 @@ export class MailRequestNode implements Node<Label>, Link<Label> {
   formatLink(field: Label): string {
     switch (field) {
       case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
-      case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands, "SCRIPT")
+      case Label.METHOD_RESOURCE: return this.nodeObject?.command || '?'
       case Label.SIZE_COMPRESSION: return this.nodeObject?.count < 0 ? '0': this.nodeObject?.count!= undefined? this.nodeObject?.count.toString() : '?';
       case Label.PROTOCOL_SCHEME: return "SMTP/Basic"
       case Label.STATUS_EXCEPTION: return this.nodeObject.exception && 'KO:' + this.nodeObject.exception?.type || 'OK'
@@ -321,9 +372,21 @@ export class LdapRequestNode implements Node<Label>, Link<Label> {
     this.nodeObject = nodeObject;
   }
 
-  linkInfo(): { icon: string; label: string; value: string; color?: string; }[] {
-        throw new Error("Method not implemented.");
-    }
+  linkInfo(): any {
+    const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+    const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
+    const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
+    const isError   = this.nodeObject.failed
+    const isOngoing = this.nodeObject?.end == null;
+    const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
+    const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
+     return {
+       status:   { icon: statusIcon, value: status, color: statusColor },
+       elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
+       resource: { icon: 'person', value: resource, color: '#8b5cf6' },
+       request:  { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type:'ldap'},
+     }
+  }
 
   nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
     const rows: any[] = [];
@@ -343,7 +406,7 @@ export class LdapRequestNode implements Node<Label>, Link<Label> {
   formatLink(field: Label): string {
     switch (field) {
       case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
-      case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands, "SCRIPT") || '?'
+      case Label.METHOD_RESOURCE: return this.nodeObject?.command || '?'
       case Label.SIZE_COMPRESSION: return "?"
       case Label.PROTOCOL_SCHEME: return this.nodeObject.protocol ?? "LDAP/Basic" // wait for fix backend
       case Label.STATUS_EXCEPTION: return this.nodeObject.exception && 'KO:' + this.nodeObject.exception?.type || 'OK'
@@ -358,15 +421,39 @@ export class LdapRequestNode implements Node<Label>, Link<Label> {
   }
 }
 
-export class RestRequestNode implements Node<Label> {
+export class RestRequestNode implements Node<Label>, Link<Label> {
   nodeObject: RestRequestTree;
   constructor(nodeObject: RestRequestTree) {
     this.nodeObject = nodeObject;
   }
 
   nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
-        throw new Error("Method not implemented.");
-    }
+    const rows: any[] = [];
+    if (this.nodeObject?.host)     rows.push({ icon: 'dns',      label: 'Hôte',     value: this.nodeObject.port && this.nodeObject.port !== -1 ? `${this.nodeObject.host}:${this.nodeObject.port}` : this.nodeObject.host, color: '#6366f1' });
+    if (this.nodeObject?.method)   rows.push({ icon: 'code',     label: 'Méthode',  value: this.nodeObject.method, color: '#3b82f6' });
+    if (this.nodeObject?.path)     rows.push({ icon: 'route',    label: 'Chemin',   value: this.nodeObject.path, color: '#0ea5e9' });
+    if (this.nodeObject?.protocol) rows.push({ icon: 'lock',     label: 'Protocole', value: this.nodeObject.protocol, color: '#8b5cf6' });
+    if (this.nodeObject?.authScheme) rows.push({ icon: 'security', label: 'Auth',    value: this.nodeObject.authScheme, color: '#10b981' });
+    if (this.nodeObject?.user)     rows.push({ icon: 'person',   label: 'Utilisateur', value: this.nodeObject.user, color: '#f59e0b' });
+    return rows;
+  }
+
+   linkInfo(): any {
+     const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
+     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
+     const isError   = this.nodeObject.exception != null
+     const isOngoing = this.nodeObject?.end == null;
+     const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
+     const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
+     return {
+       status:   { icon: statusIcon, value: status, color: statusColor },
+       elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
+       resource: { icon: 'code', value: resource, color: '#3b82f6' },
+       request:  { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type:'rest'},
+          ...(this.nodeObject.remoteTrace ? { session: { icon: 'link', value: this.nodeObject.id, color: '#3b82f6', type:'rest' } } : {}),
+     }
+   }
 
   formatNode(field: Label): string {
     switch (field) {
@@ -396,7 +483,7 @@ export class RestRequestNode implements Node<Label> {
       case Label.METHOD_RESOURCE: return `${this.nodeObject.method || "?"} ${this.nodeObject.path || "?"}`
       case Label.SIZE_COMPRESSION: return `${this.nodeObject.inDataSize < 0 ? 0 : sizeFormatter(this.nodeObject.inDataSize) } ↓↑ ${this.nodeObject.outDataSize < 0 ? 0 :sizeFormatter(this.nodeObject.outDataSize) }`
       case Label.PROTOCOL_SCHEME: return `${this.nodeObject.protocol || "?"}/${this.nodeObject.authScheme || "?"}`
-      case Label.STATUS_EXCEPTION: return (this.nodeObject.status!= null ? this.nodeObject.status.toString():"?")+ (this.nodeObject?.exception ? ': ' + (this.nodeObject?.exception?.type || this.nodeObject?.exception?.message ):'');
+      case Label.STATUS_EXCEPTION: return (this.nodeObject.status!= null ? this.nodeObject.status.toString():"?");
       case Label.USER: return `${this.nodeObject.remoteTrace?.user ?? "?"}`
       default: return '?';
     }
@@ -426,20 +513,6 @@ export enum Label {
   USER = "USER"
 }
 
-function getCommand<T>(arr: T[], multiple: string) {
-  if (arr) {
-    let r = arr.reduce((acc: any, item: any) => {
-      if (!acc[item]) {
-        acc[item] = 0
-      }
-      return acc;
-    }, {});
-    return Object.keys(r).length == 1
-      ? Object.keys(r)[0]
-      : multiple;
-  }
-  return '?';
-}
 
 function sizeFormatter(value:any){
   if(!value && value!= 0) return '';
@@ -485,11 +558,8 @@ export class TreeGraph {
     graph.getLabel = function (cell: any) {
       if (cell?.isEdge() && cell.value && typeof cell.value === 'object' && cell.value.hasOwnProperty('linkLbl')) {
         let compare = cell.value.nodes[0].formatLink(cell.value.linkLbl)
-        console.log(compare)
         return tg.checkSome(cell.value.nodes, x => x.formatLink(cell.value.linkLbl) != compare) ? `... ×${cell.value.nodes.length}` : `${compare} ×${cell.value.nodes.length}`
       }else if(cell?.isVertex() && cell.value && typeof cell.value === 'object'){
-       // console.log(cell.value.node) im here
-        if(cell.value.node?.length != 1) return "ef"
         const lbl: string = cell.value.node.formatNode(cell.value.serverlbl) ?? '';
         return lbl.length > 22 ? lbl.substring(0, 22) + '…' : lbl;
       }
@@ -509,6 +579,17 @@ export class TreeGraph {
     graph.panningHandler.ignoreCell = true; // Specifies if panning should be active even if there is a cell under the mousepointer.
     graph.container.style.cursor = 'move'
     graph.setPanning(true);
+
+    // Zoom with mouse scroll wheel
+    mx.mxEvent.addMouseWheelListener((evt: WheelEvent, up: boolean) => {
+      if (mx.mxEvent.isConsumed(evt)) return;
+      if (up) {
+        graph.zoomIn();
+      } else {
+        graph.zoomOut();
+      }
+      mx.mxEvent.consume(evt);
+    }, graph.container);
 
     // Highlight vertices and edges on hover
     const cellTracker = new mx.mxCellTracker(graph, '#dbeafe'); // blue-100 tint
@@ -716,22 +797,37 @@ export class TreeGraph {
   }
 
   resizeAndCenter() {
-    let availableWidth = document.getElementById("fixed-width-container")?.offsetWidth;
-    let availableHeight = document.getElementById("fixed-width-container")?.offsetHeight;
+    const container = document.getElementById("fixed-width-container");
+    const availableWidth  = container?.offsetWidth;
+    const availableHeight = container?.offsetHeight;
     this.graph.doResizeContainer(availableWidth, availableHeight);
-    this.graph.fit()
-    let margin = 2;
-    let max = 3;
-    let bounds = this.graph.getGraphBounds();
-    let cw = this.graph.container.clientWidth - margin;
-    let ch = this.graph.container.clientHeight - margin;
-    let w = bounds.width / this.graph.view.scale;
-    let h = bounds.height / this.graph.view.scale;
-    let s = Math.min(max, Math.min(cw / w, ch / h));
+    this.graph.fit();
 
-    this.graph.view.scaleAndTranslate(s,
+    const margin = 2;
+    const max    = 3;
+
+    // View-controls is now at the bottom — reserve space below instead of above
+    const viewControls = container?.querySelector('.view-controls') as HTMLElement | null;
+    const bottomOffset = viewControls
+      ? viewControls.offsetHeight + 16
+      : margin;
+    const topOffset = margin;
+
+    const bounds = this.graph.getGraphBounds();
+    const cw = this.graph.container.clientWidth  - margin;
+    const ch = this.graph.container.clientHeight - margin;      // full usable height
+    const chEff = ch - topOffset - bottomOffset;                // usable height between top and bottom overlays
+    const w  = bounds.width  / this.graph.view.scale;
+    const h  = bounds.height / this.graph.view.scale;
+    const s  = Math.min(max, Math.min(cw / w, chEff / h));
+
+    this.graph.view.scaleAndTranslate(
+      s,
+      // horizontal: centred in full width (unchanged)
       (margin + cw - w * s) / (2 * s) - bounds.x / this.graph.view.scale,
-      (margin + ch - h * s) / (2 * s) - bounds.y / this.graph.view.scale);
+      // vertical: centred in the zone below the toolbar
+      topOffset / s + (chEff - h * s) / (2 * s) - bounds.y / this.graph.view.scale
+    );
   }
 
   private _ongoingObserver: MutationObserver | null = null;
@@ -905,3 +1001,14 @@ export const LinkConfig = {
   UNREACHABLE:  "strokeColor=#ef4444;",
   ONGOING:      "strokeColor=#3b82f6;dashed=1;ongoing=1;"
 }
+
+export const resourceConfig = {
+  'READ': { icon: 'visibility', color: '#3b82f6' },
+  'EDIT': { icon: 'edit', color: '#f97316' },
+  'ROLE': { icon: 'security', color: '#8b5cf6' },
+  'ACCESS': { icon: 'lock_open', color: '#22c55e' },
+  'SETUP': { icon: 'settings', color: '#64748b' },
+  'SCRIPT': { icon: 'code', color: '#06b6d4' },
+  'EMIT': { icon: 'arrow_upward', color: '#06b6d4' }
+}
+
