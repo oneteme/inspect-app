@@ -1,4 +1,4 @@
-import {ChartProvider, field, values} from "@oneteme/jquery-core";
+﻿import {ChartProvider, field, values} from "@oneteme/jquery-core";
 import {UserAction} from "../model/trace.model";
 
 export const INFINITY = new Date(9999,12,31).getTime();
@@ -639,7 +639,7 @@ export class Constants {
         ],
         options: {
             legend: { show: false },
-            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
+            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v === 0 ? '' : v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
             series: [{ smooth: true }],
             tooltip: {
                 formatter: (params: any[]) => {
@@ -658,7 +658,7 @@ export class Constants {
         ],
         options: {
             legend: { show: false },
-            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
+            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v === 0 ? '' : v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
             series: [{ smooth: true }],
             tooltip: {
                 formatter: (params: any[]) => {
@@ -677,7 +677,7 @@ export class Constants {
         ],
         options: {
             legend: { show: false },
-            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
+            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v === 0 ? '' : v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
             series: [{ smooth: true }],
             tooltip: {
                 formatter: (params: any[]) => {
@@ -696,7 +696,7 @@ export class Constants {
         ],
         options: {
             legend: { show: false },
-            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
+            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v === 0 ? '' : v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
             series: [{ smooth: true }],
             tooltip: {
                 formatter: (params: any[]) => {
@@ -715,7 +715,7 @@ export class Constants {
         ],
         options: {
             legend: { show: false },
-            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
+            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v === 0 ? '' : v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
             series: [{ smooth: true }],
             tooltip: {
                 formatter: (params: any[]) => {
@@ -734,7 +734,7 @@ export class Constants {
         ],
         options: {
             legend: { show: false },
-            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
+            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v === 0 ? '' : v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
             series: [{ smooth: true }],
             tooltip: {
                 formatter: (params: any[]) => {

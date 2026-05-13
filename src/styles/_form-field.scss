@@ -1,9 +1,11 @@
-// ── Mat Form Field — Redesign scoped aux blocs .header-filter ──
+﻿// Mat Form Field — Redesign scoped aux blocs .header-filter
 // Angular Material 16 (MDC) — appearance="outline"
 // Toutes les règles visuelles sont scoped à .header-filter pour ne
 // pas impacter les tableaux et autres composants Material de l'app.
 
-.header-filter {
+.header-filter,
+.filter-container,
+.header-right {
 
   // Contour (les 3 pièces de la bordure)
   .mdc-text-field--outlined .mdc-notched-outline__leading,
@@ -120,9 +122,9 @@
     color: #1464dc !important;
   }
 
-} // fin .header-filter
+} // fin scope filtres
 
-// ── Panel dropdown (rendu dans l'overlay, hors .header-filter) ─
+// Panel dropdown (rendu dans l'overlay, hors .header-filter)
 .mat-mdc-select-panel {
   border-radius: 10px !important;
   border: 1px solid rgba(34, 36, 38, .12) !important;
@@ -151,8 +153,7 @@
   }
 }
 
-// ── Nettoyage technique global (pas d'impact visuel) ──────────
-
+// Nettoyage technique global (pas d'impact visuel)
 // focus-overlay (fond teinté MDC)
 .mat-mdc-form-field .mat-mdc-form-field-focus-overlay {
   display: none !important;
@@ -171,7 +172,7 @@
   display: none !important;
 }
 
-// ── Fix ligne bleue parasite dans le select focalisé ──────────
+// Fix ligne bleue parasite dans le select focalisé
 .mat-mdc-select-trigger::before {
   display: none !important;
 }
@@ -180,7 +181,7 @@
   border-right: none !important;
 }
 
-// ── Focus natif navigateur — éléments host ────────────────────
+// Focus natif navigateur — éléments host
 mat-select,
 .mat-mdc-select {
   outline: none !important;
@@ -193,7 +194,7 @@ mat-select,
   }
 }
 
-// ── Outline natif navigateur sur les inputs date-range ────────
+// Outline natif navigateur sur les inputs date-range
 .mat-date-range-input-container input,
 .mat-date-range-input-start-wrapper input,
 .mat-date-range-input-end-wrapper input {
