@@ -241,7 +241,10 @@ export const formatters: any = {
 
     date: function byDay(r: any[], _datePipe: DatePipe, nameOutput: string = 'date') {
         r.forEach(e => {
-            var date = new Date(e['date']);
+            const ts = e['date'];
+            // Construire la date en heure locale pour éviter le décalage UTC
+            const d = new Date(ts);
+            const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
             e[nameOutput] = _datePipe.transform(date, 'd MMM yy');
         });
     },

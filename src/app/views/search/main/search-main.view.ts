@@ -94,7 +94,7 @@ export class SearchMainView implements OnInit, OnDestroy {
         if (queryParams.q) {
           this.tableConfig = {
             ...this.tableConfig,
-            search: { ...this.tableConfig?.search, initialQuery: queryParams.q }
+            search: { ...this.tableConfig?.search, initialQuery: queryParams.q, searchColumns: ['exception'] }
           }
         }
         this.patchStatusValue(this.queryParams.rangestatus)

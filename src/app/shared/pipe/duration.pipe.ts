@@ -1,40 +1,30 @@
 import {inject, Pipe, PipeTransform} from "@angular/core";
 import {DecimalPipe} from "@angular/common";
 
+/** Logique pure de formatage d'une durée en secondes — utilisable hors pipe (ex: searchValue). */
+export function formatDuration(seconds: number): string {
+    if (!seconds && seconds !== 0) return 'En cours';
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.round((seconds % 60) * 1000) / 1000;
+    if (days > 0) return `${days} jour(s)`;
+    if (hours > 0) return `${hours}h, ${minutes > 0 ? minutes + 'min' : '0 min'}`;
+    if (minutes > 0) {
+        const secPart = secs ? ' : ' + secs + 's' : '';
+        return minutes + 'min' + secPart;
+    }
+    return `${secs}s`;
+}
+
 @Pipe({
     name:"duration"
 })
-
 export class DurationPipe implements PipeTransform {
      _decimalPipe = inject(DecimalPipe);
 
-    transform(value: {start: number, end: number} | number, ...args: any[]):string {
-
-        let time = typeof value == "object" ? value.end - value.start : value;
-        if(!time && time !=0){
-            return "En cours";
-        }
-        // console.log("duration pipe", typeof value == "object" ? new Date(value.end) : '', typeof value == "object" ? new Date(value.start): '');
-        const remainingSeconds = this._decimalPipe.transform(Math.round((time % 60) * 1000) / 1000);
-        const minutes = Math.floor((time % 3600) / 60);
-        const hours = Math.floor(time/3600);
-        const days  = Math.floor(time/86400)
-
-        // console.log("duration pipe", {remainingSeconds, minutes, hours, days});
-
-        const dayString = days > 0 ? `${days} jour(s)`:''
-        const hourString = hours > 0 ? `${hours}h` : ''
-        const minuteString = minutes > 0 ? `${minutes}min` : ''
-        const secondString = `${remainingSeconds}s`
-    
-        if(days > 0 ){
-            return `${dayString}`;
-        }
-        if (hours > 0) {
-            return `${hourString}, ${minuteString || '0 min'}`
-        } else if (!hours && minutes > 0) {
-            return `${minuteString} ${secondString && `: ${secondString}`}`
-        }
-        return secondString;
+    transform(value: {start: number, end: number} | number, ...args: any[]): string {
+        const time = typeof value === 'object' ? value.end - value.start : value;
+        return formatDuration(time);
     }
 }

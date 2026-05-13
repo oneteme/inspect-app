@@ -27,8 +27,7 @@ import {
 } from './dashboard/components/protocol-exception-modal/protocol-exception-modal.component';
 import {ArchitectureView} from "./architecture/architecture.view";
 import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
-import {NumberFormatterPipe} from '../shared/pipe/number.pipe';
-import {DeploimentComponent} from './deploiment/deploiment.component';
+import {NumberFormatterPipe, CompactNumberPipe} from '../shared/pipe/number.pipe';
 import {SearchRequestView} from "./search/request/search-request.view";
 import {AnalyticView} from "./analytic/analytic.view";
 import {DetailTimelineComponent} from "./detail/session/_component/timeline/detail-timeline.component";
@@ -47,6 +46,9 @@ import {
 import {InstanceComponent} from './detail/instance/instance.component';
 import {InstanceTableComponent} from './detail/instance/_component/instance-table/instance-table.component';
 import {ParameterTableComponent} from "./detail/instance/_component/parameter-table/parameter-table.component";
+import {DashboardInstancesTableComponent} from './dashboard/components/instances-table/instances-table.component';
+import {DashboardCarouselComponent} from './dashboard/components/carousel/carousel.component';
+import {DashboardDetailViewComponent} from './dashboard/components/detail-view/detail-view.component';
 import {RequestKpiView} from "./kpi/request/request-kpi.view";
 import {RestComponent as RequestRestComponent} from "./kpi/request/rest/rest.component";
 import {RestComponent as SessionRestComponent} from "./kpi/session/rest/rest.component";
@@ -107,7 +109,7 @@ import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.compone
     ArchitectureView,
     TreeView,
     NumberFormatterPipe,
-    DeploimentComponent,
+    CompactNumberPipe,
     AnalyticView,
     ActionTableComponent,
     SearchRequestView,
@@ -119,6 +121,9 @@ import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.compone
     InstanceComponent,
     InstanceTableComponent,
     ParameterTableComponent,
+    DashboardInstancesTableComponent,
+    DashboardCarouselComponent,
+    DashboardDetailViewComponent,
 
     // New
     RequestKpiView,

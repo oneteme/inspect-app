@@ -24,7 +24,6 @@ import {ArchitectureView} from "./views/architecture/architecture.view";
 import {NumberFormatterPipe} from './shared/pipe/number.pipe';
 import {TreeView} from './views/tree/tree.view';
 import {SizePipe} from "./shared/pipe/size.pipe";
-import {DeploimentComponent} from './views/deploiment/deploiment.component';
 import {Interceptor} from "./shared/interceptor/interceptor";
 import {AnalyticView} from "./views/analytic/analytic.view";
 import {SearchRequestView} from "./views/search/request/search-request.view";
@@ -150,11 +149,6 @@ const routes: Route[] = [
     path: 'home',
     component: DashboardComponent,
     title: 'Page d\'accueil'
-  },
-  {
-    path: 'deploiment',
-    component: DeploimentComponent,
-    title: 'Instances Actives'
   },
   {
     path: 'architecture',

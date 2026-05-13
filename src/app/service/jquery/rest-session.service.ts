@@ -425,6 +425,36 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
+    getCountByEnv(filters: {env: string, start: Date, end: Date}): Observable<{total: number, errors: number}> {
+        return this.getRestSession<{count: number, countErrorServer: number, countErrorClient: number}[]>({
+            'column': 'count:count,count_error_server:countErrorServer,count_error_client:countErrorClient',
+            'join': 'instance',
+            'instance.environement': filters.env,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString()
+        }).pipe(map(data => {
+            const d = data[0];
+            return d ? { total: d.count, errors: (d.countErrorServer ?? 0) + (d.countErrorClient ?? 0) } : { total: 0, errors: 0 };
+        }));
+    }
+
+    getCountByUserAgent(filters: { env: string, start: Date, end: Date, app_name?: string }): Observable<{ count: number, userAgent: string }[]> {
+        const args: any = {
+            'column': 'count:count,user_agt',
+            'join': 'instance',
+            'instance.environement': filters.env,
+            'instance.type': 'SERVER',
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'order': 'count.desc',
+            'limit': 100
+        };
+        if (filters.app_name) {
+            args['instance.app_name'] = filters.app_name;
+        }
+        return this.getRestSession(args);
+    }
+
     getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
               filters: {env: string, start: Date, end: Date, hosts?: string[], filters?: string[] }): Observable<any[]> {
 

@@ -1,0 +1,111 @@
+﻿// Carousel section (sidebar)
+.carousel-section {
+  border-top: 1px solid rgba(34, 36, 38, .08);
+  padding-top: .75em;
+}
+
+.ts-section {
+  margin-top: 0;
+}
+
+.db-insights-hdr {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 0 2px 6px;
+  border-bottom: 2px solid rgba(34,36,38,.08);
+  margin-bottom: 10px;
+}
+
+.dih-title { font-size: .72em; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: rgba(0,0,0,.55); }
+
+.ts-header {
+  margin-bottom: .55em;
+  align-items: center;
+}
+
+.ts-nav-arrows {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+}
+
+.ts-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  border: 1px solid rgba(34,36,38,.13);
+  background: transparent;
+  cursor: pointer;
+  color: rgba(0,0,0,.55);
+  padding: 0;
+  transition: background .12s, color .12s, border-color .12s;
+  mat-icon { font-size: 16px; width: 16px; height: 16px; }
+  &:not([disabled]):hover { background: rgba(34,36,38,.06); color: rgba(0,0,0,.8); border-color: rgba(34,36,38,.25); }
+  &[disabled] { opacity: .3; cursor: default; }
+}
+
+.ts-scroll-track {
+  display: flex;
+  gap: 7px;
+  overflow-x: scroll;
+  padding: 4px 2px 8px;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}
+
+.ts-devicon-img {
+  width: 1.6em;
+  height: 1.6em;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.ts-pill {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 5px;
+  padding: 10px 10px 9px;
+  border-radius: 8px;
+  border: 1px solid rgba(34, 36, 38, .1);
+  background: #fff;
+  white-space: nowrap;
+  cursor: default;
+  min-width: 62px;
+  position: relative;
+  transition: box-shadow .15s ease, border-color .15s ease;
+  flex-shrink: 0;
+
+  &:hover {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, .1);
+    border-color: rgba(34, 36, 38, .2);
+  }
+}
+
+.ts-devicon {
+  font-size: 1.6em;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.ts-pill-name {
+  font-size: .68em;
+  font-weight: 600;
+  color: rgba(0, 0, 0, .72);
+  text-align: center;
+}
+
+.ts-pill-version {
+  font-size: .58em;
+  font-weight: 500;
+  color: rgba(0, 0, 0, .35);
+  background: rgba(34, 36, 38, .06);
+  padding: 1px 5px;
+  border-radius: 4px;
+  margin-top: -4px;
+}
