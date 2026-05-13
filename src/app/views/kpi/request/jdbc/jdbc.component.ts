@@ -1,16 +1,8 @@
 import {Component, inject, Input, OnInit} from "@angular/core";
 import {ChartProvider, field} from "@oneteme/jquery-core";
-import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 import {QueryParams} from "../../../../model/conf.model";
-import {RestRequestService} from "../../../../service/jquery/rest-request.service";
 import {DatabaseRequestService} from "../../../../service/jquery/database-request.service";
-import {
-  ChartConfig, JDBC_PERFORMANCE_CHART_CONFIG, JDBC_STATUS_CHART_CONFIG,
-  REST_LATENCY_CHART_CONFIG,
-  REST_PERFORMANCE_CHART_CONFIG,
-  REST_STATUS_CHART_CONFIG,
-  REST_VOLUMETRY_CHART_CONFIG
-} from "../../kpi.config";
+import {ChartConfig, JDBC_PERFORMANCE_CHART_CONFIG, JDBC_STATUS_CHART_CONFIG} from "../../kpi.config";
 import {finalize} from "rxjs";
 import {periodManagement2} from "../../../../shared/util";
 
@@ -31,7 +23,26 @@ export class JdbcComponent implements OnInit {
   readonly DATABASE_PIE_CONFIG: ChartProvider<string, number> = {
     series: [
       { data: { x: field('db_name'), y: field('count') } }
-    ]
+    ],
+    options: {
+      legend: {
+        orient: 'horizontal',
+        bottom: 0,
+        left: 'center'
+      },
+      series: [{
+        label: {
+          show: false             // pas de datalabels sur les slices
+        },
+        labelLine: {
+          show: false             // pas de lignes de labels non plus
+        }
+      }],
+      tooltip: {
+        formatter: (params: any) =>
+          `${params.name} : <b>${params.value.toLocaleString('fr-FR')}</b> (${params.percent}%)`
+      }
+    }
   }
 
   groupedBy: string = '';
@@ -77,7 +88,7 @@ export class JdbcComponent implements OnInit {
       });
     } else if(event.eventType === 'filter') {
       if(actualFilter) {
-        this._jdbcRequestService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end}).subscribe({
+        this._jdbcRequestService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts}).subscribe({
           next: (res: any[]) => {
             slice.data = res;
           }

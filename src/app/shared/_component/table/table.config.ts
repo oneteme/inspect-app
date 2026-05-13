@@ -438,6 +438,7 @@ export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTra
     { key: 'restart', header: 'Démarrage', icon: 'restart_alt', groupable: false, sliceable: false },
     { key: 'os', header: 'OS', icon: 'computer', optional: true, width: '8%' },
     { key: 're', header: 'RE', icon: 'sdk', optional: true, width: '8%' },
+    { key: 'address', header: 'Adresse', icon: 'fingerprint', sliceable: false, groupable: false, optional: true },
     { key: 'user', header: 'Utilisateur', icon: 'person', optional: true, width: '10%' }
   ],
   defaultSort: { active: 'duration', direction: 'desc' },

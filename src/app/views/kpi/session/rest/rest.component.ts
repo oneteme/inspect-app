@@ -23,7 +23,26 @@ export class RestComponent implements OnInit {
   readonly METHOD_PIE_CONFIG: ChartProvider<string, number> = {
     series: [
       { data: { x: field('method'), y: field('count') } }
-    ]
+    ],
+    options: {
+      legend: {
+        orient: 'horizontal',
+        bottom: 0,
+        left: 'center'
+      },
+      series: [{
+        label: {
+          show: false             // pas de datalabels sur les slices
+        },
+        labelLine: {
+          show: false             // pas de lignes de labels non plus
+        }
+      }],
+      tooltip: {
+        formatter: (params: any) =>
+          `${params.name} : <b>${params.value.toLocaleString('fr-FR')}</b> (${params.percent}%)`
+      }
+    }
   }
 
   readonly USER_AGENT_PIE_CONFIG: ChartProvider<string, number> = {
@@ -32,7 +51,21 @@ export class RestComponent implements OnInit {
     ],
     options: {
       legend: {
-        formatter: (value: string) => value?.length > 6 ? value.substring(0, 6) + '…' : value
+        orient: 'horizontal',
+        bottom: 0,
+        left: 'center'
+      },
+      series: [{
+        label: {
+          show: false             // pas de datalabels sur les slices
+        },
+        labelLine: {
+          show: false             // pas de lignes de labels non plus
+        }
+      }],
+      tooltip: {
+        formatter: (params: any) =>
+          `${params.name} : <b>${params.value.toLocaleString('fr-FR')}</b> (${params.percent}%)`
       }
     }
   }
@@ -86,6 +119,7 @@ export class RestComponent implements OnInit {
   getCustom(event: {eventType: 'default' | 'filter', chartConfig: ChartConfig, filteredTasks?: any[]},
             arr: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig}>,
             slice: {data: any[], loading: boolean}) {
+
     let actualIndicator = this.getActualIndicator(arr.chartConfig);
     let actualGroup = this.getActualGroup(arr.chartConfig);
     let actualStack = this.getActualStack(arr.chartConfig);
@@ -100,7 +134,7 @@ export class RestComponent implements OnInit {
       });
     } else if(event.eventType === 'filter') {
       if(actualFilter) {
-        this._restSessionService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end}).subscribe({
+        this._restSessionService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts}).subscribe({
           next: (res: any[]) => {
             slice.data = res;
           }

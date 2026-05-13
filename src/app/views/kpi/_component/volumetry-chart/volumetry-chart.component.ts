@@ -1,18 +1,8 @@
-import {Component, EventEmitter, inject, Input, Output} from "@angular/core";
-import {DecimalPipe} from "@angular/common";
-import {RestRequestService} from "../../../../service/jquery/rest-request.service";
+import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {ChartProvider} from "@oneteme/jquery-core";
 import {QueryParams} from "../../../../model/conf.model";
-import {periodManagement2} from "../../../../shared/util";
 import {SliceConfig} from "@oneteme/jquery-table";
-import {finalize} from "rxjs";
-import {
-  buildSeries,
-  ChartConfig,
-  REST_PERFORMANCE_CHART_CONFIG,
-  pivotByStack,
-  REST_VOLUMETRY_CHART_CONFIG
-} from "../../kpi.config";
+import {buildSeries, ChartConfig, pivotByStack} from "../../kpi.config";
 
 @Component({
   selector: 'volumetry-chart',
@@ -33,6 +23,14 @@ export class VolumetryChartComponent {
           overflow: 'truncate', // tronquer si trop long
           width: 120         // largeur max avant troncature (ajuste selon ta résolution)
         }
+      },
+      yAxis: {
+        axisLabel: {
+          formatter: (value: number) => value?.toLocaleString('fr-FR')
+        }
+      },
+      tooltip: {
+        valueFormatter: (value: number) => value?.toLocaleString('fr-FR')
       }
     }
   }

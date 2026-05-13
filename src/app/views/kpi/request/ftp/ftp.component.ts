@@ -1,17 +1,6 @@
 import {Component, inject, Input, OnInit} from "@angular/core";
-import {field} from "@oneteme/jquery-core";
-import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 import {QueryParams} from "../../../../model/conf.model";
-import {RestRequestService} from "../../../../service/jquery/rest-request.service";
-import {DatabaseRequestService} from "../../../../service/jquery/database-request.service";
-import {
-  ChartConfig,
-  FTP_PERFORMANCE_CHART_CONFIG, FTP_STATUS_CHART_CONFIG, JDBC_PERFORMANCE_CHART_CONFIG, JDBC_STATUS_CHART_CONFIG,
-  REST_LATENCY_CHART_CONFIG,
-  REST_PERFORMANCE_CHART_CONFIG,
-  REST_STATUS_CHART_CONFIG,
-  REST_VOLUMETRY_CHART_CONFIG
-} from "../../kpi.config";
+import {ChartConfig, FTP_PERFORMANCE_CHART_CONFIG, FTP_STATUS_CHART_CONFIG} from "../../kpi.config";
 import {finalize} from "rxjs";
 import {periodManagement2} from "../../../../shared/util";
 import {FtpRequestService} from "../../../../service/jquery/ftp-request.service";
@@ -71,7 +60,7 @@ export class FtpComponent implements OnInit {
       });
     } else if(event.eventType === 'filter') {
       if(actualFilter) {
-        this._ftpRequestService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end}).subscribe({
+        this._ftpRequestService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts}).subscribe({
           next: (res: any[]) => {
             slice.data = res;
           }

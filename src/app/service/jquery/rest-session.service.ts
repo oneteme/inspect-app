@@ -306,13 +306,15 @@ export class RestSessionService {
             'column': 'rest_request.count:count,rest_request.size_out.sum:sum,instance.app_name:origin,instance_join.app_name:target',
             'instance.id': 'instance_env',
             'id': 'rest_request.parent',
-            'rest_request.remote': 'rest_session_join.id',
+            'rest_request.id': 'rest_session_join.id',
             'rest_session_join.instance_env': 'instance_join.id',
             'view': 'rest_session:rest_session_join,instance:instance_join',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'rest_session_join.start.ge': filters.start.toISOString(),
             'rest_session_join.start.lt': filters.end.toISOString(),
+            'rest_request.start.ge': filters.start.toISOString(),
+            'rest_request.start.lt': filters.end.toISOString(),
             'instance.environement': filters.env,
             'instance_join.environement': filters.env,
             'order': 'origin.asc,target.asc'
@@ -455,6 +457,7 @@ export class RestSessionService {
 
     getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
               filters: {env: string, start: Date, end: Date, hosts?: string[], filters?: string[] }): Observable<any[]> {
+
         let args: any = {
             'column': `${data.series.map(d => d.jquery.value + '.' + data.indicator.jquery.value + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value}:${data.group.jquery.buildAlias()}`,
             'instance_env': 'instance.id',
@@ -469,7 +472,7 @@ export class RestSessionService {
         if(data.group.jquery.order){
             args['order'] = `${data.group.jquery.buildAlias()}.${data.group.jquery.order}`;
         }
-        if(filters.filters?.length) {
+        if(data.filter && filters.filters?.length) {
             args[`${data.filter.jquery.value}.in`] = filters.filters.map(o => `"${o}"`).join(',');
         }
         if(filters.hosts?.length){
@@ -478,7 +481,7 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getFilters(filter: ChartItem, filters: {env: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], method?: string[] }) {
+    getFilters(filter: ChartItem, filters: {env: string, start: Date, end: Date, hosts: string[] }) {
         let args: any = {
             'column': `${filter.jquery.value}.distinct:${filter.jquery.buildAlias()}`,
             'instance_env': 'instance.id',
@@ -487,7 +490,7 @@ export class RestSessionService {
             'start.lt': filters.end.toISOString()
         }
         if(filters.hosts?.length){
-            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+            args['instance.app_name.in'] = filters.hosts.map(o => `"${o}"`).join(',');
         }
         return this.getRestSession(args);
     }
