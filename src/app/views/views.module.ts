@@ -28,17 +28,6 @@ import {
 import {ArchitectureView} from "./architecture/architecture.view";
 import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
 import {NumberFormatterPipe, CompactNumberPipe} from '../shared/pipe/number.pipe';
-import {StatisticServerView} from "./statistic/server/statistic-server.view";
-import {RestTabComponent} from "./statistic/server/_component/rest-tab/rest-tab.component";
-import {BatchTabComponent} from "./statistic/server/_component/batch-tab/batch-tab.component";
-import {DependencyTableComponent} from "./statistic/server/_component/dependency-table/dependency-table.component";
-import {EvolUserCardComponent} from "./statistic/server/_component/evol-user-card/evol-user-card.component";
-import {PerformanceCardComponent} from "./statistic/_component/performance-card/performance-card.component";
-import {DependencyCardComponent} from "./statistic/server/_component/dependency-card/dependency-card.component";
-import {
-  RepartitionTypeCardComponent as RestRepartitionTypeCardComponent
-} from "./statistic/_component/repartition-type-card/repartition-type-card.component";
-import {DeploimentComponent} from './deploiment/deploiment.component';
 import {SearchRequestView} from "./search/request/search-request.view";
 import {AnalyticView} from "./analytic/analytic.view";
 import {DetailTimelineComponent} from "./detail/session/_component/timeline/detail-timeline.component";
@@ -57,21 +46,6 @@ import {
 import {InstanceComponent} from './detail/instance/instance.component';
 import {InstanceTableComponent} from './detail/instance/_component/instance-table/instance-table.component';
 import {ParameterTableComponent} from "./detail/instance/_component/parameter-table/parameter-table.component";
-import {
-  DependencyTableRequestComponent
-} from './statistic/_component/dependency-table-request/dependency-table-request.component';
-import {
-  DependencyTableRequestHttpComponent
-} from "./statistic/_component/dependency-table-request-http/dependency-table-request-http.component";
-import {
-  RepartitionSizeCardHttpComponent
-} from "./statistic/_component/repartition-size-card-http/repartition-size-card-http.component";
-import {DynamicTableComponent} from "./statistic/_component/dynamic-table/dynamic-table.component";
-import {LatencyCardHttpComponent} from "./statistic/_component/latency-card-http/latency-card-http.component";
-import {
-  RepartitionTypeCrossTableComponent
-} from "./statistic/_component/repartition-type-cross-table/repartition-type-cross-table.component";
-import {DynamicChartComponent} from "./statistic/_component/dynamic-chart/dynamic-chart.component";
 import {DashboardInstancesTableComponent} from './dashboard/components/instances-table/instances-table.component';
 import {DashboardCarouselComponent} from './dashboard/components/carousel/carousel.component';
 import {DashboardDetailViewComponent} from './dashboard/components/detail-view/detail-view.component';
@@ -141,17 +115,9 @@ import {BatchComponent} from "./kpi/session/batch/batch.component";
     InstanceComponent,
     InstanceTableComponent,
     ParameterTableComponent,
-    DependencyTableRequestComponent,
-    DependencyTableRequestHttpComponent,
-    RepartitionTypeCrossTableComponent,
-    RepartitionSizeCardHttpComponent,
-    DynamicTableComponent,
-    LatencyCardHttpComponent,
-    DynamicChartComponent,
     DashboardInstancesTableComponent,
     DashboardCarouselComponent,
     DashboardDetailViewComponent,
-    DeploimentComponent,
 
     // New
     RequestKpiView,

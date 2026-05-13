@@ -774,9 +774,6 @@ export class Constants {
             },
             grid: { yaxis: { lines: { show: false } }, xaxis: { lines: { show: false } } }
         }
-=======
-        options: Constants.REQUEST_EXCEPTION_OPTIONS
->>>>>>> origin/develop
     };
 }
 
