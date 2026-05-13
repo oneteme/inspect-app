@@ -104,7 +104,7 @@ export class RestRequestService {
     }
 
     getLatency2(data: {serie: ChartItem, indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
-                filters: {env: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], method?: string[], filters?: string[] }): Observable<any[]> {
+                filters: {env: string, start: Date, end: Date, hosts?: string[], method?: string[], filters?: string[] }): Observable<any[]> {
         let args: any = {
             'column': `${data.indicator.jquery.value}(${data.serie.jquery.value}.minus(rest_session.${data.serie.jquery.value})):${data.indicator.jquery.buildAlias(data.serie.jquery.buildAlias())},${data.group.jquery.value}:${data.group.jquery.buildAlias()}`,
             'join': 'instance,rest_session_inner',
@@ -119,7 +119,7 @@ export class RestRequestService {
             args['order'] = `${data.group.jquery.buildAlias()}.${data.group.jquery.order}`;
         }
         if(data.filter && filters.filters?.length) {
-            args[`${data.filter.jquery.buildAlias()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
+            args[`${data.filter.jquery.value}.in`] = filters.filters.map(o => `"${o}"`).join(',');
         }
         if(filters.hosts?.length){
             args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');

@@ -64,11 +64,32 @@
   min-width: 0;
 }
 
+.kpi-stat-value-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: nowrap;
+}
+
 .kpi-stat-value {
   font-size: 20px;
   font-weight: 700;
   color: #0f172a;
   white-space: nowrap;
+}
+
+.kpi-error-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 7px 2px 5px;
+  border-radius: 20px;
+  white-space: nowrap;
+  letter-spacing: .01em;
+  background: #fef2f2;
+  color: #dc2626;
 }
 
 .kpi-stat-label {
