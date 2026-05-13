@@ -7,7 +7,7 @@ import {DatePipe} from "@angular/common";
   template: `
     <div class="status-indicator"
          (click)="navigate($event)"
-         [matTooltip]="loading ? 'Chargement en cours' : tooltip"
+         [matTooltip]="loading ? '' : tooltip"
          [ngClass]="class">
       <div class="status-dot"></div>
     </div>
