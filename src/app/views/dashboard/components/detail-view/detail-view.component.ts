@@ -118,6 +118,18 @@ export class DashboardDetailViewComponent {
         return `${prefix} — ${label}`;
     }
 
+    /** Indique si le bloc db-clt-block est encore en chargement pour l'insight sélectionné */
+    get isBlockLoading(): boolean {
+        const key = this.selectedKey;
+        if (!key) return false;
+        if (key === 'SERVICE') return this.tabRequests['sessionExceptionsTable']?.isLoading !== false;
+        if (key === 'BATCH')   return this.tabRequests['batchExceptionTable']?.isLoading !== false;
+        if (key === 'VIEW')    return this.tabRequests['viewExceptionTable']?.isLoading !== false;
+        if (key === 'STARTUP' || key === 'TEST') return this.sessionCountLoading;
+        const def = this.protocolDefs.find(p => p.key === key);
+        return def ? this.chartRequests[def.reqKey]?.isLoading !== false : this.kpiLoading;
+    }
+
     /** Loading du graphique selon le type de session sélectionné */
     get sessionChartLoading(): boolean {
         if (this.selectedKey === 'BATCH')   return this.tabRequests['batchExceptionTable']?.isLoading || this.tabRequests['batchTopJobsTable']?.isLoading;

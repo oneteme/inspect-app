@@ -82,9 +82,9 @@
            || (selectedInsights.has('ldap')    && topErrors['ldap']?.length)
            || (selectedInsights.has('SERVICE') && (tabRequests.sessionExceptionsTable?.isLoading !== false || topSessionErrors.length))
            || (selectedInsights.has('BATCH')   && (tabRequests.batchExceptionTable?.isLoading !== false || topBatchErrors.length))
-           || (selectedInsights.has('STARTUP') && (!sessionCountLoading && sessionInitErrors > 0 || divergentBranches.length > 0))
+           || (selectedInsights.has('STARTUP') && (sessionCountLoading || sessionInitErrors > 0 || divergentBranches.length > 0))
            || (selectedInsights.has('VIEW')    && (tabRequests.viewExceptionTable?.isLoading !== false || topViewErrors.length || sessionWebErrors > 0))
-           || (selectedInsights.has('TEST')    && sessionTestErrors > 0)">
+           || (selectedInsights.has('TEST')    && (sessionCountLoading || sessionTestErrors > 0))">
 
       <div class="db-errors-section">
 
@@ -141,6 +141,8 @@
             </div>
           </div>
 
+          <div class="dbi-card dbi-card--loading"
+               *ngIf="selectedInsights.has('STARTUP') && sessionCountLoading"></div>
           <div class="dbi-card" *ngIf="selectedInsights.has('STARTUP') && !sessionCountLoading && sessionInitErrors > 0">
             <ng-container *ngIf="startupErrorsByServer.length; else startupSingleRow">
               <div class="dbi-row dbi-row-link" *ngFor="let s of startupErrorsByServer"
@@ -182,6 +184,8 @@
             </div>
           </div>
 
+          <div class="dbi-card dbi-card--loading"
+               *ngIf="selectedInsights.has('TEST') && sessionCountLoading"></div>
           <div class="dbi-card" *ngIf="selectedInsights.has('TEST') && !sessionCountLoading && sessionTestErrors > 0">
             <div class="dbi-row dbi-row-link" (click)="sessionTypeNav.emit({ type: 'TEST' })">
               <span class="dbi-dot dbi-dot-err"></span>
@@ -202,7 +206,7 @@
     </div><!-- fin .clt-body -->
 
     <!-- Aucun incident sur la période -->
-    <div class="db-no-incidents" *ngIf="isNoIncidents">
+    <div class="db-no-incidents" *ngIf="!isBlockLoading && isNoIncidents">
       <mat-icon class="material-symbols-outlined">event_available</mat-icon>
       <span class="db-no-incidents__title">Aucun incident relevé</span>
       <span class="db-no-incidents__sub">Aucune anomalie détectée sur la période sélectionnée</span>

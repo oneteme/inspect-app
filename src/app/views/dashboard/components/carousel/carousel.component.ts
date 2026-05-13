@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, ViewChild, ViewEncapsulation } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, ElementRef, ViewChild, ViewEncapsulation } from '@angular/core';
 import { TECH_CATALOG, TechDef } from 'src/app/views/constants';
 import { APP_TECH_STACK } from 'src/app/config/tech-stack.config';
 
@@ -23,6 +23,8 @@ export class DashboardCarouselComponent implements AfterViewInit {
     canScrollLeft = false;
     canScrollRight = false;
 
+    constructor(private _cdr: ChangeDetectorRef) {}
+
     trackByTechId(_: number, tech: { id: string }): string { return tech.id; }
 
     getTechTitle(tech: TechDef & { id: string; version?: string }): string {
@@ -32,6 +34,7 @@ export class DashboardCarouselComponent implements AfterViewInit {
 
     ngAfterViewInit(): void {
         this._updateArrows();
+        this._cdr.detectChanges();
         this.techScrollTrack?.nativeElement?.addEventListener('scroll', () => this._updateArrows(), { passive: true });
     }
 

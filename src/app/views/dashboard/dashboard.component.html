@@ -173,38 +173,33 @@
     </ng-template>
 
     <!-- Distribution Flux (ex-Request) -->
-    <ng-container *ngIf="kpiLoading; else fluxBlock">
-      <div class="sb-block sb-distribution-block sb-skel-block">
-        <div class="sbd-title">Flux</div>
-        <ng-container *ngFor="let _ of [1,2,3,4,5]">
+    <div class="sb-block sb-distribution-block">
+      <div class="sbd-title">Flux</div>
+      <div class="sbd-empty" *ngIf="protocolSummaries.length === 0 && !kpiLoading">
+        <mat-icon>info_outline</mat-icon>
+        <span>Aucun flux sur la période</span>
+      </div>
+      <ng-container *ngFor="let p of protocolSummaries">
+        <ng-container *ngIf="p.loading">
           <div class="sbd-skel-label"></div>
           <div class="sbd-skel-track"></div>
           <div class="sbd-skel-rate"></div>
           <div class="sbd-skel-count"></div>
         </ng-container>
-      </div>
-    </ng-container>
-    <ng-template #fluxBlock>
-    <div class="sb-block sb-distribution-block">
-      <div class="sbd-title">Flux</div>
-      <div class="sbd-empty" *ngIf="protocolSummaries.length === 0">
-        <mat-icon>info_outline</mat-icon>
-        <span>Aucun flux sur la période</span>
-      </div>
-      <div class="sbd-row" *ngFor="let p of protocolSummaries"
-        [class.sbd-row-selected]="selectedInsights.has(p.key)"
-        [class.sbd-row-clickable]="p.rate > 0"
-        [title]="(p.total | number:'1.0-0') + ' requêtes · ' + (p.count | number:'1.0-0') + ' erreurs'"
-        (click)="p.rate > 0 ? toggleInsight(p.key) : null">
-        <span class="sbd-label">{{ p.label }}</span>
-        <div class="sbd-track" [class.track-active]="p.total > 0">
-          <div class="sbd-fill" [style.width.%]="p.total > 0 ? (100 - p.rate) : 0"></div>
+        <div class="sbd-row" *ngIf="!p.loading"
+          [class.sbd-row-selected]="selectedInsights.has(p.key)"
+          [class.sbd-row-clickable]="p.rate > 0"
+          [title]="(p.total | number:'1.0-0') + ' requêtes · ' + (p.count | number:'1.0-0') + ' erreurs'"
+          (click)="p.rate > 0 ? toggleInsight(p.key) : null">
+          <span class="sbd-label">{{ p.label }}</span>
+          <div class="sbd-track" [class.track-active]="p.total > 0">
+            <div class="sbd-fill" [style.width.%]="p.total > 0 ? (100 - p.rate) : 0"></div>
+          </div>
+          <span class="sbd-rate" [class.c-ok]="p.rate === 0" [class.c-err]="p.rate > 0">{{ p.rate === 0 ? '100%' : (p.rate | number:'1.2-2') + '%' }}</span>
+          <span class="sbd-count">{{ p.total | compact }}</span>
         </div>
-        <span class="sbd-rate" [class.c-ok]="p.rate === 0" [class.c-err]="p.rate > 0">{{ p.rate === 0 ? '100%' : (p.rate | number:'1.2-2') + '%' }}</span>
-        <span class="sbd-count">{{ p.total | compact }}</span>
-      </div>
+      </ng-container>
     </div>
-    </ng-template>
 
     <!-- Stack Technique — Carousel -->
     <dashboard-carousel></dashboard-carousel>

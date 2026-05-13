@@ -106,6 +106,7 @@ export class DashboardComponent implements OnDestroy {
     private _offlineRows: (LastServerStart & { lastTrace?: number })[] = [];
     sessionCountData: { type: string; total: number; errors: number }[] = [];
     sessionCountLoading = true;
+    restSessionCountLoading = true;
     restSessionCount: { total: number; errors: number } = { total: 0, errors: 0 };
     globalKpi: { globalErrorRate: number; totalSessions: number; totalErrors: number } | null = null;
     kpiLoading = true;
@@ -141,8 +142,8 @@ export class DashboardComponent implements OnDestroy {
     instanceSearchQuery = '';
 
     // résumés calculés après chargement
-    protocolSummaries: { key: string; label: string; rate: number; count: number; total: number }[] = [];
-    sessionSummaries: { key: string; label: string; errors: number; total: number; rate: number; barPct: number }[] = [];
+    protocolSummaries: { key: string; label: string; rate: number; count: number; total: number; loading: boolean }[] = [];
+    sessionSummaries: { key: string; label: string; errors: number; total: number; rate: number; barPct: number; loading: boolean }[] = [];
     sessionTotal = 0;
 
     private _chartsResolved = 0;
@@ -184,6 +185,7 @@ export class DashboardComponent implements OnDestroy {
                 this.protocolSummaries = [];
                 this.sessionCountData = [];
                 this.sessionCountLoading = true;
+                this.restSessionCountLoading = true;
                 this.restSessionCount = { total: 0, errors: 0 };
                 this.startupErrorsByServer = [];
                 this.deployTableRows = [];
@@ -192,7 +194,8 @@ export class DashboardComponent implements OnDestroy {
                 this.initCharts();
                 this.loadServerHealth(this.params.env);
                 this.sessionSubscriptions.push(this._sessionService.getCountByEnv({ env: this.params.env, start: this.params.start, end: this.params.end })
-                    .subscribe({ next: (data) => { this.restSessionCount = data; this._rebuildSessionSummaries(); } }));
+                    .pipe(finalize(() => { this.restSessionCountLoading = false; this._rebuildSessionSummaries(); }))
+                    .subscribe({ next: (data) => { this.restSessionCount = data; } }));
                 this.sessionSubscriptions.push(this._mainService.getCountByType({ env: this.params.env, start: this.params.start, end: this.params.end })
                     .pipe(finalize(() => this.sessionCountLoading = false))
                     .subscribe({ next: (data) => { this.sessionCountData = data; this._rebuildSessionSummaries(); } }));
@@ -222,6 +225,13 @@ export class DashboardComponent implements OnDestroy {
             this.chartRequests[k].chart = [];
             this.chartRequests[k].isLoading = true;
         });
+        this.protocolSummaries = [
+            { key: 'rest',  label: 'REST',  rate: 0, count: 0, total: 0, loading: true },
+            { key: 'jdbc',  label: 'JDBC',  rate: 0, count: 0, total: 0, loading: true },
+            { key: 'ftp',   label: 'FTP',   rate: 0, count: 0, total: 0, loading: true },
+            { key: 'smtp',  label: 'SMTP',  rate: 0, count: 0, total: 0, loading: true },
+            { key: 'ldap',  label: 'LDAP',  rate: 0, count: 0, total: 0, loading: true },
+        ];
 
         this._chartsResolved = 0;
         const totalCharts = keys.length;
@@ -229,6 +239,7 @@ export class DashboardComponent implements OnDestroy {
             this.chartSubscriptions.push(this.chartRequests[k].observable
                 .pipe(finalize(() => {
                     this.chartRequests[k].isLoading = false;
+                    this._rebuildProtocolSummaries();
                     if (++this._chartsResolved >= totalCharts) {
                         this.computeGlobalKpi();
                     }
@@ -754,10 +765,11 @@ export class DashboardComponent implements OnDestroy {
         ];
         this.protocolSummaries = entries
             .map(p => {
+                const loading = this.chartRequests[p.reqKey]?.isLoading ?? false;
                 const s = this.sumcounts(this.chartRequests[p.reqKey]?.chart ?? []);
-                return { key: p.key, label: p.label, rate: p.rate, count: s.count, total: s.countok };
+                return { key: p.key, label: p.label, rate: p.rate, count: s.count, total: s.countok, loading };
             })
-            .filter(p => p.total > 0);
+            .filter(p => p.loading || p.total > 0);
         this._rebuildServerHealth();
     }
 
@@ -773,12 +785,12 @@ export class DashboardComponent implements OnDestroy {
         const overallTotal = this.sessionTotal;
         this.sessionSummaries = types
             .map(t => {
-                let total: number; let errors: number;
-                if (t.type === 'REST') { total = this.restSessionCount.total; errors = this.restSessionCount.errors; }
+                let total: number; let errors: number; let loading = false;
+                if (t.type === 'REST') { total = this.restSessionCount.total; errors = this.restSessionCount.errors; loading = this.restSessionCountLoading; }
                 else { const found = this.sessionCountData.find(d => d.type === t.type); total = found?.total ?? 0; errors = found?.errors ?? 0; }
-                return { key: t.key, label: t.label, errors, total, rate: total > 0 ? (errors * 100) / total : 0, barPct: overallTotal > 0 ? (total * 100) / overallTotal : 0 };
+                return { key: t.key, label: t.label, errors, total, rate: total > 0 ? (errors * 100) / total : 0, barPct: overallTotal > 0 ? (total * 100) / overallTotal : 0, loading };
             })
-            .filter(s => s.total > 0);
+            .filter(s => s.loading || s.total > 0);
         this._rebuildInsightsAllClear();
     }
 
