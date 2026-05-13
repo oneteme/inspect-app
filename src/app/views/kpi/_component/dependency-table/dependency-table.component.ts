@@ -1,7 +1,6 @@
 import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {QueryParams} from "../../../../model/conf.model";
 import {TableProvider} from "@oneteme/jquery-table";
-import {RestSessionDto} from "../../../../model/request.model";
 import {DEFAULT_TABLE_CONFIG} from "../../../../shared/_component/table/table.config";
 
 @Component({

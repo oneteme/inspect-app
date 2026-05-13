@@ -64,6 +64,12 @@ import {SessionKpiView} from "./kpi/session/session-kpi.view";
 import {DependencyNewTableComponent} from "./kpi/_component/dependency-table/dependency-table.component";
 import {DependentNewTableComponent} from "./kpi/_component/dependent-table/dependent-table.component";
 import {BatchComponent} from "./kpi/session/batch/batch.component";
+import {CommandChartComponent} from "./kpi/_component/command-chart/command-chart.component";
+import {DependencyChartComponent} from "./kpi/_component/dependency-chart/dependency-chart.component";
+import {MediaTypeChartComponent} from "./kpi/_component/media-type-chart/media-type-chart.component";
+import {DependentChartComponent} from "./kpi/_component/dependent-chart/dependent-chart.component";
+import {StartupComponent} from "./kpi/session/startup/startup.component";
+import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.component";
 
 @NgModule({
   imports: [
@@ -119,6 +125,7 @@ import {BatchComponent} from "./kpi/session/batch/batch.component";
     RequestRestComponent,
     SessionRestComponent,
     BatchComponent,
+    StartupComponent,
     JdbcComponent,
     FtpComponent,
     LdapComponent,
@@ -130,7 +137,12 @@ import {BatchComponent} from "./kpi/session/batch/batch.component";
     ChartMenuComponent,
     SessionKpiView,
     DependencyNewTableComponent,
-    DependentNewTableComponent
+    DependentNewTableComponent,
+    CommandChartComponent,
+    DependencyChartComponent,
+    DependentChartComponent,
+    MediaTypeChartComponent,
+    UserChartComponent
   ]
 })
 export class ViewsModule { }

@@ -40,7 +40,8 @@ export class SessionKpiView implements OnInit, OnDestroy {
   params: Partial<{type: 'rest' | 'batch', queryParams: QueryParams}> = {};
   serviceType: { [key: string]: {service : RestSessionService | MainSessionService }  } = {
     "rest": { service: this._restSessionService },
-    "batch": { service: this._mainSessionService }
+    "batch": { service: this._mainSessionService },
+    "startup": { service: this._mainSessionService }
   };
 
   ngOnInit() {
@@ -90,7 +91,7 @@ export class SessionKpiView implements OnInit, OnDestroy {
     }
     this.nameDataList = null;
     this.serverNameIsLoading = true;
-    this.hostSubscription = this.serviceType[this.params.type].service.getHosts({ env: this.params.queryParams.env, start: this.params.queryParams.period.start, end: this.params.queryParams.period.end})
+    this.hostSubscription = this.serviceType[this.params.type].service.getHosts({ env: this.params.queryParams.env, start: this.params.queryParams.period.start, end: this.params.queryParams.period.end, type: this.params.type.toUpperCase()})
         .pipe(finalize(()=> this.serverNameIsLoading = false))
         .subscribe({
           next: res => {

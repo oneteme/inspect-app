@@ -225,9 +225,9 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getDependenciesNew(filters: {env: string, start: Date, end: Date, servers: string[] }): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, dep: string, actual: string, type: string}[]> {
+    getDependenciesNew(filters: {env: string, start: Date, end: Date, servers: string[] }): Observable<{count: number, origin: string, target: string}[]> {
         let args: any = {
-            'column': `count:count,count_succes:countSucces,count_error_client:countErrClient,count_error_server:countErrServer,instance.app_name:dep,instance.type,instance_join.app_name:actual`,
+            'column': `count:count,instance.app_name:origin,instance_join.app_name:target`,
             'instance.id': 'instance_env',
             'id': 'rest_request.parent',
             'rest_request.id': 'rest_session_join.id',
@@ -242,7 +242,7 @@ export class RestSessionService {
             'view': 'rest_session:rest_session_join,instance:instance_join',
             'order': 'count.desc'
         }
-        if(filters.servers) {
+        if(filters.servers?.length) {
             args['instance_join.app_name.in'] = filters.servers.map(o => `"${o}"`).join(',');
         }
         return this.getRestSession(args);
@@ -278,9 +278,9 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getDependentsNew(filters: {env: string, start: Date, end: Date, servers: string[] }): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, dep: string, actual: string }[]> {
+    getDependentsNew(filters: {env: string, start: Date, end: Date, servers: string[] }): Observable<{count: number, target: string, origin: string }[]> {
         let args: any = {
-            'column': `rest_session_join.count:count,rest_session_join.count_succes:countSucces,rest_session_join.count_error_client:countErrClient,rest_session_join.count_error_server:countErrServer,instance_join.app_name:dep,instance.app_name:actual`,
+            'column': `rest_session_join.count:count,instance_join.app_name:target,instance.app_name:origin`,
             'id': 'rest_request.parent',
             'rest_request.id': 'rest_session_join.id',
             'rest_request.start.ge': filters.start.toISOString(),
@@ -295,7 +295,7 @@ export class RestSessionService {
             'view': 'rest_session:rest_session_join,instance:instance_join',
             'order': 'count.desc'
         }
-        if(filters.servers) {
+        if(filters.servers?.length) {
             args['instance.app_name.in'] = filters.servers.map(o => `"${o}"`).join(',');
         }
         return this.getRestSession(args);

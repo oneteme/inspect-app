@@ -53,7 +53,10 @@ export class RestComponent implements OnInit {
   $latencyRepartition : Partial<{data: any[], loading: boolean, chartConfig: ChartConfig}> = {data: [], loading: true};
   $latencyRepartitionSlice : {data: any[], loading: boolean} = {data: [], loading: true};
   $methodRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
-  $globalStatistic: {totalRequest: number, totalRequestError: number, percentSuccess: number, totalHost: number} = {totalRequest: 0, totalRequestError: 0, percentSuccess: 0, totalHost: 0};
+  $mediaRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
+  $globalStatistic: {totalRequest: number, totalRequestError: number, percentError: number, totalHost: number} = {totalRequest: 0, totalRequestError: 0, percentError: 0, totalHost: 0};
+  $dependencyRepartition: {data: any[], loading: boolean} = {data: [], loading: true};
+  $userRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
 
   groupedBy: string = '';
   params: QueryParams;
@@ -67,6 +70,9 @@ export class RestComponent implements OnInit {
       this.$volumetryRepartition.chartConfig = REST_VOLUMETRY_CHART_CONFIG(this.groupedBy);
       this.$latencyRepartition.chartConfig = REST_LATENCY_CHART_CONFIG(this.groupedBy);
       this.getMethods();
+      this.getUser();
+      this.getMediaType();
+      this.getDependencies();
       this.getGlobalStatistics();
     }
   };
@@ -119,6 +125,26 @@ export class RestComponent implements OnInit {
     }
   }
 
+  getUser() {
+    let args: any = {
+      'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
+      'instance_env': 'instance.id',
+      'instance.environement': this.params.env,
+      'start.ge': this.params.period.start.toISOString(),
+      'start.lt': this.params.period.end.toISOString(),
+      'order': `start.${this.groupedBy}.asc`
+    }
+    if(this.params.hosts?.length){
+      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    }
+    this.$userRepartition.loading = true;
+    this._httpRequestService.getRestRequest(args).pipe(finalize(() => this.$userRepartition.loading = false)).subscribe({
+      next: (res: any[]) => {
+        this.$userRepartition.data = res;
+      }
+    });
+  }
+
   getLatency(event: {eventType: 'default' | 'filter', chartConfig: ChartConfig, filteredTasks?: any[]},
             arr: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig}>,
             slice: {data: any[], loading: boolean}) {
@@ -129,7 +155,7 @@ export class RestComponent implements OnInit {
     if(event.eventType === 'default') {
       arr.loading = true;
       arr.data = [];
-      this._httpRequestService.getLatency2({serie: event.chartConfig.series.items[0], indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, filters: event.filteredTasks})
+      this._httpRequestService.getLatency2({serie: event.chartConfig.series.items[0], indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks})
       .pipe(finalize(() => arr.loading = false))
       .subscribe(data => {
         arr.data = data;
@@ -145,6 +171,46 @@ export class RestComponent implements OnInit {
         slice.data = [];
       }
     }
+  }
+
+  getDependencies() {
+    let args: any = {
+      'column': `instance.app_name:origin,host:target,count:count`,
+      'instance_env': 'instance.id',
+      'instance.environement': this.params.env,
+      'start.ge': this.params.period.start.toISOString(),
+      'start.lt': this.params.period.end.toISOString(),
+      'order': 'count.asc'
+    }
+    if(this.params.hosts?.length){
+      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    }
+    this.$dependencyRepartition.loading = true;
+    this._httpRequestService.getRestRequest(args).pipe(finalize(() => this.$dependencyRepartition.loading = false)).subscribe({
+      next: (res: any[]) => {
+        this.$dependencyRepartition.data = res;
+      }
+    });
+  }
+
+  getMediaType() {
+    let args: any = {
+      'column': `count:count,media.coalesce("Non renseigné"):media`,
+      'instance_env': 'instance.id',
+      'instance.environement': this.params.env,
+      'start.ge': this.params.period.start.toISOString(),
+      'start.lt': this.params.period.end.toISOString(),
+      'order': 'count.desc'
+    }
+    if(this.params.hosts?.length){
+      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    }
+    this.$mediaRepartition.loading = true;
+    this._httpRequestService.getRestRequest(args).pipe(finalize(() => this.$mediaRepartition.loading = false)).subscribe({
+      next: (res: any[]) => {
+        this.$mediaRepartition.data = res;
+      }
+    });
   }
 
   getMethods() {
@@ -169,7 +235,7 @@ export class RestComponent implements OnInit {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `count(host.distinct):count_host,count:count_request,count_succes:count_success,count_error:count_error`,
+      'column': `count(host.distinct):count_host,count:count_request,count_error:count_error`,
       'instance_env': 'instance.id',
       'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
@@ -181,8 +247,8 @@ export class RestComponent implements OnInit {
     this._httpRequestService.getRestRequest(args).subscribe({
       next: (res: any[]) => {
         this.$globalStatistic.totalRequest = res[0].count_request;
-        this.$globalStatistic.percentSuccess = (res[0].count_success / res[0].count_request) * 100;
         this.$globalStatistic.totalRequestError = res[0].count_error;
+        this.$globalStatistic.percentError = (res[0].count_error / res[0].count_request) * 100 || 0;
         this.$globalStatistic.totalHost = res[0].count_host;
       }
     });

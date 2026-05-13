@@ -7,16 +7,7 @@
       </div>
       <div class="kpi-stat-content">
         <span class="kpi-stat-value">{{$globalStatistic.totalRequest | number}}</span>
-        <span class="kpi-stat-label">Requêtes totales</span>
-      </div>
-    </div>
-    <div class="kpi-stat-card">
-      <div class="kpi-stat-icon green">
-        <mat-icon class="material-symbols-outlined">check_circle</mat-icon>
-      </div>
-      <div class="kpi-stat-content">
-        <span class="kpi-stat-value">{{$globalStatistic.percentSuccess | number: '1.0-2'}} %</span>
-        <span class="kpi-stat-label">Taux de succès</span>
+        <span class="kpi-stat-label">Nombre de Requêtes</span>
       </div>
     </div>
     <div class="kpi-stat-card">
@@ -24,8 +15,13 @@
         <mat-icon class="material-symbols-outlined">error_outline</mat-icon>
       </div>
       <div class="kpi-stat-content">
-        <span class="kpi-stat-value">{{$globalStatistic.totalRequestError | number}}</span>
-        <span class="kpi-stat-label">Erreurs détectées</span>
+        <div class="kpi-stat-value-row">
+          <span class="kpi-stat-value">{{$globalStatistic.totalRequestError | number}}</span>
+          <span class="kpi-error-badge">
+            soit {{$globalStatistic.percentError | number: '1.0-1'}}%
+          </span>
+        </div>
+        <span class="kpi-stat-label">Nombre d'Incidents</span>
       </div>
     </div>
     <div class="kpi-stat-card">
@@ -54,7 +50,15 @@
       </status-chart>
     </div>
 
-    <div class="kpi-chart-card span-4">
+    <div class="kpi-chart-card">
+      <command-chart
+              [data]="$commandRepartition.data"
+              [loading]="$commandRepartition.loading"
+              [queryParams]="params">
+      </command-chart>
+    </div>
+
+    <div class="kpi-chart-card span-3">
       <performance-chart
               [chartConfig]="$performanceRepartition.chartConfig"
               [data]="$performanceRepartition.data"
@@ -63,6 +67,18 @@
               [queryParams]="params"
               (onChartChange)="onPerformanceChartChange($event)">
       </performance-chart>
+    </div>
+    <div class="kpi-chart-card span-4">
+      <user-chart
+              [data]="$userRepartition.data"
+              [loading]="$userRepartition.loading"
+              [queryParams]="params"></user-chart>
+    </div>
+    <div class="kpi-chart-card span-4">
+      <dependency-chart
+              [data]="$dependencyRepartition.data"
+              [loading]="$dependencyRepartition.loading"
+              [queryParams]="params"></dependency-chart>
     </div>
   </div>
 </div>
