@@ -1,11 +1,9 @@
-.server-card-host {
+﻿.server-card-host {
   flex: 0 0 38%;
   min-width: 280px;
 }
 
-// ──────────────────────────────────────────────
 // CARTE SESSION REST
-// ──────────────────────────────────────────────
 .session-card {
   flex: 1 1 60%;
   min-width: 0;
@@ -21,7 +19,7 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
   }
 
-  // ── Icône colorée selon le statut ──
+ // Icône colorée selon le statut
   &.success .session-icon-wrap {
     background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
     border-color: #86efac;
@@ -64,7 +62,7 @@
   min-width: 0;
 }
 
-// ── En-tête ──
+// En-tête
 .session-header {
   display: flex;
   align-items: flex-start;
@@ -149,7 +147,7 @@
   color: #64748b;
 }
 
-// ── Pill de statut HTTP ──
+// Pill de statut HTTP
 .status-pill {
   display: inline-flex;
   align-items: center;
@@ -166,7 +164,7 @@
   &.unavailable{ background: #f1f5f9; color: #475569; }
 }
 
-// ── Badge méthode HTTP ──
+// Badge méthode HTTP
 .method-badge {
   display: inline-flex;
   align-items: center;
@@ -181,7 +179,7 @@
   flex-shrink: 0;
 }
 
-// ── Pied de carte ──
+// Pied de carte
 .session-footer {
   display: flex;
   align-items: center;
@@ -202,7 +200,7 @@
   gap: 0.5em;
 }
 
-// ── Chips de métadonnées (utilisateur/date) ──
+// Chips de métadonnées (utilisateur/date)
 .meta-chip {
   display: inline-flex;
   align-items: center;
@@ -223,7 +221,7 @@
   }
 }
 
-// ── Section métadonnées HTTP (icônes) ──
+// Section métadonnées HTTP (icônes)
 .http-meta {
   gap: 4px;
 }
@@ -260,7 +258,7 @@
   }
 }
 
-// ── Section stats données ──
+// Section stats données
 .data-stats {
   gap: 0.75em;
 }

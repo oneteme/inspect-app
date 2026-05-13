@@ -53,7 +53,6 @@ export class DashboardDetailViewComponent {
         return 'stable';
     }
 
-    // â”€â”€ KPI dynamiques liÃ©s Ã  l'insight sÃ©lectionnÃ© â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     get selectedKey(): string | null {
         for (const k of this.context.selectedInsights) return k;
         return null;

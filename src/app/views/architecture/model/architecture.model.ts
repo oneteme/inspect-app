@@ -148,8 +148,8 @@ export class ArchitectureTree {
             if (!node) return;
             node.querySelectorAll('path').forEach((p: SVGPathElement) => {
                 p.style.strokeDasharray = '10 6';
-                p.style.animation       = 'edgeFlowAnim 0.7s linear infinite';
-                p.style.strokeWidth     = '3';
+                p.style.animation = 'edgeFlowAnim 0.7s linear infinite';
+                p.style.strokeWidth = '3';
             });
         });
     }
@@ -163,8 +163,8 @@ export class ArchitectureTree {
             if (!node) return;
             node.querySelectorAll('path').forEach((p: SVGPathElement) => {
                 p.style.strokeDasharray = '';
-                p.style.animation       = '';
-                p.style.strokeWidth     = '';
+                p.style.animation = '';
+                p.style.strokeWidth = '';
             });
         });
         this._animatedEdges.clear();
@@ -211,8 +211,8 @@ export class ArchitectureTree {
             if (!this._animatedEdges.size) return;
             setTimeout(() => this._applyFlowToAnimatedEdges(), 0);
         };
-        this._graph.view.addListener(mx.mxEvent.SCALE,               reapply);
-        this._graph.view.addListener(mx.mxEvent.TRANSLATE,           reapply);
+        this._graph.view.addListener(mx.mxEvent.SCALE, reapply);
+        this._graph.view.addListener(mx.mxEvent.TRANSLATE, reapply);
         this._graph.view.addListener(mx.mxEvent.SCALE_AND_TRANSLATE, reapply);
     }
 

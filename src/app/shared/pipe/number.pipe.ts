@@ -33,8 +33,8 @@ export function compactNumber(value: number): string {
     };
     const abs = Math.abs(value);
     if (abs >= 1_000_000_000) return fmt(value / 1_000_000_000, 'G');
-    if (abs >= 1_000_000)     return fmt(value / 1_000_000, 'M');
-    if (abs >= 1_000)         return fmt(value / 1_000, 'k');
+    if (abs >= 1_000_000) return fmt(value / 1_000_000, 'M');
+    if (abs >= 1_000) return fmt(value / 1_000, 'k');
     return String(value);
 }
 

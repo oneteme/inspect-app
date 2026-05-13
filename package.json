@@ -27,7 +27,6 @@
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.43",
     "mxgraph": "^4.2.2",
-    "pptxgenjs": "^4.0.1",
     "rxjs": "~7.5.0",
     "tslib": "^2.0.0",
     "vis-data": "^7.1.9",

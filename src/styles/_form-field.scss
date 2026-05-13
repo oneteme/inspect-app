@@ -25,14 +25,14 @@
     border-radius: 0 10px 10px 0 !important;
   }
 
-  // ── Fond du champ ─────────────────────────────────────────────
+ // Fond du champ
   .mdc-text-field--outlined {
     background: rgba(34, 36, 38, .03) !important;
     border-radius: 10px !important;
     transition: background .18s ease;
   }
 
-  // ── Hover ─────────────────────────────────────────────────────
+ // Hover
   .mdc-text-field--outlined:not(.mdc-text-field--disabled):hover {
     background: rgba(34, 36, 38, .055) !important;
 
@@ -43,7 +43,7 @@
     }
   }
 
-  // ── Focus ─────────────────────────────────────────────────────
+ // Focus
   .mdc-text-field--outlined.mdc-text-field--focused {
     background: rgba(20, 100, 220, .035) !important;
 
@@ -54,7 +54,7 @@
     }
   }
 
-  // ── Label flottant ────────────────────────────────────────────
+ // Label flottant
   .mdc-text-field--outlined .mdc-floating-label {
     font-size: 13px !important;
     font-weight: 500 !important;
@@ -66,14 +66,14 @@
     color: #1464dc !important;
   }
 
-  // ── Texte saisi ───────────────────────────────────────────────
+ // Texte saisi
   .mdc-text-field--outlined .mdc-text-field__input {
     font-size: 13px !important;
     color: rgba(0, 0, 0, .82) !important;
     caret-color: #1464dc;
   }
 
-  // ── Icônes suffix / prefix ────────────────────────────────────
+ // Icônes suffix / prefix
   .mat-mdc-form-field-icon-suffix,
   .mat-mdc-form-field-icon-prefix {
     color: rgba(0, 0, 0, .32) !important;
@@ -87,7 +87,7 @@
     }
   }
 
-  // ── Mat-select : valeur + placeholder + flèche ────────────────
+ // Mat-select : valeur + placeholder + flèche
   .mat-mdc-select-value-text {
     font-size: 13px;
     color: rgba(0, 0, 0, .82);
@@ -107,7 +107,7 @@
     fill: #1464dc !important;
   }
 
-  // ── Datepicker toggle ─────────────────────────────────────────
+ // Datepicker toggle
   .mat-datepicker-toggle .mat-mdc-icon-button {
     color: rgba(0, 0, 0, .35) !important;
     transition: color .15s;

@@ -1,4 +1,4 @@
-/* You can add global styles to this file, and also import other style files */
+﻿/* You can add global styles to this file, and also import other style files */
 
 body {
   margin: 0;
@@ -20,7 +20,7 @@ body {
 
 .mat-mdc-mini-fab,
 .mat-mdc-fab {
-  // ── Géométrie : moins circulaire que FAB par défaut ──────────
+ // Géométrie : moins circulaire que FAB par défaut
   border-radius: 12px !important;
   width: 38px !important;
   height: 38px !important;
@@ -29,7 +29,7 @@ body {
     box-shadow .15s ease,
     transform .1s ease !important;
 
-  // ── Icône centrée ────────────────────────────────────────────
+ // Icône centrée
   .mat-icon {
     font-size: 19px !important;
     width: 19px !important;
@@ -42,7 +42,7 @@ body {
   }
 }
 
-// ── Couleur primary (bleu) ───────────────────────────────────
+// Couleur primary (bleu)
 .mat-mdc-mini-fab.mat-primary,
 .mat-mdc-fab.mat-primary {
   --mdc-fab-container-color: #1464dc;
@@ -60,7 +60,7 @@ body {
   }
 }
 
-// ── Couleur warn (rouge) ─────────────────────────────────────
+// Couleur warn (rouge)
 .mat-mdc-mini-fab.mat-warn,
 .mat-mdc-fab.mat-warn {
   box-shadow: 0 1px 3px rgba(205, 6, 6, .2), 0 0 0 1px rgba(205, 6, 6, .12) !important;
@@ -70,7 +70,7 @@ body {
   }
 }
 
-// ── mat-icon-button (boutons menu trois points, etc.) ────────
+// mat-icon-button (boutons menu trois points, etc.)
 .mat-mdc-icon-button.menu-btn {
   border-radius: 10px !important;
   width: 36px !important;

@@ -4,12 +4,12 @@ import {DecimalPipe} from "@angular/common";
 /** Logique pure de formatage d'une durée en secondes — utilisable hors pipe (ex: searchValue). */
 export function formatDuration(seconds: number): string {
     if (!seconds && seconds !== 0) return 'En cours';
-    const days    = Math.floor(seconds / 86400);
-    const hours   = Math.floor(seconds / 3600);
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor(seconds / 3600);
     const minutes = Math.floor((seconds % 3600) / 60);
-    const secs    = Math.round((seconds % 60) * 1000) / 1000;
-    if (days > 0)    return `${days} jour(s)`;
-    if (hours > 0)   return `${hours}h, ${minutes > 0 ? minutes + 'min' : '0 min'}`;
+    const secs = Math.round((seconds % 60) * 1000) / 1000;
+    if (days > 0) return `${days} jour(s)`;
+    if (hours > 0) return `${hours}h, ${minutes > 0 ? minutes + 'min' : '0 min'}`;
     if (minutes > 0) {
         const secPart = secs ? ' : ' + secs + 's' : '';
         return minutes + 'min' + secPart;

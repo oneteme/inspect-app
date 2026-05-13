@@ -1,6 +1,4 @@
-// ─────────────────────────────────────────────
-//  KPI PAGE – REST
-// ─────────────────────────────────────────────
+﻿//  KPI PAGE – REST
 
 .kpi-page {
   display: flex;
@@ -11,9 +9,7 @@
   box-sizing: border-box;
 }
 
-// ─────────────────────────────────────────────
 //  SUMMARY ROW
-// ─────────────────────────────────────────────
 
 .kpi-summary-row {
   display: flex;
@@ -82,9 +78,7 @@
   white-space: nowrap;
 }
 
-// ─────────────────────────────────────────────
 //  CHART GRID
-// ─────────────────────────────────────────────
 
 .kpi-grid {
   display: grid;
@@ -99,9 +93,7 @@
   }
 }
 
-// ─────────────────────────────────────────────
 //  CHART CARD
-// ─────────────────────────────────────────────
 
 .kpi-chart-card {
   background: #ffffff;
@@ -142,7 +134,7 @@
 
 
 
-// ── Header ──
+// Header
 .kpi-chart-header {
   display: flex;
   align-items: center;
@@ -206,7 +198,7 @@
   }
 }
 
-// ── Fil d'Ariane ──
+// Fil d'Ariane
 .kpi-breadcrumb {
   display: flex;
   align-items: center;
@@ -260,7 +252,7 @@
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
 }
 
-// ── Subheader ──
+// Subheader
 .kpi-chart-subheader {
   display: flex;
   align-items: center;
@@ -276,12 +268,10 @@
   font-weight: 500;
 }
 
-// ─────────────────────────────────────────────
 //  CHART OPTION MENU  (overlay → styles globaux)
 //  Cible les panels Material directement
-// ─────────────────────────────────────────────
 
-// ── Panel ──
+// Panel
 ::ng-deep .kpi-menu {
   .mat-mdc-menu-panel,
   .mat-menu-panel {
@@ -297,7 +287,7 @@
 }
 
 
-// ── Titre du menu principal ──
+// Titre du menu principal
 .kpi-menu-title {
   font-size: 11px;
   font-weight: 700;
@@ -308,7 +298,7 @@
   pointer-events: none;
 }
 
-// ── Label de section (sous-menus) ──
+// Label de section (sous-menus)
 .kpi-menu-section-label {
   font-size: 10.5px;
   font-weight: 700;
@@ -319,7 +309,7 @@
   pointer-events: none;
 }
 
-// ── Items ──
+// Items
 ::ng-deep .kpi-menu {
   .mat-mdc-menu-item,
   .mat-menu-item {
@@ -339,7 +329,7 @@
       background: #f8fafc !important;
     }
 
-    // ── État sélectionné ──
+ // État sélectionné
     &.kpi-menu-item--selected {
       background: #eff6ff !important;
 
