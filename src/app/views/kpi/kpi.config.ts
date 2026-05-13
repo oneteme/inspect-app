@@ -173,7 +173,7 @@ export const REST_SESSION_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartCon
       key: 'size_in',
       selected: true,
       menu: {
-        label: 'Données reçues'
+        label: '↓'
       },
       jquery: {
         value: 'size_in_notnull',
@@ -183,7 +183,7 @@ export const REST_SESSION_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartCon
       key: 'size_out',
       selected: true,
       menu: {
-        label: 'Données envoyées'
+        label: '↑'
       },
       jquery: {
         value: 'size_out_notnull',
@@ -215,7 +215,7 @@ export const REST_SESSION_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartCon
             jquery: {
               value: 'size_tranche',
               buildAlias: () => 'size_tranche',
-              buildName: (chartItem, value) => SIZE_TRANCHE[value].label + " " + chartItem.menu.label,
+              buildName: (chartItem, value) => chartItem.menu.label + " " + SIZE_TRANCHE[value].label,
               buildColor: (value) => SIZE_TRANCHE[value].color
             }
           }]
@@ -291,7 +291,7 @@ export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => (
       label: 'Api'
     },
     jquery: {
-      value: `api_name.coalesce("<empty>")`,
+      value: `api_name.coalesce("Non renseigné")`,
       buildAlias: () => 'name',
       order: 'asc'
     }
@@ -302,7 +302,7 @@ export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => (
       label: 'Utilisateur'
     },
     jquery: {
-      value: `user.coalesce("<empty>")`,
+      value: `user.coalesce("Non renseigné")`,
       buildAlias: () => 'user',
       order: 'asc'
     }
@@ -313,7 +313,7 @@ export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => (
       label: 'Method'
     },
     jquery: {
-      value: `method.coalesce("<empty>")`,
+      value: `method.coalesce("Non renseigné")`,
       buildAlias: () => 'method',
       order: 'asc'
     }
@@ -324,7 +324,7 @@ export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => (
       label: 'Media'
     },
     jquery: {
-      value: `media.coalesce("<empty>")`,
+      value: `media.coalesce("Non renseigné")`,
       buildAlias: () => 'media',
       order: 'asc'
     }
@@ -335,7 +335,7 @@ export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => (
       label: 'Auth'
     },
     jquery: {
-      value: `auth.coalesce("<empty>")`,
+      value: `auth.coalesce("Non renseigné")`,
       buildAlias: () => 'auth',
       order: 'asc'
     }
@@ -373,7 +373,7 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
       label: 'Api'
     },
     jquery: {
-      value: `api_name.coalesce("<empty>")`,
+      value: `api_name.coalesce("Non renseigné")`,
       buildAlias: () => 'name',
       order: 'asc'
     }
@@ -384,7 +384,7 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
       label: 'Utilisateur'
     },
     jquery: {
-      value: `user.coalesce("<empty>")`,
+      value: `user.coalesce("Non renseigné")`,
       buildAlias: () => 'user',
       order: 'asc'
     }
@@ -395,7 +395,7 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
       label: 'Method'
     },
     jquery: {
-      value: `method.coalesce("<empty>")`,
+      value: `method.coalesce("Non renseigné")`,
       buildAlias: () => 'method',
       order: 'asc'
     }
@@ -406,7 +406,7 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
       label: 'Media'
     },
     jquery: {
-      value: `method.coalesce("<empty>")`,
+      value: `method.coalesce("Non renseigné")`,
       buildAlias: () => 'media',
       order: 'asc'
     }
@@ -417,7 +417,7 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
       label: 'Auth'
     },
     jquery: {
-      value: `auth.coalesce("<empty>")`,
+      value: `auth.coalesce("Non renseigné")`,
       buildAlias: () => 'auth',
       order: 'asc'
     }
@@ -530,6 +530,95 @@ export const BATCH_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection =>
     jquery: {
       value: `name`,
       buildAlias: () => 'name',
+      order: 'asc'
+    }
+  }]
+});
+
+export const STARTUP_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+  series: {
+    optional: false,
+    items: [{
+      key: 'type',
+      selected: true,
+      menu: {
+        label: ''
+      },
+      jquery: {
+        value: 'type',
+        buildAlias: () => 'type'
+      }
+    }]
+  },
+  indicators: {
+    optional: false,
+    items: [{
+      key: 'count',
+      selected: true,
+      menu: {
+        label: 'Nombre d\'Appel',
+        icon: 'numbers'
+      },
+      jquery: {
+        value: 'count',
+        buildAlias: () => 'count',
+        buildName: () => 'Nombre d\'Appel'
+      }
+    }]
+  },
+  groups: STARTUP_SESSION_GROUPS_CONFIG(groupedBy),
+  filters: STARTUP_SESSION_FILTERS_CONFIG(groupedBy)
+});
+
+export const STARTUP_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
+  optional: false,
+  items: [{
+    key: 'date',
+    selected: true,
+    menu: {
+      label: 'Date'
+    },
+    jquery: {
+      value: `start.${groupedBy}.varchar`,
+      buildAlias: () => 'date',
+      order: 'asc'
+    }
+  }, {
+    key: 'host',
+    selected: false,
+    menu: {
+      label: 'Hôte'
+    },
+    jquery: {
+      value: `instance.app_name`,
+      buildAlias: () => 'host',
+      order: 'asc'
+    }
+  }]
+});
+
+export const STARTUP_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
+  optional: false,
+  items: [{
+    key: 'date',
+    selected: false,
+    menu: {
+      label: 'Date'
+    },
+    jquery: {
+      value: `start.${groupedBy}.varchar`,
+      buildAlias: () => 'date',
+      order: 'asc'
+    }
+  }, {
+    key: 'host',
+    selected: false,
+    menu: {
+      label: 'Hôte'
+    },
+    jquery: {
+      value: `instance.app_name`,
+      buildAlias: () => 'host',
       order: 'asc'
     }
   }]
@@ -707,7 +796,7 @@ export const REST_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartConfig => (
       key: 'size_in',
       selected: true,
       menu: {
-        label: 'Données reçues'
+        label: '↓'
       },
       jquery: {
         value: 'size_in_notnull',
@@ -717,7 +806,7 @@ export const REST_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartConfig => (
       key: 'size_out',
       selected: true,
       menu: {
-        label: 'Données envoyées'
+        label: '↑'
       },
       jquery: {
         value: 'size_out_notnull',
@@ -749,7 +838,7 @@ export const REST_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartConfig => (
             jquery: {
               value: 'size_tranche',
               buildAlias: () => 'size_tranche',
-              buildName: (chartItem, value) => SIZE_TRANCHE[value].label + " " + chartItem.menu.label,
+              buildName: (chartItem, value) => chartItem.menu.label + " " + SIZE_TRANCHE[value].label,
               buildColor: (value) => SIZE_TRANCHE[value].color
             }
           }]
@@ -884,7 +973,7 @@ export const REST_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Method'
     },
     jquery: {
-      value: `method.coalesce("<empty>")`,
+      value: `method.coalesce("Non renseigné")`,
       buildAlias: () => 'method',
       order: 'asc'
     }
@@ -895,7 +984,7 @@ export const REST_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Media'
     },
     jquery: {
-      value: `method.coalesce("<empty>")`,
+      value: `media.coalesce("Non renseigné")`,
       buildAlias: () => 'media',
       order: 'asc'
     }
@@ -906,7 +995,7 @@ export const REST_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Auth'
     },
     jquery: {
-      value: `auth.coalesce("<empty>")`,
+      value: `auth.coalesce("Non renseigné")`,
       buildAlias: () => 'auth',
       order: 'asc'
     }
@@ -944,7 +1033,7 @@ export const REST_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Method'
     },
     jquery: {
-      value: `method.coalesce("<empty>")`,
+      value: `method.coalesce("Non renseigné")`,
       buildAlias: () => 'method',
       order: 'asc'
     }
@@ -955,7 +1044,7 @@ export const REST_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Media'
     },
     jquery: {
-      value: `method.coalesce("<empty>")`,
+      value: `media.coalesce("Non renseigné")`,
       buildAlias: () => 'media',
       order: 'asc'
     }
@@ -966,7 +1055,7 @@ export const REST_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Auth'
     },
     jquery: {
-      value: `auth.coalesce("<empty>")`,
+      value: `auth.coalesce("Non renseigné")`,
       buildAlias: () => 'auth',
       order: 'asc'
     }
@@ -1147,7 +1236,7 @@ export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Commande'
     },
     jquery: {
-      value: `command.coalesce("<empty>")`,
+      value: `command.coalesce("Non renseigné")`,
       buildAlias: () => 'command',
       order: 'asc',
     }
@@ -1158,7 +1247,7 @@ export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Schéma'
     },
     jquery: {
-      value: `schema.coalesce("<empty>")`,
+      value: `schema.coalesce("Non renseigné")`,
       buildAlias: () => 'schema',
       order: 'asc',
     }
@@ -1169,7 +1258,7 @@ export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Utilisateur'
     },
     jquery: {
-      value: `user.coalesce("<empty>")`,
+      value: `user.coalesce("Non renseigné")`,
       buildAlias: () => 'user',
       order: 'asc',
     }
@@ -1180,7 +1269,7 @@ export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Nom de la base de données'
     },
     jquery: {
-      value: `db_name.coalesce("<empty>")`,
+      value: `db_name.coalesce("Non renseigné")`,
       buildAlias: () => 'db_name',
       order: 'asc',
     }
@@ -1191,7 +1280,7 @@ export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Version de la base de données'
     },
     jquery: {
-      value: `db_version.coalesce("<empty>")`,
+      value: `db_version.coalesce("Non renseigné")`,
       buildAlias: () => 'db_version',
       order: 'asc',
     }
@@ -1202,7 +1291,7 @@ export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Version du driver'
     },
     jquery: {
-      value: `driver.coalesce("<empty>")`,
+      value: `driver.coalesce("Non renseigné")`,
       buildAlias: () => 'driver',
       order: 'asc',
     }
@@ -1229,7 +1318,7 @@ export const JDBC_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Commande'
     },
     jquery: {
-      value: `command.coalesce("<empty>")`,
+      value: `command.coalesce("Non renseigné")`,
       buildAlias: () => 'command',
       order: 'asc',
     }
@@ -1240,7 +1329,7 @@ export const JDBC_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Schéma'
     },
     jquery: {
-      value: `schema.coalesce("<empty>")`,
+      value: `schema.coalesce("Non renseigné")`,
       buildAlias: () => 'schema',
       order: 'asc',
     }
@@ -1251,7 +1340,7 @@ export const JDBC_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Utilisateur'
     },
     jquery: {
-      value: `user.coalesce("<empty>")`,
+      value: `user.coalesce("Non renseigné")`,
       buildAlias: () => 'user',
       order: 'asc',
     }
@@ -1262,7 +1351,7 @@ export const JDBC_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Nom de la base de données'
     },
     jquery: {
-      value: `db_name.coalesce("<empty>")`,
+      value: `db_name.coalesce("Non renseigné")`,
       buildAlias: () => 'db_name',
       order: 'asc',
     }
@@ -1273,7 +1362,7 @@ export const JDBC_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Version de la base de données'
     },
     jquery: {
-      value: `db_version.coalesce("<empty>")`,
+      value: `db_version.coalesce("Non renseigné")`,
       buildAlias: () => 'db_version',
       order: 'asc',
     }
@@ -1284,7 +1373,7 @@ export const JDBC_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Version du driver'
     },
     jquery: {
-      value: `driver.coalesce("<empty>")`,
+      value: `driver.coalesce("Non renseigné")`,
       buildAlias: () => 'driver',
       order: 'asc',
     }
@@ -1465,7 +1554,7 @@ export const FTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Commande'
     },
     jquery: {
-      value: `command.coalesce("<empty>")`,
+      value: `command.coalesce("Non renseigné")`,
       buildAlias: () => 'command',
       order: 'asc',
     }
@@ -1476,7 +1565,7 @@ export const FTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Utilisateur'
     },
     jquery: {
-      value: `user.coalesce("<empty>")`,
+      value: `user.coalesce("Non renseigné")`,
       buildAlias: () => 'user',
       order: 'asc',
     }
@@ -1487,7 +1576,7 @@ export const FTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Version du serveur'
     },
     jquery: {
-      value: `server_version.coalesce("<empty>")`,
+      value: `server_version.coalesce("Non renseigné")`,
       buildAlias: () => 'server_version',
       order: 'asc',
     }
@@ -1498,7 +1587,7 @@ export const FTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Version du client'
     },
     jquery: {
-      value: `client_version.coalesce("<empty>")`,
+      value: `client_version.coalesce("Non renseigné")`,
       buildAlias: () => 'client_version',
       order: 'asc',
     }
@@ -1525,7 +1614,7 @@ export const FTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Commande'
     },
     jquery: {
-      value: `command.coalesce("<empty>")`,
+      value: `command.coalesce("Non renseigné")`,
       buildAlias: () => 'command',
       order: 'asc',
     }
@@ -1536,7 +1625,7 @@ export const FTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Utilisateur'
     },
     jquery: {
-      value: `user.coalesce("<empty>")`,
+      value: `user.coalesce("Non renseigné")`,
       buildAlias: () => 'user',
       order: 'asc',
     }
@@ -1547,7 +1636,7 @@ export const FTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Version du serveur'
     },
     jquery: {
-      value: `server_version.coalesce("<empty>")`,
+      value: `server_version.coalesce("Non renseigné")`,
       buildAlias: () => 'server_version',
       order: 'asc',
     }
@@ -1558,7 +1647,7 @@ export const FTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Version du client'
     },
     jquery: {
-      value: `client_version.coalesce("<empty>")`,
+      value: `client_version.coalesce("Non renseigné")`,
       buildAlias: () => 'client_version',
       order: 'asc',
     }
@@ -1739,7 +1828,7 @@ export const LDAP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Commande'
     },
     jquery: {
-      value: `command.coalesce("<empty>")`,
+      value: `command.coalesce("Non renseigné")`,
       buildAlias: () => 'command',
       order: 'asc',
     }
@@ -1750,7 +1839,7 @@ export const LDAP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Utilisateur'
     },
     jquery: {
-      value: `user.coalesce("<empty>")`,
+      value: `user.coalesce("Non renseigné")`,
       buildAlias: () => 'user',
       order: 'asc',
     }
@@ -1777,7 +1866,7 @@ export const LDAP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Commande'
     },
     jquery: {
-      value: `command.coalesce("<empty>")`,
+      value: `command.coalesce("Non renseigné")`,
       buildAlias: () => 'command',
       order: 'asc',
     }
@@ -1788,7 +1877,7 @@ export const LDAP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Utilisateur'
     },
     jquery: {
-      value: `user.coalesce("<empty>")`,
+      value: `user.coalesce("Non renseigné")`,
       buildAlias: () => 'user',
       order: 'asc',
     }
@@ -1969,7 +2058,7 @@ export const SMTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Commande'
     },
     jquery: {
-      value: `command.coalesce("<empty>")`,
+      value: `command.coalesce("Non renseigné")`,
       buildAlias: () => 'command',
       order: 'asc',
     }
@@ -1980,7 +2069,7 @@ export const SMTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Utilisateur'
     },
     jquery: {
-      value: `user.coalesce("<empty>")`,
+      value: `user.coalesce("Non renseigné")`,
       buildAlias: () => 'user',
       order: 'asc',
     }
@@ -2007,7 +2096,7 @@ export const SMTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Commande'
     },
     jquery: {
-      value: `command.coalesce("<empty>")`,
+      value: `command.coalesce("Non renseigné")`,
       buildAlias: () => 'command',
       order: 'asc',
     }
@@ -2018,7 +2107,7 @@ export const SMTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Utilisateur'
     },
     jquery: {
-      value: `user.coalesce("<empty>")`,
+      value: `user.coalesce("Non renseigné")`,
       buildAlias: () => 'user',
       order: 'asc',
     }
@@ -2038,33 +2127,33 @@ const REQUEST_STATUS_STACK = {
 }
 
 const STATUS_TRANCHE = {
-  '1': {label: 'Cat. 1 (0)', color: '#94a3b8'},
-  '2': {label: 'Cat. 2 (1xx)', color: '#8b5cf6'},
-  '3': {label: 'Cat. 3 (2xx)', color: '#22c55e'},
-  '4': {label: 'Cat. 4 (3xx)', color: '#06b6d4'},
-  '5': {label: 'Cat. 5 (4xx)', color: '#f59e0b'},
-  '6': {label: 'Cat. 6 (5xx)', color: '#ef4444'}
+  '1': {label: '0', color: '#94a3b8'},
+  '2': {label: '1xx', color: '#8b5cf6'},
+  '3': {label: '2xx', color: '#22c55e'},
+  '4': {label: '3xx', color: '#06b6d4'},
+  '5': {label: '4xx', color: '#f59e0b'},
+  '6': {label: '5xx', color: '#ef4444'}
 }
 
 const PERFORMANCE_TRANCHE1 = {
-  '1': { label: 'Cat. 1 (0 - 1s)', color: '#22c55e' },  // vert    – excellent
-  '2': { label: 'Cat. 2 (1 - 3s)', color: '#84cc16' },  // lime    – bon
-  '3': { label: 'Cat. 3 (3 - 5s)', color: '#eab308' },  // jaune   – acceptable
-  '4': { label: 'Cat. 4 (5 - 10s)', color: '#f97316' },  // orange  – lent
-  '5': { label: 'Cat. 5 (> 10s)', color: '#ef4444' },  // rouge   – très lent
+  '1': { label: '< 1s', color: '#22c55e' },  // vert    – excellent
+  '2': { label: '[1-3s[', color: '#84cc16' },  // lime    – bon
+  '3': { label: '[3-5s[', color: '#eab308' },  // jaune   – acceptable
+  '4': { label: '[5-10s[', color: '#f97316' },  // orange  – lent
+  '5': { label: '≥ 10s', color: '#ef4444' },  // rouge   – très lent
 }
 
 const PERFORMANCE_TRANCHE2 = {
-  '1': { label: 'Cat. 1 (0 - 5s)', color: '#84cc16' },  // vert    – excellent
-  '2': { label: 'Cat. 2 (5 - 10s)', color: '#f97316' },  // lime    – bon
-  '3': { label: 'Cat. 3 (> 10s)', color: '#ef4444' }  // jaune   – acceptable
+  '1': { label: '< 5s', color: '#84cc16' },  // vert    – excellent
+  '2': { label: '[5-10s[', color: '#f97316' },  // lime    – bon
+  '3': { label: '≥ 10s', color: '#ef4444' }  // jaune   – acceptable
 }
 
 const SIZE_TRANCHE = {
-  '1': { label: 'Cat. 1 (0 - 100o)', color: '#22c55e' },
-  '2': { label: 'Cat. 2 (100 - 200o)', color: '#84cc16' },
-  '3': { label: 'Cat. 3 (200 - 300o)', color: '#eab308' },
-  '4': { label: 'Cat. 4 (> 300o)', color: '#f97316' }
+  '1': { label: '< 100o', color: '#22c55e' },
+  '2': { label: '[100-200o[', color: '#84cc16' },
+  '3': { label: '[200-300o[', color: '#eab308' },
+  '4': { label: '≥ 300o', color: '#f97316' }
 }
 
 export interface ChartItem<TExtra = {}> {

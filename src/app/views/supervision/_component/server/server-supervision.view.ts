@@ -125,6 +125,8 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   };
   readonly USAGE_INSTANCE_TRACE_BY_PERIOD_LINE: ChartProvider<string, number> = {
     height: 335,
+    group: 'sync',
+    groupSync: ['tooltip', 'datazoom'],
     stacked: false,
     ytitle: '',
     series: [

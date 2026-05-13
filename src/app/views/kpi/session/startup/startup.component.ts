@@ -1,15 +1,15 @@
 import {Component, inject, Input, OnInit} from "@angular/core";
 import {QueryParams} from "../../../../model/conf.model";
 import {finalize} from "rxjs";
-import {BATCH_SESSION_STATUS_CHART_CONFIG, ChartConfig} from "../../kpi.config";
+import {BATCH_SESSION_STATUS_CHART_CONFIG, ChartConfig, STARTUP_SESSION_STATUS_CHART_CONFIG} from "../../kpi.config";
 import {periodManagement2} from "../../../../shared/util";
 import {MainSessionService} from "../../../../service/jquery/main-session.service";
 
 @Component({
-  templateUrl: './batch.component.html',
-  styleUrls: ['./batch.component.scss']
+  templateUrl: './startup.component.html',
+  styleUrls: ['./startup.component.scss']
 })
-export class BatchComponent implements OnInit {
+export class StartupComponent implements OnInit {
   private readonly _mainSessionService = inject(MainSessionService);
 
   $statusRepartition: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig}> = { data: [], loading: true};
@@ -24,7 +24,7 @@ export class BatchComponent implements OnInit {
     if(value) {
       this.params = value;
       this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
-      this.$statusRepartition.chartConfig = BATCH_SESSION_STATUS_CHART_CONFIG(this.groupedBy);
+      this.$statusRepartition.chartConfig = STARTUP_SESSION_STATUS_CHART_CONFIG(this.groupedBy);
       this.getDependents();
       this.getGlobalStatistics();
     }
@@ -48,14 +48,14 @@ export class BatchComponent implements OnInit {
     if(event.eventType === 'default') {
       arr.loading = true;
       arr.data = [];
-      this._mainSessionService.getCustom({series: arr.chartConfig.series.items, indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks, type: 'BATCH'})
+      this._mainSessionService.getCustom({series: arr.chartConfig.series.items, indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks, type: 'STARTUP'})
       .pipe(finalize(() => arr.loading = false))
       .subscribe(data => {
         arr.data = data;
       });
     } else if(event.eventType === 'filter') {
       if(actualFilter) {
-        this._mainSessionService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, type: 'BATCH'}).subscribe({
+        this._mainSessionService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, type: 'STARTUP'}).subscribe({
           next: (res: any[]) => {
             slice.data = res;
           }
@@ -69,7 +69,7 @@ export class BatchComponent implements OnInit {
   getDependents() {
     this.$dependentChart.loading = true;
     this.$dependentChart.data = [];
-    this._mainSessionService.getDependentsNew2({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts, type: 'BATCH'})
+    this._mainSessionService.getDependentsNew2({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts, type: 'STARTUP'})
     .pipe(finalize(() => this.$dependentChart.loading = false))
     .subscribe({
       next: (res: any[]) => {this.$dependentChart.data = res}
@@ -78,11 +78,11 @@ export class BatchComponent implements OnInit {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `count(instance.app_name.distinct):count_host,count:count_request,count_exception:count_error,count(name.distinct):count_batch`,
+      'column': `count(instance.app_name.distinct):count_host,count:count_request,count_exception:count_error`,
       'instance_env': 'instance.id',
       'instance.environement': this.params.env,
       'instance.type': 'SERVER',
-      'type': 'BATCH',
+      'type': 'STARTUP',
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString()
     }
@@ -95,7 +95,6 @@ export class BatchComponent implements OnInit {
         this.$globalStatistic.totalRequestError = res[0].count_error;
         this.$globalStatistic.percentError = (res[0].count_error / res[0].count_request) * 100 || 0;
         this.$globalStatistic.totalHost = res[0].count_host;
-        this.$globalStatistic.totalName = res[0].count_batch;
       }
     });
   }

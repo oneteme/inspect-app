@@ -14,7 +14,7 @@ export class MainSessionService {
 
     }
 
-    getHosts(filters: {start: Date, end: Date , env: string}): Observable<{ host: string }[]> {
+    getHosts(filters: {start: Date, end: Date, env: string, type: string}): Observable<{ host: string }[]> {
         var args: any = {
             'column': `instance.app_name.distinct:host`,
             'instance_env': 'instance.id',
@@ -22,7 +22,7 @@ export class MainSessionService {
             'instance.type': 'SERVER',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            'type': 'BATCH',
+            'type': filters.type,
             'order': 'instance.app_name.asc',
         };
 
@@ -236,10 +236,11 @@ export class MainSessionService {
         return this.getMainSession(args);
     }
 
-    getDependentsNew2(filters: {env: string, start: Date, end: Date, servers: string[]}): Observable<{count: number, countSucces: number, countErrClient: number, countErrServer: number, dep: string, actual: string}[]> {
+    getDependentsNew2(filters: {env: string, start: Date, end: Date, servers: string[], type: string}): Observable<{count: number, target: string, origin: string}[]> {
         let args: any = {
-            'column': `rest_session_join.count:count,rest_session_join.count_succes:countSucces,rest_session_join.count_error_client:countErrClient,rest_session_join.count_error_server:countErrServer,instance_join.app_name:dep,instance.app_name:actual`,
+            'column': `rest_session_join.count:count,instance_join.app_name:target,instance.app_name:origin`,
             'id': 'rest_request.parent',
+            'type': filters.type,
             'rest_request.id': 'rest_session_join.id',
             'rest_request.start.ge': filters.start.toISOString(),
             'rest_request.start.lt': filters.end.toISOString(),
@@ -301,13 +302,13 @@ export class MainSessionService {
     }
 
     getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
-              filters: {env: string, start: Date, end: Date, hosts?: string[], filters?: string[] }): Observable<any[]> {
+              filters: {env: string, start: Date, end: Date, hosts?: string[], filters?: string[], type: string }): Observable<any[]> {
         let args: any = {
             'column': `${data.series.map(d => d.jquery.value + '.' + data.indicator.jquery.value + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value}:${data.group.jquery.buildAlias()}`,
             'instance_env': 'instance.id',
             'instance.environement': filters.env,
             'instance.type': 'SERVER',
-            'type': 'BATCH',
+            'type': filters.type,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
@@ -327,13 +328,13 @@ export class MainSessionService {
         return this.getMainSession(args);
     }
 
-    getFilters(filter: ChartItem, filters: {env: string, start: Date, end: Date, hosts: string[] }) {
+    getFilters(filter: ChartItem, filters: {env: string, start: Date, end: Date, hosts: string[], type: string }) {
         let args: any = {
             'column': `${filter.jquery.value}.distinct:${filter.jquery.buildAlias()}`,
             'instance_env': 'instance.id',
             'instance.environement': filters.env,
             'instance.type': 'SERVER',
-            'type': 'BATCH',
+            'type': filters.type,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }

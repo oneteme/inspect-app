@@ -78,9 +78,11 @@ export class RestComponent implements OnInit {
   $volumetryRepartitionSlice : {data: any[], loading: boolean} = {data: [], loading: true};
   $methodRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
   $userAgentRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
-  $dependencyTable: {data: any[], loading: boolean} = {data: [], loading: true};
-  $dependentTable: {data: any[], loading: boolean} = {data: [], loading: true};
-  $globalStatistic: {totalRequest: number, totalRequestError: number, percentSuccess: number, totalHost: number, totalUser: number} = {totalRequest: 0, totalRequestError: 0, percentSuccess: 0, totalHost: 0, totalUser: 0};
+  $dependencyRepartition: {data: any[], loading: boolean} = {data: [], loading: true};
+  $dependentRepartition: {data: any[], loading: boolean} = {data: [], loading: true};
+  $mediaRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
+  $userRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
+  $globalStatistic: {totalRequest: number, percentError: number, totalRequestError: number, totalHost: number, totalUser: number} = {totalRequest: 0, totalRequestError: 0, percentError: 0, totalHost: 0, totalUser: 0};
 
   groupedBy: string = '';
   params: QueryParams;
@@ -93,7 +95,9 @@ export class RestComponent implements OnInit {
       this.$performanceRepartition.chartConfig = REST_SESSION_PERFORMANCE_CHART_CONFIG(this.groupedBy);
       this.$volumetryRepartition.chartConfig = REST_SESSION_VOLUMETRY_CHART_CONFIG(this.groupedBy);
       this.getMethods();
+      this.getUser();
       this.getUserAgents();
+      this.getMediaType();
       this.getDependencies();
       this.getDependents();
       this.getGlobalStatistics();
@@ -145,6 +149,46 @@ export class RestComponent implements OnInit {
     }
   }
 
+  getUser() {
+    let args: any = {
+      'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
+      'instance_env': 'instance.id',
+      'instance.environement': this.params.env,
+      'start.ge': this.params.period.start.toISOString(),
+      'start.lt': this.params.period.end.toISOString(),
+      'order': `start.${this.groupedBy}.asc`
+    }
+    if(this.params.hosts?.length){
+      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    }
+    this.$userRepartition.loading = true;
+    this._restSessionService.getRestSession(args).pipe(finalize(() => this.$userRepartition.loading = false)).subscribe({
+      next: (res: any[]) => {
+        this.$userRepartition.data = res;
+      }
+    });
+  }
+
+  getMediaType() {
+    let args: any = {
+      'column': `count:count,media.coalesce("Non renseigné"):media`,
+      'instance_env': 'instance.id',
+      'instance.environement': this.params.env,
+      'start.ge': this.params.period.start.toISOString(),
+      'start.lt': this.params.period.end.toISOString(),
+      'order': 'count.desc'
+    }
+    if(this.params.hosts?.length){
+      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    }
+    this.$mediaRepartition.loading = true;
+    this._restSessionService.getRestSession(args).pipe(finalize(() => this.$mediaRepartition.loading = false)).subscribe({
+      next: (res: any[]) => {
+        this.$mediaRepartition.data = res;
+      }
+    });
+  }
+
   getMethods() {
     let args: any = {
       'column': `count:count,method:method`,
@@ -186,32 +230,29 @@ export class RestComponent implements OnInit {
   }
 
   getDependencies() {
-    if(this.params.hosts?.length){
-      this.$dependencyTable.loading = true;
-      this.$dependencyTable.data = [];
-      this._restSessionService.getDependenciesNew({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
-        .pipe(finalize(() => this.$dependencyTable.loading = false))
-        .subscribe({
-          next: (res: any[]) => {this.$dependencyTable.data = res}
-        })
-    }
+    this.$dependencyRepartition.loading = true;
+    this.$dependencyRepartition.data = [];
+    this._restSessionService.getDependenciesNew({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
+      .pipe(finalize(() => this.$dependencyRepartition.loading = false))
+      .subscribe({
+        next: (res: any[]) => {this.$dependencyRepartition.data = res}
+      })
+
   }
 
   getDependents() {
-    if(this.params.hosts?.length){
-      this.$dependentTable.loading = true;
-      this.$dependentTable.data = [];
-      this._restSessionService.getDependentsNew({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
-      .pipe(finalize(() => this.$dependentTable.loading = false))
-      .subscribe({
-        next: (res: any[]) => {this.$dependentTable.data = res}
-      })
-    }
+    this.$dependentRepartition.loading = true;
+    this.$dependentRepartition.data = [];
+    this._restSessionService.getDependentsNew({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
+    .pipe(finalize(() => this.$dependentRepartition.loading = false))
+    .subscribe({
+      next: (res: any[]) => {this.$dependentRepartition.data = res}
+    })
   }
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `count(instance.app_name.distinct):count_host,count:count_request,count_succes:count_success,count_error:count_error,count(user.distinct):count_user`,
+      'column': `count(instance.app_name.distinct):count_host,count:count_request,count_error:count_error,count(user.distinct):count_user`,
       'instance_env': 'instance.id',
       'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
@@ -223,8 +264,8 @@ export class RestComponent implements OnInit {
     this._restSessionService.getRestSession(args).subscribe({
       next: (res: any[]) => {
         this.$globalStatistic.totalRequest = res[0].count_request;
-        this.$globalStatistic.percentSuccess = (res[0].count_success / res[0].count_request) * 100 || 0;
         this.$globalStatistic.totalRequestError = res[0].count_error;
+        this.$globalStatistic.percentError = (res[0].count_error / res[0].count_request) * 100 || 0;
         this.$globalStatistic.totalHost = res[0].count_host;
         this.$globalStatistic.totalUser = res[0].count_user;
       }
