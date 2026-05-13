@@ -11,15 +11,6 @@
       <mat-date-range-picker #picker></mat-date-range-picker>
     </mat-form-field>
 
-    <!-- <mat-form-field class="no-subscript" [class.loading]="serverNameIsLoading" appearance="outline">
-      <mat-label>Serveur</mat-label>
-      <mat-select [formControl]="serverFilterForm.controls.appname" multiple>
-        <span *ngIf="serverNameIsLoading && params.serveurs[0]!=''"><mat-option *ngFor="let s of params.serveurs" [value]="s">{{s}}</mat-option></span>
-        <mat-option *ngFor="let d of nameDataList" [value]="d">{{d}}</mat-option>
-      </mat-select>
-      <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>
-    </mat-form-field> -->
-
     <button mat-mini-fab color="primary" (click)="search()">
       <mat-icon matSuffix>search</mat-icon>
     </button>
@@ -61,30 +52,7 @@
     <!-- Vue détail : affiché au clic sur une ligne Request ou Session -->
     <dashboard-detail-view
       *ngIf="hasSelectedInsights"
-      [selectedInsights]="selectedInsights"
-      [protocolDefs]="protocolDefs"
-      [topErrors]="topErrors"
-      [kpiLoading]="kpiLoading"
-      [serverHealthLoading]="serverHealthLoading"
-      [tabRequests]="tabRequests"
-      [topSessionErrors]="topSessionErrors"
-      [topBatchErrors]="topBatchErrors"
-      [topViewErrors]="topViewErrors"
-      [sessionExceptionChart]="sessionExceptionChart"
-      [batchExceptionChart]="batchExceptionChart"
-      [viewExceptionChart]="viewExceptionChart"
-      [startupExceptionChart]="startupExceptionChart"
-      [sessExcLineConfig]="sessExcLineConfig"
-      [sessionCountLoading]="sessionCountLoading"
-      [sessionInitErrors]="sessionInitErrors"
-      [startupErrorsByServer]="startupErrorsByServer"
-      [sessionWebErrors]="sessionWebErrors"
-      [sessionTestErrors]="sessionTestErrors"
-      [insightsAllClear]="insightsAllClear"
-      [divergentBranches]="divergentBranches"
-      [chartRequests]="chartRequests"
-      [sparklinePercs]="sparklinePercs"
-      [sparklineTitles]="sparklineTitles"
+      [context]="detailContext"
       (requestProtocolNav)="navigateToRequestProtocol($event.key, $event.errorType)"
       (sessionTypeNav)="navigateToSessionByType($event.type, undefined, $event.server)"
       (exceptionNav)="navigateToException($event.type, $event.tab)"
@@ -102,7 +70,7 @@
       <div class="dov-stats-wrap dov-stats-skel">
         <div class="dov-stats-lbl">Instances actives</div>
         <div class="dov-stats-sidebar">
-          <div class="dov-stat-sb-skel" *ngFor="let _ of [1,2,3,4]"></div>
+          <div class="dov-stat-sb-skel" *ngFor="let _ of skeletonRows"></div>
         </div>
       </div>
     </ng-container>
@@ -134,7 +102,7 @@
     <ng-container *ngIf="sessionCountLoading; else sessionBlock">
       <div class="sb-block sb-distribution-block sb-skel-block">
         <div class="sbd-title">Session</div>
-        <ng-container *ngFor="let _ of [1,2,3,4]">
+        <ng-container *ngFor="let _ of skeletonRows">
           <div class="sbd-skel-label"></div>
           <div class="sbd-skel-track"></div>
           <div class="sbd-skel-rate"></div>
@@ -159,7 +127,7 @@
         <div class="sbd-row" *ngIf="!s.loading"
           [class.sbd-row-selected]="selectedInsights.has(s.key)"
           [class.sbd-row-clickable]="s.rate > 0"
-          [title]="(s.total | number:'1.0-0') + ' sessions · ' + (s.errors | number:'1.0-0') + ' erreurs'"
+          [title]="s.title"
           (click)="s.rate > 0 ? toggleInsight(s.key) : null">
           <span class="sbd-label">{{ s.label }}</span>
           <div class="sbd-track" [class.track-active]="s.total > 0">
@@ -189,7 +157,7 @@
         <div class="sbd-row" *ngIf="!p.loading"
           [class.sbd-row-selected]="selectedInsights.has(p.key)"
           [class.sbd-row-clickable]="p.rate > 0"
-          [title]="(p.total | number:'1.0-0') + ' requêtes · ' + (p.count | number:'1.0-0') + ' erreurs'"
+          [title]="p.title"
           (click)="p.rate > 0 ? toggleInsight(p.key) : null">
           <span class="sbd-label">{{ p.label }}</span>
           <div class="sbd-track" [class.track-active]="p.total > 0">

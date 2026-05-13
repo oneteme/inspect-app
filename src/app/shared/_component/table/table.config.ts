@@ -29,7 +29,7 @@ export const DEFAULT_TABLE_CONFIG: TableProvider = {
   search: { enabled: true },
   view: { enabled: true, enableColumnRemoval: true },
   pagination: { enabled: true, pageSize: 10, pageSizeOptions: [5, 10, 15, 20, 100], pageSizeOptionsGroupBy: [20, 50, 100, 200] },
-  labels: { empty: 'Aucun résultat', loading: 'Chargement des requêtes...' },
+  labels: { empty: 'Aucun résultat', loading: 'Chargement des données...' },
 };
 
 export const DEFAULT_SORT_CONFIG: { active: string; direction: 'asc' | 'desc'; } = { active: 'start', direction: 'desc' };
@@ -39,12 +39,12 @@ export const DEFAULT_DURATION_SLICE_CONFIG: SliceConfig = {
   columnKey: 'duration',
   hidden: true,
   categories: [
-    { key: '<100ms',     label: '< 100ms',       filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
-    { key: '100-500ms',  label: '100ms - 500ms',  filter: (row) => row.end != null && (row.end - row.start) >= 0.1  && (row.end - row.start) < 0.5 },
-    { key: '500ms-1s',   label: '500ms - 1s',     filter: (row) => row.end != null && (row.end - row.start) >= 0.5  && (row.end - row.start) < 1 },
-    { key: '1s-5s',      label: '1s - 5s',        filter: (row) => row.end != null && (row.end - row.start) >= 1    && (row.end - row.start) < 5 },
-    { key: '>5s',        label: '> 5s',           filter: (row) => row.end != null && (row.end - row.start) >= 5 },
-    { key: 'in-progress', label: 'En cours...',    filter: (row) => row.end == null }
+    { key: '<100ms', label: '< 100ms', filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
+    { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1  && (row.end - row.start) < 0.5 },
+    { key: '500ms-1s', label: '500ms - 1s', filter: (row) => row.end != null && (row.end - row.start) >= 0.5  && (row.end - row.start) < 1 },
+    { key: '1s-5s', label: '1s - 5s', filter: (row) => row.end != null && (row.end - row.start) >= 1    && (row.end - row.start) < 5 },
+    { key: '>5s', label: '> 5s', filter: (row) => row.end != null && (row.end - row.start) >= 5 },
+    { key: 'in-progress', label: 'En cours...', filter: (row) => row.end == null }
   ]
 };
 

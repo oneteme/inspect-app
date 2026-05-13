@@ -1,108 +1,128 @@
-// ── Mat Form Field — Redesign global ────────────────────────────
+// ── Mat Form Field — Redesign scoped aux blocs .header-filter ──
 // Angular Material 16 (MDC) — appearance="outline"
-// Ciblage direct des classes MDC rendues dans le DOM
+// Toutes les règles visuelles sont scoped à .header-filter pour ne
+// pas impacter les tableaux et autres composants Material de l'app.
 
-// ── Contour (les 3 pièces de la bordure) ─────────────────────
-.mdc-text-field--outlined .mdc-notched-outline__leading,
-.mdc-text-field--outlined .mdc-notched-outline__notch,
-.mdc-text-field--outlined .mdc-notched-outline__trailing {
-  border-color: rgba(34, 36, 38, .2) !important;
-  border-width: 1px !important;
-  transition: border-color .18s ease, border-width .1s ease;
-}
+.header-filter {
 
-.mdc-text-field--outlined .mdc-notched-outline__leading {
-  border-radius: 10px 0 0 10px !important;
-  min-width: 10px !important;
-}
-
-.mdc-text-field--outlined .mdc-notched-outline__trailing {
-  border-radius: 0 10px 10px 0 !important;
-}
-
-// ── Fond du champ ─────────────────────────────────────────────
-.mdc-text-field--outlined {
-  background: rgba(34, 36, 38, .03) !important;
-  border-radius: 10px !important;
-  transition: background .18s ease;
-}
-
-// ── Hover ─────────────────────────────────────────────────────
-.mdc-text-field--outlined:not(.mdc-text-field--disabled):hover {
-  background: rgba(34, 36, 38, .055) !important;
-
-  .mdc-notched-outline__leading,
-  .mdc-notched-outline__notch,
-  .mdc-notched-outline__trailing {
-    border-color: rgba(34, 36, 38, .42) !important;
+  // Contour (les 3 pièces de la bordure)
+  .mdc-text-field--outlined .mdc-notched-outline__leading,
+  .mdc-text-field--outlined .mdc-notched-outline__notch,
+  .mdc-text-field--outlined .mdc-notched-outline__trailing {
+    border-color: rgba(34, 36, 38, .2) !important;
+    border-width: 1px !important;
+    transition: border-color .18s ease, border-width .1s ease;
   }
-}
 
-// ── Focus ─────────────────────────────────────────────────────
-.mdc-text-field--outlined.mdc-text-field--focused {
-  background: rgba(20, 100, 220, .035) !important;
-
-  .mdc-notched-outline__leading,
-  .mdc-notched-outline__notch,
-  .mdc-notched-outline__trailing {
-    border-color: #1464dc !important;
+  .mdc-text-field--outlined .mdc-notched-outline__leading {
+    border-radius: 10px 0 0 10px !important;
+    min-width: 10px !important;
   }
-}
 
-// ── Label flottant ────────────────────────────────────────────
-.mdc-text-field--outlined .mdc-floating-label {
-  font-size: 13px !important;
-  font-weight: 500 !important;
-  color: rgba(0, 0, 0, .45) !important;
-  letter-spacing: .01em !important;
-}
+  .mdc-text-field--outlined .mdc-notched-outline__trailing {
+    border-radius: 0 10px 10px 0 !important;
+  }
 
-.mdc-text-field--outlined.mdc-text-field--focused .mdc-floating-label {
-  color: #1464dc !important;
-}
+  // ── Fond du champ ─────────────────────────────────────────────
+  .mdc-text-field--outlined {
+    background: rgba(34, 36, 38, .03) !important;
+    border-radius: 10px !important;
+    transition: background .18s ease;
+  }
 
-// ── Texte saisi ───────────────────────────────────────────────
-.mdc-text-field--outlined .mdc-text-field__input {
-  font-size: 13px !important;
-  color: rgba(0, 0, 0, .82) !important;
-  caret-color: #1464dc;
-}
+  // ── Hover ─────────────────────────────────────────────────────
+  .mdc-text-field--outlined:not(.mdc-text-field--disabled):hover {
+    background: rgba(34, 36, 38, .055) !important;
 
-// ── Icônes suffix / prefix ────────────────────────────────────
-.mat-mdc-form-field-icon-suffix,
-.mat-mdc-form-field-icon-prefix {
-  color: rgba(0, 0, 0, .32) !important;
-  transition: color .15s;
-}
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: rgba(34, 36, 38, .42) !important;
+    }
+  }
 
-.mat-mdc-form-field.mat-focused {
-  .mat-mdc-form-field-icon-suffix,
-  .mat-mdc-form-field-icon-prefix {
+  // ── Focus ─────────────────────────────────────────────────────
+  .mdc-text-field--outlined.mdc-text-field--focused {
+    background: rgba(20, 100, 220, .035) !important;
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: #1464dc !important;
+    }
+  }
+
+  // ── Label flottant ────────────────────────────────────────────
+  .mdc-text-field--outlined .mdc-floating-label {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: rgba(0, 0, 0, .45) !important;
+    letter-spacing: .01em !important;
+  }
+
+  .mdc-text-field--outlined.mdc-text-field--focused .mdc-floating-label {
     color: #1464dc !important;
   }
-}
 
-// ── Mat-select : valeur + placeholder + flèche ────────────────
-.mat-mdc-select-value-text {
-  font-size: 13px;
-  color: rgba(0, 0, 0, .82);
-}
+  // ── Texte saisi ───────────────────────────────────────────────
+  .mdc-text-field--outlined .mdc-text-field__input {
+    font-size: 13px !important;
+    color: rgba(0, 0, 0, .82) !important;
+    caret-color: #1464dc;
+  }
 
-.mat-mdc-select-placeholder {
-  font-size: 13px;
-  color: rgba(0, 0, 0, .35) !important;
-}
+  // ── Icônes suffix / prefix ────────────────────────────────────
+  .mat-mdc-form-field-icon-suffix,
+  .mat-mdc-form-field-icon-prefix {
+    color: rgba(0, 0, 0, .32) !important;
+    transition: color .15s;
+  }
 
-.mat-mdc-select-arrow svg {
-  fill: rgba(0, 0, 0, .35);
-  transition: fill .18s;
-}
+  .mat-mdc-form-field.mat-focused {
+    .mat-mdc-form-field-icon-suffix,
+    .mat-mdc-form-field-icon-prefix {
+      color: #1464dc !important;
+    }
+  }
 
-.mat-focused .mat-mdc-select-arrow svg {
-  fill: #1464dc !important;
-}
+  // ── Mat-select : valeur + placeholder + flèche ────────────────
+  .mat-mdc-select-value-text {
+    font-size: 13px;
+    color: rgba(0, 0, 0, .82);
+  }
 
-// ── Panel dropdown ────────────────────────────────────────────
+  .mat-mdc-select-placeholder {
+    font-size: 13px;
+    color: rgba(0, 0, 0, .35) !important;
+  }
+
+  .mat-mdc-select-arrow svg {
+    fill: rgba(0, 0, 0, .35);
+    transition: fill .18s;
+  }
+
+  .mat-focused .mat-mdc-select-arrow svg {
+    fill: #1464dc !important;
+  }
+
+  // ── Datepicker toggle ─────────────────────────────────────────
+  .mat-datepicker-toggle .mat-mdc-icon-button {
+    color: rgba(0, 0, 0, .35) !important;
+    transition: color .15s;
+    margin-right: 4px;
+
+    &:hover {
+      color: rgba(0, 0, 0, .65) !important;
+    }
+  }
+
+  .mat-mdc-form-field.mat-focused .mat-datepicker-toggle .mat-mdc-icon-button {
+    color: #1464dc !important;
+  }
+
+} // fin .header-filter
+
+// ── Panel dropdown (rendu dans l'overlay, hors .header-filter) ─
 .mat-mdc-select-panel {
   border-radius: 10px !important;
   border: 1px solid rgba(34, 36, 38, .12) !important;
@@ -131,22 +151,7 @@
   }
 }
 
-// ── Datepicker toggle ─────────────────────────────────────────
-.mat-datepicker-toggle .mat-mdc-icon-button {
-  color: rgba(0, 0, 0, .35) !important;
-  transition: color .15s;
-  margin-right: 4px;
-
-  &:hover {
-    color: rgba(0, 0, 0, .65) !important;
-  }
-}
-
-.mat-mdc-form-field.mat-focused .mat-datepicker-toggle .mat-mdc-icon-button {
-  color: #1464dc !important;
-}
-
-// ── Suppression des indicateurs visuels internes ──────────────
+// ── Nettoyage technique global (pas d'impact visuel) ──────────
 
 // focus-overlay (fond teinté MDC)
 .mat-mdc-form-field .mat-mdc-form-field-focus-overlay {
@@ -167,7 +172,6 @@
 }
 
 // ── Fix ligne bleue parasite dans le select focalisé ──────────
-// State-layer MDC sur le trigger du select (::before) + notch droit
 .mat-mdc-select-trigger::before {
   display: none !important;
 }

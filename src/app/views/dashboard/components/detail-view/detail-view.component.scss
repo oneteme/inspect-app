@@ -1,4 +1,4 @@
-// ── Vue détail (ua + insights + protocole) ────────────────────
+﻿// Vue détail (ua + insights + protocole)
 .db-detail-view {
   display: flex;
   flex-direction: column;
@@ -7,7 +7,7 @@
 
 // db-detail-top supprimé — db-ua-block est maintenant pleine largeur
 
-// ── Ligne basse : infrastructure + protocole côte à côte ─────────
+// Ligne basse : infrastructure + protocole côte à côte
 .db-detail-bottom {
   display: flex;
   gap: .75em;
@@ -28,7 +28,7 @@
   gap: 0;
 }
 
-// ── En-têtes de section ───────────────────────────────────────
+// En-têtes de section
 .dmp-header {
   display: flex;
   align-items: center;
@@ -72,7 +72,7 @@
   margin-left: 1px;
 }
 
-// ── Bloc Clients ───────────────────────────────────────────────
+// Bloc Clients
 .db-clt-block {
   border-radius: 8px;
   border: 1px solid rgba(34, 36, 38, .11);
@@ -80,7 +80,7 @@
 }
 
 .clt-body {
-  padding: .6em .9em .75em;
+  padding: 0;
   display: flex;
   flex-direction: column;
   min-width: 0;
@@ -99,7 +99,16 @@
   }
 }
 
-// ── Insights ──────────────────────────────────────────────────
+// Insights
+.clt-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  font-size: .85em;
+  color: rgba(0,0,0,.65);
+}
+
 .db-insights-wrap {
   flex: 1;
   min-width: 0;
@@ -133,16 +142,10 @@
   display: flex;
   flex-direction: column;
   flex: 1;
-  gap: 8px;
-  padding: 2px 0 6px;
 }
 
 .dbi-card {
   min-width: 0;
-  border-radius: 6px;
-  border: 1px solid rgba(34,36,38,.11);
-  background: var(--mat-sidenav-content-background-color, #fff);
-  overflow: hidden;
 
   &.dbi-card--loading {
     flex: 1;
@@ -184,7 +187,7 @@
   display: flex;
   align-items: center;
   gap: 7px;
-  padding: 5px 10px;
+  padding: 6px .75em;
   border-bottom: 1px solid rgba(34,36,38,.05);
   &:last-child { border-bottom: none; }
 }
@@ -220,11 +223,6 @@
 
 .dbi-name { font-size: .74em; color: rgba(0,0,0,.72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 2 0 0; min-width: 0; }
 
-.db-errors-section {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
 
 
 .db-branches-wrap {
@@ -274,7 +272,7 @@
   mat-icon { font-size: 15px; width: 15px; height: 15px; flex-shrink: 0; color: #21ba45; }
 }
 
-// ── Aucun incident sur la période ─────────────────────────────
+// Aucun incident sur la période
 .db-no-incidents {
   display: flex;
   flex-direction: column;
@@ -303,7 +301,7 @@
   }
 }
 
-// ── Protocol list ─────────────────────────────────────────────
+// Protocol list
 .proto-list {
   border-radius: 6px;
   border: 1px solid rgba(34,36,38,.11);
@@ -316,7 +314,7 @@
   display: grid;
   grid-template-columns: 1fr;
   align-items: stretch;
-  height: 165px;
+  height: 210px;
   @media (max-width: 900px)  { grid-template-columns: 1fr; }
   position: relative;
   overflow: hidden;
@@ -352,7 +350,7 @@
 
 .pr-chart {
   position: absolute;
-  inset: 0;
+  inset: 20px 0 0;
   overflow: hidden;
   display: flex;
   align-items: stretch;
@@ -397,7 +395,7 @@
   100% { background-position: -200% 0; }
 }
 
-// ── Exceptions dans le temps (sessions) ─────────────────────
+// Exceptions dans le temps (sessions)
 .db-sess-chart-wrap {
   display: flex;
   flex-direction: column;
