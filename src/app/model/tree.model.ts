@@ -151,10 +151,20 @@ export class LinkRequestNode implements Link<Label> {
     const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
-    const isError   = this.nodeObject.exception != null
     const isOngoing = this.nodeObject?.end == null;
-    const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
-    const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
+    
+    // Extract color from LinkConfig based on status
+    let linkStyle = 'SUCCES'; // default
+    if (isOngoing) linkStyle = 'ONGOING';
+    else if (this.nodeObject.status >= 500 || this.nodeObject.status === 0) linkStyle = 'ERROR';
+    else if (this.nodeObject.status >= 400 && this.nodeObject.status < 500) linkStyle = 'CLIENT_ERROR';
+    
+    // Extract hex color from LinkConfig (format: "strokeColor=#XXXXXX;...")
+    const colorMatch = LinkConfig[linkStyle].match(/#[0-9a-f]{6}/i);
+    const statusColor = colorMatch ? colorMatch[0] : '#22c55e';
+    
+    const statusIcon = isOngoing ? 'schedule' : (this.nodeObject.status < 400 ? 'check_circle' : (this.nodeObject.status < 500 ? 'warning' : 'error'));
+    
     return {
       status:   { icon: statusIcon, value: status, color: statusColor },
       elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
@@ -235,7 +245,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
     return {
       status:   { icon: statusIcon, value: status, color: statusColor },
       elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
-      resource: { icon: resourceConfig[resource]?.icon ?? 'storage', value: resource, color: resourceConfig[resource]?.color ?? '#6366f1' },
+      resource: { icon: resourceConfig[resource]?.icon ?? ' ', value: resource, color: resourceConfig[resource]?.color ?? '#6366f1' },
       request:  { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type:'jdbc'},
 
      }
@@ -267,7 +277,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
     return {
       status:   { icon: statusIcon, value: status, color: statusColor },
       elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
-      resource: { icon: 'terminal', value: resource, color: '#0e7490' },
+      resource: { icon: resourceConfig[resource]?.icon ?? ' ', value: resource, color: '#0e7490' },
       request:  { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type:'ftp'},
      }
   }
@@ -277,7 +287,6 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
     if (this.nodeObject?.host)     rows.push({ icon: 'dns',      label: 'Hôte',     value: this.nodeObject.port && this.nodeObject.port !== -1 ? `${this.nodeObject.host}:${this.nodeObject.port}` : this.nodeObject.host, color: '#6366f1' });
     if (this.nodeObject?.serverVersion) rows.push({ icon: 'computer',   label: 'Serveur', value: this.nodeObject.serverVersion, color: '#0e7490' });
     if (this.nodeObject?.clientVersion) rows.push({ icon: 'laptop',     label: 'Client',  value: this.nodeObject.clientVersion, color: '#0891b2' });
-    if (this.nodeObject?.commands?.length) rows.push({ icon: 'terminal', label: 'Commandes', value: `${this.nodeObject.commands.length} cmd(s)`, color: '#0e7490' }); // todo get
     return rows
     }
 
@@ -326,7 +335,7 @@ export class MailRequestNode implements Node<Label>, Link<Label> {
      return {
        status:   { icon: statusIcon, value: status, color: statusColor },
        elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
-       resource: { icon: 'email', value: resource, color: '#f59e0b' },
+       resource: { icon: resourceConfig[resource]?.icon ?? ' ', value: resource, color: '#f59e0b' },
        request:  { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type:'smtp'},
      }
    }
@@ -383,7 +392,7 @@ export class LdapRequestNode implements Node<Label>, Link<Label> {
      return {
        status:   { icon: statusIcon, value: status, color: statusColor },
        elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
-       resource: { icon: 'person', value: resource, color: '#8b5cf6' },
+       resource: { icon: resourceConfig[resource]?.icon ?? ' ', value: resource, color: '#8b5cf6' },
        request:  { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type:'ldap'},
      }
   }
@@ -438,22 +447,32 @@ export class RestRequestNode implements Node<Label>, Link<Label> {
     return rows;
   }
 
-   linkInfo(): any {
-     const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
-     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
-     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
-     const isError   = this.nodeObject.exception != null
-     const isOngoing = this.nodeObject?.end == null;
-     const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
-     const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
-     return {
-       status:   { icon: statusIcon, value: status, color: statusColor },
-       elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
-       resource: { icon: 'code', value: resource, color: '#3b82f6' },
-       request:  { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type:'rest'},
-          ...(this.nodeObject.remoteTrace ? { session: { icon: 'link', value: this.nodeObject.id, color: '#3b82f6', type:'rest' } } : {}),
-     }
-   }
+    linkInfo(): any {
+      const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+      const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
+      const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
+      const isOngoing = this.nodeObject?.end == null;
+      
+      // Extract color from LinkConfig based on status
+      let linkStyle = 'SUCCES'; // default
+      if (isOngoing) linkStyle = 'ONGOING';
+      else if (this.nodeObject.status >= 500 || this.nodeObject.status === 0) linkStyle = 'ERROR';
+      else if (this.nodeObject.status >= 400 && this.nodeObject.status < 500) linkStyle = 'CLIENT_ERROR';
+      
+      // Extract hex color from LinkConfig (format: "strokeColor=#XXXXXX;...")
+      const colorMatch = LinkConfig[linkStyle].match(/#[0-9a-f]{6}/i);
+      const statusColor = colorMatch ? colorMatch[0] : '#22c55e';
+      
+      const statusIcon = isOngoing ? 'schedule' : (this.nodeObject.status < 400 ? 'check_circle' : (this.nodeObject.status < 500 ? 'warning' : 'error'));
+      
+      return {
+        status:   { icon: statusIcon, value: status, color: statusColor },
+        elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
+        resource: { icon: 'code', value: resource, color: '#3b82f6' },
+        request:  { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type:'rest'},
+           ...(this.nodeObject.remoteTrace ? { session: { icon: 'link', value: this.nodeObject.id, color: '#3b82f6', type:'rest' } } : {}),
+      }
+    }
 
   formatNode(field: Label): string {
     switch (field) {
@@ -1003,7 +1022,7 @@ export const LinkConfig = {
 }
 
 export const resourceConfig = {
-  'READ': { icon: 'visibility', color: '#3b82f6' },
+  'READ': { icon: 'description', color: '#3b82f6' },
   'EDIT': { icon: 'edit', color: '#f97316' },
   'ROLE': { icon: 'security', color: '#8b5cf6' },
   'ACCESS': { icon: 'lock_open', color: '#22c55e' },

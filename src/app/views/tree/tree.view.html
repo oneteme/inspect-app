@@ -17,7 +17,7 @@
       <div class="view-control-group view-control-group--node">
         <span class="view-group-label">
           <mat-icon class="view-group-icon">device_hub</mat-icon>
-          <span class="view-group-text">Nœuds</span>
+          <span class="view-group-text">Machine</span>
         </span>
         <div class="view-group-btns">
           <button class="view-btn view-btn--node" [class.active]="ViewForm.controls.nodeView.value === 'SERVER_IDENTITY'"
@@ -35,7 +35,7 @@
       <div class="view-control-group view-control-group--link">
         <span class="view-group-label">
           <mat-icon class="view-group-icon">timeline</mat-icon>
-          <span class="view-group-text">Liens</span>
+          <span class="view-group-text">Flux</span>
         </span>
         <div class="view-group-btns">
           <button class="view-btn view-btn--link" [class.active]="ViewForm.controls.linkView.value === 'ELAPSED_LATENSE'"
@@ -46,15 +46,11 @@
                   matTooltip="Méthode / Ressource" (click)="ViewForm.controls.linkView.setValue('METHOD_RESOURCE')">
             <mat-icon class="view-btn-icon">code</mat-icon>
           </button>
-          <!--<button class="view-btn view-btn--link" [class.active]="ViewForm.controls.linkView.value === 'SIZE_COMPRESSION'"
-                  matTooltip="Traffic" (click)="ViewForm.controls.linkView.setValue('SIZE_COMPRESSION')">
-            <mat-icon class="view-btn-icon">swap_vert</mat-icon>
-          </button>-->
           <button class="view-btn view-btn--link" [class.active]="ViewForm.controls.linkView.value === 'PROTOCOL_SCHEME'"
                   matTooltip="Protocole / Auth" (click)="ViewForm.controls.linkView.setValue('PROTOCOL_SCHEME')">
             <mat-icon class="view-btn-icon">lock</mat-icon>
           </button>
-         <button class="view-btn view-btn--link" [class.active]="ViewForm.controls.linkView.value === 'STATUS_EXCEPTION'"
+          <button class="view-btn view-btn--link" [class.active]="ViewForm.controls.linkView.value === 'STATUS_EXCEPTION'"
                   matTooltip="Statut / Exception" (click)="ViewForm.controls.linkView.setValue('STATUS_EXCEPTION')">
             <mat-icon class="view-btn-icon">fact_check</mat-icon>
           </button>
@@ -63,7 +59,8 @@
     </div>
 
     <!-- Zoom controls -->
-    <div class="zoom-controls">      <button mat-icon-button class="zoom-btn" matTooltip="Zoom avant" (click)="tree.graph.zoomIn()">
+    <div class="zoom-controls">
+      <button mat-icon-button class="zoom-btn" matTooltip="Zoom avant" (click)="tree.graph.zoomIn()">
         <mat-icon>add</mat-icon>
       </button>
       <div class="zoom-divider"></div>
@@ -91,13 +88,13 @@
       <button mat-icon-button class="zoom-btn" matTooltip="Rechercher un serveur"
               [class.active]="searchVisible" (click)="toggleSearch()">
         <mat-icon>search</mat-icon>
-       </button>
-       <div class="zoom-divider"></div>
-       <button mat-icon-button class="zoom-btn" matTooltip="Légende"
-               #legendMenuTrigger="matMenuTrigger" [matMenuTriggerFor]="legendMenu">
-         <mat-icon>info_outline</mat-icon>
-       </button>
-     </div>
+      </button>
+      <div class="zoom-divider"></div>
+      <button mat-icon-button class="zoom-btn" matTooltip="Légende"
+              #legendMenuTrigger="matMenuTrigger" [matMenuTriggerFor]="legendMenu">
+        <mat-icon>info_outline</mat-icon>
+      </button>
+    </div>
 
     <!-- Search panel — glisse depuis la card zoom -->
     <div class="search-panel" [class.visible]="searchVisible">
@@ -200,24 +197,6 @@
       </div>
     </div>
 
-    <!-- Légende -->
-    <div class="legend-panel" [class.visible]="legendVisible">
-      <div class="legend-section-title">Liens</div>
-      <div class="legend-item"><span class="legend-line" style="background:#22c55e;"></span><span>Succès</span></div>
-      <div class="legend-item"><span class="legend-line" style="background:#f9ad4e;"></span><span>Erreur client</span></div>
-      <div class="legend-item"><span class="legend-line" style="background:#ef4444;"></span><span>Erreur serveur</span></div>
-      <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:#3b82f6;"></span><span>En cours</span></div>
-      <div class="legend-divider"></div>
-      <div class="legend-section-title">Nœuds</div>
-      <div class="legend-item"><img src="assets/mxgraph/microservice.drawio.svg" class="legend-icon"/><span>REST</span></div>
-      <div class="legend-item"><img src="assets/mxgraph/database.drawio.svg" class="legend-icon"/><span>JDBC</span></div>
-      <div class="legend-item"><img src="assets/mxgraph/ftp.drawio.svg" class="legend-icon"/><span>FTP</span></div>
-      <div class="legend-item"><img src="assets/mxgraph/smtp.drawio.svg" class="legend-icon"/><span>SMTP</span></div>
-      <div class="legend-item"><img src="assets/mxgraph/ldap.drawio.svg" class="legend-icon"/><span>LDAP</span></div>
-      <div class="legend-item"><img src="assets/mxgraph/view.drawio.svg" class="legend-icon"/><span>Vue</span></div>
-      <div class="legend-item"><img src="assets/mxgraph/batch.drawio.svg" class="legend-icon"/><span>Batch</span></div>
-      <div class="legend-item"><img src="assets/mxgraph/ghost.drawio.svg" class="legend-icon"/><span>Inconnu</span></div>
-    </div>
 
     <!-- Graph canvas -->
     <div #graphContainer id="graphContainer"></div>
@@ -243,14 +222,14 @@
     <div class="legend-item"><span class="legend-line legend-dashed" style="border-color:#3b82f6;"></span><span>En cours</span></div>
     <div class="legend-divider"></div>
     <div class="legend-section-title">Nœuds</div>
-    <div class="legend-item"><img src="assets/mxgraph/microservice.drawio.svg" class="legend-icon"/><span>REST</span></div>
-    <div class="legend-item"><img src="assets/mxgraph/database.drawio.svg" class="legend-icon"/><span>JDBC</span></div>
-    <div class="legend-item"><img src="assets/mxgraph/ftp.drawio.svg" class="legend-icon"/><span>FTP</span></div>
-    <div class="legend-item"><img src="assets/mxgraph/smtp.drawio.svg" class="legend-icon"/><span>SMTP</span></div>
-    <div class="legend-item"><img src="assets/mxgraph/ldap.drawio.svg" class="legend-icon"/><span>LDAP</span></div>
-    <div class="legend-item"><img src="assets/mxgraph/view.drawio.svg" class="legend-icon"/><span>Vue</span></div>
-    <div class="legend-item"><img src="assets/mxgraph/batch.drawio.svg" class="legend-icon"/><span>Batch</span></div>
-    <div class="legend-item"><img src="assets/mxgraph/ghost.drawio.svg" class="legend-icon"/><span>Inconnu</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/microservice.drawio.svg" class="legend-icon"/><span>Serveur Web</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/database.drawio.svg" class="legend-icon"/><span>SGBD</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/ftp.drawio.svg" class="legend-icon"/><span>Serveur FTP</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/smtp.drawio.svg" class="legend-icon"/><span>Serveur Mail</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/ldap.drawio.svg" class="legend-icon"/><span>Serveur LDAP</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/view.drawio.svg" class="legend-icon"/><span>Application Web</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/batch.drawio.svg" class="legend-icon"/><span>tâche planifiée</span></div>
+    <div class="legend-item"><img src="assets/mxgraph/ghost.drawio.svg" class="legend-icon"/><span>Hors scope</span></div>
   </div>
 </mat-menu>
 

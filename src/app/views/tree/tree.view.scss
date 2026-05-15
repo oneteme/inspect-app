@@ -5,15 +5,6 @@
   flex-direction: column;
 }
 
-.header-filter {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 0.5em;
-  margin-top: 0.5em;
-  margin-left: auto;
-}
-
 // ── Main graph container ─────────────────────────────
 #fixed-width-container {
   border: 1px solid #e2e8f0;
@@ -261,7 +252,7 @@
   &.active { color: #2563eb; }
 }
 
-// ── Évolution 3 : Recherche ─────────────────────────────────────────────────
+// ── Recherche ─────────────────────────────────────────
 .search-panel {
   position: absolute;
   top: 8px;
@@ -364,7 +355,7 @@
   letter-spacing: 0.2px;
 }
 
-// ── Évolution 6 : Panel de détail ─────────────────────────────────────────
+// ── Panel de détail ───────────────────────────────────
 .detail-panel {
   position: absolute;
   bottom: 20px;
@@ -462,13 +453,6 @@
     min-width: 0;
   }
 
-  .detail-type-icon {
-    font-size: 15px;
-    width: 15px;
-    height: 15px;
-    color: #3b82f6;
-  }
-
   .detail-header-actions {
     display: flex;
     align-items: center;
@@ -541,28 +525,6 @@
     white-space: normal;
   }
 
-  // ── Multiple items per row (legacy) ─────────────────
-  .detail-row-items {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    align-items: center;
-    flex: 1;
-  }
-
-  // ── Carte pour format keyed (wrapper) ──
-  .detail-keyed-card {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    padding: 10px 12px;
-    background: rgba(248, 250, 252, 0.5);
-    border: 1px solid rgba(203, 213, 225, 0.4);
-    border-radius: 8px;
-    width: 100%;
-  }
-
-  // ── Conteneur pour deux lignes de format keyed ──
   .detail-keyed-rows {
     display: flex;
     flex-direction: column;
@@ -571,7 +533,6 @@
     width: 100%;
   }
 
-  // ── Ligne unique pour format keyed (status / elapsed / resource / id) ──
   .detail-keyed-row {
     display: flex;
     flex-direction: row;
@@ -580,14 +541,7 @@
     flex: 1;
     overflow: hidden;
 
-    &--line1 {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 5px;
-      width: 100%;
-    }
-
+    &--line1,
     &--line2 {
       display: flex;
       flex-direction: row;
@@ -596,8 +550,6 @@
       width: 100%;
     }
   }
-
-  // ── Bouton navigation (supprimé l'ancienne classe nav-full) ──
 
   .detail-keyed-item {
     display: inline-flex;
@@ -636,29 +588,6 @@
       &:hover {
         border-color: rgba(99, 102, 241, 0.65);
         box-shadow: 0 2px 8px rgba(99, 102, 241, 0.18);
-      }
-    }
-  }
-
-  .detail-row-item {
-    display: inline-flex;
-    align-items: center;
-    gap: 5px;
-    padding: 4px 10px;
-    background: rgba(248, 250, 252, 0.8);
-    border: 1px solid rgba(203, 213, 225, 0.5);
-    border-radius: 6px;
-    font-size: 11px;
-
-    &.detail-row-item--nav {
-      cursor: pointer;
-      border-color: rgba(99, 102, 241, 0.35);
-      background: rgba(238, 242, 255, 0.9);
-      transition: box-shadow 0.12s ease, border-color 0.12s ease;
-
-      &:hover {
-        border-color: rgba(99, 102, 241, 0.65);
-        box-shadow: 0 2px 8px rgba(99, 102, 241, 0.2);
       }
     }
   }
@@ -764,31 +693,7 @@
   mat-icon { font-size: 20px; width: 20px; height: 20px; }
 }
 
-// ── Légende ───────────────────────────────────────────
-.legend-panel {
-  position: absolute;
-  bottom: 12px;
-  left: 8px;
-  z-index: 2;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
-  border-radius: 10px;
-  padding: 8px 10px;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-  min-width: 110px;
-  opacity: 0;
-  pointer-events: none;
-  transform: translateY(6px) scale(0.97);
-  transition: opacity 0.2s ease, transform 0.2s ease;
-  display: none; /* Masquée, utiliser le menu à la place */
-
-  &.visible {
-    opacity: 1;
-    pointer-events: all;
-    transform: translateY(0) scale(1);
-  }
-}
-
+// ── Legend Menu ────────────────────────────────────────
 .legend-section-title {
   font-size: 10px;
   font-weight: 600;
@@ -838,7 +743,6 @@
   flex-shrink: 0;
 }
 
-// ── Legend Menu ────────────────────────────────────────
 ::ng-deep .legend-menu {
   .mat-mdc-menu-content {
     padding: 8px 0 !important;
@@ -849,40 +753,4 @@
   padding: 8px 12px;
   min-width: 200px;
   max-width: 280px;
-}
-
-// ── Misc ──────────────────────────────────────────────
-#detail-element {
-  width: 100%;
-  word-wrap: break-word;
-  height: 10%;
-  overflow: auto;
-}
-
-.progress { height: 20px; }
-
-.progress-bar {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  overflow: hidden;
-  color: #fff;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.dbfailed { background-color: red !important; }
-
-.md-chips {
-  .md-chip { margin: 0 5px 3px 0; }
-}
-
-.md-chip {
-  display: inline-block;
-  padding: 0 12px;
-  background-color: #ccc;
-  border-radius: 32px;
-  font-size: 13px;
-  color: #fff;
-  &.md-chip-hover:hover { background: #ccc; }
 }

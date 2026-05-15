@@ -1,22 +1,20 @@
 import {ChangeDetectorRef, Component, ElementRef, inject, NgZone, OnDestroy, ViewChild} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
-import {combineLatest, finalize, forkJoin, fromEvent, Subscription} from 'rxjs';
+import {combineLatest, finalize, forkJoin, Subscription} from 'rxjs';
 import {Location} from '@angular/common';
 
 import {TraceService} from 'src/app/service/trace.service';
 import {app} from 'src/environments/environment';
 import {EnvRouter} from "../../service/router.service";
 import {TreeService} from 'src/app/service/tree.service';
-import {FormControl, FormGroup} from '@angular/forms';
-import {LinkConfig, ServerConfig, ServerType, TreeGraph} from '../../model/tree.model';
+import {FormGroup, FormControl} from '@angular/forms';
 import {
-  DatabaseRequestTree,
-  DirectoryRequestTree, FtpRequestNode,
-  FtpRequestTree, JdbcRequestNode, Label, LdapRequestNode, LinkRequestNode, MailRequestNode,
-  MailRequestTree, MainServerNode,
-  MainSessionTree, RestRequestNode, RestServerNode,
-  RestSessionTree
-} from "../../model/tree.model";
+  DatabaseRequestTree, DirectoryRequestTree, FtpRequestNode, FtpRequestTree,
+  JdbcRequestNode, Label, LdapRequestNode, LinkConfig, LinkRequestNode,
+  MailRequestNode, MailRequestTree, MainServerNode, MainSessionTree,
+  RestRequestNode, RestServerNode, RestSessionTree,
+  ServerConfig, ServerType, TreeGraph
+} from '../../model/tree.model';
 import {Constants} from "../constants";
 
 
@@ -24,7 +22,6 @@ import {Constants} from "../constants";
   selector: 'app-tree',
   templateUrl: './tree.view.html',
   styleUrls: ['./tree.view.scss'],
-
 })
 export class TreeView implements OnDestroy {
   private _activatedRoute = inject(ActivatedRoute);
@@ -36,8 +33,7 @@ export class TreeView implements OnDestroy {
   private _cdr = inject(ChangeDetectorRef);
   subscriptions: Subscription[] = [];
   id: string;
-  tree: any
-  resizeSubscription: any;
+  tree: any;
   env: any;
   isLoading: boolean;
   data: any;
@@ -84,7 +80,6 @@ export class TreeView implements OnDestroy {
 
 
   constructor() {
-    const self = this;
     this.subscriptions.push(combineLatest([
       this._activatedRoute.params,
       this._activatedRoute.data,
@@ -93,22 +88,22 @@ export class TreeView implements OnDestroy {
       next: ([params, data, queryParams]) => {
         this.id = params['id_session'];
         this.env = queryParams.env || app.defaultEnv;
-        this.serverLbl = Label[queryParams.server_lbl] || Label.SERVER_IDENTITY
-        this.linkLbl = Label[queryParams.link_lbl] || Label.ELAPSED_LATENSE
-        this.patchDataView(this.serverLbl,this.linkLbl)
-        this.data = data
+        this.serverLbl = Label[queryParams.server_lbl] || Label.SERVER_IDENTITY;
+        this.linkLbl = Label[queryParams.link_lbl] || Label.ELAPSED_LATENSE;
+        this.patchDataView(this.serverLbl, this.linkLbl);
+        this.data = data;
         this.getTree(this.data, this.serverLbl, this.linkLbl);
         this.subscriptions.push(this.ViewForm.controls.nodeView.valueChanges.subscribe(v => {
           this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&server_lbl=${v}&link_lbl=${this.linkLbl}`);
-          this.ViewEvent[v](Label[v])
-        }))
+          this.ViewEvent[v](Label[v]);
+        }));
         this.subscriptions.push(this.ViewForm.controls.linkView.valueChanges.subscribe(v => {
           this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&server_lbl=${this.serverLbl}&link_lbl=${v}`);
-          this.ViewEvent[v](Label[v])
-        }))
+          this.ViewEvent[v](Label[v]);
+        }));
         this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&server_lbl=${this.serverLbl}&link_lbl=${this.linkLbl}`);
       },
-    }))
+    }));
   }
 
   patchDataView(node: Label, link: Label){
@@ -120,19 +115,18 @@ export class TreeView implements OnDestroy {
 
   getTree(data: any, serverlbl: Label, linklbl: Label) {
     this.isLoading = true;
-    this.subscriptions.push(this._traceService.getTree(this.id, data['type']).pipe(finalize(() => this.isLoading = false)).subscribe((d: RestSessionTree /*| ServerMainSession*/) => {
+    this.subscriptions.push(this._traceService.getTree(this.id, data['type']).pipe(finalize(() => this.isLoading = false)).subscribe((d: RestSessionTree) => {
       this.TreeObj = d;
-      this.isLoading = false;         // force à false avant d'accéder au ViewChild
-      this._cdr.detectChanges();      // force le rendu du DOM pour que graphContainer existe
-      let self = this;
+      this.isLoading = false;
+      this._cdr.detectChanges();
       this.tree = TreeGraph.setup(this.graphContainer.nativeElement, tg => {
-        tg.draw(() => {})//self.dr(tg, self.TreeObj, serverlbl, linklbl)) // refacto
+        tg.draw(() => {});
         return tg;
       });
-      this.ViewEvent[linklbl](Label[linklbl])// draw
-      this.tree.setOutline(this.outlineContainer.nativeElement)
+      this.ViewEvent[linklbl](Label[linklbl]);
+      this.tree.setOutline(this.outlineContainer.nativeElement);
       this.registerCellClickListener();
-    }))
+    }));
   }
 
   registerCellClickListener() {
@@ -458,11 +452,11 @@ export class TreeView implements OnDestroy {
     return arr.some(r => fn(r));
   }
 
-  getIcon(obj: RestSessionTree | MainSessionTree) { // todo rework this
+  getIcon(obj: RestSessionTree | MainSessionTree): ServerType {
     if ("type" in obj) {
-      return obj.type == 'VIEW' ? 'VIEW' : 'BATCH'
+      return obj.type == 'VIEW' ? 'VIEW' : 'BATCH';
     }
-    return ('id' in obj ? 'REST' : 'GHOST')
+    return ('id' in obj ? 'REST' : 'GHOST');
   }
 
    // ── Évolution 3 : Recherche de nœud ────────────────────────────────────────
@@ -765,9 +759,6 @@ export class TreeView implements OnDestroy {
   }
 
   ngOnDestroy() {
-    if (this.resizeSubscription) {
-      this.resizeSubscription.unsubscribe();
-    }
     this.tree?.disconnectObserver();
     this.subscriptions.forEach(s => s.unsubscribe());
   }
@@ -834,38 +825,4 @@ export class TreeView implements OnDestroy {
     fn(treeObj);
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 

@@ -14,7 +14,7 @@
   <g filter="url(#callerShadow2)">
     <!-- Outer hexagon — tech feel -->
     <polygon points="15,2 26.3,8.5 26.3,21.5 15,28 3.7,21.5 3.7,8.5"
-             fill="#475569" stroke="#334155" stroke-width="0.8" stroke-linejoin="round"/>
+             fill="#275569" stroke="#334155" stroke-width="0.8" stroke-linejoin="round"/>
     <!-- Inner glow -->
     <circle cx="15" cy="15" r="10" fill="url(#orbGlow)" stroke="none"/>
 
