@@ -605,7 +605,7 @@ export class Constants {
     };
 
     static readonly MAPPING_TYPE: {[key: string]: Partial<{title: string, subtitle: string, icon: string}>} = {
-        request: {title: 'Intéractions', subtitle: 'Communications externes',icon: 'call_made'},
+        request: {title: 'Flux', subtitle: 'Communications externes',icon: 'call_made'},
         rest: {title: 'Services Exposés', subtitle: 'Appels API et distribution de ressources statiques', icon: 'call_received'},
         batch: {title: 'Tâches planifiées', subtitle: 'Historique des jobs asynchrones et tâches de fond', icon: 'manufacturing'},
         test: {title: 'Validation & Tests', subtitle: 'Lancements de tests automatisés et résultats', icon: 'rule'},
