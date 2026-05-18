@@ -119,7 +119,6 @@ export class DashboardComponent implements OnDestroy {
     sessExcLineConfig = Constants.SESSION_EXCEPTION_LINE;
 
     // server health
-    inactiveProtocolsCount = 0;
     quietProtocols: typeof this.protocolDefs = [];
     stoppedServers: LastServerStart[] = [];
     unstableServers: LastServerStart[] = [];
@@ -442,7 +441,6 @@ export class DashboardComponent implements OnDestroy {
 
     private _rebuildServerHealth(): void {
         const keys = ['restRequestExceptionsTable', 'databaseRequestExceptionsTable', 'ftpRequestExceptionsTable', 'smtpRequestExceptionsTable', 'ldapRequestExceptionsTable'];
-        this.inactiveProtocolsCount = keys.filter(k => !this.chartRequests[k]?.isLoading && !this.chartRequests[k]?.data?.length).length;
         this.quietProtocols = this.protocolDefs.filter(p =>
             !this.chartRequests[p.reqKey].isLoading &&
             !this.chartRequests[p.reqKey].data?.length
