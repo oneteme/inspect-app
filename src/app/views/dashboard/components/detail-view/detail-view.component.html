@@ -4,7 +4,7 @@
   <div class="db-proto-wrap" *ngIf="context.selectedInsights.size > 0 && !isSessionInsight">
     <div class="db-insights-hdr">
       <span class="dih-title">Incidents sur la période</span>
-      <span class="dih-sub">Taux d'erreur sur la période analysée</span>
+      <span class="dih-sub">{{ fluxChartSubtitle }}</span>
     </div>
     <div class="proto-list">
       <ng-container *ngFor="let p of context.protocolDefs; trackBy: trackByKey">
@@ -67,7 +67,7 @@
       </ng-container>
       <span class="dbi-chip dbi-chip-err" *ngIf="context.selectedInsights.has('SERVICE') && context.tabRequests.sessionExceptionsTable?.isLoading === false && context.topSessionErrors.length">{{ context.topSessionErrors.length }}</span>
       <span class="dbi-chip dbi-chip-err" *ngIf="context.selectedInsights.has('BATCH') && context.tabRequests.batchExceptionTable?.isLoading === false && context.topBatchErrors.length">{{ context.topBatchErrors.length }}</span>
-      <span class="dbi-chip dbi-chip-err" *ngIf="context.selectedInsights.has('STARTUP') && !context.sessionCountLoading && context.sessionInitErrors > 0">{{ context.startupErrorsByServer.length || 1 }}</span>
+      <span class="dbi-chip dbi-chip-err" *ngIf="context.selectedInsights.has('STARTUP') && !context.sessionCountLoading && context.sessionInitErrors > 0">{{ context.topStartupErrors.length || 1 }}</span>
       <span class="dbi-chip dbi-chip-err" *ngIf="context.selectedInsights.has('VIEW') && context.tabRequests.viewExceptionTable?.isLoading === false && context.topViewErrors.length">{{ context.topViewErrors.length }}</span>
       <span class="dbi-chip dbi-chip-err" *ngIf="context.selectedInsights.has('TEST') && !context.sessionCountLoading && context.sessionTestErrors > 0">{{ context.sessionTestErrors | compact }}</span>
     </div>
@@ -134,22 +134,24 @@
             </div>
           </div>
 
-          <div class="dbi-card" *ngIf="context.selectedInsights.has('STARTUP') && !context.sessionCountLoading && context.sessionInitErrors > 0">
-            <ng-container *ngIf="context.startupErrorsByServer.length; else startupSingleRow">
-              <div class="dbi-row dbi-row-link" *ngFor="let s of context.startupErrorsByServer"
-                   (click)="sessionTypeNav.emit({ type: 'STARTUP', server: s.appName })">
-                <span class="dbi-dot dbi-dot-err"></span>
-                <span class="dbi-name" style="flex:1">{{ s.errors | number:'1.0-0' }} erreurs au démarrage / <strong>{{ s.appName }}</strong></span>
-                <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
-              </div>
-            </ng-container>
-            <ng-template #startupSingleRow>
-              <div class="dbi-row dbi-row-link" (click)="sessionTypeNav.emit({ type: 'STARTUP' })">
-                <span class="dbi-dot dbi-dot-err"></span>
-                <span class="dbi-name" style="flex:1">{{ context.sessionInitErrors | number:'1.0-0' }} erreurs au démarrage</span>
-                <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
-              </div>
-            </ng-template>
+          <!-- STARTUP -->
+          <div class="dbi-card"
+               *ngIf="context.selectedInsights.has('STARTUP') && !context.sessionCountLoading && context.sessionInitErrors > 0">
+            <div class="dbi-row dbi-row-link"
+                 *ngFor="let e of context.topStartupErrors; trackBy: trackByType"
+                 (click)="sessionTypeNav.emit({ type: 'STARTUP' })">
+              <span class="dbi-dot dbi-dot-err"></span>
+              <span class="dbi-name" [title]="e.type">{{ e.type }}</span>
+              <div class="dbi-bar-wrap"><div class="dbi-bar dbi-bar-err" [style.width.%]="getErrBarWidth(context.topStartupErrors, e.count)"></div></div>
+              <span class="dbi-badge dbi-badge-warn">{{ e.count | compact }}</span>
+              <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
+            </div>
+            <div class="dbi-row dbi-row-link" *ngIf="!context.topStartupErrors.length"
+                 (click)="sessionTypeNav.emit({ type: 'STARTUP' })">
+              <span class="dbi-dot dbi-dot-err"></span>
+              <span class="dbi-name">{{ context.sessionInitErrors | number:'1.0-0' }} erreurs au démarrage</span>
+              <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
+            </div>
           </div>
 
           <!-- VIEW -->
