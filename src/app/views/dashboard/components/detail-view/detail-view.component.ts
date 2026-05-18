@@ -76,18 +76,27 @@ export class DashboardDetailViewComponent {
 
     get sessionChartSubtitle(): string {
         switch (this.selectedKey) {
-            case 'BATCH': return 'Batch — nombre d\'exceptions par période';
-            case 'VIEW': return 'UI — nombre d\'exceptions par période';
-            case 'STARTUP': return 'Démarrage — nombre d\'exceptions par période';
-            default: return 'Service — nombre d\'exceptions par période';
+            case 'BATCH':   return 'Job — taux d\'exceptions';
+            case 'VIEW':    return 'UI — taux d\'exceptions';
+            case 'STARTUP': return 'Startup — taux d\'exceptions';
+            default:        return 'Service — taux d\'exceptions';
         }
     }
 
     get selectedLabel(): string {
         if (!this.selectedKey) return 'Clients';
-        const label = this.context.protocolDefs.find(p => p.key === this.selectedKey)?.label ?? this.selectedKey;
-        const prefix = this.isSessionInsight ? 'Session' : 'Request';
-        return `${prefix} — ${label}`;
+        if (this.isSessionInsight) {
+            const sessionLabels: Record<string, string> = {
+                SERVICE: 'Service', BATCH: 'Job', STARTUP: 'Startup', VIEW: 'UI', TEST: 'Test'
+            };
+            return sessionLabels[this.selectedKey] ?? this.selectedKey;
+        }
+        return this.context.protocolDefs.find(p => p.key === this.selectedKey)?.label ?? this.selectedKey;
+    }
+
+    get fluxChartSubtitle(): string {
+        const proto = this.context.protocolDefs.find(p => this.context.selectedInsights.has(p.key));
+        return proto ? `${proto.label} — Taux d'exceptions` : 'Taux d\'exceptions';
     }
 
     /** Indique si le bloc db-clt-block est encore en chargement pour l'insight sélectionné */

@@ -635,7 +635,7 @@ export class Constants {
     static REST_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<string, number> = {
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions REST', color: "#ff0000" },
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000" },
         ],
         options: {
             legend: { show: false },
@@ -654,7 +654,7 @@ export class Constants {
     static  DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions JDBC', color: "#ff0000" }
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000" }
         ],
         options: {
             legend: { show: false },
@@ -673,7 +673,7 @@ export class Constants {
     static  FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions FTP', color: "#ff0000"}
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000"}
         ],
         options: {
             legend: { show: false },
@@ -692,7 +692,7 @@ export class Constants {
     static  SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions SMTP', color: "#ff0000" }
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000" }
         ],
         options: {
             legend: { show: false },
@@ -711,7 +711,7 @@ export class Constants {
     static  LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions LDAP', color: "#ff0000" }
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000" }
         ],
         options: {
             legend: { show: false },

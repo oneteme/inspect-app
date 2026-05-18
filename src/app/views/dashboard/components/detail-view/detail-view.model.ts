@@ -8,6 +8,7 @@ export interface DashboardDetailContext {
     topSessionErrors: any[];
     topBatchErrors: any[];
     topViewErrors: any[];
+    topStartupErrors: { type: string; count: number }[];
     sessionExceptionChart: { stringDate: string; count: number; perc: number }[];
     batchExceptionChart: { stringDate: string; count: number; perc: number }[];
     viewExceptionChart: { stringDate: string; count: number; perc: number }[];
@@ -15,7 +16,6 @@ export interface DashboardDetailContext {
     sessExcLineConfig: any;
     sessionCountLoading: boolean;
     sessionInitErrors: number;
-    startupErrorsByServer: { appName: string; errors: number }[];
     sessionWebErrors: number;
     sessionTestErrors: number;
     insightsAllClear: boolean;

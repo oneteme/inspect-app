@@ -33,11 +33,11 @@ export class DashboardComponent implements OnDestroy {
     constants = Constants;
 
     readonly protocolDefs: { key: string; reqKey: string; label: string; chartConfig: any }[] = [
-        { key: 'rest',  reqKey: 'restRequestExceptionsTable',     label: 'REST',  chartConfig: Constants.REST_REQUEST_EXCEPTION_BY_PERIOD_LINE },
-        { key: 'jdbc',  reqKey: 'databaseRequestExceptionsTable', label: 'JDBC',  chartConfig: Constants.DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE },
-        { key: 'ftp',   reqKey: 'ftpRequestExceptionsTable',      label: 'FTP',   chartConfig: Constants.FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE },
-        { key: 'smtp',  reqKey: 'smtpRequestExceptionsTable',     label: 'SMTP',  chartConfig: Constants.SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE },
-        { key: 'ldap',  reqKey: 'ldapRequestExceptionsTable',     label: 'LDAP',  chartConfig: Constants.LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE },
+        { key: 'rest', reqKey: 'restRequestExceptionsTable', label: 'HTTP', chartConfig: Constants.REST_REQUEST_EXCEPTION_BY_PERIOD_LINE },
+        { key: 'jdbc', reqKey: 'databaseRequestExceptionsTable', label: 'JDBC', chartConfig: Constants.DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE },
+        { key: 'ftp', reqKey: 'ftpRequestExceptionsTable', label: 'FTP', chartConfig: Constants.FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE },
+        { key: 'smtp', reqKey: 'smtpRequestExceptionsTable', label: 'SMTP', chartConfig: Constants.SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE },
+        { key: 'ldap', reqKey: 'ldapRequestExceptionsTable', label: 'LDAP', chartConfig: Constants.LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE },
     ];
 
     private _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
@@ -64,7 +64,7 @@ export class DashboardComponent implements OnDestroy {
         smtp: {title: string, subtitle: string},
         ldap: {title: string, subtitle: string}
     } = {
-        rest: {title: 'REST: 0.00%', subtitle: 'sur 0 requête'},
+        rest: {title: 'HTTP: 0.00%', subtitle: 'sur 0 requête'},
         jdbc: {title: 'JDBC: 0.00%', subtitle: 'sur 0 requête'},
         ftp: {title: 'FTP: 0.00%', subtitle: 'sur 0 requête'},
         smtp: {title: 'SMTP: 0.00%', subtitle: 'sur 0 requête'},
@@ -129,6 +129,7 @@ export class DashboardComponent implements OnDestroy {
     topSessionErrors: { type: string; count: number }[] = [];
     topBatchErrors: { type: string; count: number }[] = [];
     topViewErrors: { type: string; count: number }[] = [];
+    topStartupErrors: { type: string; count: number }[] = [];
     sessionExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
     batchExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
     viewExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
@@ -138,7 +139,6 @@ export class DashboardComponent implements OnDestroy {
     insightsAllClear = false;
     hasRequestErrors = false;
     sessionInitErrors = 0;
-    startupErrorsByServer: { appName: string; errors: number }[] = [];
     sessionWebErrors = 0;
     sessionTestErrors = 0;
     instanceSearchQuery = '';
@@ -192,7 +192,6 @@ export class DashboardComponent implements OnDestroy {
                 this.sessionCountLoading = true;
                 this.restSessionCountLoading = true;
                 this.restSessionCount = { total: 0, errors: 0 };
-                this.startupErrorsByServer = [];
                 this.deployTableRows = [];
                 this.filteredDeployRows = [];
                 this.onlineServerStat = 0;
@@ -208,8 +207,6 @@ export class DashboardComponent implements OnDestroy {
                 this.sessionSubscriptions.push(this._mainService.getCountByType({ env: this.params.env, start: this.params.start, end: this.params.end })
                     .pipe(finalize(() => { if (this._loadGen !== gen) return; this.sessionCountLoading = false; }))
                     .subscribe({ next: (data) => { if (this._loadGen !== gen) return; this.sessionCountData = data; this._rebuildSessionSummaries(); } }));
-                this.sessionSubscriptions.push(this._mainService.getStartupErrorsByServer({ env: this.params.env, start: this.params.start, end: this.params.end })
-                    .subscribe({ next: (data) => { if (this._loadGen !== gen) return; this.startupErrorsByServer = data; } }));
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${this.params.serveurs.length > 0 ? '&' + this.params.serveurs.map(name => `appname=${name}`).join('&') : ''}`)
             }
         }));
@@ -235,7 +232,7 @@ export class DashboardComponent implements OnDestroy {
             this.chartRequests[k].isLoading = true;
         });
         this.protocolSummaries = [
-            { key: 'rest',  label: 'REST',  rate: 0, count: 0, total: 0, loading: true, title: '' },
+            { key: 'rest',  label: 'HTTP',  rate: 0, count: 0, total: 0, loading: true, title: '' },
             { key: 'jdbc',  label: 'JDBC',  rate: 0, count: 0, total: 0, loading: true, title: '' },
             { key: 'ftp',   label: 'FTP',   rate: 0, count: 0, total: 0, loading: true, title: '' },
             { key: 'smtp',  label: 'SMTP',  rate: 0, count: 0, total: 0, loading: true, title: '' },
@@ -273,6 +270,7 @@ export class DashboardComponent implements OnDestroy {
         this.topSessionErrors = [];
         this.topBatchErrors = [];
         this.topViewErrors = [];
+        this.topStartupErrors = [];
         this.tabSubscriptions.forEach(t => t.unsubscribe());
         this.tabSubscriptions = [];
         Object.keys(this.tabRequests).forEach(i => {
@@ -548,12 +546,15 @@ export class DashboardComponent implements OnDestroy {
         const startupData: any[] = this.tabRequests['startupExceptionTable']?.data ?? [];
         const stud: Record<string, number> = {};
         const stuc: Record<string, number> = {};
+        const stum: Record<string, number> = {};
         startupData.forEach(d => {
+            if (d.errorType) stum[d.errorType] = (stum[d.errorType] ?? 0) + d.count;
             if (d.stringDate) {
                 stud[d.stringDate] = (stud[d.stringDate] ?? 0) + d.count;
                 if (d.countok && !stuc[d.stringDate]) stuc[d.stringDate] = d.countok;
             }
         });
+        this.topStartupErrors = Object.entries(stum).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
         this.startupExceptionChart = this._addPerc(this._fillHourGaps(stud, this.params.start, effectiveEnd), stuc);
         this._rebuildInsightsAllClear();
     }
@@ -720,6 +721,7 @@ export class DashboardComponent implements OnDestroy {
             topSessionErrors: this.topSessionErrors,
             topBatchErrors: this.topBatchErrors,
             topViewErrors: this.topViewErrors,
+            topStartupErrors: this.topStartupErrors,
             sessionExceptionChart: this.sessionExceptionChart,
             batchExceptionChart: this.batchExceptionChart,
             viewExceptionChart: this.viewExceptionChart,
@@ -727,7 +729,6 @@ export class DashboardComponent implements OnDestroy {
             sessExcLineConfig: this.sessExcLineConfig,
             sessionCountLoading: this.sessionCountLoading,
             sessionInitErrors: this.sessionInitErrors,
-            startupErrorsByServer: this.startupErrorsByServer,
             sessionWebErrors: this.sessionWebErrors,
             sessionTestErrors: this.sessionTestErrors,
             insightsAllClear: this.insightsAllClear,
@@ -758,7 +759,7 @@ export class DashboardComponent implements OnDestroy {
 
     private _rebuildProtocolSummaries(): void {
         const entries = [
-            { key: 'rest', label: 'REST', reqKey: 'restRequestExceptionsTable', rate: this.sparklinePercs.rest },
+            { key: 'rest', label: 'HTTP', reqKey: 'restRequestExceptionsTable', rate: this.sparklinePercs.rest },
             { key: 'jdbc', label: 'JDBC', reqKey: 'databaseRequestExceptionsTable', rate: this.sparklinePercs.jdbc },
             { key: 'ftp', label: 'FTP', reqKey: 'ftpRequestExceptionsTable', rate: this.sparklinePercs.ftp },
             { key: 'smtp', label: 'SMTP', reqKey: 'smtpRequestExceptionsTable', rate: this.sparklinePercs.smtp },
