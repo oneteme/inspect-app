@@ -1,19 +1,14 @@
-﻿// Vue détail (ua + insights + protocole)
-.db-detail-view {
+﻿.db-detail-view {
   display: flex;
   flex-direction: column;
   gap: .75em;
 }
 
-// db-detail-top supprimé — db-ua-block est maintenant pleine largeur
-
-// Ligne basse : infrastructure + protocole côte à côte
 .db-detail-bottom {
   display: flex;
   gap: .75em;
   align-items: flex-start;
 
-  // Session uniquement : infra sur toute la largeur, protocole masqué
   &.db-detail-bottom--full {
     .db-insights-wrap { flex: 1 1 100%; }
     .db-proto-wrap { display: none; }
@@ -28,7 +23,6 @@
   gap: 0;
 }
 
-// En-têtes de section
 .dmp-header {
   display: flex;
   align-items: center;
@@ -72,7 +66,6 @@
   margin-left: 1px;
 }
 
-// Bloc Clients
 .db-clt-block {
   border-radius: 8px;
   border: 1px solid rgba(34, 36, 38, .11);
@@ -92,14 +85,12 @@
   &::-webkit-scrollbar-track { background: transparent; }
   &::-webkit-scrollbar-thumb { background: rgba(34,36,38,.18); border-radius: 2px; }
 
-  // STARTUP : 2 blocs égaux (Erreurs | Branches)
   &:has(.db-branches-wrap) {
     display: grid;
     grid-template-rows: 1fr 1fr;
   }
 }
 
-// Insights
 .clt-loading {
   display: flex;
   align-items: center;
@@ -112,7 +103,6 @@
 .db-insights-wrap {
   flex: 1;
   min-width: 0;
-  // hauteur min calquée sur db-proto-wrap qui contient des lignes de 100px
   min-height: 120px;
 }
 
@@ -272,7 +262,6 @@
   mat-icon { font-size: 15px; width: 15px; height: 15px; flex-shrink: 0; color: #21ba45; }
 }
 
-// Aucun incident sur la période
 .db-no-incidents {
   display: flex;
   flex-direction: column;
@@ -301,7 +290,6 @@
   }
 }
 
-// Protocol list
 .proto-list {
   border-radius: 6px;
   border: 1px solid rgba(34,36,38,.11);
@@ -389,13 +377,11 @@
 .pvs-lbl { font-size: .6em; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: rgba(0,0,0,.45); }
 .pvs-ok  { display: flex; align-items: center; gap: 4px; margin-top: 3px; font-size: .68em; font-weight: 600; color: #21ba45; mat-icon { font-size: 13px; width: 13px; height: 13px; } }
 
-// Shimmer keyframes (réutilisé)
 @keyframes db-shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
-// Exceptions dans le temps (sessions)
 .db-sess-chart-wrap {
   display: flex;
   flex-direction: column;
@@ -418,4 +404,21 @@
 
   svg { overflow: hidden; }
   box-sizing: border-box;
+}
+
+@media (min-width: 1300px) {
+  .db-detail-view { gap: 1.25em; }
+  .db-insights-hdr { padding-bottom: 12px; margin-bottom: 16px; }
+  .dih-title { font-size: .86em; }
+  .dih-sub { font-size: .77em; }
+  .sb-block-head { height: 46px; font-size: .84em; padding: 0 1.2em; }
+  .dbi-header { padding: 10px 14px; font-size: .82em; }
+  .dbi-row { padding: 11px 1.1em; gap: 10px; }
+  .dbi-name { font-size: .88em; }
+  .dbi-badge { font-size: .9em; flex: 0 0 54px; }
+  .dbi-bar-wrap { height: 4px; }
+  .dbi-dot { width: 7px; height: 7px; }
+  .clt-body { max-height: 600px; }
+  .proto-row { height: clamp(300px, 42vh, 560px); }
+  .sess-chart-row { height: clamp(140px, 18vh, 220px); }
 }

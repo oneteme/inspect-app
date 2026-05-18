@@ -1,5 +1,4 @@
-﻿﻿// utilities
-.c-ok   { color: #21ba45; }
+﻿﻿.c-ok   { color: #21ba45; }
 .c-na   { color: rgba(0,0,0,.25); }
 .c-warn { color: #f59e0b; }
 .c-err  { color: #db2828; }
@@ -13,7 +12,6 @@
 
 .inline-spin { display: inline-flex; }
 
-// banner
 .db-all-ok {
   display: flex;
   align-items: center;
@@ -47,7 +45,6 @@
     &:hover { opacity: 1; background: rgba(33, 186, 69, .07); }
   }
 
-  // Variante neutre : pas de données (gris/bleu au lieu de vert)
   &.db-no-data {
     border-color: rgba(100, 116, 139, .22);
     background: rgba(100, 116, 139, .04);
@@ -56,13 +53,11 @@
   }
 }
 
-// layout
 .db-grid {
   display: grid;
-  grid-template-columns: 360px 1fr;
+  grid-template-columns: clamp(360px, 25%, 520px) 1fr;
   gap: 1em;
   align-items: start;
-  // margin-bottom: .85em;
 
   @media (max-width: 900px) {
     grid-template-columns: 1fr;
@@ -70,7 +65,6 @@
   }
 }
 
-// main column
 .db-main {
   min-width: 0;
   display: flex;
@@ -115,7 +109,6 @@
   mat-icon { font-size: 14px; width: 14px; height: 14px; }
 }
 
-// distributions
 .db-dist-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -211,7 +204,6 @@
 }
 
 
-// volume summary (slot chart quand 0 erreur)
 .pr-volume-summary {
   display: flex;
   flex-direction: column;
@@ -306,7 +298,6 @@
   mat-icon { font-size: 14px; width: 14px; height: 14px; color: #21ba45; }
 }
 
-// sparkline chart
 .pr-chart {
   overflow: visible;
   display: flex;
@@ -319,7 +310,6 @@
   }
 }
 
-// detail button
 .pr-detail-btn {
   display: flex;
   align-items: center;
@@ -356,7 +346,6 @@
   50%       { opacity: .5; transform: scale(.88); }
 }
 
-// sidebar
 .db-sidebar {
   display: flex;
   flex-direction: column;
@@ -372,7 +361,6 @@
   overflow: hidden;
 }
 
-// distribution
 .sb-distribution-block {
   border-radius: 6px;
   border: 1px solid rgba(34, 36, 38, .11);
@@ -492,7 +480,6 @@
   &.c-err { color: #db2828; }
 }
 
-// nav actions
 .sb-nav {
   padding: .4em .55em;
   display: flex;
@@ -527,7 +514,6 @@
   &:hover { background: rgba(219, 40, 40, .05); opacity: 1; }
 }
 
-// Server block
 .sb-block-head {
   display: flex;
   align-items: center;
@@ -572,13 +558,36 @@
   mat-icon { font-size: 13px; width: 13px; height: 13px; }
 }
 
-// shimmer
 @keyframes db-shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
-// bouton vue d'ensemble
+@media (min-width: 1300px) {
+  .db-grid { gap: 1.75em; }
+  .db-main { gap: .9em; }
+  .dmp-title { font-size: .82em; }
+  .sb-block-head { padding: .65em 1em; font-size: .82em; }
+  .sbn-btn { font-size: .88em; padding: 9px 13px; }
+  .sb-overview-btn { height: 44px; font-size: .9em; }
+  .dov-stats-wrap { padding: 0 16px 14px; }
+  .dov-stats-sidebar { gap: 8px; }
+
+  .sb-distribution-block,
+  .sb-distribution {
+    padding: .9em 1.1em;
+    row-gap: 11px;
+    column-gap: 9px;
+    grid-template-columns: 76px 1fr max-content 52px;
+  }
+  .sbd-title { font-size: .78em; padding-bottom: 7px; margin-bottom: 5px; }
+  .sbd-label { font-size: .82em; }
+  .sbd-rate { font-size: .86em; }
+  .sbd-count { font-size: .82em; }
+  .sbd-track { height: 5px; }
+  .proto-row { height: 120px; }
+}
+
 .sb-overview-btn {
   display: flex;
   align-items: center;
@@ -615,7 +624,6 @@
   }
 }
 
-// skeleton shimmer
 @keyframes sb-shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
@@ -630,7 +638,7 @@
 
 .dov-stat-sb-skel {
   @extend %skel-base;
-  height: 52px;
+  height: 44px;
   border-radius: 5px;
 }
 
@@ -728,6 +736,15 @@
   &.dov-stat-sb-active {
     filter: brightness(.93) saturate(1.4);
     box-shadow: inset 0 0 0 1.5px currentColor;
+  }
+}
+
+@media (min-width: 1300px) {
+  .dov-stats-lbl { font-size: .78em; padding-bottom: 8px; margin-bottom: 12px; }
+  .dov-stat-sb-skel { height: 64px; border-radius: 6px; }
+  .dov-stat-sb { padding: 14px 8px 12px; gap: 6px; border-radius: 6px;
+    .dov-stat-sb-val { font-size: 1.5em; }
+    .dov-stat-sb-lbl { font-size: .68em; }
   }
 }
 
