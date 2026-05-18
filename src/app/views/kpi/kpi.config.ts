@@ -459,6 +459,107 @@ export const BATCH_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfi
   filters: BATCH_SESSION_FILTERS_CONFIG(groupedBy)
 });
 
+export const BATCH_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+  series: {
+    optional: false,
+    items: [{
+      key: 'elapsedtime',
+      selected: true,
+      menu: {
+        label: ''
+      },
+      jquery: {
+        value: 'elapsedtime',
+        buildAlias: () => 'elapsedtime'
+      }
+    }]
+  },
+  indicators: {
+    optional: false,
+    items: [{
+      key: 'count',
+      selected: true,
+      menu: {
+        label: 'Nombre d\'Appel'
+      },
+      jquery: {
+        value: 'count',
+        buildAlias: () => 'count'
+      },
+      extra: {
+        stacks: {
+          optional: false,
+          items: [{
+            key: 'performance_tranche',
+            selected: true,
+            menu: {
+              label: 'Par tranche 1',
+              icon: ''
+            },
+            jquery: {
+              value: 'performance_tranche',
+              buildAlias: () => 'performance_tranche',
+              buildName: (chartItem, value) => PERFORMANCE_TRANCHE1[value].label,
+              buildColor: (value: string) => PERFORMANCE_TRANCHE1[value].color
+            }
+          }, {
+            key: 'performance_tranche2',
+            selected: false,
+            menu: {
+              label: 'Par tranche 2',
+              icon: ''
+            },
+            jquery: {
+              value: 'performance_tranche2',
+              buildAlias: () => 'performance_tranche2',
+              buildName: (chartItem, value) => PERFORMANCE_TRANCHE2[value].label,
+              buildColor: (value: string) => PERFORMANCE_TRANCHE2[value].color
+            }
+          }]
+        }
+      }
+    }, {
+      key: 'avg',
+      selected: false,
+      menu: {
+        label: 'Moyenne'
+      },
+      jquery: {
+        value: 'avg',
+        buildAlias: () => 'avg',
+        buildName: (chartItem) => 'Moyenne',
+        buildColor: () => '#0080ff'
+      }
+    }, {
+      key: 'min',
+      selected: false,
+      menu: {
+        label: 'Minimum'
+      },
+      jquery: {
+        value: 'min',
+        buildAlias: () => 'min',
+        buildName: (chartItem) => 'Minimum',
+        buildColor: () => '#0080ff'
+      }
+    }, {
+      key: 'max',
+      selected: false,
+      menu: {
+        label: 'Maximum'
+      },
+      jquery: {
+        value: 'max',
+        buildAlias: () => 'max',
+        buildName: (chartItem) => 'Maximum',
+        buildColor: () => '#0080ff'
+      }
+    }]
+  },
+  groups: BATCH_SESSION_GROUPS_CONFIG(groupedBy),
+  filters: BATCH_SESSION_FILTERS_CONFIG(groupedBy)
+});
+
 export const BATCH_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
   optional: false,
   items: [{

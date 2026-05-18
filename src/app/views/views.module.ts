@@ -63,8 +63,6 @@ import {FtpComponent} from "./kpi/request/ftp/ftp.component";
 import {LdapComponent} from "./kpi/request/ldap/ldap.component";
 import {SmtpComponent} from "./kpi/request/smtp/smtp.component";
 import {SessionKpiView} from "./kpi/session/session-kpi.view";
-import {DependencyNewTableComponent} from "./kpi/_component/dependency-table/dependency-table.component";
-import {DependentNewTableComponent} from "./kpi/_component/dependent-table/dependent-table.component";
 import {BatchComponent} from "./kpi/session/batch/batch.component";
 import {CommandChartComponent} from "./kpi/_component/command-chart/command-chart.component";
 import {DependencyChartComponent} from "./kpi/_component/dependency-chart/dependency-chart.component";
@@ -141,8 +139,6 @@ import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.compone
     LatencyChartComponent,
     ChartMenuComponent,
     SessionKpiView,
-    DependencyNewTableComponent,
-    DependentNewTableComponent,
     CommandChartComponent,
     DependencyChartComponent,
     DependentChartComponent,

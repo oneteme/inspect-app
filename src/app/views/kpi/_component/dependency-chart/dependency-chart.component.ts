@@ -101,18 +101,12 @@ export class DependencyChartComponent {
         backgroundColor: 'rgba(15,23,42,0.85)',
         textStyle: { color: '#f1f5f9', fontSize: 12 },
         formatter: (params: any) => {
-          const row = this._data?.[params.dataIndex];
-          const source = row?.origin ?? params.seriesName;
-          const target = row?.target ?? params.name;
-          const count  = row?.count  ?? params.value[2] ?? 0;
           return `<div style="line-height:1.6">` +
             `<span style="color:#94a3b8;font-size:11px">Cible</span><br/>` +
             `<b style="color:#f8fafc">${params.name}</b><br/>` +
             `<span style="color:#60a5fa;font-weight:700;font-size:13px">${ params.value[2].toLocaleString('fr-FR')} appels</span>` +
             `</div>`;
         }
-
-
       }
     }
   }

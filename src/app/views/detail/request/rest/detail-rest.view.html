@@ -86,13 +86,13 @@
 
           <!-- Volume & durée -->
           <div class="footer-section data-stats">
-            <div class="stat-item">
-              <mat-icon class="material-symbols-outlined stat-icon">arrow_downward</mat-icon>
-              <span class="stat-value">{{ request.inDataSize || 0 }}o</span>
-            </div>
-            <div class="stat-item">
+            <div class="stat-item" [matTooltip]="request.outDataSize + 'o Envoyés'">
               <mat-icon class="material-symbols-outlined stat-icon">arrow_upward</mat-icon>
               <span class="stat-value">{{ request.outDataSize || 0 }}o</span>
+            </div>
+            <div class="stat-item" [matTooltip]="request.inDataSize + 'o Reçus'">
+              <mat-icon class="material-symbols-outlined stat-icon">arrow_downward</mat-icon>
+              <span class="stat-value">{{ request.inDataSize || 0 }}o</span>
             </div>
             <div class="stat-item">
               <mat-icon class="material-symbols-outlined stat-icon">timer</mat-icon>
@@ -170,7 +170,7 @@
         Contexte de l'Appel
       </div>
     </div>
-    <a mat-menu-item [routerLink]="['/kpi/request', 'rest']" [queryParams]="{env: instance?.env, host: request?.host}">
+    <a mat-menu-item (click)="navigateOnKpi($event)">
       <mat-icon class="material-symbols-outlined">finance_mode</mat-icon>KPI
     </a>
 </mat-menu>

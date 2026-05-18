@@ -41,7 +41,12 @@
               (onChartChange)="onStatusChartChange($event)">
       </status-chart>
     </div>
-
+    <div class="kpi-chart-card span-4">
+      <user-chart
+              [data]="$userRepartition.data"
+              [loading]="$userRepartition.loading"
+              [queryParams]="params"></user-chart>
+    </div>
     <div class="kpi-chart-card span-4">
       <dependent-chart
               [data]="$dependentChart.data"

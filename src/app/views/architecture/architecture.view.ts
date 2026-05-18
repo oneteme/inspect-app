@@ -20,8 +20,6 @@ import {SizePipe} from "../../shared/pipe/size.pipe";
     styleUrls: ['./architecture.view.scss'],
 })
 export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
-    private _restSessionService = inject(RestSessionService);
-    private _mainSessionService = inject(MainSessionService);
     private _treeService = inject(TreeService);
     private _instanceService = inject(InstanceService);
     private _router = inject(EnvRouter);
@@ -34,136 +32,8 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
     rangesColorConfig = [ '#E9E9E9', '#AFB3EF', '#757DF4', '#3A47FA', '#0011FF' ]
     tree: ArchitectureTree;
     resizeSubscription: any;
-    treeMapConfig: ChartProvider<XaxisType, YaxisType> = {
-        series: [
-            {
-                data: { x: field('origin'), y: field('count')},
-                name: field('name'),
-                color: field('color')
 
-            }
-        ],
-        options: {
-            chart: {
-                height: '100%',
-                toolbar: {
-                    show: false
-                },
-                events: {// fix bug in treemap jquerychart
-                    mouseMove: function (e, c, config) { },
-                    mouseLeave: function (e, c, config) { }
-                }
-            },
-            tooltip: {
-
-            },
-            legend: {
-                show:true,
-                position: 'top',
-                horizontalAlign: 'right',
-                markers: {
-                    strokeWidth: 1,
-                    offsetX: 0,
-                    offsetY: 4
-                },
-            },
-            colors:[
-
-            ],
-            plotOptions: {
-                treemap: {
-                    enableShades: false,
-                }
-              }
-        }
-    };
-    heatMapConfig: ChartProvider<XaxisType, YaxisType> = {
-        series: [
-            {
-                data: { x: field('target'), y: field('count') },
-                name: field('origin')
-            }
-        ],
-        options: {
-            chart: {
-                height: '100%',
-                toolbar: {
-                    show: false
-                },
-                events: {// fix bug in treemap jquerychart
-                    mouseMove: function (e, c, config) { },
-                    mouseLeave: function (e, c, config) { }
-                }
-            },
-            dataLabels: {
-                enabled: false,
-            },
-            stroke: {
-                width: 5
-            },
-            xaxis: {
-                title: {
-                    text: 'Serveur appelé',
-                },
-                labels: {
-                    rotate: -35,
-                    hideOverlappingLabels: false
-                },
-                tooltip: {
-                    enabled: false
-                }
-            },
-            yaxis: {
-                title: {
-                    text: 'Serveur appelant'
-                },
-                labels: {
-                    show: true,
-                }
-            },
-            legend: {
-                position: 'top',
-                horizontalAlign: 'right',
-                markers: {
-                    strokeWidth: 1,
-                    offsetX: 0,
-                    offsetY: 4
-                }
-            },
-            tooltip: {
-                custom: function ({ series, seriesIndex, dataPointIndex, w }) {
-                    return (
-                        `
-                            <div class="arrow_box"> 
-                                <div style="align-self:flex-end; font-weight:bold;font-size:18px"> ${series[seriesIndex][dataPointIndex]}</div>
-                                <div> Appelant : ${w.config.series[seriesIndex].name} </div>
-                                <div> Appelé   : ${w.globals.labels[dataPointIndex]} </div>
-                            </div>
-                        `
-
-                    );
-                },
-
-                x: {
-                    show: false
-                }
-            },
-            plotOptions: {
-                heatmap: {
-                    enableShades: false,
-                    radius: 0,
-                    colorScale: {
-
-                    }
-                }
-            }
-        }
-    };
-    trafficIsloading:boolean;
     syntheseIsLoading: boolean;
-    heatMapData: { count: number, origin: string, target: string }[] = [];
-
-    treeMapData: { count: number, origin: string, name: string, color: string }[] = [];
 
     serverFilterForm = new FormGroup({
         dateRangePicker: new FormGroup({
@@ -172,8 +42,6 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
         })
     });
 
-    heatMapControl: FormControl = new FormControl<boolean>(false);
-    treeMapControl: FormControl = new FormControl<boolean>(false);
     focusControl:   FormControl = new FormControl<string | null>(null);
     edgeTypeFilters: { [key: string]: boolean } = { 'REST': true, 'VIEW': true, 'JDBC': true, 'FTP': true, 'SMTP': true, 'LDAP': true };
 
@@ -214,46 +82,6 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
             }
         }));
 
-        this.subscriptions.push(this.treeMapControl.valueChanges.subscribe({
-            next: res => {
-                let _field = res ? 'sum': 'count';
-                let d  = this.heatMapData.reduce((acc:any,cur:any) => {
-                    let i = acc.findIndex(a => a.origin === cur.origin)
-                    if(i == -1){
-                        acc.push({origin: cur.origin, count: 0})
-                    }else {
-                        acc[i].count += cur[_field];
-                    }
-                    return acc;
-                },[]).sort((a,b)=>(a.count-b.count))
-
-                const treeRanges = this.createRanges(d, 'count', res);
-                this.treeMapData = d.map(t => {
-                    let r = treeRanges.find(r=> t.count >= r.from && t.count <= r.to)
-                    if(r){
-                        t.name = r.name
-                        t.color = r.color
-                    }
-                    return t
-                });
-            }
-        }));
-
-        this.subscriptions.push(this.heatMapControl.valueChanges.subscribe({
-            next: res => {
-                let _field = res ? 'sum': 'count';
-                const ranges = this.createRanges(this.heatMapData, _field, res);
-                let newConfig = this.heatMapConfig;
-                newConfig.options.plotOptions.heatmap.colorScale.ranges = ranges;
-                newConfig.series = [
-                    {
-                        data: { x: field('target'), y: field(_field) },
-                        name: field('origin')
-                    }
-                ];
-                this.heatMapConfig = { ...newConfig };
-            }
-        }));
 
         this.subscriptions.push(this.focusControl.valueChanges.subscribe(name => {
             if (!this.tree || !this._architectures.length) return;
@@ -420,23 +248,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
     }
 
     init() {
-        this.trafficIsloading = true;
         this.syntheseIsLoading = true;
-        this.heatMapData = [];
-        this.treeMapData = [];
-        this.subscriptions.push(forkJoin(
-            {
-                rest: this._restSessionService.getArchitectureForHeatMap({ start: this.params.start, end: this.params.end, env: this.params.env }),
-                main: this._mainSessionService.getMainSessionArchitectureForHeatMap({ start: this.params.start, end: this.params.end, env: this.params.env }),
-            }
-        ).pipe(finalize(()=>  this.trafficIsloading = false)).subscribe({
-            next: (result: {rest: any[], main: any[]})  => {
-                let res = [...result.rest, ...result.main];
-                this.buildHeatMapCharts(res);
-                this.treeMapControl.updateValueAndValidity();
-                this.heatMapControl.updateValueAndValidity();
-            }
-        }));
 
         this.subscriptions.push(forkJoin({
             mainSession: this._instanceService.getMainSessionApplication(this.params.start, this.params.end, this.params.env),
@@ -489,33 +301,6 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
         // Ordre d'affichage
         const order = ['REST', 'VIEW', 'JDBC', 'FTP', 'SMTP', 'LDAP'];
         this.statsCards = cards.sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
-    }
-
-    buildHeatMapCharts(res: {count: number, sum: number, origin: string, target: string}[]) {
-        let orders  = res.reduce((acc, cur) => {
-            if(!acc[cur.target]) {
-                acc[cur.target] = 0;
-            }
-            acc[cur.target] += 1;
-            return acc;
-        }, {});
-        let distinct = Object.entries(orders).map((e1: [string, number]) => ({name: e1[0], count: e1[1]})).sort((a1, a2) => a2.count - a1.count);
-        let map: any = {};
-        res.forEach(r => {
-            if (!map[r.origin]) {
-                map[r.origin] = {};
-                distinct.forEach(v => map[r.origin][v.name] = {count: 0, sum: 0});
-            }
-            map[r.origin][r.target] = {count: r.count, sum: r.sum};
-        });
-        let arr: { count: number, sum: number, origin: string, target: string, targetSum: number }[] = [];
-        Object.entries(map).forEach(e1 => {
-            let sum = Object.values(e1[1]).filter(v => v.count > 0).length;
-            Object.entries(e1[1]).forEach(e2 => {
-                arr.push({ origin: e1[0], target: e2[0], count: e2[1].count, sum: e2[1].sum < 0 ? 0 : e2[1].sum, targetSum: sum})
-            });
-        });
-        this.heatMapData = arr.sort((a1, a2) => a2.targetSum - a1.targetSum);
     }
 
     createRanges(arr: any[], field: string, isSize: boolean) {

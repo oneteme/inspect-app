@@ -96,8 +96,7 @@
      [disabled]="!session?.user">
     <mat-icon class="material-symbols-outlined">web_traffic</mat-icon>Parcours Utilisateur
   </a>
-  <a mat-menu-item *ngIf="session?.type == 'BATCH'" [routerLink]="['/kpi/session', 'batch']"
-     [queryParams]="{host: instance?.name, env: instance?.env}">
+  <a mat-menu-item *ngIf="session?.type == 'BATCH' || session?.type == 'STARTUP'" (click)="navigate($event)">
     <mat-icon class="material-symbols-outlined">finance_mode</mat-icon>KPI
   </a>
 </mat-menu>

@@ -8,13 +8,16 @@
 }
 
 #container {
-  height: calc(100vh - 56px - 48px - 1em);
+  height: calc(100vh - 56px - 88px - 14px);
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
 }
 
 #fixed-width-container {
+  border: 1px solid #e2e8f0;
+  box-shadow: inset 0 1px 4px rgba(0, 0, 0, 0.05);
+  border-radius: 6px;
   width: 100%;
   position: relative;
   height: 100%;

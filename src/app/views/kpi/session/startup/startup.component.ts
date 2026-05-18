@@ -14,6 +14,7 @@ export class StartupComponent implements OnInit {
 
   $statusRepartition: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig}> = { data: [], loading: true};
   $statusRepartitionSlice: {data: any[], loading: boolean} = { data: [], loading: true};
+  $userRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
   $dependentChart: {data: any[], loading: boolean} = {data: [], loading: true};
   $globalStatistic: {totalRequest: number, totalRequestError: number, percentError: number,  totalHost: number, totalName: number} = {totalRequest: 0, totalRequestError: 0, percentError: 0, totalHost: 0, totalName: 0};
 
@@ -26,6 +27,7 @@ export class StartupComponent implements OnInit {
       this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
       this.$statusRepartition.chartConfig = STARTUP_SESSION_STATUS_CHART_CONFIG(this.groupedBy);
       this.getDependents();
+      this.getUser();
       this.getGlobalStatistics();
     }
   };
@@ -64,6 +66,28 @@ export class StartupComponent implements OnInit {
         slice.data = [];
       }
     }
+  }
+
+  getUser() {
+    let args: any = {
+      'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
+      'instance_env': 'instance.id',
+      'instance.environement': this.params.env,
+      'instance.type': 'SERVER',
+      'type': 'STARTUP',
+      'start.ge': this.params.period.start.toISOString(),
+      'start.lt': this.params.period.end.toISOString(),
+      'order': `start.${this.groupedBy}.asc`
+    }
+    if(this.params.hosts?.length){
+      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    }
+    this.$userRepartition.loading = true;
+    this._mainSessionService.getMainSession(args).pipe(finalize(() => this.$userRepartition.loading = false)).subscribe({
+      next: (res: any[]) => {
+        this.$userRepartition.data = res;
+      }
+    });
   }
 
   getDependents() {

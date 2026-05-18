@@ -61,6 +61,24 @@
     </div>
 
     <div class="kpi-chart-card span-4">
+      <performance-chart
+              [chartConfig]="$performanceRepartition.chartConfig"
+              [data]="$performanceRepartition.data"
+              [loading]="$performanceRepartition.loading"
+              [sliceData]="$performanceRepartitionSlice.data"
+              [queryParams]="params"
+              (onChartChange)="onPerformanceChartChange($event)">
+      </performance-chart>
+    </div>
+
+    <div class="kpi-chart-card span-4">
+      <user-chart
+              [data]="$userRepartition.data"
+              [loading]="$userRepartition.loading"
+              [queryParams]="params"></user-chart>
+    </div>
+
+    <div class="kpi-chart-card span-4">
       <dependent-chart
               [data]="$dependentChart.data"
               [loading]="$dependentChart.loading"

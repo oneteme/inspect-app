@@ -107,4 +107,10 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
         }
       });
     }
+
+    navigate(event: MouseEvent) {
+        var start = new Date(this.session.start * 1000);
+        var end = this.session.end ? new Date(this.session.end * 1000) : new Date();
+        this._router.navigateOnClick(event, ['/kpi/session', 'rest'], { queryParams: {host: this.instance?.name, env: this.instance?.env, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
+    }
 }

@@ -127,7 +127,7 @@ export class SmtpComponent implements OnInit {
       'order': `start.${this.groupedBy}.asc`
     }
     if(this.params.hosts?.length){
-      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
     }
     this.$userRepartition.loading = true;
     this._smtpRequestService.getSmtp(args).pipe(finalize(() => this.$userRepartition.loading = false)).subscribe({

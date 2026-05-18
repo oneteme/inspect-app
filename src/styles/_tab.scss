@@ -37,8 +37,8 @@
   }
 
   &.active {
-    background: rgba(219,40,40,.05);
-    color: rgba(219,40,40,.9);
+    background: rgba(124, 58, 237, 0.05);
+    color: #7c3aed;
     font-weight: 700;
 
     &::after {
@@ -48,15 +48,19 @@
       top: 20%;
       height: 60%;
       width: 2px;
-      background: #db2828;
+      background-color: #7c3aed;
       border-radius: 2px 0 0 2px;
     }
 
     mat-icon { color: inherit; }
 
     .tab-count {
-      background: rgba(219,40,40,.12);
-      color: #db2828;
+      background: #7c3aed;
+      color: white;
+    }
+
+    .error-indicator {
+      color: #ef4444;
     }
   }
 

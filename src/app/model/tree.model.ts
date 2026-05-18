@@ -69,7 +69,6 @@ export class RestServerNode implements Node<Label>{
 
   nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
       const rows: any[] = [];
-      if (this.nodeObject?.appName)   rows.push({ icon: 'label',         label: 'Application', value: this.nodeObject.appName,             color: '#3b82f6' });
       if (this.nodeObject?.host)      rows.push({ icon: 'dns',           label: 'Hôte',        value: this.nodeObject.host,                color: '#6366f1' });
       if (this.nodeObject?.port)      rows.push({ icon: 'settings_ethernet', label: 'Port',    value: String(this.nodeObject.port),        color: '#8b5cf6' });
       //if (obj?.protocol)  rows.push({ icon: 'lock',          label: 'Protocole',   value: obj.protocol,            color: '#0ea5e9' });
@@ -107,7 +106,6 @@ export class MainServerNode implements Node<Label> {
 
   nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
     const rows: any[] = [];
-    if (this.nodeObject?.appName)   rows.push({ icon: 'label',         label: 'Application', value: this.nodeObject.appName,             color: '#3b82f6' });
     //if (obj?.protocol)  rows.push({ icon: 'lock',          label: 'Protocole',   value: obj.protocol,            color: '#0ea5e9' });
     //if (obj?.type)      rows.push({ icon: 'category',      label: 'Type',        value: obj.type,                color: '#f59e0b' });
     if (this.nodeObject?.os)        rows.push({ icon: 'computer',      label: 'OS',          value: this.nodeObject.os,                  color: '#64748b' });
@@ -164,13 +162,12 @@ export class LinkRequestNode implements Link<Label> {
     const statusColor = colorMatch ? colorMatch[0] : '#22c55e';
     
     const statusIcon = isOngoing ? 'schedule' : (this.nodeObject.status < 400 ? 'check_circle' : (this.nodeObject.status < 500 ? 'warning' : 'error'));
-    
     return {
       status:   { icon: statusIcon, value: status, color: statusColor },
       elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
       resource: { icon: 'code', value: resource, color: '#3b82f6' },
       //id:       { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type: ""},
-  //    ...(this.nodeObject.remoteTrace ? { session: { icon: 'link', value: this.nodeObject.id, color: '#3b82f6', type:'rest' } } : {}),
+      // ...(this.nodeObject.remoteTrace ? { session: { icon: 'link', value: this.nodeObject.id, color: '#3b82f6', type:'rest' } } : {}),
     }
   }
   getLinkStyle(): string {

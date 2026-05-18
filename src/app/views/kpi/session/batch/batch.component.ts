@@ -1,7 +1,10 @@
 import {Component, inject, Input, OnInit} from "@angular/core";
 import {QueryParams} from "../../../../model/conf.model";
 import {finalize} from "rxjs";
-import {BATCH_SESSION_STATUS_CHART_CONFIG, ChartConfig} from "../../kpi.config";
+import {
+  BATCH_SESSION_PERFORMANCE_CHART_CONFIG,
+  BATCH_SESSION_STATUS_CHART_CONFIG, ChartConfig, REST_SESSION_PERFORMANCE_CHART_CONFIG
+} from "../../kpi.config";
 import {periodManagement2} from "../../../../shared/util";
 import {MainSessionService} from "../../../../service/jquery/main-session.service";
 
@@ -14,6 +17,9 @@ export class BatchComponent implements OnInit {
 
   $statusRepartition: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig}> = { data: [], loading: true};
   $statusRepartitionSlice: {data: any[], loading: boolean} = { data: [], loading: true};
+  $performanceRepartition: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig}> = {data: [], loading: true};
+  $performanceRepartitionSlice: { data: any[], loading: boolean } = {data: [], loading: true};
+  $userRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
   $dependentChart: {data: any[], loading: boolean} = {data: [], loading: true};
   $globalStatistic: {totalRequest: number, totalRequestError: number, percentError: number,  totalHost: number, totalName: number} = {totalRequest: 0, totalRequestError: 0, percentError: 0, totalHost: 0, totalName: 0};
 
@@ -25,6 +31,8 @@ export class BatchComponent implements OnInit {
       this.params = value;
       this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
       this.$statusRepartition.chartConfig = BATCH_SESSION_STATUS_CHART_CONFIG(this.groupedBy);
+      this.$performanceRepartition.chartConfig = BATCH_SESSION_PERFORMANCE_CHART_CONFIG(this.groupedBy);
+      this.getUser();
       this.getDependents();
       this.getGlobalStatistics();
     }
@@ -32,6 +40,10 @@ export class BatchComponent implements OnInit {
 
   ngOnInit() {
 
+  }
+
+  onPerformanceChartChange(event: {eventType: 'default' | 'filter', chartConfig: ChartConfig, filteredTasks?: any[]}) {
+    this.getCustom(event, this.$performanceRepartition, this.$performanceRepartitionSlice);
   }
 
   onStatusChartChange(event: {eventType: 'default' | 'filter', chartConfig: ChartConfig}) {
@@ -64,6 +76,28 @@ export class BatchComponent implements OnInit {
         slice.data = [];
       }
     }
+  }
+
+  getUser() {
+    let args: any = {
+      'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
+      'instance_env': 'instance.id',
+      'instance.environement': this.params.env,
+      'instance.type': 'SERVER',
+      'type': 'BATCH',
+      'start.ge': this.params.period.start.toISOString(),
+      'start.lt': this.params.period.end.toISOString(),
+      'order': `start.${this.groupedBy}.asc`
+    }
+    if(this.params.hosts?.length){
+      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    }
+    this.$userRepartition.loading = true;
+    this._mainSessionService.getMainSession(args).pipe(finalize(() => this.$userRepartition.loading = false)).subscribe({
+      next: (res: any[]) => {
+        this.$userRepartition.data = res;
+      }
+    });
   }
 
   getDependents() {

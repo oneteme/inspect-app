@@ -246,4 +246,10 @@ export class DetailFtpView implements OnInit, OnDestroy {
       }
     });
   }
+
+  navigateOnKpi(event: MouseEvent) {
+    var start = new Date(this.request.start * 1000);
+    var end = this.request.end ? new Date(this.request.end * 1000) : new Date();
+    this._router.navigateOnClick(event, ['/kpi/request', 'ftp'], { queryParams: {host: this.request.host, env: this.instance.env, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
+  }
 }
