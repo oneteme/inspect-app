@@ -5,7 +5,7 @@
 
 .header-filter,
 .filter-container,
-.header-right {
+header-page .right {
 
   // Contour (les 3 pièces de la bordure)
   .mdc-text-field--outlined .mdc-notched-outline__leading,
@@ -60,6 +60,10 @@
     font-weight: 500 !important;
     color: rgba(0, 0, 0, .45) !important;
     letter-spacing: .01em !important;
+  }
+
+  .mdc-text-field--outlined .mdc-floating-label:not(.mdc-floating-label--float-above) {
+    top: calc(50% - 1px) !important;
   }
 
   .mdc-text-field--outlined.mdc-text-field--focused .mdc-floating-label {
