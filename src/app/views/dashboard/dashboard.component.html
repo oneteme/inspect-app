@@ -24,13 +24,6 @@
   <button (click)="showInactiveProtocols = true">Afficher quand même</button>
 </div>
 
-<!-- Banner : tous protocoles OK -->
-<div class="db-all-ok" *ngIf="!hasNoData && !kpiLoading && inactiveProtocolsCount === protocolDefs.length && !showInactiveProtocols">
-  <mat-icon class="material-symbols-outlined">check_circle</mat-icon>
-  <span>Aucun incident protocole sur la période sélectionnée</span>
-  <button (click)="showInactiveProtocols = true">Afficher l'activité</button>
-</div>
-
 <div class="db-grid">
   <!-- Colonne principale : liste des protocoles -->
   <section class="db-main">
