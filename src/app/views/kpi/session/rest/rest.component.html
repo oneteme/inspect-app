@@ -18,7 +18,7 @@
       <div class="kpi-stat-content">
         <div class="kpi-stat-value-row">
           <span class="kpi-stat-value">{{$globalStatistic.totalRequestError | number}}</span>
-          <span class="kpi-error-badge">
+          <span class="kpi-badge error">
             soit {{$globalStatistic.percentError | number: '1.0-2'}}%
           </span>
         </div>
@@ -32,11 +32,11 @@
       <div class="kpi-stat-content">
         <div class="kpi-stat-value-row">
           <span class="kpi-stat-value">{{$globalStatistic.elapsedPercentile | duration}}</span>
-          <span class="kpi-error-badge">
-            soit P.95
+          <span class="kpi-badge">
+            P.95
           </span>
         </div>
-        <span class="kpi-stat-label">Temps de réponse</span>
+        <span class="kpi-stat-label">Temps de réponse max</span>
       </div>
     </div>
     <div class="kpi-stat-card">

@@ -78,7 +78,7 @@
   white-space: nowrap;
 }
 
-.kpi-error-badge {
+.kpi-badge {
   display: inline-flex;
   align-items: center;
   gap: 2px;
@@ -88,8 +88,13 @@
   border-radius: 20px;
   white-space: nowrap;
   letter-spacing: .01em;
-  background: #fef2f2;
-  color: #dc2626;
+  background: #f1f5f9;
+  color: #64748b;
+
+  &.error {
+    background: #fef2f2;
+    color: #dc2626;
+  }
 }
 
 .kpi-stat-label {
