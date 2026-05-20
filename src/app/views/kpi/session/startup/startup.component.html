@@ -25,6 +25,20 @@
         <span class="kpi-stat-label">Nombre d'Incidents</span>
       </div>
     </div>
+    <div class="kpi-stat-card">
+      <div class="kpi-stat-icon purple">
+        <mat-icon class="material-symbols-outlined">schedule</mat-icon>
+      </div>
+      <div class="kpi-stat-content">
+        <div class="kpi-stat-value-row">
+          <span class="kpi-stat-value">{{$globalStatistic.elapsedPercentile | duration}}</span>
+          <span class="kpi-error-badge">
+            soit P.95
+          </span>
+        </div>
+        <span class="kpi-stat-label">Temps de réponse</span>
+      </div>
+    </div>
   </div>
 
   <!-- ── Grille des charts ── -->
@@ -37,9 +51,18 @@
               [loading]="$statusRepartition.loading"
               [sliceData]="$statusRepartitionSlice.data"
               [queryParams]="params"
-              title="Lancement"
               (onChartChange)="onStatusChartChange($event)">
       </status-chart>
+    </div>
+    <div class="kpi-chart-card span-4">
+      <performance-chart
+              [chartConfig]="$performanceRepartition.chartConfig"
+              [data]="$performanceRepartition.data"
+              [loading]="$performanceRepartition.loading"
+              [sliceData]="$performanceRepartitionSlice.data"
+              [queryParams]="params"
+              (onChartChange)="onPerformanceChartChange($event)">
+      </performance-chart>
     </div>
     <div class="kpi-chart-card span-4">
       <user-chart

@@ -16,7 +16,7 @@ export class LdapComponent implements OnInit {
   $statusRepartitionSlice: {data: any[], loading: boolean} = { data: [], loading: true};
   $performanceRepartition: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig}> = {data: [], loading: true};
   $performanceRepartitionSlice: {data: any[], loading: boolean} = {data: [], loading: true};
-  $globalStatistic: {totalRequest: number, totalRequestError: number, percentError: number, totalHost: number} = {totalRequest: 0, totalRequestError: 0, percentError: 0, totalHost: 0};
+  $globalStatistic: {totalRequest: number, totalRequestError: number, percentError: number, elapsedPercentile: number} = {totalRequest: 0, totalRequestError: 0, percentError: 0, elapsedPercentile: 0};
   $commandRepartition: Partial<{data: any[], loading: boolean}> = { data: [], loading: true};
   $dependencyRepartition: {data: any[], loading: boolean} = {data: [], loading: true};
   $userRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
@@ -59,7 +59,7 @@ export class LdapComponent implements OnInit {
     if(event.eventType === 'default') {
       arr.loading = true;
       arr.data = [];
-      this._ldapRequestService.getCustom2({series: arr.chartConfig.series.items, indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, filters: event.filteredTasks})
+      this._ldapRequestService.getCustom({series: arr.chartConfig.series.items, indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, filters: event.filteredTasks})
       .pipe(finalize(() => arr.loading = false))
       .subscribe(data => {
         arr.data = data;
@@ -139,7 +139,7 @@ export class LdapComponent implements OnInit {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `count(host.distinct):count_host,count:count_request,count_request_error:count_error`,
+      'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_request_error:count_error`,
       'instance_env': 'instance.id',
       'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
@@ -153,7 +153,7 @@ export class LdapComponent implements OnInit {
         this.$globalStatistic.totalRequest = res[0].count_request;
         this.$globalStatistic.totalRequestError = res[0].count_error;
         this.$globalStatistic.percentError = (res[0].count_error / res[0].count_request) * 100 || 0;
-        this.$globalStatistic.totalHost = res[0].count_host;
+        this.$globalStatistic.elapsedPercentile = res[0].elapsedPercentile;
       }
     });
   }

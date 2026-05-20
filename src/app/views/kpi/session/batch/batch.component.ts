@@ -1,10 +1,7 @@
 import {Component, inject, Input, OnInit} from "@angular/core";
 import {QueryParams} from "../../../../model/conf.model";
 import {finalize} from "rxjs";
-import {
-  BATCH_SESSION_PERFORMANCE_CHART_CONFIG,
-  BATCH_SESSION_STATUS_CHART_CONFIG, ChartConfig, REST_SESSION_PERFORMANCE_CHART_CONFIG
-} from "../../kpi.config";
+import {BATCH_SESSION_PERFORMANCE_CHART_CONFIG, BATCH_SESSION_STATUS_CHART_CONFIG, ChartConfig} from "../../kpi.config";
 import {periodManagement2} from "../../../../shared/util";
 import {MainSessionService} from "../../../../service/jquery/main-session.service";
 
@@ -21,7 +18,7 @@ export class BatchComponent implements OnInit {
   $performanceRepartitionSlice: { data: any[], loading: boolean } = {data: [], loading: true};
   $userRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
   $dependentChart: {data: any[], loading: boolean} = {data: [], loading: true};
-  $globalStatistic: {totalRequest: number, totalRequestError: number, percentError: number,  totalHost: number, totalName: number} = {totalRequest: 0, totalRequestError: 0, percentError: 0, totalHost: 0, totalName: 0};
+  $globalStatistic: {totalRequest: number, totalRequestError: number, percentError: number,  elapsedPercentile: number, totalName: number} = {totalRequest: 0, totalRequestError: 0, percentError: 0, elapsedPercentile: 0, totalName: 0};
 
   groupedBy: string = '';
   params: QueryParams;
@@ -112,7 +109,7 @@ export class BatchComponent implements OnInit {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `count(instance.app_name.distinct):count_host,count:count_request,count_exception:count_error,count(name.distinct):count_batch`,
+      'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_exception:count_error,count(name.distinct):count_batch`,
       'instance_env': 'instance.id',
       'instance.environement': this.params.env,
       'instance.type': 'SERVER',
@@ -128,7 +125,7 @@ export class BatchComponent implements OnInit {
         this.$globalStatistic.totalRequest = res[0].count_request;
         this.$globalStatistic.totalRequestError = res[0].count_error;
         this.$globalStatistic.percentError = (res[0].count_error / res[0].count_request) * 100 || 0;
-        this.$globalStatistic.totalHost = res[0].count_host;
+        this.$globalStatistic.elapsedPercentile = res[0].elapsedPercentile;
         this.$globalStatistic.totalName = res[0].count_batch;
       }
     });

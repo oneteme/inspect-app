@@ -54,7 +54,7 @@ export class RestComponent implements OnInit {
   $latencyRepartitionSlice : {data: any[], loading: boolean} = {data: [], loading: true};
   $methodRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
   $mediaRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
-  $globalStatistic: {totalRequest: number, totalRequestError: number, percentError: number, totalHost: number} = {totalRequest: 0, totalRequestError: 0, percentError: 0, totalHost: 0};
+  $globalStatistic: {totalRequest: number, totalRequestError: number, percentError: number, elapsedPercentile: number} = {totalRequest: 0, totalRequestError: 0, percentError: 0, elapsedPercentile: 0};
   $dependencyRepartition: {data: any[], loading: boolean} = {data: [], loading: true};
   $userRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
 
@@ -90,7 +90,7 @@ export class RestComponent implements OnInit {
   }
 
   onVolumetryChartChange(event: {eventType: 'default' | 'filter', chartConfig: ChartConfig}) {
-    this.getCustom(event, this.$volumetryRepartition, this.$volumetryRepartitionSlice);
+    this.getSizeCustom(event, this.$volumetryRepartition, this.$volumetryRepartitionSlice);
   }
 
   onLatencyChartChange(event: {eventType: 'default' | 'filter', chartConfig: ChartConfig}) {
@@ -107,7 +107,35 @@ export class RestComponent implements OnInit {
     if(event.eventType === 'default') {
       arr.loading = true;
       arr.data = [];
-      this._httpRequestService.getCustom2({series: arr.chartConfig.series.items, indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks})
+      this._httpRequestService.getCustom({series: arr.chartConfig.series.items, indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks})
+      .pipe(finalize(() => arr.loading = false))
+      .subscribe(data => {
+        arr.data = data;
+      });
+    } else if(event.eventType === 'filter') {
+      if(actualFilter) {
+        this._httpRequestService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts}).subscribe({
+          next: (res: any[]) => {
+            slice.data = res;
+          }
+        });
+      } else {
+        slice.data = [];
+      }
+    }
+  }
+
+  getSizeCustom(event: {eventType: 'default' | 'filter', chartConfig: ChartConfig, filteredTasks?: any[]},
+            arr: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig}>,
+            slice: {data: any[], loading: boolean}) {
+    let actualIndicator = this.getActualIndicator(arr.chartConfig);
+    let actualGroup = this.getActualGroup(arr.chartConfig);
+    let actualStack = this.getActualStack(arr.chartConfig);
+    let actualFilter = this.getActualFilter(arr.chartConfig);
+    if(event.eventType === 'default') {
+      arr.loading = true;
+      arr.data = [];
+      this._httpRequestService.getSizeCustom({series: arr.chartConfig.series.items, indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks})
       .pipe(finalize(() => arr.loading = false))
       .subscribe(data => {
         arr.data = data;
@@ -235,7 +263,7 @@ export class RestComponent implements OnInit {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `count(host.distinct):count_host,count:count_request,count_error:count_error`,
+      'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_error:count_error`,
       'instance_env': 'instance.id',
       'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
@@ -249,7 +277,7 @@ export class RestComponent implements OnInit {
         this.$globalStatistic.totalRequest = res[0].count_request;
         this.$globalStatistic.totalRequestError = res[0].count_error;
         this.$globalStatistic.percentError = (res[0].count_error / res[0].count_request) * 100 || 0;
-        this.$globalStatistic.totalHost = res[0].count_host;
+        this.$globalStatistic.elapsedPercentile = res[0].elapsedPercentile;
       }
     });
   }

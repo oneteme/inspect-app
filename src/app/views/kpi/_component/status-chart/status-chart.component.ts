@@ -1,5 +1,4 @@
-import {Component, EventEmitter, inject, Input, Output} from "@angular/core";
-import {DecimalPipe} from "@angular/common";
+import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {ChartProvider} from "@oneteme/jquery-core";
 import {QueryParams} from "../../../../model/conf.model";
 import {SliceConfig} from "@oneteme/jquery-table";
@@ -18,20 +17,74 @@ export class StatusChartComponent {
     stacked: true,
     series: [],
     options: {
+      backgroundColor: 'transparent',
+      grid: {
+        top: 16,
+        bottom: 48,
+        left: 8,
+        right: 16,
+        containLabel: true
+      },
       xAxis: {
+        axisLine:  { show: false },
+        axisTick:  { show: false },
+        splitLine: { show: false },
         axisLabel: {
-          rotate: 30,        // rotation en degrés (30-45 recommandé)
-          overflow: 'truncate', // tronquer si trop long
-          width: 120         // largeur max avant troncature (ajuste selon ta résolution)
+          rotate: 30,
+          overflow: 'truncate',
+          width: 120,
+          fontSize: 11,
+          fontWeight: 500,
+          fontFamily: 'Inter, system-ui, sans-serif'
         }
       },
       yAxis: {
+        axisLine:  { show: false },
+        axisTick:  { show: false },
+        splitLine: {
+          lineStyle: { color: '#f1f5f9', type: 'dashed' }
+        },
         axisLabel: {
+          fontSize: 11,
+          color: '#94a3b8',
+          fontFamily: 'Inter, system-ui, sans-serif',
           formatter: (value: number) => value?.toLocaleString('fr-FR')
         }
       },
       tooltip: {
-        valueFormatter: (value: number) => value?.toLocaleString('fr-FR')
+        trigger: 'axis',
+        axisPointer: {
+          type: 'shadow',
+          shadowStyle: { color: 'rgba(148,163,184,0.08)' }
+        },
+        borderRadius: 10,
+        borderWidth: 0,
+        backgroundColor: 'rgba(15,23,42,0.88)',
+        textStyle: {
+          color: '#f1f5f9',
+          fontSize: 12,
+          fontFamily: 'Inter, system-ui, sans-serif'
+        },
+        formatter: (params: any[]) => {
+          if (!params?.length) return '';
+          const total = params.reduce((s: number, p: any) => s + (p.value ?? 0), 0);
+          const rows = params
+            .filter(p => (p.value ?? 0) > 0)
+            .map(p =>
+              `<div style="display:flex;align-items:center;gap:6px;margin-top:4px">` +
+              `<span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${p.color}"></span>` +
+              `<span style="color:#cbd5e1;font-size:11px;flex:1">${p.seriesName}</span>` +
+              `<b style="color:#f8fafc">${(p.value ?? 0).toLocaleString('fr-FR')}</b>` +
+              `</div>`
+            ).join('');
+          return `<div style="line-height:1.6;min-width:160px">` +
+            `<span style="color:#94a3b8;font-size:11px">${params[0].axisValue}</span>` +
+            `${rows}` +
+            `<div style="border-top:1px solid rgba(148,163,184,0.2);margin-top:6px;padding-top:4px;display:flex;justify-content:space-between">` +
+            `<span style="color:#94a3b8;font-size:11px">Total</span>` +
+            `<b style="color:#f8fafc">${total.toLocaleString('fr-FR')}</b>` +
+            `</div></div>`;
+        }
       }
     }
   }

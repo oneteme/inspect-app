@@ -1,6 +1,6 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {map, Observable} from "rxjs";
+import {forkJoin, map, Observable} from "rxjs";
 import {
     ExceptionsByPeriodAndAppname,
     RepartitionRequestByPeriod,
@@ -454,26 +454,81 @@ export class RestSessionService {
         }
         return this.getRestSession(args);
     }
+    getSizeCustom(
+      data: { series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
+      filters: { env: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], filters?: string[] }
+    ): Observable<any[]> {
+        const groupAlias = data.group.jquery.buildAlias();
+        const stackAlias = data.stack?.jquery.buildAlias();
+
+        // Une requête par série (size_in, size_out, ...)
+        const requests = data.series.map(serie => {
+            const serieAlias = data.indicator.jquery.buildAlias(serie.jquery.buildAlias());
+            const args: any = {
+                'column': `${serie.jquery.value()}.${data.indicator.jquery.value()}:${serieAlias},${data.group.jquery.value()}:${groupAlias}`,
+                'instance_env': 'instance.id',
+                'instance.environement': filters.env,
+                'start.ge': filters.start.toISOString(),
+                'start.lt': filters.end.toISOString()
+            };
+            if (data.stack) {
+                args['column'] += `,${data.stack.jquery.value(serie.jquery.buildAlias())}:${stackAlias}`;
+                args[`${stackAlias}.notNull`] = '';
+            }
+            if (data.group.jquery.order) {
+                args['order'] = data.group.jquery.order;
+            }
+            if (data.filter && filters.filters?.length) {
+                args[`${data.filter.jquery.value()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
+            }
+            if (filters.hosts?.length) {
+                args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+            }
+            return this.getRestSession<any[]>(args);
+        });
+
+        // Fusion des résultats par clé group (+ stack si présent)
+        return forkJoin(requests).pipe(
+          map((results: any[][]) => {
+              const mergeMap = new Map<string, any>();
+              results.forEach((rows, i) => {
+                  const serieAlias = data.indicator.jquery.buildAlias(data.series[i].jquery.buildAlias());
+                  rows.forEach(row => {
+                      const key = stackAlias
+                        ? `${row[groupAlias]}__${row[stackAlias]}`
+                        : `${row[groupAlias]}`;
+                      if (!mergeMap.has(key)) {
+                          const base: any = { [groupAlias]: row[groupAlias] };
+                          if (stackAlias) base[stackAlias] = row[stackAlias];
+                          mergeMap.set(key, base);
+                      }
+                      mergeMap.get(key)![serieAlias] = row[serieAlias];
+                  });
+              });
+              return Array.from(mergeMap.values());
+          })
+        );
+    }
 
     getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
               filters: {env: string, start: Date, end: Date, hosts?: string[], filters?: string[] }): Observable<any[]> {
 
         let args: any = {
-            'column': `${data.series.map(d => d.jquery.value + '.' + data.indicator.jquery.value + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value}:${data.group.jquery.buildAlias()}`,
+            'column': `${data.series.map(d => d.jquery.value() + '.' + data.indicator.jquery.value() + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
             'instance_env': 'instance.id',
             'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
         if(data.stack) {
-            args['column'] += `,${data.stack.jquery.value}:${data.stack.jquery.buildAlias()}`;
+            args['column'] += `,${data.stack.jquery.value()}:${data.stack.jquery.buildAlias()}`;
             args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
         }
         if(data.group.jquery.order){
-            args['order'] = `${data.group.jquery.buildAlias()}.${data.group.jquery.order}`;
+            args['order'] = `${data.group.jquery.order}`;
         }
         if(data.filter && filters.filters?.length) {
-            args[`${data.filter.jquery.value}.in`] = filters.filters.map(o => `"${o}"`).join(',');
+            args[`${data.filter.jquery.value()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
         }
         if(filters.hosts?.length){
             args['instance.app_name.in'] = filters.hosts.map(o => `"${o}"`).join(',');
@@ -483,7 +538,8 @@ export class RestSessionService {
 
     getFilters(filter: ChartItem, filters: {env: string, start: Date, end: Date, hosts: string[] }) {
         let args: any = {
-            'column': `${filter.jquery.value}.distinct:${filter.jquery.buildAlias()}`,
+            'column': `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
+            'distinct': 'true',
             'instance_env': 'instance.id',
             'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),
