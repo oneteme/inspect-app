@@ -46,6 +46,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
   isLoadingEnv = false;
   subscriptions: Subscription[] = [];
 
+  readonly isFirefox = typeof navigator !== 'undefined' && /Firefox\//.test(navigator.userAgent);
+
   readonly navItems: NavItem[] = [
     {
       label: Constants.MAPPING_TYPE['request'].title,
