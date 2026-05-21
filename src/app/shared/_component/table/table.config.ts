@@ -205,7 +205,8 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
     },
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline',
       value: (row) => row.exception?.type
-    }
+    },
+    { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,

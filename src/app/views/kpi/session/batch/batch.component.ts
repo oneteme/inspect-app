@@ -79,7 +79,7 @@ export class BatchComponent implements OnInit {
     let args: any = {
       'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
       'instance_env': 'instance.id',
-      'instance.environement': this.params.env,
+      'instance.environement': `"${this.params.env}"`,
       'instance.type': 'SERVER',
       'type': 'BATCH',
       'start.ge': this.params.period.start.toISOString(),
@@ -111,7 +111,7 @@ export class BatchComponent implements OnInit {
     let args: any = {
       'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_exception:count_error,count(name.distinct):count_batch`,
       'instance_env': 'instance.id',
-      'instance.environement': this.params.env,
+      'instance.environement': `"${this.params.env}"`,
       'instance.type': 'SERVER',
       'type': 'BATCH',
       'start.ge': this.params.period.start.toISOString(),

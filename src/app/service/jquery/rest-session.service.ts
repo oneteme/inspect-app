@@ -24,7 +24,7 @@ export class RestSessionService {
         var args: any = {
             'column': `instance.app_name.distinct:host`,
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'instance.type': 'SERVER',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
@@ -51,7 +51,7 @@ export class RestSessionService {
             }
         } else {
             args['instance_env'] = 'instance.id';
-            args['instance.environement'] = filters.env;
+            args['instance.environement'] = `"${filters.env}"`;
             if (filters.user) {
                 args['user'] = filters.user;
             }
@@ -77,7 +77,7 @@ export class RestSessionService {
             }
         } else {
             args['instance_env'] = 'instance.id';
-            args['instance.environement'] = filters.env;
+            args['instance.environement'] = `"${filters.env}"`;
             if (filters.user) {
                 args['user'] = filters.user;
             }
@@ -89,7 +89,7 @@ export class RestSessionService {
         let args: any = {
             'column': `count_succes:countSuccess,count_error_client:countErrorClient,count_error_server:countErrorServer,count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max,start.${filters.groupedBy}:date,start.year:year`,
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'instance.app_name': filters.server,
             'instance.type': 'SERVER',
             'start.ge': filters.start.toISOString(),
@@ -126,7 +126,7 @@ export class RestSessionService {
             }
         } else {
             args['instance_env'] = 'instance.id';
-            args['instance.environement'] = filters.env;
+            args['instance.environement'] = `"${filters.env}"`;
             if (filters.user) {
                 args['user'] = filters.user;
             }
@@ -187,7 +187,7 @@ export class RestSessionService {
             args['instance_env.in'] = filters.ids;
         } else {
             args['instance_env'] = 'instance.id';
-            args['instance.environement'] = filters.env;
+            args['instance.environement'] = `"${filters.env}"`;
             if (filters.user) {
                 args['user'] = filters.user;
             }
@@ -207,7 +207,7 @@ export class RestSessionService {
             'rest_session_join.start.lt': filters.end.toISOString(),
             'rest_session_join.instance_env': 'instance_join.id',
             'instance_join.app_name': filters.server,
-            'instance_join.environement': filters.env,
+            'instance_join.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'view': 'rest_session:rest_session_join,instance:instance_join',
@@ -236,7 +236,7 @@ export class RestSessionService {
             'rest_session_join.start.ge': filters.start.toISOString(),
             'rest_session_join.start.lt': filters.end.toISOString(),
             'rest_session_join.instance_env': 'instance_join.id',
-            'instance_join.environement': filters.env,
+            'instance_join.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'view': 'rest_session:rest_session_join,instance:instance_join',
@@ -262,7 +262,7 @@ export class RestSessionService {
             'start.lt': filters.end.toISOString(),
             'instance_env': 'instance.id',
             'instance.app_name': filters.server,
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'view': 'rest_session:rest_session_join,instance:instance_join',
             'order': 'count.desc'
         }
@@ -291,7 +291,7 @@ export class RestSessionService {
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'view': 'rest_session:rest_session_join,instance:instance_join',
             'order': 'count.desc'
         }
@@ -315,8 +315,8 @@ export class RestSessionService {
             'rest_session_join.start.lt': filters.end.toISOString(),
             'rest_request.start.ge': filters.start.toISOString(),
             'rest_request.start.lt': filters.end.toISOString(),
-            'instance.environement': filters.env,
-            'instance_join.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
+            'instance_join.environement': `"${filters.env}"`,
             'order': 'origin.asc,target.asc'
         });
     }
@@ -339,7 +339,7 @@ export class RestSessionService {
             if(filters.apiName) args['api_name'] = `"${filters.apiName}"`;
         } else {
             args['instance_env'] = 'instance.id';
-            args['instance.environement'] = filters.env;
+            args['instance.environement'] = `"${filters.env}"`;
             if (filters.user) {
                 args['user'] = filters.user;
             }
@@ -353,7 +353,7 @@ export class RestSessionService {
             'join': 'instance',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'instance.type': 'SERVER',
             "order": "date.desc,count.desc"
         }
@@ -383,7 +383,7 @@ export class RestSessionService {
             'api_name.notNull': '',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'instance.app_name': `"${filters.appName}"`,
             'instance.type': 'SERVER'
         }).pipe(map((data: {apiName: string}[]) => (data.map(d => d.apiName))));
@@ -396,7 +396,7 @@ export class RestSessionService {
             'user.notNull': '',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'instance.app_name': `"${filters.appName}"`,
             'instance.type': 'SERVER'
         }).pipe(map((data: {user: string}[]) => (data.map(d => d.user))));
@@ -409,7 +409,7 @@ export class RestSessionService {
             'user.notNull': '',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'instance.app_name': filters.server,
             'instance.type': 'SERVER'
         };
@@ -429,7 +429,7 @@ export class RestSessionService {
         return this.getRestSession<{count: number, countErrorServer: number, countErrorClient: number}[]>({
             'column': 'count:count,count_error_server:countErrorServer,count_error_client:countErrorClient',
             'join': 'instance',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }).pipe(map(data => {
@@ -442,7 +442,7 @@ export class RestSessionService {
         const args: any = {
             'column': 'count:count,user_agt',
             'join': 'instance',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'instance.type': 'SERVER',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
@@ -467,7 +467,7 @@ export class RestSessionService {
             const args: any = {
                 'column': `${serie.jquery.value()}.${data.indicator.jquery.value()}:${serieAlias},${data.group.jquery.value()}:${groupAlias}`,
                 'instance_env': 'instance.id',
-                'instance.environement': filters.env,
+                'instance.environement': `"${filters.env}"`,
                 'start.ge': filters.start.toISOString(),
                 'start.lt': filters.end.toISOString()
             };
@@ -516,7 +516,7 @@ export class RestSessionService {
         let args: any = {
             'column': `${data.series.map(d => d.jquery.value() + '.' + data.indicator.jquery.value() + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
@@ -541,7 +541,7 @@ export class RestSessionService {
             'column': `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
             'distinct': 'true',
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }

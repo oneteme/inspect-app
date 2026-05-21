@@ -83,7 +83,7 @@ export class StartupComponent implements OnInit {
     let args: any = {
       'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
       'instance_env': 'instance.id',
-      'instance.environement': this.params.env,
+      'instance.environement': `"${this.params.env}"`,
       'instance.type': 'SERVER',
       'type': 'STARTUP',
       'start.ge': this.params.period.start.toISOString(),
@@ -115,7 +115,7 @@ export class StartupComponent implements OnInit {
     let args: any = {
       'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_exception:count_error`,
       'instance_env': 'instance.id',
-      'instance.environement': this.params.env,
+      'instance.environement': `"${this.params.env}"`,
       'instance.type': 'SERVER',
       'type': 'STARTUP',
       'start.ge': this.params.period.start.toISOString(),

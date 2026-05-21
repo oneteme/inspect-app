@@ -35,7 +35,7 @@ export class RestRequestService {
         let args = {
             'column': `count:count,error_type`,
             'join': 'exception,instance',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
         }
@@ -65,7 +65,7 @@ export class RestRequestService {
             const args: any = {
                 'column': `${serie.jquery.value()}.${data.indicator.jquery.value()}:${serieAlias},${data.group.jquery.value()}:${groupAlias}`,
                 'instance_env': 'instance.id',
-                'instance.environement': filters.env,
+                'instance.environement': `"${filters.env}"`,
                 'start.ge': filters.start.toISOString(),
                 'start.lt': filters.end.toISOString()
             };
@@ -113,7 +113,7 @@ export class RestRequestService {
         let args: any = {
             'column': `${data.series.map(d => d.jquery.value() + '.' + data.indicator.jquery.value() + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
@@ -139,7 +139,7 @@ export class RestRequestService {
             'column': `${data.indicator.jquery.value()}(${data.serie.jquery.value()}.minus(rest_session.${data.serie.jquery.value()})):${data.indicator.jquery.buildAlias(data.serie.jquery.buildAlias())},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
             'join': 'instance,rest_session_inner',
             'status.gt': 0,
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'rest_session.start.ge': filters.start.toISOString(),
@@ -162,7 +162,7 @@ export class RestRequestService {
             'column': `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
             'distinct': 'true',
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
@@ -177,7 +177,7 @@ export class RestRequestService {
         let args: any = {
             'column': `${query.serie}.${query.indicator}:${query.indicator},${query.serie}:${query.serie},${query.group}`,
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
@@ -188,7 +188,7 @@ export class RestRequestService {
         let args: any = {
             'column': `size_out_avg:sizeOut,size_in_avg:sizeIn,count_succes:countSuccess,count_error_server:countErrorServer,count_error_client:countErrorClient,elapsed_time_arg(10,null):elapsedTimeSlowest,elapsed_time_arg(5,10):elapsedTimeSlow,elapsed_time_arg(3,5):elapsedTimeMedium,elapsed_time_arg(1,3):elapsedTimeFast,elapsed_time_arg(null,1):elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max,count_unavailable_server:countServerUnavailableRows`,
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
@@ -210,7 +210,7 @@ export class RestRequestService {
             'column': `${data.base}`,
             'join': 'instance,rest_session_inner',
             'status.gt': 0,
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'rest_session.start.ge': filters.start.toISOString(),
@@ -235,7 +235,7 @@ export class RestRequestService {
         let args = {
             'column': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,error_type,start.${filters.groupedBy}:date,start.year:year`,
             'join': 'exception,instance',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'order': 'date.asc'

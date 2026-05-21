@@ -157,7 +157,7 @@ export class RestComponent implements OnInit {
     let args: any = {
       'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
       'instance_env': 'instance.id',
-      'instance.environement': this.params.env,
+      'instance.environement': `"${this.params.env}"`,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': `start.${this.groupedBy}.asc`
@@ -205,7 +205,7 @@ export class RestComponent implements OnInit {
     let args: any = {
       'column': `instance.app_name:origin,host:target,count:count`,
       'instance_env': 'instance.id',
-      'instance.environement': this.params.env,
+      'instance.environement': `"${this.params.env}"`,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.asc'
@@ -225,7 +225,7 @@ export class RestComponent implements OnInit {
     let args: any = {
       'column': `count:count,media.coalesce("Non renseigné"):media`,
       'instance_env': 'instance.id',
-      'instance.environement': this.params.env,
+      'instance.environement': `"${this.params.env}"`,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
@@ -245,7 +245,7 @@ export class RestComponent implements OnInit {
     let args: any = {
       'column': `count:count,method:method`,
       'instance_env': 'instance.id',
-      'instance.environement': this.params.env,
+      'instance.environement': `"${this.params.env}"`,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
@@ -265,7 +265,7 @@ export class RestComponent implements OnInit {
     let args: any = {
       'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_error:count_error`,
       'instance_env': 'instance.id',
-      'instance.environement': this.params.env,
+      'instance.environement': `"${this.params.env}"`,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString()
     }

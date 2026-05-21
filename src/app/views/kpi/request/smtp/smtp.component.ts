@@ -81,7 +81,7 @@ export class SmtpComponent implements OnInit {
     let args: any = {
       'column': `count:count,command.coalesce("Non renseigné"):command`,
       'instance_env': 'instance.id',
-      'instance.environement': this.params.env,
+      'instance.environement': `"${this.params.env}"`,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
@@ -101,7 +101,7 @@ export class SmtpComponent implements OnInit {
     let args: any = {
       'column': `instance.app_name:origin,host:target,count:count`,
       'instance_env': 'instance.id',
-      'instance.environement': this.params.env,
+      'instance.environement': `"${this.params.env}"`,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.asc'
@@ -121,7 +121,7 @@ export class SmtpComponent implements OnInit {
     let args: any = {
       'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
       'instance_env': 'instance.id',
-      'instance.environement': this.params.env,
+      'instance.environement': `"${this.params.env}"`,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': `start.${this.groupedBy}.asc`
@@ -141,7 +141,7 @@ export class SmtpComponent implements OnInit {
     let args: any = {
       'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_request_error:count_error`,
       'instance_env': 'instance.id',
-      'instance.environement': this.params.env,
+      'instance.environement': `"${this.params.env}"`,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString()
     }

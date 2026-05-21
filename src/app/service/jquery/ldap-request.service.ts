@@ -31,7 +31,7 @@ export class LdapRequestService {
         let args = {
             'column': `start.${filters.groupedBy}:date,count.sum.over(partition(date)):countok,exception.count_exception:count,count.divide(countok).multiply(100).round(2):pct,exception.err_type.coalesce():errorType,start.year:year`,
             'join': 'exception,instance',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
         }
@@ -46,7 +46,7 @@ export class LdapRequestService {
         let args = {
             'column': `exception.err_type.coalesce():errorType`,
             'join': 'exception,instance',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
         }
@@ -67,7 +67,7 @@ export class LdapRequestService {
         let args: any = {
             'column': `count_request_success:countSuccess,count_request_error:countError,count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max`,
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'instance.type': 'SERVER',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
@@ -89,7 +89,7 @@ export class LdapRequestService {
         let args: any = {
             'column': `${data.series.map(d => d.jquery.value() + '.' + data.indicator.jquery.value() + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
@@ -114,7 +114,7 @@ export class LdapRequestService {
             'column': `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
             'distinct': 'true',
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
