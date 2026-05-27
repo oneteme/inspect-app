@@ -16,7 +16,8 @@ import {Constants} from "../../constants";
 
 @Component({
   templateUrl: './request-kpi.view.html',
-  styleUrls: ['./request-kpi.view.scss']
+  styleUrls: ['./request-kpi.view.scss'],
+  host: { 'data-view': 'request-kpi' }
 })
 export class RequestKpiView implements OnInit, OnDestroy {
   private readonly _activatedRoute = inject(ActivatedRoute);

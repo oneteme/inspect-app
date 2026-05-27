@@ -13,7 +13,8 @@ import {MainSessionService} from "../../../service/jquery/main-session.service";
 
 @Component({
   templateUrl: './session-kpi.view.html',
-  styleUrls: ['./session-kpi.view.scss']
+  styleUrls: ['./session-kpi.view.scss'],
+  host: { 'data-view': 'session-kpi' }
 })
 export class SessionKpiView implements OnInit, OnDestroy {
   private readonly _activatedRoute = inject(ActivatedRoute);

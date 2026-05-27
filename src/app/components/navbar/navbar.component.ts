@@ -79,6 +79,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   openAbout(): void {
+    (document.activeElement as HTMLElement)?.blur();
     this._dialog.open(AboutDialogComponent, { panelClass: 'about-dialog-panel' });
   }
 

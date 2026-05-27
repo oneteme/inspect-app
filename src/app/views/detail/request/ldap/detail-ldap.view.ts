@@ -23,6 +23,7 @@ import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/p
 @Component({
     templateUrl: './detail-ldap.view.html',
     styleUrls: ['./detail-ldap.view.scss'],
+    host: { 'data-view': 'detail-ldap' }
 })
 export class DetailLdapView implements OnInit, OnDestroy {
     private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);

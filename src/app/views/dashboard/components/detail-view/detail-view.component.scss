@@ -186,6 +186,7 @@
   padding: 6px .75em;
   border-bottom: 1px solid rgba(34,36,38,.05);
   &:last-child { border-bottom: none; }
+  &[type="button"] { width: 100%; border: none; background: transparent; font: inherit; color: inherit; text-align: left; }
 }
 
 .dbi-row-link {
@@ -255,11 +256,12 @@
 }
 
 .db-clear-state {
+  min-height: calc(100dvh - 255px);
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 12px;
   padding: 3em 2em;
   border-radius: 10px;
   border: 1px solid rgba(33, 186, 69, .18);
@@ -268,38 +270,50 @@
 }
 
 .db-clear-icon {
-  width: 52px;
-  height: 52px;
+  width: 64px;
+  height: 64px;
   border-radius: 50%;
   background: rgba(33, 186, 69, .1);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 6px;
-  mat-icon { font-size: 28px; width: 28px; height: 28px; color: #21ba45; }
+  margin-bottom: 8px;
+  mat-icon { font-size: 34px; width: 34px; height: 34px; color: #21ba45; }
+
+  @media (min-width: 1600px) {
+    width: 82px;
+    height: 82px;
+    mat-icon { font-size: 44px; width: 44px; height: 44px; }
+  }
 }
 
 .db-clear-title {
-  font-size: .92em;
+  font-size: 1.05em;
   font-weight: 700;
   color: rgba(0, 0, 0, .72);
   letter-spacing: .02em;
+
+  @media (min-width: 1600px) { font-size: 1.35em; }
 }
 
 .db-clear-label {
-  font-size: .75em;
+  font-size: .87em;
   font-weight: 700;
   color: #21ba45;
   text-transform: uppercase;
   letter-spacing: .07em;
   opacity: .85;
+
+  @media (min-width: 1600px) { font-size: 1.05em; }
 }
 
 .db-clear-sub {
-  font-size: .76em;
+  font-size: .87em;
   color: rgba(0, 0, 0, .4);
-  max-width: 320px;
-  margin-top: 2px;
+  max-width: 360px;
+  margin-top: 4px;
+
+  @media (min-width: 1600px) { font-size: 1em; max-width: 460px; }
 }
 
 .proto-list {

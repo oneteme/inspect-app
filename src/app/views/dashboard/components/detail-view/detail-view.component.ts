@@ -54,8 +54,7 @@ export class DashboardDetailViewComponent {
     }
 
     get selectedKey(): string | null {
-        for (const k of this.context.selectedInsights) return k;
-        return null;
+        return this.context.selectedInsights.values().next().value ?? null;
     }
 
     get isSessionInsight(): boolean {
@@ -107,6 +106,12 @@ export class DashboardDetailViewComponent {
         if (key === 'BATCH')   return this.context.tabRequests['batchExceptionTable']?.isLoading !== false;
         if (key === 'VIEW')    return this.context.tabRequests['viewExceptionTable']?.isLoading !== false;
         if (key === 'STARTUP' || key === 'TEST') return this.context.tabRequests['startupExceptionTable']?.isLoading !== false;
+        const protoDef = this.context.protocolDefs.find(p => p.key === key);
+        if (protoDef) {
+            if (this.context.chartRequests[protoDef.reqKey]?.isLoading !== false) return true;
+            // chart chargé : si taux 0 % on sait qu'il n'y a rien, sinon attendre topErrors
+            return this.context.sparklinePercs[key] !== 0 && this.context.kpiLoading;
+        }
         return this.context.kpiLoading;
     }
 
@@ -133,8 +138,13 @@ export class DashboardDetailViewComponent {
                 return !this.context.sessionCountLoading && !this.context.sessionInitErrors;
             case 'TEST':
                 return !this.context.sessionCountLoading && !this.context.sessionTestErrors;
-            default:
-                return !this.context.kpiLoading && !this.context.topErrors[key]?.length;
+            default: {
+                const protoDef = this.context.protocolDefs.find(p => p.key === key);
+                const loaded = protoDef
+                    ? this.context.chartRequests[protoDef.reqKey]?.isLoading === false
+                    : !this.context.kpiLoading;
+                return loaded && this.context.sparklinePercs[key] === 0;
+            }
         }
     }
 

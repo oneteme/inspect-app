@@ -70,18 +70,24 @@
         <mat-icon class="dov-stats-lbl-info material-symbols-outlined" title="Les instances actives ne dépendent pas de la période sélectionnée">info</mat-icon>
       </div>
     <div class="dov-stats-sidebar">
-      <div class="dov-stat-sb sb-total" (click)="selectServerStatus('all')" [class.dov-stat-sb-active]="serverStatusFilter === 'all' && showOverview">
+      <button type="button" class="dov-stat-sb sb-total"
+              (click)="selectServerStatus('all')"
+              [class.dov-stat-sb-active]="serverStatusFilter === 'all' && showOverview">
         <span class="dov-stat-sb-val">{{ hasNoData ? '--' : deployTableRows.length }}</span>
         <span class="dov-stat-sb-lbl">Total</span>
-      </div>
-      <div class="dov-stat-sb sb-pending" (click)="selectServerStatus('pending')" [class.dov-stat-sb-active]="serverStatusFilter === 'pending' && showOverview">
+      </button>
+      <button type="button" class="dov-stat-sb sb-pending"
+              (click)="selectServerStatus('pending')"
+              [class.dov-stat-sb-active]="serverStatusFilter === 'pending' && showOverview">
         <span class="dov-stat-sb-val">{{ hasNoData ? '--' : pendingServerStat }}</span>
         <span class="dov-stat-sb-lbl">En attente</span>
-      </div>
-      <div class="dov-stat-sb sb-offline" (click)="selectServerStatus('offline')" [class.dov-stat-sb-active]="serverStatusFilter === 'offline' && showOverview">
+      </button>
+      <button type="button" class="dov-stat-sb sb-offline"
+              (click)="selectServerStatus('offline')"
+              [class.dov-stat-sb-active]="serverStatusFilter === 'offline' && showOverview">
         <span class="dov-stat-sb-val">{{ hasNoData ? '--' : offlineServerStat }}</span>
         <span class="dov-stat-sb-lbl">Hors ligne</span>
-      </div>
+      </button>
     </div>
     </div>
     </ng-template>
@@ -126,7 +132,9 @@
           [class.sbd-row-selected]="selectedInsights.has(s.key)"
           [class.sbd-row-clickable]="true"
           [title]="s.title"
-          (click)="toggleInsight(s.key)">
+          tabindex="0"
+          (click)="toggleInsight(s.key)"
+          (keydown.enter)="toggleInsight(s.key)">
           <div class="sbd-main">
             <div class="sbd-top">
               <span class="sbd-label">{{ s.label }}</span>
@@ -165,7 +173,9 @@
           [class.sbd-row-selected]="selectedInsights.has(p.key)"
           [class.sbd-row-clickable]="true"
           [title]="p.title"
-          (click)="toggleInsight(p.key)">
+          tabindex="0"
+          (click)="toggleInsight(p.key)"
+          (keydown.enter)="toggleInsight(p.key)">
           <div class="sbd-main">
             <div class="sbd-top">
               <span class="sbd-label">{{ p.label }}</span>

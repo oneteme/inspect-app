@@ -104,7 +104,7 @@
           <ng-container *ngFor="let p of context.protocolDefs">
             <div class="dbi-card"
                  *ngIf="context.selectedInsights.has(p.key) && context.topErrors[p.key]?.length">
-              <div class="dbi-row dbi-row-link"
+              <button type="button" class="dbi-row dbi-row-link"
                    *ngFor="let e of context.topErrors[p.key]; trackBy: trackByType"
                    (click)="requestProtocolNav.emit({ key: p.key, errorType: e.type })">
                 <span class="dbi-dot dbi-dot-err"></span>
@@ -112,14 +112,14 @@
                 <div class="dbi-bar-wrap"><div class="dbi-bar dbi-bar-err" [style.width.%]="getErrBarWidth(context.topErrors[p.key], e.count)"></div></div>
                 <span class="dbi-badge dbi-badge-warn">{{ e.count | compact }}</span>
                 <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
-              </div>
+              </button>
             </div>
           </ng-container>
 
           <!-- SERVICE -->
           <div class="dbi-card"
                *ngIf="context.selectedInsights.has('SERVICE') && context.tabRequests.sessionExceptionsTable?.isLoading === false && context.topSessionErrors.length">
-            <div class="dbi-row dbi-row-link"
+            <button type="button" class="dbi-row dbi-row-link"
                  *ngFor="let e of context.topSessionErrors; trackBy: trackByType"
                  (click)="exceptionNav.emit({ type: e.type, tab: 'rest' })">
               <span class="dbi-dot dbi-dot-err"></span>
@@ -127,13 +127,13 @@
               <div class="dbi-bar-wrap"><div class="dbi-bar dbi-bar-err" [style.width.%]="getErrBarWidth(context.topSessionErrors, e.count)"></div></div>
               <span class="dbi-badge dbi-badge-warn">{{ e.count | compact }}</span>
               <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
-            </div>
+            </button>
           </div>
 
           <!-- BATCH -->
           <div class="dbi-card"
                *ngIf="context.selectedInsights.has('BATCH') && context.tabRequests.batchExceptionTable?.isLoading === false && context.topBatchErrors.length">
-            <div class="dbi-row dbi-row-link"
+            <button type="button" class="dbi-row dbi-row-link"
                  *ngFor="let e of context.topBatchErrors; trackBy: trackByType"
                  (click)="exceptionNav.emit({ type: e.type, tab: 'batch' })">
               <span class="dbi-dot dbi-dot-err"></span>
@@ -141,13 +141,13 @@
               <div class="dbi-bar-wrap"><div class="dbi-bar dbi-bar-err" [style.width.%]="getErrBarWidth(context.topBatchErrors, e.count)"></div></div>
               <span class="dbi-badge dbi-badge-warn">{{ e.count | compact }}</span>
               <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
-            </div>
+            </button>
           </div>
 
           <!-- STARTUP -->
           <div class="dbi-card"
                *ngIf="context.selectedInsights.has('STARTUP') && !context.sessionCountLoading && context.sessionInitErrors > 0">
-            <div class="dbi-row dbi-row-link"
+            <button type="button" class="dbi-row dbi-row-link"
                  *ngFor="let e of context.topStartupErrors; trackBy: trackByType"
                  (click)="sessionTypeNav.emit({ type: 'STARTUP' })">
               <span class="dbi-dot dbi-dot-err"></span>
@@ -155,20 +155,20 @@
               <div class="dbi-bar-wrap"><div class="dbi-bar dbi-bar-err" [style.width.%]="getErrBarWidth(context.topStartupErrors, e.count)"></div></div>
               <span class="dbi-badge dbi-badge-warn">{{ e.count | compact }}</span>
               <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
-            </div>
-            <div class="dbi-row dbi-row-link" *ngIf="!context.topStartupErrors.length"
+            </button>
+            <button type="button" class="dbi-row dbi-row-link" *ngIf="!context.topStartupErrors.length"
                  (click)="sessionTypeNav.emit({ type: 'STARTUP' })">
               <span class="dbi-dot dbi-dot-err"></span>
               <span class="dbi-name">{{ context.sessionInitErrors | number:'1.0-0' }} erreurs au démarrage</span>
               <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
-            </div>
+            </button>
           </div>
 
           <!-- VIEW -->
           <div class="dbi-card"
                *ngIf="context.selectedInsights.has('VIEW') && context.tabRequests.viewExceptionTable?.isLoading === false && (context.topViewErrors.length || context.sessionWebErrors > 0)">
             <ng-container *ngIf="context.topViewErrors.length">
-              <div class="dbi-row dbi-row-link"
+              <button type="button" class="dbi-row dbi-row-link"
                    *ngFor="let e of context.topViewErrors; trackBy: trackByType"
                    (click)="exceptionNav.emit({ type: e.type, tab: 'view' })">
                 <span class="dbi-dot dbi-dot-err"></span>
@@ -176,21 +176,25 @@
                 <div class="dbi-bar-wrap"><div class="dbi-bar dbi-bar-err" [style.width.%]="getErrBarWidth(context.topViewErrors, e.count)"></div></div>
                 <span class="dbi-badge dbi-badge-warn">{{ e.count | compact }}</span>
                 <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
-              </div>
+              </button>
             </ng-container>
             <div class="dbi-row" *ngIf="!context.topViewErrors.length">
               <span class="dbi-dot dbi-dot-ok"></span>
               <span class="dbi-name">{{ context.sessionWebErrors | number:'1.0-0' }} erreurs navigateur</span>
-              <mat-icon class="dbi-nav material-symbols-outlined" (click)="sessionTypeNav.emit({ type: 'VIEW' })">chevron_right</mat-icon>
+              <mat-icon class="dbi-nav material-symbols-outlined"
+                        tabindex="0"
+                        (click)="sessionTypeNav.emit({ type: 'VIEW' })"
+                        (keydown.enter)="sessionTypeNav.emit({ type: 'VIEW' })">chevron_right</mat-icon>
             </div>
           </div>
 
           <div class="dbi-card" *ngIf="context.selectedInsights.has('TEST') && !context.sessionCountLoading && context.sessionTestErrors > 0">
-            <div class="dbi-row dbi-row-link" (click)="sessionTypeNav.emit({ type: 'TEST' })">
+            <button type="button" class="dbi-row dbi-row-link"
+                 (click)="sessionTypeNav.emit({ type: 'TEST' })">
               <span class="dbi-dot dbi-dot-err"></span>
               <span class="dbi-name">{{ context.sessionTestErrors | number:'1.0-0' }} erreurs test</span>
               <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
-            </div>
+            </button>
           </div>
 
       </div><!-- fin .db-insights -->

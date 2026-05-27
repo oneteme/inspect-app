@@ -40,22 +40,22 @@ export class DashboardComponent implements OnDestroy {
         { key: 'ldap', reqKey: 'ldapRequestExceptionsTable', label: 'LDAP', chartConfig: Constants.LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE },
     ];
 
-    private _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
-    private _router: EnvRouter = inject(EnvRouter);
-    private _instanceService = inject(InstanceService);
-    private _sessionService = inject(RestSessionService);
-    private _mainService = inject(MainSessionService);
-    private _restService = inject(RestRequestService);
-    private _datebaseService = inject(DatabaseRequestService);
-    private _ftpService = inject(FtpRequestService);
-    private _smtpService = inject(SmtpRequestService)
-    private _ldapService = inject(LdapRequestService);
-    private _location: Location = inject(Location);
-    private _datePipe = inject(DatePipe);
-    private _dialog = inject(MatDialog);
-    private _decimalPipe = inject(DecimalPipe);
-    private _instanceTraceService = inject(InstanceTraceService);
-    private _cdr = inject(ChangeDetectorRef);
+    private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
+    private readonly _router: EnvRouter = inject(EnvRouter);
+    private readonly _instanceService = inject(InstanceService);
+    private readonly _sessionService = inject(RestSessionService);
+    private readonly _mainService = inject(MainSessionService);
+    private readonly _restService = inject(RestRequestService);
+    private readonly _datebaseService = inject(DatabaseRequestService);
+    private readonly _ftpService = inject(FtpRequestService);
+    private readonly _smtpService = inject(SmtpRequestService)
+    private readonly _ldapService = inject(LdapRequestService);
+    private readonly _location: Location = inject(Location);
+    private readonly _datePipe = inject(DatePipe);
+    private readonly _dialog = inject(MatDialog);
+    private readonly _decimalPipe = inject(DecimalPipe);
+    private readonly _instanceTraceService = inject(InstanceTraceService);
+    private readonly _cdr = inject(ChangeDetectorRef);
 
     sparklineTitles: {
         rest: {title: string, subtitle: string},
@@ -159,7 +159,9 @@ export class DashboardComponent implements OnDestroy {
                 this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(0, 1).start;
                 this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(0, 1).end;
                 this.groupedBy = periodManagement(this.params.start, this.params.end);
-                this.params.serveurs = Array.isArray(v.queryParams['appname']) ? v.queryParams['appname'] : v.queryParams['appname'] ? [v.queryParams['appname']] : []
+                const appname = v.queryParams['appname'];
+                if (Array.isArray(appname)) this.params.serveurs = appname;
+                else this.params.serveurs = appname ? [appname] : [];
                 if (this.params.serveurs.length > 0) {
                     this.patchServerValue(this.params.serveurs);
                 }
@@ -204,10 +206,11 @@ export class DashboardComponent implements OnDestroy {
                     this.loadServerHealth(this.params.env, gen);
                 }
                 this.sessionSubscriptions.push(this._sessionService.getCountByEnv({ env: this.params.env, start: this.params.start, end: this.params.end })
-                    .pipe(finalize(() => { if (this._loadGen !== gen) return; this.restSessionCountLoading = false; this._rebuildSessionSummaries(); }))
-                    .subscribe({ next: (data) => { if (this._loadGen !== gen) return; this.restSessionCount = data; } }));
+                    .pipe(finalize(() => { if (this._loadGen === gen) { this.restSessionCountLoading = false; this._rebuildSessionSummaries(); } }))
+                    .subscribe({ next: (data) => { if (this._loadGen === gen) { this.restSessionCount = data; } } }));
 
-                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${this.params.serveurs.length > 0 ? '&' + this.params.serveurs.map(name => `appname=${name}`).join('&') : ''}`)
+                const serverQuery = this.params.serveurs.length > 0 ? '&' + this.params.serveurs.map(name => 'appname=' + name).join('&') : '';
+                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${serverQuery}`)
             }
         }));
     }
@@ -337,7 +340,7 @@ export class DashboardComponent implements OnDestroy {
 
     createServerFilter(): any {
         if (this.params.serveurs.length > 0) {
-            return { app_name: `${this.params.serveurs.map(v => `"${v}"`).join(',')}` };
+            return { app_name: this.params.serveurs.map(v => '"' + v + '"').join(',') };
         }
         return { app_name: null };
     }
@@ -398,7 +401,7 @@ export class DashboardComponent implements OnDestroy {
                             ? this._instanceTraceService.getLastInstanceTrace({ instance: servers.map(s => s.id) })
                             : of([])
                     })),
-                    finalize(() => { if (this._loadGen !== gen) return; this.serverHealthLoading = false; this._cdr.markForCheck(); })
+                    finalize(() => { if (this._loadGen === gen) { this.serverHealthLoading = false; this._cdr.markForCheck(); } })
                 )
                 .subscribe({ next: ({ servers, traces }) => {
                     if (this._loadGen !== gen) return;
@@ -413,7 +416,7 @@ export class DashboardComponent implements OnDestroy {
     }
 
     private _rebuildDeployStats(): void {
-        const now = new Date().getTime();
+        const now = Date.now();
         this._onlineRows = [];
         this._pendingRows = [];
         this._offlineRows = [];
@@ -482,84 +485,54 @@ export class DashboardComponent implements OnDestroy {
         return filled.map(p => ({ ...p, perc: countokMap[p.stringDate] ? (p.count * 100) / countokMap[p.stringDate] : 0 }));
     }
 
+    private _aggregateTabData(data: any[]): { errors: Record<string, number>; dates: Record<string, number>; countoks: Record<string, number> } {
+        const errors: Record<string, number> = {};
+        const dates: Record<string, number> = {};
+        const countoks: Record<string, number> = {};
+        data.forEach(d => {
+            if (d.errorType) errors[d.errorType] = (errors[d.errorType] ?? 0) + d.count;
+            if (d.stringDate) {
+                dates[d.stringDate] = (dates[d.stringDate] ?? 0) + d.count;
+                if (d.countok && !countoks[d.stringDate]) countoks[d.stringDate] = d.countok;
+            }
+        });
+        return { errors, dates, countoks };
+    }
+
+    private _patchSessionCountData(type: string): void {
+        const counts = this._sessionCountByType[type];
+        if (!counts) return;
+        const idx = this.sessionCountData.findIndex(d => d.type === type);
+        if (idx >= 0) {
+            this.sessionCountData = [...this.sessionCountData.slice(0, idx), { type, ...counts }, ...this.sessionCountData.slice(idx + 1)];
+        } else {
+            this.sessionCountData = [...this.sessionCountData, { type, ...counts }];
+        }
+    }
+
     private _rebuildSingleTabErrors(tabKey: string): void {
         const effectiveEnd = this.params.end! > new Date() ? new Date() : this.params.end!;
         if (tabKey === 'sessionExceptionsTable') {
-            const data: any[] = this.tabRequests['sessionExceptionsTable']?.data ?? [];
-            const sm: Record<string, number> = {};
-            const sd: Record<string, number> = {};
-            const sc: Record<string, number> = {};
-            data.forEach(d => {
-                if (d.errorType) sm[d.errorType] = (sm[d.errorType] ?? 0) + d.count;
-                if (d.stringDate) {
-                    sd[d.stringDate] = (sd[d.stringDate] ?? 0) + d.count;
-                    if (d.countok && !sc[d.stringDate]) sc[d.stringDate] = d.countok;
-                }
-            });
+            const { errors: sm, dates: sd, countoks: sc } = this._aggregateTabData(this.tabRequests['sessionExceptionsTable']?.data ?? []);
             this.topSessionErrors = Object.entries(sm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
             this.sessionExceptionChart = this._addPerc(this._fillHourGaps(sd, this.params.start!, effectiveEnd), sc);
         } else if (tabKey === 'batchExceptionTable') {
-            const data: any[] = this.tabRequests['batchExceptionTable']?.data ?? [];
-            const bm: Record<string, number> = {};
-            const bd: Record<string, number> = {};
-            const bc: Record<string, number> = {};
-            data.forEach(d => {
-                if (d.errorType) bm[d.errorType] = (bm[d.errorType] ?? 0) + d.count;
-                if (d.stringDate) {
-                    bd[d.stringDate] = (bd[d.stringDate] ?? 0) + d.count;
-                    if (d.countok && !bc[d.stringDate]) bc[d.stringDate] = d.countok;
-                }
-            });
+            const { errors: bm, dates: bd, countoks: bc } = this._aggregateTabData(this.tabRequests['batchExceptionTable']?.data ?? []);
             this.topBatchErrors = Object.entries(bm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
             this.batchExceptionChart = this._addPerc(this._fillHourGaps(bd, this.params.start!, effectiveEnd), bc);
-            const batchCounts = this._sessionCountByType['BATCH'];
-            if (batchCounts) {
-                const idx = this.sessionCountData.findIndex(d => d.type === 'BATCH');
-                if (idx >= 0) this.sessionCountData = [...this.sessionCountData.slice(0, idx), { type: 'BATCH', ...batchCounts }, ...this.sessionCountData.slice(idx + 1)];
-                else this.sessionCountData = [...this.sessionCountData, { type: 'BATCH', ...batchCounts }];
-            }
+            this._patchSessionCountData('BATCH');
             this._rebuildSessionSummaries();
         } else if (tabKey === 'viewExceptionTable') {
-            const data: any[] = this.tabRequests['viewExceptionTable']?.data ?? [];
-            const vm: Record<string, number> = {};
-            const vd: Record<string, number> = {};
-            const vc: Record<string, number> = {};
-            data.forEach(d => {
-                if (d.errorType) vm[d.errorType] = (vm[d.errorType] ?? 0) + d.count;
-                if (d.stringDate) {
-                    vd[d.stringDate] = (vd[d.stringDate] ?? 0) + d.count;
-                    if (d.countok && !vc[d.stringDate]) vc[d.stringDate] = d.countok;
-                }
-            });
+            const { errors: vm, dates: vd, countoks: vc } = this._aggregateTabData(this.tabRequests['viewExceptionTable']?.data ?? []);
             this.topViewErrors = Object.entries(vm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
             this.viewExceptionChart = this._addPerc(this._fillHourGaps(vd, this.params.start!, effectiveEnd), vc);
-            const viewCounts = this._sessionCountByType['VIEW'];
-            if (viewCounts) {
-                const idx = this.sessionCountData.findIndex(d => d.type === 'VIEW');
-                if (idx >= 0) this.sessionCountData = [...this.sessionCountData.slice(0, idx), { type: 'VIEW', ...viewCounts }, ...this.sessionCountData.slice(idx + 1)];
-                else this.sessionCountData = [...this.sessionCountData, { type: 'VIEW', ...viewCounts }];
-            }
+            this._patchSessionCountData('VIEW');
             this._rebuildSessionSummaries();
         } else if (tabKey === 'startupExceptionTable') {
-            const data: any[] = this.tabRequests['startupExceptionTable']?.data ?? [];
-            const stud: Record<string, number> = {};
-            const stuc: Record<string, number> = {};
-            const stum: Record<string, number> = {};
-            data.forEach(d => {
-                if (d.errorType) stum[d.errorType] = (stum[d.errorType] ?? 0) + d.count;
-                if (d.stringDate) {
-                    stud[d.stringDate] = (stud[d.stringDate] ?? 0) + d.count;
-                    if (d.countok && !stuc[d.stringDate]) stuc[d.stringDate] = d.countok;
-                }
-            });
+            const { errors: stum, dates: stud, countoks: stuc } = this._aggregateTabData(this.tabRequests['startupExceptionTable']?.data ?? []);
             this.topStartupErrors = Object.entries(stum).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
             this.startupExceptionChart = this._addPerc(this._fillHourGaps(stud, this.params.start!, effectiveEnd), stuc);
-            const startupCounts = this._sessionCountByType['STARTUP'];
-            if (startupCounts) {
-                const idx = this.sessionCountData.findIndex(d => d.type === 'STARTUP');
-                if (idx >= 0) this.sessionCountData = [...this.sessionCountData.slice(0, idx), { type: 'STARTUP', ...startupCounts }, ...this.sessionCountData.slice(idx + 1)];
-                else this.sessionCountData = [...this.sessionCountData, { type: 'STARTUP', ...startupCounts }];
-            }
+            this._patchSessionCountData('STARTUP');
             this._rebuildSessionSummaries();
         }
         // batchTopJobsTable : pas de graphique associé
@@ -799,14 +772,14 @@ export class DashboardComponent implements OnDestroy {
     groupBypropertyRest(property: string, array: any[]) {
         let helper: any = {};
         return array.reduce((acc: any, item: any) => {
-            if (!helper[item[property]]) {
-                helper[item[property]] = Object.assign({}, item);
+            if (helper[item[property]]) {
+                if (item.errorType) {
+                    helper[item[property]].count += item['count'];
+                }
+            } else {
+                helper[item[property]] = { ...item };
                 helper[item[property]].count = item.errorType ? item.count : 0;
                 acc.push(helper[item[property]]);
-            } else {
-                if(item.errorType){
-                    helper[item[property]].count += item["count"];
-                }
             }
             return acc;
         }, []);
@@ -876,9 +849,10 @@ export class DashboardComponent implements OnDestroy {
             }),
             tap(({ sumRes }) => {
                 this.sparklinePercs[key] = sumRes ? (sumRes.count * 100) / sumRes.countok : 0;
+                const plural = sumRes && sumRes.countok > 1 ? 's' : '';
                 this.sparklineTitles[key] = {
                     title: sumRes ? `${label}: ${((sumRes.count * 100) / sumRes.countok).toFixed(2)}%` : `${label}: 0.00%`,
-                    subtitle: sumRes ? `sur ${this._decimalPipe.transform(sumRes.countok)} requête${sumRes.countok > 1 ? 's' : ''}` : 'sur 0 requête'
+                    subtitle: sumRes ? `sur ${this._decimalPipe.transform(sumRes.countok)} requ\u00eate${plural}` : 'sur 0 requ\u00eate'
                 };
             }),
             map(({ chart, data }) => ({ chart, data }))
