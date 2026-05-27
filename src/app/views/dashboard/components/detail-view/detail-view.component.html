@@ -1,4 +1,14 @@
-﻿<div class="db-detail-view">
+﻿<!-- État : aucun incident sur la période -->
+<div class="db-clear-state" *ngIf="!isBlockLoading && isNoIncidents">
+  <div class="db-clear-icon">
+    <mat-icon class="material-symbols-outlined">verified</mat-icon>
+  </div>
+  <span class="db-clear-title">Aucun incident sur la période</span>
+  <span class="db-clear-label">{{ selectedLabel }}</span>
+  <span class="db-clear-sub">Aucune anomalie ni exception détectée sur la période sélectionnée</span>
+</div>
+
+<div class="db-detail-view" *ngIf="isBlockLoading || !isNoIncidents">
 
   <!-- ── Activité protocole : pleine largeur (protocoles uniquement) ── -->
   <div class="db-proto-wrap" *ngIf="context.selectedInsights.size > 0 && !isSessionInsight">
@@ -44,7 +54,7 @@
   </div><!-- fin .db-proto-wrap -->
 
   <!-- ── Exceptions dans le temps : SERVICE, BATCH, VIEW, STARTUP ── -->
-  <div class="db-sess-chart-wrap" *ngIf="selectedKey === 'SERVICE' || selectedKey === 'BATCH' || selectedKey === 'VIEW' || selectedKey === 'STARTUP'">
+  <div class="db-sess-chart-wrap" *ngIf="isSessionInsight && selectedKey !== 'TEST'">
     <div class="db-insights-hdr">
       <span class="dih-title">Incidents sur la période</span>
       <span class="dih-sub">{{ sessionChartSubtitle }}</span>
@@ -82,7 +92,7 @@
            || (context.selectedInsights.has('ldap')    && context.topErrors['ldap']?.length)
            || (context.selectedInsights.has('SERVICE') && (context.tabRequests.sessionExceptionsTable?.isLoading !== false || context.topSessionErrors.length))
            || (context.selectedInsights.has('BATCH')   && (context.tabRequests.batchExceptionTable?.isLoading !== false || context.topBatchErrors.length))
-           || (context.selectedInsights.has('STARTUP') && (context.sessionCountLoading || context.sessionInitErrors > 0 || context.divergentBranches.length > 0))
+           || (context.selectedInsights.has('STARTUP') && (context.sessionCountLoading || context.sessionInitErrors > 0))
            || (context.selectedInsights.has('VIEW')    && (context.tabRequests.viewExceptionTable?.isLoading !== false || context.topViewErrors.length || context.sessionWebErrors > 0))
            || (context.selectedInsights.has('TEST')    && (context.sessionCountLoading || context.sessionTestErrors > 0))">
 
@@ -185,20 +195,8 @@
 
       </div><!-- fin .db-insights -->
 
-      <div class="dbi-all-clear" *ngIf="context.insightsAllClear">
-          <mat-icon class="material-symbols-outlined">verified</mat-icon>
-          <span>Infrastructure saine — aucun incident détecté</span>
-      </div><!-- fin .dbi-all-clear -->
-
     </div><!-- fin .clt-body -->
-
-    <!-- Aucun incident sur la période -->
-    <div class="db-no-incidents" *ngIf="!isBlockLoading && isNoIncidents">
-      <mat-icon class="material-symbols-outlined">event_available</mat-icon>
-      <span class="db-no-incidents__title">Aucun incident relevé</span>
-      <span class="db-no-incidents__sub">Aucune anomalie détectée sur la période sélectionnée</span>
-    </div>
 
   </div><!-- fin .db-clt-block -->
 
-</div>
+</div><!-- fin .db-detail-view -->

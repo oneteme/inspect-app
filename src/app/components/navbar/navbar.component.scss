@@ -195,6 +195,10 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
+.about-btn {
+  &:hover mat-icon { transform: none; }
+}
+
 .deploy-btn:hover {
   background: rgba(20, 184, 166, 0.14);
   border-color: rgba(20, 184, 166, 0.32);

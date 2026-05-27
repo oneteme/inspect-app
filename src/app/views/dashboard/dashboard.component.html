@@ -17,13 +17,6 @@
   </form>
 </header-page>
 
-<!-- Banner : pas de données -->
-<div class="db-all-ok db-no-data" *ngIf="hasNoData && !showInactiveProtocols">
-  <mat-icon class="material-symbols-outlined">info</mat-icon>
-  <span>Aucune donnée disponible sur la période sélectionnée</span>
-  <button (click)="showInactiveProtocols = true">Afficher quand même</button>
-</div>
-
 <div class="db-grid">
   <!-- Colonne principale : liste des protocoles -->
   <section class="db-main">
@@ -61,19 +54,25 @@
     <!-- Stats instances compactes -->
     <ng-container *ngIf="serverHealthLoading; else instancesBlock">
       <div class="dov-stats-wrap dov-stats-skel">
-        <div class="dov-stats-lbl">Instances actives</div>
+        <div class="dov-stats-lbl">
+          Instances actives
+          <mat-icon class="dov-stats-lbl-info material-symbols-outlined" title="Les instances actives ne dépendent pas de la période sélectionnée">info</mat-icon>
+        </div>
         <div class="dov-stats-sidebar">
-          <div class="dov-stat-sb-skel" *ngFor="let _ of skeletonRows"></div>
+          <div class="dov-stat-sb-skel" *ngFor="let _ of statSkeletonRows"></div>
         </div>
       </div>
     </ng-container>
     <ng-template #instancesBlock>
     <div class="dov-stats-wrap">
-      <div class="dov-stats-lbl">Instances actives</div>
+      <div class="dov-stats-lbl">
+        Instances actives
+        <mat-icon class="dov-stats-lbl-info material-symbols-outlined" title="Les instances actives ne dépendent pas de la période sélectionnée">info</mat-icon>
+      </div>
     <div class="dov-stats-sidebar">
-      <div class="dov-stat-sb sb-online" (click)="selectServerStatus('online')" [class.dov-stat-sb-active]="serverStatusFilter === 'online' && showOverview">
-        <span class="dov-stat-sb-val">{{ hasNoData ? '--' : onlineServerStat }}</span>
-        <span class="dov-stat-sb-lbl">En ligne</span>
+      <div class="dov-stat-sb sb-total" (click)="selectServerStatus('all')" [class.dov-stat-sb-active]="serverStatusFilter === 'all' && showOverview">
+        <span class="dov-stat-sb-val">{{ hasNoData ? '--' : deployTableRows.length }}</span>
+        <span class="dov-stat-sb-lbl">Total</span>
       </div>
       <div class="dov-stat-sb sb-pending" (click)="selectServerStatus('pending')" [class.dov-stat-sb-active]="serverStatusFilter === 'pending' && showOverview">
         <span class="dov-stat-sb-val">{{ hasNoData ? '--' : pendingServerStat }}</span>
@@ -82,10 +81,6 @@
       <div class="dov-stat-sb sb-offline" (click)="selectServerStatus('offline')" [class.dov-stat-sb-active]="serverStatusFilter === 'offline' && showOverview">
         <span class="dov-stat-sb-val">{{ hasNoData ? '--' : offlineServerStat }}</span>
         <span class="dov-stat-sb-lbl">Hors ligne</span>
-      </div>
-      <div class="dov-stat-sb sb-total" (click)="selectServerStatus('all')" [class.dov-stat-sb-active]="serverStatusFilter === 'all' && showOverview">
-        <span class="dov-stat-sb-val">{{ hasNoData ? '--' : deployTableRows.length }}</span>
-        <span class="dov-stat-sb-lbl">Total</span>
       </div>
     </div>
     </div>
@@ -96,10 +91,15 @@
       <div class="sb-block sb-distribution-block sb-skel-block">
         <div class="sbd-title">Session</div>
         <ng-container *ngFor="let _ of skeletonRows">
-          <div class="sbd-skel-label"></div>
-          <div class="sbd-skel-track"></div>
+          <div class="sbd-skel-dot"></div>
+          <div class="sbd-skel-main">
+            <div class="sbd-skel-top">
+              <div class="sbd-skel-label"></div>
+              <div class="sbd-skel-count"></div>
+            </div>
+            <div class="sbd-skel-track"></div>
+          </div>
           <div class="sbd-skel-rate"></div>
-          <div class="sbd-skel-count"></div>
         </ng-container>
       </div>
     </ng-container>
@@ -112,22 +112,31 @@
       </div>
       <ng-container *ngFor="let s of sessionSummaries">
         <ng-container *ngIf="s.loading">
-          <div class="sbd-skel-label"></div>
-          <div class="sbd-skel-track"></div>
+          <div class="sbd-skel-dot"></div>
+          <div class="sbd-skel-main">
+            <div class="sbd-skel-top">
+              <div class="sbd-skel-label"></div>
+              <div class="sbd-skel-count"></div>
+            </div>
+            <div class="sbd-skel-track"></div>
+          </div>
           <div class="sbd-skel-rate"></div>
-          <div class="sbd-skel-count"></div>
         </ng-container>
         <div class="sbd-row" *ngIf="!s.loading"
           [class.sbd-row-selected]="selectedInsights.has(s.key)"
-          [class.sbd-row-clickable]="s.rate > 0"
+          [class.sbd-row-clickable]="true"
           [title]="s.title"
-          (click)="s.rate > 0 ? toggleInsight(s.key) : null">
-          <span class="sbd-label">{{ s.label }}</span>
-          <div class="sbd-track" [class.track-active]="s.total > 0">
-            <div class="sbd-fill" [style.width.%]="s.total > 0 ? (100 - s.rate) : 0"></div>
+          (click)="toggleInsight(s.key)">
+          <div class="sbd-main">
+            <div class="sbd-top">
+              <span class="sbd-label">{{ s.label }}</span>
+              <span class="sbd-count">{{ s.total | compact }}</span>
+            </div>
+            <div class="sbd-track" [class.track-active]="s.total > 0">
+              <div class="sbd-fill" [style.width.%]="s.total > 0 ? (100 - s.rate) : 0"></div>
+            </div>
           </div>
           <span class="sbd-rate" [class.c-ok]="s.total > 0 && s.rate === 0" [class.c-err]="s.rate > 0">{{ s.rate === 0 ? '100%' : (s.rate | number:'1.2-2') + '%' }}</span>
-          <span class="sbd-count">{{ s.total | compact }}</span>
         </div>
       </ng-container>
     </div>
@@ -142,28 +151,34 @@
       </div>
       <ng-container *ngFor="let p of protocolSummaries">
         <ng-container *ngIf="p.loading">
-          <div class="sbd-skel-label"></div>
-          <div class="sbd-skel-track"></div>
+          <div class="sbd-skel-dot"></div>
+          <div class="sbd-skel-main">
+            <div class="sbd-skel-top">
+              <div class="sbd-skel-label"></div>
+              <div class="sbd-skel-count"></div>
+            </div>
+            <div class="sbd-skel-track"></div>
+          </div>
           <div class="sbd-skel-rate"></div>
-          <div class="sbd-skel-count"></div>
         </ng-container>
         <div class="sbd-row" *ngIf="!p.loading"
           [class.sbd-row-selected]="selectedInsights.has(p.key)"
-          [class.sbd-row-clickable]="p.rate > 0"
+          [class.sbd-row-clickable]="true"
           [title]="p.title"
-          (click)="p.rate > 0 ? toggleInsight(p.key) : null">
-          <span class="sbd-label">{{ p.label }}</span>
-          <div class="sbd-track" [class.track-active]="p.total > 0">
-            <div class="sbd-fill" [style.width.%]="p.total > 0 ? (100 - p.rate) : 0"></div>
+          (click)="toggleInsight(p.key)">
+          <div class="sbd-main">
+            <div class="sbd-top">
+              <span class="sbd-label">{{ p.label }}</span>
+              <span class="sbd-count">{{ p.total | compact }}</span>
+            </div>
+            <div class="sbd-track" [class.track-active]="p.total > 0">
+              <div class="sbd-fill" [style.width.%]="p.total > 0 ? (100 - p.rate) : 0"></div>
+            </div>
           </div>
           <span class="sbd-rate" [class.c-ok]="p.rate === 0" [class.c-err]="p.rate > 0">{{ p.rate === 0 ? '100%' : (p.rate | number:'1.2-2') + '%' }}</span>
-          <span class="sbd-count">{{ p.total | compact }}</span>
         </div>
       </ng-container>
     </div>
-
-    <!-- Stack Technique — Carousel -->
-    <dashboard-carousel></dashboard-carousel>
 
   </aside>
 

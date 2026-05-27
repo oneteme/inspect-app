@@ -1,0 +1,19 @@
+<div class="about-header">
+  <span class="about-title">Stack Technique</span>
+  <p class="about-desc">Technologies utilisées dans cette application.</p>
+</div>
+
+<mat-dialog-content class="about-content">
+  <div class="about-grid" *ngIf="techStack.length">
+    <div class="ts-pill" *ngFor="let tech of techStack; trackBy: trackByTechId" [title]="getTechTitle(tech)">
+      <img *ngIf="tech.svgUrl" [src]="tech.svgUrl" class="ts-devicon-img" [alt]="tech.name" />
+      <i *ngIf="!tech.svgUrl" [class]="tech.devicon" class="ts-devicon" [style.color]="tech.color"></i>
+      <span class="ts-pill-name">{{ tech.name }}</span>
+      <span class="ts-pill-version" *ngIf="tech.version">{{ tech.version }}</span>
+    </div>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close class="about-close-btn">Fermer</button>
+</mat-dialog-actions>

@@ -635,7 +635,7 @@ export class Constants {
     static REST_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<string, number> = {
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000" },
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { color: '#f97316' } } as any,
         ],
         options: {
             legend: { show: false },
@@ -644,6 +644,7 @@ export class Constants {
             tooltip: {
                 formatter: (params: any[]) => {
                     const p = params[0];
+                    if (p.data?._noData) return `${p.axisValueLabel ?? p.axisValue}<br/><span style="color:rgba(255,255,255,0.6);font-size:11px">Aucune donnée</span>`;
                     const val = Array.isArray(p.value) ? p.value[1] : p.value;
                     return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName}&nbsp;&nbsp;<b>${(val ?? 0).toFixed(2)}%</b>`;
                 }
@@ -654,7 +655,7 @@ export class Constants {
     static  DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000" }
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { color: '#f97316' } } as any
         ],
         options: {
             legend: { show: false },
@@ -663,6 +664,7 @@ export class Constants {
             tooltip: {
                 formatter: (params: any[]) => {
                     const p = params[0];
+                    if (p.data?._noData) return `${p.axisValueLabel ?? p.axisValue}<br/><span style="color:rgba(255,255,255,0.6);font-size:11px">Aucune donnée</span>`;
                     const val = Array.isArray(p.value) ? p.value[1] : p.value;
                     return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName}&nbsp;&nbsp;<b>${(val ?? 0).toFixed(2)}%</b>`;
                 }
@@ -673,7 +675,7 @@ export class Constants {
     static  FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000"}
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { color: '#f97316' } } as any
         ],
         options: {
             legend: { show: false },
@@ -682,6 +684,7 @@ export class Constants {
             tooltip: {
                 formatter: (params: any[]) => {
                     const p = params[0];
+                    if (p.data?._noData) return `${p.axisValueLabel ?? p.axisValue}<br/><span style="color:rgba(255,255,255,0.6);font-size:11px">Aucune donnée</span>`;
                     const val = Array.isArray(p.value) ? p.value[1] : p.value;
                     return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName}&nbsp;&nbsp;<b>${(val ?? 0).toFixed(2)}%</b>`;
                 }
@@ -692,7 +695,7 @@ export class Constants {
     static  SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000" }
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { color: '#f97316' } } as any
         ],
         options: {
             legend: { show: false },
@@ -701,6 +704,7 @@ export class Constants {
             tooltip: {
                 formatter: (params: any[]) => {
                     const p = params[0];
+                    if (p.data?._noData) return `${p.axisValueLabel ?? p.axisValue}<br/><span style="color:rgba(255,255,255,0.6);font-size:11px">Aucune donnée</span>`;
                     const val = Array.isArray(p.value) ? p.value[1] : p.value;
                     return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName}&nbsp;&nbsp;<b>${(val ?? 0).toFixed(2)}%</b>`;
                 }
@@ -711,7 +715,7 @@ export class Constants {
     static  LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000" }
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { color: '#f97316' } } as any
         ],
         options: {
             legend: { show: false },
@@ -720,6 +724,7 @@ export class Constants {
             tooltip: {
                 formatter: (params: any[]) => {
                     const p = params[0];
+                    if (p.data?._noData) return `${p.axisValueLabel ?? p.axisValue}<br/><span style="color:rgba(255,255,255,0.6);font-size:11px">Aucune donnée</span>`;
                     const val = Array.isArray(p.value) ? p.value[1] : p.value;
                     return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName}&nbsp;&nbsp;<b>${(val ?? 0).toFixed(2)}%</b>`;
                 }

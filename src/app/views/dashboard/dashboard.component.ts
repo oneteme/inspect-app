@@ -97,7 +97,6 @@ export class DashboardComponent implements OnDestroy {
     deployTableRows: (LastServerStart & { lastTrace?: number })[] = [];
     deployTableToday: Date = new Date();
     versionColor: any = {};
-    onlineServerStat = 0;
     pendingServerStat = 0;
     offlineServerStat = 0;
     showOverview = true;
@@ -114,15 +113,11 @@ export class DashboardComponent implements OnDestroy {
     kpiLoading = true;
     sparklinePercs: { rest: number; jdbc: number; ftp: number; smtp: number; ldap: number } = { rest: 0, jdbc: 0, ftp: 0, smtp: 0, ldap: 0 };
     topErrors: Record<string, { type: string; count: number }[]> = {};
-    showInactiveProtocols = false;
     selectedInsights = new Set<string>();
     sessExcLineConfig = Constants.SESSION_EXCEPTION_LINE;
 
     // server health
-    quietProtocols: typeof this.protocolDefs = [];
-    stoppedServers: LastServerStart[] = [];
-    unstableServers: LastServerStart[] = [];
-    divergentBranches: { branch: string; count: number; servers: string[] }[] = [];
+
 
     // exception charts par type de session
     topSessionErrors: { type: string; count: number }[] = [];
@@ -135,14 +130,14 @@ export class DashboardComponent implements OnDestroy {
     startupExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
 
     // état des insights (tout clair / erreurs par catégorie)
-    insightsAllClear = false;
-    hasRequestErrors = false;
+
     sessionInitErrors = 0;
     sessionWebErrors = 0;
     sessionTestErrors = 0;
     instanceSearchQuery = '';
 
     readonly skeletonRows = [1, 2, 3, 4];
+    readonly statSkeletonRows = [1, 2, 3];
 
     // résumés calculés après chargement
     protocolSummaries: { key: string; label: string; rate: number; count: number; total: number; loading: boolean; title: string }[] = [];
@@ -150,7 +145,10 @@ export class DashboardComponent implements OnDestroy {
     sessionTotal = 0;
 
     private _chartsResolved = 0;
+    private _tabsResolved = 0;
     private _loadGen = 0;
+    private _lastHealthEnv: string | null = null;
+    private _sessionCountByType: Record<string, { total: number; errors: number }> = {};
     constructor() {
         this.subscriptions.push(combineLatest({
             params: this._activatedRoute.params,
@@ -184,28 +182,31 @@ export class DashboardComponent implements OnDestroy {
                 this.tabRequests   = this.TAB_REQUESTS(this.params.env, this.params.start, effectiveEnd, serverParam.app_name);
                 this.sessionSubscriptions.forEach(s => s.unsubscribe());
                 this.sessionSubscriptions = [];
-                this.showInactiveProtocols = false;
                 this.sessionSummaries = [];
                 this.protocolSummaries = [];
                 this.sessionCountData = [];
                 this.sessionCountLoading = true;
                 this.restSessionCountLoading = true;
                 this.restSessionCount = { total: 0, errors: 0 };
-                this.deployTableRows = [];
-                this.filteredDeployRows = [];
-                this.onlineServerStat = 0;
-                this.pendingServerStat = 0;
-                this.offlineServerStat = 0;
+                const envChanged = this.params.env !== this._lastHealthEnv;
+                if (envChanged) {
+                    this.deployTableRows = [];
+                    this.filteredDeployRows = [];
+                    this.serverHealthLoading = true;
+                    this.pendingServerStat = 0;
+                    this.offlineServerStat = 0;
+                }
                 const gen = ++this._loadGen;
                 this.initTab(gen);
                 this.initCharts(gen);
-                this.loadServerHealth(this.params.env, gen);
+                if (envChanged) {
+                    this._lastHealthEnv = this.params.env ?? null;
+                    this.loadServerHealth(this.params.env, gen);
+                }
                 this.sessionSubscriptions.push(this._sessionService.getCountByEnv({ env: this.params.env, start: this.params.start, end: this.params.end })
                     .pipe(finalize(() => { if (this._loadGen !== gen) return; this.restSessionCountLoading = false; this._rebuildSessionSummaries(); }))
                     .subscribe({ next: (data) => { if (this._loadGen !== gen) return; this.restSessionCount = data; } }));
-                this.sessionSubscriptions.push(this._mainService.getCountByType({ env: this.params.env, start: this.params.start, end: this.params.end })
-                    .pipe(finalize(() => { if (this._loadGen !== gen) return; this.sessionCountLoading = false; }))
-                    .subscribe({ next: (data) => { if (this._loadGen !== gen) return; this.sessionCountData = data; this._rebuildSessionSummaries(); } }));
+
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${this.params.serveurs.length > 0 ? '&' + this.params.serveurs.map(name => `appname=${name}`).join('&') : ''}`)
             }
         }));
@@ -272,14 +273,25 @@ export class DashboardComponent implements OnDestroy {
         this.topStartupErrors = [];
         this.tabSubscriptions.forEach(t => t.unsubscribe());
         this.tabSubscriptions = [];
-        Object.keys(this.tabRequests).forEach(i => {
+        this._tabsResolved = 0;
+        this._sessionCountByType = {};
+        this.sessionCountLoading = true;
+        const keys = Object.keys(this.tabRequests);
+        const totalTabs = keys.length;
+        keys.forEach(i => {
             this.tabRequests[i].data = [];
             this.tabRequests[i].isLoading = true;
             this.tabSubscriptions.push(this.tabRequests[i].observable
                 .pipe(finalize(() => {
                     if (this._loadGen !== gen) return;
                     this.tabRequests[i].isLoading = false;
-                    this._rebuildTabErrors();
+                    this._rebuildSingleTabErrors(i);
+                    if (++this._tabsResolved >= totalTabs) {
+                        this.sessionCountLoading = false;
+                        this._rebuildInsightsAllClear();
+                    } else {
+                        this._cdr.markForCheck();
+                    }
                 }))
                 .subscribe({
                     next: (res: any[]) => {
@@ -287,7 +299,7 @@ export class DashboardComponent implements OnDestroy {
                         this.tabRequests[i].data = res;
                     }
                 }));
-        })
+        });
     }
 
     search() {
@@ -377,9 +389,6 @@ export class DashboardComponent implements OnDestroy {
         this.serverHealthLoading = true;
         this.serverHealthData = [];
         this.deployTableRows = [];
-        this.stoppedServers = [];
-        this.unstableServers = [];
-        this.divergentBranches = [];
         this._serverHealthSub?.unsubscribe();
         this._serverHealthSub = this._instanceService.getLastServerStart({ env })
                 .pipe(
@@ -420,7 +429,6 @@ export class DashboardComponent implements OnDestroy {
                 }
             }
         }
-        this.onlineServerStat = this._onlineRows.length;
         this.pendingServerStat = this._pendingRows.length;
         this.offlineServerStat = this._offlineRows.length;
         this._applyStatusFilter();
@@ -436,36 +444,10 @@ export class DashboardComponent implements OnDestroy {
     }
 
     get hasNoData(): boolean {
-        return !this.serverHealthLoading && !this.kpiLoading && this.deployTableRows.length === 0;
+        return !this.serverHealthLoading && this.deployTableRows.length === 0;
     }
 
     private _rebuildServerHealth(): void {
-        const keys = ['restRequestExceptionsTable', 'databaseRequestExceptionsTable', 'ftpRequestExceptionsTable', 'smtpRequestExceptionsTable', 'ldapRequestExceptionsTable'];
-        this.quietProtocols = this.protocolDefs.filter(p =>
-            !this.chartRequests[p.reqKey].isLoading &&
-            !this.chartRequests[p.reqKey].data?.length
-        );
-        this.unstableServers = this.serverHealthData
-            .filter(s => s.restart > 1)
-            .sort((a, b) => b.restart - a.restart)
-            .slice(0, 5);
-        this.stoppedServers = this.serverHealthData
-            .filter(s => s.end !== null && s.end !== undefined)
-            .sort((a, b) => b.end - a.end)
-            .slice(0, 5);
-        if (!this.serverHealthData.length) {
-            this.divergentBranches = [];
-            this._cdr.markForCheck();
-            return;
-        }
-        const bmap: Record<string, string[]> = {};
-        this.serverHealthData.forEach(s => {
-            const b = s.branch?.trim();
-            if (!b || b === 'main' || b === 'master') return;
-            if (!bmap[b]) bmap[b] = [];
-            bmap[b].push(s.appName);
-        });
-        this.divergentBranches = Object.entries(bmap).map(([branch, servers]) => ({ branch, count: servers.length, servers })).sort((a, b) => b.count - a.count);
         this._cdr.markForCheck();
     }
 
@@ -500,61 +482,87 @@ export class DashboardComponent implements OnDestroy {
         return filled.map(p => ({ ...p, perc: countokMap[p.stringDate] ? (p.count * 100) / countokMap[p.stringDate] : 0 }));
     }
 
-    private _rebuildTabErrors(): void {
-        const effectiveEnd = this.params.end > new Date() ? new Date() : this.params.end;
-        const sessionData: any[] = this.tabRequests['sessionExceptionsTable']?.data ?? [];
-        const sm: Record<string, number> = {};
-        const sd: Record<string, number> = {};
-        const sc: Record<string, number> = {};
-        sessionData.forEach(d => {
-            if (d.errorType) sm[d.errorType] = (sm[d.errorType] ?? 0) + d.count;
-            if (d.stringDate) {
-                sd[d.stringDate] = (sd[d.stringDate] ?? 0) + d.count;
-                if (d.countok && !sc[d.stringDate]) sc[d.stringDate] = d.countok;
+    private _rebuildSingleTabErrors(tabKey: string): void {
+        const effectiveEnd = this.params.end! > new Date() ? new Date() : this.params.end!;
+        if (tabKey === 'sessionExceptionsTable') {
+            const data: any[] = this.tabRequests['sessionExceptionsTable']?.data ?? [];
+            const sm: Record<string, number> = {};
+            const sd: Record<string, number> = {};
+            const sc: Record<string, number> = {};
+            data.forEach(d => {
+                if (d.errorType) sm[d.errorType] = (sm[d.errorType] ?? 0) + d.count;
+                if (d.stringDate) {
+                    sd[d.stringDate] = (sd[d.stringDate] ?? 0) + d.count;
+                    if (d.countok && !sc[d.stringDate]) sc[d.stringDate] = d.countok;
+                }
+            });
+            this.topSessionErrors = Object.entries(sm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
+            this.sessionExceptionChart = this._addPerc(this._fillHourGaps(sd, this.params.start!, effectiveEnd), sc);
+        } else if (tabKey === 'batchExceptionTable') {
+            const data: any[] = this.tabRequests['batchExceptionTable']?.data ?? [];
+            const bm: Record<string, number> = {};
+            const bd: Record<string, number> = {};
+            const bc: Record<string, number> = {};
+            data.forEach(d => {
+                if (d.errorType) bm[d.errorType] = (bm[d.errorType] ?? 0) + d.count;
+                if (d.stringDate) {
+                    bd[d.stringDate] = (bd[d.stringDate] ?? 0) + d.count;
+                    if (d.countok && !bc[d.stringDate]) bc[d.stringDate] = d.countok;
+                }
+            });
+            this.topBatchErrors = Object.entries(bm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
+            this.batchExceptionChart = this._addPerc(this._fillHourGaps(bd, this.params.start!, effectiveEnd), bc);
+            const batchCounts = this._sessionCountByType['BATCH'];
+            if (batchCounts) {
+                const idx = this.sessionCountData.findIndex(d => d.type === 'BATCH');
+                if (idx >= 0) this.sessionCountData = [...this.sessionCountData.slice(0, idx), { type: 'BATCH', ...batchCounts }, ...this.sessionCountData.slice(idx + 1)];
+                else this.sessionCountData = [...this.sessionCountData, { type: 'BATCH', ...batchCounts }];
             }
-        });
-        this.topSessionErrors = Object.entries(sm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
-        this.sessionExceptionChart = this._addPerc(this._fillHourGaps(sd, this.params.start, effectiveEnd), sc);
-        const batchData: any[] = this.tabRequests['batchExceptionTable']?.data ?? [];
-        const bm: Record<string, number> = {};
-        const bd: Record<string, number> = {};
-        const bc: Record<string, number> = {};
-        batchData.forEach(d => {
-            if (d.errorType) bm[d.errorType] = (bm[d.errorType] ?? 0) + d.count;
-            if (d.stringDate) {
-                bd[d.stringDate] = (bd[d.stringDate] ?? 0) + d.count;
-                if (d.countok && !bc[d.stringDate]) bc[d.stringDate] = d.countok;
+            this._rebuildSessionSummaries();
+        } else if (tabKey === 'viewExceptionTable') {
+            const data: any[] = this.tabRequests['viewExceptionTable']?.data ?? [];
+            const vm: Record<string, number> = {};
+            const vd: Record<string, number> = {};
+            const vc: Record<string, number> = {};
+            data.forEach(d => {
+                if (d.errorType) vm[d.errorType] = (vm[d.errorType] ?? 0) + d.count;
+                if (d.stringDate) {
+                    vd[d.stringDate] = (vd[d.stringDate] ?? 0) + d.count;
+                    if (d.countok && !vc[d.stringDate]) vc[d.stringDate] = d.countok;
+                }
+            });
+            this.topViewErrors = Object.entries(vm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
+            this.viewExceptionChart = this._addPerc(this._fillHourGaps(vd, this.params.start!, effectiveEnd), vc);
+            const viewCounts = this._sessionCountByType['VIEW'];
+            if (viewCounts) {
+                const idx = this.sessionCountData.findIndex(d => d.type === 'VIEW');
+                if (idx >= 0) this.sessionCountData = [...this.sessionCountData.slice(0, idx), { type: 'VIEW', ...viewCounts }, ...this.sessionCountData.slice(idx + 1)];
+                else this.sessionCountData = [...this.sessionCountData, { type: 'VIEW', ...viewCounts }];
             }
-        });
-        this.topBatchErrors = Object.entries(bm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
-        this.batchExceptionChart = this._addPerc(this._fillHourGaps(bd, this.params.start, effectiveEnd), bc);
-        const viewData: any[] = this.tabRequests['viewExceptionTable']?.data ?? [];
-        const vm: Record<string, number> = {};
-        const vd: Record<string, number> = {};
-        const vc: Record<string, number> = {};
-        viewData.forEach(d => {
-            if (d.errorType) vm[d.errorType] = (vm[d.errorType] ?? 0) + d.count;
-            if (d.stringDate) {
-                vd[d.stringDate] = (vd[d.stringDate] ?? 0) + d.count;
-                if (d.countok && !vc[d.stringDate]) vc[d.stringDate] = d.countok;
+            this._rebuildSessionSummaries();
+        } else if (tabKey === 'startupExceptionTable') {
+            const data: any[] = this.tabRequests['startupExceptionTable']?.data ?? [];
+            const stud: Record<string, number> = {};
+            const stuc: Record<string, number> = {};
+            const stum: Record<string, number> = {};
+            data.forEach(d => {
+                if (d.errorType) stum[d.errorType] = (stum[d.errorType] ?? 0) + d.count;
+                if (d.stringDate) {
+                    stud[d.stringDate] = (stud[d.stringDate] ?? 0) + d.count;
+                    if (d.countok && !stuc[d.stringDate]) stuc[d.stringDate] = d.countok;
+                }
+            });
+            this.topStartupErrors = Object.entries(stum).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
+            this.startupExceptionChart = this._addPerc(this._fillHourGaps(stud, this.params.start!, effectiveEnd), stuc);
+            const startupCounts = this._sessionCountByType['STARTUP'];
+            if (startupCounts) {
+                const idx = this.sessionCountData.findIndex(d => d.type === 'STARTUP');
+                if (idx >= 0) this.sessionCountData = [...this.sessionCountData.slice(0, idx), { type: 'STARTUP', ...startupCounts }, ...this.sessionCountData.slice(idx + 1)];
+                else this.sessionCountData = [...this.sessionCountData, { type: 'STARTUP', ...startupCounts }];
             }
-        });
-        this.topViewErrors = Object.entries(vm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
-        this.viewExceptionChart = this._addPerc(this._fillHourGaps(vd, this.params.start, effectiveEnd), vc);
-        const startupData: any[] = this.tabRequests['startupExceptionTable']?.data ?? [];
-        const stud: Record<string, number> = {};
-        const stuc: Record<string, number> = {};
-        const stum: Record<string, number> = {};
-        startupData.forEach(d => {
-            if (d.errorType) stum[d.errorType] = (stum[d.errorType] ?? 0) + d.count;
-            if (d.stringDate) {
-                stud[d.stringDate] = (stud[d.stringDate] ?? 0) + d.count;
-                if (d.countok && !stuc[d.stringDate]) stuc[d.stringDate] = d.countok;
-            }
-        });
-        this.topStartupErrors = Object.entries(stum).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
-        this.startupExceptionChart = this._addPerc(this._fillHourGaps(stud, this.params.start, effectiveEnd), stuc);
-        this._rebuildInsightsAllClear();
+            this._rebuildSessionSummaries();
+        }
+        // batchTopJobsTable : pas de graphique associé
     }
 
     isRecentlyStarted(server: LastServerStart): boolean {
@@ -563,20 +571,9 @@ export class DashboardComponent implements OnDestroy {
     }
 
     private _rebuildInsightsAllClear(): void {
-        this.hasRequestErrors = Object.values(this.topErrors).some(e => e?.length > 0);
         this.sessionInitErrors = this.sessionCountData.find(d => d.type === 'STARTUP')?.errors ?? 0;
         this.sessionWebErrors  = this.sessionCountData.find(d => d.type === 'VIEW')?.errors ?? 0;
         this.sessionTestErrors = this.sessionCountData.find(d => d.type === 'TEST')?.errors ?? 0;
-        this.insightsAllClear = !this.serverHealthLoading
-            && !this.stoppedServers.length
-            && this.tabRequests.sessionExceptionsTable?.isLoading === false
-            && this.tabRequests.batchExceptionTable?.isLoading === false
-            && !this.topSessionErrors.length
-            && !this.topBatchErrors.length
-            && !this.hasRequestErrors
-            && !this.sessionInitErrors
-            && !this.sessionWebErrors
-            && !this.sessionTestErrors;
         this._cdr.markForCheck();
     }
 
@@ -704,9 +701,6 @@ export class DashboardComponent implements OnDestroy {
 
     trackByKey(_: number, item: { key: string }): string { return item.key; }
     trackByType(_: number, item: { type: string }): string { return item.type; }
-    trackByVersion(_: number, item: { version: string }): string { return item.version; }
-    trackByBranch(_: number, item: { branch: string }): string { return item.branch; }
-    trackByAppName(_: number, item: { appName: string }): string { return item.appName; }
 
     get detailContext(): DashboardDetailContext {
         return {
@@ -714,7 +708,6 @@ export class DashboardComponent implements OnDestroy {
             protocolDefs: this.protocolDefs,
             topErrors: this.topErrors,
             kpiLoading: this.kpiLoading,
-            serverHealthLoading: this.serverHealthLoading,
             tabRequests: this.tabRequests,
             topSessionErrors: this.topSessionErrors,
             topBatchErrors: this.topBatchErrors,
@@ -729,8 +722,6 @@ export class DashboardComponent implements OnDestroy {
             sessionInitErrors: this.sessionInitErrors,
             sessionWebErrors: this.sessionWebErrors,
             sessionTestErrors: this.sessionTestErrors,
-            insightsAllClear: this.insightsAllClear,
-            divergentBranches: this.divergentBranches,
             chartRequests: this.chartRequests,
             sparklinePercs: this.sparklinePercs,
             sparklineTitles: this.sparklineTitles,
@@ -776,10 +767,10 @@ export class DashboardComponent implements OnDestroy {
 
     private _rebuildSessionSummaries(): void {
         const types = [
-            { key: 'SERVICE', type: 'REST', label: 'Service' },
-            { key: 'BATCH', type: 'BATCH', label: 'Job' },
-            { key: 'STARTUP', type: 'STARTUP', label: 'Startup' },
-            { key: 'VIEW', type: 'VIEW', label: 'UI' },
+            { key: 'SERVICE', type: 'REST', label: 'Services exposés' },
+            { key: 'BATCH', type: 'BATCH', label: 'Tâches planifiées' },
+            { key: 'STARTUP', type: 'STARTUP', label: 'Initialisation' },
+            { key: 'VIEW', type: 'VIEW', label: 'Parcours client' },
             { key: 'TEST', type: 'TEST', label: 'Test' },
         ];
         this.sessionTotal = this.sessionCountData.reduce((s, d) => s + d.total, 0) + this.restSessionCount.total;
@@ -830,20 +821,57 @@ export class DashboardComponent implements OnDestroy {
         }, { countok: 0, count: 0 });
     }
 
+    private _fillFluxGaps(chart: any[], groupedBy: string, start: Date, end: Date): any[] {
+        const now = new Date();
+        const effectiveEnd = end > now ? now : end;
+        if (groupedBy === 'date') {
+            const map = new Map(chart.map(d => [d.stringDate, d]));
+            const result: any[] = [];
+            const d = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+            while (d < effectiveEnd) {
+                const label = this._datePipe.transform(d, 'd MMM yy');
+                result.push(map.get(label) ?? { stringDate: label, count: null, countok: 0, perc: 0, _noData: true });
+                d.setDate(d.getDate() + 1);
+            }
+            return result;
+        }
+        if (groupedBy === 'hour') {
+            const map = new Map(chart.map(d => [d.stringDate, d]));
+            const result: any[] = [];
+            const startH = start.getHours();
+            const isToday = start.toDateString() === now.toDateString();
+            const endH = isToday ? now.getHours() : 23;
+            for (let h = startH; h <= endH; h++) {
+                const label = this._datePipe.transform(new Date(2000, 1, 1, h), 'shortTime');
+                result.push(map.get(label) ?? { stringDate: label, count: null, countok: 0, perc: 0, _noData: true });
+            }
+            return result;
+        }
+        return chart;
+    }
+
     private buildExceptionObservable(
         source$: Observable<any[]>,
         groupedBy: string,
         label: string,
-        key: 'rest' | 'jdbc' | 'ftp' | 'smtp' | 'ldap'
+        key: 'rest' | 'jdbc' | 'ftp' | 'smtp' | 'ldap',
+        start?: Date,
+        end?: Date
     ): Observable<{ chart: any[]; data: any[] }> {
         return source$.pipe(
             map((result: any[]) => {
                 formatters[groupedBy](result, this._datePipe, 'stringDate');
-                const chart = this.groupBypropertyRest('stringDate', result)
+                const sorted = this.groupBypropertyRest('stringDate', result)
                     .map((d: any) => ({ ...d, perc: (d.count * 100) / d.countok }))
-                    .sort((a: any, b: any) => a.stringDate.localeCompare(b.stringDate));
+                    .sort((a: any, b: any) => {
+                        if (a.year !== undefined && b.year !== undefined && a.year !== b.year) {
+                            return a.year - b.year;
+                        }
+                        return a.date - b.date;
+                    });
+                const chart = start && end ? this._fillFluxGaps(sorted, groupedBy, start, end) : sorted;
                 const data = result.filter((a: any) => a.errorType != null);
-                const sumRes = chart.length ? this.sumcounts(chart) : null;
+                const sumRes = sorted.length ? this.sumcounts(sorted) : null;
                 return { chart, data, sumRes };
             }),
             tap(({ sumRes }) => {
@@ -858,18 +886,25 @@ export class DashboardComponent implements OnDestroy {
     }
 
     TAB_REQUESTS = (env: string, start: Date, end: Date, app_name: string) => {
+        const groupedBy = this.groupedBy; // capturé une fois à la création
         return {
             sessionExceptionsTable: {
-                observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, server: app_name, others: {"status.ge(500).or(status.lt(400))": ""}})
+                observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, server: app_name, others: {"status.ge(500).or(status.lt(400))": ""}})
                     .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
-                        formatters[this.groupedBy](result, this._datePipe, 'stringDate');
+                        formatters[groupedBy](result, this._datePipe, 'stringDate');
                         return result.filter(r => r.errorType != null);
                     }))
             },
             batchExceptionTable: {
-                observable: this._mainService.getMainExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, app_name: app_name })
+                observable: this._mainService.getMainExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
-                        formatters[this.groupedBy](result, this._datePipe, 'stringDate');
+                        formatters[groupedBy](result, this._datePipe, 'stringDate');
+                        const dateMap = new Map<string, number>();
+                        (result as any[]).forEach(r => { if (r.stringDate != null && r.countok != null) dateMap.set(r.stringDate, r.countok); });
+                        this._sessionCountByType['BATCH'] = {
+                            total: Array.from(dateMap.values()).reduce((s, v) => s + v, 0),
+                            errors: result.filter(r => r.errorType != null).reduce((s, r) => s + r.count, 0)
+                        };
                         return result.filter(r => r.errorType != null);
                     }))
             },
@@ -877,16 +912,28 @@ export class DashboardComponent implements OnDestroy {
                 observable: this._mainService.getTopBatchJobErrors({ env: env, start: start, end: end, app_name: app_name })
             },
             viewExceptionTable: {
-                observable: this._mainService.getViewExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, app_name: app_name })
+                observable: this._mainService.getViewExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
-                        formatters[this.groupedBy](result, this._datePipe, 'stringDate');
+                        formatters[groupedBy](result, this._datePipe, 'stringDate');
+                        const dateMap = new Map<string, number>();
+                        (result as any[]).forEach(r => { if (r.stringDate != null && r.countok != null) dateMap.set(r.stringDate, r.countok); });
+                        this._sessionCountByType['VIEW'] = {
+                            total: Array.from(dateMap.values()).reduce((s, v) => s + v, 0),
+                            errors: result.filter(r => r.errorType != null).reduce((s, r) => s + r.count, 0)
+                        };
                         return result.filter(r => r.errorType != null);
                     }))
             },
             startupExceptionTable: {
-                observable: this._mainService.getStartupExceptions({ env: env, start: start, end: end, groupedBy: this.groupedBy, app_name: app_name })
+                observable: this._mainService.getStartupExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
-                        formatters[this.groupedBy](result, this._datePipe, 'stringDate');
+                        formatters[groupedBy](result, this._datePipe, 'stringDate');
+                        const dateMap = new Map<string, number>();
+                        (result as any[]).forEach(r => { if (r.stringDate != null && r.countok != null) dateMap.set(r.stringDate, r.countok); });
+                        this._sessionCountByType['STARTUP'] = {
+                            total: Array.from(dateMap.values()).reduce((s, v) => s + v, 0),
+                            errors: result.filter(r => r.errorType != null).reduce((s, r) => s + r.count, 0)
+                        };
                         return result.filter(r => r.errorType != null);
                     }))
             }
@@ -896,11 +943,11 @@ export class DashboardComponent implements OnDestroy {
         const groupedBy = periodManagement(start, end);
         const p = { env, start, end, groupedBy, app_name };
         return {
-            restRequestExceptionsTable: { observable: this.buildExceptionObservable(this._restService.getRestExceptions1(p), groupedBy, 'REST', 'rest') },
-            databaseRequestExceptionsTable: { observable: this.buildExceptionObservable(this._datebaseService.getJdbcRestSessionExceptions(p), groupedBy, 'JDBC', 'jdbc') },
-            ftpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ftpService.getftpSessionExceptions(p), groupedBy, 'FTP', 'ftp') },
-            smtpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._smtpService.getSmtpExceptions(p), groupedBy, 'SMTP', 'smtp') },
-            ldapRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ldapService.getLdapSessionExceptions(p), groupedBy, 'LDAP', 'ldap') },
+            restRequestExceptionsTable: { observable: this.buildExceptionObservable(this._restService.getRestExceptions1(p), groupedBy, 'REST', 'rest', start, end) },
+            databaseRequestExceptionsTable: { observable: this.buildExceptionObservable(this._datebaseService.getJdbcRestSessionExceptions(p), groupedBy, 'JDBC', 'jdbc', start, end) },
+            ftpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ftpService.getftpSessionExceptions(p), groupedBy, 'FTP', 'ftp', start, end) },
+            smtpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._smtpService.getSmtpExceptions(p), groupedBy, 'SMTP', 'smtp', start, end) },
+            ldapRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ldapService.getLdapSessionExceptions(p), groupedBy, 'LDAP', 'ldap', start, end) },
         };
     }
 

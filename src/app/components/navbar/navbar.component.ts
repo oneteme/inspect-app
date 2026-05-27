@@ -5,6 +5,8 @@ import { distinctUntilChanged, finalize, Subscription } from 'rxjs';
 import { DomSanitizer } from '@angular/platform-browser';
 import { MatIconRegistry } from '@angular/material/icon';
 import { MatMenuTrigger } from '@angular/material/menu';
+import { MatDialog } from '@angular/material/dialog';
+import { AboutDialogComponent } from '../about/about-dialog.component';
 import { app } from 'src/environments/environment';
 import { Constants } from '../../views/constants';
 import { EnvRouter } from '../../service/router.service';
@@ -68,10 +70,16 @@ export class NavbarComponent implements OnInit, OnDestroy {
     { label: Constants.MAPPING_TYPE['view'].title, icon: Constants.MAPPING_TYPE['view'].icon, id: 'view', route: 'session/view' },
   ];
 
+  private readonly _dialog = inject(MatDialog);
+
   constructor() {
     const iconRegistry = inject(MatIconRegistry);
     const sanitizer = inject(DomSanitizer);
     iconRegistry.addSvgIcon('github', sanitizer.bypassSecurityTrustResourceUrl('./assets/github.svg'));
+  }
+
+  openAbout(): void {
+    this._dialog.open(AboutDialogComponent, { panelClass: 'about-dialog-panel' });
   }
 
   ngOnInit() {

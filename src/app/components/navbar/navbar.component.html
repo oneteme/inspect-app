@@ -86,6 +86,12 @@
     </div>
 
     <div class="nav-actions">
+      <button class="action-btn about-btn" (click)="openAbout()" matTooltip="À propos" aria-label="À propos">
+        <mat-icon>info_outline</mat-icon>
+      </button>
+
+      <div class="nav-divider"></div>
+
       <button class="env-trigger" [matMenuTriggerFor]="envMenu" [ngClass]="'env-' + getEnvClass(env.value)">
         <span class="env-letter">{{ env.value?.charAt(0) | uppercase }}</span>
         <span class="env-label">{{ env.value | uppercase }}</span>
