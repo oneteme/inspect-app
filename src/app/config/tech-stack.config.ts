@@ -28,17 +28,17 @@ export const APP_TECH_STACK: TechStackEntry[] = [
     { id: 'postgresql' },
 
     // ── Messaging & Intégrations ──
-    { id: 'kafka' },
+    // { id: 'kafka' },
     { id: 'smtp' },
     { id: 'ftp' },
     { id: 'ldap' },
 
     // ── Infrastructure ──
-    { id: 'docker' },
+    // { id: 'docker' },
     { id: 'kubernetes' },
-    { id: 'apachetomcat' },
-    { id: 'linux' },
-    { id: 'git' },
-    { id: 'github' },
+    // { id: 'apachetomcat' },
+    // { id: 'linux' },
+    // { id: 'git' },
+    // { id: 'github' },
     { id: 'gitlab' },
 ];

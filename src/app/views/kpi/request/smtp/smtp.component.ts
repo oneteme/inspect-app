@@ -7,7 +7,8 @@ import {SmtpRequestService} from "../../../../service/jquery/smtp-request.servic
 
 @Component({
   templateUrl: './smtp.component.html',
-  styleUrls: ['./smtp.component.scss']
+  styleUrls: ['./smtp.component.scss'],
+  host: { 'data-view': 'kpi-smtp' }
 })
 export class SmtpComponent implements OnInit {
   private readonly _smtpRequestService = inject(SmtpRequestService);

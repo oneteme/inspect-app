@@ -47,7 +47,6 @@ import {InstanceComponent} from './detail/instance/instance.component';
 import {InstanceTableComponent} from './detail/instance/_component/instance-table/instance-table.component';
 import {ParameterTableComponent} from "./detail/instance/_component/parameter-table/parameter-table.component";
 import {DashboardInstancesTableComponent} from './dashboard/components/instances-table/instances-table.component';
-import {DashboardCarouselComponent} from './dashboard/components/carousel/carousel.component';
 import {DashboardDetailViewComponent} from './dashboard/components/detail-view/detail-view.component';
 import {RequestKpiView} from "./kpi/request/request-kpi.view";
 import {RestComponent as RequestRestComponent} from "./kpi/request/rest/rest.component";
@@ -120,7 +119,6 @@ import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.compone
     InstanceTableComponent,
     ParameterTableComponent,
     DashboardInstancesTableComponent,
-    DashboardCarouselComponent,
     DashboardDetailViewComponent,
 
     // New

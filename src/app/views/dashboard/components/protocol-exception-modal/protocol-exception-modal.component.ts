@@ -11,7 +11,7 @@ import {EnvRouter} from "../../../../service/router.service";
 })
 export class ProtocolExceptionComponent {
 
-    private _router: EnvRouter = inject(EnvRouter);
+    private readonly _router: EnvRouter = inject(EnvRouter);
 
     errorStatus = {
         "ServerError": "5xx",

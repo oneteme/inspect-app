@@ -54,8 +54,7 @@ export class DashboardDetailViewComponent {
     }
 
     get selectedKey(): string | null {
-        for (const k of this.context.selectedInsights) return k;
-        return null;
+        return this.context.selectedInsights.values().next().value ?? null;
     }
 
     get isSessionInsight(): boolean {
@@ -76,10 +75,10 @@ export class DashboardDetailViewComponent {
 
     get sessionChartSubtitle(): string {
         switch (this.selectedKey) {
-            case 'BATCH':   return 'Job — taux d\'exceptions';
-            case 'VIEW':    return 'UI — taux d\'exceptions';
-            case 'STARTUP': return 'Startup — taux d\'exceptions';
-            default:        return 'Service — taux d\'exceptions';
+            case 'BATCH': return 'Tâches planifiées — taux d\'exceptions';
+            case 'VIEW': return 'Parcours client — taux d\'exceptions';
+            case 'STARTUP': return 'Initialisation — taux d\'exceptions';
+            default: return 'Services exposés — taux d\'exceptions';
         }
     }
 
@@ -87,7 +86,7 @@ export class DashboardDetailViewComponent {
         if (!this.selectedKey) return 'Clients';
         if (this.isSessionInsight) {
             const sessionLabels: Record<string, string> = {
-                SERVICE: 'Service', BATCH: 'Job', STARTUP: 'Startup', VIEW: 'UI', TEST: 'Test'
+                SERVICE: 'Services exposés', BATCH: 'Tâches planifiées', STARTUP: 'Initialisation', VIEW: 'Parcours client', TEST: 'Test'
             };
             return sessionLabels[this.selectedKey] ?? this.selectedKey;
         }
@@ -106,7 +105,13 @@ export class DashboardDetailViewComponent {
         if (key === 'SERVICE') return this.context.tabRequests['sessionExceptionsTable']?.isLoading !== false;
         if (key === 'BATCH')   return this.context.tabRequests['batchExceptionTable']?.isLoading !== false;
         if (key === 'VIEW')    return this.context.tabRequests['viewExceptionTable']?.isLoading !== false;
-        if (key === 'STARTUP' || key === 'TEST') return this.context.sessionCountLoading;
+        if (key === 'STARTUP' || key === 'TEST') return this.context.tabRequests['startupExceptionTable']?.isLoading !== false;
+        const protoDef = this.context.protocolDefs.find(p => p.key === key);
+        if (protoDef) {
+            if (this.context.chartRequests[protoDef.reqKey]?.isLoading !== false) return true;
+            // chart chargé : si taux 0 % on sait qu'il n'y a rien, sinon attendre topErrors
+            return this.context.sparklinePercs[key] !== 0 && this.context.kpiLoading;
+        }
         return this.context.kpiLoading;
     }
 
@@ -130,15 +135,19 @@ export class DashboardDetailViewComponent {
             case 'VIEW':
                 return this.context.tabRequests['viewExceptionTable']?.isLoading === false && !this.context.topViewErrors.length && !this.context.sessionWebErrors;
             case 'STARTUP':
-                return !this.context.sessionCountLoading && !this.context.sessionInitErrors && !this.context.divergentBranches.length;
+                return !this.context.sessionCountLoading && !this.context.sessionInitErrors;
             case 'TEST':
                 return !this.context.sessionCountLoading && !this.context.sessionTestErrors;
-            default:
-                return !this.context.kpiLoading && !this.context.topErrors[key]?.length;
+            default: {
+                const protoDef = this.context.protocolDefs.find(p => p.key === key);
+                const loaded = protoDef
+                    ? this.context.chartRequests[protoDef.reqKey]?.isLoading === false
+                    : !this.context.kpiLoading;
+                return loaded && this.context.sparklinePercs[key] === 0;
+            }
         }
     }
 
     trackByType(_: number, item: { type: string }): string { return item.type; }
-    trackByAppName(_: number, item: { appName: string }): string { return item.appName; }
     trackByKey(_: number, item: { key: string }): string { return item.key; }
 }

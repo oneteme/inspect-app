@@ -18,6 +18,7 @@ import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/p
 @Component({
   templateUrl: './detail-ftp.view.html',
   styleUrls: ['./detail-ftp.view.scss'],
+  host: { 'data-view': 'detail-ftp' }
 })
 export class DetailFtpView implements OnInit, OnDestroy {
   private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);

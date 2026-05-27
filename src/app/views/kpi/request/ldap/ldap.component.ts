@@ -7,7 +7,8 @@ import {LdapRequestService} from "../../../../service/jquery/ldap-request.servic
 
 @Component({
   templateUrl: './ldap.component.html',
-  styleUrls: ['./ldap.component.scss']
+  styleUrls: ['./ldap.component.scss'],
+  host: { 'data-view': 'kpi-ldap' }
 })
 export class LdapComponent implements OnInit {
   private readonly _ldapRequestService = inject(LdapRequestService);

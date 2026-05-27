@@ -3,7 +3,6 @@ export interface DashboardDetailContext {
     protocolDefs: any[];
     topErrors: Record<string, { type: string; count: number }[]>;
     kpiLoading: boolean;
-    serverHealthLoading: boolean;
     tabRequests: Record<string, any>;
     topSessionErrors: any[];
     topBatchErrors: any[];
@@ -18,8 +17,6 @@ export interface DashboardDetailContext {
     sessionInitErrors: number;
     sessionWebErrors: number;
     sessionTestErrors: number;
-    insightsAllClear: boolean;
-    divergentBranches: { branch: string; count: number; servers: string[] }[];
     chartRequests: Record<string, any>;
     sparklinePercs: Record<string, number>;
     sparklineTitles: Record<string, { title: string; subtitle: string }>;

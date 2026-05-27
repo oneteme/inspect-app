@@ -7,7 +7,8 @@ import {FtpRequestService} from "../../../../service/jquery/ftp-request.service"
 
 @Component({
   templateUrl: './ftp.component.html',
-  styleUrls: ['./ftp.component.scss']
+  styleUrls: ['./ftp.component.scss'],
+  host: { 'data-view': 'kpi-ftp' }
 })
 export class FtpComponent implements OnInit {
   private readonly _ftpRequestService = inject(FtpRequestService);
