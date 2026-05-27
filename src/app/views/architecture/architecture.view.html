@@ -1,5 +1,5 @@
-<header-page titleIcon="lan" ui-title="Architecture">
-    <form [formGroup]="serverFilterForm" class="header-filter md-2">
+<page-panel panelTitle="Filtres" panelIcon="filter_list">
+    <form [formGroup]="serverFilterForm" class="panel-filter">
         <mat-form-field appearance="outline" class="no-subscript">
             <mat-label>Période</mat-label>
             <mat-date-range-input [formGroup]="serverFilterForm.controls.dateRangePicker" [rangePicker]="picker">
@@ -17,11 +17,13 @@
                  <mat-option *ngFor="let name of appNames" [value]="name">{{ name }}</mat-option>
              </mat-select>
          </mat-form-field>
-        <button mat-mini-fab color="primary" (click)="search()">
-            <mat-icon matSuffix>search</mat-icon>
-        </button>
+        <div class="pp-actions">
+          <button mat-mini-fab color="primary" (click)="search()">
+              <mat-icon matSuffix>search</mat-icon>
+          </button>
+        </div>
     </form>
-</header-page>
+</page-panel>
 <div id="container">
     <div id="fixed-width-container">
         <div [hidden]="!syntheseIsLoading" style="height: 100%"><div class="loading">Loading...</div></div>

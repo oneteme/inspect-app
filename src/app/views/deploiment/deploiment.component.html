@@ -1,4 +1,4 @@
-<header-page [iconOutlined]="true" [titleIcon]="MAPPING_TYPE['deploiment'].icon" [ui-title]="MAPPING_TYPE['deploiment'].title" [ui-subtitle]="MAPPING_TYPE['deploiment'].subtitle">
+<page-panel panelTitle="Statistiques" panelIcon="dns">
   <div class="stats-container">
     <div class="stat-item stat-online">
       <div class="stat-icon-wrapper">
@@ -42,7 +42,7 @@
       </div>
     </div>
   </div>
-</header-page>
+</page-panel>
 
 <jquery-table class="flex-table" [config]="tableConfig" [data]="rawRows" [isLoading]="isLoading">
 

@@ -1,4 +1,4 @@
-import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy} from '@angular/core';
+import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
 import {combineLatest, finalize, forkJoin, map, Observable, of, Subscription, switchMap, tap} from 'rxjs';
 import {DatePipe, DecimalPipe, Location} from '@angular/common';
@@ -23,13 +23,14 @@ import {
 import {SmtpRequestService} from 'src/app/service/jquery/smtp-request.service';
 import {InstanceTraceService} from 'src/app/service/jquery/instance-trace.service';
 import {DashboardDetailContext} from './components/detail-view/detail-view.model';
+import {PageTitleService} from '../../service/page-title.service';
 
 @Component({
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DashboardComponent implements OnDestroy {
+export class DashboardComponent implements OnInit, OnDestroy {
     constants = Constants;
 
     readonly protocolDefs: { key: string; reqKey: string; label: string; chartConfig: any }[] = [
@@ -56,6 +57,7 @@ export class DashboardComponent implements OnDestroy {
     private readonly _decimalPipe = inject(DecimalPipe);
     private readonly _instanceTraceService = inject(InstanceTraceService);
     private readonly _cdr = inject(ChangeDetectorRef);
+    private readonly _pageTitleService = inject(PageTitleService);
 
     sparklineTitles: {
         rest: {title: string, subtitle: string},
@@ -925,6 +927,14 @@ export class DashboardComponent implements OnDestroy {
         };
     }
 
+    ngOnInit(): void {
+        this._pageTitleService.set({
+            icon: Constants.MAPPING_TYPE['dashboard']?.icon || 'deployed_code',
+            title: Constants.MAPPING_TYPE['dashboard']?.title || 'Vue d\'ensemble',
+            iconOutlined: true
+        });
+    }
+
     ngOnDestroy(): void {
         this.subscriptions.forEach(s => s.unsubscribe());
         this.chartSubscriptions.forEach(s => s.unsubscribe());
@@ -934,5 +944,6 @@ export class DashboardComponent implements OnDestroy {
         if(this._dialog){
             this._dialog.closeAll();
         }
+        this._pageTitleService.clear();
     }
 }

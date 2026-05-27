@@ -8,6 +8,7 @@ import {EnvRouter} from "../../../service/router.service";
 import {IPeriod, QueryParams} from "../../../model/conf.model";
 import {app, makeDatePeriod} from "../../../../environments/environment";
 import {Constants} from "../../constants";
+import {PageTitleService} from "../../../service/page-title.service";
 import {RestSessionService} from "../../../service/jquery/rest-session.service";
 import {MainSessionService} from "../../../service/jquery/main-session.service";
 
@@ -23,6 +24,7 @@ export class SessionKpiView implements OnInit, OnDestroy {
   private readonly _viewContainerRef = inject(ViewContainerRef);
   private readonly _restSessionService = inject(RestSessionService);
   private readonly _mainSessionService = inject(MainSessionService);
+  private readonly _pageTitleService = inject(PageTitleService);
 
   private readonly _location = inject(Location);
 
@@ -51,6 +53,12 @@ export class SessionKpiView implements OnInit, OnDestroy {
       queryParams: this._activatedRoute.queryParams}).subscribe({
       next: (v: { params: Params, queryParams: Params }) => {
         this.params.type = v.params.session_type;
+        this._pageTitleService.set({
+          icon: 'finance_mode',
+          iconOutlined: true,
+          title: Constants.MAPPING_TYPE[this.params.type]?.title || this.params.type,
+          subtitle: 'Tableau de bord'
+        });
         this.params.queryParams = new QueryParams(new IPeriod(v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(0, 1).start, v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(0, 1).end), v.queryParams.env || app.defaultEnv,null,!v.queryParams.host ? [] : Array.isArray(v.queryParams.host) ? v.queryParams.host : [v.queryParams.host])
         this.patchDateValue(this.params.queryParams.period.start, new Date(this.params.queryParams.period.end.getFullYear(), this.params.queryParams.period.end.getMonth(), this.params.queryParams.period.end.getDate() - 1));
         this.getHosts();
@@ -67,6 +75,7 @@ export class SessionKpiView implements OnInit, OnDestroy {
     if(this.hostSubscription) {
       this.hostSubscription.unsubscribe();
     }
+    this._pageTitleService.clear();
   }
 
   onChangeEnd() {

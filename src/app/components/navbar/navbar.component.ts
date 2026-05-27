@@ -11,6 +11,8 @@ import { app } from 'src/environments/environment';
 import { Constants } from '../../views/constants';
 import { EnvRouter } from '../../service/router.service';
 import { InstanceService } from '../../service/jquery/instance.service';
+import { PageTitleService } from '../../service/page-title.service';
+import { PagePanelService } from '../../service/page-panel.service';
 
 interface SubNavItem {
   label: string;
@@ -38,6 +40,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _service = inject(InstanceService);
   private readonly _envRouter = inject(EnvRouter);
+  private readonly _panelSvc = inject(PagePanelService);
+  readonly pageTitle$ = inject(PageTitleService).config$;
+  readonly hasPanel$    = this._panelSvc.hasPanel$;
+  readonly isPanelOpen$ = this._panelSvc.isOpen$;
+  readonly panelIcon$   = this._panelSvc.icon$;
 
   @ViewChild('mainTrigger') mainMenuTrigger: MatMenuTrigger;
 
@@ -147,5 +154,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
     const known = ['dev', 'ppd', 'prv', 'rec', 'pg', 'rcc'];
     return known.includes(env) ? env : 'other';
   }
+
+  onFilterEnter(): void { this._panelSvc.open(); }
+  onFilterClick(): void { this._panelSvc.closeIfNotJustOpened(); }
+  onNavLeave(): void  { this._panelSvc.scheduleClose(200); }
+  onNavEnter(): void  { this._panelSvc.cancelClose(); }
 
 }

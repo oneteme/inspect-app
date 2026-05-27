@@ -1,0 +1,109 @@
+﻿// Variables
+$navbar-h:   56px;
+$bar-bg:     #ffffff;
+$border:     rgba(15, 23, 42, 0.1);
+$shadow:     0 6px 24px rgba(15, 23, 42, 0.10);
+$transition: 0.24s cubic-bezier(0.4, 0, 0.2, 1);
+$primary:    #2563eb;
+
+// Host
+:host {
+    display: contents; // le composant ne prend pas de place dans le flux
+}
+
+// Bandeau
+.pp-bar {
+    position: fixed;
+    top: $navbar-h;
+    left: 0;
+    right: 0;
+    z-index: 990;
+    background: $bar-bg;
+    border-bottom: 1px solid $border;
+    box-shadow: $shadow;
+
+    // Slide-down depuis le bord haut
+    transform: translateY(-100%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform $transition, opacity $transition;
+
+    &.pp-bar--open {
+        transform: translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+    }
+}
+
+// Corps
+.pp-body {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 16px;
+    padding: 10px 40px 14px;
+
+    // Scrollbar si overflow
+    overflow-x: auto;
+    &::-webkit-scrollbar { height: 3px; }
+    &::-webkit-scrollbar-thumb { background: rgba(15,23,42,.15); border-radius: 2px; }
+
+    // Conteneur générique de filtres : doit passer en row
+    ::ng-deep .panel-filter {
+        display: contents; // les enfants remontent directement dans .pp-body flex
+    }
+
+    ::ng-deep .pp-filters {
+        display: contents;
+    }
+
+    // mat-form-field : largeur adaptative en mode horizontal
+    ::ng-deep mat-form-field {
+        width: auto !important;
+        min-width: 180px;
+        flex: 1 1 200px;
+        max-width: 260px;
+        flex-shrink: 0;
+    }
+
+    // Groupe de boutons aligné en bas
+    ::ng-deep .pp-actions {
+        display: flex;
+        gap: 8px;
+        align-items: flex-end;
+        padding-bottom: 4px;
+        flex-shrink: 0;
+    }
+
+    // Info instance (supervision) : compact pill inline
+    ::ng-deep .pp-instance-info {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 4px 12px;
+        background: rgba(37, 99, 235, 0.05);
+        border: 1px solid rgba(37, 99, 235, 0.15);
+        border-radius: 8px;
+        align-self: flex-end;
+        margin-bottom: 4px;
+        flex-shrink: 0;
+    }
+
+    ::ng-deep .pp-instance-name {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-weight: 600;
+        font-size: 13px;
+        color: #0f172a;
+        white-space: nowrap;
+    }
+
+    ::ng-deep .pp-instance-badges {
+        display: flex;
+        gap: 4px;
+        align-items: center;
+    }
+}

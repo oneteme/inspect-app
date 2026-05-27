@@ -20,6 +20,7 @@ import {MatSnackBar} from "@angular/material/snack-bar";
 import {
   ClientInstanceSelectorDialogComponent
 } from "./client-instance-selector-dialog/client-instance-selector-dialog.component";
+import {PageTitleService} from '../../../../service/page-title.service';
 
 @Component({
   templateUrl: './client-supervision.view.html',
@@ -48,6 +49,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   private readonly _decimalPipe: DecimalPipe = inject(DecimalPipe);
   private readonly _datePipe = inject(DatePipe);
   private readonly _snackBar = inject(MatSnackBar);
+  private readonly _pageTitleService = inject(PageTitleService);
   private readonly $destroy = new Subject<void>();
 
 
@@ -158,12 +160,14 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   activityDisplayType: 'TRACE' | 'ATTEMPT' | 'REPORT' = 'TRACE';
 
   ngOnInit() {
+    this._pageTitleService.set({ icon: 'browse_activity', iconOutlined: true, title: 'Supervision' });
     this.onRouteChange();
   }
 
   ngOnDestroy() {
     this.$destroy.next();
     this.$destroy.complete();
+    this._pageTitleService.clear();
   }
 
   onRouteChange(){
@@ -257,6 +261,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
         return EMPTY;
       }
       this.instance = res;
+      this._pageTitleService.set({ icon: 'browse_activity', iconOutlined: true, title: this.instance.name });
       this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}&app_name=${this.instance.name}&_reload=${new Date().getTime()}`);
       return forkJoin([
         this.instance.end ? of([]) : this._instanceTraceService.getLastInstanceTrace({instance: [this.params.instance]}),

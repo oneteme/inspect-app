@@ -13,6 +13,7 @@
 .inline-spin { display: inline-flex; }
 
 .db-grid {
+  padding: .4em .2em 0;
   display: grid;
   grid-template-columns: clamp(300px, 22%, 450px) 1fr;
   gap: 1em;

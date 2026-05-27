@@ -20,6 +20,7 @@ import {DatabaseRequestService} from "../../../service/jquery/database-request.s
 import {FtpRequestService} from "../../../service/jquery/ftp-request.service";
 import {SmtpRequestService} from "../../../service/jquery/smtp-request.service";
 import {LdapRequestService} from "../../../service/jquery/ldap-request.service";
+import {PageTitleService} from "../../../service/page-title.service";
 
 
 
@@ -50,6 +51,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
 
 
   REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
+  private readonly _pageTitleService = inject(PageTitleService);
   nameDataList: any[];
   displayedColumns: string[] = ['rangestatus', 'app_name', 'method/path', 'query', 'start', 'durée', 'user'];
   requests: any[];
@@ -116,6 +118,12 @@ export class SearchRequestView implements OnInit, OnDestroy {
       ]).subscribe({
       next: ([params, queryParams]) => {
           this.params.type = params.type || 'rest';
+          this._pageTitleService.set({
+            icon: Constants.REQUEST_MAPPING_TYPE[this.params.type]?.icon || 'api',
+            iconOutlined: true,
+            title: Constants.REQUEST_MAPPING_TYPE[this.params.type]?.title || this.params.type,
+            subtitle: Constants.REQUEST_MAPPING_TYPE[this.params.type]?.subtitle
+          });
           if(queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env ||  app.defaultEnv,null,!queryParams.host ? [] : Array.isArray(queryParams.host) ? queryParams.host : [queryParams.host],!queryParams.rangestatus ? []: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] )
           if(!queryParams.start && !queryParams.end){
             let period;
@@ -147,6 +155,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
     this.subscriptions.forEach(s => s.unsubscribe());
     this.hostSubscription.unsubscribe();
     this.RequestSubscription.unsubscribe();
+    this._pageTitleService.clear();
   }
 
   search() {
