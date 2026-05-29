@@ -33,14 +33,6 @@ export class JdbcComponent implements OnInit {
         bottom: 0,
         left: 'center'
       },
-      series: [{
-        label: {
-          show: false             // pas de datalabels sur les slices
-        },
-        labelLine: {
-          show: false             // pas de lignes de labels non plus
-        }
-      }],
       tooltip: {
         formatter: (params: any) =>
           `${params.name} : <b>${params.value.toLocaleString('fr-FR')}</b> (${params.percent}%)`

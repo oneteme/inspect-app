@@ -1,4 +1,5 @@
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {PageTitleService} from '../../../../service/page-title.service';
 
 import {ActivatedRoute} from '@angular/router';
 import {catchError, combineLatest, finalize, forkJoin, of, Subject, switchMap, takeUntil} from "rxjs";
@@ -28,6 +29,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
   private readonly durationPipe = new DurationPipe();
   private readonly $destroy = new Subject<void>();
   private readonly _dialog = inject(MatDialog);
+  private readonly _pageTitleService = inject(PageTitleService);
 
   tabs: TabData[] = [];
   selectedTabIndex: number = 0;
@@ -76,6 +78,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([params, queryParams]) => {
         this.params = {idJdbc: params.id_request, env: queryParams.env || app.defaultEnv};
+        this._pageTitleService.set({ icon: 'database', iconOutlined: true, title: 'Flux JDBC • ' + params.id_request, subtitle: 'Communications externes' });
         this.getRequest();
       }
     });
@@ -226,6 +229,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.$destroy.next();
     this.$destroy.complete();
+    this._pageTitleService.clear();
   }
 
   getDate(start: number) {

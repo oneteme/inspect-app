@@ -21,6 +21,7 @@ import {
 } from "./server-instance-selector-dialog/server-instance-selector-dialog.component";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
+import {PageTitleService} from '../../../../service/page-title.service';
 
 @Component({
   templateUrl: './server-supervision.view.html',
@@ -48,6 +49,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   private readonly _decimalPipe: DecimalPipe = inject(DecimalPipe);
   private readonly $destroy = new Subject<void>();
   private readonly _snackBar = inject(MatSnackBar);
+  private readonly _pageTitleService = inject(PageTitleService);
   private readonly _ngZone = inject(NgZone);
 
   readonly formGroup = new FormGroup({
@@ -193,12 +195,14 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   selectedPeriod: Partial<{start: Date, end: Date}>;
 
   ngOnInit() {
+    this._pageTitleService.set({ icon: 'browse_activity', iconOutlined: true, title: 'Supervision', subtitle: 'Serveur' });
     this.onRouteChange();
   }
 
   ngOnDestroy() {
     this.$destroy.next();
     this.$destroy.complete();
+    this._pageTitleService.clear();
   }
 
   ngAfterViewInit() {
@@ -292,6 +296,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
         return EMPTY;
       }
       this.instance = res;
+      this._pageTitleService.set({ icon: 'browse_activity', iconOutlined: true, title: this.instance.name, subtitle: 'Supervision • Serveur' });
       return forkJoin([
         this.instance.end ? of([]) : this._instanceTraceService.getLastInstanceTrace({instance: [this.params.instance]}),
         this._machineUsageService.getResourceMachineByPeriod({instance: this.params.instance, start: this.params.start, end: this.params.end}),

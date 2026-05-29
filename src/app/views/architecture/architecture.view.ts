@@ -14,6 +14,7 @@ import {InstanceService} from "../../service/jquery/instance.service";
 import {MainSessionService} from "../../service/jquery/main-session.service";
 import {NumberFormatterPipe} from "src/app/shared/pipe/number.pipe";
 import {SizePipe} from "../../shared/pipe/size.pipe";
+import {PageTitleService} from '../../service/page-title.service';
 
 @Component({
     templateUrl: './architecture.view.html',
@@ -23,6 +24,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
     private _treeService = inject(TreeService);
     private _instanceService = inject(InstanceService);
     private _router = inject(EnvRouter);
+    private _pageTitleService = inject(PageTitleService);
     private _activatedRoute = inject(ActivatedRoute);
     private _location = inject(Location);
     private _numberFormatter = inject(NumberFormatterPipe);
@@ -68,6 +70,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
     statsCards: { type: string; label: string; count: number; icon: string; color: string }[] = [];
 
     ngOnInit() {
+        this._pageTitleService.set({ icon: 'lan', title: 'Architecture' });
         this.subscriptions.push(combineLatest({
             params: this._activatedRoute.params,
             queryParams: this._activatedRoute.queryParams
@@ -219,6 +222,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
         if (this.resizeSubscription) {
             this.resizeSubscription.unsubscribe();
         }
+        this._pageTitleService.clear();
     }
 
     patchDateValue(start: Date, end: Date) {

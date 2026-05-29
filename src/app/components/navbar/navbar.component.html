@@ -1,4 +1,4 @@
-<nav class="navbar">
+<nav class="navbar" (mouseleave)="onNavLeave()" (mouseenter)="onNavEnter()">
   <div class="navbar-glow"></div>
 
   <div class="navbar-content">
@@ -83,6 +83,27 @@
         </ng-container>
       </mat-menu>
 
+      <ng-container *ngIf="pageTitle$ | async as pt">
+        <div class="nav-page-title">
+          <mat-icon class="npt-icon" [ngClass]="{'material-symbols-outlined': pt.iconOutlined}">{{ pt.icon }}</mat-icon>
+          <div class="npt-text">
+            <span class="npt-label">{{ pt.title }}</span>
+            <span class="npt-sub" *ngIf="pt.subtitle">{{ pt.subtitle }}</span>
+          </div>
+        </div>
+      </ng-container>
+
+      <ng-container *ngIf="hasPanel$ | async">
+        <button class="nav-filter-btn"
+                [class.nav-filter-btn--open]="isPanelOpen$ | async"
+                (mouseenter)="onFilterEnter()"
+                (click)="onFilterClick()"
+                [matTooltip]="(isPanelOpen$ | async) ? 'Masquer les filtres' : 'Afficher les filtres'">
+          <mat-icon class="nfb-icon material-symbols-outlined">filter_list</mat-icon>
+          <mat-icon class="nfb-chevron">expand_more</mat-icon>
+        </button>
+      </ng-container>
+
     </div>
 
     <div class="nav-actions">
@@ -105,8 +126,6 @@
           <span>{{ e | uppercase }}</span>
         </button>
       </mat-menu>
-
-      <div class="nav-divider"></div>
 
       <a
         class="action-btn github-btn"

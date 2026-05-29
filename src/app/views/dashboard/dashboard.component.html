@@ -1,6 +1,5 @@
-﻿<header-page [iconOutlined]="true" [titleIcon]="MAPPING_TYPE['dashboard'].icon" [ui-title]="MAPPING_TYPE['dashboard'].title">
-
-  <form [formGroup]="serverFilterForm" class="header-filter md-2">
+﻿<page-panel panelTitle="Filtres" panelIcon="calendar_month">
+  <form [formGroup]="serverFilterForm" class="panel-filter">
     <mat-form-field class="no-subscript" appearance="outline">
       <mat-label>Période</mat-label>
       <mat-date-range-input [formGroup]="serverFilterForm.controls.dateRangePicker" [rangePicker]="picker">
@@ -11,11 +10,13 @@
       <mat-date-range-picker #picker></mat-date-range-picker>
     </mat-form-field>
 
-    <button mat-mini-fab color="primary" (click)="search()">
-      <mat-icon matSuffix>search</mat-icon>
-    </button>
+    <div class="pp-actions">
+      <button mat-mini-fab color="primary" (click)="search()">
+        <mat-icon matSuffix>search</mat-icon>
+      </button>
+    </div>
   </form>
-</header-page>
+</page-panel>
 
 <div class="db-grid">
   <!-- Colonne principale : liste des protocoles -->
@@ -97,7 +98,6 @@
       <div class="sb-block sb-distribution-block sb-skel-block">
         <div class="sbd-title">Session</div>
         <ng-container *ngFor="let _ of skeletonRows">
-          <div class="sbd-skel-dot"></div>
           <div class="sbd-skel-main">
             <div class="sbd-skel-top">
               <div class="sbd-skel-label"></div>
@@ -118,7 +118,6 @@
       </div>
       <ng-container *ngFor="let s of sessionSummaries">
         <ng-container *ngIf="s.loading">
-          <div class="sbd-skel-dot"></div>
           <div class="sbd-skel-main">
             <div class="sbd-skel-top">
               <div class="sbd-skel-label"></div>
@@ -159,7 +158,6 @@
       </div>
       <ng-container *ngFor="let p of protocolSummaries">
         <ng-container *ngIf="p.loading">
-          <div class="sbd-skel-dot"></div>
           <div class="sbd-skel-main">
             <div class="sbd-skel-top">
               <div class="sbd-skel-label"></div>

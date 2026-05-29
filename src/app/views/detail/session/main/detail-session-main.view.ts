@@ -1,4 +1,5 @@
 import {Component, inject, OnDestroy, OnInit} from "@angular/core";
+import {PageTitleService} from "../../../../service/page-title.service";
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {EnvRouter} from "../../../../service/router.service";
@@ -24,6 +25,7 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
     private readonly $destroy = new Subject<void>();
     private readonly _dialog = inject(MatDialog);
     protected readonly _router = inject(EnvRouter);
+    private readonly _pageTitleService = inject(PageTitleService);
     MAPPING_TYPE = Constants.MAPPING_TYPE;
     session: MainSessionView;
     completedSession: MainSessionView;
@@ -40,6 +42,7 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
             next: ([params, queryParams]) => {
                 this.env = queryParams.env || app.defaultEnv;
                 this.type = params.type_main;
+                this._pageTitleService.set({ icon: Constants.MAPPING_TYPE[params.type_main]?.icon || 'manufacturing', iconOutlined: true, title: (Constants.MAPPING_TYPE[params.type_main]?.title || params.type_main) + ' • ' + params.id_session, subtitle: Constants.MAPPING_TYPE[params.type_main]?.subtitle });
                 this.getSession(params.id_session);
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}`)
             }
@@ -86,6 +89,7 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.$destroy.next();
         this.$destroy.complete();
+        this._pageTitleService.clear();
     }
 
     onClickPulse() {

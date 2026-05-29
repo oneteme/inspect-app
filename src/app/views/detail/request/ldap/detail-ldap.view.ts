@@ -1,4 +1,5 @@
 import {Component, inject, OnDestroy, OnInit} from "@angular/core";
+import {PageTitleService} from '../../../../service/page-title.service';
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
@@ -33,6 +34,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
     private readonly durationPipe = new DurationPipe();
     private readonly $destroy = new Subject<void>();
     private readonly _dialog = inject(MatDialog);
+    private readonly _pageTitleService = inject(PageTitleService);
 
     private params: Partial<{idLdap: string, env: string}> = {};
 
@@ -60,6 +62,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
         ]).subscribe({
             next: ([params, queryParams]) => {
                 this.params = {idLdap: params.id_request, env: queryParams.env || app.defaultEnv};
+        this._pageTitleService.set({ icon: 'user_attributes', iconOutlined: true, title: 'Flux LDAP • ' + params.id_request, subtitle: 'Communications externes' });
                 this.getRequest();
             }
         });
@@ -91,6 +94,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.$destroy.next();
         this.$destroy.complete();
+        this._pageTitleService.clear();
     }
 
     getRequest() {

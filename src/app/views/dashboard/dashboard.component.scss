@@ -13,6 +13,7 @@
 .inline-spin { display: inline-flex; }
 
 .db-grid {
+  padding: .4em .2em 0;
   display: grid;
   grid-template-columns: clamp(300px, 22%, 450px) 1fr;
   gap: 1em;
@@ -327,7 +328,7 @@
   overflow: hidden;
   padding: .65em .9em .7em;
   display: grid;
-  grid-template-columns: 6px 1fr max-content;
+  grid-template-columns: 1fr max-content;
   row-gap: 7px;
   column-gap: 10px;
 }
@@ -335,7 +336,7 @@
 .sb-distribution {
   padding: .65em .9em .7em;
   display: grid;
-  grid-template-columns: 6px 1fr max-content;
+  grid-template-columns: 1fr max-content;
   row-gap: 7px;
   column-gap: 10px;
   border-bottom: 1px solid rgba(34, 36, 38, .07);
@@ -376,17 +377,6 @@
 .sbd-row {
   display: contents;
 
-  &::before {
-    content: '';
-    align-self: center;
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
-    background: transparent;
-    transition: background .15s, transform .15s;
-    transform: scale(0);
-  }
-
   &.sbd-row-clickable > * {
     cursor: pointer;
     transition: opacity .1s;
@@ -395,7 +385,6 @@
   &.sbd-row-clickable:hover > * { opacity: .7; }
 
   &.sbd-row-selected {
-    &::before { background: #2185d0; transform: scale(1); }
     .sbd-label { opacity: 1; color: rgba(0, 0, 0, .82); }
     .sbd-rate  { opacity: 1; }
     .sbd-count { opacity: .75; }
@@ -627,11 +616,6 @@
 
 .sb-skel-block {
   pointer-events: none;
-}
-
-.sbd-skel-dot {
-  width: 6px;
-  align-self: center;
 }
 
 .sbd-skel-main {

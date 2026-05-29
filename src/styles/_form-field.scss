@@ -5,7 +5,17 @@
 
 .header-filter,
 .filter-container,
-header-page .right {
+header-page .right,
+page-panel .pp-body {
+  .mat-mdc-form-field {
+    --mdc-outlined-text-field-container-height: 46px;
+  }
+
+  .mat-mdc-text-field-wrapper.mdc-text-field--outlined .mat-mdc-form-field-infix {
+    padding-top: 11px !important;
+    padding-bottom: 11px !important;
+    min-height: 46px !important;
+  }
 
   // Contour (les 3 pièces de la bordure)
   .mdc-text-field--outlined .mdc-notched-outline__leading,

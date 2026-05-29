@@ -1,3 +1,10 @@
-.tab-panel {
-  height: calc(100vh - 56px - 7px - 200px - 1.5em);
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
+
+.tabs-container {
+  flex: 1 1 0;
+}
+

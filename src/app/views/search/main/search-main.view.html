@@ -1,8 +1,8 @@
-<header-page [iconOutlined]="true" [titleIcon]="MAPPING_TYPE[type].icon" [ui-title]="MAPPING_TYPE[type].title" [ui-subtitle]="MAPPING_TYPE[type].subtitle">
-  <div class="filter-container md-3" [formGroup]="serverFilterForm">
+<page-panel panelTitle="Filtres" panelIcon="filter_list">
+  <div class="panel-filter md-3" [formGroup]="serverFilterForm">
     <advanced-filter-recap [filters]="advancedParams" (filterRemoved)="handleRemovedFilter($event)"
                            (focusField)="focusField($event)"></advanced-filter-recap>
-    <mat-form-field style="width: 315px" class="no-subscript" appearance="outline">
+    <mat-form-field style="width: 310px" class="no-subscript period-wide" appearance="outline">
       <mat-label>Période</mat-label>
       <mat-date-range-input [formGroup]="serverFilterForm.controls.dateRangePicker" [rangePicker]="picker">
         <input matStartDate formControlName="start" placeholder="Start date" (dateChange)="onChangeStart($event)">
@@ -35,19 +35,21 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
-    <button mat-mini-fab color="primary" (click)="search()">
-      <mat-icon matSuffix>search</mat-icon>
-    </button>
-    <advanced-filter-trigger [pageName]="'session-main'"
-                             [filterConfig]="filterConstants.SEARCH[type]"
-                             [focusField]="focusFieldName"
-                             [additionalFilter]="{'start.ge':queryParams.period.start?.toISOString(),'start.lt': queryParams.period.end?.toISOString()}"
-                             (handleDialogclose)="handledialogclose($event)"
-                             (handlePresetSelection)="handlePresetSelection($event)"
-                             (handlePresetSelectionReset)="handlePresetSelectionReset()"
-                             (handleFilterReset)="handleFilterReset()"></advanced-filter-trigger>
+    <div class="pp-actions">
+      <button mat-mini-fab color="primary" (click)="search()">
+        <mat-icon matSuffix>search</mat-icon>
+      </button>
+      <advanced-filter-trigger [pageName]="'session-main'"
+                               [filterConfig]="filterConstants.SEARCH[type]"
+                               [focusField]="focusFieldName"
+                               [additionalFilter]="{'start.ge':queryParams.period.start?.toISOString(),'start.lt': queryParams.period.end?.toISOString()}"
+                               (handleDialogclose)="handledialogclose($event)"
+                               (handlePresetSelection)="handlePresetSelection($event)"
+                               (handlePresetSelectionReset)="handlePresetSelectionReset()"
+                               (handleFilterReset)="handleFilterReset()"></advanced-filter-trigger>
+    </div>
   </div>
-</header-page>
+</page-panel>
 
 <jquery-table class="flex-table"
     [config]="tableConfig"

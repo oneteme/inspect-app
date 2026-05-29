@@ -11,6 +11,8 @@ import { app } from 'src/environments/environment';
 import { Constants } from '../../views/constants';
 import { EnvRouter } from '../../service/router.service';
 import { InstanceService } from '../../service/jquery/instance.service';
+import { PageTitleService } from '../../service/page-title.service';
+import { PagePanelService } from '../../service/page-panel.service';
 
 interface SubNavItem {
   label: string;
@@ -38,6 +40,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _service = inject(InstanceService);
   private readonly _envRouter = inject(EnvRouter);
+  private readonly _panelSvc = inject(PagePanelService);
+  readonly pageTitle$ = inject(PageTitleService).config$;
+  readonly hasPanel$    = this._panelSvc.hasPanel$;
+  readonly isPanelOpen$ = this._panelSvc.isOpen$;
 
   @ViewChild('mainTrigger') mainMenuTrigger: MatMenuTrigger;
 
@@ -56,11 +62,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
       icon: Constants.MAPPING_TYPE['request'].icon,
       id: 'request',
       children: [
-        { label: Constants.REQUEST_MAPPING_TYPE['rest'].title, icon: Constants.REQUEST_MAPPING_TYPE['rest'].icon, id: 'rest', route: 'request/rest', kpiRoute: 'kpi/request/rest' },
-        { label: Constants.REQUEST_MAPPING_TYPE['jdbc'].title, icon: Constants.REQUEST_MAPPING_TYPE['jdbc'].icon, id: 'jdbc', route: 'request/jdbc', kpiRoute: 'kpi/request/jdbc' },
-        { label: Constants.REQUEST_MAPPING_TYPE['ftp'].title, icon: Constants.REQUEST_MAPPING_TYPE['ftp'].icon, id: 'ftp', route: 'request/ftp', kpiRoute: 'kpi/request/ftp' },
-        { label: Constants.REQUEST_MAPPING_TYPE['smtp'].title, icon: Constants.REQUEST_MAPPING_TYPE['smtp'].icon, id: 'smtp', route: 'request/smtp', kpiRoute: 'kpi/request/smtp' },
-        { label: Constants.REQUEST_MAPPING_TYPE['ldap'].title, icon: Constants.REQUEST_MAPPING_TYPE['ldap'].icon, id: 'ldap', route: 'request/ldap', kpiRoute: 'kpi/request/ldap' },
+        { label: Constants.REQUEST_MAPPING_TYPE['rest'].title.replace(/^Flux\s+/i, ''), icon: Constants.REQUEST_MAPPING_TYPE['rest'].icon, id: 'rest', route: 'request/rest', kpiRoute: 'kpi/request/rest' },
+        { label: Constants.REQUEST_MAPPING_TYPE['jdbc'].title.replace(/^Flux\s+/i, ''), icon: Constants.REQUEST_MAPPING_TYPE['jdbc'].icon, id: 'jdbc', route: 'request/jdbc', kpiRoute: 'kpi/request/jdbc' },
+        { label: Constants.REQUEST_MAPPING_TYPE['ftp'].title.replace(/^Flux\s+/i, ''), icon: Constants.REQUEST_MAPPING_TYPE['ftp'].icon, id: 'ftp', route: 'request/ftp', kpiRoute: 'kpi/request/ftp' },
+        { label: Constants.REQUEST_MAPPING_TYPE['smtp'].title.replace(/^Flux\s+/i, ''), icon: Constants.REQUEST_MAPPING_TYPE['smtp'].icon, id: 'smtp', route: 'request/smtp', kpiRoute: 'kpi/request/smtp' },
+        { label: Constants.REQUEST_MAPPING_TYPE['ldap'].title.replace(/^Flux\s+/i, ''), icon: Constants.REQUEST_MAPPING_TYPE['ldap'].icon, id: 'ldap', route: 'request/ldap', kpiRoute: 'kpi/request/ldap' },
       ]
     },
     { label: Constants.MAPPING_TYPE['rest'].title, icon: Constants.MAPPING_TYPE['rest'].icon, id: 'rest', route: 'session/rest', kpiRoute: 'kpi/session/rest' },
@@ -147,5 +153,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
     const known = ['dev', 'ppd', 'prv', 'rec', 'pg', 'rcc'];
     return known.includes(env) ? env : 'other';
   }
+
+  onFilterEnter(): void { this._panelSvc.open(); }
+  onFilterClick(): void { this._panelSvc.closeIfNotJustOpened(); }
+  onNavLeave(): void  { this._panelSvc.scheduleClose(200); }
+  onNavEnter(): void  { this._panelSvc.cancelClose(); }
 
 }

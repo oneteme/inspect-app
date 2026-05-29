@@ -16,6 +16,7 @@ import {
   ServerConfig, ServerType, TreeGraph
 } from '../../model/tree.model';
 import {Constants} from "../constants";
+import {PageTitleService} from '../../service/page-title.service';
 
 
 @Component({
@@ -31,6 +32,7 @@ export class TreeView implements OnDestroy {
   private _location = inject(Location);
   private _treeService = inject(TreeService);
   private _cdr = inject(ChangeDetectorRef);
+  private readonly _pageTitleService = inject(PageTitleService);
   subscriptions: Subscription[] = [];
   id: string;
   tree: any;
@@ -80,6 +82,12 @@ export class TreeView implements OnDestroy {
 
 
   constructor() {
+    this._pageTitleService.set({
+      icon: 'lan',
+      iconOutlined: true,
+      title: 'Arbre d\'Appels',
+      subtitle: Constants.MAPPING_TYPE['tree']?.subtitle
+    });
     this.subscriptions.push(combineLatest([
       this._activatedRoute.params,
       this._activatedRoute.data,
@@ -761,6 +769,7 @@ export class TreeView implements OnDestroy {
   ngOnDestroy() {
     this.tree?.disconnectObserver();
     this.subscriptions.forEach(s => s.unsubscribe());
+    this._pageTitleService.clear();
   }
 
 

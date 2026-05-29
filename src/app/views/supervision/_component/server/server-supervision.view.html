@@ -1,26 +1,7 @@
-<header-page [templateTitle]="title" [iconOutlined]="true" titleIcon="browse_activity" [templateSubTitle]="subtitle">
-  <ng-template #title>
-    <div style="display: flex; align-items: center; gap: 1.5em">
-      {{ (instance?.name | titleCase) || 'Aucune instance sélectionnée' }}
-      <app-status-indicator *ngIf="!isLoading && instance"
-                            [params]="{id: instance.id, end: instance.end, configuration: instance.configuration, lastTrace: lastTrace, date: date.getTime()}"></app-status-indicator>
-    </div>
-
-  </ng-template>
-  <ng-template #subtitle>
-    <div style="display: flex; gap: 0.5em">
-      <app-version-badge
-              [backgroundColor]="'#22577a'"
-              [configuration]="instance?.configuration"
-              [collector]="instance?.collector"
-              [version]="instance?.version"
-              [name]="instance?.name"/>
-      <app-branch-chip [branch]="instance?.branch" [hash]="instance?.hash"/>
-      <label-chip *ngIf="!instance?.version" color="gray">Version non disponible</label-chip>
-    </div>
-  </ng-template>
-  <div style="display: flex; align-items: center; justify-content: space-between; margin-left: auto; gap: 0.5em">
-    <mat-form-field style="width: 315px" class="no-subscript md-3" appearance="outline">
+<page-panel panelTitle="Paramètres" panelIcon="tune">
+  <!-- Filtres -->
+  <div class="pp-filters">
+    <mat-form-field style="width: 100%" class="no-subscript md-3" appearance="outline">
       <mat-label>Période</mat-label>
       <mat-date-range-input [formGroup]="formGroup.controls.range" [rangePicker]="picker">
         <input matStartDate formControlName="start" placeholder="Start date" (dateChange)="onChangeStart($event)">
@@ -29,7 +10,7 @@
       <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-date-range-picker #picker></mat-date-range-picker>
     </mat-form-field>
-  <mat-form-field style="width: 260px" class="no-subscript md-3" [class.loading]="isLoadingInstances"
+  <mat-form-field style="width: 100%" class="no-subscript md-3" [class.loading]="isLoadingInstances"
                   appearance="outline">
       <mat-label>Serveur</mat-label>
       <mat-select [formControl]="formGroup.controls.server" (selectionChange)="onServerChange()" >
@@ -44,19 +25,39 @@
       </mat-select>
       <mat-spinner *ngIf="isLoadingInstances" [diameter]="18"></mat-spinner>
   </mat-form-field>
-    <button mat-mini-fab
-            [color]="formGroup.controls.instance.value ? 'primary' : 'warn'"
-            (click)="openInstanceSelector()"
-            [disabled]="isLoadingInstances || !formGroup.controls.server.valid"
-            [matTooltip]="formGroup.controls.instance.value ? 'Sélectionner une instance' : 'Instance requise - Cliquez pour sélectionner'">
-      <mat-icon matSuffix>list_alt</mat-icon>
-    </button>
-    <button mat-mini-fab color="primary" (click)="search()">
-      <mat-icon matSuffix>search</mat-icon>
-    </button>
+    <div class="pp-actions">
+      <button mat-mini-fab
+              [color]="formGroup.controls.instance.value ? 'primary' : 'warn'"
+              (click)="openInstanceSelector()"
+              [disabled]="isLoadingInstances || !formGroup.controls.server.valid"
+              [matTooltip]="formGroup.controls.instance.value ? 'Sélectionner une instance' : 'Instance requise - Cliquez pour sélectionner'">
+        <mat-icon matSuffix>list_alt</mat-icon>
+      </button>
+      <button mat-mini-fab color="primary" (click)="search()">
+        <mat-icon matSuffix>search</mat-icon>
+      </button>
+    </div>
   </div>
+</page-panel>
 
-</header-page>
+<!-- Sous-titre de page : informations d'instance -->
+<div class="page-instance-header" *ngIf="instance">
+  <div class="pih-name">
+    {{ instance?.name | titleCase }}
+    <app-status-indicator *ngIf="!isLoading && instance"
+                          [params]="{id: instance.id, end: instance.end, configuration: instance.configuration, lastTrace: lastTrace, date: date.getTime()}"></app-status-indicator>
+  </div>
+  <div class="pih-badges">
+    <app-version-badge
+            [backgroundColor]="'#22577a'"
+            [configuration]="instance?.configuration"
+            [collector]="instance?.collector"
+            [version]="instance?.version"
+            [name]="instance?.name"/>
+    <app-branch-chip [branch]="instance?.branch" [hash]="instance?.hash"/>
+    <label-chip *ngIf="!instance?.version" color="gray">Version non disponible</label-chip>
+  </div>
+</div>
 
 <div class="kpi-page">
   <div class="kpi-grid">

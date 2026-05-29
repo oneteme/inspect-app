@@ -1,4 +1,5 @@
 import {Component, inject, OnDestroy, OnInit} from "@angular/core";
+import {PageTitleService} from '../../../../service/page-title.service';
 import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
@@ -28,6 +29,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
   private readonly durationPipe = new DurationPipe();
   private readonly $destroy = new Subject<void>();
   private readonly _dialog = inject(MatDialog);
+  private readonly _pageTitleService = inject(PageTitleService);
 
   private params: Partial<{ idFtp: string, env: string }> = {};
   REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
@@ -56,6 +58,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([params, queryParams]) => {
         this.params = {idFtp: params.id_request, env: queryParams.env || app.defaultEnv};
+        this._pageTitleService.set({ icon: 'smb_share', iconOutlined: true, title: 'Flux FTP • ' + params.id_request, subtitle: 'Communications externes' });
         this.getRequest();
       }
     });
@@ -87,6 +90,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.$destroy.next();
     this.$destroy.complete();
+    this._pageTitleService.clear();
   }
 
   getRequest() {

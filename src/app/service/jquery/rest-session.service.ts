@@ -370,8 +370,7 @@ export class RestSessionService {
             args['user.in'] = filters.users;
         }
         if(filters.others) {
-            const key = Object.keys(filters.others)[0];
-            args[key] = filters.others[key];
+            Object.entries(filters.others).forEach(([key, value]) => args[key] = value);
         }
         return this.getRestSession(args);
     }

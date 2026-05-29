@@ -10,6 +10,7 @@ import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constan
 import {FilterService} from 'src/app/service/filter.service';
 import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
+import {PageTitleService} from "../../../service/page-title.service";
 import {DateAdapter, MAT_DATE_FORMATS} from "@angular/material/core";
 import {CustomDateAdapter} from "../../../shared/material/custom-date-adapter";
 import {MY_DATE_FORMATS} from "../../../shared/shared.module";
@@ -34,6 +35,7 @@ export class SearchMainView implements OnInit, OnDestroy {
   private readonly _router = inject(EnvRouter);
   private readonly _traceService = inject(TraceService);
   private readonly _instanceService = inject(InstanceService);
+  private readonly _pageTitleService = inject(PageTitleService);
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _location = inject(Location);
   private readonly _filter = inject(FilterService);
@@ -81,6 +83,12 @@ export class SearchMainView implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([params, queryParams]) => {
         this.type = params.type_main;
+        this._pageTitleService.set({
+          icon: Constants.MAPPING_TYPE[this.type]?.icon || 'search',
+          iconOutlined: true,
+          title: (Constants.MAPPING_TYPE[this.type]?.title || this.type) + ' • Suivi',
+          subtitle: Constants.MAPPING_TYPE[this.type]?.subtitle
+        });
         if (queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env || app.defaultEnv, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server], null, !queryParams.rangestatus ? [] : Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus])
         if (!queryParams.start && !queryParams.end) {
           let period;
@@ -158,6 +166,7 @@ export class SearchMainView implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.$destroy.next();
     this.$destroy.complete();
+    this._pageTitleService.clear();
   }
 
   getMainRequests() {
