@@ -136,7 +136,7 @@ const routes: Route[] = [
         path: 'detail/:id_instance',
         component: InstanceComponent,
         title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          return `instance > ${route.paramMap.get('id_instance')}`;
+          return `Supervision • Instance • ${route.paramMap.get('id_instance')}`;
         }
       },
     ]
@@ -159,7 +159,7 @@ const routes: Route[] = [
   {
     path: 'supervision/server/:instance',
     component: ServerSupervisionView,
-    title: 'Server Supervision'
+    title: 'Supervision • Serveur'
   },
   {
     path: 'kpi/request/:request_type',
@@ -178,7 +178,7 @@ const routes: Route[] = [
   {
     path: 'supervision/client/:instance',
     component: ClientSupervisionView,
-    title: 'Client Supervision'
+    title: 'Supervision • Client'
   },
   {path: '**', pathMatch: 'full', redirectTo: `/home`}
 ];

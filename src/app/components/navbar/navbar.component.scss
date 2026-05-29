@@ -339,9 +339,10 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 
 .nav-divider {
   width: 1px;
-  height: 28px;
+  height: 20px;
   background: linear-gradient(to bottom, transparent, rgba(15, 23, 42, 0.2), transparent);
-  margin: 0 4px;
+  flex-shrink: 0;
+  align-self: center;
 }
 
 $env-dev: #10b981;

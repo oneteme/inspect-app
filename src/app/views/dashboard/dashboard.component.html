@@ -98,7 +98,6 @@
       <div class="sb-block sb-distribution-block sb-skel-block">
         <div class="sbd-title">Session</div>
         <ng-container *ngFor="let _ of skeletonRows">
-          <div class="sbd-skel-dot"></div>
           <div class="sbd-skel-main">
             <div class="sbd-skel-top">
               <div class="sbd-skel-label"></div>
@@ -119,7 +118,6 @@
       </div>
       <ng-container *ngFor="let s of sessionSummaries">
         <ng-container *ngIf="s.loading">
-          <div class="sbd-skel-dot"></div>
           <div class="sbd-skel-main">
             <div class="sbd-skel-top">
               <div class="sbd-skel-label"></div>
@@ -160,7 +158,6 @@
       </div>
       <ng-container *ngFor="let p of protocolSummaries">
         <ng-container *ngIf="p.loading">
-          <div class="sbd-skel-dot"></div>
           <div class="sbd-skel-main">
             <div class="sbd-skel-top">
               <div class="sbd-skel-label"></div>

@@ -865,10 +865,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
         const groupedBy = this.groupedBy; // capturé une fois à la création
         return {
             sessionExceptionsTable: {
-                observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, server: app_name, others: {"status.ge(500).or(status.lt(400))": ""}})
-                    .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
+                observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, server: app_name })
+                    .pipe(map((result: any[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
-                        return result.filter(r => r.errorType != null);
+                        return result.filter(r => r.errorType != null && (r.status >= 400 || r.status < 100));
                     }))
             },
             batchExceptionTable: {

@@ -195,7 +195,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   selectedPeriod: Partial<{start: Date, end: Date}>;
 
   ngOnInit() {
-    this._pageTitleService.set({ icon: 'browse_activity', iconOutlined: true, title: 'Supervision' });
+    this._pageTitleService.set({ icon: 'browse_activity', iconOutlined: true, title: 'Supervision', subtitle: 'Serveur' });
     this.onRouteChange();
   }
 
@@ -296,7 +296,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
         return EMPTY;
       }
       this.instance = res;
-      this._pageTitleService.set({ icon: 'browse_activity', iconOutlined: true, title: this.instance.name });
+      this._pageTitleService.set({ icon: 'browse_activity', iconOutlined: true, title: this.instance.name, subtitle: 'Supervision • Serveur' });
       return forkJoin([
         this.instance.end ? of([]) : this._instanceTraceService.getLastInstanceTrace({instance: [this.params.instance]}),
         this._machineUsageService.getResourceMachineByPeriod({instance: this.params.instance, start: this.params.start, end: this.params.end}),

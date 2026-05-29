@@ -84,7 +84,6 @@
       </mat-menu>
 
       <ng-container *ngIf="pageTitle$ | async as pt">
-        <div class="nav-divider"></div>
         <div class="nav-page-title">
           <mat-icon class="npt-icon" [ngClass]="{'material-symbols-outlined': pt.iconOutlined}">{{ pt.icon }}</mat-icon>
           <div class="npt-text">
@@ -127,8 +126,6 @@
           <span>{{ e | uppercase }}</span>
         </button>
       </mat-menu>
-
-      <div class="nav-divider"></div>
 
       <a
         class="action-btn github-btn"

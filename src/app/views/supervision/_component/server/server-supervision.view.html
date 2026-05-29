@@ -1,24 +1,6 @@
 <page-panel panelTitle="Paramètres" panelIcon="tune">
-  <!-- Informations d'instance -->
-  <div class="pp-instance-info" *ngIf="instance">
-    <div class="pp-instance-name">
-      {{ instance?.name | titleCase }}
-      <app-status-indicator *ngIf="!isLoading && instance"
-                            [params]="{id: instance.id, end: instance.end, configuration: instance.configuration, lastTrace: lastTrace, date: date.getTime()}"></app-status-indicator>
-    </div>
-    <div class="pp-instance-badges">
-      <app-version-badge
-              [backgroundColor]="'#22577a'"
-              [configuration]="instance?.configuration"
-              [collector]="instance?.collector"
-              [version]="instance?.version"
-              [name]="instance?.name"/>
-      <app-branch-chip [branch]="instance?.branch" [hash]="instance?.hash"/>
-      <label-chip *ngIf="!instance?.version" color="gray">Version non disponible</label-chip>
-    </div>
-  </div>
   <!-- Filtres -->
-  <div class="pp-filters" style="display: flex; flex-direction: column; gap: 12px;">
+  <div class="pp-filters">
     <mat-form-field style="width: 100%" class="no-subscript md-3" appearance="outline">
       <mat-label>Période</mat-label>
       <mat-date-range-input [formGroup]="formGroup.controls.range" [rangePicker]="picker">
@@ -57,6 +39,25 @@
     </div>
   </div>
 </page-panel>
+
+<!-- Sous-titre de page : informations d'instance -->
+<div class="page-instance-header" *ngIf="instance">
+  <div class="pih-name">
+    {{ instance?.name | titleCase }}
+    <app-status-indicator *ngIf="!isLoading && instance"
+                          [params]="{id: instance.id, end: instance.end, configuration: instance.configuration, lastTrace: lastTrace, date: date.getTime()}"></app-status-indicator>
+  </div>
+  <div class="pih-badges">
+    <app-version-badge
+            [backgroundColor]="'#22577a'"
+            [configuration]="instance?.configuration"
+            [collector]="instance?.collector"
+            [version]="instance?.version"
+            [name]="instance?.name"/>
+    <app-branch-chip [branch]="instance?.branch" [hash]="instance?.hash"/>
+    <label-chip *ngIf="!instance?.version" color="gray">Version non disponible</label-chip>
+  </div>
+</div>
 
 <div class="kpi-page">
   <div class="kpi-grid">

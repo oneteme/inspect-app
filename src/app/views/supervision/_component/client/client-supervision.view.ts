@@ -160,7 +160,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   activityDisplayType: 'TRACE' | 'ATTEMPT' | 'REPORT' = 'TRACE';
 
   ngOnInit() {
-    this._pageTitleService.set({ icon: 'browse_activity', iconOutlined: true, title: 'Supervision' });
+    this._pageTitleService.set({ icon: 'browse_activity', iconOutlined: true, title: 'Supervision', subtitle: 'Client' });
     this.onRouteChange();
   }
 
@@ -261,7 +261,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
         return EMPTY;
       }
       this.instance = res;
-      this._pageTitleService.set({ icon: 'browse_activity', iconOutlined: true, title: this.instance.name });
+      this._pageTitleService.set({ icon: 'browse_activity', iconOutlined: true, title: this.instance.name, subtitle: 'Supervision • Client' });
       this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}&app_name=${this.instance.name}&_reload=${new Date().getTime()}`);
       return forkJoin([
         this.instance.end ? of([]) : this._instanceTraceService.getLastInstanceTrace({instance: [this.params.instance]}),
