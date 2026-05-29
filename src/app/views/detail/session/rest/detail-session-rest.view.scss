@@ -1,9 +1,19 @@
-// ──────────────────────────────────────────────
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+// ──────────────────────────────────────────────────
 // LAYOUT HEADER
-// ──────────────────────────────────────────────
+// ──────────────────────────────────────────────────
 .header-card {
   display: flex;
   flex-direction: row;
   gap: 0.75em;
   padding: 0.75em 0.75em 0.75em;
 }
+
+detail-session {
+  flex: 1 1 0;
+}
+

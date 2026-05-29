@@ -86,7 +86,7 @@ export class SearchMainView implements OnInit, OnDestroy {
         this._pageTitleService.set({
           icon: Constants.MAPPING_TYPE[this.type]?.icon || 'search',
           iconOutlined: true,
-          title: Constants.MAPPING_TYPE[this.type]?.title || this.type,
+          title: (Constants.MAPPING_TYPE[this.type]?.title || this.type) + ' • Suivi',
           subtitle: Constants.MAPPING_TYPE[this.type]?.subtitle
         });
         if (queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env || app.defaultEnv, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server], null, !queryParams.rangestatus ? [] : Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus])

@@ -100,7 +100,7 @@
                 (mouseenter)="onFilterEnter()"
                 (click)="onFilterClick()"
                 [matTooltip]="(isPanelOpen$ | async) ? 'Masquer les filtres' : 'Afficher les filtres'">
-          <mat-icon class="nfb-icon material-symbols-outlined">{{ panelIcon$ | async }}</mat-icon>
+          <mat-icon class="nfb-icon material-symbols-outlined">filter_list</mat-icon>
           <mat-icon class="nfb-chevron">expand_more</mat-icon>
         </button>
       </ng-container>

@@ -1,6 +1,6 @@
 <page-panel panelTitle="Filtres" panelIcon="filter_list">
   <div class="panel-filter md-3">
-    <mat-form-field style="width: 315px" class="no-subscript" appearance="outline" >
+    <mat-form-field style="width: 310px" class="no-subscript period-wide" appearance="outline" >
       <mat-label>Période</mat-label>
       <mat-date-range-input [formGroup]="requestFilterForm.controls.dateRangePicker" [rangePicker]="picker">
         <input matStartDate  formControlName="start" placeholder="Start date" (dateChange)="onChangeStart($event)">

@@ -611,16 +611,16 @@ export class Constants {
         test: {title: 'Validation & Tests', subtitle: 'Lancements de tests automatisés et résultats', icon: 'rule'},
         startup: {title: 'Initialisation', subtitle: 'Chronologie et durée des démarrages d\'application', icon: 'restart_alt'},
         view: {title: 'Parcours Client', subtitle: 'Navigation utilisateurs et accès aux pages', icon: 'ads_click'},
-        dashboard: {title:'Page d\'Accueil', icon: 'home'},
+        dashboard: {title:'Tableau de bord', icon: 'home'},
         deploiment: {title:'Instances Actives', subtitle: 'Suivi des applications en cours d\'exécution', icon:'deployed_code'},
         tree: {title: 'Arborescence des ressources', subtitle: 'Diagramme de bout en bout des flux d\'exécution', icon: 'account_tree'},
     }
     static readonly REQUEST_MAPPING_TYPE: {[key: string]: Partial<{title: string, subtitle: string, icon: string}>} = {
-        rest: {title: 'HTTP', subtitle: 'Communications externes', icon: 'public'},
-        jdbc: {title: 'JDBC', subtitle: 'Communications externes', icon: 'database'},
-        ftp: {title: 'FTP', subtitle: 'Communications externes', icon: 'smb_share'},
-        smtp: {title: 'SMTP', subtitle: 'Communications externes', icon: 'outgoing_mail'},
-        ldap: {title: 'LDAP', subtitle: 'Communications externes', icon: 'user_attributes'},
+        rest: {title: 'Flux HTTP', subtitle: 'Communications externes', icon: 'public'},
+        jdbc: {title: 'Flux JDBC', subtitle: 'Communications externes', icon: 'database'},
+        ftp: {title: 'Flux FTP', subtitle: 'Communications externes', icon: 'smb_share'},
+        smtp: {title: 'Flux SMTP', subtitle: 'Communications externes', icon: 'outgoing_mail'},
+        ldap: {title: 'Flux LDAP', subtitle: 'Communications externes', icon: 'user_attributes'},
     }
 
     static REQUEST_EXCEPTION_OPTIONS = {

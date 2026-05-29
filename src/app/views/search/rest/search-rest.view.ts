@@ -116,7 +116,7 @@ export class SearchRestView implements OnInit, OnDestroy {
     this._filter.registerGetallFilters(this.filtersSupplier.bind(this));
     this._pageTitleService.set({
       icon: Constants.MAPPING_TYPE['rest']?.icon || 'http',
-      title: Constants.MAPPING_TYPE['rest']?.title,
+      title: (Constants.MAPPING_TYPE['rest']?.title || 'Services Exposés') + ' • Suivi',
       subtitle: Constants.MAPPING_TYPE['rest']?.subtitle
     });
   }

@@ -44,7 +44,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
   readonly pageTitle$ = inject(PageTitleService).config$;
   readonly hasPanel$    = this._panelSvc.hasPanel$;
   readonly isPanelOpen$ = this._panelSvc.isOpen$;
-  readonly panelIcon$   = this._panelSvc.icon$;
 
   @ViewChild('mainTrigger') mainMenuTrigger: MatMenuTrigger;
 
@@ -63,11 +62,11 @@ export class NavbarComponent implements OnInit, OnDestroy {
       icon: Constants.MAPPING_TYPE['request'].icon,
       id: 'request',
       children: [
-        { label: Constants.REQUEST_MAPPING_TYPE['rest'].title, icon: Constants.REQUEST_MAPPING_TYPE['rest'].icon, id: 'rest', route: 'request/rest', kpiRoute: 'kpi/request/rest' },
-        { label: Constants.REQUEST_MAPPING_TYPE['jdbc'].title, icon: Constants.REQUEST_MAPPING_TYPE['jdbc'].icon, id: 'jdbc', route: 'request/jdbc', kpiRoute: 'kpi/request/jdbc' },
-        { label: Constants.REQUEST_MAPPING_TYPE['ftp'].title, icon: Constants.REQUEST_MAPPING_TYPE['ftp'].icon, id: 'ftp', route: 'request/ftp', kpiRoute: 'kpi/request/ftp' },
-        { label: Constants.REQUEST_MAPPING_TYPE['smtp'].title, icon: Constants.REQUEST_MAPPING_TYPE['smtp'].icon, id: 'smtp', route: 'request/smtp', kpiRoute: 'kpi/request/smtp' },
-        { label: Constants.REQUEST_MAPPING_TYPE['ldap'].title, icon: Constants.REQUEST_MAPPING_TYPE['ldap'].icon, id: 'ldap', route: 'request/ldap', kpiRoute: 'kpi/request/ldap' },
+        { label: Constants.REQUEST_MAPPING_TYPE['rest'].title.replace(/^Flux\s+/i, ''), icon: Constants.REQUEST_MAPPING_TYPE['rest'].icon, id: 'rest', route: 'request/rest', kpiRoute: 'kpi/request/rest' },
+        { label: Constants.REQUEST_MAPPING_TYPE['jdbc'].title.replace(/^Flux\s+/i, ''), icon: Constants.REQUEST_MAPPING_TYPE['jdbc'].icon, id: 'jdbc', route: 'request/jdbc', kpiRoute: 'kpi/request/jdbc' },
+        { label: Constants.REQUEST_MAPPING_TYPE['ftp'].title.replace(/^Flux\s+/i, ''), icon: Constants.REQUEST_MAPPING_TYPE['ftp'].icon, id: 'ftp', route: 'request/ftp', kpiRoute: 'kpi/request/ftp' },
+        { label: Constants.REQUEST_MAPPING_TYPE['smtp'].title.replace(/^Flux\s+/i, ''), icon: Constants.REQUEST_MAPPING_TYPE['smtp'].icon, id: 'smtp', route: 'request/smtp', kpiRoute: 'kpi/request/smtp' },
+        { label: Constants.REQUEST_MAPPING_TYPE['ldap'].title.replace(/^Flux\s+/i, ''), icon: Constants.REQUEST_MAPPING_TYPE['ldap'].icon, id: 'ldap', route: 'request/ldap', kpiRoute: 'kpi/request/ldap' },
       ]
     },
     { label: Constants.MAPPING_TYPE['rest'].title, icon: Constants.MAPPING_TYPE['rest'].icon, id: 'rest', route: 'session/rest', kpiRoute: 'kpi/session/rest' },

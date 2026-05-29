@@ -5,16 +5,13 @@ import { BehaviorSubject } from 'rxjs';
 export class PagePanelService {
     private readonly _isOpen$ = new BehaviorSubject<boolean>(false);
     private readonly _hasPanel$ = new BehaviorSubject<boolean>(false);
-    private readonly _icon$ = new BehaviorSubject<string>('tune');
     private _closeTimer: ReturnType<typeof setTimeout> | null = null;
     private _openedAt = 0;
 
     readonly isOpen$ = this._isOpen$.asObservable();
     readonly hasPanel$ = this._hasPanel$.asObservable();
-    readonly icon$ = this._icon$.asObservable();
 
-    register(icon = 'tune'): void {
-        this._icon$.next(icon);
+    register(): void {
         this._hasPanel$.next(true);
     }
 

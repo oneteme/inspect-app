@@ -64,8 +64,8 @@ export class RequestKpiView implements OnInit, OnDestroy {
         this._pageTitleService.set({
           icon: 'finance_mode',
           iconOutlined: true,
-          title: Constants.MAPPING_TYPE[this.params.type]?.title || this.params.type,
-          subtitle: 'Tableau de bord'
+          title: (Constants.REQUEST_MAPPING_TYPE[this.params.type]?.title || this.params.type) + ' • KPI',
+          subtitle: Constants.REQUEST_MAPPING_TYPE[this.params.type]?.subtitle
         });
         this.params.queryParams = new QueryParams(new IPeriod(v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(0, 1).start, v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(0, 1).end), v.queryParams.env || app.defaultEnv,null,!v.queryParams.host ? [] : Array.isArray(v.queryParams.host) ? v.queryParams.host : [v.queryParams.host])
         this.patchDateValue(this.params.queryParams.period.start, new Date(this.params.queryParams.period.end.getFullYear(), this.params.queryParams.period.end.getMonth(), this.params.queryParams.period.end.getDate() - 1));

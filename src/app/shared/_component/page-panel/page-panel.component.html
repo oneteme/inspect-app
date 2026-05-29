@@ -5,7 +5,7 @@
      (mouseleave)="onPanelLeave()"
      aria-label="Filtres"
      [attr.aria-hidden]="!(isOpen$ | async)">
-  <div class="pp-body">
+  <div class="pp-body" (click)="onBodyClick($event)">
     <ng-content></ng-content>
   </div>
 </section>

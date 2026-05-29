@@ -47,13 +47,13 @@ const routes: Route[] = [
           {
             path: '',
             component: SearchRequestView,
-            title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => Constants.MAPPING_TYPE['request'].title + ' ' + Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' > Recherche',
+            title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' • Suivi',
           },
           {
             path: ':id_request',
             component: DetailRequestView,
             title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-              return Constants.MAPPING_TYPE['request'].title + ' ' + Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' > Detail'
+              return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' • Détail'
             }
           }
         ]
@@ -69,7 +69,7 @@ const routes: Route[] = [
           {
             path: '',
             component: SearchRestView,
-            title: Constants.MAPPING_TYPE['rest'].title + ' > Recherche'
+            title: Constants.MAPPING_TYPE['rest'].title + ' • Suivi'
 
           },
           {
@@ -78,13 +78,13 @@ const routes: Route[] = [
               {
                 path: '',
                 component: DetailSessionRestView,
-                title: Constants.MAPPING_TYPE['rest'].title + ' > Detail'
+                title: Constants.MAPPING_TYPE['rest'].title + ' • Détail'
               },
               {
                 path: 'tree',
                 data: {type: 'rest'},
                 component: TreeView,
-                title: Constants.MAPPING_TYPE['rest'].title + ` > Arbre d'Appels`
+                title: Constants.MAPPING_TYPE['rest'].title + ' • Arbre d\'Appels'
               },
               {path: '**', pathMatch: 'full', redirectTo: `/session/rest/:id_session`}
             ]
@@ -99,7 +99,7 @@ const routes: Route[] = [
             path: '',
             component: SearchMainView,
             title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-              return Constants.MAPPING_TYPE[route.paramMap.get('type_main')].title + ' > Recherche';
+              return Constants.MAPPING_TYPE[route.paramMap.get('type_main')].title + ' • Suivi';
             }
           },
           {
@@ -109,7 +109,7 @@ const routes: Route[] = [
                 path: '',
                 component: DetailSessionMainView,
                 title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-                  return Constants.MAPPING_TYPE[route.paramMap.get('type_main')].title + ' > Detail';
+                  return Constants.MAPPING_TYPE[route.paramMap.get('type_main')].title + ' • Détail';
                 }
               },
               {
@@ -149,7 +149,7 @@ const routes: Route[] = [
   {
     path: 'home',
     component: DashboardComponent,
-    title: 'Page d\'accueil'
+    title: 'Tableau de bord'
   },
   {
     path: 'architecture',
@@ -165,14 +165,14 @@ const routes: Route[] = [
     path: 'kpi/request/:request_type',
     component: RequestKpiView,
     title:  (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-      return Constants.MAPPING_TYPE['request'].title + ' ' + Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('request_type')].title + ' > Tableau de bord';
+      return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('request_type')].title + ' • KPI';
     }
   },
   {
     path: 'kpi/session/:session_type',
     component: SessionKpiView,
     title:  (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-      return Constants.MAPPING_TYPE[route.paramMap.get('session_type')].title + ' > Tableau de bord';
+      return Constants.MAPPING_TYPE[route.paramMap.get('session_type')].title + ' • KPI';
     }
   },
   {

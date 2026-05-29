@@ -8,13 +8,12 @@ import { PagePanelService } from '../../../service/page-panel.service';
 })
 export class PagePanelComponent implements OnInit, OnDestroy {
     @Input() panelTitle = 'Parametres';
-    @Input() panelIcon = 'tune';
 
     private readonly _svc = inject(PagePanelService);
     readonly isOpen$ = this._svc.isOpen$;
 
     ngOnInit(): void {
-        this._svc.register(this.panelIcon);
+        this._svc.register();
     }
 
     ngOnDestroy(): void {
@@ -27,6 +26,13 @@ export class PagePanelComponent implements OnInit, OnDestroy {
 
     onPanelLeave(): void {
         this._svc.scheduleClose(350);
+    }
+
+    onBodyClick(event: MouseEvent): void {
+        const btn = (event.target as HTMLElement).closest('button.mat-mdc-mini-fab.mat-primary');
+        if (!btn) return;
+        const icon = btn.querySelector('mat-icon');
+        if (icon?.textContent?.trim() === 'search') this._svc.close();
     }
 
     @HostListener('document:keydown.escape')

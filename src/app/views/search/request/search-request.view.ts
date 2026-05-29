@@ -121,7 +121,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
           this._pageTitleService.set({
             icon: Constants.REQUEST_MAPPING_TYPE[this.params.type]?.icon || 'api',
             iconOutlined: true,
-            title: Constants.REQUEST_MAPPING_TYPE[this.params.type]?.title || this.params.type,
+            title: (Constants.REQUEST_MAPPING_TYPE[this.params.type]?.title || this.params.type) + ' • Suivi',
             subtitle: Constants.REQUEST_MAPPING_TYPE[this.params.type]?.subtitle
           });
           if(queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env ||  app.defaultEnv,null,!queryParams.host ? [] : Array.isArray(queryParams.host) ? queryParams.host : [queryParams.host],!queryParams.rangestatus ? []: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] )

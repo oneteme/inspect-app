@@ -68,6 +68,12 @@ $primary:    #2563eb;
         flex-shrink: 0;
     }
 
+    // Champ Période avec heures (HH:mm) : nécessite plus de place
+    ::ng-deep mat-form-field.period-wide {
+        flex: 0 0 310px;
+        max-width: 310px;
+    }
+
     // Groupe de boutons aligné en bas
     ::ng-deep .pp-actions {
         display: flex;
