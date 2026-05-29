@@ -32,7 +32,6 @@ export class PagePanelService {
         this._isOpen$.next(true);
     }
 
-    /** Ferme uniquement si le panel n'a pas été ouvert dans les `graceMs` dernières ms (évite le clic réflexe après hover). */
     closeIfNotJustOpened(graceMs = 400): void {
         if (Date.now() - this._openedAt < graceMs) return;
         this.close();
@@ -40,10 +39,8 @@ export class PagePanelService {
 
     scheduleClose(delay = 250): void {
         this._cancelClose();
-        // Ne pas fermer si un overlay CDK est ouvert (datepicker, select, autocomplete…)
         if (this._hasCdkOverlay()) return;
         this._closeTimer = setTimeout(() => {
-            // Vérifier à nouveau au moment de l'exécution
             if (this._hasCdkOverlay()) { this._closeTimer = null; return; }
             this._isOpen$.next(false);
             this._closeTimer = null;

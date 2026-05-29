@@ -1,17 +1,14 @@
-﻿// Variables
-$navbar-h:   56px;
+﻿$navbar-h:   56px;
 $bar-bg:     #ffffff;
 $border:     rgba(15, 23, 42, 0.1);
 $shadow:     0 6px 24px rgba(15, 23, 42, 0.10);
 $transition: 0.24s cubic-bezier(0.4, 0, 0.2, 1);
 $primary:    #2563eb;
 
-// Host
 :host {
-    display: contents; // le composant ne prend pas de place dans le flux
+    display: contents;
 }
 
-// Bandeau
 .pp-bar {
     position: fixed;
     top: $navbar-h;
@@ -22,7 +19,6 @@ $primary:    #2563eb;
     border-bottom: 1px solid $border;
     box-shadow: $shadow;
 
-    // Slide-down depuis le bord haut
     transform: translateY(-100%);
     opacity: 0;
     pointer-events: none;
@@ -35,7 +31,6 @@ $primary:    #2563eb;
     }
 }
 
-// Corps
 .pp-body {
     display: flex;
     flex-direction: row;
@@ -45,21 +40,18 @@ $primary:    #2563eb;
     gap: 16px;
     padding: 10px 40px 14px;
 
-    // Scrollbar si overflow
     overflow-x: auto;
     &::-webkit-scrollbar { height: 3px; }
     &::-webkit-scrollbar-thumb { background: rgba(15,23,42,.15); border-radius: 2px; }
 
-    // Conteneur générique de filtres : doit passer en row
     ::ng-deep .panel-filter {
-        display: contents; // les enfants remontent directement dans .pp-body flex
+        display: contents;
     }
 
     ::ng-deep .pp-filters {
         display: contents;
     }
 
-    // mat-form-field : largeur adaptative en mode horizontal
     ::ng-deep mat-form-field {
         width: auto !important;
         min-width: 180px;
@@ -68,13 +60,11 @@ $primary:    #2563eb;
         flex-shrink: 0;
     }
 
-    // Champ Période avec heures (HH:mm) : nécessite plus de place
     ::ng-deep mat-form-field.period-wide {
         flex: 0 0 310px;
         max-width: 310px;
     }
 
-    // Groupe de boutons aligné en bas
     ::ng-deep .pp-actions {
         display: flex;
         gap: 8px;
@@ -83,7 +73,6 @@ $primary:    #2563eb;
         flex-shrink: 0;
     }
 
-    // Info instance (supervision) : compact pill inline
     ::ng-deep .pp-instance-info {
         display: flex;
         align-items: center;

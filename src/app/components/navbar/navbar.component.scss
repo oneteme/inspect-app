@@ -129,7 +129,6 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   min-width: 0;
 }
 
-// Titre de page dans la navbar
 .nav-page-title {
   display: flex;
   align-items: center;
@@ -205,7 +204,6 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   gap: 12px;
 }
 
-// Bouton filtre (trigger du bandeau)
 .nav-filter-btn {
   display: flex;
   align-items: center;
