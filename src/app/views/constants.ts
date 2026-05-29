@@ -635,7 +635,7 @@ export class Constants {
     static REST_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<string, number> = {
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { color: '#f97316' } } as any,
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { symbolSize: 0 } } as any,
         ],
         options: {
             legend: { show: false },
@@ -655,7 +655,7 @@ export class Constants {
     static  DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { color: '#f97316' } } as any
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { symbolSize: 0 } } as any
         ],
         options: {
             legend: { show: false },
@@ -675,7 +675,7 @@ export class Constants {
     static  FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { color: '#f97316' } } as any
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { symbolSize: 0 } } as any
         ],
         options: {
             legend: { show: false },
@@ -695,7 +695,7 @@ export class Constants {
     static  SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { color: '#f97316' } } as any
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { symbolSize: 0 } } as any
         ],
         options: {
             legend: { show: false },
@@ -715,7 +715,7 @@ export class Constants {
     static  LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { color: '#f97316' } } as any
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { symbolSize: 0 } } as any
         ],
         options: {
             legend: { show: false },
