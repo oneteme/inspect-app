@@ -1,8 +1,8 @@
-import {SliceConfig, TableProvider} from '@oneteme/jquery-table';
-import {DatabaseRequestDto, DirectoryRequestDto, FtpRequestDto, MailRequestDto, MainSessionDto, RestRequestDto, RestSessionDto} from '../../../model/request.model';
-import {AbstractStage, LocalRequest, LogEntry} from "../../../model/trace.model";
-import {LastServerStart} from "../../../model/jquery.model";
-import {formatDuration} from '../../pipe/duration.pipe';
+import { SliceConfig, TableProvider } from '@oneteme/jquery-table';
+import { DatabaseRequestDto, DirectoryRequestDto, FtpRequestDto, MailRequestDto, MainSessionDto, RestRequestDto, RestSessionDto } from '../../../model/request.model';
+import { AbstractStage, LocalRequest, LogEntry } from "../../../model/trace.model";
+import { LastServerStart } from "../../../model/jquery.model";
+import { formatDuration } from '../../pipe/duration.pipe';
 
 /** Equivalent de typeColumnFormatPipe utilisable hors template. */
 function fmtMethod(value: string | null | undefined): string {
@@ -40,9 +40,9 @@ export const DEFAULT_DURATION_SLICE_CONFIG: SliceConfig = {
   hidden: true,
   categories: [
     { key: '<100ms', label: '< 100ms', filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
-    { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1  && (row.end - row.start) < 0.5 },
-    { key: '500ms-1s', label: '500ms - 1s', filter: (row) => row.end != null && (row.end - row.start) >= 0.5  && (row.end - row.start) < 1 },
-    { key: '1s-5s', label: '1s - 5s', filter: (row) => row.end != null && (row.end - row.start) >= 1    && (row.end - row.start) < 5 },
+    { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1 && (row.end - row.start) < 0.5 },
+    { key: '500ms-1s', label: '500ms - 1s', filter: (row) => row.end != null && (row.end - row.start) >= 0.5 && (row.end - row.start) < 1 },
+    { key: '1s-5s', label: '1s - 5s', filter: (row) => row.end != null && (row.end - row.start) >= 1 && (row.end - row.start) < 5 },
     { key: '>5s', label: '> 5s', filter: (row) => row.end != null && (row.end - row.start) >= 5 },
     { key: 'in-progress', label: 'En cours...', filter: (row) => row.end == null }
   ]
@@ -52,31 +52,39 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'appName', header: 'Hôte', icon: 'dns', width: '18%' },
-    { key: 'resource', header: 'Ressource', groupable: false, sliceable: false, icon: 'category',
-      searchValue: (row: RestSessionDto) => fmtMethod(row.method) + ' ' + (row.path || '') },
-    { key: 'start', header: 'Début', icon: 'schedule', width: '17%', groupable: false, sliceable: false,
-      searchValue: (row: RestSessionDto) => fmtStart(row.start) },
-    { key: 'duration', header: 'Durée', icon: 'timer', width: '13%', groupable: false,
+    {
+      key: 'resource', header: 'Ressource', groupable: false, sliceable: false, icon: 'category',
+      searchValue: (row: RestSessionDto) => fmtMethod(row.method) + ' ' + (row.path || '')
+    },
+    {
+      key: 'start', header: 'Début', icon: 'schedule', width: '17%', groupable: false, sliceable: false,
+      searchValue: (row: RestSessionDto) => fmtStart(row.start)
+    },
+    {
+      key: 'duration', header: 'Durée', icon: 'timer', width: '13%', groupable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
-      searchValue: (row: RestSessionDto) => fmtDuration(row.start, row.end) },
+      searchValue: (row: RestSessionDto) => fmtDuration(row.start, row.end)
+    },
     { key: 'user', header: 'Utilisateur', icon: 'person', width: '15%' },
-    { key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
+    {
+      key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
       value: (row: RestSessionDto) => {
-        if(!row.end) return 'En cours...';
+        if (!row.end) return 'En cours...';
         return row.status;
       }
     },
-    { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', width: '13%',
+    {
+      key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', width: '13%',
       value: (row: RestSessionDto) => {
         return row.exception?.type;
       }
     }
   ],
   slices: [
-    { title: 'Status', columnKey: 'status', hidden: true  },
+    { title: 'Status', columnKey: 'status', hidden: true },
     { title: 'Hôte', columnKey: 'appName', hidden: true },
-    { title: 'Méthode',   columnKey: 'method', icon: 'label', hidden: true },
-    { title: 'Ressource', columnKey: 'path',   icon: 'category', hidden: true },
+    { title: 'Méthode', columnKey: 'method', icon: 'label', hidden: true },
+    { title: 'Ressource', columnKey: 'path', icon: 'category', hidden: true },
     {
       title: 'Durée',
       columnKey: 'duration',
@@ -103,23 +111,26 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
 export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'Hôte', icon: 'dns',  width: '13%' },
-    { key: 'name', header: 'Nom', icon: 'label',  width: '13%' },
+    { key: 'appName', header: 'Hôte', icon: 'dns', width: '13%' },
+    { key: 'name', header: 'Nom', icon: 'label', width: '13%' },
     { key: 'location', header: 'Ressource', icon: 'category' },
-    { key: 'start', header: 'Début', groupable: false, sliceable: false, icon: 'schedule',  width: '13%' },
-    { key: 'duration', header: 'Durée', groupable: false, icon: 'timer',  width: '13%',
+    { key: 'start', header: 'Début', groupable: false, sliceable: false, icon: 'schedule', width: '13%' },
+    {
+      key: 'duration', header: 'Durée', groupable: false, icon: 'timer', width: '13%',
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
     },
-    { key: 'user', header: 'Utilisateur', icon: 'person',  width: '13%' },
-    { key: 'address', header: 'Adresse', icon: 'fingerprint',  width: '13%', optional: true },
-    { key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
+    { key: 'user', header: 'Utilisateur', icon: 'person', width: '13%' },
+    { key: 'address', header: 'Adresse', icon: 'fingerprint', width: '13%', optional: true },
+    {
+      key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
       value: (row: MainSessionDto) => {
-        if(!row.end) return 'En cours...';
-        if(row.exception) return 'KO';
-        if(!row.exception) return 'OK';
+        if (!row.end) return 'En cours...';
+        if (row.exception) return 'KO';
+        if (!row.exception) return 'OK';
       }
     },
-    { key: 'exception', header: 'Exception', sortable: true, optional: true, icon: 'error_outline', width: '13%',
+    {
+      key: 'exception', header: 'Exception', sortable: true, optional: true, icon: 'error_outline', width: '13%',
       value: (row: MainSessionDto) => {
         return row.exception?.type;
       }
@@ -151,30 +162,37 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
-    { key: 'resource', header: 'Ressource', icon: 'category',
-      searchValue: (row: RestRequestDto) => fmtMethod(row.method) + ' ' + (row.path || '') },
-    { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
-      searchValue: (row: RestRequestDto) => fmtStart(row.start) },
-    { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
+    {
+      key: 'resource', header: 'Ressource', icon: 'category',
+      searchValue: (row: RestRequestDto) => fmtMethod(row.method) + ' ' + (row.path || '')
+    },
+    {
+      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
+      searchValue: (row: RestRequestDto) => fmtStart(row.start)
+    },
+    {
+      key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: RestRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
-    { key: 'status', header: 'Status', sortable: true, optional: true, icon: 'task_alt',
+    {
+      key: 'status', header: 'Status', sortable: true, optional: true, icon: 'task_alt',
       value: (row: RestSessionDto) => {
         if (!row.end) return 'En cours...';
         return row.status;
       }
     },
-    { key: 'exception', header: 'Exception', sortable: true, optional: true, icon: 'error_outline',
+    {
+      key: 'exception', header: 'Exception', sortable: true, optional: true, icon: 'error_outline',
       value: (row: RestSessionDto) => row.exception?.type
     },
     { key: 'action', header: 'Action', icon: 'touch_app', sliceable: false, groupable: false, sortable: false }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
-    { title: 'Méthode',   columnKey: 'method', icon: 'label', hidden: true },
-    { title: 'Ressource', columnKey: 'path',   icon: 'category', hidden: true }
+    { title: 'Méthode', columnKey: 'method', icon: 'label', hidden: true },
+    { title: 'Ressource', columnKey: 'path', icon: 'category', hidden: true }
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: RestSessionDto) => {
@@ -191,19 +209,26 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
-    { key: 'resource', header: 'Ressource', icon: 'category',
-      searchValue: (row: DatabaseRequestDto) => fmtMethod(row.command) + ' ' + (row.schema || row.name || 'N/A') },
-    { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
-      searchValue: (row: DatabaseRequestDto) => fmtStart(row.start) },
-    { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
+    {
+      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false,
+      searchValue: (row: DatabaseRequestDto) => fmtMethod(row.command) + ' ' + (row.schema || row.name || 'N/A')
+    },
+    {
+      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
+      searchValue: (row: DatabaseRequestDto) => fmtStart(row.start)
+    },
+    {
+      key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: DatabaseRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
-    { key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
+    {
+      key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
     },
-    { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline',
+    {
+      key: 'exception', header: 'Exception', optional: true, icon: 'error_outline',
       value: (row) => row.exception?.type
     },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
@@ -226,7 +251,7 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: DatabaseRequestDto) => {
     const failed = row.failed;
-    if(row.end == null) return '';
+    if (row.end == null) return '';
     if (failed) return 'row-ko';
     if (!failed) return 'row-ok';
   }
@@ -236,19 +261,26 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
-    { key: 'resource', header: 'Ressource', icon: 'category',
-      searchValue: (row: FtpRequestDto) => fmtMethod(row.command) },
-    { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
-      searchValue: (row: FtpRequestDto) => fmtStart(row.start) },
-    { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
+    {
+      key: 'resource', header: 'Ressource', icon: 'category',
+      searchValue: (row: FtpRequestDto) => fmtMethod(row.command)
+    },
+    {
+      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
+      searchValue: (row: FtpRequestDto) => fmtStart(row.start)
+    },
+    {
+      key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: FtpRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
-    { key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
+    {
+      key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
     },
-    { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline',
+    {
+      key: 'exception', header: 'Exception', optional: true, icon: 'error_outline',
       value: (row) => row.exception?.type
     }
   ],
@@ -264,7 +296,7 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: FtpRequestDto) => {
     const failed = row.failed;
-    if(row.end == null) return '';
+    if (row.end == null) return '';
     if (failed) return 'row-ko';
     if (!failed) return 'row-ok';
   }
@@ -274,16 +306,22 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
-    { key: 'resource', header: 'Ressource', icon: 'category',
-      searchValue: (row: DirectoryRequestDto) => fmtMethod(row.command) },
-    { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
-      searchValue: (row: DirectoryRequestDto) => fmtStart(row.start) },
-    { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
+    {
+      key: 'resource', header: 'Ressource', icon: 'category',
+      searchValue: (row: DirectoryRequestDto) => fmtMethod(row.command)
+    },
+    {
+      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
+      searchValue: (row: DirectoryRequestDto) => fmtStart(row.start)
+    },
+    {
+      key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: DirectoryRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
-    { key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
+    {
+      key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
     },
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
@@ -300,7 +338,7 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: DirectoryRequestDto) => {
     const failed = row.failed;
-    if(row.end == null) return '';
+    if (row.end == null) return '';
     if (failed) return 'row-ko';
     if (!failed) return 'row-ok';
   }
@@ -310,16 +348,22 @@ export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
-    { key: 'resource', header: 'Ressource', icon: 'category',
-      searchValue: (row: LocalRequest) => fmtMethod((row as any).type) + ' ' + ((row as any).name || 'N/A') },
-    { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
-      searchValue: (row: LocalRequest) => fmtStart(row.start) },
-    { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
+    {
+      key: 'resource', header: 'Ressource', icon: 'category',
+      searchValue: (row: LocalRequest) => fmtMethod((row as any).type) + ' ' + ((row as any).name || 'N/A')
+    },
+    {
+      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
+      searchValue: (row: LocalRequest) => fmtStart(row.start)
+    },
+    {
+      key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: LocalRequest) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
-    { key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
+    {
+      key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
     },
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
@@ -336,7 +380,7 @@ export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: LocalRequest) => {
     const failed = row.exception;
-    if(row.end == null) return '';
+    if (row.end == null) return '';
     if (failed) return 'row-ko';
     if (!failed) return 'row-ok';
   }
@@ -346,16 +390,22 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
-    { key: 'resource', header: 'Ressource', icon: 'category',
-      searchValue: (row: MailRequestDto) => fmtMethod((row as any).command) },
-    { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
-      searchValue: (row: MailRequestDto) => fmtStart(row.start) },
-    { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
+    {
+      key: 'resource', header: 'Ressource', icon: 'category',
+      searchValue: (row: MailRequestDto) => fmtMethod((row as any).command)
+    },
+    {
+      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
+      searchValue: (row: MailRequestDto) => fmtStart(row.start)
+    },
+    {
+      key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: MailRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
-    { key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
+    {
+      key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
     },
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
@@ -372,7 +422,7 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: MailRequestDto) => {
     const failed = row.failed;
-    if(row.end == null) return '';
+    if (row.end == null) return '';
     if (failed) return 'row-ko';
     if (!failed) return 'row-ok';
   }
@@ -382,13 +432,17 @@ export const STAGE_TABLE_CONFIG: TableProvider<AbstractStage> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'name', header: 'Evènement', icon: 'event_list' },
-    { key: 'resource', header: 'Ressource', icon: 'category',
-      searchValue: (row: AbstractStage) => fmtMethod(row.command) + ' ' + ((row as any).args ?? row.arg ?? '') },
+    {
+      key: 'resource', header: 'Ressource', icon: 'category',
+      searchValue: (row: AbstractStage) => fmtMethod(row.command) + ' ' + ((row as any).args ?? row.arg ?? '')
+    },
     { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
-    { key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
+    {
+      key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
     },
-    { key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
+    {
+      key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row) => !row.end ? 'En cours...' : row.exception ? 'KO' : 'OK'
     },
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
@@ -405,7 +459,7 @@ export const STAGE_TABLE_CONFIG: TableProvider<AbstractStage> = {
   defaultSort: { active: 'start', direction: 'asc' },
   rowClass: (row: AbstractStage) => {
     const failed = row.exception;
-    if(row.end == null) return '';
+    if (row.end == null) return '';
     if (failed) return 'row-ko';
     if (!failed) return 'row-ok';
   }
@@ -435,7 +489,7 @@ export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTra
     { key: 'appName', header: 'Hôte', icon: 'dns', sliceable: false, groupable: false, width: '25%' },
     { key: 'duration', header: 'Depuis', icon: 'schedule', groupable: false, width: '12%', sortValue: (row) => row.start },
     { key: 'version', header: 'Version', icon: 'label', width: '18%' },
-    { key: 'branch',  header: 'Branche', icon: 'fork_right', width: '27%' },
+    { key: 'branch', header: 'Branche', icon: 'fork_right', width: '27%' },
     { key: 'restart', header: 'Démarrage', icon: 'restart_alt', groupable: false, sliceable: false },
     { key: 'os', header: 'OS', icon: 'computer', optional: true, width: '8%' },
     { key: 're', header: 'RE', icon: 'sdk', optional: true, width: '8%' },
