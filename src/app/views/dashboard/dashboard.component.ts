@@ -516,23 +516,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
         const effectiveEnd = this.params.end! > new Date() ? new Date() : this.params.end!;
         if (tabKey === 'sessionExceptionsTable') {
             const { errors: sm, dates: sd, countoks: sc } = this._aggregateTabData(this.tabRequests['sessionExceptionsTable']?.data ?? []);
-            this.topSessionErrors = Object.entries(sm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
+            this.topSessionErrors = Object.entries(sm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count);
             this.sessionExceptionChart = this._addPerc(this._fillHourGaps(sd, this.params.start!, effectiveEnd), sc);
         } else if (tabKey === 'batchExceptionTable') {
             const { errors: bm, dates: bd, countoks: bc } = this._aggregateTabData(this.tabRequests['batchExceptionTable']?.data ?? []);
-            this.topBatchErrors = Object.entries(bm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
+            this.topBatchErrors = Object.entries(bm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count);
             this.batchExceptionChart = this._addPerc(this._fillHourGaps(bd, this.params.start!, effectiveEnd), bc);
             this._patchSessionCountData('BATCH');
             this._rebuildSessionSummaries();
         } else if (tabKey === 'viewExceptionTable') {
             const { errors: vm, dates: vd, countoks: vc } = this._aggregateTabData(this.tabRequests['viewExceptionTable']?.data ?? []);
-            this.topViewErrors = Object.entries(vm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
+            this.topViewErrors = Object.entries(vm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count);
             this.viewExceptionChart = this._addPerc(this._fillHourGaps(vd, this.params.start!, effectiveEnd), vc);
             this._patchSessionCountData('VIEW');
             this._rebuildSessionSummaries();
         } else if (tabKey === 'startupExceptionTable') {
             const { errors: stum, dates: stud, countoks: stuc } = this._aggregateTabData(this.tabRequests['startupExceptionTable']?.data ?? []);
-            this.topStartupErrors = Object.entries(stum).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count).slice(0, 6);
+            this.topStartupErrors = Object.entries(stum).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count);
             this.startupExceptionChart = this._addPerc(this._fillHourGaps(stud, this.params.start!, effectiveEnd), stuc);
             this._patchSessionCountData('STARTUP');
             this._rebuildSessionSummaries();
@@ -868,7 +868,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, server: app_name })
                     .pipe(map((result: any[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
-                        return result.filter(r => r.errorType != null && (r.status >= 400 || r.status < 100));
+                        return result.filter(r => r.errorType != null && r.status >= 400);
                     }))
             },
             batchExceptionTable: {
