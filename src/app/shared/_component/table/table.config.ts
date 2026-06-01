@@ -163,7 +163,7 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
     {
-      key: 'resource', header: 'Ressource', icon: 'category',
+      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false,
       searchValue: (row: RestRequestDto) => fmtMethod(row.method) + ' ' + (row.path || '')
     },
     {
@@ -187,7 +187,8 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
       key: 'exception', header: 'Exception', sortable: true, optional: true, icon: 'error_outline',
       value: (row: RestSessionDto) => row.exception?.type
     },
-    { key: 'action', header: 'Action', icon: 'touch_app', sliceable: false, groupable: false, sortable: false }
+    { key: 'action', header: 'Action', icon: 'touch_app', sliceable: false, groupable: false, sortable: false },
+    { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
@@ -223,6 +224,7 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
       searchValue: (row: DatabaseRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
+    { key: 'productName', header: 'Base de données', optional: true, icon: 'storage' },
     {
       key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
@@ -262,7 +264,7 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
     {
-      key: 'resource', header: 'Ressource', icon: 'category',
+      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false,
       searchValue: (row: FtpRequestDto) => fmtMethod(row.command)
     },
     {
@@ -282,7 +284,8 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
     {
       key: 'exception', header: 'Exception', optional: true, icon: 'error_outline',
       value: (row) => row.exception?.type
-    }
+    },
+    { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
@@ -307,7 +310,7 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
     {
-      key: 'resource', header: 'Ressource', icon: 'category',
+      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false,
       searchValue: (row: DirectoryRequestDto) => fmtMethod(row.command)
     },
     {
@@ -324,7 +327,8 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
       key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
     },
-    { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
+    { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type },
+    { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
@@ -391,7 +395,7 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns' },
     {
-      key: 'resource', header: 'Ressource', icon: 'category',
+      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false,
       searchValue: (row: MailRequestDto) => fmtMethod((row as any).command)
     },
     {
@@ -408,7 +412,8 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
       key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
     },
-    { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
+    { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type },
+    { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
