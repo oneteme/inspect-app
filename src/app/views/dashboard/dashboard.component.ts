@@ -302,7 +302,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     next: (res: any[]) => {
                         if (this._loadGen !== gen) return;
                         this.tabRequests[i].data = res;
-                    }
+                    },
+                    error: (e) => { console.log(e) }
                 }));
         });
     }
