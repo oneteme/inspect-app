@@ -1,4 +1,4 @@
-<nav class="navbar" (mouseleave)="onNavLeave()" (mouseenter)="onNavEnter()">
+<nav class="navbar">
   <div class="navbar-glow"></div>
 
   <div class="navbar-content">
@@ -96,7 +96,7 @@
       <ng-container *ngIf="hasPanel$ | async">
         <button class="nav-filter-btn"
                 [class.nav-filter-btn--open]="isPanelOpen$ | async"
-                (mouseenter)="onFilterEnter()"
+
                 (click)="onFilterClick()"
                 [matTooltip]="(isPanelOpen$ | async) ? 'Masquer les filtres' : 'Afficher les filtres'">
           <mat-icon class="nfb-icon material-symbols-outlined">filter_list</mat-icon>

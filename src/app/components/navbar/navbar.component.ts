@@ -154,9 +154,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return known.includes(env) ? env : 'other';
   }
 
-  onFilterEnter(): void { this._panelSvc.open(); }
-  onFilterClick(): void { this._panelSvc.closeIfNotJustOpened(); }
-  onNavLeave(): void  { this._panelSvc.scheduleClose(200); }
-  onNavEnter(): void  { this._panelSvc.cancelClose(); }
+  onFilterClick(): void { this._panelSvc.toggle(); }
 
 }

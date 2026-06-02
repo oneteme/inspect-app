@@ -20,19 +20,15 @@ export class PagePanelComponent implements OnInit, OnDestroy {
         this._svc.unregister();
     }
 
-    onPanelEnter(): void {
-        this._svc.cancelClose();
-    }
-
-    onPanelLeave(): void {
-        this._svc.scheduleClose(350);
-    }
-
     onBodyClick(event: MouseEvent): void {
         const btn = (event.target as HTMLElement).closest('button.mat-mdc-mini-fab.mat-primary');
         if (!btn) return;
         const icon = btn.querySelector('mat-icon');
         if (icon?.textContent?.trim() === 'search') this._svc.close();
+    }
+
+    onBackdropClick(): void {
+        this._svc.close();
     }
 
     @HostListener('document:keydown.escape')
