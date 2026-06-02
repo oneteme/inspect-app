@@ -550,13 +550,17 @@
     padding: .9em 1.1em;
     row-gap: 11px;
     column-gap: 12px;
-    grid-template-columns: 6px 1fr max-content;
+    grid-template-columns: 1fr max-content;
   }
   .sbd-title { font-size: .78em; padding-bottom: 7px; margin-bottom: 5px; }
   .sbd-label { font-size: .82em; }
   .sbd-rate { font-size: .86em; }
   .sbd-count { font-size: .82em; }
   .sbd-track { height: 6px; border-radius: 2px; }
+  .sbd-skel-label { height: 11px; }
+  .sbd-skel-track { height: 7px; }
+  .sbd-skel-rate { height: 11px; }
+  .sbd-skel-count { height: 11px; }
   .proto-row { height: 120px; }
 }
 

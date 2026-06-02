@@ -24,7 +24,7 @@
 
   <ng-template jqtCellDef="action" let-row>
     <button matTooltip="Détail de la session" [style.visibility]="row.linked || row.status == 0 ? 'visible' : 'hidden'" mat-icon-button color="primary"
-            (click)="selectedRemote($event, row.id)">
+            (click)="selectedRemote($event, row.id); $event.stopPropagation()">
       <mat-icon class="material-symbols-outlined">link</mat-icon>
     </button>
   </ng-template>
