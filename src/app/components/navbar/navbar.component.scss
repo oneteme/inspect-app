@@ -300,9 +300,12 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     background: transparent;
     border-color: transparent;
     color: $text-primary;
+    transition: none;
 
     mat-icon {
+      color: $primary;
       filter: none;
+      transform: none;
     }
   }
 }
