@@ -69,7 +69,6 @@ export class RestServerNode implements Node<Label>{
 
   nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
       const rows: any[] = [];
-      if (this.nodeObject?.host)      rows.push({ icon: 'dns',           label: 'Hôte',        value: this.nodeObject.host,                color: '#6366f1' });
       if (this.nodeObject?.port)      rows.push({ icon: 'settings_ethernet', label: 'Port',    value: String(this.nodeObject.port),        color: '#8b5cf6' });
       //if (obj?.protocol)  rows.push({ icon: 'lock',          label: 'Protocole',   value: obj.protocol,            color: '#0ea5e9' });
       //if (obj?.type)      rows.push({ icon: 'category',      label: 'Type',        value: obj.type,                color: '#f59e0b' });
@@ -166,6 +165,7 @@ export class LinkRequestNode implements Link<Label> {
       status:   { icon: statusIcon, value: status, color: statusColor },
       elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
       resource: { icon: 'code', value: resource, color: '#3b82f6' },
+      session: { icon: 'link', value: this.nodeObject.id, color: '#3b82f6', type:'rest' },
       //id:       { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type: ""},
       // ...(this.nodeObject.remoteTrace ? { session: { icon: 'link', value: this.nodeObject.id, color: '#3b82f6', type:'rest' } } : {}),
     }
@@ -226,7 +226,6 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
 
   nodeInfo(){
     const rows: any[] = [];
-    if (this.nodeObject?.host)     rows.push({ icon: 'dns',      label: 'Hôte',     value: this.nodeObject.port && this.nodeObject.port !== -1 ? `${this.nodeObject.host}:${this.nodeObject.port}` : this.nodeObject.host, color: '#6366f1' });
     if (this.nodeObject?.productName) rows.push({ icon: 'inventory',  label: 'Produit', value: this.nodeObject.productName + (this.nodeObject.productVersion ? ' ' + this.nodeObject.productVersion : ''), color: '#10b981' });
     return rows
   }
@@ -281,7 +280,6 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
 
   nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
     const rows: any[] = [];
-    if (this.nodeObject?.host)     rows.push({ icon: 'dns',      label: 'Hôte',     value: this.nodeObject.port && this.nodeObject.port !== -1 ? `${this.nodeObject.host}:${this.nodeObject.port}` : this.nodeObject.host, color: '#6366f1' });
     if (this.nodeObject?.serverVersion) rows.push({ icon: 'computer',   label: 'Serveur', value: this.nodeObject.serverVersion, color: '#0e7490' });
     if (this.nodeObject?.clientVersion) rows.push({ icon: 'laptop',     label: 'Client',  value: this.nodeObject.clientVersion, color: '#0891b2' });
     return rows
@@ -339,7 +337,6 @@ export class MailRequestNode implements Node<Label>, Link<Label> {
 
    nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
     const rows: any[] = [];
-    if (this.nodeObject?.host)     rows.push({ icon: 'dns',      label: 'Hôte',     value: this.nodeObject.port && this.nodeObject.port !== -1 ? `${this.nodeObject.host}:${this.nodeObject.port}` : this.nodeObject.host, color: '#6366f1' });
     if (this.nodeObject?.mails?.length) rows.push({ icon: 'email',  label: 'Mails',   value: `${this.nodeObject.mails.length} destinataire(s)`, color: '#f59e0b' }); // todo get ?
     return rows
     }
@@ -396,7 +393,6 @@ export class LdapRequestNode implements Node<Label>, Link<Label> {
 
   nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
     const rows: any[] = [];
-    if (this.nodeObject?.host)     rows.push({ icon: 'dns',      label: 'Hôte',     value: this.nodeObject.port && this.nodeObject.port !== -1 ? `${this.nodeObject.host}:${this.nodeObject.port}` : this.nodeObject.host, color: '#6366f1' });
     return rows
     }
 
