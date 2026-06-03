@@ -141,6 +141,108 @@ mat-form-field.no-subscript {
   }
 }
 
+.period-filter-wrapper {
+  display: flex;
+  align-items: center;
+}
+
+.period-field {
+  width: 430px !important;
+
+  .mat-mdc-form-field-icon-suffix {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+    padding-right: 8px;
+  }
+
+  .mat-datepicker-toggle {
+    margin-right: 2px;
+  }
+}
+
+.period-inline-separator {
+  width: 1px;
+  height: 24px;
+  margin: 0 2px 0 4px;
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.period-action-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  padding: 0 !important;
+  border-radius: 10px !important;
+  color: rgba(0, 0, 0, 0.68);
+  transition: color .15s ease !important;
+
+  &:hover {
+    color: rgba(0, 0, 0, 0.82);
+  }
+
+  .mat-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 20px !important;
+    height: 20px !important;
+    line-height: 20px !important;
+    font-size: 20px !important;
+    margin: 0 !important;
+  }
+
+  .mat-mdc-button-persistent-ripple,
+  .mdc-icon-button__ripple,
+  .mat-mdc-button-touch-target {
+    width: 36px !important;
+    height: 36px !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    border-radius: 10px !important;
+  }
+}
+
+.period-quick-ranges-menu.mat-mdc-menu-panel,
+.period-quick-ranges-menu.mat-menu-panel {
+  border-radius: 14px !important;
+  min-width: 240px !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .12), 0 0 0 1px rgba(0, 0, 0, .06) !important;
+  overflow: hidden;
+}
+
+.period-quick-ranges-menu .mat-mdc-menu-content,
+.period-quick-ranges-menu .mat-menu-content {
+  padding: 6px !important;
+}
+
+.period-quick-ranges-menu .mat-mdc-menu-item,
+.period-quick-ranges-menu .mat-menu-item {
+  min-height: 42px !important;
+  margin: 2px 0;
+  padding: 0 14px !important;
+  border-radius: 10px !important;
+
+  .mdc-list-item__primary-text,
+  .mat-mdc-menu-item-text,
+  span {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    font-size: 13px;
+    font-weight: 500;
+    color: #0f172a;
+  }
+
+  &:hover:not([disabled]) {
+    background: #f8fafc !important;
+  }
+}
+
 .mdc-data-table__cell:has(#pie-chart) {
   overflow: visible !important;
 }

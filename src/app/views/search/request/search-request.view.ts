@@ -21,6 +21,7 @@ import {FtpRequestService} from "../../../service/jquery/ftp-request.service";
 import {SmtpRequestService} from "../../../service/jquery/smtp-request.service";
 import {LdapRequestService} from "../../../service/jquery/ldap-request.service";
 import {PageTitleService} from "../../../service/page-title.service";
+import {getDefaultRelativePeriod, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
 
 
 
@@ -65,6 +66,8 @@ export class SearchRequestView implements OnInit, OnDestroy {
       end: new FormControl<Date | null>(null, [Validators.required])
     })
   });
+
+  readonly periodQuickRanges = PERIOD_QUICK_RANGES;
 
   queryParams: Partial<QueryParams> = {};
   params: Partial<Params> = {};
@@ -128,9 +131,9 @@ export class SearchRequestView implements OnInit, OnDestroy {
           if(!queryParams.start && !queryParams.end){
             let period;
             if(queryParams.step && queryParams.from){
-                period = new IStepFrom(queryParams.step, queryParams.from);
+              period = new IStepFrom(Number(queryParams.step), Number(queryParams.from));
             } else if(queryParams.step){
-                period = new IStep(queryParams.step);
+              period = new IStep(Number(queryParams.step));
             }
             this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.env || app.defaultEnv, null, !queryParams.host ? [] : Array.isArray(queryParams.host) ? queryParams.host : [queryParams.host],!queryParams.rangestatus ? [/*this.seviceType[this.params.type].filters[0].value*/]: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] );
           }
@@ -314,8 +317,23 @@ export class SearchRequestView implements OnInit, OnDestroy {
         });
       }
     }
-}
+  }
 
+  isDefaultPeriod(): boolean {
+    return isDefaultRelativePeriod(this.queryParams?.period);
+  }
+
+  resetPeriod(): void {
+    const defaultPeriod = getDefaultRelativePeriod();
+    this.queryParams.period = defaultPeriod;
+    this.patchDateValue(defaultPeriod.start, toDisplayedPeriodEnd(defaultPeriod.end));
+  }
+
+  applyQuickRange(range: PeriodQuickRange): void {
+    const {start, end} = getQuickRangeDates(range);
+    this.queryParams.period = new IPeriod(start, end);
+    this.patchDateValue(start, toDisplayedPeriodEnd(end));
+  }
 }
 
 

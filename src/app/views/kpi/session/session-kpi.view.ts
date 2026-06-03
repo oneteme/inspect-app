@@ -11,6 +11,7 @@ import {Constants} from "../../constants";
 import {PageTitleService} from "../../../service/page-title.service";
 import {RestSessionService} from "../../../service/jquery/rest-session.service";
 import {MainSessionService} from "../../../service/jquery/main-session.service";
+import {getKpiQuickRangeDates, KPI_PERIOD_QUICK_RANGES, KpiPeriodQuickRange} from '../../../shared/period-filter';
 
 @Component({
   templateUrl: './session-kpi.view.html',
@@ -29,6 +30,7 @@ export class SessionKpiView implements OnInit, OnDestroy {
   private readonly _location = inject(Location);
 
   MAPPING_TYPE = Constants.MAPPING_TYPE;
+  readonly periodQuickRanges = KPI_PERIOD_QUICK_RANGES;
 
   serverNameIsLoading: boolean;
   nameDataList: any[] = [];
@@ -76,10 +78,6 @@ export class SessionKpiView implements OnInit, OnDestroy {
       this.hostSubscription.unsubscribe();
     }
     this._pageTitleService.clear();
-  }
-
-  onChangeEnd() {
-    this.search();
   }
 
   patchDateValue(start: Date, end: Date) {
@@ -142,9 +140,13 @@ export class SessionKpiView implements OnInit, OnDestroy {
   }
 
   onHostopenedChange() {
-    let doSearch = this.params.queryParams.hosts != this.filterForm.controls.host.value;
     this.params.queryParams.hosts = [...this.filterForm.controls.host.value];
-    doSearch && this.search();
+  }
+
+  applyQuickRange(range: KpiPeriodQuickRange): void {
+    const {start, end, queryEnd} = getKpiQuickRangeDates(range);
+    this.params.queryParams.period = new IPeriod(start, queryEnd);
+    this.patchDateValue(start, end);
   }
 }
 

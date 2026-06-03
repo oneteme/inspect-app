@@ -137,16 +137,16 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   navigateTo(event: MouseEvent, route: string) {
-    this._envRouter.navigateOnClick(event, [route], { queryParams: { env: this.env.value } });
+    this._envRouter.navigateOnClick(event, [route], { queryParams: { env: this.env.value }, queryParamsHandling: 'merge' });
   }
 
   navigateToSub(event: MouseEvent, _parent: NavItem, child: SubNavItem) {
-    this._envRouter.navigateOnClick(event, [child.route], { queryParams: { env: this.env.value } });
+    this._envRouter.navigateOnClick(event, [child.route], { queryParams: { env: this.env.value }, queryParamsHandling: 'merge' });
   }
 
   navigateToKpi(event: MouseEvent, kpiRoute: string) {
     this.mainMenuTrigger?.closeMenu();
-    this._envRouter.navigateOnClick(event, [kpiRoute], { queryParams: { env: this.env.value } });
+    this._envRouter.navigateOnClick(event, [kpiRoute], { queryParams: { env: this.env.value }, queryParamsHandling: 'merge' });
   }
 
   getEnvClass(env: string): string {
