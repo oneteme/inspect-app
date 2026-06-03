@@ -464,7 +464,7 @@ export class RestSessionService {
         const requests = data.series.map(serie => {
             const serieAlias = data.indicator.jquery.buildAlias(serie.jquery.buildAlias());
             const args: any = {
-                'column': `${serie.jquery.value()}.${data.indicator.jquery.value()}:${serieAlias},${data.group.jquery.value()}:${groupAlias}`,
+                'column': `${data.indicator.jquery.value(serie.jquery.value())}:${serieAlias},${data.group.jquery.value()}:${groupAlias}`,
                 'instance_env': 'instance.id',
                 'instance.environement': `"${filters.env}"`,
                 'start.ge': filters.start.toISOString(),
@@ -513,7 +513,7 @@ export class RestSessionService {
               filters: {env: string, start: Date, end: Date, hosts?: string[], filters?: string[] }): Observable<any[]> {
 
         let args: any = {
-            'column': `${data.series.map(d => d.jquery.value() + '.' + data.indicator.jquery.value() + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
+            'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
             'instance_env': 'instance.id',
             'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),

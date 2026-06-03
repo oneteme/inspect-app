@@ -16,88 +16,7 @@ export const REST_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartC
       }
     }]
   },
-  indicators: {
-    optional: false,
-    items: [{
-      key: 'count',
-      selected: true,
-      menu: {
-        label: 'Nombre d\'Appel'
-      },
-      jquery: {
-        value: () => 'count',
-        buildAlias: () => 'count'
-      },
-      extra: {
-        stacks: {
-          optional: false,
-          items: [{
-            key: 'performance_tranche',
-            selected: true,
-            menu: {
-              label: 'Par tranche 1',
-              icon: ''
-            },
-            jquery: {
-              value: () => 'performance_tranche',
-              buildAlias: () => 'performance_tranche',
-              buildName: (chartItem, value) => PERFORMANCE_TRANCHE1[value].label,
-              buildColor: (value: string) => PERFORMANCE_TRANCHE1[value].color
-            }
-          }, {
-            key: 'performance_tranche2',
-            selected: false,
-            menu: {
-              label: 'Par tranche 2',
-              icon: ''
-            },
-            jquery: {
-              value: () => 'performance_tranche2',
-              buildAlias: () => 'performance_tranche2',
-              buildName: (chartItem, value) => PERFORMANCE_TRANCHE2[value].label,
-              buildColor: (value: string) => PERFORMANCE_TRANCHE2[value].color
-            }
-          }]
-        }
-      }
-    }, {
-      key: 'avg',
-      selected: false,
-      menu: {
-        label: 'Moyenne'
-      },
-      jquery: {
-        value: () => 'avg',
-        buildAlias: () => 'avg',
-        buildName: (chartItem) => 'Moyenne',
-        buildColor: () => '#0080ff'
-      }
-    }, {
-      key: 'min',
-      selected: false,
-      menu: {
-        label: 'Minimum'
-      },
-      jquery: {
-        value: () => 'min',
-        buildAlias: () => 'min',
-        buildName: (chartItem) => 'Minimum',
-        buildColor: () => '#0080ff'
-      }
-    }, {
-      key: 'max',
-      selected: false,
-      menu: {
-        label: 'Maximum'
-      },
-      jquery: {
-        value: () => 'max',
-        buildAlias: () => 'max',
-        buildName: (chartItem) => 'Maximum',
-        buildColor: () => '#0080ff'
-      }
-    }]
-  },
+  indicators: PERFORMANCE_INDICATORS(),
   groups: REST_SESSION_GROUPS_CONFIG(groupedBy),
   filters: REST_SESSION_FILTERS_CONFIG(groupedBy)
 });
@@ -228,7 +147,7 @@ export const REST_SESSION_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartCon
         label: 'Total'
       },
       jquery: {
-        value: () => 'sum',
+        value:  (s: string) => `${s}.sum`,
         buildAlias: (value) => 'sum_' + value,
         buildName: (chartItem, value) => 'Total ' + chartItem.menu.label,
       }
@@ -239,7 +158,7 @@ export const REST_SESSION_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartCon
         label: 'Minimum'
       },
       jquery: {
-        value: () => 'min',
+        value:  (s: string) => `${s}.min`,
         buildAlias: (value) => 'min_' + value,
         buildName: (chartItem, value) => 'Minimum ' + chartItem.menu.label,
       }
@@ -250,7 +169,7 @@ export const REST_SESSION_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartCon
         label: 'Maximum'
       },
       jquery: {
-        value: () => 'max',
+        value:  (s: string) => `${s}.max`,
         buildAlias: (value) => 'max_' + value,
         buildName: (chartItem, value) => 'Maximum ' + chartItem.menu.label,
       }
@@ -492,88 +411,7 @@ export const BATCH_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): Chart
       }
     }]
   },
-  indicators: {
-    optional: false,
-    items: [{
-      key: 'count',
-      selected: true,
-      menu: {
-        label: 'Nombre de lancement'
-      },
-      jquery: {
-        value: () => 'count',
-        buildAlias: () => 'count'
-      },
-      extra: {
-        stacks: {
-          optional: false,
-          items: [{
-            key: 'performance_tranche',
-            selected: true,
-            menu: {
-              label: 'Par tranche 1',
-              icon: ''
-            },
-            jquery: {
-              value: () => 'performance_tranche',
-              buildAlias: () => 'performance_tranche',
-              buildName: (chartItem, value) => PERFORMANCE_TRANCHE1[value].label,
-              buildColor: (value: string) => PERFORMANCE_TRANCHE1[value].color
-            }
-          }, {
-            key: 'performance_tranche2',
-            selected: false,
-            menu: {
-              label: 'Par tranche 2',
-              icon: ''
-            },
-            jquery: {
-              value: () => 'performance_tranche2',
-              buildAlias: () => 'performance_tranche2',
-              buildName: (chartItem, value) => PERFORMANCE_TRANCHE2[value].label,
-              buildColor: (value: string) => PERFORMANCE_TRANCHE2[value].color
-            }
-          }]
-        }
-      }
-    }, {
-      key: 'avg',
-      selected: false,
-      menu: {
-        label: 'Moyenne'
-      },
-      jquery: {
-        value: () => 'avg',
-        buildAlias: () => 'avg',
-        buildName: (chartItem) => 'Moyenne',
-        buildColor: () => '#0080ff'
-      }
-    }, {
-      key: 'min',
-      selected: false,
-      menu: {
-        label: 'Minimum'
-      },
-      jquery: {
-        value: () => 'min',
-        buildAlias: () => 'min',
-        buildName: (chartItem) => 'Minimum',
-        buildColor: () => '#0080ff'
-      }
-    }, {
-      key: 'max',
-      selected: false,
-      menu: {
-        label: 'Maximum'
-      },
-      jquery: {
-        value: () => 'max',
-        buildAlias: () => 'max',
-        buildName: (chartItem) => 'Maximum',
-        buildColor: () => '#0080ff'
-      }
-    }]
-  },
+  indicators: PERFORMANCE_INDICATORS(),
   groups: BATCH_SESSION_GROUPS_CONFIG(groupedBy),
   filters: BATCH_SESSION_FILTERS_CONFIG(groupedBy)
 });
@@ -722,88 +560,7 @@ export const STARTUP_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): Cha
       }
     }]
   },
-  indicators: {
-    optional: false,
-    items: [{
-      key: 'count',
-      selected: true,
-      menu: {
-        label: 'Nombre de lancement'
-      },
-      jquery: {
-        value: () => 'count',
-        buildAlias: () => 'count'
-      },
-      extra: {
-        stacks: {
-          optional: false,
-          items: [{
-            key: 'performance_tranche',
-            selected: true,
-            menu: {
-              label: 'Par tranche 1',
-              icon: ''
-            },
-            jquery: {
-              value: () => 'performance_tranche',
-              buildAlias: () => 'performance_tranche',
-              buildName: (chartItem, value) => PERFORMANCE_TRANCHE1[value].label,
-              buildColor: (value: string) => PERFORMANCE_TRANCHE1[value].color
-            }
-          }, {
-            key: 'performance_tranche2',
-            selected: false,
-            menu: {
-              label: 'Par tranche 2',
-              icon: ''
-            },
-            jquery: {
-              value: () => 'performance_tranche2',
-              buildAlias: () => 'performance_tranche2',
-              buildName: (chartItem, value) => PERFORMANCE_TRANCHE2[value].label,
-              buildColor: (value: string) => PERFORMANCE_TRANCHE2[value].color
-            }
-          }]
-        }
-      }
-    }, {
-      key: 'avg',
-      selected: false,
-      menu: {
-        label: 'Moyenne'
-      },
-      jquery: {
-        value: () => 'avg',
-        buildAlias: () => 'avg',
-        buildName: (chartItem) => 'Moyenne',
-        buildColor: () => '#0080ff'
-      }
-    }, {
-      key: 'min',
-      selected: false,
-      menu: {
-        label: 'Minimum'
-      },
-      jquery: {
-        value: () => 'min',
-        buildAlias: () => 'min',
-        buildName: (chartItem) => 'Minimum',
-        buildColor: () => '#0080ff'
-      }
-    }, {
-      key: 'max',
-      selected: false,
-      menu: {
-        label: 'Maximum'
-      },
-      jquery: {
-        value: () => 'max',
-        buildAlias: () => 'max',
-        buildName: (chartItem) => 'Maximum',
-        buildColor: () => '#0080ff'
-      }
-    }]
-  },
+  indicators: PERFORMANCE_INDICATORS(),
   groups: STARTUP_SESSION_GROUPS_CONFIG(groupedBy),
   filters: STARTUP_SESSION_FILTERS_CONFIG(groupedBy)
 });
@@ -877,88 +634,7 @@ export const REST_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig =>
       }
     }]
   },
-  indicators: {
-    optional: false,
-    items: [{
-      key: 'count',
-      selected: true,
-      menu: {
-        label: 'Nombre d\'Appel'
-      },
-      jquery: {
-        value: () => 'count',
-        buildAlias: () => 'count'
-      },
-      extra: {
-        stacks: {
-          optional: false,
-          items: [{
-            key: 'performance_tranche',
-            selected: true,
-            menu: {
-              label: 'Par tranche 1',
-              icon: ''
-            },
-            jquery: {
-              value: () => 'performance_tranche',
-              buildAlias: () => 'performance_tranche',
-              buildName: (chartItem, value) => PERFORMANCE_TRANCHE1[value].label,
-              buildColor: (value: string) => PERFORMANCE_TRANCHE1[value].color
-            }
-          }, {
-            key: 'performance_tranche2',
-            selected: false,
-            menu: {
-              label: 'Par tranche 2',
-              icon: ''
-            },
-            jquery: {
-              value: () => 'performance_tranche2',
-              buildAlias: () => 'performance_tranche2',
-              buildName: (chartItem, value) => PERFORMANCE_TRANCHE2[value].label,
-              buildColor: (value: string) => PERFORMANCE_TRANCHE2[value].color
-            }
-          }]
-        }
-      }
-    }, {
-      key: 'avg',
-      selected: false,
-      menu: {
-        label: 'Moyenne'
-      },
-      jquery: {
-        value: () => 'avg',
-        buildAlias: () => 'avg',
-        buildName: (chartItem) => 'Moyenne',
-        buildColor: () => '#0080ff'
-      }
-    }, {
-      key: 'min',
-      selected: false,
-      menu: {
-        label: 'Minimum'
-      },
-      jquery: {
-        value: () => 'min',
-        buildAlias: () => 'min',
-        buildName: (chartItem) => 'Minimum',
-        buildColor: () => '#0080ff'
-      }
-    }, {
-      key: 'max',
-      selected: false,
-      menu: {
-        label: 'Maximum'
-      },
-      jquery: {
-        value: () => 'max',
-        buildAlias: () => 'max',
-        buildName: (chartItem) => 'Maximum',
-        buildColor: () => '#0080ff'
-      }
-    }]
-  },
+  indicators: PERFORMANCE_INDICATORS(),
   groups: REST_GROUPS_CONFIG(groupedBy),
   filters: REST_FILTERS_CONFIG(groupedBy)
 });
@@ -1089,7 +765,7 @@ export const REST_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartConfig => (
         label: 'Total'
       },
       jquery: {
-        value: () => 'sum',
+        value: (s: string) => `${s}.sum`,
         buildAlias: (value) => 'sum_' + value,
         buildName: (chartItem, value) => 'Total ' + chartItem.menu.label,
       }
@@ -1100,7 +776,7 @@ export const REST_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartConfig => (
         label: 'Minimum'
       },
       jquery: {
-        value: () => 'min',
+        value: (s: string) => `${s}.min`,
         buildAlias: (value) => 'min_' + value,
         buildName: (chartItem, value) => 'Minimum ' + chartItem.menu.label,
       }
@@ -1111,7 +787,7 @@ export const REST_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartConfig => (
         label: 'Maximum'
       },
       jquery: {
-        value: () => 'max',
+        value: (s: string) => `${s}.max`,
         buildAlias: (value) => 'max_' + value,
         buildName: (chartItem, value) => 'Maximum ' + chartItem.menu.label,
       }
@@ -1145,7 +821,7 @@ export const REST_LATENCY_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
         label: 'Moyenne'
       },
       jquery: {
-        value: () => 'avg',
+        value: (s: string) => `avg`,
         buildAlias: () => 'avg',
         buildName: (chartItem) => 'Moyenne',
         buildColor: () => '#0080ff'
@@ -1157,7 +833,7 @@ export const REST_LATENCY_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
         label: 'Minimum'
       },
       jquery: {
-        value: () => 'min',
+        value: (s: string) => `min`,
         buildAlias: () => 'min',
         buildName: (chartItem) => 'Minimum',
         buildColor: () => '#0080ff'
@@ -1169,7 +845,7 @@ export const REST_LATENCY_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
         label: 'Maximum'
       },
       jquery: {
-        value: () => 'max',
+        value: (s: string) => `max`,
         buildAlias: () => 'max',
         buildName: (chartItem) => 'Maximum',
         buildColor: () => '#0080ff'
@@ -1368,88 +1044,7 @@ export const JDBC_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig =>
       }
     }]
   },
-  indicators: {
-    optional: false,
-    items: [{
-      key: 'count',
-      selected: true,
-      menu: {
-        label: 'Nombre d\'Appel'
-      },
-      jquery: {
-        value: () => 'count',
-        buildAlias: () => 'count'
-      },
-      extra: {
-        stacks: {
-          optional: false,
-          items: [{
-            key: 'performance_tranche',
-            selected: true,
-            menu: {
-              label: 'Par tranche 1',
-              icon: ''
-            },
-            jquery: {
-              value: () => 'performance_tranche',
-              buildAlias: () => 'performance_tranche',
-              buildName: (chartItem, value) => PERFORMANCE_TRANCHE1[value].label,
-              buildColor: (value: string) => PERFORMANCE_TRANCHE1[value].color
-            }
-          }, {
-            key: 'performance_tranche2',
-            selected: false,
-            menu: {
-              label: 'Par tranche 2',
-              icon: ''
-            },
-            jquery: {
-              value: () => 'performance_tranche2',
-              buildAlias: () => 'performance_tranche2',
-              buildName: (chartItem, value) => PERFORMANCE_TRANCHE2[value].label,
-              buildColor: (value: string) => PERFORMANCE_TRANCHE2[value].color
-            }
-          }]
-        }
-      }
-    }, {
-      key: 'avg',
-      selected: false,
-      menu: {
-        label: 'Moyenne'
-      },
-      jquery: {
-        value: () => 'avg',
-        buildAlias: () => 'avg',
-        buildName: () => 'Moyenne',
-        buildColor: () => '#0080ff'
-      }
-    }, {
-      key: 'min',
-      selected: false,
-      menu: {
-        label: 'Minimum'
-      },
-      jquery: {
-        value: () => 'min',
-        buildAlias: () => 'min',
-        buildName: () => 'Minimum',
-        buildColor: () => '#0080ff'
-      }
-    }, {
-      key: 'max',
-      selected: false,
-      menu: {
-        label: 'Maximum'
-      },
-      jquery: {
-        value: () => 'max',
-        buildAlias: () => 'max',
-        buildName: () => 'Maximum',
-        buildColor: () => '#0080ff'
-      }
-    }]
-  },
+  indicators: PERFORMANCE_INDICATORS(),
   groups: JDBC_GROUPS_CONFIG(groupedBy),
   filters: JDBC_FILTERS_CONFIG(groupedBy)
 });
@@ -1686,88 +1281,7 @@ export const FTP_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => 
       }
     }]
   },
-  indicators: {
-    optional: false,
-    items: [{
-      key: 'count',
-      selected: true,
-      menu: {
-        label: 'Nombre d\'Appel'
-      },
-      jquery: {
-        value: () => 'count',
-        buildAlias: () => 'count'
-      },
-      extra: {
-        stacks: {
-          optional: false,
-          items: [{
-            key: 'performance_tranche',
-            selected: true,
-            menu: {
-              label: 'Par tranche 1',
-              icon: ''
-            },
-            jquery: {
-              value: () => 'performance_tranche',
-              buildAlias: () => 'performance_tranche',
-              buildName: (chartItem, value) => PERFORMANCE_TRANCHE1[value].label,
-              buildColor: (value: string) => PERFORMANCE_TRANCHE1[value].color
-            }
-          }, {
-            key: 'performance_tranche2',
-            selected: false,
-            menu: {
-              label: 'Par tranche 2',
-              icon: ''
-            },
-            jquery: {
-              value: () => 'performance_tranche2',
-              buildAlias: () => 'performance_tranche2',
-              buildName: (chartItem, value) => PERFORMANCE_TRANCHE2[value].label,
-              buildColor: (value: string) => PERFORMANCE_TRANCHE2[value].color
-            }
-          }]
-        }
-      }
-    }, {
-      key: 'avg',
-      selected: false,
-      menu: {
-        label: 'Moyenne'
-      },
-      jquery: {
-        value: () => 'avg',
-        buildAlias: () => 'avg',
-        buildName: () => 'Moyenne',
-        buildColor: () => '#0080ff'
-      }
-    }, {
-      key: 'min',
-      selected: false,
-      menu: {
-        label: 'Minimum'
-      },
-      jquery: {
-        value: () => 'min',
-        buildAlias: () => 'min',
-        buildName: () => 'Minimum',
-        buildColor: () => '#0080ff'
-      }
-    }, {
-      key: 'max',
-      selected: false,
-      menu: {
-        label: 'Maximum'
-      },
-      jquery: {
-        value: () => 'max',
-        buildAlias: () => 'max',
-        buildName: () => 'Maximum',
-        buildColor: () => '#0080ff'
-      }
-    }]
-  },
+  indicators: PERFORMANCE_INDICATORS(),
   groups: FTP_GROUPS_CONFIG(groupedBy),
   filters: FTP_FILTERS_CONFIG(groupedBy)
 });
@@ -1960,88 +1474,7 @@ export const LDAP_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig =>
       }
     }]
   },
-  indicators: {
-    optional: false,
-    items: [{
-      key: 'count',
-      selected: true,
-      menu: {
-        label: 'Nombre d\'Appel'
-      },
-      jquery: {
-        value: () => 'count',
-        buildAlias: () => 'count'
-      },
-      extra: {
-        stacks: {
-          optional: false,
-          items: [{
-            key: 'performance_tranche',
-            selected: true,
-            menu: {
-              label: 'Par tranche 1',
-              icon: ''
-            },
-            jquery: {
-              value: () => 'performance_tranche',
-              buildAlias: () => 'performance_tranche',
-              buildName: (chartItem, value) => PERFORMANCE_TRANCHE1[value].label,
-              buildColor: (value: string) => PERFORMANCE_TRANCHE1[value].color
-            }
-          }, {
-            key: 'performance_tranche2',
-            selected: false,
-            menu: {
-              label: 'Par tranche 2',
-              icon: ''
-            },
-            jquery: {
-              value: () => 'performance_tranche2',
-              buildAlias: () => 'performance_tranche2',
-              buildName: (chartItem, value) => PERFORMANCE_TRANCHE2[value].label,
-              buildColor: (value: string) => PERFORMANCE_TRANCHE2[value].color
-            }
-          }]
-        }
-      }
-    }, {
-      key: 'avg',
-      selected: false,
-      menu: {
-        label: 'Moyenne'
-      },
-      jquery: {
-        value: () => 'avg',
-        buildAlias: () => 'avg',
-        buildName: () => 'Moyenne',
-        buildColor: () => '#0080ff'
-      }
-    }, {
-      key: 'min',
-      selected: false,
-      menu: {
-        label: 'Minimum'
-      },
-      jquery: {
-        value: () => 'min',
-        buildAlias: () => 'min',
-        buildName: () => 'Minimum',
-        buildColor: () => '#0080ff'
-      }
-    }, {
-      key: 'max',
-      selected: false,
-      menu: {
-        label: 'Maximum'
-      },
-      jquery: {
-        value: () => 'max',
-        buildAlias: () => 'max',
-        buildName: () => 'Maximum',
-        buildColor: () => '#0080ff'
-      }
-    }]
-  },
+  indicators: PERFORMANCE_INDICATORS(),
   groups: LDAP_GROUPS_CONFIG(groupedBy),
   filters: LDAP_FILTERS_CONFIG(groupedBy)
 });
@@ -2190,88 +1623,7 @@ export const SMTP_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig =>
       }
     }]
   },
-  indicators: {
-    optional: false,
-    items: [{
-      key: 'count',
-      selected: true,
-      menu: {
-        label: 'Nombre d\'Appel'
-      },
-      jquery: {
-        value: () => 'count',
-        buildAlias: () => 'count'
-      },
-      extra: {
-        stacks: {
-          optional: false,
-          items: [{
-            key: 'performance_tranche',
-            selected: true,
-            menu: {
-              label: 'Par tranche 1',
-              icon: ''
-            },
-            jquery: {
-              value: () => 'performance_tranche',
-              buildAlias: () => 'performance_tranche',
-              buildName: (chartItem, value) => PERFORMANCE_TRANCHE1[value].label,
-              buildColor: (value: string) => PERFORMANCE_TRANCHE1[value].color
-            }
-          }, {
-            key: 'performance_tranche2',
-            selected: false,
-            menu: {
-              label: 'Par tranche 2',
-              icon: ''
-            },
-            jquery: {
-              value: () => 'performance_tranche2',
-              buildAlias: () => 'performance_tranche2',
-              buildName: (chartItem, value) => PERFORMANCE_TRANCHE2[value].label,
-              buildColor: (value: string) => PERFORMANCE_TRANCHE2[value].color
-            }
-          }]
-        }
-      }
-    }, {
-      key: 'avg',
-      selected: false,
-      menu: {
-        label: 'Moyenne'
-      },
-      jquery: {
-        value: () => 'avg',
-        buildAlias: () => 'avg',
-        buildName: () => 'Moyenne',
-        buildColor: () => '#0080ff'
-      }
-    }, {
-      key: 'min',
-      selected: false,
-      menu: {
-        label: 'Minimum'
-      },
-      jquery: {
-        value: () => 'min',
-        buildAlias: () => 'min',
-        buildName: () => 'Minimum',
-        buildColor: () => '#0080ff'
-      }
-    }, {
-      key: 'max',
-      selected: false,
-      menu: {
-        label: 'Maximum'
-      },
-      jquery: {
-        value: () => 'max',
-        buildAlias: () => 'max',
-        buildName: () => 'Maximum',
-        buildColor: () => '#0080ff'
-      }
-    }]
-  },
+  indicators: PERFORMANCE_INDICATORS(),
   groups: SMTP_GROUPS_CONFIG(groupedBy),
   filters: SMTP_FILTERS_CONFIG(groupedBy)
 });
@@ -2348,6 +1700,113 @@ export const SMTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       value: () => `user.coalesce("Non renseigné")`,
       buildAlias: () => 'user',
       order: 'user.asc',
+    }
+  }]
+});
+
+export const PERFORMANCE_INDICATORS = (): ChartSection => ({
+  optional: false,
+  items: [{
+    key: 'count',
+    selected: false,
+    menu: {
+      label: 'Nombre d\'Appel'
+    },
+    jquery: {
+      value: () => 'count',
+      buildAlias: () => 'count'
+    },
+    extra: {
+      stacks: {
+        optional: false,
+        items: [{
+          key: 'performance_tranche',
+          selected: false,
+          menu: {
+            label: 'Par tranche 1',
+            icon: ''
+          },
+          jquery: {
+            value: () => 'performance_tranche',
+            buildAlias: () => 'performance_tranche',
+            buildName: (chartItem, value) => PERFORMANCE_TRANCHE1[value].label,
+            buildColor: (value: string) => PERFORMANCE_TRANCHE1[value].color
+          }
+        }, {
+          key: 'performance_tranche2',
+          selected: false,
+          menu: {
+            label: 'Par tranche 2',
+            icon: ''
+          },
+          jquery: {
+            value: () => 'performance_tranche2',
+            buildAlias: () => 'performance_tranche2',
+            buildName: (chartItem, value) => PERFORMANCE_TRANCHE2[value].label,
+            buildColor: (value: string) => PERFORMANCE_TRANCHE2[value].color
+          }
+        }]
+      }
+    }
+  }, {
+    key: 'percentile',
+    selected: true,
+    menu: {
+      label: 'Percentile (95%)'
+    },
+    jquery: {
+      value: (s: string) => `elapsed_percentile`,
+      buildAlias: () => 'percentile',
+      buildName: (chartItem) => 'Percentile (95%)',
+      buildColor: () => '#0080ff'
+    }
+  }, {
+    key: 'median',
+    selected: false,
+    menu: {
+      label: 'Médiane'
+    },
+    jquery: {
+      value: (s: string) => `elapsed_median`,
+      buildAlias: () => 'median',
+      buildName: (chartItem) => 'Médiane',
+      buildColor: () => '#0080ff'
+    }
+  }, {
+    key: 'avg',
+    selected: false,
+    menu: {
+      label: 'Moyenne'
+    },
+    jquery: {
+      value: (s: string) => `${s}.avg`,
+      buildAlias: () => 'avg',
+      buildName: (chartItem) => 'Moyenne',
+      buildColor: () => '#0080ff'
+    }
+  }, {
+    key: 'min',
+    selected: false,
+    menu: {
+      label: 'Minimum'
+    },
+    jquery: {
+      value: (s: string) => `${s}.min`,
+      buildAlias: () => 'min',
+      buildName: (chartItem) => 'Minimum',
+      buildColor: () => '#0080ff'
+    }
+  }, {
+    key: 'max',
+    selected: false,
+    menu: {
+      label: 'Maximum'
+    },
+    jquery: {
+      value:  (s: string) => `${s}.max`,
+      buildAlias: () => 'max',
+      buildName: (chartItem) => 'Maximum',
+      buildColor: () => '#0080ff'
     }
   }]
 });

@@ -398,7 +398,7 @@ export class MainSessionService {
     getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
               filters: {env: string, start: Date, end: Date, hosts?: string[], filters?: string[], type: string }): Observable<any[]> {
         let args: any = {
-            'column': `${data.series.map(d => d.jquery.value() + '.' + data.indicator.jquery.value() + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
+            'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
             'instance_env': 'instance.id',
             'instance.environement': `"${filters.env}"`,
             'instance.type': 'SERVER',
