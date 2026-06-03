@@ -84,7 +84,7 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
     { title: 'Status', columnKey: 'status', hidden: true },
     { title: 'Hôte', columnKey: 'appName', hidden: true },
     { title: 'Méthode', columnKey: 'method', icon: 'label', hidden: true },
-    { title: 'Ressource', columnKey: 'path', icon: 'category', hidden: true },
+    { title: 'Chemin', columnKey: 'path', icon: 'route', hidden: true },
     {
       title: 'Durée',
       columnKey: 'duration',
@@ -193,7 +193,7 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
     { title: 'Méthode', columnKey: 'method', icon: 'label', hidden: true },
-    { title: 'Ressource', columnKey: 'path', icon: 'category', hidden: true }
+    { title: 'Chemin', columnKey: 'path', icon: 'route', hidden: true }
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: RestSessionDto) => {
@@ -243,12 +243,7 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
       icon: 'label',
       hidden: true
     },
-    {
-      title: 'Ressource',
-      columnKey: 'schema',
-      icon: 'category',
-      hidden: true
-    }
+    { title: 'Chemin', columnKey: 'path', icon: 'route', hidden: true }
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: DatabaseRequestDto) => {
