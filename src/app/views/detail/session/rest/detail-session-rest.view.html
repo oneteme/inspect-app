@@ -95,11 +95,11 @@
 
           <!-- Volume & durée -->
           <div class="footer-section data-stats">
-            <div class="stat-item" [matTooltip]="session.inDataSize + 'o Reçus'">
+            <div class="stat-item" [matTooltip]="session.inDataSize + 'o Envoyés'">
               <mat-icon class="material-symbols-outlined stat-icon">arrow_upward</mat-icon>
               <span class="stat-value">{{ session.inDataSize || 0 }}o</span>
             </div>
-            <div class="stat-item" [matTooltip]="session.outDataSize + 'o Envoyés'">
+            <div class="stat-item" [matTooltip]="session.outDataSize + 'o Reçus'">
               <mat-icon class="material-symbols-outlined stat-icon">arrow_downward</mat-icon>
               <span class="stat-value">{{ session.outDataSize || 0 }}o</span>
             </div>
