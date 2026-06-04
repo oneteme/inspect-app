@@ -42,7 +42,7 @@
       [context]="detailContext"
       (requestProtocolNav)="navigateToRequestProtocol($event.key, $event.errorType)"
       (sessionTypeNav)="navigateToSessionByType($event.type, undefined, $event.server)"
-      (exceptionNav)="navigateToException($event.type, $event.tab)"
+      (exceptionNav)="navigateToException($event)"
       (instanceFilter)="navigateToInstancesWithFilter($event)"
       (protocolDialogOpen)="openProtocolDialog($event)">
     </dashboard-detail-view>

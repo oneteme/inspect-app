@@ -493,10 +493,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
         const dates: Record<string, number> = {};
         const countoks: Record<string, number> = {};
         data.forEach(d => {
-            if (d.errorType) errors[d.errorType] = (errors[d.errorType] ?? 0) + d.count;
-            if (d.stringDate) {
-                dates[d.stringDate] = (dates[d.stringDate] ?? 0) + d.count;
-                if (d.countok && !countoks[d.stringDate]) countoks[d.stringDate] = d.countok;
+            if (d.stringDate && d.countok && !countoks[d.stringDate]) {
+                countoks[d.stringDate] = d.countok;
+            }
+            if (d.errorType) {
+                errors[d.errorType] = (errors[d.errorType] ?? 0) + d.count;
+                if (d.stringDate) {
+                    dates[d.stringDate] = (dates[d.stringDate] ?? 0) + d.count;
+                }
             }
         });
         return { errors, dates, countoks };
@@ -606,19 +610,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
         });
     }
 
-    navigateToException(type: string, tab: 'rest' | 'batch' | 'view') {
+    navigateToException(exception: { type: string; tab: 'rest' | 'batch' | 'view' }) {
+        const { type, tab } = exception;
         if (tab === 'view') {
             this.navigateToSessionByType('VIEW', type);
             return;
         }
         const target = tab === 'rest' ? '/session/rest' : '/session/batch';
-        const rangestatus = tab === 'rest' ? ['5xx', '4xx'] : ['Ko'];
+        const rangestatus = tab === 'rest'
+            ? (type === 'ClientError' ? ['4xx'] : ['5xx'])
+            : ['Ko'];
         this._router.navigate([target], {
             queryParams: {
                 env: this.params.env,
                 start: this.params.start?.toISOString(),
                 end: this.params.end?.toISOString(),
-                q: type,
+                ...(type !== 'ClientError' && tab === 'rest' ? { q: type } : {}),
                 server: this.params.serveurs,
                 rangestatus
             }
@@ -869,7 +876,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, server: app_name })
                     .pipe(map((result: any[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
-                        return result.filter(r => r.errorType != null && r.status >= 400);
+                        return result;
                     }))
             },
             batchExceptionTable: {
