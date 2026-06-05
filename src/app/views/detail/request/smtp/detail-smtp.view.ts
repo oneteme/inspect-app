@@ -165,7 +165,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
 
     this.dataArray.splice(0, 0, {
       title: '',
-      group: this.request.command,
+      group: this.request.command ? this.request.command : '<empty>',
       start: this.timelineStart,
       end: this.timelineEnd,
       content: (this.request.host || 'N/A'),
@@ -175,8 +175,8 @@ export class DetailSmtpView implements OnInit, OnDestroy {
 
     let groups: any[] = this.stages.map((a: MailRequestStage, i: number) => ({id: i, content: a?.name, treeLevel: 2}))
     groups.splice(0, 0, {
-      id: this.request.command,
-      content: this.request.command,
+      id: this.request.command ? this.request.command : '<empty>',
+      content: this.request.command ? this.request.command : '<empty>',
       treeLevel: 1,
       nestedGroups: groups.map(g => (g.id))
     })
@@ -196,8 +196,8 @@ export class DetailSmtpView implements OnInit, OnDestroy {
     }
 
     groups.splice(0, 0, {
-      id: this.request.command,
-      content: this.request.command,
+      id: this.request.command ? this.request.command : '<empty>',
+      content: this.request.command ? this.request.command : '<empty>',
       treeLevel: 1,
       nestedGroups: groups.map(g => (g.id))
     })
@@ -247,8 +247,8 @@ export class DetailSmtpView implements OnInit, OnDestroy {
         treeLevel: 2
       }))
       groups.splice(0, 0, {
-        id: this.request.command,
-        content: this.request.command,
+        id: this.request.command ? this.request.command : '<empty>',
+        content: this.request.command ? this.request.command : '<empty>',
         treeLevel: 1,
         nestedGroups: groups.map(g => (g.id))
       })

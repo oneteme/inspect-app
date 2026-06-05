@@ -22,10 +22,21 @@
     </div>
   </ng-template>
 
+  <ng-template jqtCellDef="status" let-row>
+    <div *ngIf="!row.end" style="display: flex; align-items: center; gap: 6px;">
+      <mat-spinner [diameter]="14"></mat-spinner>
+      <span class="cell-secondary">En cours...</span>
+    </div>
+    <div *ngIf="row.end">
+      {{ row.status }}
+    </div>
+  </ng-template>
+
   <ng-template jqtCellDef="action" let-row>
     <button matTooltip="Détail de la session" [style.visibility]="row.linked || row.status == 0 ? 'visible' : 'hidden'" mat-icon-button color="primary"
             (click)="selectedRemote($event, row.id); $event.stopPropagation()">
       <mat-icon class="material-symbols-outlined">link</mat-icon>
     </button>
   </ng-template>
+
 </jquery-table>

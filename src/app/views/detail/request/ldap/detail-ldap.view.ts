@@ -152,7 +152,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
         });
         this.dataArray.splice(0,0,{
             title: "",
-            group: this.request.command,
+            group: this.request.command ? this.request.command : '<empty>',
             start: this.timelineStart,
             end: this.timelineEnd,
             content: (this.request.host || 'N/A'),
@@ -210,7 +210,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
         timeline.on('rangechanged', (props)=>{
             let d = getDataForRange( this.dataArray, props.start.getTime(), props.end.getTime());
             let groups:any[]= getDataForRange(this.stages.map(s=>({...s, start:Math.trunc(s.start*1000), end: s.end ? Math.trunc(s.end*1000 ) : INFINITY })), props.start.getTime() , props.end.getTime()).map((a: DirectoryRequestStage, i:number) => ({ id: `${d[i+1].group}`, content: a?.name, treeLevel: 2}))
-            groups.splice(0,0,{id:this.request.command, content: this.request.command,treeLevel: 1, nestedGroups:groups.map(g=>(g.id))})
+            groups.splice(0,0,{id:this.request.command ? this.request.command : '<empty>', content: this.request.command ? this.request.command : '<empty>',treeLevel: 1, nestedGroups:groups.map(g=>(g.id))})
             timeline.setGroups(groups);
             timeline.setItems(d);
         });
