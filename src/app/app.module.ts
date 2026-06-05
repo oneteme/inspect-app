@@ -160,7 +160,8 @@ const routes: Route[] = [
   {
     path: 'home',
     component: DashboardComponent,
-    title: 'Tableau de bord'
+    title: 'Tableau de bord',
+    canActivate: [authGuard]
   },
   {
     path: 'architecture',
@@ -171,26 +172,31 @@ const routes: Route[] = [
   {
     path: 'supervision/server/:instance',
     component: ServerSupervisionView,
-    title: 'Supervision • Serveur'
+    title: 'Supervision • Serveur',
+    canActivate: [authGuard]
   },
   {
+    
     path: 'kpi/request/:request_type',
     component: RequestKpiView,
     title:  (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
       return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('request_type')].title + ' • KPI';
-    }
+    },
+    canActivate: [authGuard]
   },
   {
     path: 'kpi/session/:session_type',
     component: SessionKpiView,
     title:  (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
       return Constants.MAPPING_TYPE[route.paramMap.get('session_type')].title + ' • KPI';
-    }
+    },
+    canActivate: [authGuard]
   },
   {
     path: 'supervision/client/:instance',
     component: ClientSupervisionView,
-    title: 'Supervision • Client'
+    title: 'Supervision • Client',
+    canActivate: [authGuard]
   },
   {path: '**', pathMatch: 'full', redirectTo: `/home`}
 ];
