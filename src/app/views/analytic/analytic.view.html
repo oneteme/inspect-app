@@ -1,5 +1,5 @@
-<header-page titleIcon="web_traffic" [iconOutlined]="true" [ui-title]="'Parcours de l\'utilisateur ' + params.user">
-    <div class="header-right" [formGroup]="filterForm">
+<page-panel panelTitle="Filtres" panelIcon="person_search">
+    <div class="panel-filter" [formGroup]="filterForm">
         <mat-form-field style="width: 200px" class="no-subscript md-3" appearance="outline">
             <mat-label>Choisir une date</mat-label>
             <input matInput [matDatepicker]="picker" formControlName="date">
@@ -13,7 +13,7 @@
             </mat-select>
         </mat-form-field>
     </div>
-</header-page>
+</page-panel>
 
 <div class="timeline">
     <div *ngIf="sessions.length === 0 && !loading" class="no-data-container">

@@ -8,16 +8,7 @@
       </div>
       <div class="kpi-stat-content">
         <span class="kpi-stat-value">{{$globalStatistic.totalRequest | number}}</span>
-        <span class="kpi-stat-label">Requêtes totales</span>
-      </div>
-    </div>
-    <div class="kpi-stat-card">
-      <div class="kpi-stat-icon green">
-        <mat-icon class="material-symbols-outlined">check_circle</mat-icon>
-      </div>
-      <div class="kpi-stat-content">
-        <span class="kpi-stat-value">{{$globalStatistic.percentSuccess | number: '1.0-2'}} %</span>
-        <span class="kpi-stat-label">Taux de succès</span>
+        <span class="kpi-stat-label">Nombre d'Appels</span>
       </div>
     </div>
     <div class="kpi-stat-card">
@@ -25,17 +16,27 @@
         <mat-icon class="material-symbols-outlined">error_outline</mat-icon>
       </div>
       <div class="kpi-stat-content">
-        <span class="kpi-stat-value">{{$globalStatistic.totalRequestError | number}}</span>
-        <span class="kpi-stat-label">Erreurs détectées</span>
+        <div class="kpi-stat-value-row">
+          <span class="kpi-stat-value">{{$globalStatistic.totalRequestError | number}}</span>
+          <span class="kpi-badge error">
+            soit {{$globalStatistic.percentError | number: '1.0-2'}}%
+          </span>
+        </div>
+        <span class="kpi-stat-label">Nombre d'Incidents</span>
       </div>
     </div>
     <div class="kpi-stat-card">
       <div class="kpi-stat-icon purple">
-        <mat-icon class="material-symbols-outlined">dns</mat-icon>
+        <mat-icon class="material-symbols-outlined">schedule</mat-icon>
       </div>
       <div class="kpi-stat-content">
-        <span class="kpi-stat-value">{{$globalStatistic.totalHost | number}}</span>
-        <span class="kpi-stat-label">Hôtes</span>
+        <div class="kpi-stat-value-row">
+          <span class="kpi-stat-value">{{$globalStatistic.elapsedPercentile | duration}}</span>
+          <span class="kpi-badge">
+            P.95
+          </span>
+        </div>
+        <span class="kpi-stat-label">Temps de réponse max</span>
       </div>
     </div>
     <div class="kpi-stat-card">
@@ -44,13 +45,24 @@
       </div>
       <div class="kpi-stat-content">
         <span class="kpi-stat-value">{{$globalStatistic.totalUser | number}}</span>
-        <span class="kpi-stat-label">Utilisateurs</span>
+        <span class="kpi-stat-label">Nombre d'Utilisateurs</span>
       </div>
     </div>
   </div>
 
   <!-- ── Grille des charts ── -->
   <div class="kpi-grid">
+    <div class="kpi-chart-card span-4">
+      <status-chart
+              [chartConfig]="$statusRepartition.chartConfig"
+              [data]="$statusRepartition.data"
+              [loading]="$statusRepartition.loading"
+              [sliceData]="$statusRepartitionSlice.data"
+              [queryParams]="params"
+              (onChartChange)="onStatusChartChange($event)">
+      </status-chart>
+    </div>
+
     <div class="kpi-chart-card">
       <div class="kpi-chart-header">
         <div class="kpi-chart-title-group">
@@ -70,23 +82,41 @@
       </div>
 
     </div>
+    <!-- Chart 4 – Temps de réponse moyen -->
+    <div class="kpi-chart-card span-3">
+      <performance-chart
+              [chartConfig]="$performanceRepartition.chartConfig"
+              [data]="$performanceRepartition.data"
+              [loading]="$performanceRepartition.loading"
+              [sliceData]="$performanceRepartitionSlice.data"
+              [queryParams]="params"
+              (onChartChange)="onPerformanceChartChange($event)">
+      </performance-chart>
+    </div>
+
+    <div class="kpi-chart-card">
+      <media-type-chart
+              [data]="$mediaRepartition.data"
+              [loading]="$mediaRepartition.loading"
+              [queryParams]="params">
+      </media-type-chart>
+    </div>
 
     <div class="kpi-chart-card span-3">
-      <status-chart
-              [chartConfig]="$statusRepartition.chartConfig"
-              [data]="$statusRepartition.data"
-              [loading]="$statusRepartition.loading"
-              [sliceData]="$statusRepartitionSlice.data"
+      <volumetry-chart
+              [chartConfig]="$volumetryRepartition.chartConfig"
+              [data]="$volumetryRepartition.data"
+              [loading]="$volumetryRepartition.loading"
+              [sliceData]="$volumetryRepartitionSlice.data"
               [queryParams]="params"
-              (onChartChange)="onStatusChartChange($event)">
-      </status-chart>
+              (onChartChange)="onVolumetryChartChange($event)"></volumetry-chart>
     </div>
 
     <div class="kpi-chart-card">
       <div class="kpi-chart-header">
         <div class="kpi-chart-title-group">
           <span class="kpi-accent-bar purple-bar"></span>
-          <mat-icon class="kpi-chart-icon material-symbols-outlined">devices</mat-icon>
+          <mat-icon class="kpi-chart-icon material-symbols-outlined">launch</mat-icon>
           <span class="kpi-chart-title">Clients HTTP</span>
         </div>
       </div>
@@ -102,42 +132,29 @@
 
     </div>
 
-    <!-- Chart 4 – Temps de réponse moyen -->
     <div class="kpi-chart-card span-3">
-      <performance-chart
-              [chartConfig]="$performanceRepartition.chartConfig"
-              [data]="$performanceRepartition.data"
-              [loading]="$performanceRepartition.loading"
-              [sliceData]="$performanceRepartitionSlice.data"
-              [queryParams]="params"
-              (onChartChange)="onPerformanceChartChange($event)">
-      </performance-chart>
+      <user-chart
+              [data]="$userRepartition.data"
+              [loading]="$userRepartition.loading"
+              [queryParams]="params"></user-chart>
     </div>
 
-    <div class="kpi-chart-card span-4">
-      <volumetry-chart
-              [chartConfig]="$volumetryRepartition.chartConfig"
-              [data]="$volumetryRepartition.data"
-              [loading]="$volumetryRepartition.loading"
-              [sliceData]="$volumetryRepartitionSlice.data"
-              [queryParams]="params"
-              (onChartChange)="onVolumetryChartChange($event)"></volumetry-chart>
+    <div class="kpi-chart-card"
+         [class.span-4]="params.hosts?.length == 0"
+         [class.span-2]="params.hosts?.length > 0">
+      <dependency-chart
+              [data]="$dependencyRepartition.data"
+              [loading]="$dependencyRepartition.loading"
+              [queryParams]="params"></dependency-chart>
     </div>
-    <ng-container *ngIf="params.hosts?.length">
-      <div class="kpi-chart-card span-2" style="height: 350px">
-        <dependency-new-table
-                [data]="$dependencyTable.data"
-                [loading]="$dependencyTable.loading"
-                [queryParams]="params" (onRowSelected)="onRowSelected($event)"></dependency-new-table>
 
-      </div>
-      <div class="kpi-chart-card span-2" style="height: 350px">
-        <dependent-new-table
-                [data]="$dependentTable.data"
-                [loading]="$dependentTable.loading"
-                [queryParams]="params" (onRowSelected)="onRowSelected($event)"></dependent-new-table>
-      </div>
-    </ng-container>
+    <div class="kpi-chart-card span-2" *ngIf="params.hosts?.length > 0">
+      <dependent-chart
+              [data]="$dependentRepartition.data"
+              [loading]="$dependentRepartition.loading"
+              [queryParams]="params"></dependent-chart>
+    </div>
+
   </div>
 </div>
 

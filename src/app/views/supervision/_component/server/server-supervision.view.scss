@@ -1,3 +1,27 @@
+.page-instance-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 20px;
+  background: rgba(37, 99, 235, 0.04);
+  border-bottom: 1px solid rgba(37, 99, 235, 0.10);
+
+  .pih-name {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+    font-size: 14px;
+    color: #0f172a;
+  }
+
+  .pih-badges {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+}
+
 .activity-container {
   display: flex;
   flex: 1;

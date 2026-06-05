@@ -1,4 +1,4 @@
-/* You can add global styles to this file, and also import other style files */
+﻿/* You can add global styles to this file, and also import other style files */
 
 body {
   margin: 0;
@@ -18,23 +18,100 @@ body {
   --mdc-protected-button-label-text-color: #fff;
 }
 
-.mat-mdc-mini-fab.mat-primary,
-.mat-mdc-fab.mat-primary {
-  --mdc-fab-container-color: #2563eb;
-  --mdc-fab-icon-color: #ffffff;
-  box-shadow: none;
-  border: 1px solid rgba(37, 99, 235, 0.3);
-  transition: box-shadow 0.15s cubic-bezier(0.4, 0, 0.2, 1),
-  background 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+.mat-mdc-mini-fab,
+.mat-mdc-fab {
+ // Géométrie : moins circulaire que FAB par défaut
+  border-radius: 12px !important;
+  width: 38px !important;
+  height: 38px !important;
+  transition:
+    background .15s ease,
+    box-shadow .15s ease,
+    transform .1s ease !important;
 
-  &:hover {
-    --mdc-fab-container-color: #1d4ed8;
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.18);
+ // Icône centrée
+  .mat-icon {
+    font-size: 19px !important;
+    width: 19px !important;
+    height: 19px !important;
+    line-height: 19px !important;
   }
 
   &:active {
-    --mdc-fab-container-color: #1e40af;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
+    transform: scale(.93) !important;
+  }
+}
+
+// Couleur primary (bleu)
+.mat-mdc-mini-fab.mat-primary,
+.mat-mdc-fab.mat-primary {
+  --mdc-fab-container-color: #1464dc;
+  --mdc-fab-icon-color: #ffffff;
+  box-shadow: 0 1px 3px rgba(20, 100, 220, .25), 0 0 0 1px rgba(20, 100, 220, .15) !important;
+
+  &:hover {
+    --mdc-fab-container-color: #1255c0;
+    box-shadow: 0 3px 10px rgba(20, 100, 220, .32), 0 0 0 1px rgba(20, 100, 220, .2) !important;
+  }
+
+  &:active {
+    --mdc-fab-container-color: #0e45a0;
+    box-shadow: 0 1px 4px rgba(20, 100, 220, .3) !important;
+  }
+}
+
+// Couleur warn (rouge)
+.mat-mdc-mini-fab.mat-warn,
+.mat-mdc-fab.mat-warn {
+  box-shadow: 0 1px 3px rgba(205, 6, 6, .2), 0 0 0 1px rgba(205, 6, 6, .12) !important;
+
+  &:hover {
+    box-shadow: 0 3px 10px rgba(205, 6, 6, .28), 0 0 0 1px rgba(205, 6, 6, .18) !important;
+  }
+}
+
+// mat-icon-button (boutons menu trois points, etc.)
+.mat-mdc-icon-button.menu-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+  overflow: hidden !important;
+  border-radius: 10px !important;
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  line-height: 36px !important;
+  padding: 0 !important;
+  --mdc-icon-button-state-layer-size: 36px;
+  color: rgba(0, 0, 0, .45) !important;
+  transition: background .15s ease, color .15s ease !important;
+
+  .mat-icon {
+    font-size: 18px !important;
+    width: 18px !important;
+    height: 18px !important;
+    line-height: 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin: 0 !important;
+  }
+
+  .mat-mdc-button-persistent-ripple,
+  .mdc-icon-button__ripple,
+  .mat-mdc-button-touch-target {
+    width: 36px !important;
+    height: 36px !important;
+    top: 50% !important;
+    left: 50% !important;
+    transform: translate(-50%, -50%) !important;
+    border-radius: 10px !important;
+  }
+
+  &:hover {
+    background: rgba(34, 36, 38, .07) !important;
+    color: rgba(0, 0, 0, .72) !important;
   }
 }
 
@@ -396,11 +473,7 @@ loading.hidden {
   }
 }
 
-.mat-mdc-form-field.mat-form-field-appearance-outline {
-  --mdc-outlined-text-field-container-shape: 8px;
-  --mdc-outlined-text-field-focus-outline-color: #2563eb;
-  --mdc-outlined-text-field-focus-label-text-color: #2563eb;
-}
+// styles rénovés → voir _form-field.scss
 
 tr.mat-mdc-row {
   &.row-ok > td.mat-mdc-cell:first-of-type {

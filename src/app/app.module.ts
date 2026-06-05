@@ -24,7 +24,6 @@ import {ArchitectureView} from "./views/architecture/architecture.view";
 import {NumberFormatterPipe} from './shared/pipe/number.pipe';
 import {TreeView} from './views/tree/tree.view';
 import {SizePipe} from "./shared/pipe/size.pipe";
-import {DeploimentComponent} from './views/deploiment/deploiment.component';
 import {Interceptor} from "./shared/interceptor/interceptor";
 import {AnalyticView} from "./views/analytic/analytic.view";
 import {SearchRequestView} from "./views/search/request/search-request.view";
@@ -32,6 +31,7 @@ import {Constants} from "./views/constants";
 import {DetailRequestView} from "./views/detail/request/detail-request.view";
 import {InstanceComponent} from './views/detail/instance/instance.component';
 import {NavbarComponent} from './components/navbar/navbar.component';
+import {AboutDialogComponent} from './components/about/about-dialog.component';
 import {ServerSupervisionView} from "./views/supervision/_component/server/server-supervision.view";
 import {ClientSupervisionView} from "./views/supervision/_component/client/client-supervision.view";
 import {RequestKpiView} from "./views/kpi/request/request-kpi.view";
@@ -56,13 +56,13 @@ const routes: Route[] = [
           {
             path: '',
             component: SearchRequestView,
-            title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => Constants.MAPPING_TYPE['request'].title + ' ' + Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' > Recherche',
+            title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' • Suivi',
           },
           {
             path: ':id_request',
             component: DetailRequestView,
             title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-              return Constants.MAPPING_TYPE['request'].title + ' ' + Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' > Detail'
+              return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' • Détail'
             }
           }
         ]
@@ -78,7 +78,7 @@ const routes: Route[] = [
           {
             path: '',
             component: SearchRestView,
-            title: Constants.MAPPING_TYPE['rest'].title + ' > Recherche'
+            title: Constants.MAPPING_TYPE['rest'].title + ' • Suivi'
 
           },
           {
@@ -87,13 +87,13 @@ const routes: Route[] = [
               {
                 path: '',
                 component: DetailSessionRestView,
-                title: Constants.MAPPING_TYPE['rest'].title + ' > Detail'
+                title: Constants.MAPPING_TYPE['rest'].title + ' • Détail'
               },
               {
                 path: 'tree',
                 data: {type: 'rest'},
                 component: TreeView,
-                title: Constants.MAPPING_TYPE['rest'].title + ` > Arbre d'Appels`
+                title: Constants.MAPPING_TYPE['rest'].title + ' • Arbre d\'Appels'
               },
               {path: '**', pathMatch: 'full', redirectTo: `/session/rest/:id_session`}
             ]
@@ -108,7 +108,7 @@ const routes: Route[] = [
             path: '',
             component: SearchMainView,
             title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-              return Constants.MAPPING_TYPE[route.paramMap.get('type_main')].title + ' > Recherche';
+              return Constants.MAPPING_TYPE[route.paramMap.get('type_main')].title + ' • Suivi';
             }
           },
           {
@@ -118,7 +118,7 @@ const routes: Route[] = [
                 path: '',
                 component: DetailSessionMainView,
                 title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-                  return Constants.MAPPING_TYPE[route.paramMap.get('type_main')].title + ' > Detail';
+                  return Constants.MAPPING_TYPE[route.paramMap.get('type_main')].title + ' • Détail';
                 }
               },
               {
@@ -145,7 +145,7 @@ const routes: Route[] = [
         path: 'detail/:id_instance',
         component: InstanceComponent,
         title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          return `instance > ${route.paramMap.get('id_instance')}`;
+          return `Supervision • Instance • ${route.paramMap.get('id_instance')}`;
         }
       },
     ],
@@ -160,14 +160,7 @@ const routes: Route[] = [
   {
     path: 'home',
     component: DashboardComponent,
-    title: 'Page d\'accueil',
-    canActivate: [authGuard]
-  },
-  {
-    path: 'deploiment',
-    component: DeploimentComponent,
-    title: 'Instances Actives',
-    canActivate: [authGuard]
+    title: 'Tableau de bord'
   },
   {
     path: 'architecture',
@@ -178,30 +171,26 @@ const routes: Route[] = [
   {
     path: 'supervision/server/:instance',
     component: ServerSupervisionView,
-    title: 'Server Supervision',
-    canActivate: [authGuard]
+    title: 'Supervision • Serveur'
   },
   {
     path: 'kpi/request/:request_type',
     component: RequestKpiView,
     title:  (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-      return Constants.MAPPING_TYPE['request'].title + ' ' + Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('request_type')].title + ' > Tableau de bord';
-    },
-    canActivate: [authGuard]
+      return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('request_type')].title + ' • KPI';
+    }
   },
   {
     path: 'kpi/session/:session_type',
     component: SessionKpiView,
     title:  (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-      return Constants.MAPPING_TYPE[route.paramMap.get('session_type')].title + ' > Tableau de bord';
-    },
-    canActivate: [authGuard]
+      return Constants.MAPPING_TYPE[route.paramMap.get('session_type')].title + ' • KPI';
+    }
   },
   {
     path: 'supervision/client/:instance',
     component: ClientSupervisionView,
-    title: 'Client Supervision',
-    canActivate: [authGuard]
+    title: 'Supervision • Client'
   },
   {path: '**', pathMatch: 'full', redirectTo: `/home`}
 ];
@@ -220,7 +209,8 @@ const routes: Route[] = [
   ],
   declarations: [
     AppComponent,
-    NavbarComponent
+    NavbarComponent,
+    AboutDialogComponent
   ],
   providers: [
     SizePipe,

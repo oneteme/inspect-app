@@ -50,20 +50,33 @@ export interface DirectoryRequestTree extends DirectoryRequestDto {
 
 export interface Node<T> {
   formatNode(field: T): string;
+  nodeInfo(): { icon: string; label: string; value: string; color?: string }[]
 }
 
 export interface Link<T> {
   formatLink(field: T): string;
   getLinkStyle(): string;
+  linkInfo(): { icon: string; label: string; value: string; color?: string }[]
 }
 
-export class RestServerNode implements Node<Label> {
+export class RestServerNode implements Node<Label>{
 
   nodeObject: RestSessionTree;
 
   constructor(nodeObject: RestSessionTree) {
     this.nodeObject = nodeObject;
   }
+
+  nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
+      const rows: any[] = [];
+      if (this.nodeObject?.port)      rows.push({ icon: 'settings_ethernet', label: 'Port',    value: String(this.nodeObject.port),        color: '#8b5cf6' });
+      //if (obj?.protocol)  rows.push({ icon: 'lock',          label: 'Protocole',   value: obj.protocol,            color: '#0ea5e9' });
+      //if (obj?.type)      rows.push({ icon: 'category',      label: 'Type',        value: obj.type,                color: '#f59e0b' });
+      if (this.nodeObject?.os)        rows.push({ icon: 'computer',      label: 'OS',          value: this.nodeObject.os,                  color: '#64748b' });
+      if (this.nodeObject?.re)        rows.push({ icon: 'layers',        label: 'Env',         value: this.nodeObject.re,                  color: '#10b981' });
+      if (this.nodeObject?.address)   rows.push({ icon: 'location_on',   label: 'Adresse',         value: this.nodeObject.address,                  color: '#f97316' });
+        return rows;
+    }
 
   formatNode(field: Label): string {
     switch (field) {
@@ -90,10 +103,20 @@ export class MainServerNode implements Node<Label> {
     this.nodeObject = nodeObject;
   }
 
+  nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
+    const rows: any[] = [];
+    //if (obj?.protocol)  rows.push({ icon: 'lock',          label: 'Protocole',   value: obj.protocol,            color: '#0ea5e9' });
+    //if (obj?.type)      rows.push({ icon: 'category',      label: 'Type',        value: obj.type,                color: '#f59e0b' });
+    if (this.nodeObject?.os)        rows.push({ icon: 'computer',      label: 'OS',          value: this.nodeObject.os,                  color: '#64748b' });
+    if (this.nodeObject?.re)        rows.push({ icon: 'layers',        label: 'Env',         value: this.nodeObject.re,                  color: '#10b981' });
+    if (this.nodeObject?.address)   rows.push({ icon: 'location_on',   label: 'Adresse',         value: this.nodeObject.address,                  color: '#f97316' });
+    return rows;
+    }
+
   formatNode(field: Label): string {
     switch (field) {
       case Label.SERVER_IDENTITY: return this.nodeObject.appName || '?'/*+ this.nodeObject.version*/ //version
-      case Label.OS_RE: return (this.nodeObject.os || "?") + " " + (this.nodeObject.re || '?');
+      case Label.OS_RE: return (this.nodeObject.os || "?") + " " + (this.nodeObject.re || '');
       case Label.IP_PORT: return (this.nodeObject.address || "?")
       case Label.BRANCH_COMMIT: return "?"  // soon
       default: return '?';
@@ -119,6 +142,33 @@ export class LinkRequestNode implements Link<Label> {
 
   constructor(nodeObject: RestSessionTree) {
     this.nodeObject = nodeObject;
+  }
+
+  linkInfo(): any {
+    const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+    const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
+    const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
+    const isOngoing = this.nodeObject?.end == null;
+    
+    // Extract color from LinkConfig based on status
+    let linkStyle = 'SUCCES'; // default
+    if (isOngoing) linkStyle = 'ONGOING';
+    else if (this.nodeObject.status >= 500 || this.nodeObject.status === 0) linkStyle = 'ERROR';
+    else if (this.nodeObject.status >= 400 && this.nodeObject.status < 500) linkStyle = 'CLIENT_ERROR';
+    
+    // Extract hex color from LinkConfig (format: "strokeColor=#XXXXXX;...")
+    const colorMatch = LinkConfig[linkStyle].match(/#[0-9a-f]{6}/i);
+    const statusColor = colorMatch ? colorMatch[0] : '#22c55e';
+    
+    const statusIcon = isOngoing ? 'schedule' : (this.nodeObject.status < 400 ? 'check_circle' : (this.nodeObject.status < 500 ? 'warning' : 'error'));
+    return {
+      status:   { icon: statusIcon, value: status, color: statusColor },
+      elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
+      resource: { icon: 'code', value: resource, color: '#3b82f6' },
+      session: { icon: 'link', value: this.nodeObject.id, color: '#3b82f6', type:'rest' },
+      //id:       { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type: ""},
+      // ...(this.nodeObject.remoteTrace ? { session: { icon: 'link', value: this.nodeObject.id, color: '#3b82f6', type:'rest' } } : {}),
+    }
   }
   getLinkStyle(): string {
     if (this.nodeObject.end == null) return 'ONGOING';
@@ -150,9 +200,11 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
     this.nodeObject = nodeObject;
   }
 
+
+
   formatNode(field: Label): string {
     switch (field) {
-      case Label.SERVER_IDENTITY: return this.nodeObject.schema || this.nodeObject.name || '?'/*+ this.nodeObject.version*/ //version
+      case Label.SERVER_IDENTITY: return this.nodeObject.name || '?'/*+ this.nodeObject.version*/ //version
       case Label.OS_RE: return this.nodeObject.productName || '?';
       case Label.IP_PORT: return (this.nodeObject.name || '?') + (this.nodeObject?.port != -1 ?   ":"+ this.nodeObject?.port.toString() : '')
       case Label.BRANCH_COMMIT: return "?" // soon
@@ -166,25 +218,72 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
       case Label.METHOD_RESOURCE: return `${this.nodeObject?.command || '?'}`;
       case Label.SIZE_COMPRESSION: return this.nodeObject?.count < 0 ? '0': this.nodeObject?.count!= undefined? this.nodeObject?.count.toString() : '?'; // remove undefined condition
       case Label.PROTOCOL_SCHEME: return "JDBC/Basic"
-      case Label.STATUS_EXCEPTION: return this.nodeObject.exception && 'KO:' + this.nodeObject.exception?.type || 'OK'
+      case Label.STATUS_EXCEPTION: return this.nodeObject.failed && 'KO' || 'OK'
       case Label.USER: return `${this.nodeObject.user || '?'}`;
       default: return '?';
     }
   }
 
-  getLinkStyle(): string {
-    if (this.nodeObject.end == null) return 'ONGOING';
-    return this.nodeObject.failed ? 'ERROR' : 'SUCCES'
+  nodeInfo(){
+    const rows: any[] = [];
+    if (this.nodeObject?.productName) rows.push({ icon: 'inventory',  label: 'Produit', value: this.nodeObject.productName + (this.nodeObject.productVersion ? ' ' + this.nodeObject.productVersion : ''), color: '#10b981' });
+    return rows
   }
-}
 
-export class FtpRequestNode implements Node<Label>, Link<Label> {
+  linkInfo(): any {
+    const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+    const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
+    const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
+    const isError   = this.nodeObject.failed
+    const isOngoing = this.nodeObject?.end == null;
+    const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
+    const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
+    return {
+      status:   { icon: statusIcon, value: status, color: statusColor },
+      elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
+      resource: { icon: resourceConfig[resource]?.icon ?? ' ', value: resource, color: resourceConfig[resource]?.color ?? '#6366f1' },
+      request:  { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type:'jdbc'},
 
-  nodeObject: FtpRequestTree;
+     }
+   }
+
+   getLinkStyle(): string {
+     if (this.nodeObject.end == null) return 'ONGOING';
+     return this.nodeObject.failed ? 'ERROR' : 'SUCCES'
+   }
+ }
+
+ export class FtpRequestNode implements Node<Label>, Link<Label> {
+
+   nodeObject: FtpRequestTree;
 
   constructor(nodeObject: FtpRequestTree) {
     this.nodeObject = nodeObject;
   }
+
+  linkInfo(): any {
+    const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+    const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
+    const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
+    const isError   = this.nodeObject.failed
+    const isOngoing = this.nodeObject?.end == null;
+    const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
+    const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
+
+    return {
+      status:   { icon: statusIcon, value: status, color: statusColor },
+      elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
+      resource: { icon: resourceConfig[resource]?.icon ?? ' ', value: resource, color: '#0e7490' },
+      request:  { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type:'ftp'},
+     }
+  }
+
+  nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
+    const rows: any[] = [];
+    if (this.nodeObject?.serverVersion) rows.push({ icon: 'computer',   label: 'Serveur', value: this.nodeObject.serverVersion, color: '#0e7490' });
+    if (this.nodeObject?.clientVersion) rows.push({ icon: 'laptop',     label: 'Client',  value: this.nodeObject.clientVersion, color: '#0891b2' });
+    return rows
+    }
 
   formatNode(field: Label): string {
     switch (field) {
@@ -198,7 +297,7 @@ export class FtpRequestNode implements Node<Label>, Link<Label> {
   formatLink(field: Label): string {
     switch (field) {
       case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
-      case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands, "SCRIPT")
+      case Label.METHOD_RESOURCE: return this.nodeObject?.command || '?'
       case Label.SIZE_COMPRESSION: return "?"
       case Label.PROTOCOL_SCHEME: return this.nodeObject.protocol + '/Basic'
       case Label.STATUS_EXCEPTION: return this.nodeObject.exception && 'KO:' + this.nodeObject.exception?.type || 'OK'
@@ -220,6 +319,28 @@ export class MailRequestNode implements Node<Label>, Link<Label> {
     this.nodeObject = nodeObject;
   }
 
+  linkInfo(): any {
+    const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+    const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
+    const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
+    const isError   = this.nodeObject.failed
+    const isOngoing = this.nodeObject?.end == null;
+    const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
+    const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
+     return {
+       status:   { icon: statusIcon, value: status, color: statusColor },
+       elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
+       resource: { icon: resourceConfig[resource]?.icon ?? ' ', value: resource, color: '#f59e0b' },
+       request:  { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type:'smtp'},
+     }
+   }
+
+   nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
+    const rows: any[] = [];
+    if (this.nodeObject?.mails?.length) rows.push({ icon: 'email',  label: 'Mails',   value: `${this.nodeObject.mails.length} destinataire(s)`, color: '#f59e0b' }); // todo get ?
+    return rows
+    }
+
   formatNode(field: Label): string {
     switch (field) {
       case Label.SERVER_IDENTITY: return this.nodeObject.host || '?' //version
@@ -232,7 +353,7 @@ export class MailRequestNode implements Node<Label>, Link<Label> {
   formatLink(field: Label): string {
     switch (field) {
       case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
-      case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands, "SCRIPT")
+      case Label.METHOD_RESOURCE: return this.nodeObject?.command || '?'
       case Label.SIZE_COMPRESSION: return this.nodeObject?.count < 0 ? '0': this.nodeObject?.count!= undefined? this.nodeObject?.count.toString() : '?';
       case Label.PROTOCOL_SCHEME: return "SMTP/Basic"
       case Label.STATUS_EXCEPTION: return this.nodeObject.exception && 'KO:' + this.nodeObject.exception?.type || 'OK'
@@ -254,6 +375,27 @@ export class LdapRequestNode implements Node<Label>, Link<Label> {
     this.nodeObject = nodeObject;
   }
 
+  linkInfo(): any {
+    const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+    const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
+    const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
+    const isError   = this.nodeObject.failed
+    const isOngoing = this.nodeObject?.end == null;
+    const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
+    const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
+     return {
+       status:   { icon: statusIcon, value: status, color: statusColor },
+       elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
+       resource: { icon: resourceConfig[resource]?.icon ?? ' ', value: resource, color: '#8b5cf6' },
+       request:  { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type:'ldap'},
+     }
+  }
+
+  nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
+    const rows: any[] = [];
+    return rows
+    }
+
   formatNode(field: Label): string {
     switch (field) {
       case Label.SERVER_IDENTITY: return this.nodeObject.host || '?'/*+ this.nodeObject.version*/ //version
@@ -266,7 +408,7 @@ export class LdapRequestNode implements Node<Label>, Link<Label> {
   formatLink(field: Label): string {
     switch (field) {
       case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
-      case Label.METHOD_RESOURCE: return getCommand(this.nodeObject?.commands, "SCRIPT") || '?'
+      case Label.METHOD_RESOURCE: return this.nodeObject?.command || '?'
       case Label.SIZE_COMPRESSION: return "?"
       case Label.PROTOCOL_SCHEME: return this.nodeObject.protocol ?? "LDAP/Basic" // wait for fix backend
       case Label.STATUS_EXCEPTION: return this.nodeObject.exception && 'KO:' + this.nodeObject.exception?.type || 'OK'
@@ -281,11 +423,49 @@ export class LdapRequestNode implements Node<Label>, Link<Label> {
   }
 }
 
-export class RestRequestNode implements Node<Label> {
+export class RestRequestNode implements Node<Label>, Link<Label> {
   nodeObject: RestRequestTree;
   constructor(nodeObject: RestRequestTree) {
     this.nodeObject = nodeObject;
   }
+
+  nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
+    const rows: any[] = [];
+    if (this.nodeObject?.host)     rows.push({ icon: 'dns',      label: 'Hôte',     value: this.nodeObject.port && this.nodeObject.port !== -1 ? `${this.nodeObject.host}:${this.nodeObject.port}` : this.nodeObject.host, color: '#6366f1' });
+    if (this.nodeObject?.method)   rows.push({ icon: 'code',     label: 'Méthode',  value: this.nodeObject.method, color: '#3b82f6' });
+    if (this.nodeObject?.path)     rows.push({ icon: 'route',    label: 'Chemin',   value: this.nodeObject.path, color: '#0ea5e9' });
+    if (this.nodeObject?.protocol) rows.push({ icon: 'lock',     label: 'Protocole', value: this.nodeObject.protocol, color: '#8b5cf6' });
+    if (this.nodeObject?.authScheme) rows.push({ icon: 'security', label: 'Auth',    value: this.nodeObject.authScheme, color: '#10b981' });
+    if (this.nodeObject?.user)     rows.push({ icon: 'person',   label: 'Utilisateur', value: this.nodeObject.user, color: '#f59e0b' });
+    return rows;
+  }
+
+    linkInfo(): any {
+      const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+      const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
+      const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
+      const isOngoing = this.nodeObject?.end == null;
+      
+      // Extract color from LinkConfig based on status
+      let linkStyle = 'SUCCES'; // default
+      if (isOngoing) linkStyle = 'ONGOING';
+      else if (this.nodeObject.status >= 500 || this.nodeObject.status === 0) linkStyle = 'ERROR';
+      else if (this.nodeObject.status >= 400 && this.nodeObject.status < 500) linkStyle = 'CLIENT_ERROR';
+      
+      // Extract hex color from LinkConfig (format: "strokeColor=#XXXXXX;...")
+      const colorMatch = LinkConfig[linkStyle].match(/#[0-9a-f]{6}/i);
+      const statusColor = colorMatch ? colorMatch[0] : '#22c55e';
+      
+      const statusIcon = isOngoing ? 'schedule' : (this.nodeObject.status < 400 ? 'check_circle' : (this.nodeObject.status < 500 ? 'warning' : 'error'));
+      
+      return {
+        status:   { icon: statusIcon, value: status, color: statusColor },
+        elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
+        resource: { icon: 'code', value: resource, color: '#3b82f6' },
+        request:  { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type:'rest'},
+           ...(this.nodeObject.remoteTrace ? { session: { icon: 'link', value: this.nodeObject.id, color: '#3b82f6', type:'rest' } } : {}),
+      }
+    }
 
   formatNode(field: Label): string {
     switch (field) {
@@ -315,7 +495,7 @@ export class RestRequestNode implements Node<Label> {
       case Label.METHOD_RESOURCE: return `${this.nodeObject.method || "?"} ${this.nodeObject.path || "?"}`
       case Label.SIZE_COMPRESSION: return `${this.nodeObject.inDataSize < 0 ? 0 : sizeFormatter(this.nodeObject.inDataSize) } ↓↑ ${this.nodeObject.outDataSize < 0 ? 0 :sizeFormatter(this.nodeObject.outDataSize) }`
       case Label.PROTOCOL_SCHEME: return `${this.nodeObject.protocol || "?"}/${this.nodeObject.authScheme || "?"}`
-      case Label.STATUS_EXCEPTION: return (this.nodeObject.status!= null ? this.nodeObject.status.toString():"?")+ (this.nodeObject?.exception ? ': ' + (this.nodeObject?.exception?.type || this.nodeObject?.exception?.message ):'');
+      case Label.STATUS_EXCEPTION: return (this.nodeObject.status!= null ? this.nodeObject.status.toString():"?");
       case Label.USER: return `${this.nodeObject.remoteTrace?.user ?? "?"}`
       default: return '?';
     }
@@ -345,20 +525,6 @@ export enum Label {
   USER = "USER"
 }
 
-function getCommand<T>(arr: T[], multiple: string) {
-  if (arr) {
-    let r = arr.reduce((acc: any, item: any) => {
-      if (!acc[item]) {
-        acc[item] = 0
-      }
-      return acc;
-    }, {});
-    return Object.keys(r).length == 1
-      ? Object.keys(r)[0]
-      : multiple;
-  }
-  return '?';
-}
 
 function sizeFormatter(value:any){
   if(!value && value!= 0) return '';
@@ -425,6 +591,17 @@ export class TreeGraph {
     graph.panningHandler.ignoreCell = true; // Specifies if panning should be active even if there is a cell under the mousepointer.
     graph.container.style.cursor = 'move'
     graph.setPanning(true);
+
+    // Zoom with mouse scroll wheel
+    mx.mxEvent.addMouseWheelListener((evt: WheelEvent, up: boolean) => {
+      if (mx.mxEvent.isConsumed(evt)) return;
+      if (up) {
+        graph.zoomIn();
+      } else {
+        graph.zoomOut();
+      }
+      mx.mxEvent.consume(evt);
+    }, graph.container);
 
     // Highlight vertices and edges on hover
     const cellTracker = new mx.mxCellTracker(graph, '#dbeafe'); // blue-100 tint
@@ -559,7 +736,7 @@ export class TreeGraph {
     }
   }
 
-  insertServer(name: string, serverType: ServerType) {
+  insertServer(name: any, serverType: ServerType) {
     return this.insertVertex(name, ServerConfig[serverType].width, ServerConfig[serverType].height, ServerConfig[serverType].icon);
   }
 
@@ -632,22 +809,37 @@ export class TreeGraph {
   }
 
   resizeAndCenter() {
-    let availableWidth = document.getElementById("fixed-width-container")?.offsetWidth;
-    let availableHeight = document.getElementById("fixed-width-container")?.offsetHeight;
+    const container = document.getElementById("fixed-width-container");
+    const availableWidth  = container?.offsetWidth;
+    const availableHeight = container?.offsetHeight;
     this.graph.doResizeContainer(availableWidth, availableHeight);
-    this.graph.fit()
-    let margin = 2;
-    let max = 3;
-    let bounds = this.graph.getGraphBounds();
-    let cw = this.graph.container.clientWidth - margin;
-    let ch = this.graph.container.clientHeight - margin;
-    let w = bounds.width / this.graph.view.scale;
-    let h = bounds.height / this.graph.view.scale;
-    let s = Math.min(max, Math.min(cw / w, ch / h));
+    this.graph.fit();
 
-    this.graph.view.scaleAndTranslate(s,
+    const margin = 2;
+    const max    = 3;
+
+    // View-controls is now at the bottom — reserve space below instead of above
+    const viewControls = container?.querySelector('.view-controls') as HTMLElement | null;
+    const bottomOffset = viewControls
+      ? viewControls.offsetHeight + 16
+      : margin;
+    const topOffset = margin;
+
+    const bounds = this.graph.getGraphBounds();
+    const cw = this.graph.container.clientWidth  - margin;
+    const ch = this.graph.container.clientHeight - margin;      // full usable height
+    const chEff = ch - topOffset - bottomOffset;                // usable height between top and bottom overlays
+    const w  = bounds.width  / this.graph.view.scale;
+    const h  = bounds.height / this.graph.view.scale;
+    const s  = Math.min(max, Math.min(cw / w, chEff / h));
+
+    this.graph.view.scaleAndTranslate(
+      s,
+      // horizontal: centred in full width (unchanged)
       (margin + cw - w * s) / (2 * s) - bounds.x / this.graph.view.scale,
-      (margin + ch - h * s) / (2 * s) - bounds.y / this.graph.view.scale);
+      // vertical: centred in the zone below the toolbar
+      topOffset / s + (chEff - h * s) / (2 * s) - bounds.y / this.graph.view.scale
+    );
   }
 
   private _ongoingObserver: MutationObserver | null = null;
@@ -821,3 +1013,14 @@ export const LinkConfig = {
   UNREACHABLE:  "strokeColor=#ef4444;",
   ONGOING:      "strokeColor=#3b82f6;dashed=1;ongoing=1;"
 }
+
+export const resourceConfig = {
+  'READ': { icon: 'description', color: '#3b82f6' },
+  'EDIT': { icon: 'edit', color: '#f97316' },
+  'ROLE': { icon: 'security', color: '#8b5cf6' },
+  'ACCESS': { icon: 'lock_open', color: '#22c55e' },
+  'SETUP': { icon: 'settings', color: '#64748b' },
+  'SCRIPT': { icon: 'code', color: '#06b6d4' },
+  'EMIT': { icon: 'arrow_upward', color: '#06b6d4' }
+}
+

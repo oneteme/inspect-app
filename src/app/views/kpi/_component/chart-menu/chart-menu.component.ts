@@ -64,7 +64,11 @@ export class ChartMenuComponent {
   selectFilter(item: ChartItem): void {
     if (!this.config.filters) return;
     this.config.filters.items.filter(i => i.key != item.key).forEach(i => i.selected = false);
+    let previousSelected = item.selected;
     item.selected = !item.selected;
+    if(previousSelected) {
+      this.configChange.emit('default');
+    }
     this.configChange.emit('filter');
   }
 }

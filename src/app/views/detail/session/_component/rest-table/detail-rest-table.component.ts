@@ -17,6 +17,10 @@ export class DetailRestTableComponent {
 
   _requests: RestRequestDto[] = [];
 
+  @Input() set initialQuery(q: string) {
+    if (q) this.tableConfig = { ...this.tableConfig, search: { ...this.tableConfig.search, initialQuery: q } };
+  }
+
   @Input() isLoading: boolean;
 
   @Input() set initialSearch(value: string) {

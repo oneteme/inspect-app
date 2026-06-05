@@ -1,4 +1,5 @@
 import {Component, inject, OnDestroy, OnInit} from "@angular/core";
+import {PageTitleService} from "../../../../service/page-title.service";
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {EnvRouter} from "../../../../service/router.service";
@@ -27,6 +28,7 @@ export class DetailRestView implements OnInit, OnDestroy {
   private readonly pipe = new DatePipe('fr-FR');
   private readonly durationPipe = new DurationPipe();
   private readonly _dialog = inject(MatDialog);
+  private readonly _pageTitleService = inject(PageTitleService);
 
   private params: Partial<{idRest: string, env: string}> = {};
   REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
@@ -53,6 +55,7 @@ export class DetailRestView implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([params, queryParams]) => {
         this.params = {idRest: params.id_request, env: queryParams.env || app.defaultEnv};
+        this._pageTitleService.set({ icon: 'public', iconOutlined: true, title: 'Flux HTTP • ' + params.id_request, subtitle: 'Communications externes' });
         this.getRequest();
       }
     });
@@ -84,6 +87,7 @@ export class DetailRestView implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.$destroy.next();
     this.$destroy.complete();
+    this._pageTitleService.clear();
   }
 
   getRequest() {
@@ -196,5 +200,11 @@ export class DetailRestView implements OnInit, OnDestroy {
         end: new Date(this.request.end * 1000 + 1800000)
       }
     });
+  }
+
+  navigateOnKpi(event: MouseEvent) {
+    var start = new Date(this.request.start * 1000);
+    var end = this.request.end ? new Date(this.request.end * 1000) : new Date();
+    this._router.navigateOnClick(event, ['/kpi/request', 'rest'], { queryParams: {host: this.request.host, env: this.instance.env, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
   }
 }

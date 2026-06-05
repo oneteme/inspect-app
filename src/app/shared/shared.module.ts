@@ -1,6 +1,5 @@
 import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
-import {HeaderPageComponent} from './_component/header-page/header-page.component';
 import {MaterialModule} from './material/material.module';
 import {FilterRowPipe} from './pipe/filter-row.pipe';
 import {
@@ -33,8 +32,8 @@ import {PulseComponent} from "./_component/pulse/pulse.component";
 import {PulseDialogComponent} from "./_component/pulse/dialog/pulse-dialog.component";
 import {EmptyStateComponent} from "./_component/empty-state/empty-state.component";
 import {ExceptionsTableComponent} from "./_component/table/exceptions-table/exceptions-table.component";
-import {ConfigDialogComponent} from "./_component/config-dialog/config-dialog.component";
-
+import {ConfigDialogComponent} from './_component/config-dialog/config-dialog.component';
+import {PagePanelComponent} from './_component/page-panel/page-panel.component';
 export const MY_DATE_FORMATS = {
   parse: {
     dateInput: 'MM/YYYY',
@@ -60,7 +59,6 @@ export const MY_DATE_FORMATS = {
     JqtCellDefDirective
   ],
   declarations: [
-    HeaderPageComponent,
     AdvancedFilterComponent,
     AdvancedFilterRecapComponent,
     AdvancedFilterTriggerComponent,
@@ -84,11 +82,11 @@ export const MY_DATE_FORMATS = {
     PulseDialogComponent,
     EmptyStateComponent,
     ExceptionsTableComponent,
-    ConfigDialogComponent
+    ConfigDialogComponent,
+    PagePanelComponent
   ],
   exports: [
     MaterialModule,
-    HeaderPageComponent,
     AdvancedFilterComponent,
     AdvancedFilterRecapComponent,
     AdvancedFilterTriggerComponent,
@@ -111,7 +109,8 @@ export const MY_DATE_FORMATS = {
     PulseDialogComponent,
     EmptyStateComponent,
     ExceptionsTableComponent,
-    ConfigDialogComponent
+    ConfigDialogComponent,
+    PagePanelComponent
   ]
 })
 export class SharedModule { }

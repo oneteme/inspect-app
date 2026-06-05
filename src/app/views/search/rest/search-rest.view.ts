@@ -10,6 +10,7 @@ import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constan
 import {FilterService} from 'src/app/service/filter.service';
 import {EnvRouter} from '../../../service/router.service';
 import {InstanceService} from '../../../service/jquery/instance.service';
+import {PageTitleService} from '../../../service/page-title.service';
 import {DateAdapter, MAT_DATE_FORMATS} from '@angular/material/core';
 import {CustomDateAdapter} from '../../../shared/material/custom-date-adapter';
 import {MY_DATE_FORMATS} from '../../../shared/shared.module';
@@ -33,6 +34,7 @@ import {REST_SESSION_TABLE_CONFIG} from "../../../shared/_component/table/table.
 export class SearchRestView implements OnInit, OnDestroy {
   private readonly _router = inject(EnvRouter);
   private readonly _instanceService = inject(InstanceService);
+  private readonly _pageTitleService = inject(PageTitleService);
   private readonly _traceService = inject(TraceService);
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _location = inject(Location);
@@ -87,7 +89,7 @@ export class SearchRestView implements OnInit, OnDestroy {
           this.queryParams.optional = {q: params.q};
           this.tableConfig = {
             ...this.tableConfig,
-            search: { ...this.tableConfig?.search, initialQuery: params.q }
+            search: { ...this.tableConfig?.search, initialQuery: params.q, searchColumns: ['exception'] }
           }
         }
         this.patchStatusValue(this.queryParams.rangestatus)
@@ -112,11 +114,17 @@ export class SearchRestView implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this._filter.registerGetallFilters(this.filtersSupplier.bind(this));
+    this._pageTitleService.set({
+      icon: Constants.MAPPING_TYPE['rest']?.icon || 'http',
+      title: (Constants.MAPPING_TYPE['rest']?.title || 'Services Exposés') + ' • Suivi',
+      subtitle: Constants.MAPPING_TYPE['rest']?.subtitle
+    });
   }
 
   ngOnDestroy(): void {
     this.$destroy.next();
     this.$destroy.complete();
+    this._pageTitleService.clear();
   }
 
   onChangeStart(event: any): void {

@@ -27,8 +27,7 @@ import {
 } from './dashboard/components/protocol-exception-modal/protocol-exception-modal.component';
 import {ArchitectureView} from "./architecture/architecture.view";
 import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
-import {NumberFormatterPipe} from '../shared/pipe/number.pipe';
-import {DeploimentComponent} from './deploiment/deploiment.component';
+import {NumberFormatterPipe, CompactNumberPipe} from '../shared/pipe/number.pipe';
 import {SearchRequestView} from "./search/request/search-request.view";
 import {AnalyticView} from "./analytic/analytic.view";
 import {DetailTimelineComponent} from "./detail/session/_component/timeline/detail-timeline.component";
@@ -47,6 +46,8 @@ import {
 import {InstanceComponent} from './detail/instance/instance.component';
 import {InstanceTableComponent} from './detail/instance/_component/instance-table/instance-table.component';
 import {ParameterTableComponent} from "./detail/instance/_component/parameter-table/parameter-table.component";
+import {DashboardInstancesTableComponent} from './dashboard/components/instances-table/instances-table.component';
+import {DashboardDetailViewComponent} from './dashboard/components/detail-view/detail-view.component';
 import {RequestKpiView} from "./kpi/request/request-kpi.view";
 import {RestComponent as RequestRestComponent} from "./kpi/request/rest/rest.component";
 import {RestComponent as SessionRestComponent} from "./kpi/session/rest/rest.component";
@@ -61,9 +62,13 @@ import {FtpComponent} from "./kpi/request/ftp/ftp.component";
 import {LdapComponent} from "./kpi/request/ldap/ldap.component";
 import {SmtpComponent} from "./kpi/request/smtp/smtp.component";
 import {SessionKpiView} from "./kpi/session/session-kpi.view";
-import {DependencyNewTableComponent} from "./kpi/_component/dependency-table/dependency-table.component";
-import {DependentNewTableComponent} from "./kpi/_component/dependent-table/dependent-table.component";
 import {BatchComponent} from "./kpi/session/batch/batch.component";
+import {CommandChartComponent} from "./kpi/_component/command-chart/command-chart.component";
+import {DependencyChartComponent} from "./kpi/_component/dependency-chart/dependency-chart.component";
+import {MediaTypeChartComponent} from "./kpi/_component/media-type-chart/media-type-chart.component";
+import {DependentChartComponent} from "./kpi/_component/dependent-chart/dependent-chart.component";
+import {StartupComponent} from "./kpi/session/startup/startup.component";
+import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.component";
 
 @NgModule({
   imports: [
@@ -101,7 +106,7 @@ import {BatchComponent} from "./kpi/session/batch/batch.component";
     ArchitectureView,
     TreeView,
     NumberFormatterPipe,
-    DeploimentComponent,
+    CompactNumberPipe,
     AnalyticView,
     ActionTableComponent,
     SearchRequestView,
@@ -113,12 +118,15 @@ import {BatchComponent} from "./kpi/session/batch/batch.component";
     InstanceComponent,
     InstanceTableComponent,
     ParameterTableComponent,
+    DashboardInstancesTableComponent,
+    DashboardDetailViewComponent,
 
     // New
     RequestKpiView,
     RequestRestComponent,
     SessionRestComponent,
     BatchComponent,
+    StartupComponent,
     JdbcComponent,
     FtpComponent,
     LdapComponent,
@@ -129,8 +137,11 @@ import {BatchComponent} from "./kpi/session/batch/batch.component";
     LatencyChartComponent,
     ChartMenuComponent,
     SessionKpiView,
-    DependencyNewTableComponent,
-    DependentNewTableComponent
+    CommandChartComponent,
+    DependencyChartComponent,
+    DependentChartComponent,
+    MediaTypeChartComponent,
+    UserChartComponent
   ]
 })
 export class ViewsModule { }

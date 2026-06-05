@@ -34,7 +34,7 @@ export class SmtpRequestService {
         let args = {
             'column': `exception.err_type.coalesce():errorType`,
             'join': 'exception,instance',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
         }
@@ -54,7 +54,7 @@ export class SmtpRequestService {
         let args = {
             'column': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
             'join': 'exception,instance',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'order': 'date.asc'
@@ -74,7 +74,7 @@ export class SmtpRequestService {
     getsmtpMainExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<SmtpMainExceptionsByPeriodAndappname[]> {
         let args = {
             'column': `count:countok,exception.count_exception:count,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'join': 'exception,main_session,main_session.instance',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
@@ -90,7 +90,7 @@ export class SmtpRequestService {
         let args: any = {
             'column': `count_request_success:countSuccess,count_request_error:countError,count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max`,
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'instance.type': 'SERVER',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
@@ -113,7 +113,7 @@ export class SmtpRequestService {
         'instance_env': 'instance.id',
         'user.notNull': '',
         'host':`"${filters.host}"`,
-        'instance.environement': filters.env,
+        'instance.environement': `"${filters.env}"`,
         'start.ge': filters.start.toISOString(),
         'start.lt': filters.end.toISOString(),
         'order': `year.asc,date.asc`
@@ -132,7 +132,7 @@ export class SmtpRequestService {
             'instance.type': 'SERVER',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'order': 'count.desc'
         }
         if(filters.command){
@@ -141,50 +141,24 @@ export class SmtpRequestService {
         return this.getSmtp(args);
     }
 
-    getCustom(data: {base: string; column?: string; order?: string; sliceFilter?: string },
-              filters: {start: Date; end: Date; env: string; hosts: string[]; method?: string[] }): Observable<any[]> {
+    getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
+              filters: {env: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], filters?: string[] }): Observable<any[]> {
         let args: any = {
-            'column': `${data.base}`,
+            'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString()
-        }
-        if(data?.column){
-            args['column'] += `,${data.column}`;
-        }
-        if(data?.order){
-            args['order'] = data.order;
-        }
-        if(filters.hosts?.length){
-            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
-        }
-
-        if(data?.sliceFilter){
-            args[Object.keys(data.sliceFilter)[0]] = `"${Object.values(data.sliceFilter)[0]}"`;
-        }
-
-        return this.getSmtp(args);
-    }
-
-    getCustom2(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
-               filters: {env: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], filters?: string[] }): Observable<any[]> {
-        let args: any = {
-            'column': `${data.series.map(d => d.jquery.value + '.' + data.indicator.jquery.value + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value}:${data.group.jquery.buildAlias()}`,
-            'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
         if(data.stack) {
-            args['column'] += `,${data.stack.jquery.value}:${data.stack.jquery.buildAlias()}`;
+            args['column'] += `,${data.stack.jquery.value()}:${data.stack.jquery.buildAlias()}`;
             args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
         }
         if(data.group.jquery.order){
-            args['order'] = `${data.group.jquery.buildAlias()}.${data.group.jquery.order}`;
+            args['order'] = `${data.group.jquery.order}`;
         }
-        if(filters.filters?.length) {
-            args[`${data.filter.jquery.value}.in`] = filters.filters.map(o => `"${o}"`).join(',');
+        if(data.filter && filters.filters?.length) {
+            args[`${data.filter.jquery.value()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
         }
         if(filters.hosts?.length){
             args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
@@ -194,9 +168,10 @@ export class SmtpRequestService {
 
     getFilters(filter: ChartItem, filters: {env: string, start: Date, end: Date, hosts?: string[] }) {
         let args: any = {
-            'column': `${filter.jquery.value}.distinct:${filter.jquery.buildAlias()}`,
+            'column': `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
+            'distinct': 'true',
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }

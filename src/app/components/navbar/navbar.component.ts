@@ -1,15 +1,18 @@
-import {Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {FormControl} from '@angular/forms';
-import {ActivatedRoute} from '@angular/router';
-import {distinctUntilChanged, finalize, Subscription} from 'rxjs';
-import {DomSanitizer} from '@angular/platform-browser';
-import {MatIconRegistry} from '@angular/material/icon';
-import {MatMenuTrigger} from '@angular/material/menu';
-import {app, auth} from 'src/environments/environment';
-import {Constants} from '../../views/constants';
-import {EnvRouter} from '../../service/router.service';
-import {InstanceService} from '../../service/jquery/instance.service';
-import {AuthService} from "../../auth/auth.service";
+import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { FormControl } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
+import { distinctUntilChanged, finalize, Subscription } from 'rxjs';
+import { DomSanitizer } from '@angular/platform-browser';
+import { MatIconRegistry } from '@angular/material/icon';
+import { MatMenuTrigger } from '@angular/material/menu';
+import { MatDialog } from '@angular/material/dialog';
+import { AboutDialogComponent } from '../about/about-dialog.component';
+import { app } from 'src/environments/environment';
+import { Constants } from '../../views/constants';
+import { EnvRouter } from '../../service/router.service';
+import { InstanceService } from '../../service/jquery/instance.service';
+import { PageTitleService } from '../../service/page-title.service';
+import { PagePanelService } from '../../service/page-panel.service';
 
 interface SubNavItem {
   label: string;
@@ -37,6 +40,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _service = inject(InstanceService);
   private readonly _envRouter = inject(EnvRouter);
+  private readonly _panelSvc = inject(PagePanelService);
+  readonly pageTitle$ = inject(PageTitleService).config$;
+  readonly hasPanel$    = this._panelSvc.hasPanel$;
+  readonly isPanelOpen$ = this._panelSvc.isOpen$;
 
   @ViewChild('mainTrigger') mainMenuTrigger: MatMenuTrigger;
 
@@ -46,7 +53,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
   env: FormControl<string> = new FormControl();
   isLoadingEnv = false;
   subscriptions: Subscription[] = [];
-  authEnabled = auth.enabled;
+
+  readonly isFirefox = typeof navigator !== 'undefined' && /Firefox\//.test(navigator.userAgent);
 
   readonly navItems: NavItem[] = [
     {
@@ -54,24 +62,31 @@ export class NavbarComponent implements OnInit, OnDestroy {
       icon: Constants.MAPPING_TYPE['request'].icon,
       id: 'request',
       children: [
-        { label: Constants.REQUEST_MAPPING_TYPE['rest'].title, icon: Constants.REQUEST_MAPPING_TYPE['rest'].icon, id: 'rest', route: 'request/rest', kpiRoute: 'kpi/request/rest' },
-        { label: Constants.REQUEST_MAPPING_TYPE['jdbc'].title, icon: Constants.REQUEST_MAPPING_TYPE['jdbc'].icon, id: 'jdbc', route: 'request/jdbc', kpiRoute: 'kpi/request/jdbc' },
-        { label: Constants.REQUEST_MAPPING_TYPE['ftp'].title, icon: Constants.REQUEST_MAPPING_TYPE['ftp'].icon, id: 'ftp', route: 'request/ftp', kpiRoute: 'kpi/request/ftp' },
-        { label: Constants.REQUEST_MAPPING_TYPE['smtp'].title, icon: Constants.REQUEST_MAPPING_TYPE['smtp'].icon, id: 'smtp', route: 'request/smtp', kpiRoute: 'kpi/request/smtp' },
-        { label: Constants.REQUEST_MAPPING_TYPE['ldap'].title, icon: Constants.REQUEST_MAPPING_TYPE['ldap'].icon, id: 'ldap', route: 'request/ldap', kpiRoute: 'kpi/request/ldap' },
+        { label: Constants.REQUEST_MAPPING_TYPE['rest'].title.replace(/^Flux\s+/i, ''), icon: Constants.REQUEST_MAPPING_TYPE['rest'].icon, id: 'rest', route: 'request/rest', kpiRoute: 'kpi/request/rest' },
+        { label: Constants.REQUEST_MAPPING_TYPE['jdbc'].title.replace(/^Flux\s+/i, ''), icon: Constants.REQUEST_MAPPING_TYPE['jdbc'].icon, id: 'jdbc', route: 'request/jdbc', kpiRoute: 'kpi/request/jdbc' },
+        { label: Constants.REQUEST_MAPPING_TYPE['ftp'].title.replace(/^Flux\s+/i, ''), icon: Constants.REQUEST_MAPPING_TYPE['ftp'].icon, id: 'ftp', route: 'request/ftp', kpiRoute: 'kpi/request/ftp' },
+        { label: Constants.REQUEST_MAPPING_TYPE['smtp'].title.replace(/^Flux\s+/i, ''), icon: Constants.REQUEST_MAPPING_TYPE['smtp'].icon, id: 'smtp', route: 'request/smtp', kpiRoute: 'kpi/request/smtp' },
+        { label: Constants.REQUEST_MAPPING_TYPE['ldap'].title.replace(/^Flux\s+/i, ''), icon: Constants.REQUEST_MAPPING_TYPE['ldap'].icon, id: 'ldap', route: 'request/ldap', kpiRoute: 'kpi/request/ldap' },
       ]
     },
     { label: Constants.MAPPING_TYPE['rest'].title, icon: Constants.MAPPING_TYPE['rest'].icon, id: 'rest', route: 'session/rest', kpiRoute: 'kpi/session/rest' },
     { label: Constants.MAPPING_TYPE['batch'].title, icon: Constants.MAPPING_TYPE['batch'].icon, id: 'batch', route: 'session/batch', kpiRoute: 'kpi/session/batch' },
     { label: Constants.MAPPING_TYPE['test'].title, icon: Constants.MAPPING_TYPE['test'].icon, id: 'test', route: 'session/test' },
-    { label: Constants.MAPPING_TYPE['startup'].title, icon: Constants.MAPPING_TYPE['startup'].icon, id: 'startup', route: 'session/startup' },
+    { label: Constants.MAPPING_TYPE['startup'].title, icon: Constants.MAPPING_TYPE['startup'].icon, id: 'startup', route: 'session/startup', kpiRoute: 'kpi/session/startup' },
     { label: Constants.MAPPING_TYPE['view'].title, icon: Constants.MAPPING_TYPE['view'].icon, id: 'view', route: 'session/view' },
   ];
 
-  constructor(private authService: AuthService) {
+  private readonly _dialog = inject(MatDialog);
+
+  constructor() {
     const iconRegistry = inject(MatIconRegistry);
     const sanitizer = inject(DomSanitizer);
     iconRegistry.addSvgIcon('github', sanitizer.bypassSecurityTrustResourceUrl('./assets/github.svg'));
+  }
+
+  openAbout(): void {
+    (document.activeElement as HTMLElement)?.blur();
+    this._dialog.open(AboutDialogComponent, { panelClass: 'about-dialog-panel' });
   }
 
   ngOnInit() {
@@ -117,10 +132,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this._envRouter.navigateOnClick(event, ['home'], { queryParams: { env: this.env.value } });
   }
 
-  gotoDeploiment(event: MouseEvent) {
-    this._envRouter.navigateOnClick(event, ['deploiment'], { queryParams: { env: this.env.value } });
-  }
-
   selectEnv(value: string) {
     this.env.setValue(value);
   }
@@ -143,32 +154,6 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return known.includes(env) ? env : 'other';
   }
 
-  getUserClaims(): any {
-    return this.authService.getUserProfile() || {};
-  }
-
-  getUserInitials(): string {
-    const claims = this.getUserClaims();
-    const name: string = claims?.name || claims?.email || '';
-    if (!name) return '?';
-    const parts = name.split(/[\s.@_-]/);
-    return parts.length >= 2
-      ? (parts[0][0] + parts[1][0]).toUpperCase()
-      : name.substring(0, 2).toUpperCase();
-  }
-
-  getUserDisplayName(): string {
-    const claims = this.getUserClaims();
-    return claims?.name || claims?.preferred_username || claims?.email || 'Utilisateur';
-  }
-
-  getUserEmail(): string {
-    const claims = this.getUserClaims();
-    return claims?.email || '';
-  }
-
-  logout() {
-    this.authService.logout();
-  }
+  onFilterClick(): void { this._panelSvc.toggle(); }
 
 }

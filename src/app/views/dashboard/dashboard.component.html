@@ -1,6 +1,5 @@
-<header-page [iconOutlined]="true" [titleIcon]="MAPPING_TYPE['dashboard'].icon" [ui-title]="MAPPING_TYPE['dashboard'].title">
-  
-  <form [formGroup]="serverFilterForm" class="header-filter md-2">
+﻿<page-panel panelTitle="Filtres" panelIcon="calendar_month">
+  <form [formGroup]="serverFilterForm" class="panel-filter">
     <mat-form-field class="no-subscript" appearance="outline">
       <mat-label>Période</mat-label>
       <mat-date-range-input [formGroup]="serverFilterForm.controls.dateRangePicker" [rangePicker]="picker">
@@ -11,102 +10,184 @@
       <mat-date-range-picker #picker></mat-date-range-picker>
     </mat-form-field>
 
-    <mat-form-field class="no-subscript" [class.loading]="serverNameIsLoading" appearance="outline">
-      <mat-label>Serveur</mat-label>
-      <mat-select [formControl]="serverFilterForm.controls.appname" multiple>
-
-        <span *ngIf="serverNameIsLoading && params.serveurs[0]!=''"><mat-option *ngFor="let s of params.serveurs"
-            [value]="s">{{s}}</mat-option></span>
-        <mat-option *ngFor="let d of nameDataList" [value]="d">{{d}}</mat-option>
-      </mat-select>
-      <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>
-    </mat-form-field>
-
-    <button mat-mini-fab color="primary" (click)="search()">
-      <mat-icon matSuffix>search</mat-icon>
-    </button>
+    <div class="pp-actions">
+      <button mat-mini-fab color="primary" (click)="search()">
+        <mat-icon matSuffix>search</mat-icon>
+      </button>
+    </div>
   </form>
-</header-page>
+</page-panel>
 
-<div style="display: flex; justify-content: space-between; gap: 1em; margin-bottom: 1em;">
-  <div style="display: flex; flex-direction: column; justify-content: space-between; width: 25%;" class="mat-elevation-z5">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin: 0 0 0 1em">
-      <div style="display: flex; flex-direction: column">
-        <div style="font-weight: 900">{{sparklineTitles.rest.title}}</div>
-        <div style="font-style: italic; font-weight: 200; font-size: 12px">{{sparklineTitles.rest.subtitle}}</div>
-      </div>
-      <button mat-icon-button [disabled]="chartRequests['restRequestExceptionsTable'].isLoading || !chartRequests['restRequestExceptionsTable'].data?.length" (click)="openProtocolDialog({observable: chartRequests['restRequestExceptionsTable'], type: 'REST'})">
-        <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
-      </button>
-    </div>
-    <chart type="area"
-           [config]="constants.REST_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.restRequestExceptionsTable.chart ||[]"
-           [isLoading]="chartRequests?.restRequestExceptionsTable?.isLoading" />
-  </div>
+<div class="db-grid">
+  <!-- Colonne principale : liste des protocoles -->
+  <section class="db-main">
 
-  <div style="display: flex; flex-direction: column; justify-content: space-between; width: 25%;" class="mat-elevation-z5">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin: 0 0 0 1em">
-      <div style="display: flex; flex-direction: column">
-        <div style="font-weight: 900">{{sparklineTitles.jdbc.title}}</div>
-        <div style="font-style: italic; font-weight: 200; font-size: 12px">{{sparklineTitles.jdbc.subtitle}}</div>
-      </div>
-      <button mat-icon-button [disabled]="chartRequests['databaseRequestExceptionsTable'].isLoading || !chartRequests['databaseRequestExceptionsTable'].data?.length" (click)="openProtocolDialog({observable: chartRequests['databaseRequestExceptionsTable'], type: 'JDBC'})">
-        <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
-      </button>
-    </div>
-    <chart type="area"
-           [config]="constants.DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.databaseRequestExceptionsTable.chart|| []"
-           [isLoading]="chartRequests?.databaseRequestExceptionsTable?.isLoading" />
-  </div>
+    <!-- Vue d'ensemble : tableau des instances serveur -->
+    <dashboard-instances-table
+      *ngIf="!hasSelectedInsights && showOverview"
+      [rows]="filteredDeployRows"
+      [isLoading]="serverHealthLoading"
+      [today]="deployTableToday"
+      [versionColor]="versionColor"
+      [instanceSearchQuery]="instanceSearchQuery"
+      (statusIndicatorClick)="navigateOnStatusIndicator($event.event, $event.row)"
+      (serverClick)="navigateOnServerClick($event.event, $event.row)"
+      (sinceClick)="navigateOnSinceClick($event.event, $event.row)"
+      (restartClick)="navigateOnRestartClick($event.event, $event.minStart, $event.appName)">
+    </dashboard-instances-table>
 
-  <div style="display: flex; flex-direction: column; justify-content: space-between; width: 25%;" class="mat-elevation-z5">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin: 0 0 0 1em">
-      <div style="display: flex; flex-direction: column">
-        <div style="font-weight: 900">{{sparklineTitles.ftp.title}}</div>
-        <div style="font-style: italic; font-weight: 200; font-size: 12px">{{sparklineTitles.ftp.subtitle}}</div>
-      </div>
-      <button mat-icon-button [disabled]="chartRequests['ftpRequestExceptionsTable'].isLoading || !chartRequests['ftpRequestExceptionsTable'].data?.length" (click)="openProtocolDialog({observable: chartRequests['ftpRequestExceptionsTable'], type: 'FTP'})">
-        <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
-      </button>
-    </div>
-    <chart type="area"
-           [config]="constants.FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.ftpRequestExceptionsTable.chart||[]"
-           [isLoading]="chartRequests?.ftpRequestExceptionsTable?.isLoading" />
-  </div>
+    <!-- Vue détail : affiché au clic sur une ligne Request ou Session -->
+    <dashboard-detail-view
+      *ngIf="hasSelectedInsights"
+      [context]="detailContext"
+      (requestProtocolNav)="navigateToRequestProtocol($event.key, $event.errorType)"
+      (sessionTypeNav)="navigateToSessionByType($event.type, undefined, $event.server)"
+      (exceptionNav)="navigateToException($event.type, $event.tab)"
+      (instanceFilter)="navigateToInstancesWithFilter($event)"
+      (protocolDialogOpen)="openProtocolDialog($event)">
+    </dashboard-detail-view>
 
-  <div style="display: flex; flex-direction: column; justify-content: space-between; width: 25%;" class="mat-elevation-z5">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin: 0 0 0 1em">
-      <div style="display: flex; flex-direction: column">
-        <div style="font-weight: 900">{{sparklineTitles.smtp.title}}</div>
-        <div style="font-style: italic; font-weight: 200; font-size: 12px">{{sparklineTitles.smtp.subtitle}}</div>
+  </section>
+
+  <!-- Sidebar : KPIs globaux + serveurs -->
+  <aside class="db-sidebar">
+
+    <!-- Stats instances compactes -->
+    <ng-container *ngIf="serverHealthLoading; else instancesBlock">
+      <div class="dov-stats-wrap dov-stats-skel">
+        <div class="dov-stats-lbl">
+          Instances actives
+          <mat-icon class="dov-stats-lbl-info material-symbols-outlined" title="Les instances actives ne dépendent pas de la période sélectionnée">info</mat-icon>
+        </div>
+        <div class="dov-stats-sidebar">
+          <div class="dov-stat-sb-skel" *ngFor="let _ of statSkeletonRows"></div>
+        </div>
       </div>
-      <button mat-icon-button [disabled]="chartRequests['smtpRequestExceptionsTable'].isLoading || !chartRequests['smtpRequestExceptionsTable'].data?.length" (click)="openProtocolDialog({observable: chartRequests['smtpRequestExceptionsTable'], type: 'SMTP'})">
-        <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
+    </ng-container>
+    <ng-template #instancesBlock>
+    <div class="dov-stats-wrap">
+      <div class="dov-stats-lbl">
+        Instances actives
+        <mat-icon class="dov-stats-lbl-info material-symbols-outlined" title="Les instances actives ne dépendent pas de la période sélectionnée">info</mat-icon>
+      </div>
+    <div class="dov-stats-sidebar">
+      <button type="button" class="dov-stat-sb sb-total"
+              (click)="selectServerStatus('all')"
+              [class.dov-stat-sb-active]="serverStatusFilter === 'all' && showOverview">
+        <span class="dov-stat-sb-val">{{ hasNoData ? '--' : deployTableRows.length }}</span>
+        <span class="dov-stat-sb-lbl">Total</span>
+      </button>
+      <button type="button" class="dov-stat-sb sb-pending"
+              (click)="selectServerStatus('pending')"
+              [class.dov-stat-sb-active]="serverStatusFilter === 'pending' && showOverview">
+        <span class="dov-stat-sb-val">{{ hasNoData ? '--' : pendingServerStat }}</span>
+        <span class="dov-stat-sb-lbl">En attente</span>
+      </button>
+      <button type="button" class="dov-stat-sb sb-offline"
+              (click)="selectServerStatus('offline')"
+              [class.dov-stat-sb-active]="serverStatusFilter === 'offline' && showOverview">
+        <span class="dov-stat-sb-val">{{ hasNoData ? '--' : offlineServerStat }}</span>
+        <span class="dov-stat-sb-lbl">Hors ligne</span>
       </button>
     </div>
-    <chart type="area"
-           [config]="constants.SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.smtpRequestExceptionsTable.chart||[]"
-           [isLoading]="chartRequests?.smtpRequestExceptionsTable?.isLoading" />
-  </div>
-  <div style="display: flex; flex-direction: column; justify-content: space-between; width: 25%;" class="mat-elevation-z5">
-    <div style="display: flex; align-items: center; justify-content: space-between; margin: 0 0 0 1em">
-      <div style="display: flex; flex-direction: column">
-        <div style="font-weight: 900">{{sparklineTitles.ldap.title}}</div>
-        <div style="font-style: italic; font-weight: 200; font-size: 12px">{{sparklineTitles.ldap.subtitle}}</div>
-      </div>
-      <button mat-icon-button [disabled]="chartRequests['ldapRequestExceptionsTable'].isLoading || !chartRequests['ldapRequestExceptionsTable'].data?.length" (click)="openProtocolDialog({observable: chartRequests['ldapRequestExceptionsTable'], type: 'LDAP'})">
-        <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
-      </button>
     </div>
-    <chart type="area"
-           [config]="constants.LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE" [data]="chartRequests?.ldapRequestExceptionsTable.chart||[]"
-           [isLoading]="chartRequests?.ldapRequestExceptionsTable?.isLoading" />
-  </div>
+    </ng-template>
+
+    <!-- Distribution Session -->
+    <ng-container *ngIf="sessionCountLoading; else sessionBlock">
+      <div class="sb-block sb-distribution-block sb-skel-block">
+        <div class="sbd-title">Session</div>
+        <ng-container *ngFor="let _ of skeletonRows">
+          <div class="sbd-skel-main">
+            <div class="sbd-skel-top">
+              <div class="sbd-skel-label"></div>
+              <div class="sbd-skel-count"></div>
+            </div>
+            <div class="sbd-skel-track"></div>
+          </div>
+          <div class="sbd-skel-rate"></div>
+        </ng-container>
+      </div>
+    </ng-container>
+    <ng-template #sessionBlock>
+    <div class="sb-block sb-distribution-block">
+      <div class="sbd-title">Session</div>
+      <div class="sbd-empty" *ngIf="sessionSummaries.length === 0 && !restSessionCountLoading">
+        <mat-icon>info_outline</mat-icon>
+        <span>Aucune session sur la période</span>
+      </div>
+      <ng-container *ngFor="let s of sessionSummaries">
+        <ng-container *ngIf="s.loading">
+          <div class="sbd-skel-main">
+            <div class="sbd-skel-top">
+              <div class="sbd-skel-label"></div>
+              <div class="sbd-skel-count"></div>
+            </div>
+            <div class="sbd-skel-track"></div>
+          </div>
+          <div class="sbd-skel-rate"></div>
+        </ng-container>
+        <div class="sbd-row" *ngIf="!s.loading"
+          [class.sbd-row-selected]="selectedInsights.has(s.key)"
+          [class.sbd-row-clickable]="true"
+          [title]="s.title"
+          tabindex="0"
+          (click)="toggleInsight(s.key)"
+          (keydown.enter)="toggleInsight(s.key)">
+          <div class="sbd-main">
+            <div class="sbd-top">
+              <span class="sbd-label">{{ s.label }}</span>
+              <span class="sbd-count">{{ s.total | compact }}</span>
+            </div>
+            <div class="sbd-track" [class.track-active]="s.total > 0">
+              <div class="sbd-fill" [style.width.%]="s.total > 0 ? (100 - s.rate) : 0"></div>
+            </div>
+          </div>
+          <span class="sbd-rate" [class.c-ok]="s.total > 0 && s.rate === 0" [class.c-err]="s.rate > 0">{{ s.rate === 0 ? '100%' : (s.rate | number:'1.2-2') + '%' }}</span>
+        </div>
+      </ng-container>
+    </div>
+    </ng-template>
+
+    <!-- Distribution Flux (ex-Request) -->
+    <div class="sb-block sb-distribution-block">
+      <div class="sbd-title">Flux</div>
+      <div class="sbd-empty" *ngIf="protocolSummaries.length === 0 && !kpiLoading">
+        <mat-icon>info_outline</mat-icon>
+        <span>Aucun flux sur la période</span>
+      </div>
+      <ng-container *ngFor="let p of protocolSummaries">
+        <ng-container *ngIf="p.loading">
+          <div class="sbd-skel-main">
+            <div class="sbd-skel-top">
+              <div class="sbd-skel-label"></div>
+              <div class="sbd-skel-count"></div>
+            </div>
+            <div class="sbd-skel-track"></div>
+          </div>
+          <div class="sbd-skel-rate"></div>
+        </ng-container>
+        <div class="sbd-row" *ngIf="!p.loading"
+          [class.sbd-row-selected]="selectedInsights.has(p.key)"
+          [class.sbd-row-clickable]="true"
+          [title]="p.title"
+          tabindex="0"
+          (click)="toggleInsight(p.key)"
+          (keydown.enter)="toggleInsight(p.key)">
+          <div class="sbd-main">
+            <div class="sbd-top">
+              <span class="sbd-label">{{ p.label }}</span>
+              <span class="sbd-count">{{ p.total | compact }}</span>
+            </div>
+            <div class="sbd-track" [class.track-active]="p.total > 0">
+              <div class="sbd-fill" [style.width.%]="p.total > 0 ? (100 - p.rate) : 0"></div>
+            </div>
+          </div>
+          <span class="sbd-rate" [class.c-ok]="p.rate === 0" [class.c-err]="p.rate > 0">{{ p.rate === 0 ? '100%' : (p.rate | number:'1.2-2') + '%' }}</span>
+        </div>
+      </ng-container>
+    </div>
+
+  </aside>
+
 </div>
-
-<exceptions-table
-  [data]="tabRequests.exceptionsTable?.data"
-  [isLoading]="tabRequests.exceptionsTable?.isLoading"
-  [enableTypeColumn]="true"
-  (onRowSelected)="onSessionExceptionRowSelected($event)">
-</exceptions-table>

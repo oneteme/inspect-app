@@ -1,4 +1,5 @@
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
+import {PageTitleService} from '../../../../service/page-title.service';
 
 import {ActivatedRoute} from '@angular/router';
 import {catchError, combineLatest, finalize, forkJoin, of, Subject, switchMap, takeUntil} from "rxjs";
@@ -28,6 +29,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
   private readonly durationPipe = new DurationPipe();
   private readonly $destroy = new Subject<void>();
   private readonly _dialog = inject(MatDialog);
+  private readonly _pageTitleService = inject(PageTitleService);
 
   tabs: TabData[] = [];
   selectedTabIndex: number = 0;
@@ -76,6 +78,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([params, queryParams]) => {
         this.params = {idJdbc: params.id_request, env: queryParams.env || app.defaultEnv};
+        this._pageTitleService.set({ icon: 'database', iconOutlined: true, title: 'Flux JDBC • ' + params.id_request, subtitle: 'Communications externes' });
         this.getRequest();
       }
     });
@@ -159,7 +162,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     })
     this.dataArray.splice(0, 0, {
       title: '',
-      group: this.request.command,
+      group: this.request.command ? this.request.command : '<empty>',
       start: this.timelineStart,
       end: this.timelineEnd,
       content: (this.request.schema || this.request.name || 'N/A'),
@@ -188,8 +191,8 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
       }));
     }
     groups.splice(0, 0, {
-      id: this.request.command,
-      content: this.request.command,
+      id: this.request.command ? this.request.command : '<empty>',
+      content: this.request.command ? this.request.command : '<empty>',
       treeLevel: 1,
       nestedGroups: groups.map(g => (g.id))
     })
@@ -226,6 +229,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.$destroy.next();
     this.$destroy.complete();
+    this._pageTitleService.clear();
   }
 
   getDate(start: number) {
@@ -247,8 +251,8 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
         treeLevel: 2
       }));
       groups.splice(0, 0, {
-        id: this.request.command,
-        content: this.request.command,
+        id: this.request.command ? this.request.command : '<empty>',
+        content: this.request.command ? this.request.command : '<empty>',
         treeLevel: 1,
         nestedGroups: groups.map(g => (g.id))
       })
@@ -269,6 +273,12 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
         end: new Date(this.request.end * 1000 + 1800000)
       }
     });
+  }
+
+  navigateOnKpi(event: MouseEvent) {
+    var start = new Date(this.request.start * 1000);
+    var end = this.request.end ? new Date(this.request.end * 1000) : new Date();
+    this._router.navigateOnClick(event, ['/kpi/request', 'jdbc'], { queryParams: {host: this.request.host, env: this.instance.env, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
   }
 }
 

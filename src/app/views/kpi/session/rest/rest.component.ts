@@ -23,7 +23,26 @@ export class RestComponent implements OnInit {
   readonly METHOD_PIE_CONFIG: ChartProvider<string, number> = {
     series: [
       { data: { x: field('method'), y: field('count') } }
-    ]
+    ],
+    options: {
+      legend: {
+        orient: 'horizontal',
+        bottom: 0,
+        left: 'center'
+      },
+      series: [{
+        label: {
+          show: false             // pas de datalabels sur les slices
+        },
+        labelLine: {
+          show: false             // pas de lignes de labels non plus
+        }
+      }],
+      tooltip: {
+        formatter: (params: any) =>
+          `${params.name} : <b>${params.value.toLocaleString('fr-FR')}</b> (${params.percent}%)`
+      }
+    }
   }
 
   readonly USER_AGENT_PIE_CONFIG: ChartProvider<string, number> = {
@@ -32,7 +51,21 @@ export class RestComponent implements OnInit {
     ],
     options: {
       legend: {
-        formatter: (value: string) => value?.length > 6 ? value.substring(0, 6) + '…' : value
+        orient: 'horizontal',
+        bottom: 0,
+        left: 'center'
+      },
+      series: [{
+        label: {
+          show: false             // pas de datalabels sur les slices
+        },
+        labelLine: {
+          show: false             // pas de lignes de labels non plus
+        }
+      }],
+      tooltip: {
+        formatter: (params: any) =>
+          `${params.name} : <b>${params.value.toLocaleString('fr-FR')}</b> (${params.percent}%)`
       }
     }
   }
@@ -45,9 +78,11 @@ export class RestComponent implements OnInit {
   $volumetryRepartitionSlice : {data: any[], loading: boolean} = {data: [], loading: true};
   $methodRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
   $userAgentRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
-  $dependencyTable: {data: any[], loading: boolean} = {data: [], loading: true};
-  $dependentTable: {data: any[], loading: boolean} = {data: [], loading: true};
-  $globalStatistic: {totalRequest: number, totalRequestError: number, percentSuccess: number, totalHost: number, totalUser: number} = {totalRequest: 0, totalRequestError: 0, percentSuccess: 0, totalHost: 0, totalUser: 0};
+  $dependencyRepartition: {data: any[], loading: boolean} = {data: [], loading: true};
+  $dependentRepartition: {data: any[], loading: boolean} = {data: [], loading: true};
+  $mediaRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
+  $userRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
+  $globalStatistic: {totalRequest: number, percentError: number, totalRequestError: number, elapsedPercentile: number, totalUser: number} = {totalRequest: 0, totalRequestError: 0, percentError: 0, elapsedPercentile: 0, totalUser: 0};
 
   groupedBy: string = '';
   params: QueryParams;
@@ -60,7 +95,9 @@ export class RestComponent implements OnInit {
       this.$performanceRepartition.chartConfig = REST_SESSION_PERFORMANCE_CHART_CONFIG(this.groupedBy);
       this.$volumetryRepartition.chartConfig = REST_SESSION_VOLUMETRY_CHART_CONFIG(this.groupedBy);
       this.getMethods();
+      this.getUser();
       this.getUserAgents();
+      this.getMediaType();
       this.getDependencies();
       this.getDependents();
       this.getGlobalStatistics();
@@ -80,12 +117,13 @@ export class RestComponent implements OnInit {
   }
 
   onVolumetryChartChange(event: {eventType: 'default' | 'filter', chartConfig: ChartConfig}) {
-    this.getCustom(event, this.$volumetryRepartition, this.$volumetryRepartitionSlice);
+    this.getSizeCustom(event, this.$volumetryRepartition, this.$volumetryRepartitionSlice);
   }
 
   getCustom(event: {eventType: 'default' | 'filter', chartConfig: ChartConfig, filteredTasks?: any[]},
             arr: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig}>,
             slice: {data: any[], loading: boolean}) {
+
     let actualIndicator = this.getActualIndicator(arr.chartConfig);
     let actualGroup = this.getActualGroup(arr.chartConfig);
     let actualStack = this.getActualStack(arr.chartConfig);
@@ -111,11 +149,79 @@ export class RestComponent implements OnInit {
     }
   }
 
+  getSizeCustom(event: {eventType: 'default' | 'filter', chartConfig: ChartConfig, filteredTasks?: any[]},
+                arr: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig}>,
+                slice: {data: any[], loading: boolean}) {
+    let actualIndicator = this.getActualIndicator(arr.chartConfig);
+    let actualGroup = this.getActualGroup(arr.chartConfig);
+    let actualStack = this.getActualStack(arr.chartConfig);
+    let actualFilter = this.getActualFilter(arr.chartConfig);
+    if(event.eventType === 'default') {
+      arr.loading = true;
+      arr.data = [];
+      this._restSessionService.getSizeCustom({series: arr.chartConfig.series.items, indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks})
+      .pipe(finalize(() => arr.loading = false))
+      .subscribe(data => {
+        arr.data = data;
+      });
+    } else if(event.eventType === 'filter') {
+      if(actualFilter) {
+        this._restSessionService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts}).subscribe({
+          next: (res: any[]) => {
+            slice.data = res;
+          }
+        });
+      } else {
+        slice.data = [];
+      }
+    }
+  }
+
+  getUser() {
+    let args: any = {
+      'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
+      'instance_env': 'instance.id',
+      'instance.environement': `"${this.params.env}"`,
+      'start.ge': this.params.period.start.toISOString(),
+      'start.lt': this.params.period.end.toISOString(),
+      'order': `start.${this.groupedBy}.asc`
+    }
+    if(this.params.hosts?.length){
+      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    }
+    this.$userRepartition.loading = true;
+    this._restSessionService.getRestSession(args).pipe(finalize(() => this.$userRepartition.loading = false)).subscribe({
+      next: (res: any[]) => {
+        this.$userRepartition.data = res;
+      }
+    });
+  }
+
+  getMediaType() {
+    let args: any = {
+      'column': `count:count,media.coalesce("Non renseigné"):media`,
+      'instance_env': 'instance.id',
+      'instance.environement': `"${this.params.env}"`,
+      'start.ge': this.params.period.start.toISOString(),
+      'start.lt': this.params.period.end.toISOString(),
+      'order': 'count.desc'
+    }
+    if(this.params.hosts?.length){
+      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    }
+    this.$mediaRepartition.loading = true;
+    this._restSessionService.getRestSession(args).pipe(finalize(() => this.$mediaRepartition.loading = false)).subscribe({
+      next: (res: any[]) => {
+        this.$mediaRepartition.data = res;
+      }
+    });
+  }
+
   getMethods() {
     let args: any = {
       'column': `count:count,method:method`,
       'instance_env': 'instance.id',
-      'instance.environement': this.params.env,
+      'instance.environement': `"${this.params.env}"`,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
@@ -135,7 +241,7 @@ export class RestComponent implements OnInit {
     let args: any = {
       'column': `count:count,user_agt:user_agt`,
       'instance_env': 'instance.id',
-      'instance.environement': this.params.env,
+      'instance.environement': `"${this.params.env}"`,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
@@ -146,40 +252,40 @@ export class RestComponent implements OnInit {
     this.$userAgentRepartition.loading = true;
     this._restSessionService.getRestSession(args).pipe(finalize(() => this.$userAgentRepartition.loading = false)).subscribe({
       next: (res: any[]) => {
-        this.$userAgentRepartition.data = res;
+        this.$userAgentRepartition.data = res.map(r => ({
+          ...r,
+          user_agt: r.user_agt ? r.user_agt.split('/')[0].trim() : 'N/A'
+        }));
       }
     });
   }
 
   getDependencies() {
-    if(this.params.hosts?.length){
-      this.$dependencyTable.loading = true;
-      this.$dependencyTable.data = [];
-      this._restSessionService.getDependenciesNew({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
-        .pipe(finalize(() => this.$dependencyTable.loading = false))
-        .subscribe({
-          next: (res: any[]) => {this.$dependencyTable.data = res}
-        })
-    }
+    this.$dependencyRepartition.loading = true;
+    this.$dependencyRepartition.data = [];
+    this._restSessionService.getDependenciesNew({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
+      .pipe(finalize(() => this.$dependencyRepartition.loading = false))
+      .subscribe({
+        next: (res: any[]) => {this.$dependencyRepartition.data = res}
+      })
+
   }
 
   getDependents() {
-    if(this.params.hosts?.length){
-      this.$dependentTable.loading = true;
-      this.$dependentTable.data = [];
-      this._restSessionService.getDependentsNew({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
-      .pipe(finalize(() => this.$dependentTable.loading = false))
-      .subscribe({
-        next: (res: any[]) => {this.$dependentTable.data = res}
-      })
-    }
+    this.$dependentRepartition.loading = true;
+    this.$dependentRepartition.data = [];
+    this._restSessionService.getDependentsNew({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
+    .pipe(finalize(() => this.$dependentRepartition.loading = false))
+    .subscribe({
+      next: (res: any[]) => {this.$dependentRepartition.data = res}
+    })
   }
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `count(instance.app_name.distinct):count_host,count:count_request,count_succes:count_success,count_error:count_error,count(user.distinct):count_user`,
+      'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_error:count_error,count(user.distinct):count_user`,
       'instance_env': 'instance.id',
-      'instance.environement': this.params.env,
+      'instance.environement': `"${this.params.env}"`,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString()
     }
@@ -189,16 +295,12 @@ export class RestComponent implements OnInit {
     this._restSessionService.getRestSession(args).subscribe({
       next: (res: any[]) => {
         this.$globalStatistic.totalRequest = res[0].count_request;
-        this.$globalStatistic.percentSuccess = (res[0].count_success / res[0].count_request) * 100 || 0;
         this.$globalStatistic.totalRequestError = res[0].count_error;
-        this.$globalStatistic.totalHost = res[0].count_host;
+        this.$globalStatistic.percentError = (res[0].count_error / res[0].count_request) * 100 || 0;
+        this.$globalStatistic.elapsedPercentile = res[0].elapsedPercentile;
         this.$globalStatistic.totalUser = res[0].count_user;
       }
     });
-  }
-
-  onRowSelected(event: {row, event}) {
-    this._router.navigateOnClick(event.event, ['/kpi/session/rest'], { queryParams: {env: this.params.env, host: event.row.dep}});
   }
 
   getActualIndicator(chartConfig: ChartConfig) {

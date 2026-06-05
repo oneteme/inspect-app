@@ -16,6 +16,10 @@ export class DetailFtpTableComponent {
 
   _requests: FtpRequestDto[] = [];
 
+  @Input() set initialQuery(q: string) {
+    if (q) this.tableConfig = { ...this.tableConfig, search: { ...this.tableConfig.search, initialQuery: q } };
+  }
+
   @Input() set requests(requests: FtpRequestDto[]) {
     this._requests = requests;
   }

@@ -34,7 +34,7 @@ function loadConfig(){
  function matchRegex(v: string,  name: string, pattern: RegExp) {
   if(v && pattern.exec(v)){
      return true;
-  }else {
+  } else if (v !== undefined) {
     console.warn(`bad value ${name}=${v}, pattern=${pattern}. Default value will be used: ${app[name]}`);
   }
   return false;

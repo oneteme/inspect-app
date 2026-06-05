@@ -20,3 +20,27 @@ export class NumberFormatterPipe implements PipeTransform {
         return "";
     }
 }
+
+/**
+ * Formate un nombre en notation compacte lisible, max 4 caractères.
+ * Exemples : 999 → "999", 1400 → "1.4k", 12034 → "12k", 1_500_000 → "1.5M"
+ */
+export function compactNumber(value: number): string {
+    if (value == null) return '';
+    const fmt = (v: number, suffix: string): string => {
+        const r = parseFloat(v.toFixed(1));
+        return (r >= 10 ? Math.round(v).toString() : r.toFixed(1)) + suffix;
+    };
+    const abs = Math.abs(value);
+    if (abs >= 1_000_000_000) return fmt(value / 1_000_000_000, 'G');
+    if (abs >= 1_000_000) return fmt(value / 1_000_000, 'M');
+    if (abs >= 1_000) return fmt(value / 1_000, 'k');
+    return String(value);
+}
+
+@Pipe({ name: 'compact' })
+export class CompactNumberPipe implements PipeTransform {
+    transform(value: number): string {
+        return compactNumber(value);
+    }
+}

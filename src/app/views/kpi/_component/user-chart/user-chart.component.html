@@ -1,0 +1,16 @@
+<div class="kpi-chart-header">
+  <div class="kpi-chart-title-group">
+    <span class="kpi-accent-bar purple-bar"></span>
+    <mat-icon class="kpi-chart-icon material-symbols-outlined">show_chart</mat-icon>
+    <span class="kpi-chart-title">Audience</span>
+  </div>
+</div>
+<div class="kpi-chart-subheader">
+  <span class="kpi-chart-period">{{(queryParams.period.start | date: 'd MMM') + '–' + (queryParams.period.end | date)}}</span>
+</div>
+<div class="kpi-chart-body" >
+  <chart type="line"
+         [config]="chartProvider"
+         [data]="_data"
+         [isLoading]="loading"></chart>
+</div>

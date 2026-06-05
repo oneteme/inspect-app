@@ -31,7 +31,7 @@ export class LdapRequestService {
         let args = {
             'column': `start.${filters.groupedBy}:date,count.sum.over(partition(date)):countok,exception.count_exception:count,count.divide(countok).multiply(100).round(2):pct,exception.err_type.coalesce():errorType,start.year:year`,
             'join': 'exception,instance',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
         }
@@ -46,7 +46,7 @@ export class LdapRequestService {
         let args = {
             'column': `exception.err_type.coalesce():errorType`,
             'join': 'exception,instance',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
         }
@@ -67,7 +67,7 @@ export class LdapRequestService {
         let args: any = {
             'column': `count_request_success:countSuccess,count_request_error:countError,count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max`,
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'instance.type': 'SERVER',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
@@ -84,50 +84,24 @@ export class LdapRequestService {
         return this.getLdap(args);
     }
 
-    getCustom(data: {base: string; column?: string; order?: string; sliceFilter?: string },
-              filters: {start: Date; end: Date; env: string; hosts: string[]; method?: string[] }): Observable<any[]> {
+    getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
+              filters: {env: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], filters?: string[] }): Observable<any[]> {
         let args: any = {
-            'column': `${data.base}`,
+            'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString()
-        }
-        if(data?.column){
-            args['column'] += `,${data.column}`;
-        }
-        if(data?.order){
-            args['order'] = data.order;
-        }
-        if(filters.hosts?.length){
-            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
-        }
-
-        if(data?.sliceFilter){
-            args[Object.keys(data.sliceFilter)[0]] = `"${Object.values(data.sliceFilter)[0]}"`;
-        }
-
-        return this.getLdap(args);
-    }
-
-    getCustom2(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
-               filters: {env: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], filters?: string[] }): Observable<any[]> {
-        let args: any = {
-            'column': `${data.series.map(d => d.jquery.value + '.' + data.indicator.jquery.value + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value}:${data.group.jquery.buildAlias()}`,
-            'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
         if(data.stack) {
-            args['column'] += `,${data.stack.jquery.value}:${data.stack.jquery.buildAlias()}`;
+            args['column'] += `,${data.stack.jquery.value()}:${data.stack.jquery.buildAlias()}`;
             args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
         }
         if(data.group.jquery.order){
-            args['order'] = `${data.group.jquery.buildAlias()}.${data.group.jquery.order}`;
+            args['order'] = `${data.group.jquery.order}`;
         }
-        if(filters.filters?.length) {
-            args[`${data.filter.jquery.value}.in`] = filters.filters.map(o => `"${o}"`).join(',');
+        if(data.filter && filters.filters?.length) {
+            args[`${data.filter.jquery.value()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
         }
         if(filters.hosts?.length){
             args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
@@ -137,9 +111,10 @@ export class LdapRequestService {
 
     getFilters(filter: ChartItem, filters: {env: string, start: Date, end: Date, hosts: string[] }) {
         let args: any = {
-            'column': `${filter.jquery.value}.distinct:${filter.jquery.buildAlias()}`,
+            'column': `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
+            'distinct': 'true',
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }

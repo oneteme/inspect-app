@@ -1,6 +1,6 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
+import {forkJoin, map, Observable} from "rxjs";
 import {RestSessionExceptionsByPeriodAndappname} from "src/app/model/jquery.model";
 import {RestRequestDto} from "../../model/request.model";
 import {ChartItem} from "../../views/kpi/kpi.config";
@@ -35,7 +35,7 @@ export class RestRequestService {
         let args = {
             'column': `count:count,error_type`,
             'join': 'exception,instance',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
         }
@@ -52,50 +52,80 @@ export class RestRequestService {
         return this.getRestRequest(args);
     }
 
-    getCustom(data: {base: string ,column?: string; order?: string, sliceFilter?: string },
-              filters: {env: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], method?: string[] }): Observable<{countSuccess: number, countError: number, elapsedTimeSlowest: number, elapsedTimeSlow: number, elapsedTimeMedium: number, elapsedTimeFast: number, elapsedTimeFastest: number, avg: number, max: number, date: number, year: number}[]> {
+    getSizeCustom(
+      data: { series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
+      filters: { env: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], filters?: string[] }
+    ): Observable<any[]> {
+        const groupAlias = data.group.jquery.buildAlias();
+        const stackAlias = data.stack?.jquery.buildAlias();
+
+        // Une requête par série (size_in, size_out, ...)
+        const requests = data.series.map(serie => {
+            const serieAlias = data.indicator.jquery.buildAlias(serie.jquery.buildAlias());
+            const args: any = {
+                'column': `${data.indicator.jquery.value(serie.jquery.value())}:${serieAlias},${data.group.jquery.value()}:${groupAlias}`,
+                'instance_env': 'instance.id',
+                'instance.environement': `"${filters.env}"`,
+                'start.ge': filters.start.toISOString(),
+                'start.lt': filters.end.toISOString()
+            };
+            if (data.stack) {
+                args['column'] += `,${data.stack.jquery.value(serie.jquery.buildAlias())}:${stackAlias}`;
+                args[`${stackAlias}.notNull`] = '';
+            }
+            if (data.group.jquery.order) {
+                args['order'] = data.group.jquery.order;
+            }
+            if (data.filter && filters.filters?.length) {
+                args[`${data.filter.jquery.value()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
+            }
+            if (filters.hosts?.length) {
+                args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+            }
+            return this.getRestRequest<any[]>(args);
+        });
+
+        // Fusion des résultats par clé group (+ stack si présent)
+        return forkJoin(requests).pipe(
+          map((results: any[][]) => {
+              const mergeMap = new Map<string, any>();
+              results.forEach((rows, i) => {
+                  const serieAlias = data.indicator.jquery.buildAlias(data.series[i].jquery.buildAlias());
+                  rows.forEach(row => {
+                      const key = stackAlias
+                        ? `${row[groupAlias]}__${row[stackAlias]}`
+                        : `${row[groupAlias]}`;
+                      if (!mergeMap.has(key)) {
+                          const base: any = { [groupAlias]: row[groupAlias] };
+                          if (stackAlias) base[stackAlias] = row[stackAlias];
+                          mergeMap.set(key, base);
+                      }
+                      mergeMap.get(key)![serieAlias] = row[serieAlias];
+                  });
+              });
+              return Array.from(mergeMap.values());
+          })
+        );
+    }
+
+    getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
+              filters: {env: string, start: Date, end: Date, hosts?: string[], filters?: string[] }): Observable<any[]> {
         let args: any = {
-            'column': `${data.base}`,
+            'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString()
-        }
-    if(data?.column){
-        args['column'] += `,${data.column}`;
-    }
-    if(data?.order){
-        args['order'] = data.order;
-    }
-    if(filters.hosts?.length){
-        args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
-    }
-
-        if(data?.sliceFilter){
-            args[Object.keys(data.sliceFilter)[0]] = `"${Object.values(data.sliceFilter)[0]}"`;
-        }
-
-        return this.getRestRequest(args);
-    }
-
-    getCustom2(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
-               filters: {env: string, start: Date, end: Date, hosts?: string[], filters?: string[] }): Observable<any[]> {
-        let args: any = {
-            'column': `${data.series.map(d => d.jquery.value + '.' + data.indicator.jquery.value + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value}:${data.group.jquery.buildAlias()}`,
-            'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
         if(data.stack) {
-            args['column'] += `,${data.stack.jquery.value}:${data.stack.jquery.buildAlias()}`;
+            args['column'] += `,${data.stack.jquery.value()}:${data.stack.jquery.buildAlias()}`;
             args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
         }
         if(data.group.jquery.order){
-            args['order'] = `${data.group.jquery.buildAlias()}.${data.group.jquery.order}`;
+            args['order'] = `${data.group.jquery.order}`;
         }
-        if(filters.filters?.length) {
-            args[`${data.filter.jquery.value}.in`] = filters.filters.map(o => `"${o}"`).join(',');
+        if(data.filter && filters.filters?.length) {
+            args[`${data.filter.jquery.value()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
         }
         if(filters.hosts?.length){
             args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
@@ -104,22 +134,22 @@ export class RestRequestService {
     }
 
     getLatency2(data: {serie: ChartItem, indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
-                filters: {env: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], method?: string[], filters?: string[] }): Observable<any[]> {
+                filters: {env: string, start: Date, end: Date, hosts?: string[], method?: string[], filters?: string[] }): Observable<any[]> {
         let args: any = {
-            'column': `${data.indicator.jquery.value}(${data.serie.jquery.value}.minus(rest_session.${data.serie.jquery.value})):${data.indicator.jquery.buildAlias(data.serie.jquery.buildAlias())},${data.group.jquery.value}:${data.group.jquery.buildAlias()}`,
+            'column': `${data.indicator.jquery.value()}(${data.serie.jquery.value()}.minus(rest_session.${data.serie.jquery.value()})):${data.indicator.jquery.buildAlias(data.serie.jquery.buildAlias())},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
             'join': 'instance,rest_session_inner',
             'status.gt': 0,
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'rest_session.start.ge': filters.start.toISOString(),
             'rest_session.start.lt': filters.end.toISOString(),
         }
         if(data.group.jquery.order){
-            args['order'] = `${data.group.jquery.buildAlias()}.${data.group.jquery.order}`;
+            args['order'] = `${data.group.jquery.order}`;
         }
-        if(filters.filters?.length) {
-            args[`${data.filter.jquery.buildAlias()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
+        if(data.filter && filters.filters?.length) {
+            args[`${data.filter.jquery.value()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
         }
         if(filters.hosts?.length){
             args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
@@ -129,9 +159,10 @@ export class RestRequestService {
 
     getFilters(filter: ChartItem, filters: {env: string, start: Date, end: Date, hosts?: string[] }) {
         let args: any = {
-            'column': `${filter.jquery.value}.distinct:${filter.jquery.buildAlias()}`,
+            'column': `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
+            'distinct': 'true',
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
@@ -146,7 +177,7 @@ export class RestRequestService {
         let args: any = {
             'column': `${query.serie}.${query.indicator}:${query.indicator},${query.serie}:${query.serie},${query.group}`,
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
@@ -157,7 +188,7 @@ export class RestRequestService {
         let args: any = {
             'column': `size_out_avg:sizeOut,size_in_avg:sizeIn,count_succes:countSuccess,count_error_server:countErrorServer,count_error_client:countErrorClient,elapsed_time_arg(10,null):elapsedTimeSlowest,elapsed_time_arg(5,10):elapsedTimeSlow,elapsed_time_arg(3,5):elapsedTimeMedium,elapsed_time_arg(1,3):elapsedTimeFast,elapsed_time_arg(null,1):elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max,count_unavailable_server:countServerUnavailableRows`,
             'instance_env': 'instance.id',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
@@ -179,7 +210,7 @@ export class RestRequestService {
             'column': `${data.base}`,
             'join': 'instance,rest_session_inner',
             'status.gt': 0,
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'rest_session.start.ge': filters.start.toISOString(),
@@ -204,7 +235,7 @@ export class RestRequestService {
         let args = {
             'column': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,error_type,start.${filters.groupedBy}:date,start.year:year`,
             'join': 'exception,instance',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'order': 'date.asc'

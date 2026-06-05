@@ -11,6 +11,7 @@ import {MainSessionService} from "../../service/jquery/main-session.service";
 import {ANALYTIC_MAPPING} from "../constants";
 import {app} from "../../../environments/environment";
 import {AnalyticDto} from "../../model/request.model";
+import {PageTitleService} from '../../service/page-title.service';
 
 @Component({
     templateUrl: './analytic.view.html',
@@ -29,6 +30,7 @@ export class AnalyticView implements OnDestroy {
     private readonly _activatedRoute = inject(ActivatedRoute);
     private readonly _router = inject(EnvRouter);
     private readonly _mainSessionService = inject(MainSessionService);
+    private readonly _pageTitleService = inject(PageTitleService);
     private readonly $destroy = new Subject<void>();
     protected readonly ANALYTIC_MAPPING = ANALYTIC_MAPPING;
 
@@ -54,6 +56,7 @@ export class AnalyticView implements OnDestroy {
     ngOnDestroy() {
         this.$destroy.next();
         this.$destroy.complete();
+        this._pageTitleService.clear();
     }
 
     getUserActions() {
@@ -79,6 +82,11 @@ export class AnalyticView implements OnDestroy {
         ]).subscribe({
             next: ([params, queryParams]) => {
                 this.params.user = params.user;
+                this._pageTitleService.set({
+                    icon: 'web_traffic',
+                    iconOutlined: true,
+                    title: 'Parcours de l\'utilisateur ' + params.user
+                });
                 this.params.env = queryParams.env || app.defaultEnv;
                 this.params.date = new Date(queryParams.date);
                 this.params.offset = 0;

@@ -1,4 +1,5 @@
 import {Component, inject, OnDestroy, OnInit} from "@angular/core";
+import {PageTitleService} from "../../../../service/page-title.service";
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {Location} from "@angular/common";
@@ -23,6 +24,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     private readonly $destroy = new Subject<void>();
     protected readonly _router: EnvRouter = inject(EnvRouter);
     private readonly _dialog = inject(MatDialog);
+    private readonly _pageTitleService = inject(PageTitleService);
 
     MAPPING_TYPE = Constants.MAPPING_TYPE;
     session: RestSessionView;
@@ -41,6 +43,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
         ]).subscribe({
             next: ([params, queryParams]) => {
                 this.env = queryParams.env || app.defaultEnv;
+                this._pageTitleService.set({ icon: 'call_received', iconOutlined: true, title: 'Services Exposés • ' + params.id_session, subtitle: Constants.MAPPING_TYPE['rest']?.subtitle });
                 this.getSession(params.id_session);
                 this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}`)
             }
@@ -92,6 +95,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     ngOnDestroy() {
         this.$destroy.next();
         this.$destroy.complete();
+        this._pageTitleService.clear();
     }
 
     onClickPulse() {
@@ -106,5 +110,11 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
           end: new Date(this.session.end * 1000 + 1800000)
         }
       });
+    }
+
+    navigate(event: MouseEvent) {
+        var start = new Date(this.session.start * 1000);
+        var end = this.session.end ? new Date(this.session.end * 1000) : new Date();
+        this._router.navigateOnClick(event, ['/kpi/session', 'rest'], { queryParams: {host: this.instance?.name, env: this.instance?.env, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
     }
 }

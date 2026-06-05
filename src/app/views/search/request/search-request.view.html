@@ -1,6 +1,6 @@
-<header-page [iconOutlined]="true" [titleIcon]="REQUEST_TYPE[params.type].icon" [ui-title]="REQUEST_TYPE[params.type].title" [ui-subtitle]="REQUEST_TYPE[params.type].subtitle">
-  <div class="filter-container md-3">
-    <mat-form-field style="width: 315px" class="no-subscript" appearance="outline" >
+<page-panel panelTitle="Filtres" panelIcon="filter_list">
+  <div class="panel-filter md-3">
+    <mat-form-field style="width: 310px" class="no-subscript period-wide" appearance="outline" >
       <mat-label>Période</mat-label>
       <mat-date-range-input [formGroup]="requestFilterForm.controls.dateRangePicker" [rangePicker]="picker">
         <input matStartDate  formControlName="start" placeholder="Start date" (dateChange)="onChangeStart($event)">
@@ -33,11 +33,13 @@
         </mat-option>
       </mat-select>
     </mat-form-field>
-    <button mat-mini-fab color="primary"  (click)="search()">
-      <mat-icon matSuffix>search</mat-icon>
-    </button>
+    <div class="pp-actions">
+      <button mat-mini-fab color="primary"  (click)="search()">
+        <mat-icon matSuffix>search</mat-icon>
+      </button>
+    </div>
   </div>
-</header-page>
+</page-panel>
 
 <rest-table *ngIf="params.type=='rest'"
             [requests]="requests"
