@@ -22,8 +22,6 @@ export class AuthService {
             }
             this.oauthService.configure(authCodeFlowConfig);
             await this.oauthService.loadDiscoveryDocumentAndTryLogin();
-            console.log("token id : ", this.oauthService.getIdToken())
-            console.log("token access : ", this.oauthService.getAccessToken())
             this.initialized = true;
         }
     }

@@ -4,8 +4,6 @@ import { inject } from "@angular/core";
 import { auth } from "../../environments/environment";
 
 export const authGuard: CanActivateFn = async () => {
-
-    console.log("auth guard")
     if (auth.enabled) {
         const authService = inject(AuthService);
         if (authService.initialized && authService.isLogged()) {
