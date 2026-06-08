@@ -1,7 +1,7 @@
 ﻿<section class="pp-bar"
      [class.pp-bar--open]="isOpen$ | async"
      aria-label="Filtres"
-     [attr.aria-hidden]="!(isOpen$ | async)">
+     role="region">
   <div class="pp-body" (click)="onBodyClick($event)">
     <ng-content></ng-content>
   </div>

@@ -42,7 +42,7 @@
       [context]="detailContext"
       (requestProtocolNav)="navigateToRequestProtocol($event.key, $event.errorType)"
       (sessionTypeNav)="navigateToSessionByType($event.type, undefined, $event.server)"
-      (exceptionNav)="navigateToException($event.type, $event.tab)"
+      (exceptionNav)="navigateToException($event)"
       (instanceFilter)="navigateToInstancesWithFilter($event)"
       (protocolDialogOpen)="openProtocolDialog($event)">
     </dashboard-detail-view>
@@ -93,10 +93,10 @@
     </div>
     </ng-template>
 
-    <!-- Distribution Session -->
+    <!-- Distribution traitement -->
     <ng-container *ngIf="sessionCountLoading; else sessionBlock">
       <div class="sb-block sb-distribution-block sb-skel-block">
-        <div class="sbd-title">Session</div>
+        <div class="sbd-title">Traitements</div>
         <ng-container *ngFor="let _ of skeletonRows">
           <div class="sbd-skel-main">
             <div class="sbd-skel-top">
@@ -111,10 +111,10 @@
     </ng-container>
     <ng-template #sessionBlock>
     <div class="sb-block sb-distribution-block">
-      <div class="sbd-title">Session</div>
+      <div class="sbd-title">Traitements</div>
       <div class="sbd-empty" *ngIf="sessionSummaries.length === 0 && !restSessionCountLoading">
         <mat-icon>info_outline</mat-icon>
-        <span>Aucune session sur la période</span>
+        <span>Aucun traitement sur la période</span>
       </div>
       <ng-container *ngFor="let s of sessionSummaries">
         <ng-container *ngIf="s.loading">

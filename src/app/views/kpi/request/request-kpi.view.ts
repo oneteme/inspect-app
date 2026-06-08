@@ -14,6 +14,7 @@ import {IPeriod, QueryParams} from "../../../model/conf.model";
 import {app, makeDatePeriod} from "../../../../environments/environment";
 import {Constants} from "../../constants";
 import {PageTitleService} from "../../../service/page-title.service";
+import {getKpiQuickRangeDates, KPI_PERIOD_QUICK_RANGES, KpiPeriodQuickRange, normalizeToMinimumDay} from '../../../shared/period-filter';
 
 @Component({
   templateUrl: './request-kpi.view.html',
@@ -34,6 +35,7 @@ export class RequestKpiView implements OnInit, OnDestroy {
   private readonly _pageTitleService = inject(PageTitleService);
 
   MAPPING_TYPE = Constants.REQUEST_MAPPING_TYPE;
+  readonly periodQuickRanges = KPI_PERIOD_QUICK_RANGES;
 
   serverNameIsLoading: boolean;
   nameDataList: any[] = [];
@@ -67,7 +69,9 @@ export class RequestKpiView implements OnInit, OnDestroy {
           title: (Constants.REQUEST_MAPPING_TYPE[this.params.type]?.title || this.params.type) + ' • KPI',
           subtitle: Constants.REQUEST_MAPPING_TYPE[this.params.type]?.subtitle
         });
-        this.params.queryParams = new QueryParams(new IPeriod(v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(0, 1).start, v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(0, 1).end), v.queryParams.env || app.defaultEnv,null,!v.queryParams.host ? [] : Array.isArray(v.queryParams.host) ? v.queryParams.host : [v.queryParams.host])
+        const period = new IPeriod(v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(0, 1).start, v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(0, 1).end);
+        const normalizedPeriod = normalizeToMinimumDay(period);
+        this.params.queryParams = new QueryParams(normalizedPeriod, v.queryParams.env || app.defaultEnv,null,!v.queryParams.host ? [] : Array.isArray(v.queryParams.host) ? v.queryParams.host : [v.queryParams.host])
         this.patchDateValue(this.params.queryParams.period.start, new Date(this.params.queryParams.period.end.getFullYear(), this.params.queryParams.period.end.getMonth(), this.params.queryParams.period.end.getDate() - 1));
         this.getHosts();
         if(this.params.type) {
@@ -84,10 +88,6 @@ export class RequestKpiView implements OnInit, OnDestroy {
       this.hostSubscription.unsubscribe();
     }
     this._pageTitleService.clear();
-  }
-
-  onChangeEnd() {
-    this.search();
   }
 
   patchDateValue(start: Date, end: Date) {
@@ -150,9 +150,13 @@ export class RequestKpiView implements OnInit, OnDestroy {
   }
 
   onHostopenedChange() {
-    let doSearch = this.params.queryParams.hosts != this.filterForm.controls.host.value;
     this.params.queryParams.hosts = [...this.filterForm.controls.host.value];
-    doSearch && this.search();
+  }
+
+  applyQuickRange(range: KpiPeriodQuickRange): void {
+    const {start, end, queryEnd} = getKpiQuickRangeDates(range);
+    this.params.queryParams.period = new IPeriod(start, queryEnd);
+    this.patchDateValue(start, end);
   }
 }
 

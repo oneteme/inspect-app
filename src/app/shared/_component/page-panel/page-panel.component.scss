@@ -1,9 +1,9 @@
-﻿$navbar-h:   56px;
-$bar-bg:     #ffffff;
-$border:     rgba(15, 23, 42, 0.1);
-$shadow:     0 6px 24px rgba(15, 23, 42, 0.10);
+﻿$navbar-h: 56px;
+$bar-bg: #ffffff;
+$border: rgba(15, 23, 42, 0.1);
+$shadow: 0 6px 24px rgba(15, 23, 42, 0.10);
 $transition: 0.24s cubic-bezier(0.4, 0, 0.2, 1);
-$primary:    #2563eb;
+$primary: #2563eb;
 
 :host {
     display: contents;
@@ -38,7 +38,7 @@ $primary:    #2563eb;
     align-items: flex-end;
     justify-content: center;
     gap: 16px;
-    padding: 10px 40px 14px;
+    padding: 14px 40px 13px;
 
     overflow-x: auto;
     &::-webkit-scrollbar { height: 3px; }
@@ -55,14 +55,29 @@ $primary:    #2563eb;
     ::ng-deep mat-form-field {
         width: auto !important;
         min-width: 180px;
-        flex: 1 1 200px;
-        max-width: 260px;
+        flex: 1 1 240px;
+        max-width: 240px;
         flex-shrink: 0;
     }
 
     ::ng-deep mat-form-field.period-wide {
-        flex: 0 0 310px;
-        max-width: 310px;
+        flex: 0 0 395px;
+        max-width: 395px;
+    }
+
+    ::ng-deep mat-form-field.host-filter {
+        flex: 0 0 260px;
+        max-width: 260px;
+    }
+
+    ::ng-deep mat-form-field.host-kpi-filter {
+        flex: 0 0 380px;
+        max-width: 380px;
+    }
+
+    ::ng-deep mat-form-field.status-filter {
+        flex: 0 0 180px;
+        max-width: 180px;
     }
 
     ::ng-deep .pp-actions {

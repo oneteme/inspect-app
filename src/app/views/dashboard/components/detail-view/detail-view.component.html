@@ -13,7 +13,7 @@
   <!-- ── Activité protocole : pleine largeur (protocoles uniquement) ── -->
   <div class="db-proto-wrap" *ngIf="context.selectedInsights.size > 0 && !isSessionInsight">
     <div class="db-insights-hdr">
-      <span class="dih-title">Incidents sur la période</span>
+      <span class="dih-title">Pourcentage d'incidents sur la période</span>
       <span class="dih-sub">{{ fluxChartSubtitle }}</span>
     </div>
     <div class="proto-list">
@@ -56,7 +56,7 @@
   <!-- ── Exceptions dans le temps : SERVICE, BATCH, VIEW, STARTUP ── -->
   <div class="db-sess-chart-wrap" *ngIf="isSessionInsight && selectedKey !== 'TEST'">
     <div class="db-insights-hdr">
-      <span class="dih-title">Incidents sur la période</span>
+      <span class="dih-title">Pourcentage d'incidents sur la période</span>
       <span class="dih-sub">{{ sessionChartSubtitle }}</span>
     </div>
     <div class="proto-list">
@@ -71,7 +71,8 @@
   <!-- ── Bloc principal : erreurs & infrastructure ── -->
   <div class="db-clt-block">
     <div class="sb-block-head">
-      <span>Incidents — {{ selectedLabel }}</span>
+      <span>Nombre d'incidents par exception</span>
+      <span class="sb-block-head-sub"> — Total d'exceptions</span>
       <ng-container *ngFor="let p of context.protocolDefs">
         <span class="dbi-chip dbi-chip-err" *ngIf="context.selectedInsights.has(p.key) && !context.kpiLoading && context.topErrors[p.key]?.length">{{ context.topErrors[p.key].length }}</span>
       </ng-container>
@@ -85,16 +86,16 @@
     <!-- Erreurs & Infrastructure (pleine largeur) -->
     <div class="clt-body"
          *ngIf="context.kpiLoading
-           || (context.selectedInsights.has('rest')    && context.topErrors['rest']?.length)
-           || (context.selectedInsights.has('jdbc')    && context.topErrors['jdbc']?.length)
-           || (context.selectedInsights.has('ftp')     && context.topErrors['ftp']?.length)
-           || (context.selectedInsights.has('smtp')    && context.topErrors['smtp']?.length)
-           || (context.selectedInsights.has('ldap')    && context.topErrors['ldap']?.length)
+           || (context.selectedInsights.has('rest') && context.topErrors['rest']?.length)
+           || (context.selectedInsights.has('jdbc') && context.topErrors['jdbc']?.length)
+           || (context.selectedInsights.has('ftp') && context.topErrors['ftp']?.length)
+           || (context.selectedInsights.has('smtp') && context.topErrors['smtp']?.length)
+           || (context.selectedInsights.has('ldap') && context.topErrors['ldap']?.length)
            || (context.selectedInsights.has('SERVICE') && (context.tabRequests.sessionExceptionsTable?.isLoading !== false || context.topSessionErrors.length))
-           || (context.selectedInsights.has('BATCH')   && (context.tabRequests.batchExceptionTable?.isLoading !== false || context.topBatchErrors.length))
+           || (context.selectedInsights.has('BATCH') && (context.tabRequests.batchExceptionTable?.isLoading !== false || context.topBatchErrors.length))
            || (context.selectedInsights.has('STARTUP') && (context.sessionCountLoading || context.sessionInitErrors > 0))
-           || (context.selectedInsights.has('VIEW')    && (context.tabRequests.viewExceptionTable?.isLoading !== false || context.topViewErrors.length || context.sessionWebErrors > 0))
-           || (context.selectedInsights.has('TEST')    && (context.sessionCountLoading || context.sessionTestErrors > 0))">
+           || (context.selectedInsights.has('VIEW') && (context.tabRequests.viewExceptionTable?.isLoading !== false || context.topViewErrors.length || context.sessionWebErrors > 0))
+           || (context.selectedInsights.has('TEST') && (context.sessionCountLoading || context.sessionTestErrors > 0))">
 
       <!-- État chargement -->
       <div class="clt-loading" *ngIf="isBlockLoading">Chargement des données...</div>
