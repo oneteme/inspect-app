@@ -1,12 +1,22 @@
 export interface Application {
-    host: string; 
+    host: string;
     defaultEnv: string;
-    gridViewPeriod: string; 
+    gridViewPeriod: string;
     kpiViewPeriod: string;
 }
-
+export interface AuthParams {
+  redirectUri: string,
+  authIssuer: string,
+  clientId: string,
+  clientSecret: string,
+  enabled?: boolean,
+  sendAccessToken?: boolean,
+  debug?: boolean,
+  requireHttps?: boolean,
+  logOutRedirectUri?: string
+}
 export class QueryParams {
-    private _optional: {[key: string]: any} = {};
+    private _optional: { [key: string]: any } = {};
 
     constructor(public _period: Period, public _env: string, public _appname?: string[], public _hosts?: string[], public _rangestatus?: string[], public _commands?: string[], public _schemas?: string[]) {
     }
@@ -24,7 +34,7 @@ export class QueryParams {
     }
 
     set appname(appname: string[]) {
-       this._appname = appname;
+        this._appname = appname;
     }
 
     get appname(): string[] {
@@ -48,14 +58,14 @@ export class QueryParams {
     }
 
 
-    set commands(command: string[]){
+    set commands(command: string[]) {
         this._commands = command
     }
     get commands(): string[] {
         return this._commands;
     }
 
-    set schemas(schema: string[]){
+    set schemas(schema: string[]) {
         this._schemas = schema
     }
     get schemas(): string[] {
@@ -63,44 +73,44 @@ export class QueryParams {
     }
 
 
-    get optional(): {[key: string]: any} {
+    get optional(): { [key: string]: any } {
         return this._optional;
     }
 
-    set optional(optional: {[key: string]: any}) {
+    set optional(optional: { [key: string]: any }) {
         this._optional = {};
         Object.entries(optional).forEach(([key, value]) => {
-            if(value && value.length) this._optional[key] = value;
+            if (value && value.length) this._optional[key] = value;
         })
     }
 
     buildParams(): { [key: string]: any } {
         let params = { ...this.period.buildParams(), ...this.optional };
-        if(this.appname && this.appname.length > 0){
-            params = { ...params, server: this.appname.length == 1 ? this.appname[0] : this.appname};
+        if (this.appname && this.appname.length > 0) {
+            params = { ...params, server: this.appname.length == 1 ? this.appname[0] : this.appname };
         }
-        if(this.hosts && this.hosts.length > 0){
-            params = { ...params, host: this.hosts.length == 1 ? this.hosts[0] : this.hosts};
+        if (this.hosts && this.hosts.length > 0) {
+            params = { ...params, host: this.hosts.length == 1 ? this.hosts[0] : this.hosts };
         }
-        if(this.rangestatus && this.rangestatus.length > 0){
-            params = { ...params, rangestatus: this.rangestatus.length == 1 ? this.rangestatus[0] : this.rangestatus};
+        if (this.rangestatus && this.rangestatus.length > 0) {
+            params = { ...params, rangestatus: this.rangestatus.length == 1 ? this.rangestatus[0] : this.rangestatus };
         }
-        if(this.env) {
+        if (this.env) {
             params = { ...params, env: this.env };
         }
-        if(this.commands && this.commands.length> 0){
-            params = {...params, command: this.commands.toString()}
+        if (this.commands && this.commands.length > 0) {
+            params = { ...params, command: this.commands.toString() }
         }
-        if(this.schemas && this.schemas.length> 0){
-            params = {...params, schema: this.schemas.toString()}
+        if (this.schemas && this.schemas.length > 0) {
+            params = { ...params, schema: this.schemas.toString() }
         }
         return params;
     }
 
     buildPath(): string {
         return Object.entries(this.buildParams()).map(v => {
-            if(Array.isArray(v[1])) {
-                if(v[1].length) return v[1].map(a => `${v[0]}=${a}`).join('&');
+            if (Array.isArray(v[1])) {
+                if (v[1].length) return v[1].map(a => `${v[0]}=${a}`).join('&');
                 else return null;
             }
             return `${v[0]}=${v[1]}`;
@@ -162,9 +172,9 @@ export class IStep implements Period {
     }
 }
 
-export class IStepFrom  implements Period {
+export class IStepFrom implements Period {
 
-    constructor(public _step:number, public _from: number){
+    constructor(public _step: number, public _from: number) {
 
     }
 
@@ -186,8 +196,8 @@ export class IStepFrom  implements Period {
         return new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes() - this._from, 0, 0);
     }
 
-    buildParams(): { step: number, from: number  } {
-        return { step: this._step, from: this._from};
+    buildParams(): { step: number, from: number } {
+        return { step: this._step, from: this._from };
     }
 }
 
@@ -198,5 +208,5 @@ export interface Period {
     set end(value: Date);
     get end(): Date;
 
-    buildParams(): {[key: string]: any};
+    buildParams(): { [key: string]: any };
 }

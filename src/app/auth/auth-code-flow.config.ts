@@ -11,4 +11,5 @@ export const authCodeFlowConfig: AuthConfig = {
   requestAccessToken: false,
   oidc: true,
   clearHashAfterLogin: true,
+  logoutUrl: auth.logOutRedirectUri ?? window.location.origin
 };
