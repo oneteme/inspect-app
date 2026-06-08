@@ -18,9 +18,9 @@ export const app: Application = {
 
 export const auth = {
   redirectUri: 'http://localhost:4200',
-  authIssuer: 'https://dev-454nmj6iu2c1yjbs.au.auth0.com/',
-  clientId: 'lE1vnI7ybUrJDih4KdXIFFVaTBGNDBev',
-  clientSecret: '41jQ1HSziTeygD8ngijnIpJHOuvw8gt6e6AgHW-sOo8xpMMMV1efoPKtuPgMvhLA',
+  authIssuer: '',
+  clientId: '',
+  clientSecret: '',
   enabled: true,
   sendAccessToken: true,
   debug: true
