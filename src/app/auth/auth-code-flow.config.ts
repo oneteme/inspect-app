@@ -1,4 +1,3 @@
-import { F } from '@angular/cdk/keycodes';
 import { AuthConfig } from 'angular-oauth2-oidc';
 import { auth } from 'src/environments/environment';
 

@@ -4,16 +4,16 @@ import { inject } from "@angular/core";
 import { auth } from "../../environments/environment";
 
 export const authGuard: CanActivateFn = async () => {
+    // true => user is logged and page is not blocked by authentication
     if (auth.enabled) {
         const authService = inject(AuthService);
         if (authService.initialized && authService.isLogged()) {
-            console.log(authService.getUserProfile());
             return true;
         } else {
-            authService.login();
+            authService.login(); // Redirection to login page
             return false;
         }
     }
-    return true;
+    return true; 
 };
 
