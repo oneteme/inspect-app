@@ -1,4 +1,3 @@
-import { F } from '@angular/cdk/keycodes';
 import { AuthConfig } from 'angular-oauth2-oidc';
 import { auth } from 'src/environments/environment';
 
@@ -12,4 +11,5 @@ export const authCodeFlowConfig: AuthConfig = {
   requestAccessToken: false,
   oidc: true,
   clearHashAfterLogin: true,
+  logoutUrl: auth.logOutRedirectUri ?? window.location.origin
 };

@@ -7,12 +7,13 @@ import { MatIconRegistry } from '@angular/material/icon';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 import { AboutDialogComponent } from '../about/about-dialog.component';
-import { app } from 'src/environments/environment';
+import { app, auth } from 'src/environments/environment';
 import { Constants } from '../../views/constants';
 import { EnvRouter } from '../../service/router.service';
 import { InstanceService } from '../../service/jquery/instance.service';
 import { PageTitleService } from '../../service/page-title.service';
 import { PagePanelService } from '../../service/page-panel.service';
+import { AuthService } from 'src/app/auth/auth.service';
 
 interface SubNavItem {
   label: string;
@@ -53,6 +54,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   env: FormControl<string> = new FormControl();
   isLoadingEnv = false;
   subscriptions: Subscription[] = [];
+  authEnabled = auth.enabled;
 
   readonly isFirefox = typeof navigator !== 'undefined' && /Firefox\//.test(navigator.userAgent);
 
@@ -78,7 +80,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   private readonly _dialog = inject(MatDialog);
 
-  constructor() {
+  constructor(private authService: AuthService) {
     const iconRegistry = inject(MatIconRegistry);
     const sanitizer = inject(DomSanitizer);
     iconRegistry.addSvgIcon('github', sanitizer.bypassSecurityTrustResourceUrl('./assets/github.svg'));
@@ -155,5 +157,34 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   onFilterClick(): void { this._panelSvc.toggle(); }
+
+
+  getUserClaims(): any {
+    return this.authService.getUserProfile() || {};
+  }
+
+  getUserInitials(): string {
+    const claims = this.getUserClaims();
+    const name: string =  claims?.name || claims?.email || claims?.sub || '';
+    if (!name) return '?';
+    let parts = name.split(/[\s.@_-]/);
+    return parts.length >= 2
+      ? (parts[0][0] + parts[1][0]).toUpperCase()
+      : name.substring(0, 2).toUpperCase();
+  }
+
+  getUserDisplayName(): string {
+    const claims = this.getUserClaims();
+    return claims?.name || claims?.preferred_username || claims?.email || claims?.sub || 'Utilisateur';
+  }
+
+  getUserEmail(): string {
+    const claims = this.getUserClaims();
+    return claims?.email || '';
+  }
+
+  logout() {
+    this.authService.logout();
+  }
 
 }
