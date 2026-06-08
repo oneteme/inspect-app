@@ -129,7 +129,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   gotoHome(event: MouseEvent) {
-    this._envRouter.navigateOnClick(event, ['home'], { queryParams: { env: this.env.value } });
+    this._envRouter.navigateOnClick(event, ['home'], { queryParams: { env: this.env.value }, queryParamsHandling: 'merge' });
   }
 
   selectEnv(value: string) {
