@@ -15,6 +15,11 @@ export function getQuickRangeDates(range: PeriodQuickRange, reference: Date = ne
   return { start, end };
 }
 
+export function getQuickRangeStep(range: PeriodQuickRange): IStep {
+  const minutes = PERIOD_QUICK_RANGE_MINUTES[range];
+  return new IStep(minutes);
+}
+
 export function getKpiQuickRangeDates(range: KpiPeriodQuickRange, reference: Date = new Date()): { start: Date; end: Date; queryEnd: Date } {
   const days = Number(range.replace('d', ''));
   const end = new Date(reference.getFullYear(), reference.getMonth(), reference.getDate());
@@ -51,6 +56,17 @@ export function isDefaultTodayPeriod(period?: Period | null, reference: Date = n
 
 export function toDisplayedPeriodEnd(end: Date): Date {
   return new Date(end.getTime() - 1);
+}
+
+export function normalizeToMinimumDay(period: Period, reference: Date = new Date()): Period {
+  const durationMs = period.end.getTime() - period.start.getTime();
+  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+  
+  if (durationMs < ONE_DAY_MS) {
+    return getDefaultTodayPeriod(reference);
+  }
+  
+  return period;
 }
 
 function isSameDay(firstDate: Date, secondDate: Date): boolean {

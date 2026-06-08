@@ -7,6 +7,8 @@ import {EnvRouter} from "../../service/router.service";
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {Constants} from '../constants';
 import {formatters, groupByColor, periodManagement} from 'src/app/shared/util';
+import {IPeriod} from '../../model/conf.model';
+import {normalizeToMinimumDay} from '../../shared/period-filter';
 import {MatDialog} from '@angular/material/dialog';
 import {ProtocolExceptionComponent} from './components/protocol-exception-modal/protocol-exception-modal.component';
 import {InstanceService} from 'src/app/service/jquery/instance.service';
@@ -158,8 +160,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }).subscribe({
             next: (v: { params: Params, queryParams: Params }) => {
                 this.params.env = v.queryParams.env || app.defaultEnv;
-                this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(0, 1).start;
-                this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(0, 1).end;
+                const rawStart = v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(0, 1).start;
+                const rawEnd = v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(0, 1).end;
+                const rawPeriod = new IPeriod(rawStart, rawEnd);
+                const normalizedPeriod = normalizeToMinimumDay(rawPeriod);
+                this.params.start = normalizedPeriod.start;
+                this.params.end = normalizedPeriod.end;
                 this.groupedBy = periodManagement(this.params.start, this.params.end);
                 const appname = v.queryParams['appname'];
                 if (Array.isArray(appname)) this.params.serveurs = appname;

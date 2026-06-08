@@ -442,12 +442,10 @@
 .sbd-rate {
   font-size: .72em;
   font-weight: 700;
-  text-align: right;
-  align-self: center;
-  justify-self: end;
+  text-align: end;
   white-space: nowrap;
-  border-radius: 4px;
-  padding: 2px 4px;
+  padding: 0px 4px;
+  align-self: flex-end;
   &.c-ok  { color: #21ba45; }
   &.c-err { color: #db2828; }
 }
@@ -652,7 +650,7 @@
   height: 9px;
   width: 36px;
   justify-self: end;
-  align-self: center;
+  align-self: flex-end;
 }
 
 .sbd-skel-count {

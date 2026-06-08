@@ -21,7 +21,7 @@ import {shallowEqual} from "../rest/search-rest.view";
 import {MainSessionDto} from "../../../model/request.model";
 import {TableProvider} from "@oneteme/jquery-table";
 import {MAIN_SESSION_TABLE_CONFIG} from "../../../shared/_component/table/table.config";
-import {getDefaultRelativePeriod, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
+import {getDefaultRelativePeriod, getQuickRangeStep, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
 
 @Component({
   templateUrl: './search-main.view.html',
@@ -269,9 +269,9 @@ export class SearchMainView implements OnInit, OnDestroy {
   }
 
   applyQuickRange(range: PeriodQuickRange): void {
-    const {start, end} = getQuickRangeDates(range);
-    this.queryParams.period = new IPeriod(start, end);
-    this.patchDateValue(start, toDisplayedPeriodEnd(end));
+    const period = getQuickRangeStep(range);
+    this.queryParams.period = period;
+    this.patchDateValue(period.start, toDisplayedPeriodEnd(period.end));
   }
 
   handlePresetSelection(filterPreset: FilterPreset) {

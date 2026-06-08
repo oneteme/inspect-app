@@ -21,7 +21,7 @@ import {FtpRequestService} from "../../../service/jquery/ftp-request.service";
 import {SmtpRequestService} from "../../../service/jquery/smtp-request.service";
 import {LdapRequestService} from "../../../service/jquery/ldap-request.service";
 import {PageTitleService} from "../../../service/page-title.service";
-import {getDefaultRelativePeriod, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
+import {getDefaultRelativePeriod, getQuickRangeStep, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
 
 
 
@@ -330,9 +330,9 @@ export class SearchRequestView implements OnInit, OnDestroy {
   }
 
   applyQuickRange(range: PeriodQuickRange): void {
-    const {start, end} = getQuickRangeDates(range);
-    this.queryParams.period = new IPeriod(start, end);
-    this.patchDateValue(start, toDisplayedPeriodEnd(end));
+    const period = getQuickRangeStep(range);
+    this.queryParams.period = period;
+    this.patchDateValue(period.start, toDisplayedPeriodEnd(period.end));
   }
 }
 
