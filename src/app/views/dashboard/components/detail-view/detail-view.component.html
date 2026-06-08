@@ -13,8 +13,7 @@
   <!-- ── Activité protocole : pleine largeur (protocoles uniquement) ── -->
   <div class="db-proto-wrap" *ngIf="context.selectedInsights.size > 0 && !isSessionInsight">
     <div class="db-insights-hdr">
-      <span class="dih-title">Incidents sur la période</span>
-      <span class="dih-sub">{{ fluxChartSubtitle }}</span>
+      <span class="dih-title">Pourcentage d'incidents sur la période</span>
     </div>
     <div class="proto-list">
       <ng-container *ngFor="let p of context.protocolDefs; trackBy: trackByKey">
@@ -56,8 +55,7 @@
   <!-- ── Exceptions dans le temps : SERVICE, BATCH, VIEW, STARTUP ── -->
   <div class="db-sess-chart-wrap" *ngIf="isSessionInsight && selectedKey !== 'TEST'">
     <div class="db-insights-hdr">
-      <span class="dih-title">Incidents sur la période</span>
-      <span class="dih-sub">{{ sessionChartSubtitle }}</span>
+      <span class="dih-title">Pourcentage d'incidents sur la période</span>
     </div>
     <div class="proto-list">
       <div class="proto-row">
@@ -71,7 +69,7 @@
   <!-- ── Bloc principal : erreurs & infrastructure ── -->
   <div class="db-clt-block">
     <div class="sb-block-head">
-      <span>Incidents — {{ selectedLabel }}</span>
+      <span>Nombre d'incidents par exception</span>
       <ng-container *ngFor="let p of context.protocolDefs">
         <span class="dbi-chip dbi-chip-err" *ngIf="context.selectedInsights.has(p.key) && !context.kpiLoading && context.topErrors[p.key]?.length">{{ context.topErrors[p.key].length }}</span>
       </ng-container>
