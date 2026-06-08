@@ -31,7 +31,7 @@ export class AuthService {
     }
 
     logout() {
-        this.oauthService.logOut();
+        this.oauthService.logOut(!auth.logOutRedirectUri ? true : false);
     }
 
     isLogged(): boolean {
