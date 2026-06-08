@@ -2,7 +2,7 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-import { Application, IStep, IStepFrom, Period } from "src/app/model/conf.model";
+import {Application, AuthParams, IStep, IStepFrom, Period} from "src/app/model/conf.model";
 
 export const environment = {
   production: false,
@@ -16,7 +16,7 @@ export const app: Application = {
 }
 
 
-export const auth = {
+export const auth: AuthParams = {
   redirectUri: 'http://localhost:4200',
   authIssuer: '',
   clientId: '',
