@@ -529,7 +529,7 @@ export class RestSessionService {
         if(data.filter && filters.filters?.length) {
             args[`${data.filter.jquery.value()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
         }
-        if(filters.hosts?.length && !args['host.in']){
+        if(filters.hosts?.length && !args['instance.app_name.in']){
             args['instance.app_name.in'] = filters.hosts.map(o => `"${o}"`).join(',');
         }
         return this.getRestSession(args);
