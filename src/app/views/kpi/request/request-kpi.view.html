@@ -1,7 +1,9 @@
 <page-panel panelTitle="Filtres" panelIcon="filter_list">
   <form class="panel-filter" [formGroup]="filterForm">
     <div class="period-filter-wrapper">
-      <mat-form-field class="no-subscript md-3 period-field period-wide" appearance="outline">
+      <mat-form-field class="no-subscript md-3 period-field period-wide"
+              [style.--period-field-width]="isDefaultPeriod() ? '372px' : '408px'"
+              appearance="outline">
         <mat-label>Période</mat-label>
         <mat-date-range-input [formGroup]="filterForm.controls.dateRange" [rangePicker]="picker">
           <input matStartDate formControlName="start" placeholder="Start date" readonly>
@@ -16,6 +18,15 @@
                 matTooltip="Plages de temps rapides"
                 class="period-action-btn">
           <mat-icon class="material-symbols-outlined">schedule</mat-icon>
+        </button>
+        <button *ngIf="!isDefaultPeriod()"
+                mat-icon-button
+                matSuffix
+                type="button"
+                matTooltip="Réinitialiser à la date du jour"
+                (click)="resetPeriod()"
+                class="period-action-btn">
+          <mat-icon class="material-symbols-outlined">restart_alt</mat-icon>
         </button>
         <mat-date-range-picker #picker></mat-date-range-picker>
       </mat-form-field>

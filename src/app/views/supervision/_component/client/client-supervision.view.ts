@@ -261,7 +261,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
         return EMPTY;
       }
       this.instance = res;
-      this._pageTitleService.set({ icon: 'browse_activity', iconOutlined: true, title: this.instance.name, subtitle: 'Supervision • Client' });
+      this.updatePageTitle();
       this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}&app_name=${this.instance.name}&_reload=${new Date().getTime()}`);
       return forkJoin([
         this.instance.end ? of([]) : this._instanceTraceService.getLastInstanceTrace({instance: [this.params.instance]}),
@@ -285,7 +285,23 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
             : [];
         this.logEntryByPeriod = log.map(r => ({...r, date: this._datePipe.transform(r.instant * 1000, 'dd/MM/yyyy HH:mm:ss')}));
         this.lastTrace = last[0]?.date;
+        this.updatePageTitle();
         this.getStatActivity();
+      }
+    });
+  }
+
+  private updatePageTitle() {
+    if (!this.instance) return;
+    this._pageTitleService.set({
+      icon: 'browse_activity',
+      iconOutlined: true,
+      title: this.instance.name,
+      subtitle: 'Supervision • Client',
+      instanceContext: {
+        instance: this.instance,
+        lastTrace: this.lastTrace,
+        date: this.date.getTime()
       }
     });
   }
