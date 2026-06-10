@@ -10,7 +10,7 @@ export const environment = {
       scheduling: {
         interval: 60000 // default: '60s'
       },
-      name: "inspect-prod",
+      name: "inspect-app",
       version: "1.3.2",
       env: 'prod',
       user: () => {
