@@ -40,6 +40,8 @@ import {AuthService} from "./auth/auth.service";
 import {authGuard} from "./auth/auth.guard";
 import {OAuthModule} from "angular-oauth2-oidc";
 import {AuthInterceptor} from "./auth/auth.interceptor";
+import {environment} from "../environments/environment";
+import {NgCollectorModule} from "@oneteme/inspect-ng-collector";
 
 registerLocaleData(localeFr, 'fr-FR');
 
@@ -206,6 +208,7 @@ const routes: Route[] = [
     BrowserModule,
     BrowserAnimationsModule,
     RouterModule.forRoot(routes, {useHash: true}),
+    NgCollectorModule.forRoot(environment.application),
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,
