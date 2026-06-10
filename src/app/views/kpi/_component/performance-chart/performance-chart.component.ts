@@ -91,6 +91,7 @@ export class PerformanceChartComponent {
     }
   }
   _data: any = [];
+  filteredTasks: any[] = [];
   jqueryConfig: ChartConfig;
 
   @Input() queryParams: QueryParams;
@@ -130,12 +131,13 @@ export class PerformanceChartComponent {
   @Output() onChartChange: EventEmitter<{eventType: 'default' | 'filter', chartConfig: ChartConfig, filteredTasks?: any[]}> = new EventEmitter();
 
   onMenuChange(event: 'default' | 'filter') {
-    this.onChartChange.emit({eventType: event, chartConfig: this.jqueryConfig});
+    this.filteredTasks = event == 'default' ? this.filteredTasks : [];
+    this.onChartChange.emit({eventType: event, chartConfig: this.jqueryConfig, filteredTasks: this.filteredTasks});
   }
 
   onFilterChange(filterFn: (row: any) => boolean): void {
-    let filteredTasks = this.tasks.filter(filterFn).map(task => task[this.actualFilter.jquery.buildAlias()]);
-    this.onChartChange.emit({eventType: 'default', chartConfig: this.jqueryConfig, filteredTasks: filteredTasks});
+    this.filteredTasks = this.tasks.filter(filterFn).map(task => task[this.actualFilter.jquery.buildAlias()]);
+    this.onChartChange.emit({eventType: 'default', chartConfig: this.jqueryConfig, filteredTasks: this.filteredTasks});
   }
 
   get actualIndicator() {

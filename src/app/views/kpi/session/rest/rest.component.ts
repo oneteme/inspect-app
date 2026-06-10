@@ -108,7 +108,7 @@ export class RestComponent implements OnInit {
 
   }
 
-  onStatusChartChange(event: {eventType: 'default' | 'filter', chartConfig: ChartConfig}) {
+  onStatusChartChange(event: {eventType: 'default' | 'filter', chartConfig: ChartConfig, filteredTasks?: any[]}) {
     this.getCustom(event, this.$statusRepartition, this.$statusRepartitionSlice);
   }
 
@@ -123,7 +123,7 @@ export class RestComponent implements OnInit {
   getCustom(event: {eventType: 'default' | 'filter', chartConfig: ChartConfig, filteredTasks?: any[]},
             arr: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig}>,
             slice: {data: any[], loading: boolean}) {
-
+    console.log("getCustom", event)
     let actualIndicator = this.getActualIndicator(arr.chartConfig);
     let actualGroup = this.getActualGroup(arr.chartConfig);
     let actualStack = this.getActualStack(arr.chartConfig);
