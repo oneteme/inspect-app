@@ -58,7 +58,7 @@ export class RestRequestService {
     ): Observable<any[]> {
         const groupAlias = data.group.jquery.buildAlias();
         const stackAlias = data.stack?.jquery.buildAlias();
-
+        console.log(data, filters);
         // Une requête par série (size_in, size_out, ...)
         const requests = data.series.map(serie => {
             const serieAlias = data.indicator.jquery.buildAlias(serie.jquery.buildAlias());
@@ -79,7 +79,7 @@ export class RestRequestService {
             if (data.filter && filters.filters?.length) {
                 args[`${data.filter.jquery.value()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
             }
-            if (filters.hosts?.length) {
+            if (filters.hosts?.length && !args['host.in']) {
                 args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
             }
             return this.getRestRequest<any[]>(args);
@@ -127,7 +127,7 @@ export class RestRequestService {
         if(data.filter && filters.filters?.length) {
             args[`${data.filter.jquery.value()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
         }
-        if(filters.hosts?.length){
+        if(filters.hosts?.length && !args['host.in']){
             args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
         }
         return this.getRestRequest(args);
@@ -151,7 +151,7 @@ export class RestRequestService {
         if(data.filter && filters.filters?.length) {
             args[`${data.filter.jquery.value()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
         }
-        if(filters.hosts?.length){
+        if(filters.hosts?.length && !args['host.in']){
             args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
         }
         return this.getRestRequest(args);
@@ -168,18 +168,6 @@ export class RestRequestService {
         }
         if(filters.hosts?.length){
             args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
-        }
-        return this.getRestRequest(args);
-    }
-
-    test(query: { indicator?: string, group?: string, serie?: string; order?: string },
-         filters: { env: string, start: Date, end: Date, groupedBy: string, hosts: string[], method?: string[] }): Observable<any> {
-        let args: any = {
-            'column': `${query.serie}.${query.indicator}:${query.indicator},${query.serie}:${query.serie},${query.group}`,
-            'instance_env': 'instance.id',
-            'instance.environement': `"${filters.env}"`,
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString()
         }
         return this.getRestRequest(args);
     }

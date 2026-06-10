@@ -21,7 +21,7 @@ export const auth: AuthParams = {
   authIssuer: '',
   clientId: '',
   clientSecret: '',
-  enabled: true,
+  enabled: false,
   sendAccessToken: true,
   debug: true
 }

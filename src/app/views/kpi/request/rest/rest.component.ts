@@ -135,6 +135,7 @@ export class RestComponent implements OnInit {
     if(event.eventType === 'default') {
       arr.loading = true;
       arr.data = [];
+      console.log(event)
       this._httpRequestService.getSizeCustom({series: arr.chartConfig.series.items, indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks})
       .pipe(finalize(() => arr.loading = false))
       .subscribe(data => {
@@ -190,7 +191,7 @@ export class RestComponent implements OnInit {
       });
     } else if(event.eventType === 'filter') {
       if(actualFilter) {
-        this._httpRequestService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end}).subscribe({
+        this._httpRequestService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts}).subscribe({
           next: (res: any[]) => {
             slice.data = res;
           }

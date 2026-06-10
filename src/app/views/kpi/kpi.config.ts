@@ -881,6 +881,17 @@ export const REST_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       order: 'host.asc'
     }
   }, {
+    key: 'user',
+    selected: false,
+    menu: {
+      label: 'Utilisateur'
+    },
+    jquery: {
+      value: () => `user.coalesce("Non renseigné")`,
+      buildAlias: () => 'user',
+      order: 'user.asc'
+    }
+  }, {
     key: 'method',
     selected: false,
     menu: {
@@ -939,6 +950,17 @@ export const REST_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       value: () => `host`,
       buildAlias: () => 'host',
       order: 'host.asc'
+    }
+  }, {
+    key: 'user',
+    selected: false,
+    menu: {
+      label: 'Utilisateur'
+    },
+    jquery: {
+      value: () => `user.coalesce("Non renseigné")`,
+      buildAlias: () => 'user',
+      order: 'user.asc'
     }
   }, {
     key: 'method',
@@ -1063,6 +1085,17 @@ export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       order: `start.${groupedBy}.asc`,
     }
   }, {
+    key: 'host',
+    selected: false,
+    menu: {
+      label: 'Hôte'
+    },
+    jquery: {
+      value: () => `host`,
+      buildAlias: () => 'host',
+      order: 'host.asc'
+    }
+  }, {
     key: 'command',
     selected: false,
     menu: {
@@ -1143,6 +1176,17 @@ export const JDBC_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       value: () => `start.${groupedBy}.varchar`,
       buildAlias: () => 'date',
       order: `start.${groupedBy}.asc`,
+    }
+  }, {
+    key: 'host',
+    selected: false,
+    menu: {
+      label: 'Hôte'
+    },
+    jquery: {
+      value: () => `host`,
+      buildAlias: () => 'host',
+      order: 'host.asc'
     }
   }, {
     key: 'command',
@@ -1300,6 +1344,17 @@ export const FTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       order: `start.${groupedBy}.asc`,
     }
   }, {
+    key: 'host',
+    selected: false,
+    menu: {
+      label: 'Hôte'
+    },
+    jquery: {
+      value: () => `host`,
+      buildAlias: () => 'host',
+      order: 'host.asc'
+    }
+  }, {
     key: 'command',
     selected: false,
     menu: {
@@ -1358,6 +1413,17 @@ export const FTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       value: () => `start.${groupedBy}.varchar`,
       buildAlias: () => 'date',
       order: `start.${groupedBy}.asc`,
+    }
+  }, {
+    key: 'host',
+    selected: false,
+    menu: {
+      label: 'Hôte'
+    },
+    jquery: {
+      value: () => `host`,
+      buildAlias: () => 'host',
+      order: 'host.asc'
     }
   }, {
     key: 'command',
@@ -1493,6 +1559,17 @@ export const LDAP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       order: `start.${groupedBy}.asc`,
     }
   }, {
+    key: 'host',
+    selected: false,
+    menu: {
+      label: 'Hôte'
+    },
+    jquery: {
+      value: () => `host`,
+      buildAlias: () => 'host',
+      order: 'host.asc'
+    }
+  }, {
     key: 'command',
     selected: false,
     menu: {
@@ -1529,6 +1606,17 @@ export const LDAP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       value: () => `start.${groupedBy}.varchar`,
       buildAlias: () => 'date',
       order: `start.${groupedBy}.asc`,
+    }
+  }, {
+    key: 'host',
+    selected: false,
+    menu: {
+      label: 'Hôte'
+    },
+    jquery: {
+      value: () => `host`,
+      buildAlias: () => 'host',
+      order: 'host.asc'
     }
   }, {
     key: 'command',
@@ -1642,6 +1730,17 @@ export const SMTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       order: `start.${groupedBy}.asc`,
     }
   }, {
+    key: 'host',
+    selected: false,
+    menu: {
+      label: 'Hôte'
+    },
+    jquery: {
+      value: () => `host`,
+      buildAlias: () => 'host',
+      order: 'host.asc'
+    }
+  }, {
     key: 'command',
     selected: false,
     menu: {
@@ -1678,6 +1777,17 @@ export const SMTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       value: () => `start.${groupedBy}.varchar`,
       buildAlias: () => 'date',
       order: `start.${groupedBy}.asc`,
+    }
+  }, {
+    key: 'host',
+    selected: false,
+    menu: {
+      label: 'Hôte'
+    },
+    jquery: {
+      value: () => `host`,
+      buildAlias: () => 'host',
+      order: 'host.asc'
     }
   }, {
     key: 'command',
