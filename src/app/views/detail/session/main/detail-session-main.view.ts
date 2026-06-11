@@ -1,6 +1,6 @@
 import {Component, inject, OnDestroy, OnInit} from "@angular/core";
 import {PageTitleService} from "../../../../service/page-title.service";
-import {ActivatedRoute} from "@angular/router";
+import {ActivatedRoute, Params} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {EnvRouter} from "../../../../service/router.service";
 import {Location} from "@angular/common";
@@ -110,5 +110,21 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
         var start = new Date(this.session.start * 1000);
         var end = this.session.end ? new Date(this.session.end * 1000) : new Date();
         this._router.navigateOnClick(event, ['/kpi/session', this.session.type.toLowerCase()], { queryParams: {host: this.instance?.name, env: this.instance?.env, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
+    }
+
+    buildClientSupervisionQueryParams(): Params | null {
+        if (!this.session || !this.instance || this.instance.type !== 'CLIENT') {
+            return null;
+        }
+
+        const start = new Date(this.session.start * 1000);
+        const end = this.session.end ? new Date(this.session.end * 1000) : new Date();
+
+        return {
+            env: this.instance.env,
+            start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(),
+            end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString(),
+            app_name: this.instance.name
+        };
     }
 }

@@ -3,7 +3,9 @@
     <advanced-filter-recap [filters]="advancedParams" (filterRemoved)="handleRemovedFilter($event)"
                            (focusField)="focusField($event)"></advanced-filter-recap>
     <div class="period-filter-wrapper">
-      <mat-form-field class="no-subscript period-wide period-field" appearance="outline">
+      <mat-form-field class="no-subscript period-wide period-field"
+              [style.--period-field-width]="queryParams?.period && !isDefaultPeriod() ? '408px' : '372px'"
+                      appearance="outline">
         <mat-label>Période</mat-label>
         <mat-date-range-input [formGroup]="serverFilterForm.controls.dateRangePicker" [rangePicker]="picker">
           <input matStartDate formControlName="start" placeholder="Start date" (dateChange)="onChangeStart($event)">

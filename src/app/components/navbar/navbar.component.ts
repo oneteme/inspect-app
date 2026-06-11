@@ -1,6 +1,6 @@
 import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Params } from '@angular/router';
 import { distinctUntilChanged, finalize, Subscription } from 'rxjs';
 import { DomSanitizer } from '@angular/platform-browser';
 import { MatIconRegistry } from '@angular/material/icon';
@@ -131,7 +131,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   gotoHome(event: MouseEvent) {
-    this._envRouter.navigateOnClick(event, ['home'], { queryParams: { env: this.env.value }, queryParamsHandling: 'merge' });
+    this._envRouter.navigateOnClick(event, ['home'], { queryParams: this.buildNavigationQueryParams() });
   }
 
   selectEnv(value: string) {
@@ -139,16 +139,40 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   navigateTo(event: MouseEvent, route: string) {
-    this._envRouter.navigateOnClick(event, [route], { queryParams: { env: this.env.value }, queryParamsHandling: 'merge' });
+    this._envRouter.navigateOnClick(event, [route], { queryParams: this.buildNavigationQueryParams() });
   }
 
   navigateToSub(event: MouseEvent, _parent: NavItem, child: SubNavItem) {
-    this._envRouter.navigateOnClick(event, [child.route], { queryParams: { env: this.env.value }, queryParamsHandling: 'merge' });
+    this._envRouter.navigateOnClick(event, [child.route], { queryParams: this.buildNavigationQueryParams() });
   }
 
   navigateToKpi(event: MouseEvent, kpiRoute: string) {
     this.mainMenuTrigger?.closeMenu();
-    this._envRouter.navigateOnClick(event, [kpiRoute], { queryParams: { env: this.env.value }, queryParamsHandling: 'merge' });
+    this._envRouter.navigateOnClick(event, [kpiRoute], { queryParams: this.buildNavigationQueryParams() });
+  }
+
+  private buildNavigationQueryParams(): Params {
+    const currentQueryParams = this._activatedRoute.snapshot.queryParams;
+    const queryParams: Params = { env: this.env.value };
+
+    if (currentQueryParams.step && currentQueryParams.from) {
+      queryParams.step = currentQueryParams.step;
+      queryParams.from = currentQueryParams.from;
+      return queryParams;
+    }
+
+    if (currentQueryParams.step) {
+      queryParams.step = currentQueryParams.step;
+      return queryParams;
+    }
+
+    if (currentQueryParams.start && currentQueryParams.end) {
+      queryParams.start = currentQueryParams.start;
+      queryParams.end = currentQueryParams.end;
+      return queryParams;
+    }
+
+    return queryParams;
   }
 
   getEnvClass(env: string): string {
@@ -158,12 +182,21 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   onFilterClick(): void { this._panelSvc.toggle(); }
 
+  // Locale
+  // private readonly mockUserData = {
+  //   name: 'Jean Dupont',
+  //   email: 'jean.dupont@example.com',
+  //   sub: 'user-uuid-123456789',
+  //   preferred_username: 'jdupont'
+  // };
 
   getUserClaims(): any {
+    // return this.mockUserData;
     return this.authService.getUserProfile() || {};
   }
 
   getUserInitials(): string {
+    // return 'JD';
     const claims = this.getUserClaims();
     const name: string =  claims?.name || claims?.email || claims?.sub || '';
     if (!name) return '?';
@@ -174,11 +207,13 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   getUserDisplayName(): string {
+    // return 'JD89567';
     const claims = this.getUserClaims();
     return claims?.name || claims?.preferred_username || claims?.email || claims?.sub || 'Utilisateur';
   }
 
   getUserEmail(): string {
+    // return 'jean.dupont@example.com';
     const claims = this.getUserClaims();
     return claims?.email || '';
   }
