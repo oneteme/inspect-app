@@ -2,15 +2,40 @@
   <div class="panel-filter md-3" [formGroup]="serverFilterForm">
     <advanced-filter-recap [filters]="advancedParams" (filterRemoved)="handleRemovedFilter($event)"
                            (focusField)="focusField($event)"></advanced-filter-recap>
-    <mat-form-field style="width: 310px" class="no-subscript period-wide" appearance="outline">
-      <mat-label>Période</mat-label>
-      <mat-date-range-input [formGroup]="serverFilterForm.controls.dateRangePicker" [rangePicker]="picker">
-        <input matStartDate formControlName="start" placeholder="Start date" (dateChange)="onChangeStart($event)">
-        <input matEndDate formControlName="end" placeholder="End date" (dateChange)="onChangeEnd($event)">
-      </mat-date-range-input>
-      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-date-range-picker #picker></mat-date-range-picker>
-    </mat-form-field>
+    <div class="period-filter-wrapper">
+      <mat-form-field class="no-subscript period-wide period-field" appearance="outline">
+        <mat-label>Période</mat-label>
+        <mat-date-range-input [formGroup]="serverFilterForm.controls.dateRangePicker" [rangePicker]="picker">
+          <input matStartDate formControlName="start" placeholder="Start date" (dateChange)="onChangeStart($event)">
+          <input matEndDate formControlName="end" placeholder="End date" (dateChange)="onChangeEnd($event)">
+        </mat-date-range-input>
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <span matSuffix class="period-inline-separator" aria-hidden="true"></span>
+        <button mat-icon-button 
+                matSuffix
+                type="button"
+                [matMenuTriggerFor]="quickRangesMenu"
+                matTooltip="Plages de temps rapides"
+                class="period-action-btn">
+          <mat-icon class="material-symbols-outlined">schedule</mat-icon>
+        </button>
+        <button *ngIf="queryParams?.period && !isDefaultPeriod()" 
+                mat-icon-button 
+                matSuffix
+                type="button"
+                matTooltip="Réinitialiser à la dernière heure du jour"
+                (click)="resetPeriod()"
+                class="period-action-btn">
+          <mat-icon class="material-symbols-outlined">restart_alt</mat-icon>
+        </button>
+        <mat-date-range-picker #picker></mat-date-range-picker>
+      </mat-form-field>
+      <mat-menu #quickRangesMenu="matMenu" class="period-quick-ranges-menu">
+        <button *ngFor="let quickRange of periodQuickRanges" mat-menu-item (click)="applyQuickRange(quickRange.value)">
+          <span>{{ quickRange.label }}</span>
+        </button>
+      </mat-menu>
+    </div>
     <mat-form-field class="no-subscript" [class.loading]="serverNameIsLoading" appearance="outline">
       <mat-label>Hôte</mat-label>
       <mat-select [formControl]="serverFilterForm.controls.appname" multiple (selectionChange)="onChangeServer($event)">
@@ -21,7 +46,7 @@
       </mat-select>
       <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>
     </mat-form-field>
-    <mat-form-field style="width: 165px" class="no-subscript" appearance="outline">
+    <mat-form-field class="no-subscript status-filter" appearance="outline">
       <mat-label>Status</mat-label>
       <mat-select [formControl]="serverFilterForm.controls.rangestatus" multiple (selectionChange)="onChangeStatus($event)">
         <mat-select-trigger style="display: flex; gap: 0.5em; align-items: center">

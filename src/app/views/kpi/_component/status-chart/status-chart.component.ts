@@ -132,6 +132,7 @@ export class StatusChartComponent {
   @Output() onChartChange: EventEmitter<{eventType: 'default' | 'filter', chartConfig: ChartConfig, filteredTasks?: any[]}> = new EventEmitter();
 
   onMenuChange(event: 'default' | 'filter') {
+    this.filteredTasks = event == 'default' ? this.filteredTasks : [];
     this.onChartChange.emit({eventType: event, chartConfig: this.jqueryConfig, filteredTasks: this.filteredTasks});
   }
 

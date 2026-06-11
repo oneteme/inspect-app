@@ -67,18 +67,18 @@ export class DashboardDetailViewComponent {
     }
 
     get sessionChartData(): { stringDate: string; count: number }[] {
-        if (this.selectedKey === 'BATCH')   return this.context.batchExceptionChart;
-        if (this.selectedKey === 'VIEW')    return this.context.viewExceptionChart;
+        if (this.selectedKey === 'BATCH') return this.context.batchExceptionChart;
+        if (this.selectedKey === 'VIEW') return this.context.viewExceptionChart;
         if (this.selectedKey === 'STARTUP') return this.context.startupExceptionChart;
         return this.context.sessionExceptionChart;
     }
 
     get sessionChartSubtitle(): string {
         switch (this.selectedKey) {
-            case 'BATCH': return 'Tâches planifiées — taux d\'exceptions';
-            case 'VIEW': return 'Parcours client — taux d\'exceptions';
-            case 'STARTUP': return 'Initialisation — taux d\'exceptions';
-            default: return 'Services exposés — taux d\'exceptions';
+            case 'BATCH': return ' — Tâches planifiées';
+            case 'VIEW': return ' — Parcours client';
+            case 'STARTUP': return ' — Initialisation';
+            default: return ' — Services exposés';
         }
     }
 
@@ -95,7 +95,7 @@ export class DashboardDetailViewComponent {
 
     get fluxChartSubtitle(): string {
         const proto = this.context.protocolDefs.find(p => this.context.selectedInsights.has(p.key));
-        return proto ? `${proto.label} — Taux d'exceptions` : 'Taux d\'exceptions';
+        return proto ? ` — ${proto.label}` : '';
     }
 
     /** Indique si le bloc db-clt-block est encore en chargement pour l'insight sélectionné */

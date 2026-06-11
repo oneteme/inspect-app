@@ -139,22 +139,28 @@
               [queryParams]="params"></user-chart>
     </div>
 
-    <div class="kpi-chart-card"
-         [class.span-4]="params.hosts?.length == 0"
-         [class.span-2]="params.hosts?.length > 0">
-      <dependency-chart
-              [data]="$dependencyRepartition.data"
-              [loading]="$dependencyRepartition.loading"
-              [queryParams]="params"></dependency-chart>
+    <div class="kpi-chart-card span-4">
+      <div class="kpi-chart-header">
+        <div class="kpi-chart-title-group">
+          <span class="kpi-accent-bar purple-bar"></span>
+          <mat-icon class="kpi-chart-icon material-symbols-outlined">dns</mat-icon>
+          <span class="kpi-chart-title">Dépendances</span>
+        </div>
+      </div>
+      <div class="kpi-chart-subheader">
+        <span class="kpi-chart-period">{{(params.period.start | date: 'd MMM') + '–' + (params.period.end | date)}}</span>
+      </div>
+      <div class="kpi-chart-body">
+        <dependency-chart style="width: 100%"
+                          [data]="$dependencyRepartition.data"
+                          [loading]="$dependencyRepartition.loading"
+                          [queryParams]="params"></dependency-chart>
+        <dependent-chart style="width: 100%" *ngIf="params.hosts?.length > 0"
+                [data]="$dependentRepartition.data"
+                [loading]="$dependentRepartition.loading"
+                [queryParams]="params"></dependent-chart>
+      </div>
     </div>
-
-    <div class="kpi-chart-card span-2" *ngIf="params.hosts?.length > 0">
-      <dependent-chart
-              [data]="$dependentRepartition.data"
-              [loading]="$dependentRepartition.loading"
-              [queryParams]="params"></dependent-chart>
-    </div>
-
   </div>
 </div>
 

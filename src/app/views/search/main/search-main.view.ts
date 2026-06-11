@@ -21,6 +21,7 @@ import {shallowEqual} from "../rest/search-rest.view";
 import {MainSessionDto} from "../../../model/request.model";
 import {TableProvider} from "@oneteme/jquery-table";
 import {MAIN_SESSION_TABLE_CONFIG} from "../../../shared/_component/table/table.config";
+import {getDefaultRelativePeriod, getQuickRangeStep, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
 
 @Component({
   templateUrl: './search-main.view.html',
@@ -43,6 +44,7 @@ export class SearchMainView implements OnInit, OnDestroy {
 
   MAPPING_TYPE = Constants.MAPPING_TYPE;
   filterConstants = FilterConstants;
+  readonly periodQuickRanges = PERIOD_QUICK_RANGES;
   tableConfig: TableProvider<MainSessionDto> = {
     ...MAIN_SESSION_TABLE_CONFIG,
     onRowSelected: (row, event) => this.selectedRequest(event, row)
@@ -93,9 +95,9 @@ export class SearchMainView implements OnInit, OnDestroy {
         if (!queryParams.start && !queryParams.end) {
           let period;
           if (queryParams.step && queryParams.from) {
-            period = new IStepFrom(queryParams.step, queryParams.from);
+            period = new IStepFrom(Number(queryParams.step), Number(queryParams.from));
           } else if (queryParams.step) {
-            period = new IStep(queryParams.step);
+            period = new IStep(Number(queryParams.step));
           }
           this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.env || app.defaultEnv, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server], null, !queryParams.rangestatus ? [] : Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus]);
         }
@@ -254,6 +256,22 @@ export class SearchMainView implements OnInit, OnDestroy {
     this.advancedParams = {};
     this.advancedParams = {};
     this._filter.setFilterMap({})
+  }
+
+  isDefaultPeriod(): boolean {
+    return isDefaultRelativePeriod(this.queryParams?.period);
+  }
+
+  resetPeriod(): void {
+    const defaultPeriod = getDefaultRelativePeriod();
+    this.queryParams.period = defaultPeriod;
+    this.patchDateValue(defaultPeriod.start, toDisplayedPeriodEnd(defaultPeriod.end));
+  }
+
+  applyQuickRange(range: PeriodQuickRange): void {
+    const period = getQuickRangeStep(range);
+    this.queryParams.period = period;
+    this.patchDateValue(period.start, toDisplayedPeriodEnd(period.end));
   }
 
   handlePresetSelection(filterPreset: FilterPreset) {

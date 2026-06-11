@@ -348,8 +348,8 @@ export class RestSessionService {
     }
 
     getSessionExceptions(filters: {env: string, start: Date, end: Date, groupedBy: string, server?: string, apiNames?: string, users?: string, versions?: string, others?: {[key: string]: any}  }): Observable<ExceptionsByPeriodAndAppname[]> {
-        let args = {
-            "column": `start.${filters.groupedBy}:date,err_type,count:count,status,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year,instance.type:type`,
+        let args: any = {
+            "column": `start.${filters.groupedBy}:date,error_type_session:errorType,count:count,status,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year,instance.type:type`,
             'join': 'instance',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
@@ -480,7 +480,7 @@ export class RestSessionService {
             if (data.filter && filters.filters?.length) {
                 args[`${data.filter.jquery.value()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
             }
-            if (filters.hosts?.length) {
+            if (filters.hosts?.length && !args['host.in']) {
                 args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
             }
             return this.getRestSession<any[]>(args);
@@ -529,7 +529,7 @@ export class RestSessionService {
         if(data.filter && filters.filters?.length) {
             args[`${data.filter.jquery.value()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
         }
-        if(filters.hosts?.length){
+        if(filters.hosts?.length && !args['instance.app_name.in']){
             args['instance.app_name.in'] = filters.hosts.map(o => `"${o}"`).join(',');
         }
         return this.getRestSession(args);

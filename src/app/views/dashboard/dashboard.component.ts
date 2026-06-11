@@ -7,6 +7,8 @@ import {EnvRouter} from "../../service/router.service";
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {Constants} from '../constants';
 import {formatters, groupByColor, periodManagement} from 'src/app/shared/util';
+import {IPeriod} from '../../model/conf.model';
+import {normalizeToMinimumDay} from '../../shared/period-filter';
 import {MatDialog} from '@angular/material/dialog';
 import {ProtocolExceptionComponent} from './components/protocol-exception-modal/protocol-exception-modal.component';
 import {InstanceService} from 'src/app/service/jquery/instance.service';
@@ -158,8 +160,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }).subscribe({
             next: (v: { params: Params, queryParams: Params }) => {
                 this.params.env = v.queryParams.env || app.defaultEnv;
-                this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(0, 1).start;
-                this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(0, 1).end;
+                const rawStart = v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(0, 1).start;
+                const rawEnd = v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(0, 1).end;
+                const rawPeriod = new IPeriod(rawStart, rawEnd);
+                const normalizedPeriod = normalizeToMinimumDay(rawPeriod);
+                this.params.start = normalizedPeriod.start;
+                this.params.end = normalizedPeriod.end;
                 this.groupedBy = periodManagement(this.params.start, this.params.end);
                 const appname = v.queryParams['appname'];
                 if (Array.isArray(appname)) this.params.serveurs = appname;
@@ -493,10 +499,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
         const dates: Record<string, number> = {};
         const countoks: Record<string, number> = {};
         data.forEach(d => {
-            if (d.errorType) errors[d.errorType] = (errors[d.errorType] ?? 0) + d.count;
-            if (d.stringDate) {
-                dates[d.stringDate] = (dates[d.stringDate] ?? 0) + d.count;
-                if (d.countok && !countoks[d.stringDate]) countoks[d.stringDate] = d.countok;
+            if (d.stringDate && d.countok && !countoks[d.stringDate]) {
+                countoks[d.stringDate] = d.countok;
+            }
+            if (d.errorType) {
+                errors[d.errorType] = (errors[d.errorType] ?? 0) + d.count;
+                if (d.stringDate) {
+                    dates[d.stringDate] = (dates[d.stringDate] ?? 0) + d.count;
+                }
             }
         });
         return { errors, dates, countoks };
@@ -606,19 +616,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
         });
     }
 
-    navigateToException(type: string, tab: 'rest' | 'batch' | 'view') {
+    navigateToException(exception: { type: string; tab: 'rest' | 'batch' | 'view' }) {
+        const { type, tab } = exception;
         if (tab === 'view') {
             this.navigateToSessionByType('VIEW', type);
             return;
         }
         const target = tab === 'rest' ? '/session/rest' : '/session/batch';
-        const rangestatus = tab === 'rest' ? ['5xx', '4xx'] : ['Ko'];
+        const rangestatus = tab === 'rest'
+            ? (type === 'ClientError' ? ['4xx'] : ['5xx'])
+            : ['Ko'];
         this._router.navigate([target], {
             queryParams: {
                 env: this.params.env,
                 start: this.params.start?.toISOString(),
                 end: this.params.end?.toISOString(),
-                q: type,
+                ...(type !== 'ClientError' && tab === 'rest' ? { q: type } : {}),
                 server: this.params.serveurs,
                 rangestatus
             }
@@ -869,7 +882,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, server: app_name })
                     .pipe(map((result: any[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
-                        return result.filter(r => r.errorType != null && r.status >= 400);
+                        return result;
                     }))
             },
             batchExceptionTable: {

@@ -151,7 +151,7 @@ export class DatabaseRequestService {
         if(data.filter && filters.filters?.length) {
             args[`${data.filter.jquery.value()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
         }
-        if(filters.hosts?.length){
+        if(filters.hosts?.length && !args['host.in']){
             args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
         }
         return this.getDatabaseRequest(args);
