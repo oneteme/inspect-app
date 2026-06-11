@@ -2,36 +2,53 @@ import { Injectable } from '@angular/core';
 import { OAuthService } from 'angular-oauth2-oidc';
 import { authCodeFlowConfig } from "./auth-code-flow.config";
 import { auth } from "../../environments/environment";
+import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
     public initialized = false;
     private isCodeFlow = authCodeFlowConfig.responseType == "code";
-    private isImplicitFlow = authCodeFlowConfig.responseType != "code";
 
-    constructor(private oauthService: OAuthService) { }
+    constructor(private oauthService: OAuthService, private router: Router) { }
 
 
-    async init(): Promise<void> {
+    init(): Promise<void> {
 
-        if (auth.enabled) {
-            console.log("auth init")
-            if (this.initialized) {
-                return;
-            }
-            this.oauthService.configure(authCodeFlowConfig);
-            await this.oauthService.loadDiscoveryDocumentAndTryLogin();
-            this.initialized = true;
+        if (!auth.enabled || this.initialized) {
+            return Promise.resolve();
         }
+        const cleanUrl = window.location.origin + window.location.pathname + window.location.hash;
+        authCodeFlowConfig.redirectUri = cleanUrl;
+        this.oauthService.configure(authCodeFlowConfig);
+
+        return this.oauthService.loadDiscoveryDocumentAndTryLogin()
+            .then(() => {
+                this.initialized = true;
+                if (this.isLogged()) {
+                    const state = this.oauthService.state;
+                    if (state) {
+                        this.router.navigateByUrl(state);
+                    }
+                }
+            });
+    }
+
+    isInitialized(): boolean {
+        return this.initialized;
     }
 
     login() {
-        this.oauthService.initLoginFlow();
+        const hash = window.location.hash;
+        if (hash) {
+            this.oauthService.initLoginFlow(window.location.hash.slice(1));
+        }
     }
 
     logout() {
-        this.oauthService.logOut();
+        this.oauthService.logOut({
+            post_logout_redirect_uri: auth.logOutRedirectUri
+        });
     }
 
     isLogged(): boolean {
@@ -45,4 +62,5 @@ export class AuthService {
     getUserProfile() {
         return this.oauthService.getIdentityClaims();
     }
+
 }
