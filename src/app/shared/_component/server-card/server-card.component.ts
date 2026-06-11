@@ -36,6 +36,7 @@ export class ServerCardComponent {
   };
 
   @Input() menu: MatMenu;
+  @Input() supervisionQueryParams: Params | null = null;
 
 
   navigate(event: MouseEvent) {
@@ -49,6 +50,13 @@ export class ServerCardComponent {
   }
 
   private buildSupervisionQueryParams(): Params {
+    if (this.supervisionQueryParams) {
+      return {
+        env: this._instance.env,
+        ...this.supervisionQueryParams
+      };
+    }
+
     const currentQueryParams = this._activatedRoute.snapshot.queryParams;
     const queryParams: Params = { env: this._instance.env };
 
@@ -66,6 +74,9 @@ export class ServerCardComponent {
     if (currentQueryParams.start && currentQueryParams.end) {
       queryParams.start = currentQueryParams.start;
       queryParams.end = currentQueryParams.end;
+      if (currentQueryParams.app_name) {
+        queryParams.app_name = currentQueryParams.app_name;
+      }
       return queryParams;
     }
 

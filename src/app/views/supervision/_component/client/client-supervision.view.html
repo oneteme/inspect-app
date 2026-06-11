@@ -1,16 +1,41 @@
 <page-panel panelTitle="Paramètres" panelIcon="tune">
   <!-- Filtres -->
   <div class="pp-filters">
-    <mat-form-field style="width: 100%" class="no-subscript md-3" appearance="outline">
+    <mat-form-field class="no-subscript md-3 period-wide period-field"
+                    [style.--period-field-width]="!isDefaultPeriod() ? '408px' : '372px'"
+                    appearance="outline">
       <mat-label>Période</mat-label>
       <mat-date-range-input [formGroup]="formGroup.controls.range" [rangePicker]="picker">
         <input matStartDate formControlName="start" placeholder="Start date" (dateChange)="onChangeStart($event)">
         <input matEndDate formControlName="end" placeholder="End date" (dateChange)="onChangeEnd($event)">
       </mat-date-range-input>
       <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <span matSuffix class="period-inline-separator" aria-hidden="true"></span>
+      <button mat-icon-button
+              matSuffix
+              type="button"
+              [matMenuTriggerFor]="quickRangesMenu"
+              matTooltip="Plages de temps rapides"
+              class="period-action-btn">
+        <mat-icon class="material-symbols-outlined">schedule</mat-icon>
+      </button>
+      <button *ngIf="!isDefaultPeriod()"
+              mat-icon-button
+              matSuffix
+              type="button"
+              matTooltip="Réinitialiser à la dernière heure du jour"
+              (click)="resetPeriod()"
+              class="period-action-btn">
+        <mat-icon class="material-symbols-outlined">restart_alt</mat-icon>
+      </button>
       <mat-date-range-picker #picker></mat-date-range-picker>
+      <mat-menu #quickRangesMenu="matMenu" class="period-quick-ranges-menu">
+        <button *ngFor="let quickRange of periodQuickRanges" mat-menu-item (click)="applyQuickRange(quickRange.value)">
+          <span>{{ quickRange.label }}</span>
+        </button>
+      </mat-menu>
     </mat-form-field>
-  <mat-form-field style="width: 100%" class="no-subscript md-3" [class.loading]="isLoadingInstances"
+  <mat-form-field class="no-subscript md-3 host-filter" [class.loading]="isLoadingInstances"
                   appearance="outline">
       <mat-label>Serveur</mat-label>
       <mat-select [formControl]="formGroup.controls.server" (selectionChange)="onServerChange()">

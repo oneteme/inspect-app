@@ -69,7 +69,11 @@
     </div>
 
     <!-- ═══ CARTE SERVEUR ═══ -->
-    <app-server-card class="server-card-host" [menu]="session?.type != 'VIEW' ? menuServer : null" [instance]="instance"></app-server-card>
+    <app-server-card class="server-card-host"
+                     [menu]="session?.type != 'VIEW' ? menuServer : null"
+                     [instance]="instance"
+                     [supervisionQueryParams]="buildClientSupervisionQueryParams()">
+    </app-server-card>
   </div>
 
   <detail-session [session]="session" [completedSession]="completedSession"
