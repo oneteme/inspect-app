@@ -395,26 +395,17 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .github-btn {
-  @include nav-button;
-  width: 36px;
-  padding: 0;
-  border-radius: 50%;
-  border-color: rgba(100, 116, 139, 0.15);
-
-  svg {
-    width: 18px;
-    height: 18px;
-    transition: all $transition-fast;
-  }
+  width: 18px;
+  height: 18px;
+  color: $text-primary;
+  opacity: 0.4;
+  cursor: pointer;
+  transition: all $transition-fast;
 
   &:hover {
-    border-color: rgba(249, 115, 22, 0.35);
-    box-shadow: inset 0 0 0 1px rgba(249, 115, 22, 0.15), 0 2px 8px rgba(249, 115, 22, 0.08);
-
-    svg {
-      transform: scale(1.1);
-      filter: drop-shadow(0 2px 4px rgba(249, 115, 22, 0.2));
-    }
+    background: transparent;
+    opacity: 1;
+    transform: scale(1.05);
   }
 }
 
