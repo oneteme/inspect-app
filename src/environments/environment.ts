@@ -67,7 +67,7 @@ export const auth: AuthParams = {
   authIssuer: '',
   clientId: '',
   clientSecret: '',
-  enabled: true,
+  enabled: false,
 
   // Locale
   // enabled: false,
