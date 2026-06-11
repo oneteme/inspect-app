@@ -219,7 +219,7 @@
     <div class="nav-actions">
       <div class="nav-divider"></div>
 
-      <button class="env-trigger" [matMenuTriggerFor]="envMenu" [ngClass]="'env-' + getEnvClass(env.value)">
+      <button class="env-trigger" [matMenuTriggerFor]="envMenu" [ngClass]="'env-' + getEnvClass(env.value)" matTooltip="Changer l'environnement">
         <span class="env-letter">{{ env.value?.charAt(0) | uppercase }}</span>
         <span class="env-label">{{ env.value | uppercase }}</span>
         <mat-icon>expand_more</mat-icon>
@@ -234,7 +234,8 @@
       </mat-menu>
 
       <button class="user-btn"
-             [matMenuTriggerFor]="userMenu">
+             [matMenuTriggerFor]="userMenu"
+             matTooltip="Profil utilisateur">
         <span class="user-name">{{ getUserDisplayName() }}</span>
       </button>
 
@@ -259,7 +260,7 @@
         </button> -->
       <a
         class="action-btn github-btn"
-        href="https://github.com/oneteme"
+        href="https://github.com/orgs/oneteme/projects/45"
         target="_blank"
         matTooltip="Contribuer sur GitHub"
       >
