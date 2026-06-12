@@ -18,8 +18,6 @@ export class AuthService {
         if (!auth.enabled || this.initialized) {
             return Promise.resolve();
         }
-        const cleanUrl = window.location.origin + window.location.pathname + window.location.hash;
-        authCodeFlowConfig.redirectUri = cleanUrl;
         this.oauthService.configure(authCodeFlowConfig);
 
         return this.oauthService.loadDiscoveryDocumentAndTryLogin()
@@ -39,10 +37,8 @@ export class AuthService {
     }
 
     login() {
-        const hash = window.location.hash;
-        if (hash) {
-            this.oauthService.initLoginFlow(window.location.hash.slice(1));
-        }
+        const hash = window.location.hash ? window.location.hash.slice(1) : "/";
+        this.oauthService.initLoginFlow();
     }
 
     logout() {
