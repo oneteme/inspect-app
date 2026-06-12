@@ -3,7 +3,6 @@ import { OAuthService } from 'angular-oauth2-oidc';
 import { authCodeFlowConfig } from "./auth-code-flow.config";
 import { auth } from "../../environments/environment";
 import { Router } from '@angular/router';
-import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -12,17 +11,14 @@ export class AuthService {
     private isCodeFlow = authCodeFlowConfig.responseType == "code";
 
     constructor(private oauthService: OAuthService, private router: Router) { }
-    constructor(private oauthService: OAuthService, private router: Router) { }
 
 
-    init(): Promise<void> {
     init(): Promise<void> {
 
         if (!auth.enabled || this.initialized) {
             return Promise.resolve();
         }
         this.oauthService.configure(authCodeFlowConfig);
-
         return this.oauthService.loadDiscoveryDocumentAndTryLogin()
             .then(() => {
                 this.initialized = true;
@@ -41,15 +37,13 @@ export class AuthService {
 
     login() {
         const hash = window.location.hash ? window.location.hash.slice(1) : "/";
-        this.oauthService.initLoginFlow();
+        this.oauthService.initLoginFlow(hash);
+
     }
 
     logout() {
         this.oauthService.logOut({
-            post_logout_redirect_uri: auth.logOutRedirectUri
-        });
-        this.oauthService.logOut({
-            post_logout_redirect_uri: auth.logOutRedirectUri
+            post_logout_redirect_uri: authCodeFlowConfig.logoutUrl
         });
     }
 
@@ -64,6 +58,5 @@ export class AuthService {
     getUserProfile() {
         return this.oauthService.getIdentityClaims();
     }
-
 
 }
