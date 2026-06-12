@@ -9,7 +9,7 @@ import {DateAdapter, MAT_DATE_FORMATS} from '@angular/material/core';
 import {Constants} from '../constants';
 import {formatters, groupByColor, periodManagement} from 'src/app/shared/util';
 import {IPeriod, IStep, IStepFrom} from '../../model/conf.model';
-import {getDefaultTodayPeriod, getQuickRangeStep, isDefaultTodayPeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../shared/period-filter';
+import {getDefaultTodayPeriod, getQuickRangeStep, getQuickRangeDates, isDefaultTodayPeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../shared/period-filter';
 import {MatDialog} from '@angular/material/dialog';
 import {ProtocolExceptionComponent} from './components/protocol-exception-modal/protocol-exception-modal.component';
 import {InstanceService} from 'src/app/service/jquery/instance.service';
@@ -454,7 +454,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     applyQuickRange(range: PeriodQuickRange): void {
-        const period = getQuickRangeStep(range);
+        let period;
+        if (range === 'yesterday') {
+            const dates = getQuickRangeDates(range);
+            period = new IPeriod(dates.start, dates.end);
+        } else {
+            period = getQuickRangeStep(range);
+        }
         this.period = period;
         this.patchDateValue(period.start, toDisplayedPeriodEnd(period.end));
     }
