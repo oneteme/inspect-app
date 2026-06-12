@@ -31,6 +31,10 @@ export class AuthService {
             });
     }
 
+    setupAuthConfig() {
+        authCodeFlowConfig.oidc=auth.enableOpenId?auth.enableOpenId
+    }
+
     isInitialized(): boolean {
         return this.initialized;
     }
@@ -38,7 +42,6 @@ export class AuthService {
     login() {
         const hash = window.location.hash ? window.location.hash.slice(1) : "/";
         this.oauthService.initLoginFlow(hash);
-
     }
 
     logout() {

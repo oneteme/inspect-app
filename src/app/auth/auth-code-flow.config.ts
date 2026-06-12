@@ -3,14 +3,14 @@ import { auth } from 'src/environments/environment';
 
 export const authCodeFlowConfig: AuthConfig = {
   issuer: auth.authIssuer,
-  redirectUri: auth.redirectUri,
+  redirectUri: auth.redirectUri ?? window.location.origin,
   clientId: auth.clientId,
-  responseType: 'id_token',
+  responseType: auth.authFlow,
   scope: 'openid',
   showDebugInformation: auth.debug ?? false,
-  requestAccessToken: false,
+  requestAccessToken: true,
   oidc: true,
-  clearHashAfterLogin: true,
-  logoutUrl: auth.logOutRedirectUri
+  clearHashAfterLogin: auth.clearHashPostLogin ?? true,
+  logoutUrl: window.location.origin + "/logout.html"
 };
 

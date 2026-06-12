@@ -4,17 +4,7 @@ export interface Application {
     gridViewPeriod: string;
     kpiViewPeriod: string;
 }
-export interface AuthParams {
-  redirectUri: string,
-  authIssuer: string,
-  clientId: string,
-  clientSecret: string,
-  enabled?: boolean,
-  sendAccessToken?: boolean,
-  debug?: boolean,
-  requireHttps?: boolean,
-  logOutRedirectUri?: string
-}
+
 export class QueryParams {
     private _optional: { [key: string]: any } = {};
 
