@@ -7,6 +7,7 @@ import {
   RestSessionDto
 } from "./request.model";
 import mx from "../../mxgraph";
+import {formatDuration} from "../shared/pipe/duration.pipe";
 
 export interface SessionTree {
   os: string;
@@ -145,7 +146,7 @@ export class LinkRequestNode implements Link<Label> {
   }
 
   linkInfo(): any {
-    const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+    const elapsed  = this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null;
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
     const isOngoing = this.nodeObject?.end == null;
@@ -166,8 +167,6 @@ export class LinkRequestNode implements Link<Label> {
       elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
       resource: { icon: 'code', value: resource, color: '#3b82f6' },
       session: { icon: 'link', value: this.nodeObject.id, color: '#3b82f6', type:'rest' },
-      //id:       { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type: ""},
-      // ...(this.nodeObject.remoteTrace ? { session: { icon: 'link', value: this.nodeObject.id, color: '#3b82f6', type:'rest' } } : {}),
     }
   }
   getLinkStyle(): string {
@@ -182,7 +181,10 @@ export class LinkRequestNode implements Link<Label> {
 
   formatLink(field: Label): string {
     switch (field) {
-      case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
+      case Label.ELAPSED_LATENSE: {
+        if (this.nodeObject.end == null) return formatDuration(null);
+        return formatDuration(this.nodeObject.end - this.nodeObject.start || null);
+      }
       case Label.METHOD_RESOURCE: return `${this.nodeObject.method || "?"} ${this.nodeObject.path || "?"}`
       case Label.SIZE_COMPRESSION: return `${this.nodeObject.inDataSize < 0 ? 0 : sizeFormatter(this.nodeObject.inDataSize) } ↓↑ ${this.nodeObject.outDataSize < 0 ? 0 : sizeFormatter(this.nodeObject.outDataSize) }`
       case Label.PROTOCOL_SCHEME: return `${this.nodeObject.protocol || "?"}/${this.nodeObject.authScheme || "?"}`
@@ -212,18 +214,6 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
     }
   }
 
-  formatLink(field: Label): string {
-    switch (field) {
-      case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
-      case Label.METHOD_RESOURCE: return `${this.nodeObject?.command || '?'} / ${this.nodeObject?.schema || '?'}`;
-      case Label.SIZE_COMPRESSION: return this.nodeObject?.count < 0 ? '0': this.nodeObject?.count!= undefined? this.nodeObject?.count.toString() : '?'; // remove undefined condition
-      case Label.PROTOCOL_SCHEME: return "JDBC/Basic"
-      case Label.STATUS_EXCEPTION: return this.nodeObject.failed && 'KO' || 'OK'
-      case Label.USER: return `${this.nodeObject.user || '?'}`;
-      default: return '?';
-    }
-  }
-
   nodeInfo(){
     const rows: any[] = [];
     if (this.nodeObject?.productName) rows.push({ icon: 'inventory',  label: 'Produit', value: this.nodeObject.productName + (this.nodeObject.productVersion ? ' ' + this.nodeObject.productVersion : ''), color: '#10b981' });
@@ -231,7 +221,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
   }
 
   linkInfo(): any {
-    const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+    const elapsed  = this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null;
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
     const isError   = this.nodeObject.failed
@@ -243,7 +233,6 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
       elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
       resource: { icon: resourceConfig[resource]?.icon ?? ' ', value: resource, color: resourceConfig[resource]?.color ?? '#6366f1' },
       request:  { icon: 'open_in_new', value: this.nodeObject.id, color: '#3b82f6', type:'jdbc'},
-
      }
    }
 
@@ -251,6 +240,21 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
      if (this.nodeObject.end == null) return 'ONGOING';
      return this.nodeObject.failed ? 'ERROR' : 'SUCCES'
    }
+
+  formatLink(field: Label): string {
+    switch (field) {
+      case Label.ELAPSED_LATENSE: {
+        if (this.nodeObject.end == null) return formatDuration(null);
+        return formatDuration(this.nodeObject.end - this.nodeObject.start || null);
+      }
+      case Label.METHOD_RESOURCE: return `${this.nodeObject?.command || '?'} / ${this.nodeObject?.schema || '?'}`;
+      case Label.SIZE_COMPRESSION: return this.nodeObject?.count < 0 ? '0': this.nodeObject?.count!= undefined? this.nodeObject?.count.toString() : '?';
+      case Label.PROTOCOL_SCHEME: return "JDBC/Basic"
+      case Label.STATUS_EXCEPTION: return this.nodeObject.failed && 'KO' || 'OK'
+      case Label.USER: return `${this.nodeObject.user || '?'}`;
+      default: return '?';
+    }
+  }
  }
 
  export class FtpRequestNode implements Node<Label>, Link<Label> {
@@ -262,7 +266,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
   }
 
   linkInfo(): any {
-    const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+    const elapsed  = this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null;
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
     const isError   = this.nodeObject.failed
@@ -278,25 +282,30 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
      }
   }
 
+  // ...existing code...
+
   nodeInfo(): { icon: string; label: string; value: string; color?: string; }[] {
     const rows: any[] = [];
     if (this.nodeObject?.serverVersion) rows.push({ icon: 'computer',   label: 'Serveur', value: this.nodeObject.serverVersion, color: '#0e7490' });
     if (this.nodeObject?.clientVersion) rows.push({ icon: 'laptop',     label: 'Client',  value: this.nodeObject.clientVersion, color: '#0891b2' });
     return rows
-    }
+  }
 
   formatNode(field: Label): string {
     switch (field) {
-      case Label.SERVER_IDENTITY: return this.nodeObject.host || '?'; //version
-      case Label.IP_PORT: return (this.nodeObject.host || '?') + (this.nodeObject?.port != -1 ?   ":"+ this.nodeObject?.port.toString() : '')
-      case Label.BRANCH_COMMIT: return "?"  // soon
+      case Label.SERVER_IDENTITY: return this.nodeObject.host || '?';
+      case Label.IP_PORT: return (this.nodeObject.host || '?') + (this.nodeObject?.port != -1 ? ':' + this.nodeObject?.port.toString() : '')
+      case Label.BRANCH_COMMIT: return "?"
       default: return '?';
     }
   }
 
   formatLink(field: Label): string {
     switch (field) {
-      case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
+      case Label.ELAPSED_LATENSE: {
+        if (this.nodeObject.end == null) return formatDuration(null);
+        return formatDuration(this.nodeObject.end - this.nodeObject.start || null);
+      }
       case Label.METHOD_RESOURCE: return this.nodeObject?.command || '?'
       case Label.SIZE_COMPRESSION: return "?"
       case Label.PROTOCOL_SCHEME: return this.nodeObject.protocol + '/Basic'
@@ -320,7 +329,7 @@ export class MailRequestNode implements Node<Label>, Link<Label> {
   }
 
   linkInfo(): any {
-    const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+    const elapsed  = this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null;
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
     const isError   = this.nodeObject.failed
@@ -352,7 +361,10 @@ export class MailRequestNode implements Node<Label>, Link<Label> {
 
   formatLink(field: Label): string {
     switch (field) {
-      case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
+      case Label.ELAPSED_LATENSE: {
+        if (this.nodeObject.end == null) return formatDuration(null);
+        return formatDuration(this.nodeObject.end - this.nodeObject.start || null);
+      }
       case Label.METHOD_RESOURCE: return this.nodeObject?.command || '?'
       case Label.SIZE_COMPRESSION: return this.nodeObject?.count < 0 ? '0': this.nodeObject?.count!= undefined? this.nodeObject?.count.toString() : '?';
       case Label.PROTOCOL_SCHEME: return "SMTP/Basic"
@@ -376,7 +388,7 @@ export class LdapRequestNode implements Node<Label>, Link<Label> {
   }
 
   linkInfo(): any {
-    const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+    const elapsed  = this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null;
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
     const isError   = this.nodeObject.failed
@@ -407,7 +419,10 @@ export class LdapRequestNode implements Node<Label>, Link<Label> {
 
   formatLink(field: Label): string {
     switch (field) {
-      case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
+      case Label.ELAPSED_LATENSE: {
+        if (this.nodeObject.end == null) return formatDuration(null);
+        return formatDuration(this.nodeObject.end - this.nodeObject.start || null);
+      }
       case Label.METHOD_RESOURCE: return this.nodeObject?.command || '?'
       case Label.SIZE_COMPRESSION: return "?"
       case Label.PROTOCOL_SCHEME: return this.nodeObject.protocol ?? "LDAP/Basic" // wait for fix backend
@@ -441,7 +456,7 @@ export class RestRequestNode implements Node<Label>, Link<Label> {
   }
 
     linkInfo(): any {
-      const elapsed  = this.formatLink?.(Label.ELAPSED_LATENSE)  ?? '?';
+      const elapsed  = this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null;
       const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
       const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
       const isOngoing = this.nodeObject?.end == null;
@@ -479,18 +494,15 @@ export class RestRequestNode implements Node<Label>, Link<Label> {
   formatLink(field: Label): string {
     switch (field) {
       case Label.ELAPSED_LATENSE: {
-        let e1 = this.nodeObject.end - this.nodeObject.start;
-        if(!e1){
-          return "?";
-        }
+        if (this.nodeObject.end == null) return formatDuration(null);
+        const e1 = this.nodeObject.end - this.nodeObject.start;
+        if (!e1) return formatDuration(null);
         let e2 = 0;
         if (this.nodeObject.remoteTrace) {
-          let e3 = this.nodeObject.remoteTrace.end - this.nodeObject.remoteTrace.start;
-          if(e3){
-            e2 = e1 - e3;
-          }
+          const e3 = this.nodeObject.remoteTrace.end - this.nodeObject.remoteTrace.start;
+          if (e3) e2 = e1 - e3;
         }
-        return `${e1.toFixed(3)}s` + (e2 >= 1 ? `~${e2.toFixed(3)}s` : '');
+        return formatDuration(e1) + (e2 >= 1 ? ` ~${formatDuration(e2)}` : '');
       }
       case Label.METHOD_RESOURCE: return `${this.nodeObject.method || "?"} ${this.nodeObject.path || "?"}`
       case Label.SIZE_COMPRESSION: return `${this.nodeObject.inDataSize < 0 ? 0 : sizeFormatter(this.nodeObject.inDataSize) } ↓↑ ${this.nodeObject.outDataSize < 0 ? 0 :sizeFormatter(this.nodeObject.outDataSize) }`
@@ -570,7 +582,9 @@ export class TreeGraph {
     graph.getLabel = function (cell: any) {
       if (cell?.isEdge() && cell.value && typeof cell.value === 'object' && cell.value.hasOwnProperty('linkLbl')) {
         let compare = cell.value.nodes[0].formatLink(cell.value.linkLbl)
-        return tg.checkSome(cell.value.nodes, x => x.formatLink(cell.value.linkLbl) != compare) ? `... ×${cell.value.nodes.length}` : `${compare} ×${cell.value.nodes.length}`
+        const count = cell.value.nodes.length;
+        const suffix = count > 1 ? ` ×${count}` : '';
+        return tg.checkSome(cell.value.nodes, x => x.formatLink(cell.value.linkLbl) != compare) ? `...${suffix}` : `${compare}${suffix}`
       }else if(cell?.isVertex() && cell.value && typeof cell.value === 'object'){
         const lbl: string = cell.value.node.formatNode(cell.value.serverlbl) ?? '';
         return lbl.length > 22 ? lbl.substring(0, 22) + '…' : lbl;
@@ -616,7 +630,13 @@ export class TreeGraph {
           let res = tg.groupBy(cell.value.nodes, (v: any) => v.formatLink(cell.value.linkLbl))
           let entries = Object.entries(res)
           if(cell.value.linkLbl =="ELAPSED_LATENSE"){
-            entries = entries.sort((a,b) => (+b[0].substring(0,b[0].length -1) - +a[0].substring(0,a[0].length -1) ))
+            entries = entries.sort((a: any, b: any) => {
+              const getElapsed = (nodes: any[]) => {
+                const n = nodes[0];
+                return (n.nodeObject?.end != null ? (n.nodeObject.end - n.nodeObject.start) : -1) || -1;
+              };
+              return getElapsed(b[1]) - getElapsed(a[1]);
+            });
           }
           modal = tg.getModal(entries, cell.value.nodes.length);
         }
