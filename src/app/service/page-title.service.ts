@@ -1,11 +1,17 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { InstanceEnvironment } from '../model/trace.model';
 
 export interface PageTitleConfig {
     title: string;
     icon: string;
     iconOutlined?: boolean;
     subtitle?: string;
+    instanceContext?: {
+        instance: Partial<InstanceEnvironment>;
+        lastTrace?: number;
+        date?: number;
+    };
 }
 
 @Injectable({ providedIn: 'root' })

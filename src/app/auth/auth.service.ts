@@ -3,6 +3,7 @@ import { OAuthService } from 'angular-oauth2-oidc';
 import { authCodeFlowConfig } from "./auth-code-flow.config";
 import { auth } from "../../environments/environment";
 import { Router } from '@angular/router';
+import { Router } from '@angular/router';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -11,8 +12,10 @@ export class AuthService {
     private isCodeFlow = authCodeFlowConfig.responseType == "code";
 
     constructor(private oauthService: OAuthService, private router: Router) { }
+    constructor(private oauthService: OAuthService, private router: Router) { }
 
 
+    init(): Promise<void> {
     init(): Promise<void> {
 
         if (!auth.enabled || this.initialized) {
@@ -45,6 +48,9 @@ export class AuthService {
         this.oauthService.logOut({
             post_logout_redirect_uri: auth.logOutRedirectUri
         });
+        this.oauthService.logOut({
+            post_logout_redirect_uri: auth.logOutRedirectUri
+        });
     }
 
     isLogged(): boolean {
@@ -58,5 +64,6 @@ export class AuthService {
     getUserProfile() {
         return this.oauthService.getIdentityClaims();
     }
+
 
 }

@@ -21,6 +21,9 @@ import {
   ClientInstanceSelectorDialogComponent
 } from "./client-instance-selector-dialog/client-instance-selector-dialog.component";
 import {PageTitleService} from '../../../../service/page-title.service';
+import {getDefaultRelativePeriod, getQuickRangeStep, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../../shared/period-filter';
+import {IPeriod, IStep, IStepFrom} from '../../../../model/conf.model';
+import {shallowEqual} from '../../../search/rest/search-rest.view';
 
 @Component({
   templateUrl: './client-supervision.view.html',
@@ -158,6 +161,8 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   isLoadingInstances = false;
   reloadInstances = true;
   activityDisplayType: 'TRACE' | 'ATTEMPT' | 'REPORT' = 'TRACE';
+  readonly periodQuickRanges = PERIOD_QUICK_RANGES;
+  period: IPeriod | IStep | IStepFrom;
 
   ngOnInit() {
     this._pageTitleService.set({ icon: 'browse_activity', iconOutlined: true, title: 'Supervision', subtitle: 'Client' });
@@ -179,10 +184,22 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
         this.reloadInstances = !!(this.params.env && queryParams.env && this.params.env !== queryParams.env);
         this.params.instance = params.instance;
         this.params.env = queryParams.env;
-        this.params.start = new Date(queryParams.start);
-        this.params.end = new Date(queryParams.end);
+
+        if (queryParams.start && queryParams.end) {
+          this.period = new IPeriod(new Date(queryParams.start), new Date(queryParams.end));
+        } else if (queryParams.step && queryParams.from) {
+          this.period = new IStepFrom(Number(queryParams.step), Number(queryParams.from));
+        } else if (queryParams.step) {
+          this.period = new IStep(Number(queryParams.step));
+        } else {
+          this.period = getDefaultRelativePeriod();
+        }
+
+        this.params.start = this.period.start;
+        this.params.end = this.period.end;
         this.params.app_name = queryParams.app_name;
-        this.patchDateValue(this.params.start, this.params.end);
+        this.syncChartPeriodBounds();
+        this.patchDateValue(this.params.start, toDisplayedPeriodEnd(this.params.end));
         if(this.reloadInstances){
           // Réinitialiser les valeurs du formulaire quand l'environnement change
           this.formGroup.patchValue({
@@ -200,18 +217,22 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   onChangeStart(event) {
     this.formGroup.controls.range.controls.end.updateValueAndValidity({onlySelf: true});
     this.formGroup.controls.range.updateValueAndValidity({onlySelf: true});
-    let start = this.formGroup.controls.range.controls.start.value;
-    let end = this.formGroup.controls.range.controls.end.value || null;
+    const start = this.formGroup.controls.range.controls.start.value;
+    const end = this.formGroup.controls.range.controls.end.value || null;
+    this.period = new IPeriod(start, end || start);
     if(this.formGroup.controls.range.valid) {
-      this.getInstances(start, end);
+      this.getInstances(start, end || start);
     }
   }
 
   onChangeEnd(event) {
     this.formGroup.controls.range.controls.start.updateValueAndValidity({onlySelf: true});
     this.formGroup.controls.range.updateValueAndValidity({onlySelf: true});
-    let start = this.formGroup.controls.range.controls.start.value || null;
-    let end = this.formGroup.controls.range.controls.end.value;
+    const start = this.formGroup.controls.range.controls.start.value || null;
+    const end = this.formGroup.controls.range.controls.end.value;
+    if (start) {
+      this.period = new IPeriod(start, end ? new Date(end.getFullYear(), end.getMonth(), end.getDate(), end.getHours(), end.getMinutes() + 1) : start);
+    }
     if(this.formGroup.controls.range.valid) {
       this.getInstances(start, end);
     }
@@ -249,6 +270,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
     this.lastTrace = null;
     this.unavailableStat = 0;
     this.traceStat = 0;
+    this.syncChartPeriodBounds();
     this._traceService.getInstance(this.params.instance)
     .pipe(switchMap(res => {
       if(res?.env !== this.params.env) {
@@ -261,7 +283,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
         return EMPTY;
       }
       this.instance = res;
-      this._pageTitleService.set({ icon: 'browse_activity', iconOutlined: true, title: this.instance.name, subtitle: 'Supervision • Client' });
+      this.updatePageTitle();
       this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}&app_name=${this.instance.name}&_reload=${new Date().getTime()}`);
       return forkJoin([
         this.instance.end ? of([]) : this._instanceTraceService.getLastInstanceTrace({instance: [this.params.instance]}),
@@ -285,17 +307,55 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
             : [];
         this.logEntryByPeriod = log.map(r => ({...r, date: this._datePipe.transform(r.instant * 1000, 'dd/MM/yyyy HH:mm:ss')}));
         this.lastTrace = last[0]?.date;
+        this.updatePageTitle();
         this.getStatActivity();
+      }
+    });
+  }
+
+  private updatePageTitle() {
+    if (!this.instance) return;
+    this._pageTitleService.set({
+      icon: 'browse_activity',
+      iconOutlined: true,
+      title: this.instance.name,
+      subtitle: 'Supervision • Client',
+      instanceContext: {
+        instance: this.instance,
+        lastTrace: this.lastTrace,
+        date: this.date.getTime()
       }
     });
   }
 
   search() {
     if (this.formGroup.valid) {
+      const start = this.formGroup.controls.range.controls.start.getRawValue();
+      const end = this.formGroup.controls.range.controls.end.getRawValue();
+      const appName = this.formGroup.controls.instance.value?.appName || this.formGroup.controls.server.value || this.params.app_name;
+
+      if (!(this.period instanceof IStep) && !(this.period instanceof IStepFrom)) {
+        this.period = new IPeriod(start, end ? new Date(end.getFullYear(), end.getMonth(), end.getDate(), end.getHours(), end.getMinutes() + 1) : start);
+      }
+
+      const newQueryParams: any = {
+        env: this.params.env,
+        app_name: appName,
+        ...this.period.buildParams()
+      };
+
       this.reloadInstances = false;
-      this._router.navigate(['supervision', 'client', this.formGroup.controls.instance.value.id], {
-        queryParams: { start: this.formGroup.controls.range.controls.start.getRawValue().toISOString(), end: this.formGroup.controls.range.controls.end.getRawValue().toISOString(), env: this.params.env, _reload: new Date().getTime() },
-      });
+      if (!shallowEqual(this._activatedRoute.snapshot.queryParams, newQueryParams)) {
+        this._router.navigate(['supervision', 'client', this.formGroup.controls.instance.value.id], {
+          queryParams: newQueryParams,
+        });
+      } else {
+        this.params.start = this.period.start;
+        this.params.end = this.period.end;
+        this.patchDateValue(this.params.start, toDisplayedPeriodEnd(this.params.end));
+        this.getInstances(this.params.start, this.params.end);
+        this.getInstance();
+      }
     }
   }
 
@@ -340,6 +400,22 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
     this.formGroup.patchValue({
       server: server
     }, { emitEvent: false });
+  }
+
+  isDefaultPeriod(): boolean {
+    return isDefaultRelativePeriod(this.period);
+  }
+
+  resetPeriod(): void {
+    const defaultPeriod = getDefaultRelativePeriod();
+    this.period = defaultPeriod;
+    this.patchDateValue(defaultPeriod.start, toDisplayedPeriodEnd(defaultPeriod.end));
+  }
+
+  applyQuickRange(range: PeriodQuickRange): void {
+    const period = getQuickRangeStep(range);
+    this.period = period;
+    this.patchDateValue(period.start, toDisplayedPeriodEnd(period.end));
   }
 
   openInstanceSelector() {
@@ -433,6 +509,32 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
 
   getMinDate(date1: Date, date2: Date): Date {
     return date1.getTime() < date2.getTime() ? date1 : date2;
+  }
+
+  private syncChartPeriodBounds(): void {
+    const min = this.params.start?.getTime();
+    const currentMinute = new Date();
+    currentMinute.setSeconds(59, 999);
+    const requestedMax = this.params.end ? this.params.end.getTime() - 1 : undefined;
+    const max = requestedMax != null ? Math.min(requestedMax, currentMinute.getTime()) : undefined;
+
+    [
+      this.USAGE_RESOURCE_BY_PERIOD_LINE,
+      this.USAGE_INSTANCE_TRACE_BY_PERIOD_LINE,
+      this.ATTEMPT_INSTANCE_TRACE_BY_PERIOD_LINE
+    ].forEach((chartConfig) => {
+      chartConfig.options = {
+        ...chartConfig.options,
+        xAxis: {
+          ...(chartConfig.options?.xAxis || {}),
+          min,
+          max,
+          axisLabel: {
+            ...(chartConfig.options?.xAxis as any)?.axisLabel
+          }
+        }
+      };
+    });
   }
 
   get filtredInstances(){

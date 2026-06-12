@@ -61,8 +61,9 @@ $primary: #2563eb;
     }
 
     ::ng-deep mat-form-field.period-wide {
-        flex: 0 0 395px;
-        max-width: 395px;
+        flex: 0 0 var(--period-field-width, 372px);
+        max-width: var(--period-field-width, 372px);
+        transition: flex-basis .18s ease, max-width .18s ease, width .18s ease;
     }
 
     ::ng-deep mat-form-field.host-filter {

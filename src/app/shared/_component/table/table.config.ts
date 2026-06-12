@@ -494,7 +494,8 @@ export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTra
     { key: 'os', header: 'OS', icon: 'computer', optional: true, width: '8%' },
     { key: 're', header: 'RE', icon: 'sdk', optional: true, width: '8%' },
     { key: 'address', header: 'Adresse', icon: 'fingerprint', sliceable: false, groupable: false, optional: true },
-    { key: 'user', header: 'Utilisateur', icon: 'person', optional: true, width: '10%' }
+    { key: 'user', header: 'Utilisateur', icon: 'person', optional: true, width: '10%' },
+    { key: 'collector', header: 'Collector', icon: 'sensors', optional: true, width: '10%' }
   ],
   defaultSort: { active: 'duration', direction: 'desc' },
   slices: [
@@ -510,12 +511,6 @@ export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTra
         { key: '1j - 7j', label: '1j - 7j', filter: (row) => { const s = (new Date().getTime() - row.start) / 1000; return s >= 86400 && s < 7 * 86400; } },
         { key: '> 7 jours', label: '> 7 jours', filter: (row) => (new Date().getTime() - row.start) / 1000 >= 7 * 86400 }
       ]
-    },
-    {
-      title: 'Collector',
-      icon: 'sensors',
-      columnKey: 'collector',
-      hidden: true
     }
   ]
 }

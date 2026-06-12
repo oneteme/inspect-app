@@ -147,7 +147,8 @@ mat-form-field.no-subscript {
 }
 
 .period-field {
-  width: 430px !important;
+  width: var(--period-field-width, 372px) !important;
+  transition: width .18s ease, max-width .18s ease, flex-basis .18s ease;
 
   .mat-mdc-form-field-icon-suffix {
     display: inline-flex;

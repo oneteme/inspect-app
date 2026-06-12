@@ -1,8 +1,10 @@
 import {Component, inject, OnDestroy, OnInit, ViewContainerRef} from "@angular/core";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
+import {DateAdapter, MAT_DATE_FORMATS} from '@angular/material/core';
 import {ActivatedRoute, Params} from "@angular/router";
 import {combineLatest, finalize, Subscription} from "rxjs";
 import {Location} from "@angular/common";
+import {MAT_DATE_RANGE_SELECTION_STRATEGY} from '@angular/material/datepicker';
 import {RequestKpiComponentResolverService} from "./request-kpi-component-resolver.service";
 import {RestRequestService} from "../../../service/jquery/rest-request.service";
 import {DatabaseRequestService} from "../../../service/jquery/database-request.service";
@@ -10,16 +12,24 @@ import {FtpRequestService} from "../../../service/jquery/ftp-request.service";
 import {SmtpRequestService} from "../../../service/jquery/smtp-request.service";
 import {LdapRequestService} from "../../../service/jquery/ldap-request.service";
 import {EnvRouter} from "../../../service/router.service";
-import {IPeriod, QueryParams} from "../../../model/conf.model";
-import {app, makeDatePeriod} from "../../../../environments/environment";
+import {IPeriod, IStep, IStepFrom, Period, QueryParams} from "../../../model/conf.model";
+import {app} from "../../../../environments/environment";
 import {Constants} from "../../constants";
 import {PageTitleService} from "../../../service/page-title.service";
-import {getKpiQuickRangeDates, KPI_PERIOD_QUICK_RANGES, KpiPeriodQuickRange, normalizeToMinimumDay} from '../../../shared/period-filter';
+import {CustomDateAdapter} from '../../../shared/material/custom-date-adapter';
+import {MY_DATE_FORMATS} from '../../../shared/shared.module';
+import {CustomDateRangeSelectionStrategy} from '../../../shared/material/custom-date-range-selection-strategy';
+import {getDefaultTodayPeriod, getKpiQuickRangeDates, isDefaultTodayPeriod, KPI_PERIOD_QUICK_RANGES, KpiPeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
 
 @Component({
   templateUrl: './request-kpi.view.html',
   styleUrls: ['./request-kpi.view.scss'],
-  host: { 'data-view': 'request-kpi' }
+  host: { 'data-view': 'request-kpi' },
+  providers: [
+    { provide: DateAdapter, useClass: CustomDateAdapter },
+    { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
+    { provide: MAT_DATE_RANGE_SELECTION_STRATEGY, useClass: CustomDateRangeSelectionStrategy }
+  ]
 })
 export class RequestKpiView implements OnInit, OnDestroy {
   private readonly _activatedRoute = inject(ActivatedRoute);
@@ -62,20 +72,35 @@ export class RequestKpiView implements OnInit, OnDestroy {
       params: this._activatedRoute.params,
       queryParams: this._activatedRoute.queryParams}).subscribe({
       next: (v: { params: Params, queryParams: Params }) => {
-        this.params.type = v.params.request_type;
+        const type = v.params.request_type as 'jdbc' | 'ftp' | 'smtp' | 'ldap' | 'rest';
+        this.params.type = type;
         this._pageTitleService.set({
           icon: 'finance_mode',
           iconOutlined: true,
-          title: (Constants.REQUEST_MAPPING_TYPE[this.params.type]?.title || this.params.type) + ' • KPI',
-          subtitle: Constants.REQUEST_MAPPING_TYPE[this.params.type]?.subtitle
+          title: (Constants.REQUEST_MAPPING_TYPE[type]?.title || type) + ' • KPI',
+          subtitle: Constants.REQUEST_MAPPING_TYPE[type]?.subtitle
         });
-        const period = new IPeriod(v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(0, 1).start, v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(0, 1).end);
-        const normalizedPeriod = normalizeToMinimumDay(period);
-        this.params.queryParams = new QueryParams(normalizedPeriod, v.queryParams.env || app.defaultEnv,null,!v.queryParams.host ? [] : Array.isArray(v.queryParams.host) ? v.queryParams.host : [v.queryParams.host])
-        this.patchDateValue(this.params.queryParams.period.start, new Date(this.params.queryParams.period.end.getFullYear(), this.params.queryParams.period.end.getMonth(), this.params.queryParams.period.end.getDate() - 1));
+        let period: Period = getDefaultTodayPeriod();
+        if (v.queryParams.start && v.queryParams.end) {
+          period = new IPeriod(new Date(v.queryParams.start), new Date(v.queryParams.end));
+        } else if (v.queryParams.step && v.queryParams.from) {
+          period = new IStepFrom(Number(v.queryParams.step), Number(v.queryParams.from));
+        } else if (v.queryParams.step) {
+          period = new IStep(Number(v.queryParams.step));
+        }
+        let hosts: string[] = [];
+        if (v.queryParams.host) {
+          if (Array.isArray(v.queryParams.host)) {
+            hosts = v.queryParams.host;
+          } else {
+            hosts = [v.queryParams.host];
+          }
+        }
+        this.params.queryParams = new QueryParams(period, v.queryParams.env || app.defaultEnv, undefined, hosts)
+        this.patchDateValue(this.params.queryParams.period.start, toDisplayedPeriodEnd(this.params.queryParams.period.end));
         this.getHosts();
-        if(this.params.type) {
-          const componentType = this._componentResolver.resolveComponent(this.params.type);
+        if(type) {
+          const componentType = this._componentResolver.resolveComponent(type);
           this.loadComponent(componentType);
         }
         this._location.replaceState(`${this._router.url.split('?')[0]}?${this.params.queryParams.buildPath()}`);
@@ -104,18 +129,19 @@ export class RequestKpiView implements OnInit, OnDestroy {
   }
 
   getHosts(){
+    if (!this.params.type || !this.params.queryParams) return;
     if(this.hostSubscription){
       this.hostSubscription.unsubscribe();
     }
-    this.nameDataList = null;
+    this.nameDataList = [];
     this.serverNameIsLoading = true;
     this.hostSubscription = this.serviceType[this.params.type].service.getHost(this.params.type, { env: this.params.queryParams.env, start: this.params.queryParams.period.start.toISOString(), end: this.params.queryParams.period.end.toISOString()})
         .pipe(finalize(()=> this.serverNameIsLoading = false))
         .subscribe({
-          next: res => {
+          next: (res: any[]) => {
             this.nameDataList = res;
-            this.patchHostValue(this.params.queryParams.hosts);
-          }, error: (e) => {
+            this.patchHostValue(this.params.queryParams?.hosts || []);
+          }, error: (e: any) => {
             console.log(e)
           }
         });
@@ -128,10 +154,13 @@ export class RequestKpiView implements OnInit, OnDestroy {
   }
 
   search(){
-    if(this.filterForm.valid) {
-      let start = this.filterForm.controls.dateRange.controls.start.value;
-      let end = this.filterForm.controls.dateRange.controls.end.value;
-      this.params.queryParams.period = new IPeriod(start, new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1));
+    if(this.filterForm.valid && this.params.queryParams) {
+      const start = this.filterForm.controls.dateRange.controls.start.value;
+      const end = this.filterForm.controls.dateRange.controls.end.value;
+      if (!start || !end) {
+        return;
+      }
+      this.params.queryParams.period = new IPeriod(start, new Date(end.getFullYear(), end.getMonth(), end.getDate(), end.getHours(), end.getMinutes() + 1));
       this._router.navigate([], {
         relativeTo: this._activatedRoute,
         queryParams: this.params.queryParams.buildParams()
@@ -140,23 +169,38 @@ export class RequestKpiView implements OnInit, OnDestroy {
   }
 
   onChangeHost() {
-    if (this.filterForm.controls.host.value.includes('global')) {
+    if (!this.params.queryParams) return;
+    const hosts = this.filterForm.controls.host.value || [];
+    if (hosts.includes('global')) {
       // Si "Global" est sélectionné, vider le tableau des hosts
       this.params.queryParams.hosts = [];
     } else {
       // Sinon, utiliser les valeurs sélectionnées
-      this.params.queryParams.hosts = [...this.filterForm.controls.host.value];
+      this.params.queryParams.hosts = [...hosts];
     }
   }
 
   onHostopenedChange() {
-    this.params.queryParams.hosts = [...this.filterForm.controls.host.value];
+    if (!this.params.queryParams) return;
+    this.params.queryParams.hosts = [...(this.filterForm.controls.host.value || [])];
   }
 
   applyQuickRange(range: KpiPeriodQuickRange): void {
+    if (!this.params.queryParams) return;
     const {start, end, queryEnd} = getKpiQuickRangeDates(range);
     this.params.queryParams.period = new IPeriod(start, queryEnd);
     this.patchDateValue(start, end);
+  }
+
+  isDefaultPeriod(): boolean {
+    return isDefaultTodayPeriod(this.params.queryParams?.period);
+  }
+
+  resetPeriod(): void {
+    if (!this.params.queryParams) return;
+    const period = getDefaultTodayPeriod();
+    this.params.queryParams.period = period;
+    this.patchDateValue(period.start, toDisplayedPeriodEnd(period.end));
   }
 }
 

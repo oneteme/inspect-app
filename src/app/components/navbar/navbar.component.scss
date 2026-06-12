@@ -13,6 +13,29 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
+@mixin nav-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 36px;
+  padding: 0 12px;
+  background: transparent;
+  border: 1px solid rgba(15, 23, 42, 0.08);
+  border-radius: 10px;
+  color: $text-primary;
+  cursor: pointer;
+  transition: all $transition-fast;
+  flex-shrink: 0;
+  font-size: 12px;
+  @include focus-ring;
+
+  &:hover {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.12), 0 2px 8px rgba(15, 23, 42, 0.04);
+  }
+}
+
 .navbar {
   position: fixed;
   top: 0;
@@ -58,11 +81,11 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   cursor: pointer;
-  padding: 6px 0;
+  padding: 6px 0 0;
 }
 
 .brand-logo {
-  height: 26px;
+  height: 32px;
   width: auto;
   display: block;
   color: $text-primary;
@@ -152,6 +175,13 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   min-width: 0;
 }
 
+.npt-top-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
 .npt-label {
   font-size: 13px;
   font-weight: 600;
@@ -169,6 +199,15 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   overflow: hidden;
   text-overflow: ellipsis;
   line-height: 1.3;
+}
+
+.nav-instance-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  transform: scale(0.7);
+  transform-origin: left center;
 }
 
 .menu-trigger {
@@ -202,17 +241,6 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   gap: 12px;
-}
-
-.nav-actions-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 8px;
-  background: rgba(15, 23, 42, 0.02);
-  border: 1px solid rgba(15, 23, 42, 0.08);
-  border-radius: 10px;
-  transition: all $transition-fast;
 }
 
 .nav-filter-btn {
@@ -344,63 +372,44 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
 
+// Bouton utilisateur
+
+.user-btn {
+  @include nav-button;
+  border-color: rgba(37, 99, 235, 0.15);
+
+  .user-name {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100px;
+  }
+
+  &:hover {
+    border-color: rgba(37, 99, 235, 0.25);
+    box-shadow: inset 0 0 0 1px rgba(37, 99, 235, 0.15), 0 2px 8px rgba(37, 99, 235, 0.06);
+  }
+}
+
 .github-btn {
-  width: 36px;
-  height: 36px;
-  background: transparent;
-  border-color: transparent;
-  color: $text-secondary;
-  opacity: 0.8;
+  width: 18px;
+  height: 18px;
+  color: $text-primary;
+  opacity: 0.4;
+  cursor: pointer;
   transition: all $transition-fast;
 
   &:hover {
     background: transparent;
-    border-color: transparent;
     opacity: 1;
-
-    svg {
-      transform: scale(1.1) !important;
-    }
+    transform: scale(1.05);
   }
 }
 
-// ─── Bouton utilisateur ───────────────────────────────────────────────────────
-
-.user-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: transparent;
-  border: none;
-  border-radius: 50%;
-  padding: 0;
-  cursor: pointer;
-  transition: all $transition-fast;
-  @include focus-ring;
-
-  .user-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, $primary 0%, $accent 100%);
-    color: #fff;
-    font-size: 11px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.25);
-    transition: box-shadow $transition-fast, transform $transition-fast;
-  }
-
-  &:hover .user-avatar {
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.35);
-    transform: scale(1.06);
-  }
-}
-
-// ─── Menu utilisateur ─────────────────────────────────────────────────────────
+// Menu utilisateur
 
 ::ng-deep .user-menu-panel {
   .mat-mdc-menu-panel {
@@ -525,21 +534,10 @@ $env-rcc: #ec4899;
 $env-other: #64748b;
 
 .env-trigger {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 12px;
-  background: rgba(15, 23, 42, 0.04);
-  border: 1px solid rgba(15, 23, 42, 0.12);
-  border-radius: 10px;
-  cursor: pointer;
-  transition: all $transition-fast;
-  color: $text-primary;
-  font-size: 12px;
+  @include nav-button;
 
   &:hover {
-    background: rgba(15, 23, 42, 0.08);
-    border-color: rgba(15, 23, 42, 0.18);
+    border-color: rgba(15, 23, 42, 0.15);
   }
 
   .env-letter {
@@ -576,12 +574,12 @@ $env-other: #64748b;
     transform: rotate(180deg);
   }
 
-  &.env-dev .env-letter   { background: rgba($env-dev,   0.15); color: $env-dev;   }
-  &.env-ppd .env-letter   { background: rgba($env-ppd,   0.15); color: $env-ppd;   }
-  &.env-prv .env-letter   { background: rgba($env-prv,   0.15); color: $env-prv;   }
-  &.env-rec .env-letter   { background: rgba($env-rec,   0.15); color: $env-rec;   }
-  &.env-pg  .env-letter   { background: rgba($env-pg,    0.15); color: $env-pg;    }
-  &.env-rcc .env-letter   { background: rgba($env-rcc,   0.15); color: $env-rcc;   }
+  &.env-dev .env-letter { background: rgba($env-dev, 0.15); color: $env-dev; }
+  &.env-ppd .env-letter { background: rgba($env-ppd, 0.15); color: $env-ppd; }
+  &.env-prv .env-letter { background: rgba($env-prv, 0.15); color: $env-prv; }
+  &.env-rec .env-letter { background: rgba($env-rec, 0.15); color: $env-rec; }
+  &.env-pg .env-letter { background: rgba($env-pg, 0.15); color: $env-pg; }
+  &.env-rcc .env-letter { background: rgba($env-rcc, 0.15); color: $env-rcc; }
   &.env-other .env-letter { background: rgba($env-other, 0.15); color: $env-other; }
 }
 

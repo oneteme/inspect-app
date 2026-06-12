@@ -2,13 +2,14 @@ import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy
 import {ActivatedRoute, Params} from '@angular/router';
 import {combineLatest, finalize, forkJoin, map, Observable, of, Subscription, switchMap, tap} from 'rxjs';
 import {DatePipe, DecimalPipe, Location} from '@angular/common';
-import {app, makeDatePeriod} from 'src/environments/environment';
+import {app} from 'src/environments/environment';
 import {EnvRouter} from "../../service/router.service";
 import {FormControl, FormGroup, Validators} from '@angular/forms';
+import {DateAdapter, MAT_DATE_FORMATS} from '@angular/material/core';
 import {Constants} from '../constants';
 import {formatters, groupByColor, periodManagement} from 'src/app/shared/util';
-import {IPeriod} from '../../model/conf.model';
-import {normalizeToMinimumDay} from '../../shared/period-filter';
+import {IPeriod, IStep, IStepFrom} from '../../model/conf.model';
+import {getDefaultTodayPeriod, getQuickRangeStep, isDefaultTodayPeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../shared/period-filter';
 import {MatDialog} from '@angular/material/dialog';
 import {ProtocolExceptionComponent} from './components/protocol-exception-modal/protocol-exception-modal.component';
 import {InstanceService} from 'src/app/service/jquery/instance.service';
@@ -26,11 +27,20 @@ import {SmtpRequestService} from 'src/app/service/jquery/smtp-request.service';
 import {InstanceTraceService} from 'src/app/service/jquery/instance-trace.service';
 import {DashboardDetailContext} from './components/detail-view/detail-view.model';
 import {PageTitleService} from '../../service/page-title.service';
+import {CustomDateAdapter} from '../../shared/material/custom-date-adapter';
+import {MY_DATE_FORMATS} from '../../shared/shared.module';
+import {MAT_DATE_RANGE_SELECTION_STRATEGY} from '@angular/material/datepicker';
+import {CustomDateRangeSelectionStrategy} from '../../shared/material/custom-date-range-selection-strategy';
 
 @Component({
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
+    providers: [
+        { provide: DateAdapter, useClass: CustomDateAdapter },
+        { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
+        { provide: MAT_DATE_RANGE_SELECTION_STRATEGY, useClass: CustomDateRangeSelectionStrategy }
+    ]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
     constants = Constants;
@@ -82,8 +92,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     sessionSubscriptions: Subscription[] = [];
     private _serverHealthSub: Subscription | null = null;
     private _applicationsSub: Subscription | null = null;
-    tabRequests: { [key: string]: { observable?: Observable<Object>, data?: any[], isLoading?: boolean, key?: string } } = {};
-    chartRequests: { [key: string]: { observable?: Observable<Object>, data?: any[], chart?:any[], isLoading?: boolean, key?: string, title?: string, subtitle?: string } } = {};
+    tabRequests: { [key: string]: { observable?: Observable<any>, data?: any[], isLoading?: boolean, key?: string } } = {};
+    chartRequests: { [key: string]: { observable?: Observable<any>, data?: any[], chart?:any[], isLoading?: boolean, key?: string, title?: string, subtitle?: string } } = {};
     serverFilterForm = new FormGroup({
         appname: new FormControl([""]),
         dateRangePicker: new FormGroup({
@@ -95,6 +105,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     params: Partial<{ env: string, start: Date, end: Date, serveurs: string[] }> = {};
     nameDataList: any[];
     groupedBy: string;
+    period: IPeriod | IStep | IStepFrom;
+    readonly periodQuickRanges = PERIOD_QUICK_RANGES;
 
     serverHealthData: LastServerStart[] = [];
     serverHealthLoading = true;
@@ -153,6 +165,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private _loadGen = 0;
     private _lastHealthEnv: string | null = null;
     private _sessionCountByType: Record<string, { total: number; errors: number }> = {};
+
     constructor() {
         this.subscriptions.push(combineLatest({
             params: this._activatedRoute.params,
@@ -160,36 +173,43 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }).subscribe({
             next: (v: { params: Params, queryParams: Params }) => {
                 this.params.env = v.queryParams.env || app.defaultEnv;
-                const rawStart = v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(0, 1).start;
-                const rawEnd = v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(0, 1).end;
-                const rawPeriod = new IPeriod(rawStart, rawEnd);
-                const normalizedPeriod = normalizeToMinimumDay(rawPeriod);
-                this.params.start = normalizedPeriod.start;
-                this.params.end = normalizedPeriod.end;
-                this.groupedBy = periodManagement(this.params.start, this.params.end);
+                if (v.queryParams.start && v.queryParams.end) {
+                    this.period = new IPeriod(new Date(v.queryParams.start), new Date(v.queryParams.end));
+                } else if (v.queryParams.step && v.queryParams.from) {
+                    this.period = new IStepFrom(Number(v.queryParams.step), Number(v.queryParams.from));
+                } else if (v.queryParams.step) {
+                    this.period = new IStep(Number(v.queryParams.step));
+                } else {
+                    this.period = getDefaultTodayPeriod();
+                }
+                this.params.start = this.period.start;
+                this.params.end = this.period.end;
+                const currentEnv = this.params.env || app.defaultEnv;
+                const currentStart = this.params.start;
+                const currentEnd = this.params.end;
+                this.groupedBy = periodManagement(currentStart, currentEnd);
                 const appname = v.queryParams['appname'];
                 if (Array.isArray(appname)) this.params.serveurs = appname;
                 else this.params.serveurs = appname ? [appname] : [];
-                if (this.params.serveurs.length > 0) {
-                    this.patchServerValue(this.params.serveurs);
-                }
-                this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
-        this._applicationsSub?.unsubscribe();
-                this._applicationsSub = this._instanceService.getApplications('SERVER', this.params.env)
+                this.patchServerValue(this.params.serveurs || []);
+                this.patchDateValue(currentStart, toDisplayedPeriodEnd(currentEnd));
+                this.serverNameIsLoading = true;
+                this._applicationsSub?.unsubscribe();
+                this._applicationsSub = this._instanceService.getApplications('SERVER', currentEnv)
                     .pipe(finalize(() => this.serverNameIsLoading = false))
                     .subscribe({
                         next: (appNames: { appName: string }[]) => {
                             this.nameDataList = appNames.map(r => r.appName);
-                            this.patchServerValue(this.params.serveurs);
+                            this.patchServerValue(this.params.serveurs || []);
                         }, error: (e) => {
                             console.log(e)
                         }
                     });
 
-                let serverParam = this.createServerFilter();
-                const effectiveEnd = this.params.end > new Date() ? new Date() : this.params.end;
-                this.chartRequests = this.REQUESTS(this.params.env, this.params.start, effectiveEnd, serverParam.app_name);
-                this.tabRequests   = this.TAB_REQUESTS(this.params.env, this.params.start, effectiveEnd, serverParam.app_name);
+                const serverParam = this.createServerFilter();
+                const effectiveEnd = currentEnd > new Date() ? new Date() : currentEnd;
+                this.chartRequests = this.REQUESTS(currentEnv, currentStart, effectiveEnd, serverParam.app_name);
+                this.tabRequests   = this.TAB_REQUESTS(currentEnv, currentStart, effectiveEnd, serverParam.app_name);
                 this.sessionSubscriptions.forEach(s => s.unsubscribe());
                 this.sessionSubscriptions = [];
                 this.sessionSummaries = [];
@@ -210,15 +230,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 this.initTab(gen);
                 this.initCharts(gen);
                 if (envChanged) {
-                    this._lastHealthEnv = this.params.env ?? null;
-                    this.loadServerHealth(this.params.env, gen);
+                    this._lastHealthEnv = currentEnv;
+                    this.loadServerHealth(currentEnv, gen);
                 }
-                this.sessionSubscriptions.push(this._sessionService.getCountByEnv({ env: this.params.env, start: this.params.start, end: this.params.end })
+                this.sessionSubscriptions.push(this._sessionService.getCountByEnv({ env: currentEnv, start: currentStart, end: currentEnd })
                     .pipe(finalize(() => { if (this._loadGen === gen) { this.restSessionCountLoading = false; this._rebuildSessionSummaries(); } }))
                     .subscribe({ next: (data) => { if (this._loadGen === gen) { this.restSessionCount = data; } } }));
 
-                const serverQuery = this.params.serveurs.length > 0 ? '&' + this.params.serveurs.map(name => 'appname=' + name).join('&') : '';
-                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}${serverQuery}`)
+                this._location.replaceState(`${this._router.url.split('?')[0]}?${this.buildQueryPath(this.buildQueryParams())}`)
             }
         }));
     }
@@ -253,7 +272,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this._chartsResolved = 0;
         const totalCharts = keys.length;
         keys.forEach(k => {
-            this.chartSubscriptions.push(this.chartRequests[k].observable
+            this.chartSubscriptions.push(this.chartRequests[k].observable!
                 .pipe(finalize(() => {
                     if (this._loadGen !== gen) return;
                     this.chartRequests[k].isLoading = false;
@@ -292,7 +311,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         keys.forEach(i => {
             this.tabRequests[i].data = [];
             this.tabRequests[i].isLoading = true;
-            this.tabSubscriptions.push(this.tabRequests[i].observable
+            this.tabSubscriptions.push(this.tabRequests[i].observable!
                 .pipe(finalize(() => {
                     if (this._loadGen !== gen) return;
                     this.tabRequests[i].isLoading = false;
@@ -316,25 +335,69 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     search() {
         if (this.serverFilterForm.valid) {
-            let appname = this.serverFilterForm.getRawValue().appname;
-            let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
-            let end = this.serverFilterForm.getRawValue().dateRangePicker.end
-            let excludedEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1)
-            if (this.params.start.toISOString() != start.toISOString()
-                || this.params.end.toISOString() != excludedEnd.toISOString()
-                || !this.params?.serveurs?.every((element, index) => element === appname[index])
-                || appname.length != this.params?.serveurs?.length) {
+            const appname = this.serverFilterForm.getRawValue().appname || [];
+            const start = this.serverFilterForm.getRawValue().dateRangePicker.start;
+            const end = this.serverFilterForm.getRawValue().dateRangePicker.end;
+
+            if (!start || !end) return;
+
+            if (!(this.period instanceof IStep) && !(this.period instanceof IStepFrom)) {
+                this.period = new IPeriod(
+                    start,
+                    new Date(end.getFullYear(), end.getMonth(), end.getDate(), end.getHours(), end.getMinutes() + 1)
+                );
+            }
+
+            const queryParams = this.buildQueryParams(appname);
+            if (!shallowEqual(this._activatedRoute.snapshot.queryParams, queryParams)) {
                 this._router.navigate([], {
                     relativeTo: this._activatedRoute,
-                    queryParamsHandling: 'merge',
-                    queryParams: { ...(appname !== undefined && { appname }), start: start.toISOString(), end: excludedEnd }
-                })
+                    queryParams
+                });
             } else {
+                if (this.period instanceof IStep || this.period instanceof IStepFrom) {
+                    this.params.start = this.period.start;
+                    this.params.end = this.period.end;
+                    this.patchDateValue(this.params.start, toDisplayedPeriodEnd(this.params.end));
+                }
                 const gen = ++this._loadGen;
+                const currentEnv = this.params.env || app.defaultEnv;
+                const currentStart = this.params.start || this.period.start;
+                const currentEnd = this.params.end || this.period.end;
+                this.groupedBy = periodManagement(currentStart, currentEnd);
+                const serverParam = this.createServerFilter();
+                const effectiveEnd = currentEnd > new Date() ? new Date() : currentEnd;
+                this.chartRequests = this.REQUESTS(currentEnv, currentStart, effectiveEnd, serverParam.app_name);
+                this.tabRequests = this.TAB_REQUESTS(currentEnv, currentStart, effectiveEnd, serverParam.app_name);
                 this.initTab(gen);
                 this.initCharts(gen);
             }
         }
+    }
+
+    onChangeStart(event: any) {
+        this.serverFilterForm.controls.dateRangePicker.controls.end.updateValueAndValidity({ onlySelf: true });
+        const start = this.serverFilterForm.controls.dateRangePicker.controls.start.value;
+        const end = this.serverFilterForm.controls.dateRangePicker.controls.end.value || null;
+        if (!start) {
+            return;
+        }
+        this.period = new IPeriod(start, end || start);
+    }
+
+    onChangeEnd(event: any) {
+        this.serverFilterForm.controls.dateRangePicker.controls.start.updateValueAndValidity({ onlySelf: true });
+        const start = this.serverFilterForm.controls.dateRangePicker.controls.start.value || null;
+        const end = this.serverFilterForm.controls.dateRangePicker.controls.end.value;
+        if (!start) return;
+        if (!end) {
+            this.period = new IPeriod(start, start);
+            return;
+        }
+        this.period = new IPeriod(
+            start,
+            new Date(end.getFullYear(), end.getMonth(), end.getDate(), end.getHours(), end.getMinutes() + 1)
+        );
     }
 
     patchDateValue(start: Date, end: Date) {
@@ -348,8 +411,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
 
     createServerFilter(): any {
-        if (this.params.serveurs.length > 0) {
-            return { app_name: this.params.serveurs.map(v => '"' + v + '"').join(',') };
+        const servers = this.params.serveurs || [];
+        if (servers.length > 0) {
+            return { app_name: servers.map(v => '"' + v + '"').join(',') };
         }
         return { app_name: null };
     }
@@ -377,6 +441,43 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.serverFilterForm.patchValue({
             appname: servers
         }, { emitEvent: false })
+    }
+
+    isDefaultPeriod(): boolean {
+        return isDefaultTodayPeriod(this.period);
+    }
+
+    resetPeriod(): void {
+        const defaultPeriod = getDefaultTodayPeriod();
+        this.period = defaultPeriod;
+        this.patchDateValue(defaultPeriod.start, toDisplayedPeriodEnd(defaultPeriod.end));
+    }
+
+    applyQuickRange(range: PeriodQuickRange): void {
+        const period = getQuickRangeStep(range);
+        this.period = period;
+        this.patchDateValue(period.start, toDisplayedPeriodEnd(period.end));
+    }
+
+    private buildQueryParams(appname: string[] = this.serverFilterForm.getRawValue().appname || []): Params {
+        const queryParams: Params = {
+            env: this.params.env,
+            ...this.period.buildParams()
+        };
+
+        if (appname.length > 0) {
+            queryParams.appname = appname.length === 1 ? appname[0] : appname;
+        }
+
+        return queryParams;
+    }
+
+    private buildQueryPath(queryParams: Params): string {
+        return Object.entries(queryParams)
+            .flatMap(([key, value]) => Array.isArray(value)
+                ? value.map(item => `${key}=${encodeURIComponent(String(item))}`)
+                : [`${key}=${encodeURIComponent(String(value))}`])
+            .join('&');
     }
 
     computeGlobalKpi() {
@@ -471,7 +572,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             const isToday = start.toDateString() === now.toDateString();
             const endH = isToday ? now.getHours() : 23;
             for (let h = startH; h <= endH; h++) {
-                const label = this._datePipe.transform(new Date(2000, 1, 1, h), 'shortTime');
+                const label = this._datePipe.transform(new Date(2000, 1, 1, h), 'shortTime') || '';
                 result.push({ stringDate: label, count: map[label] ?? 0 });
             }
             return result;
@@ -481,7 +582,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             const effectiveEnd = end > now ? now : end;
             const d = new Date(start.getFullYear(), start.getMonth(), start.getDate());
             while (d < effectiveEnd) {
-                const label = this._datePipe.transform(d, 'd MMM yy');
+                const label = this._datePipe.transform(d, 'd MMM yy') || '';
                 result.push({ stringDate: label, count: map[label] ?? 0 });
                 d.setDate(d.getDate() + 1);
             }
@@ -664,13 +765,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     get hasSelectedInsights(): boolean { return this.selectedInsights.size > 0; }
 
     navigateOnStatusIndicator(event: MouseEvent, row: any): void {
-        const date = new Date(row.lastTrace);
         this._router.navigateOnClick(event, ['/supervision', row.type.toLowerCase(), row.id], {
-            queryParams: {
-                env: row.env,
-                start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(),
-                end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString()
-            }
+            queryParams: this.buildSupervisionQueryParams(row.env)
         });
     }
 
@@ -777,12 +873,17 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     navigateToSupervision(server: LastServerStart) {
-        const d = new Date(server.lastStart);
-        const dayStart = new Date(d.getFullYear(), d.getMonth(), d.getDate());
-        const dayEnd = new Date(d.getFullYear(), d.getMonth(), d.getDate() + 1);
         this._router.navigate(['/supervision/server', server.id], {
-            queryParams: { env: this.params.env, start: dayStart.toISOString(), end: dayEnd.toISOString() }
+            queryParams: this.buildSupervisionQueryParams(this.params.env)
         });
+    }
+
+    private buildSupervisionQueryParams(env?: string): Params {
+        const periodParams = this.period?.buildParams?.() || this.buildQueryParams();
+        return {
+            env: env || this.params.env || app.defaultEnv,
+            ...periodParams
+        };
     }
 
     groupBypropertyRest(property: string, array: any[]) {
@@ -960,4 +1061,37 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
         this._pageTitleService.clear();
     }
+}
+
+function shallowEqual(
+    a: {[key: string | symbol]: any},
+    b: {[key: string | symbol]: any},
+): boolean {
+    const k1 = a ? getDataKeys(a) : undefined;
+    const k2 = b ? getDataKeys(b) : undefined;
+    if (!k1 || !k2 || k1.length != k2.length) {
+        return false;
+    }
+    let key: string | symbol;
+    for (let i = 0; i < k1.length; i++) {
+        key = k1[i];
+        if (!equalArraysOrString(a[key], b[key])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function getDataKeys(obj: Object): Array<string | symbol> {
+    return [...Object.keys(obj), ...Object.getOwnPropertySymbols(obj)];
+}
+
+function equalArraysOrString(a: string | string[], b: string | string[]) {
+    if (Array.isArray(a) && Array.isArray(b)) {
+        if (a.length !== b.length) return false;
+        const aSorted = [...a].sort();
+        const bSorted = [...b].sort();
+        return aSorted.every((val, index) => bSorted[index] === val);
+    }
+    return a === b;
 }

@@ -1,4 +1,5 @@
 import {Component, inject, Input} from "@angular/core";
+import {ActivatedRoute, Params} from "@angular/router";
 import {InstanceEnvironment} from "../../../model/trace.model";
 import {InstanceTraceService} from "../../../service/jquery/instance-trace.service";
 import {finalize} from "rxjs";
@@ -13,6 +14,7 @@ import {EnvRouter} from "../../../service/router.service";
 export class ServerCardComponent {
   private readonly _instanceTraceService = inject(InstanceTraceService);
   protected readonly _router: EnvRouter = inject(EnvRouter);
+  private readonly _activatedRoute = inject(ActivatedRoute);
 
   date = new Date();
   _instance: InstanceEnvironment;
@@ -34,14 +36,50 @@ export class ServerCardComponent {
   };
 
   @Input() menu: MatMenu;
+  @Input() supervisionQueryParams: Params | null = null;
 
 
   navigate(event: MouseEvent) {
-    var date = new Date(this._lastTrace);
-    this._router.navigateOnClick(event, ['/supervision', this._instance.type.toLowerCase(), this._instance.id], { queryParams: {start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString(), env: this._instance.env} });
+    this._router.navigateOnClick(event, ['/supervision', this._instance.type.toLowerCase(), this._instance.id], {
+      queryParams: this.buildSupervisionQueryParams()
+    });
   }
 
   navigateOnServerClick(event: MouseEvent) {
     this._router.navigateOnClick(event, ['/instance/detail', this._instance.id], { queryParams: {env: this._instance.env} });
+  }
+
+  private buildSupervisionQueryParams(): Params {
+    if (this.supervisionQueryParams) {
+      return {
+        env: this._instance.env,
+        ...this.supervisionQueryParams
+      };
+    }
+
+    const currentQueryParams = this._activatedRoute.snapshot.queryParams;
+    const queryParams: Params = { env: this._instance.env };
+
+    if (currentQueryParams.step && currentQueryParams.from) {
+      queryParams.step = currentQueryParams.step;
+      queryParams.from = currentQueryParams.from;
+      return queryParams;
+    }
+
+    if (currentQueryParams.step) {
+      queryParams.step = currentQueryParams.step;
+      return queryParams;
+    }
+
+    if (currentQueryParams.start && currentQueryParams.end) {
+      queryParams.start = currentQueryParams.start;
+      queryParams.end = currentQueryParams.end;
+      if (currentQueryParams.app_name) {
+        queryParams.app_name = currentQueryParams.app_name;
+      }
+      return queryParams;
+    }
+
+    return queryParams;
   }
 }
