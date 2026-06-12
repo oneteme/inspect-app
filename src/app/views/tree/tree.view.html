@@ -157,7 +157,7 @@
                 </span>
                 <span class="detail-keyed-item detail-keyed-item--flex" [matTooltip]="row.elapsed.value">
                   <mat-icon class="detail-item-icon" [style.color]="row.elapsed.color">{{ row.elapsed.icon }}</mat-icon>
-                  <span class="detail-item-value">{{ row.elapsed.value }}</span>
+                  <span class="detail-item-value">{{ row.elapsed.value | duration }}</span>
                 </span>
                 <span class="detail-keyed-item detail-keyed-item--nav" matTooltip="Voir le détail de la reqûete" *ngIf="row.request?.type"
                       (click)="navigateToRequest(row.request, $event)" >
