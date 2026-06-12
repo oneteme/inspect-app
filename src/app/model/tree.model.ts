@@ -215,7 +215,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
   formatLink(field: Label): string {
     switch (field) {
       case Label.ELAPSED_LATENSE: return `${this.nodeObject.end - this.nodeObject.start ? (this.nodeObject.end - this.nodeObject.start).toFixed(3)+"s": "?"}`
-      case Label.METHOD_RESOURCE: return `${this.nodeObject?.command || '?'} / ${this.nodeObject?.schema || '?'}`;
+      case Label.METHOD_RESOURCE: return `${this.nodeObject?.command || '?'} /${this.nodeObject?.schema || '?'}`;
       case Label.SIZE_COMPRESSION: return this.nodeObject?.count < 0 ? '0': this.nodeObject?.count!= undefined? this.nodeObject?.count.toString() : '?'; // remove undefined condition
       case Label.PROTOCOL_SCHEME: return "JDBC/Basic"
       case Label.STATUS_EXCEPTION: return this.nodeObject.failed && 'KO' || 'OK'
@@ -570,7 +570,9 @@ export class TreeGraph {
     graph.getLabel = function (cell: any) {
       if (cell?.isEdge() && cell.value && typeof cell.value === 'object' && cell.value.hasOwnProperty('linkLbl')) {
         let compare = cell.value.nodes[0].formatLink(cell.value.linkLbl)
-        return tg.checkSome(cell.value.nodes, x => x.formatLink(cell.value.linkLbl) != compare) ? `... ×${cell.value.nodes.length}` : `${compare} ×${cell.value.nodes.length}`
+        const count = cell.value.nodes.length;
+        const suffix = count > 1 ? ` ×${count}` : '';
+        return tg.checkSome(cell.value.nodes, x => x.formatLink(cell.value.linkLbl) != compare) ? `...${suffix}` : `${compare}${suffix}`
       }else if(cell?.isVertex() && cell.value && typeof cell.value === 'object'){
         const lbl: string = cell.value.node.formatNode(cell.value.serverlbl) ?? '';
         return lbl.length > 22 ? lbl.substring(0, 22) + '…' : lbl;
