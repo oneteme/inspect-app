@@ -2,7 +2,7 @@
 // `ng build --prod` replaces `environment.ts` with `environment.prod.ts`.
 // The list of file replacements can be found in `angular.json`.
 
-import { authFlow, AuthParams } from "src/app/model/auth.model";
+import { AuthFlow, AuthParams } from "src/app/model/auth.model";
 import { Application, IStep, IStepFrom, Period } from "src/app/model/conf.model";
 
 export const environment = {
@@ -63,15 +63,13 @@ export const app: Application = {
 }
 
 export const auth: AuthParams = {
-  redirectUri: 'http://localhost:4200',
-  authIssuer: 'https://dev-454nmj6iu2c1yjbs.au.auth0.com/',
-  clientId: 'lE1vnI7ybUrJDih4KdXIFFVaTBGNDBev',
-  clientSecret: '41jQ1HSziTeygD8ngijnIpJHOuvw8gt6e6AgHW-sOo8xpMMMV1efoPKtuPgMvhLA',
-  authFlow: authFlow.IMPLICIT_ID,
-  enabled: true,
-  sendAccessToken: true,
-  debug: true,
-  logOutRedirectUri: 'http://localhost:4200/logout.html'
+  authFlow: AuthFlow.IMPLICIT_ID,
+  authIssuer: '',
+  clientId: '',
+  clientSecret: '',
+  scope: "openid",
+  enabled: false,
+  debug: true
 }
 
 export function makeDateTimePeriod(step: number): Period {

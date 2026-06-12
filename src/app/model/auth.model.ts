@@ -1,13 +1,13 @@
 import { AuthConfig } from "angular-oauth2-oidc";
 
 export interface AuthParams {
-    authFlow: authFlow,
+    authFlow: AuthFlow,
     authIssuer: string,
     clientId: string,
     clientSecret: string,
     redirectUri?: string,
-    logOutRedirectUri?: string,
     scope?: string,
+    customQueryParams?: object;
     enabled?: boolean,
     debug?: boolean,
 
@@ -24,25 +24,44 @@ export interface AuthParams {
  * to be used with https.
  */
     requireHttps?: boolean,
-
-    /**
- * Defines whether to use OpenId Connect during
- * implicit flow. (for id_token or access_token or both)
- */
-    enableOpenId?: boolean,
     clearHashPostLogin?: boolean
 }
 
-export enum authFlow {
+export enum AuthFlow {
     CODE = "code",
     IMPLICIT = "id_token token",
     IMPLICIT_ID = "id_token",
     IMPLICIT_ACCESS = "token"
 }
 
+// convert to function with switch case
 export const AUTH_FLOWS: Record<string, AuthConfig> = {
-    CODE: { responseType: 'code', oidc: true, requestAccessToken: true },
-    IMPLICIT: { responseType: 'id_token token', oidc: true, requestAccessToken: true },
-    IMPLICIT_ID: { responseType: 'id_token', oidc: true, requestAccessToken: false },
-    IMPLICIT_ACCESS: { responseType: 'token', oidc: false, requestAccessToken: true }
+    [AuthFlow.CODE]: { oidc: true, requestAccessToken: true },
+    [AuthFlow.IMPLICIT]: { oidc: true, requestAccessToken: true },
+    [AuthFlow.IMPLICIT_ID]: { oidc: true, requestAccessToken: false },
+    [AuthFlow.IMPLICIT_ACCESS]: { oidc: false, requestAccessToken: true }
 };
+
+export function isOidc(params: AuthParams) {
+    return params.scope?.toLowerCase()?.includes("openid") && AUTH_FLOWS[params.authFlow].oidc
+}
+
+export function isRequestAccess(params: AuthParams) {
+    return params.sendAccessToken || AUTH_FLOWS[params.authFlow].requestAccessToken;
+}
+
+export function isCodeFlow(params: AuthParams) {
+    return params.authFlow == AuthFlow.CODE;
+}
+
+export function isImplicitFlow(params: AuthParams) {
+    return params.authFlow == AuthFlow.IMPLICIT;
+}
+
+export function isImplicitId(params: AuthParams) {
+    return params.authFlow == AuthFlow.IMPLICIT_ID;
+}
+
+export function isImplicitAccess(params: AuthParams) {
+    return params.authFlow == AuthFlow.IMPLICIT_ACCESS;
+}

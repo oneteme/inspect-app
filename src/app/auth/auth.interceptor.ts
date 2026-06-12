@@ -10,7 +10,7 @@ export class AuthInterceptor implements HttpInterceptor {
 
   intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
 
-    const accessToken = this.oauthService.getIdToken();
+    const accessToken = this.oauthService.getAccessToken();
 
     // On ajoute le token uniquement si présent
     if (accessToken) {

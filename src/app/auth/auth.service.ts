@@ -3,18 +3,17 @@ import { OAuthService } from 'angular-oauth2-oidc';
 import { authCodeFlowConfig } from "./auth-code-flow.config";
 import { auth } from "../../environments/environment";
 import { Router } from '@angular/router';
+import { isImplicitId } from '../model/auth.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
 
-    public initialized = false;
-    private isCodeFlow = authCodeFlowConfig.responseType == "code";
+    private initialized = false;
 
     constructor(private oauthService: OAuthService, private router: Router) { }
 
 
     init(): Promise<void> {
-
         if (!auth.enabled || this.initialized) {
             return Promise.resolve();
         }
@@ -31,17 +30,13 @@ export class AuthService {
             });
     }
 
-    setupAuthConfig() {
-        authCodeFlowConfig.oidc=auth.enableOpenId?auth.enableOpenId
-    }
-
     isInitialized(): boolean {
         return this.initialized;
     }
 
     login() {
-        const hash = window.location.hash ? window.location.hash.slice(1) : "/";
-        this.oauthService.initLoginFlow(hash);
+        const hash = window.location.hash;
+        this.oauthService.initLoginFlow(hash ? hash.slice(1) : "/");
     }
 
     logout() {
@@ -51,11 +46,19 @@ export class AuthService {
     }
 
     isLogged(): boolean {
-        return this.isCodeFlow ? this.oauthService.hasValidAccessToken() : this.oauthService.hasValidIdToken();
+        return !isImplicitId(auth) ? this.oauthService.hasValidAccessToken() : this.oauthService.hasValidIdToken();
     }
 
     getToken(): string {
-        return this.isCodeFlow ? this.oauthService.getAccessToken() : this.oauthService.getIdToken();
+        return !isImplicitId(auth) ? this.oauthService.getAccessToken() : this.oauthService.getIdToken();
+    }
+
+    getAccessToken(): string {
+        return this.oauthService.getAccessToken() ?? this.getToken();
+    }
+
+    getIdToken(): string {
+        return this.oauthService.getIdToken() ?? this.getToken();
     }
 
     getUserProfile() {
