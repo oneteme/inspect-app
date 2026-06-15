@@ -5,7 +5,10 @@
   </div>
   <span class="db-clear-title">Aucun incident sur la période</span>
   <span class="db-clear-label">{{ selectedLabel }}</span>
-  <span class="db-clear-sub">Aucune anomalie ni exception détectée sur la période sélectionnée</span>
+  <button type="button" class="db-clear-action" (click)="viewAllClick.emit(selectedKey || '')">
+    Voir tout
+    <mat-icon class="material-symbols-outlined">arrow_forward</mat-icon>
+  </button>
 </div>
 
 <div class="db-detail-view" *ngIf="isBlockLoading || !isNoIncidents">

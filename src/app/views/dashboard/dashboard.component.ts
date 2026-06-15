@@ -686,14 +686,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
         };
         const rangestatus = key === 'rest' ? (rangestatusMap[errorType] ?? '0xx') : 'Ko';
         this._router.navigate([target], {
-            queryParams: {
-                env: this.params.env,
-                start: this.params.start?.toISOString(),
-                end: this.params.end?.toISOString(),
+            queryParams: this.buildNavigationQueryParams({
                 rangestatus,
                 ...(key !== 'rest' || !rangestatusMap[errorType] ? { q: errorType } : {}),
                 server: this.params.serveurs,
-            }
+            })
         });
     }
 
@@ -712,14 +709,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
         const target = routes[sessionType];
         if (!target) return;
         this._router.navigate([target], {
-            queryParams: {
-                env: this.params.env,
-                start: this.params.start?.toISOString(),
-                end: this.params.end?.toISOString(),
+            queryParams: this.buildNavigationQueryParams({
                 server: serverOverride ?? this.params.serveurs,
                 rangestatus: ['Ko'],
                 ...(errorType ? { q: errorType } : {}),
-            }
+            })
         });
     }
 
@@ -734,14 +728,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
             ? (type === 'ClientError' ? ['4xx'] : ['5xx'])
             : ['Ko'];
         this._router.navigate([target], {
-            queryParams: {
-                env: this.params.env,
-                start: this.params.start?.toISOString(),
-                end: this.params.end?.toISOString(),
+            queryParams: this.buildNavigationQueryParams({
                 ...(type !== 'ClientError' && tab === 'rest' ? { q: type } : {}),
                 server: this.params.serveurs,
                 rangestatus
-            }
+            })
         });
     }
 
@@ -767,6 +758,36 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this._applyStatusFilter();
     }
 
+    onViewAllClick(key: string | null): void {
+        if (!key) return;
+        const sessionKeyMap: Record<string, string> = {
+            SERVICE: 'rest',
+            BATCH: 'batch',
+            STARTUP: 'startup',
+            VIEW: 'view',
+            TEST: 'test'
+        };
+        const queryParams = {
+            env: this.params.env,
+            ...this.period.buildParams()
+        };
+        const mappedKey = sessionKeyMap[key];
+        if (mappedKey) {
+            // Session type
+            this._router.navigate([`/session/${mappedKey}`], { queryParams });
+        } else {
+            // Request protocol (rest, jdbc, ftp, smtp, ldap)
+            this._router.navigate(['/request', key], { queryParams });
+        }
+    }
+
+    private buildNavigationQueryParams(extraParams: Params = {}): Params {
+        return {
+            env: this.params.env,
+            ...this.period.buildParams(),
+            ...extraParams,
+        };
+    }
 
     get hasSelectedInsights(): boolean { return this.selectedInsights.size > 0; }
 
