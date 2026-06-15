@@ -337,6 +337,39 @@
   @media (min-width: 1600px) { font-size: 1em; max-width: 460px; }
 }
 
+.db-clear-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  margin-top: 16px;
+  font-size: .88em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  border: 1px solid rgba(33, 186, 69, .3);
+  border-radius: 4px;
+  background: transparent;
+  color: rgba(33, 186, 69, 1);
+  cursor: pointer;
+  transition: background .2s, border-color .2s;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &:hover {
+    background: rgba(33, 186, 69, .05);
+    border-color: rgba(33, 186, 69, .5);
+  }
+
+  &:active {
+    background: rgba(33, 186, 69, .1);
+  }
+}
+
 .proto-list {
   border-radius: 6px;
   border: 1px solid rgba(34,36,38,.11);

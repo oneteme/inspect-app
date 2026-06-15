@@ -488,8 +488,8 @@ export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTra
   columns: [
     { key: 'appName', header: 'Hôte', icon: 'dns', sliceable: false, groupable: false, width: '25%' },
     { key: 'duration', header: 'Depuis', icon: 'schedule', groupable: false, width: '12%', sortValue: (row) => row.start },
-    { key: 'version', header: 'Version', icon: 'label', width: '18%' },
-    { key: 'branch', header: 'Branche', icon: 'fork_right', width: '27%' },
+    { key: 'version', header: 'Version', icon: 'label', width: '20%' },
+    { key: 'branch', header: 'Branche', icon: 'fork_right', width: '25%' },
     { key: 'restart', header: 'Démarrage', icon: 'restart_alt', groupable: false, sliceable: false },
     { key: 'os', header: 'OS', icon: 'computer', optional: true, width: '8%' },
     { key: 're', header: 'RE', icon: 'sdk', optional: true, width: '8%' },

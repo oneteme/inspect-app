@@ -21,7 +21,7 @@ import {FtpRequestService} from "../../../service/jquery/ftp-request.service";
 import {SmtpRequestService} from "../../../service/jquery/smtp-request.service";
 import {LdapRequestService} from "../../../service/jquery/ldap-request.service";
 import {PageTitleService} from "../../../service/page-title.service";
-import {getDefaultRelativePeriod, getQuickRangeStep, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
+import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
 
 
 
@@ -330,7 +330,13 @@ export class SearchRequestView implements OnInit, OnDestroy {
   }
 
   applyQuickRange(range: PeriodQuickRange): void {
-    const period = getQuickRangeStep(range);
+    let period;
+    if (range === 'yesterday') {
+      const dates = getQuickRangeDates(range);
+      period = new IPeriod(dates.start, dates.end);
+    } else {
+      period = getQuickRangeStep(range);
+    }
     this.queryParams.period = period;
     this.patchDateValue(period.start, toDisplayedPeriodEnd(period.end));
   }

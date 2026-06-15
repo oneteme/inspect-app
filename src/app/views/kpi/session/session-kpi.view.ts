@@ -177,7 +177,7 @@ export class SessionKpiView implements OnInit, OnDestroy {
     if (!this.params.queryParams) return;
     const {start, end, queryEnd} = getKpiQuickRangeDates(range);
     this.params.queryParams.period = new IPeriod(start, queryEnd);
-    this.patchDateValue(start, end);
+    this.patchDateValue(start, toDisplayedPeriodEnd(end));
   }
 
   isDefaultPeriod(): boolean {
