@@ -21,7 +21,7 @@ import {
   ClientInstanceSelectorDialogComponent
 } from "./client-instance-selector-dialog/client-instance-selector-dialog.component";
 import {PageTitleService} from '../../../../service/page-title.service';
-import {getDefaultRelativePeriod, getQuickRangeStep, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../../shared/period-filter';
+import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../../shared/period-filter';
 import {IPeriod, IStep, IStepFrom} from '../../../../model/conf.model';
 import {shallowEqual} from '../../../search/rest/search-rest.view';
 
@@ -413,7 +413,13 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   }
 
   applyQuickRange(range: PeriodQuickRange): void {
-    const period = getQuickRangeStep(range);
+    let period;
+    if (range === 'yesterday') {
+      const dates = getQuickRangeDates(range);
+      period = new IPeriod(dates.start, dates.end);
+    } else {
+      period = getQuickRangeStep(range);
+    }
     this.period = period;
     this.patchDateValue(period.start, toDisplayedPeriodEnd(period.end));
   }

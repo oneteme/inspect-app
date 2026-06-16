@@ -22,7 +22,7 @@ import {
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
 import {PageTitleService} from '../../../../service/page-title.service';
-import {getDefaultRelativePeriod, getQuickRangeStep, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../../shared/period-filter';
+import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../../shared/period-filter';
 import {IPeriod, IStep, IStepFrom} from '../../../../model/conf.model';
 import {shallowEqual} from '../../../search/rest/search-rest.view';
 
@@ -565,7 +565,13 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   }
 
   applyQuickRange(range: PeriodQuickRange): void {
-    const period = getQuickRangeStep(range);
+    let period;
+    if (range === 'yesterday') {
+      const dates = getQuickRangeDates(range);
+      period = new IPeriod(dates.start, dates.end);
+    } else {
+      period = getQuickRangeStep(range);
+    }
     this.period = period;
     this.patchDateValue(period.start, toDisplayedPeriodEnd(period.end));
   }

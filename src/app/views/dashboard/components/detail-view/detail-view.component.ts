@@ -16,6 +16,7 @@ export class DashboardDetailViewComponent {
     @Output() exceptionNav = new EventEmitter<{ type: string; tab: 'rest' | 'batch' | 'view' }>();
     @Output() protocolDialogOpen = new EventEmitter<{ observable: any; type: string }>();
     @Output() instanceFilter = new EventEmitter<string>();
+    @Output() viewAllClick = new EventEmitter<string>();
 
     getErrBarWidth(list: { count: number }[], count: number): number {
         return list?.[0]?.count ? Math.round((count / list[0].count) * 100) : 0;
