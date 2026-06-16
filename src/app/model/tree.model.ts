@@ -247,7 +247,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
         if (this.nodeObject.end == null) return formatDuration(null);
         return formatDuration(this.nodeObject.end - this.nodeObject.start || null);
       }
-      case Label.METHOD_RESOURCE: return `${this.nodeObject?.command || '?'} / ${this.nodeObject?.schema || '?'}`;
+      case Label.METHOD_RESOURCE: return `${this.nodeObject?.command || '?'} /${this.nodeObject?.schema || '?'}`;
       case Label.SIZE_COMPRESSION: return this.nodeObject?.count < 0 ? '0': this.nodeObject?.count!= undefined? this.nodeObject?.count.toString() : '?';
       case Label.PROTOCOL_SCHEME: return "JDBC/Basic"
       case Label.STATUS_EXCEPTION: return this.nodeObject.failed && 'KO' || 'OK'
