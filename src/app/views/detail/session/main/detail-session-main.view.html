@@ -90,7 +90,7 @@
 
 
 <mat-menu #menuEndPoint="matMenu" xPosition="after">
-  <a mat-menu-item [routerLink]="['/session', session?.type, session?.id, 'tree']" [queryParams]="{env: instance?.env}">
+  <a mat-menu-item [routerLink]="['/session', session?.type?.toLowerCase(), session?.id, 'tree']" [queryParams]="{env: instance?.env}">
     <mat-icon class="material-symbols-outlined">lan</mat-icon>Arbre d'appels
   </a>
   <a mat-menu-item *ngIf="session?.type == 'VIEW'"
