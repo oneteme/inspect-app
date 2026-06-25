@@ -51,11 +51,18 @@ export class RequestKpiView implements OnInit, OnDestroy {
   nameDataList: any[] = [];
   filterForm = new FormGroup({
     host: new FormControl([""]),
+    instanceType: new FormControl<string>(''),
     dateRange: new FormGroup({
       start: new FormControl<Date | null>(null, [Validators.required]),
       end: new FormControl<Date | null>(null, [Validators.required])
     })
   });
+
+  readonly INSTANCE_TYPE_OPTIONS = [
+    { value: '',       label: '— Tous —' },
+    { value: 'SERVER', label: 'Backend to backend' },
+    { value: 'CLIENT', label: 'Frontend to backend' }
+  ];
   hostSubscription: Subscription;
   params: Partial<{type: 'jdbc' | 'ftp' | 'smtp' | 'ldap' | 'rest', queryParams: QueryParams}> = {};
   serviceType: { [key: string]: {service : RestRequestService | DatabaseRequestService | FtpRequestService | SmtpRequestService | LdapRequestService }  } =
@@ -97,6 +104,12 @@ export class RequestKpiView implements OnInit, OnDestroy {
           }
         }
         this.params.queryParams = new QueryParams(period, v.queryParams.env || app.defaultEnv, undefined, hosts)
+        if (v.queryParams.instanceType) {
+          this.params.queryParams.optional = { instanceType: v.queryParams.instanceType };
+          this.filterForm.controls.instanceType.setValue(v.queryParams.instanceType, { emitEvent: false });
+        } else {
+          this.filterForm.controls.instanceType.setValue('', { emitEvent: false });
+        }
         this.patchDateValue(this.params.queryParams.period.start, toDisplayedPeriodEnd(this.params.queryParams.period.end));
         this.getHosts();
         if(type) {
@@ -161,11 +174,19 @@ export class RequestKpiView implements OnInit, OnDestroy {
         return;
       }
       this.params.queryParams.period = new IPeriod(start, new Date(end.getFullYear(), end.getMonth(), end.getDate(), end.getHours(), end.getMinutes() + 1));
+      const instanceType = this.filterForm.controls.instanceType.value;
+      this.params.queryParams.optional = instanceType ? { instanceType } : {};
       this._router.navigate([], {
         relativeTo: this._activatedRoute,
         queryParams: this.params.queryParams.buildParams()
       });
     }
+  }
+
+  onChangeInstanceType() {
+    if (!this.params.queryParams) return;
+    const instanceType = this.filterForm.controls.instanceType.value;
+    this.params.queryParams.optional = instanceType ? { instanceType } : {};
   }
 
   onChangeHost() {

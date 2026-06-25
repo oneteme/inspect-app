@@ -76,6 +76,11 @@ $primary: #2563eb;
         max-width: 380px;
     }
 
+    ::ng-deep mat-form-field.type-kpi-filter {
+        flex: 0 0 200px;
+        max-width: 200px;
+    }
+
     ::ng-deep mat-form-field.status-filter {
         flex: 0 0 180px;
         max-width: 180px;

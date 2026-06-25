@@ -44,6 +44,14 @@
        </mat-select>
        <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>
    </mat-form-field>
+
+   <mat-form-field class="no-subscript md-3 type-kpi-filter" appearance="outline" *ngIf="params.type === 'rest'" >
+     <mat-label>Type d'appel</mat-label>
+     <mat-select [formControl]="filterForm.controls.instanceType" (selectionChange)="onChangeInstanceType()">
+       <mat-option *ngFor="let opt of INSTANCE_TYPE_OPTIONS" [value]="opt.value">{{ opt.label }}</mat-option>
+     </mat-select>
+   </mat-form-field>
+
     <div class="pp-actions">
       <button mat-mini-fab color="primary"  (click)="search()">
         <mat-icon matSuffix>search</mat-icon>
