@@ -1,6 +1,7 @@
 import {Component, inject, OnDestroy, OnInit, ViewContainerRef} from "@angular/core";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {DateAdapter, MAT_DATE_FORMATS} from '@angular/material/core';
+import { MatOptionSelectionChange } from '@angular/material/core';
 import {ActivatedRoute, Params} from "@angular/router";
 import {combineLatest, finalize, Subscription} from "rxjs";
 import {Location} from "@angular/common";
@@ -51,7 +52,7 @@ export class RequestKpiView implements OnInit, OnDestroy {
   nameDataList: any[] = [];
   filterForm = new FormGroup({
     host: new FormControl([""]),
-    instanceType: new FormControl<string | null>(null),
+    instanceType: new FormControl<string[]>([]),
     dateRange: new FormGroup({
       start: new FormControl<Date | null>(null, [Validators.required]),
       end: new FormControl<Date | null>(null, [Validators.required])
@@ -59,8 +60,8 @@ export class RequestKpiView implements OnInit, OnDestroy {
   });
 
   readonly INSTANCE_TYPE_OPTIONS = [
-    { value: 'SERVER', label: 'Backend vers backend' },
-    { value: 'CLIENT', label: 'Frontend vers backend' }
+    { value: 'SERVER', label: 'Backend to backend' },
+    { value: 'CLIENT', label: 'Frontend to backend' }
   ];
   hostSubscription: Subscription;
   params: Partial<{type: 'jdbc' | 'ftp' | 'smtp' | 'ldap' | 'rest', queryParams: QueryParams}> = {};
@@ -105,9 +106,9 @@ export class RequestKpiView implements OnInit, OnDestroy {
         this.params.queryParams = new QueryParams(period, v.queryParams.env || app.defaultEnv, undefined, hosts)
         if (v.queryParams.instanceType) {
           this.params.queryParams.optional = { instanceType: v.queryParams.instanceType };
-          this.filterForm.controls.instanceType.setValue(v.queryParams.instanceType, { emitEvent: false });
+          this.filterForm.controls.instanceType.setValue([v.queryParams.instanceType], { emitEvent: false });
         } else {
-          this.filterForm.controls.instanceType.setValue(null, { emitEvent: false });
+          this.filterForm.controls.instanceType.setValue([], { emitEvent: false });
         }
         this.patchDateValue(this.params.queryParams.period.start, toDisplayedPeriodEnd(this.params.queryParams.period.end));
         this.getHosts();
@@ -173,7 +174,7 @@ export class RequestKpiView implements OnInit, OnDestroy {
         return;
       }
       this.params.queryParams.period = new IPeriod(start, new Date(end.getFullYear(), end.getMonth(), end.getDate(), end.getHours(), end.getMinutes() + 1));
-      const instanceType = this.filterForm.controls.instanceType.value;
+      const instanceType = this.filterForm.controls.instanceType.value?.[0] ?? null;
       this.params.queryParams.optional = instanceType ? { instanceType } : {};
       this._router.navigate([], {
         relativeTo: this._activatedRoute,
@@ -182,9 +183,17 @@ export class RequestKpiView implements OnInit, OnDestroy {
     }
   }
 
+  onInstanceTypeOptionSelection(event: MatOptionSelectionChange): void {
+    if (!event.isUserInput) return;
+
+    const value = event.source.value as string;
+    this.filterForm.controls.instanceType.setValue(event.source.selected ? [value] : [], { emitEvent: false });
+    this.onChangeInstanceType();
+  }
+
   onChangeInstanceType() {
     if (!this.params.queryParams) return;
-    const instanceType = this.filterForm.controls.instanceType.value;
+    const instanceType = this.filterForm.controls.instanceType.value?.[0] ?? null;
     this.params.queryParams.optional = instanceType ? { instanceType } : {};
   }
 
