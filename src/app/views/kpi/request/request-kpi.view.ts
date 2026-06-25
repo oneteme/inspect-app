@@ -51,7 +51,7 @@ export class RequestKpiView implements OnInit, OnDestroy {
   nameDataList: any[] = [];
   filterForm = new FormGroup({
     host: new FormControl([""]),
-    instanceType: new FormControl<string>(''),
+    instanceType: new FormControl<string | null>(null),
     dateRange: new FormGroup({
       start: new FormControl<Date | null>(null, [Validators.required]),
       end: new FormControl<Date | null>(null, [Validators.required])
@@ -59,9 +59,8 @@ export class RequestKpiView implements OnInit, OnDestroy {
   });
 
   readonly INSTANCE_TYPE_OPTIONS = [
-    { value: '',       label: '— Tous —' },
-    { value: 'SERVER', label: 'Backend to backend' },
-    { value: 'CLIENT', label: 'Frontend to backend' }
+    { value: 'SERVER', label: 'Backend vers backend' },
+    { value: 'CLIENT', label: 'Frontend vers backend' }
   ];
   hostSubscription: Subscription;
   params: Partial<{type: 'jdbc' | 'ftp' | 'smtp' | 'ldap' | 'rest', queryParams: QueryParams}> = {};
@@ -108,7 +107,7 @@ export class RequestKpiView implements OnInit, OnDestroy {
           this.params.queryParams.optional = { instanceType: v.queryParams.instanceType };
           this.filterForm.controls.instanceType.setValue(v.queryParams.instanceType, { emitEvent: false });
         } else {
-          this.filterForm.controls.instanceType.setValue('', { emitEvent: false });
+          this.filterForm.controls.instanceType.setValue(null, { emitEvent: false });
         }
         this.patchDateValue(this.params.queryParams.period.start, toDisplayedPeriodEnd(this.params.queryParams.period.end));
         this.getHosts();
