@@ -39,8 +39,8 @@ $primary: #2563eb;
     justify-content: center;
     gap: 16px;
     padding: 14px 40px 13px;
-
     overflow-x: auto;
+    overflow-y: visible;
     &::-webkit-scrollbar { height: 3px; }
     &::-webkit-scrollbar-thumb { background: rgba(15,23,42,.15); border-radius: 2px; }
 
@@ -62,7 +62,10 @@ $primary: #2563eb;
 
     ::ng-deep mat-form-field.period-wide {
         flex: 0 0 var(--period-field-width, 372px);
+        flex-basis: var(--period-field-width, 372px);
         max-width: var(--period-field-width, 372px);
+        width: var(--period-field-width, 372px) !important;
+        min-width: var(--period-field-width, 372px);
         transition: flex-basis .18s ease, max-width .18s ease, width .18s ease;
     }
 
