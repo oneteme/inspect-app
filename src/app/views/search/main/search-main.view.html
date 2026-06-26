@@ -81,7 +81,7 @@
 <jquery-table class="flex-table"
     [config]="tableConfig"
     [data]="sessions"
-    [isLoading]="isLoading">
+  [isLoading]="isLoading">
 
   <ng-template jqtCellDef="start" let-row>
     {{ (row.start*1000 | date:'dd/MM/yyyy')}}
