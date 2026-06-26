@@ -377,7 +377,8 @@ export class RestSessionService {
 
     getRequestNames(filters: {env: string, appName: string, start: Date, end: Date}): Observable<string[]> {
         return this.getRestSession({
-            'column.distinct': 'api_name',
+            'column': 'api_name',
+            'distinct': true,
             'join': 'instance',
             'api_name.notNull': '',
             'start.ge': filters.start.toISOString(),
@@ -390,7 +391,8 @@ export class RestSessionService {
 
     getUsers(filters: {env: string, appName: string, start: Date, end: Date}): Observable<string[]> {
         return this.getRestSession({
-            'column.distinct': 'user',
+            'column': 'user',
+            'distinct': true,
             'join': 'instance',
             'user.notNull': '',
             'start.ge': filters.start.toISOString(),
@@ -403,7 +405,8 @@ export class RestSessionService {
 
     getUsersByPeriod(filters: {server: string, env: string, start: Date, end: Date, groupedBy: string, apiNames: string, users: string, versions: string }): Observable<{user: string, date: number, year: number}[]> {
         let args = {
-            'column.distinct': `user,start.${filters.groupedBy}:date,start.year:year`,
+            'column': `user,start.${filters.groupedBy}:date,start.year:year`,
+            'distinct': true,
             'join': 'instance',
             'user.notNull': '',
             'start.ge': filters.start.toISOString(),

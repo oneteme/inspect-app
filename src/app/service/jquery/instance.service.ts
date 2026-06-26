@@ -17,7 +17,8 @@ export class InstanceService {
 
   getEnvironments(): Observable<{ environement: string }[]> {
     let args = {
-      'column.distinct': 'environement',
+      'column': 'environement',
+      'distinct': true,
       'environement.notNull': '',
       'order': 'environement.asc'
     }
@@ -26,7 +27,8 @@ export class InstanceService {
 
   getApplications(type: string, env: string): Observable<{ appName: string }[]> {
     let args = {
-      'column.distinct': 'app_name:appName',
+      'column': 'app_name:appName',
+      'distinct': true,
       'appName.notNull': '',
       'environement': `"${env}"`,
       'type': type,
@@ -59,7 +61,8 @@ export class InstanceService {
 
   getMainSessionApplication(start: Date, end: Date, env: string): Observable<{ appName: string, type: string }[]> {
     let args = {
-      'column.distinct': 'app_name:appName,main_session.type',
+      'column': 'app_name:appName,main_session.type',
+      'distinct': true,
       'id': 'main_session.instance_env',
       'main_session.start.ge': start.toISOString(),
       'main_session.start.lt': end.toISOString(),
@@ -113,7 +116,8 @@ export class InstanceService {
   }
   getCountVersions(filters: { env: string, appName: string }): Observable<number> {
     return this.getInstance({
-      'column.distinct': 'version',
+      'column': 'version',
+      'distinct': true,
       'environement': `"${filters.env}"`,
       'app_name': `"${filters.appName}"`,
     }).pipe(map((res: { version: string }[]) => res.length));
@@ -130,7 +134,8 @@ export class InstanceService {
 
   getVersionsRestSession(filters: { env: string, appName: string, start: Date, end: Date }): Observable<string[]> {
     return this.getInstance({
-      'column.distinct': 'version',
+      'column': 'version',
+      'distinct': true,
       'environement': `"${filters.env}"`,
       'app_name': `"${filters.appName}"`,
       'id': 'rest_session.instance_env',
@@ -141,7 +146,8 @@ export class InstanceService {
 
   getVersionsMainSession(filters: { env: string, appName: string, start: Date, end: Date }): Observable<string[]> {
     return this.getInstance({
-      'column.distinct': 'version',
+      'column': 'version',
+      'distinct': true,
       'environement': `"${filters.env}"`,
       'app_name': `"${filters.appName}"`,
       'id': 'main_session.instance_env',

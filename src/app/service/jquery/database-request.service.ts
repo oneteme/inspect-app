@@ -122,7 +122,8 @@ export class DatabaseRequestService {
 
     getSchemaList(filters: { start: Date, end: Date,env: string, host: string[] }): Observable<{schema: string}[]> {
         let args: any = {
-            'column.distinct': `schema`,
+            'column': `schema`,
+            'distinct': true,
             'host':`"${filters.host}"`,
             'join': 'instance',
             'start.ge': filters.start.toISOString(),

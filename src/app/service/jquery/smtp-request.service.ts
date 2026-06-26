@@ -109,7 +109,8 @@ export class SmtpRequestService {
 
     getUsersByPeriod(filters: {env: string, start: Date, end: Date, groupedBy: string, host: string[], command?: string[]}): Observable<{user: string, date: number, year: number}[]> {
       let args = {
-        'column.distinct': `user,start.${filters.groupedBy}:date,start.year:year`,
+        'column': `user,start.${filters.groupedBy}:date,start.year:year`,
+        'distinct': true,
         'instance_env': 'instance.id',
         'user.notNull': '',
         'host':`"${filters.host}"`,
