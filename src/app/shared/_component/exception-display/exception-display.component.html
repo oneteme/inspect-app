@@ -1,22 +1,30 @@
-<div class="container" *ngIf="_exception?.type || _exception?.message">
-  <div class="content" [ngClass]="type">
+<div class="exception-bar" *ngIf="_exception?.type || _exception?.message" [ngClass]="type">
 
+  <mat-icon class="material-symbols-outlined bar-icon">
+    {{ type === 'success' ? 'info' : type === 'warning' ? 'warning' : 'error' }}
+  </mat-icon>
 
-    <mat-icon class="material-symbols-outlined">{{type == 'success' ? 'info' : type == 'warning' ? 'warning' : 'error'}}</mat-icon>
-
-    <div class="exception">
-      <div class="type" *ngIf="_exception.type">
-        {{ _exception.type }}
-      </div>
-      <div class="message ellipsis" *ngIf="_exception.message" [matTooltip]="_exception.message" >
-        {{ _exception.message }}
-      </div>
-    </div>
-
-    <div class="actions" *ngIf="_exception.stackTraceRows">
-      <button mat-icon-button (click)="showStacktrace()" matTooltip="Voir la stacktrace">
-        <mat-icon>visibility</mat-icon>
-      </button>
-    </div>
+  <div class="bar-text">
+    <span class="exc-type"  *ngIf="_exception.type">{{ _exception.type }}</span>
+    <span class="exc-sep"   *ngIf="_exception.type && _exception.message">·</span>
+    <span class="exc-message ellipsis" *ngIf="_exception.message" [matTooltip]="_exception.message">
+      {{ _exception.message }}
+    </span>
   </div>
+
+  <div class="bar-actions">
+    <button class="action-btn"
+            [cdkCopyToClipboard]="clipboardText"
+            (cdkCopyToClipboardCopied)="onCopied()"
+            [matTooltip]="copied ? 'Copié !' : 'Copier l\'exception'">
+      <mat-icon class="material-symbols-outlined copied-icon" [class.is-copied]="copied">
+        {{ copied ? 'check' : 'content_copy' }}
+      </mat-icon>
+    </button>
+    <button class="action-btn" *ngIf="_exception.stackTraceRows"
+            (click)="showStacktrace()" matTooltip="Voir la stacktrace">
+      <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
+    </button>
+  </div>
+
 </div>

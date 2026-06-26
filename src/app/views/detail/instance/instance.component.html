@@ -1,53 +1,60 @@
 
-
-<div class="header-card"  *ngIf="instance">
+<ng-container *ngIf="instance else noDataTemplate">
+  <div class="header-card">
     <app-server-card style="width: 100vw;"
-                     (onClick)="navigateOnStatusIndicator($event)"
                      [menu]="menuServer"
                      [instance]="instance"></app-server-card>
-</div>
+  </div>
 
-<div class="tabs-container">
+  <div class="tabs-container">
     <!-- Navigation verticale des onglets -->
     <div class="vertical-tabs">
-        <div *ngFor="let tab of tabs; let i = index"
-             class="tab-button"
-             [class.active]="selectedTabIndex === i"
-             [class.hidden]="!tab.visible"
-             (click)="selectedTabIndex = i">
-            <mat-icon class="material-symbols-outlined">{{ tab.icon }}</mat-icon>
-            <span class="tab-label">{{ tab.label }}</span>
-            <div style="display: flex; align-items: center; gap: 4px;">
-                <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
-                <mat-icon *ngIf="tab.hasError && tab.errorCount > 0"
-                          class="error-indicator material-symbols-outlined"
-                          [matTooltip]="tab.errorCount + ' erreur(s)'"
-                          matTooltipPosition="right">
-                    error
-                </mat-icon>
-            </div>
+      <div *ngFor="let tab of tabs; let i = index"
+           class="tab-button"
+           [class.active]="selectedTabIndex === i"
+           [class.hidden]="!tab.visible"
+           (click)="selectedTabIndex = i">
+        <mat-icon class="material-symbols-outlined">{{ tab.icon }}</mat-icon>
+        <span class="tab-label">{{ tab.label }}</span>
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
+          <mat-icon *ngIf="tab.hasError && tab.errorCount > 0"
+                    class="error-indicator material-symbols-outlined"
+                    [matTooltip]="tab.errorCount + ' erreur(s)'"
+                    matTooltipPosition="right">
+            error
+          </mat-icon>
         </div>
+      </div>
     </div>
     <div class="tab-content">
       <div *ngIf="tabs[selectedTabIndex]?.type === 'instances'" class="tab-panel">
-          <instance-table [requests]="allInstance"[mainId]="instance?.id">
-          </instance-table>
+        <instance-table [requests]="allInstance">
+        </instance-table>
       </div>
       <div *ngIf="tabs[selectedTabIndex]?.type === 'timeline'" class="tab-panel">
-          <app-timeline [options]="options"
-                        [groups]="dataGroups"
-                        [items]="dataItems"
-                        [displayHeader]="false">
-          </app-timeline>
+        <app-timeline [options]="options"
+                      [groups]="dataGroups"
+                      [items]="dataItems">
+        </app-timeline>
       </div>
       <div *ngIf="tabs[selectedTabIndex]?.type === 'resource'" class="tab-panel">
-          <parameter-table [data]="resourceData"></parameter-table>
+        <parameter-table [data]="resourceData"></parameter-table>
       </div>
       <div *ngIf="tabs[selectedTabIndex]?.type === 'property'" class="tab-panel">
-          <parameter-table [data]="propertiesData"></parameter-table>
-        </div>
+        <parameter-table [data]="propertiesData"></parameter-table>
+      </div>
     </div>
-</div>
+  </div>
+</ng-container>
+
+<ng-template #noDataTemplate>
+  <app-empty-state
+    [loading]="isLoading"
+    icon="dns">
+  </app-empty-state>
+</ng-template>
+
 <mat-menu #menuServer="matMenu">
     <a mat-menu-item [routerLink]="['/session', instance?.name, 'dump']" [queryParams]="{env: instance?.env, date: getDate(instance?.instant * 1000).toISOString()}"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
     <a mat-menu-item [routerLink]="['/dashboard', instance?.type.toLowerCase() , instance?.name]" [queryParams]="{env: instance?.env}"><mat-icon class="material-symbols-outlined">monitoring</mat-icon>KPI Serveur</a>

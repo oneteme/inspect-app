@@ -1,0 +1,12 @@
+﻿<section class="pp-bar"
+     [class.pp-bar--open]="isOpen$ | async"
+     aria-label="Filtres"
+     role="region">
+  <div class="pp-body" (click)="onBodyClick($event)">
+    <ng-content></ng-content>
+  </div>
+</section>
+
+<div class="pp-backdrop"
+     *ngIf="isOpen$ | async"
+     (click)="onBackdropClick()"></div>

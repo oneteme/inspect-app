@@ -1,32 +1,6 @@
-.filter-container{
-    margin-top: 20px;
-}
 
 
-.title{
-    width: max-content;
-    margin-right: 10px;
-}
-
-.dialog-header{
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-}
-
-.dialog-actions{
-    margin-left: auto;
-}
-
-.hidden {
-    display: none;
-}
-
-
-.mat-mdc-row .mat-mdc-cell {
-    cursor: pointer
-}
-
-.mat-mdc-row:hover .mat-mdc-cell {
-    background-color: rgb(206, 206, 206);
+.modal-table {
+  flex: 1 1 0;
+  min-height: 0;
 }

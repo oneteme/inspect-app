@@ -1,7 +1,18 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
 .header-card {
   display: flex;
   flex-direction: row;
-  gap: 0.5em;
-  margin-bottom: 2em;
+  gap: 0.75em;
+  padding: 0.75em 0.75em 0.75em;
 }
+
+.tabs-container {
+  flex: 1 1 0;
+}
+
 

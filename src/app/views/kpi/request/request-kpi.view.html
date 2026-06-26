@@ -1,0 +1,66 @@
+<page-panel panelTitle="Filtres" panelIcon="filter_list">
+  <form class="panel-filter" [formGroup]="filterForm">
+    <div class="period-filter-wrapper">
+      <mat-form-field class="no-subscript md-3 period-field period-wide"
+              [style.--period-field-width]="isDefaultPeriod() ? '372px' : '408px'"
+              appearance="outline">
+        <mat-label>Période</mat-label>
+        <mat-date-range-input [formGroup]="filterForm.controls.dateRange" [rangePicker]="picker">
+          <input matStartDate formControlName="start" placeholder="Start date">
+          <input matEndDate formControlName="end" placeholder="End date">
+        </mat-date-range-input>
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <span matSuffix class="period-inline-separator" aria-hidden="true"></span>
+        <button mat-icon-button 
+                matSuffix
+                type="button"
+                [matMenuTriggerFor]="quickRangesMenu"
+                matTooltip="Plages de temps rapides"
+                class="period-action-btn">
+          <mat-icon class="material-symbols-outlined">schedule</mat-icon>
+        </button>
+        <button *ngIf="!isDefaultPeriod()"
+                mat-icon-button
+                matSuffix
+                type="button"
+                matTooltip="Réinitialiser à la date du jour"
+                (click)="resetPeriod()"
+                class="period-action-btn">
+          <mat-icon class="material-symbols-outlined">restart_alt</mat-icon>
+        </button>
+        <mat-date-range-picker #picker></mat-date-range-picker>
+      </mat-form-field>
+      <mat-menu #quickRangesMenu="matMenu" class="period-quick-ranges-menu">
+        <button *ngFor="let quickRange of periodQuickRanges" mat-menu-item (click)="applyQuickRange(quickRange.value)">
+          <span>{{ quickRange.label }}</span>
+        </button>
+      </mat-menu>
+    </div>
+   <mat-form-field class="no-subscript md-3 host-kpi-filter" appearance="outline" [class.loading]="serverNameIsLoading" >
+       <mat-label>Hôte</mat-label>
+       <mat-select [formControl]="filterForm.controls.host" multiple (openedChange)="onHostopenedChange()" (selectionChange)="onChangeHost()">
+           <span *ngIf="filterForm && params.queryParams.appname && params.queryParams.appname[0]!=''"><mat-option *ngFor="let s of params.queryParams.appname">{{s}}</mat-option></span>
+           <mat-option *ngFor="let d of nameDataList" [value]="d" >{{d}}</mat-option>
+       </mat-select>
+       <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>
+   </mat-form-field>
+
+   <mat-form-field class="no-subscript md-3 type-kpi-filter" appearance="outline" *ngIf="params.type === 'rest'" >
+     <mat-label>Type d'appel</mat-label>
+     <mat-select [formControl]="filterForm.controls.instanceType" multiple>
+       <mat-option *ngFor="let opt of INSTANCE_TYPE_OPTIONS"
+                   [value]="opt.value"
+                   (onSelectionChange)="onInstanceTypeOptionSelection($event)">
+         {{ opt.label }}
+       </mat-option>
+     </mat-select>
+   </mat-form-field>
+
+    <div class="pp-actions">
+      <button mat-mini-fab color="primary"  (click)="search()">
+        <mat-icon matSuffix>search</mat-icon>
+      </button>
+    </div>
+</form>
+</page-panel>
+<ng-container #container></ng-container>

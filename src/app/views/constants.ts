@@ -1,4 +1,4 @@
-import {ChartProvider, field, values} from "@oneteme/jquery-core";
+﻿import {ChartProvider, field, values} from "@oneteme/jquery-core";
 import {UserAction} from "../model/trace.model";
 
 export const INFINITY = new Date(9999,12,31).getTime();
@@ -22,6 +22,136 @@ export const ANALYTIC_MAPPING : {[key: string]: {label: string, text: (param: Us
     }
 };
 
+export type UaGroup = 'service' | 'user' | 'tool' | 'unknown';
+
+// Tech Stack Catalog
+
+export type TechCategory = 'backend' | 'data' | 'integration' | 'client' | 'frontend' | 'infra';
+
+export interface TechDef {
+    name: string;
+    /** Classe Devicons (ex: 'devicon-java-plain colored') */
+    devicon: string;
+    /** URL SVG de secours si l'icône n'existe pas dans la webfont Devicons */
+    svgUrl?: string;
+    color: string;
+    category: TechCategory;
+    categoryLabel: string;
+    /** true = détecté via métriques Inspect ; false = déclaré manuellement */
+    confident: boolean;
+    order: number;
+}
+
+/**
+ * Catalogue complet des technologies supportées.
+ * Clé = ID à utiliser dans APP_TECH_STACK (tech-stack.config.ts).
+ */
+export const TECH_CATALOG: Record<string, TechDef> = {
+    // Backend
+    'java': { name: 'Java', devicon: 'devicon-java-plain colored', color: '#f89820', category: 'backend', categoryLabel: 'Backend', confident: false, order: 10 },
+    'spring': { name: 'Spring Boot', devicon: 'devicon-spring-plain colored', color: '#6db33f', category: 'backend', categoryLabel: 'Backend', confident: false, order: 11 },
+    'quarkus': { name: 'Quarkus', devicon: 'devicon-quarkus-plain colored', color: '#4695eb', category: 'backend', categoryLabel: 'Backend', confident: false, order: 12 },
+    'micronaut': { name: 'Micronaut', devicon: 'devicon-micronaut-plain colored', color: '#3f4449', category: 'backend', categoryLabel: 'Backend', confident: false, order: 13 },
+    'dotnet': { name: '.NET', devicon: 'devicon-dotnetcore-plain colored', color: '#512bd4', category: 'backend', categoryLabel: 'Backend', confident: false, order: 14 },
+    'python': { name: 'Python', devicon: 'devicon-python-plain colored', color: '#3776ab', category: 'backend', categoryLabel: 'Backend', confident: true, order: 15 },
+    'go': { name: 'Go', devicon: 'devicon-go-plain colored', color: '#00add8', category: 'backend', categoryLabel: 'Backend', confident: true, order: 16 },
+    'nodejs': { name: 'Node.js', devicon: 'devicon-nodejs-plain colored', color: '#339933', category: 'backend', categoryLabel: 'Backend', confident: true, order: 17 },
+    'rust': { name: 'Rust', devicon: 'devicon-rust-plain colored', color: '#000000', category: 'backend', categoryLabel: 'Backend', confident: false, order: 18 },
+    // Frontend
+    'angular': { name: 'Angular', devicon: 'devicon-angular-plain colored', color: '#dd0031', category: 'frontend', categoryLabel: 'Frontend', confident: false, order: 20 },
+    'react': { name: 'React', devicon: 'devicon-react-plain colored', color: '#61dafb', category: 'frontend', categoryLabel: 'Frontend', confident: false, order: 21 },
+    'vuejs': { name: 'Vue.js', devicon: 'devicon-vuejs-plain colored', color: '#42b883', category: 'frontend', categoryLabel: 'Frontend', confident: false, order: 22 },
+    'nextjs': { name: 'Next.js', devicon: 'devicon-nextjs-plain', color: '#000000', category: 'frontend', categoryLabel: 'Frontend', confident: false, order: 23 },
+    'nuxtjs': { name: 'Nuxt.js', devicon: 'devicon-nuxtjs-plain colored', color: '#00dc82', category: 'frontend', categoryLabel: 'Frontend', confident: false, order: 24 },
+    // Bases de données
+    'postgresql': { name: 'PostgreSQL', devicon: 'devicon-postgresql-plain colored', color: '#336791', category: 'data', categoryLabel: 'Données', confident: false, order: 30 },
+    'mysql': { name: 'MySQL', devicon: 'devicon-mysql-plain colored', color: '#4479a1', category: 'data', categoryLabel: 'Données', confident: false, order: 31 },
+    'oracle': { name: 'Oracle DB', devicon: 'devicon-oracle-plain colored', color: '#f80000', category: 'data', categoryLabel: 'Données', confident: false, order: 32 },
+    'sqlserver': { name: 'SQL Server', devicon: 'devicon-microsoftsqlserver-plain colored', color: '#cc2927', category: 'data', categoryLabel: 'Données', confident: false, order: 33 },
+    'mongodb': { name: 'MongoDB', devicon: 'devicon-mongodb-plain colored', color: '#47a248', category: 'data', categoryLabel: 'Données', confident: false, order: 34 },
+    'redis': { name: 'Redis', devicon: 'devicon-redis-plain colored', color: '#dc382d', category: 'data', categoryLabel: 'Données', confident: false, order: 35 },
+    'elasticsearch': { name: 'Elasticsearch', devicon: 'devicon-elasticsearch-plain colored', color: '#005571', category: 'data', categoryLabel: 'Données', confident: false, order: 36 },
+    'cassandra': { name: 'Cassandra', devicon: 'devicon-cassandra-plain colored', color: '#1287b1', category: 'data', categoryLabel: 'Données', confident: false, order: 37 },
+    'teradata': { name: 'Teradata', devicon: 'devicon-sqldeveloper-plain', color: '#f37440', category: 'data', categoryLabel: 'Données', confident: false, order: 38 },
+    // Messages & Intégrations
+    'kafka': { name: 'Kafka', devicon: 'devicon-apachekafka-plain colored', color: '#231f20', category: 'integration', categoryLabel: 'Intégration', confident: false, order: 40 },
+    'rabbitmq': { name: 'RabbitMQ', devicon: 'devicon-rabbitmq-plain colored', color: '#ff6600', category: 'integration', categoryLabel: 'Intégration', confident: false, order: 41 },
+    'smtp': { name: 'SMTP (e-mail)', devicon: 'devicon-google-plain colored', color: '#ea4335', category: 'integration', categoryLabel: 'Intégration', confident: true, order: 42 },
+    'ftp': { name: 'FTP', devicon: 'devicon-filezilla-plain colored', color: '#bf0000', category: 'integration', categoryLabel: 'Intégration', confident: true, order: 43 },
+    'ldap': { name: 'LDAP / Active Directory', devicon: 'devicon-windows11-plain colored', color: '#0078d4', category: 'integration', categoryLabel: 'Intégration', confident: true, order: 44 },
+    // Infra & Outils
+    'docker': { name: 'Docker', devicon: 'devicon-docker-plain colored', color: '#2496ed', category: 'infra', categoryLabel: 'Infrastructure', confident: false, order: 50 },
+    'kubernetes': { name: 'Kubernetes', devicon: 'devicon-kubernetes-plain colored', color: '#326ce5', category: 'infra', categoryLabel: 'Infrastructure', confident: false, order: 51 },
+    'nginx': { name: 'Nginx', devicon: 'devicon-nginx-plain colored', color: '#009639', category: 'infra', categoryLabel: 'Infrastructure', confident: false, order: 52 },
+    'apachetomcat': { name: 'Tomcat', devicon: 'devicon-tomcat-original colored', svgUrl: 'https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tomcat/tomcat-original.svg', color: '#f8dc75', category: 'infra', categoryLabel: 'Infrastructure', confident: false, order: 53 },
+    'linux': { name: 'Linux', devicon: 'devicon-linux-plain colored', color: '#fcc624', category: 'infra', categoryLabel: 'Infrastructure', confident: false, order: 54 },
+    'git': { name: 'Git', devicon: 'devicon-git-plain colored', color: '#f05032', category: 'infra', categoryLabel: 'Infrastructure', confident: false, order: 55 },
+    'github': { name: 'GitHub', devicon: 'devicon-github-plain', color: '#181717', category: 'infra', categoryLabel: 'Infrastructure', confident: false, order: 56 },
+    'gitlab': { name: 'GitLab', devicon: 'devicon-gitlab-plain colored', color: '#fc6d26', category: 'infra', categoryLabel: 'Infrastructure', confident: false, order: 57 },
+};
+
+export interface UaCategoryDef {
+    color: string;
+    group: UaGroup;
+    keywords: string[];
+}
+
+/** Catalogue des catégories de User-Agent : couleur, groupe et mots-clés de détection (ordre = priorité). */
+export const UA_CATEGORY_DEFS: Record<string, UaCategoryDef> = {
+    'Apache HTTP': { color: '#f97316', group: 'service', keywords: ['apache-httpclient', 'apache httpclient', 'apache httpcomponents'] },
+    'Spring (Reactor)': { color: '#68d391', group: 'service', keywords: ['reactornetty'] },
+    'OkHttp': { color: '#10b981', group: 'service', keywords: ['okhttp'] },
+    'Java': { color: '#f59e0b', group: 'service', keywords: ['java'] },
+    'Go': { color: '#06b6d4', group: 'service', keywords: ['go-http-client', 'go http'] },
+    'Node.js': { color: '#84cc16', group: 'service', keywords: ['node-fetch', 'node.js', 'undici'] },
+    'Python': { color: '#3b82f6', group: 'service', keywords: ['python'] },
+    'Axios': { color: '#8b5cf6', group: 'service', keywords: ['axios'] },
+    'Chrome': { color: '#22c55e', group: 'user', keywords: ['chrome'] },
+    'Edge': { color: '#0ea5e9', group: 'user', keywords: ['edge'] },
+    'Firefox': { color: '#e8441a', group: 'user', keywords: ['firefox'] },
+    'Safari': { color: '#60a5fa', group: 'user', keywords: ['safari'] },
+    'Postman': { color: '#ef4444', group: 'tool', keywords: ['postman'] },
+    'cURL': { color: '#6b7280', group: 'tool', keywords: ['curl'] },
+    'Wget': { color: '#e879f9', group: 'tool', keywords: ['wget'] },
+    'Autre': { color: '#94a3b8', group: 'unknown', keywords: [] },
+    'Inconnu': { color: '#d1d5db', group: 'unknown', keywords: [] },
+};
+
+/** Config de base du treemap User-Agent (sans les couleurs dynamiques). */
+export const UA_BAR_BASE: ChartProvider<string, number> = {
+    height: 180,
+    series: [{ data: { x: field('label'), y: field('count') } }],
+    options: {
+        chart: { toolbar: { show: false }, animations: { enabled: false } },
+        legend: { show: false },
+        dataLabels: { enabled: false },
+        tooltip: {
+            enabled: true,
+            y: { formatter: (val: number) => val.toLocaleString('fr-FR') + ' req.' }
+        },
+        plotOptions: { bar: { horizontal: true, barHeight: '65%', borderRadius: 3 } },
+        xaxis: { labels: { show: false }, axisBorder: { show: false }, axisTicks: { show: false } },
+        yaxis: { labels: { style: { fontSize: '11px' } } },
+        grid: { show: false }
+    }
+};
+
+/** Config de base pie pour les erreurs par type (flux). Couleurs et tooltip fournis dynamiquement. */
+export const UA_ERR_DONUT_BASE: ChartProvider<string, number> = {
+    series: [{ data: { x: field('label'), y: field('count') } }],
+    options: {
+        legend: { show: false }
+    }
+};
+
+/** Config de base pie User-Agent (sans les couleurs dynamiques). */
+export const UA_PIE_BASE: ChartProvider<string, number> = {
+    series: [{ data: { x: field('label'), y: field('count') } }],
+    options: {
+        legend: { show: false }
+    }
+};
+
 export class Constants {
 
     static readonly REPARTITION_TYPE_RESPONSE_PIE: ChartProvider<string, number> = {
@@ -34,14 +164,8 @@ export class Constants {
             { data: { x: values('5xx'), y: field('countErrorServer') }, name: '5xx', color: '#ff0000' }
         ],
         options: {
-            chart: {
-                toolbar: {
-                    show: true
-                }
-            },
-            legend: {
-                height: 225
-            }
+            chart: { toolbar: { show: true } },
+            legend: { height: 225 }
         }
     };
 
@@ -55,14 +179,8 @@ export class Constants {
             { data: { x: values('< 1'), y: field('elapsedTimeFastest') }, name: 'mapper 5', color: '#81D4FA' }
         ],
         options: {
-            chart: {
-                toolbar: {
-                    show: false
-                }
-            },
-            legend: {
-                height: 225
-            }
+            chart: { toolbar: { show: false } },
+            legend: { height: 225 }
         }
     };
 
@@ -73,14 +191,8 @@ export class Constants {
             { data: { x: field('user'), y: field('count') }, name: 'Total' }
         ],
         options: {
-            chart: {
-                toolbar: {
-                    show: false
-                }
-            },
-            legend: {
-                height: 225
-            }
+            chart: { toolbar: { show: false } },
+            legend: { height: 225 }
         }
     };
 
@@ -90,13 +202,7 @@ export class Constants {
         series: [
             { data: { x: field('re'), y: field('count') } }
         ],
-        options: {
-            chart: {
-                toolbar: {
-                    show: false
-                }
-            }
-        }
+        options: { chart: { toolbar: { show: false } } }
     }
 
     static readonly REPARTITION_USER_BAR: ChartProvider<string, number> = {
@@ -499,197 +605,179 @@ export class Constants {
     };
 
     static readonly MAPPING_TYPE: {[key: string]: Partial<{title: string, subtitle: string, icon: string}>} = {
-        request: {title: 'Intéractions', subtitle: 'Communications externes',icon: 'call_made'},
+        request: {title: 'Flux', subtitle: 'Communications externes',icon: 'call_made'},
         rest: {title: 'Services Exposés', subtitle: 'Appels API et distribution de ressources statiques', icon: 'call_received'},
         batch: {title: 'Tâches planifiées', subtitle: 'Historique des jobs asynchrones et tâches de fond', icon: 'manufacturing'},
         test: {title: 'Validation & Tests', subtitle: 'Lancements de tests automatisés et résultats', icon: 'rule'},
         startup: {title: 'Initialisation', subtitle: 'Chronologie et durée des démarrages d\'application', icon: 'restart_alt'},
         view: {title: 'Parcours Client', subtitle: 'Navigation utilisateurs et accès aux pages', icon: 'ads_click'},
-        dashboard: {title:'Page d\'Accueil', icon: 'home'},
+        dashboard: {title:'Tableau de bord', icon: 'home'},
         deploiment: {title:'Instances Actives', subtitle: 'Suivi des applications en cours d\'exécution', icon:'deployed_code'},
         tree: {title: 'Arborescence des ressources', subtitle: 'Diagramme de bout en bout des flux d\'exécution', icon: 'account_tree'},
     }
     static readonly REQUEST_MAPPING_TYPE: {[key: string]: Partial<{title: string, subtitle: string, icon: string}>} = {
-        rest: {title: 'HTTP', subtitle: 'Communications externes', icon: 'public'},
-        jdbc: {title: 'JDBC', subtitle: 'Communications externes', icon: 'database'},
-        ftp: {title: 'FTP', subtitle: 'Communications externes', icon: 'smb_share'},
-        smtp: {title: 'SMTP', subtitle: 'Communications externes', icon: 'outgoing_mail'},
-        ldap: {title: 'LDAP', subtitle: 'Communications externes', icon: 'user_attributes'},
+        rest: {title: 'Flux HTTP', subtitle: 'Communications externes', icon: 'public'},
+        jdbc: {title: 'Flux JDBC', subtitle: 'Communications externes', icon: 'database'},
+        ftp: {title: 'Flux FTP', subtitle: 'Communications externes', icon: 'smb_share'},
+        smtp: {title: 'Flux SMTP', subtitle: 'Communications externes', icon: 'outgoing_mail'},
+        ldap: {title: 'Flux LDAP', subtitle: 'Communications externes', icon: 'user_attributes'},
     }
 
-
+    static REQUEST_EXCEPTION_OPTIONS = {
+        grid: { top: 2, bottom: 2, left: 2, right: 2, containLabel: false },
+        xAxis: { show: false },
+        yAxis: { show: false, max: 100 },
+        legend: { show: false },
+        tooltip: { formatter: (p: any) => { const v = Array.isArray(p[0]?.value) ? p[0].value[1] : p[0]?.value; return `<b>${p[0].name}</b><br>${p[0].marker} ${p[0].seriesName}: <b>${(+v).toFixed(2)}%</b>`; } },
+        series: [{ showSymbol: false }]
+    }
     
     static REST_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<string, number> = {
-        height: 100,
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions REST', color: "#ff0000" },
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { symbolSize: 0 } } as any,
         ],
         options: {
-            chart: {
-                sparkline: {
-                   enabled: true
-                },
-                toolbar: {
-                    show: false
+            legend: { show: false },
+            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v === 0 ? '' : v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
+            series: [{ smooth: true }],
+            tooltip: {
+                formatter: (params: any[]) => {
+                    const p = params[0];
+                    if (p.data?._noData) return `${p.axisValueLabel ?? p.axisValue}<br/><span style="color:rgba(255,255,255,0.6);font-size:11px">Aucune donnée</span>`;
+                    const val = Array.isArray(p.value) ? p.value[1] : p.value;
+                    return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName}&nbsp;&nbsp;<b>${(val ?? 0).toFixed(2)}%</b>`;
                 }
-                
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
             }
         }
     };
     
     static  DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        height: 100,
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions JDBC', color: "#ff0000" }
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { symbolSize: 0 } } as any
         ],
         options: {
-            chart: {
-                sparkline: {
-                    enabled: true
-                },
-                toolbar: {
-                    show: false
+            legend: { show: false },
+            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v === 0 ? '' : v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
+            series: [{ smooth: true }],
+            tooltip: {
+                formatter: (params: any[]) => {
+                    const p = params[0];
+                    if (p.data?._noData) return `${p.axisValueLabel ?? p.axisValue}<br/><span style="color:rgba(255,255,255,0.6);font-size:11px">Aucune donnée</span>`;
+                    const val = Array.isArray(p.value) ? p.value[1] : p.value;
+                    return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName}&nbsp;&nbsp;<b>${(val ?? 0).toFixed(2)}%</b>`;
                 }
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
             }
         }
     };
 
     static  FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        height: 100,
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions FTP', color: "#ff0000"}
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { symbolSize: 0 } } as any
         ],
         options: {
-            chart: {
-                sparkline: {
-                    enabled: true
-                },
-                toolbar: {
-                    show: false
+            legend: { show: false },
+            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v === 0 ? '' : v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
+            series: [{ smooth: true }],
+            tooltip: {
+                formatter: (params: any[]) => {
+                    const p = params[0];
+                    if (p.data?._noData) return `${p.axisValueLabel ?? p.axisValue}<br/><span style="color:rgba(255,255,255,0.6);font-size:11px">Aucune donnée</span>`;
+                    const val = Array.isArray(p.value) ? p.value[1] : p.value;
+                    return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName}&nbsp;&nbsp;<b>${(val ?? 0).toFixed(2)}%</b>`;
                 }
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
             }
         }
     };
 
     static  SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        height: 100,
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions SMTP', color: "#ff0000" }
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { symbolSize: 0 } } as any
         ],
         options: {
-            chart: {
-                sparkline: {
-                    enabled: true
-                },
-                toolbar: {
-                    show: false
+            legend: { show: false },
+            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v === 0 ? '' : v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
+            series: [{ smooth: true }],
+            tooltip: {
+                formatter: (params: any[]) => {
+                    const p = params[0];
+                    if (p.data?._noData) return `${p.axisValueLabel ?? p.axisValue}<br/><span style="color:rgba(255,255,255,0.6);font-size:11px">Aucune donnée</span>`;
+                    const val = Array.isArray(p.value) ? p.value[1] : p.value;
+                    return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName}&nbsp;&nbsp;<b>${(val ?? 0).toFixed(2)}%</b>`;
                 }
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
-            yaxis: {
-                labels: {
-                    formatter: function (val: any) {
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
             }
         }
     };
 
     static  LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<Date, number> = {
-        height: 100,
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('perc') }, name: 'Nombre d\'exceptions LDAP', color: "#ff0000" }
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: "#ff0000", noDataStyle: { symbolSize: 0 } } as any
         ],
         options: {
-            chart: {
-                sparkline: {
-                    enabled: true
+            legend: { show: false },
+            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v === 0 ? '' : v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
+            series: [{ smooth: true }],
+            tooltip: {
+                formatter: (params: any[]) => {
+                    const p = params[0];
+                    if (p.data?._noData) return `${p.axisValueLabel ?? p.axisValue}<br/><span style="color:rgba(255,255,255,0.6);font-size:11px">Aucune donnée</span>`;
+                    const val = Array.isArray(p.value) ? p.value[1] : p.value;
+                    return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName}&nbsp;&nbsp;<b>${(val ?? 0).toFixed(2)}%</b>`;
                 }
-            },
-            stroke: {
-                curve: 'straight'
-            },
-            xaxis: {
-                labels: {
-                    datetimeUTC: false
-                },
-            },
+            }
+        }
+    };
+
+    static readonly SESSION_EXCEPTION_LINE: ChartProvider<string, number> = {
+        continue: true,
+        series: [
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Exceptions', color: '#ff0000' }
+        ],
+        options: {
+            legend: { show: false },
+            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v === 0 ? '' : v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
+            series: [{ smooth: true }],
+            tooltip: {
+                formatter: (params: any[]) => {
+                    const p = params[0];
+                    const val = Array.isArray(p.value) ? p.value[1] : p.value;
+                    return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName}&nbsp;&nbsp;<b>${(val ?? 0).toFixed(2)}%</b>`;
+                }
+            }
+        }
+    };
+
+    static readonly SESSION_ERRORS_BAR: ChartProvider<string, number> = {
+        height: 185,
+        series: [
+            { data: { x: field('type'), y: field('count') }, name: '', color: '#ef4444' }
+        ],
+        options: {
+            chart: { toolbar: { show: false }, animations: { enabled: false } },
+            plotOptions: { bar: { horizontal: true, barHeight: '60%', borderRadius: 2 } },
+            dataLabels: { enabled: false },
+            legend: { show: false },
+            tooltip: { followCursor: true },
+            xaxis: { labels: { show: false } },
             yaxis: {
                 labels: {
-                    formatter: function (val: any) {
-
-                        return val.toFixed(2)+"%";
-                    },
-                },
-                showForNullSeries: false,
-                max: 100
-            }
+                    maxWidth: 168,
+                    style: { fontSize: '10px' },
+                    formatter: (val: any) => {
+                        if (!val) return '';
+                        const s = String(val);
+                        const short = s.includes('$') ? s.slice(s.lastIndexOf('$') + 1)
+                            : s.includes('.') ? s.slice(s.lastIndexOf('.') + 1)
+                            : s;
+                        return short.length > 26 ? short.slice(0, 24) + '…' : short;
+                    }
+                }
+            },
+            grid: { yaxis: { lines: { show: false } }, xaxis: { lines: { show: false } } }
         }
     };
 }

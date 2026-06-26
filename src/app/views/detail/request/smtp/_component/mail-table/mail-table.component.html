@@ -1,0 +1,26 @@
+<jquery-table class="flex-table"
+              [config]="tableConfig" [data]="_mails">
+  <ng-template jqtCellDef="from" let-row>
+    <div style="display: flex; flex-direction: column">
+      <span *ngFor="let f of row.from">
+          {{ f }}
+      </span>
+    </div>
+  </ng-template>
+
+  <ng-template jqtCellDef="recipients" let-row>
+    <div style="display: flex; flex-direction: column">
+      <span *ngFor="let f of row.recipients">
+          {{ f }}
+      </span>
+    </div>
+  </ng-template>
+
+  <ng-template jqtCellDef="replyTo" let-row>
+    <div style="display: flex; flex-direction: column">
+      <span *ngFor="let f of row.replyTo" [title]="f">
+        {{ f }}
+      </span>
+    </div>
+  </ng-template>
+</jquery-table>

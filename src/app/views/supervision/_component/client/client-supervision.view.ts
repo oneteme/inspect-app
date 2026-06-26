@@ -15,15 +15,15 @@ import {MY_DATE_FORMATS} from "../../../../shared/shared.module";
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
 import {CustomDateRangeSelectionStrategy} from "../../../../shared/material/custom-date-range-selection-strategy";
 import {EnvRouter} from "../../../../service/router.service";
-import {ConfigDialogComponent} from "../config-dialog/config-dialog.component";
 import {InstanceService} from "../../../../service/jquery/instance.service";
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {
   ClientInstanceSelectorDialogComponent
 } from "./client-instance-selector-dialog/client-instance-selector-dialog.component";
-import {
-  StacktraceDialogComponent
-} from "../../../../shared/_component/exception-display/stacktrace-dialog/stacktrace-dialog.component";
+import {PageTitleService} from '../../../../service/page-title.service';
+import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../../shared/period-filter';
+import {IPeriod, IStep, IStepFrom} from '../../../../model/conf.model';
+import {shallowEqual} from '../../../search/rest/search-rest.view';
 
 @Component({
   templateUrl: './client-supervision.view.html',
@@ -52,6 +52,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   private readonly _decimalPipe: DecimalPipe = inject(DecimalPipe);
   private readonly _datePipe = inject(DatePipe);
   private readonly _snackBar = inject(MatSnackBar);
+  private readonly _pageTitleService = inject(PageTitleService);
   private readonly $destroy = new Subject<void>();
 
 
@@ -77,157 +78,24 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
 
     ],
     options: {
-      chart: {
-        id: 'line-1',
-        group: 'group',
-        animations: {
-          enabled: false
-        },
-        zoom: {
-          type: 'x',
-          enabled: true,
-          autoScaleYaxis: true
-        },
-        toolbar: {
-          show: true,
-          tools: {
-            download: true,
-            selection: true,
-            zoom: true,
-            zoomin: true,
-            zoomout: true,
-            pan: true,
-            reset: true,
-            customIcons: []
-          },
-          export: {
-            csv: {
-              columnDelimiter: ',',
-              headerCategory: 'category',
-              headerValue: 'value'
+      animation: false,
+      dataZoom: [{ type: 'inside', xAxisIndex: 0 }],
+      xAxis: { axisLabel: { hideOverlap: true } },
+      yAxis: { axisLabel: { formatter: (v: number) => this._decimalPipe.transform(v) } },
+      series: [
+        {
+          lineStyle: { type: 'dashed' },
+          areaStyle: {
+            color: {
+              type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+              colorStops: [
+                { offset: 0, color: '#feb019CC' },
+                { offset: 1, color: '#feb01911' }
+              ]
             }
-          },
-          autoSelected: 'zoom'
-        }
-      },
-      xaxis: {
-        labels: {
-          datetimeUTC: false
-        }
-      },
-      yaxis: {
-        labels: {
-          formatter: (value) => {
-            return this._decimalPipe.transform(value);
           }
         }
-      },
-      fill: {
-        type: ['gradient', 'solid', 'solid'],
-        gradient: {
-          shade: 'light',
-          type: 'vertical',
-          inverseColors: 'false',
-          shadeIntensity: 0.4,
-          opacityFrom: 0.9,
-          opacityTo: 0.3,
-          stops: [0, 100]
-        }
-      },
-      stroke: {
-        curve: 'smooth',
-        dashArray: [5,0,0],
-        width: [1,1,1]
-      },
-      dataLabels: {
-        enabled: false
-      },
-      tooltip: {
-        x: {
-          format: 'dd MMM HH:mm:ss'
-        }
-      }
-    }
-  };
-  readonly USAGE_DISK_BY_PERIOD_LINE: ChartProvider<string, number> = {
-    height: 300,
-    stacked: false,
-    ytitle: '',
-    series: [
-      {data: {x: field('date'), y: field('diskTotalSpace')}, name: 'Maximum', type: 'area', color: '#FEB019'},
-      {data: {x: field('date'), y: field('usedDiskSpace')}, name: 'Utilisée', color: '#008ffb'}
-    ],
-    options: {
-      chart: {
-        id: 'line-2',
-        group: 'group',
-        animations: {
-          enabled: false
-        },
-        zoom: {
-          type: 'x',
-          enabled: true,
-          autoScaleYaxis: true
-        },
-        toolbar: {
-          show: true,
-          tools: {
-            download: true,
-            selection: true,
-            zoom: true,
-            zoomin: true,
-            zoomout: true,
-            pan: true,
-            reset: true,
-            customIcons: []
-          },
-          export: {
-            csv: {
-              columnDelimiter: ',',
-              headerCategory: 'category',
-              headerValue: 'value'
-            }
-          },
-          autoSelected: 'zoom'
-        }
-      },
-      xaxis: {
-        labels: {
-          datetimeUTC: false
-        }
-      },
-      yaxis: {
-        labels: {
-          formatter: (value) => {
-            return this._decimalPipe.transform(value);
-          }
-        }
-      },
-      fill: {
-        type: ['gradient','solid'],
-        gradient: {
-          shade: 'light',
-          type: 'vertical',
-          inverseColors: 'false',
-          shadeIntensity: 0.4,
-          opacityFrom: 0.9,
-          opacityTo: 0.3,
-          stops: [0, 100]
-        }
-      },
-      stroke: {
-        curve: 'smooth',
-        dashArray: [5,0],
-        width: [1,1]
-      },
-      dataLabels: {
-        enabled: false
-      },
-      tooltip: {
-        x: {
-          format: 'dd MMM HH:mm:ss'
-        }
-      }
+      ]
     }
   };
   readonly USAGE_INSTANCE_TRACE_BY_PERIOD_LINE: ChartProvider<string, number> = {
@@ -240,76 +108,26 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
       {data: {x: field('date'), y: field('queueCapacity')}, name: 'Maximum', type: 'area', color: '#FEB019', visible: false}
     ],
     options: {
-      chart: {
-        id: 'line-3',
-        group: 'group',
-        animations: {
-          enabled: false
-        },
-        zoom: {
-          type: 'x',
-          enabled: true,
-          autoScaleYaxis: true
-        },
-        toolbar: {
-          show: true,
-          tools: {
-            download: true,
-            selection: true,
-            zoom: true,
-            zoomin: true,
-            zoomout: true,
-            pan: true,
-            reset: true,
-            customIcons: []
-          },
-          export: {
-            csv: {
-              columnDelimiter: ',',
-              headerCategory: 'category',
-              headerValue: 'value'
+      animation: false,
+      dataZoom: [{ type: 'inside', xAxisIndex: 0 }],
+      xAxis: { axisLabel: { hideOverlap: true } },
+      yAxis: { axisLabel: { formatter: (v: number) => this._decimalPipe.transform(v) } },
+      series: [
+        {},
+        {},
+        {
+          lineStyle: { type: 'dashed' },
+          areaStyle: {
+            color: {
+              type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
+              colorStops: [
+                { offset: 0, color: '#FEB019CC' },
+                { offset: 1, color: '#FEB01911' }
+              ]
             }
-          },
-          autoSelected: 'zoom'
-        }
-      },
-      xaxis: {
-        labels: {
-          datetimeUTC: false
-        }
-      },
-      yaxis: {
-        labels: {
-          formatter: (value) => {
-            return this._decimalPipe.transform(value);
           }
         }
-      },
-      fill: {
-        type: ['solid', 'solid', 'gradient'],
-        gradient: {
-          shade: 'light',
-          type: 'vertical',
-          inverseColors: 'false',
-          shadeIntensity: 0.4,
-          opacityFrom: 0.9,
-          opacityTo: 0.3,
-          stops: [0, 100]
-        }
-      },
-      stroke: {
-        curve: 'smooth',
-        dashArray: [0,0,5],
-        width: [1,1,1]
-      },
-      dataLabels: {
-        enabled: false
-      },
-      tooltip: {
-        x: {
-          format: 'dd MMM HH:mm:ss'
-        }
-      }
+      ]
     }
   };
   readonly ATTEMPT_INSTANCE_TRACE_BY_PERIOD_LINE: ChartProvider<string, number> = {
@@ -320,69 +138,15 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
       {data: {x: field('date'), y: field('attempts')}, name: 'Tentative'}
     ],
     options: {
-      chart: {
-        id: 'line-4',
-        group: 'group',
-        animations: {
-          enabled: false
-        },
-        zoom: {
-          type: 'x',
-          enabled: true,
-          autoScaleYaxis: true
-        },
-        toolbar: {
-          show: true,
-          tools: {
-            download: true,
-            selection: true,
-            zoom: true,
-            zoomin: true,
-            zoomout: true,
-            pan: true,
-            reset: true,
-            customIcons: []
-          },
-          export: {
-            csv: {
-              columnDelimiter: ',',
-              headerCategory: 'category',
-              headerValue: 'value'
-            }
-          },
-          autoSelected: 'zoom'
-        }
-      },
-      xaxis: {
-        labels: {
-          datetimeUTC: false
-        }
-      },
-      yaxis: {
-        labels: {
-          formatter: (value) => {
-            return this._decimalPipe.transform(value);
-          }
-        }
-      },
-      stroke: {
-        curve: 'smooth',
-        width: [1]
-      },
-      dataLabels: {
-        enabled: false
-      },
-      legend: {
-        showForSingleSeries: true
-      },
-      tooltip: {
-        x: {
-          format: 'dd MMM HH:mm:ss'
-        }
-      }
+      animation: false,
+      dataZoom: [{ type: 'inside', xAxisIndex: 0 }],
+      xAxis: { axisLabel: { hideOverlap: true } },
+      yAxis: { axisLabel: { formatter: (v: number) => this._decimalPipe.transform(v) } },
+      legend: { show: true }
     }
   };
 
+  date = new Date();
   servers: string[] = [];
   instance: Partial<InstanceEnvironment> = {};
   instances: {id: string, appName: string, address:string,  start: number, end: number}[] = [];
@@ -393,19 +157,22 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   unavailableStat:  number = 0;
   traceStat:  number = 0;
   params: Partial<{instance: string, env: string, start: Date, end: Date, app_name?: string}> = {};
-  date = new Date().getTime();
   isLoading = false;
   isLoadingInstances = false;
   reloadInstances = true;
   activityDisplayType: 'TRACE' | 'ATTEMPT' | 'REPORT' = 'TRACE';
+  readonly periodQuickRanges = PERIOD_QUICK_RANGES;
+  period: IPeriod | IStep | IStepFrom;
 
   ngOnInit() {
+    this._pageTitleService.set({ icon: 'browse_activity', iconOutlined: true, title: 'Supervision', subtitle: 'Client' });
     this.onRouteChange();
   }
 
   ngOnDestroy() {
     this.$destroy.next();
     this.$destroy.complete();
+    this._pageTitleService.clear();
   }
 
   onRouteChange(){
@@ -417,10 +184,22 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
         this.reloadInstances = !!(this.params.env && queryParams.env && this.params.env !== queryParams.env);
         this.params.instance = params.instance;
         this.params.env = queryParams.env;
-        this.params.start = new Date(queryParams.start);
-        this.params.end = new Date(queryParams.end);
+
+        if (queryParams.start && queryParams.end) {
+          this.period = new IPeriod(new Date(queryParams.start), new Date(queryParams.end));
+        } else if (queryParams.step && queryParams.from) {
+          this.period = new IStepFrom(Number(queryParams.step), Number(queryParams.from));
+        } else if (queryParams.step) {
+          this.period = new IStep(Number(queryParams.step));
+        } else {
+          this.period = getDefaultRelativePeriod();
+        }
+
+        this.params.start = this.period.start;
+        this.params.end = this.period.end;
         this.params.app_name = queryParams.app_name;
-        this.patchDateValue(this.params.start, this.params.end);
+        this.syncChartPeriodBounds();
+        this.patchDateValue(this.params.start, toDisplayedPeriodEnd(this.params.end));
         if(this.reloadInstances){
           // Réinitialiser les valeurs du formulaire quand l'environnement change
           this.formGroup.patchValue({
@@ -438,18 +217,22 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   onChangeStart(event) {
     this.formGroup.controls.range.controls.end.updateValueAndValidity({onlySelf: true});
     this.formGroup.controls.range.updateValueAndValidity({onlySelf: true});
-    let start = this.formGroup.controls.range.controls.start.value;
-    let end = this.formGroup.controls.range.controls.end.value || null;
+    const start = this.formGroup.controls.range.controls.start.value;
+    const end = this.formGroup.controls.range.controls.end.value || null;
+    this.period = new IPeriod(start, end || start);
     if(this.formGroup.controls.range.valid) {
-      this.getInstances(start, end);
+      this.getInstances(start, end || start);
     }
   }
 
   onChangeEnd(event) {
     this.formGroup.controls.range.controls.start.updateValueAndValidity({onlySelf: true});
     this.formGroup.controls.range.updateValueAndValidity({onlySelf: true});
-    let start = this.formGroup.controls.range.controls.start.value || null;
-    let end = this.formGroup.controls.range.controls.end.value;
+    const start = this.formGroup.controls.range.controls.start.value || null;
+    const end = this.formGroup.controls.range.controls.end.value;
+    if (start) {
+      this.period = new IPeriod(start, end ? new Date(end.getFullYear(), end.getMonth(), end.getDate(), end.getHours(), end.getMinutes() + 1) : start);
+    }
     if(this.formGroup.controls.range.valid) {
       this.getInstances(start, end);
     }
@@ -487,6 +270,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
     this.lastTrace = null;
     this.unavailableStat = 0;
     this.traceStat = 0;
+    this.syncChartPeriodBounds();
     this._traceService.getInstance(this.params.instance)
     .pipe(switchMap(res => {
       if(res?.env !== this.params.env) {
@@ -499,6 +283,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
         return EMPTY;
       }
       this.instance = res;
+      this.updatePageTitle();
       this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}&app_name=${this.instance.name}&_reload=${new Date().getTime()}`);
       return forkJoin([
         this.instance.end ? of([]) : this._instanceTraceService.getLastInstanceTrace({instance: [this.params.instance]}),
@@ -522,23 +307,59 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
             : [];
         this.logEntryByPeriod = log.map(r => ({...r, date: this._datePipe.transform(r.instant * 1000, 'dd/MM/yyyy HH:mm:ss')}));
         this.lastTrace = last[0]?.date;
+        this.updatePageTitle();
         this.getStatActivity();
       }
     });
   }
 
-  open(row: any) {
-    this._dialog.open(StacktraceDialogComponent, {
-      data: { message: row.message, stackTraceRows: row.stackRows }
+  private updatePageTitle() {
+    if (!this.instance) return;
+    this._pageTitleService.set({
+      icon: 'browse_activity',
+      iconOutlined: true,
+      title: this.instance.name,
+      subtitle: 'Supervision • Client',
+      instanceContext: {
+        instance: this.instance,
+        lastTrace: this.lastTrace,
+        date: this.date.getTime()
+      }
     });
   }
 
   search() {
     if (this.formGroup.valid) {
+      const start = this.formGroup.controls.range.controls.start.getRawValue();
+      const end = this.formGroup.controls.range.controls.end.getRawValue();
+      const appName = this.formGroup.controls.instance.value?.appName || this.formGroup.controls.server.value || this.params.app_name;
+
+      if (!(this.period instanceof IStep) && !(this.period instanceof IStepFrom)) {
+        this.period = new IPeriod(start, end ? new Date(end.getFullYear(), end.getMonth(), end.getDate(), end.getHours(), end.getMinutes() + 1) : start);
+      }
+
+      const newQueryParams: any = {
+        env: this.params.env,
+        app_name: appName,
+        ...this.period.buildParams()
+      };
+
+      const newInstanceId = this.formGroup.controls.instance.value.id;
+      const currentInstanceId = this._activatedRoute.snapshot.params['instance'];
+      const instanceChanged = currentInstanceId !== newInstanceId;
+
       this.reloadInstances = false;
-      this._router.navigate(['supervision', 'client', this.formGroup.controls.instance.value.id], {
-        queryParams: { start: this.formGroup.controls.range.controls.start.getRawValue().toISOString(), end: this.formGroup.controls.range.controls.end.getRawValue().toISOString(), env: this.params.env, _reload: new Date().getTime() },
-      });
+      if (instanceChanged || !shallowEqual(this._activatedRoute.snapshot.queryParams, newQueryParams)) {
+        this._router.navigate(['supervision', 'client', newInstanceId], {
+          queryParams: newQueryParams,
+        });
+      } else {
+        this.params.start = this.period.start;
+        this.params.end = this.period.end;
+        this.patchDateValue(this.params.start, toDisplayedPeriodEnd(this.params.end));
+        this.getInstances(this.params.start, this.params.end);
+        this.getInstance();
+      }
     }
   }
 
@@ -585,14 +406,30 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
     }, { emitEvent: false });
   }
 
-  openConfig() {
-    this._dialog.open(ConfigDialogComponent, {
-      data: this.instance.configuration
-    });
+  isDefaultPeriod(): boolean {
+    return isDefaultRelativePeriod(this.period);
+  }
+
+  resetPeriod(): void {
+    const defaultPeriod = getDefaultRelativePeriod();
+    this.period = defaultPeriod;
+    this.patchDateValue(defaultPeriod.start, toDisplayedPeriodEnd(defaultPeriod.end));
+  }
+
+  applyQuickRange(range: PeriodQuickRange): void {
+    let period;
+    if (range === 'yesterday') {
+      const dates = getQuickRangeDates(range);
+      period = new IPeriod(dates.start, dates.end);
+    } else {
+      period = getQuickRangeStep(range);
+    }
+    this.period = period;
+    this.patchDateValue(period.start, toDisplayedPeriodEnd(period.end));
   }
 
   openInstanceSelector() {
-    this.updateFormValues();
+    //this.updateFormValues();   todo : check if needed
     const dialogRef = this._dialog.open(ClientInstanceSelectorDialogComponent, {
       width: '500px',
       data: {
@@ -682,6 +519,32 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
 
   getMinDate(date1: Date, date2: Date): Date {
     return date1.getTime() < date2.getTime() ? date1 : date2;
+  }
+
+  private syncChartPeriodBounds(): void {
+    const min = this.params.start?.getTime();
+    const currentMinute = new Date();
+    currentMinute.setSeconds(59, 999);
+    const requestedMax = this.params.end ? this.params.end.getTime() - 1 : undefined;
+    const max = requestedMax != null ? Math.min(requestedMax, currentMinute.getTime()) : undefined;
+
+    [
+      this.USAGE_RESOURCE_BY_PERIOD_LINE,
+      this.USAGE_INSTANCE_TRACE_BY_PERIOD_LINE,
+      this.ATTEMPT_INSTANCE_TRACE_BY_PERIOD_LINE
+    ].forEach((chartConfig) => {
+      chartConfig.options = {
+        ...chartConfig.options,
+        xAxis: {
+          ...(chartConfig.options?.xAxis || {}),
+          min,
+          max,
+          axisLabel: {
+            ...(chartConfig.options?.xAxis as any)?.axisLabel
+          }
+        }
+      };
+    });
   }
 
   get filtredInstances(){

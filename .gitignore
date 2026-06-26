@@ -38,4 +38,11 @@ testem.log
 
 # System Files
 .DS_Store
+
+# Docs locaux (contexte non versionné)
+docs/
 Thumbs.db
+
+# Local context & documentation
+CONTEXT.md
+

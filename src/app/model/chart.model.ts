@@ -5,3 +5,11 @@ export enum ChartGroup {
     byMonth = 'month',
     byYear = 'year'
 }
+
+export enum ChartGroup2 {
+    yearMonth = 'yearMonth',
+    yearWeek = 'yearWeek',
+    monthDay = 'monthDay',
+    byYear = 'year',
+    byHour = 'hour'
+}

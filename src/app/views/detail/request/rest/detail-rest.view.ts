@@ -1,4 +1,5 @@
 import {Component, inject, OnDestroy, OnInit} from "@angular/core";
+import {PageTitleService} from "../../../../service/page-title.service";
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {EnvRouter} from "../../../../service/router.service";
@@ -12,6 +13,8 @@ import {DataGroup, DataItem, TimelineOptions} from "vis-timeline";
 import {DatePipe} from "@angular/common";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {TabData} from "../../session/_component/detail-session.component";
+import {MatDialog} from "@angular/material/dialog";
+import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
 
 @Component({
   templateUrl: './detail-rest.view.html',
@@ -24,6 +27,8 @@ export class DetailRestView implements OnInit, OnDestroy {
   private readonly $destroy = new Subject<void>();
   private readonly pipe = new DatePipe('fr-FR');
   private readonly durationPipe = new DurationPipe();
+  private readonly _dialog = inject(MatDialog);
+  private readonly _pageTitleService = inject(PageTitleService);
 
   private params: Partial<{idRest: string, env: string}> = {};
   REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
@@ -50,6 +55,7 @@ export class DetailRestView implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([params, queryParams]) => {
         this.params = {idRest: params.id_request, env: queryParams.env || app.defaultEnv};
+        this._pageTitleService.set({ icon: 'public', iconOutlined: true, title: 'Flux HTTP • ' + params.id_request, subtitle: 'Communications externes' });
         this.getRequest();
       }
     });
@@ -81,6 +87,7 @@ export class DetailRestView implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.$destroy.next();
     this.$destroy.complete();
+    this._pageTitleService.clear();
   }
 
   getRequest() {
@@ -162,11 +169,6 @@ export class DetailRestView implements OnInit, OnDestroy {
     return Utils.getSessionUrl(this.request);
   }
 
-  navigateOnStatusIndicator(event: MouseEvent) {
-    var date = new Date(this.request.start * 1000);
-    this._router.navigateOnClick(event, ['/supervision', this.instance.type.toLowerCase(), this.instance.id], { queryParams: {start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString(), env: this.instance?.env} });
-  }
-
   navigate(event: MouseEvent, targetType: string, extraParam?: string) {
       let params: any[] = [];
       switch (targetType) {
@@ -186,7 +188,23 @@ export class DetailRestView implements OnInit, OnDestroy {
       }
   }
 
-  getDate(start: number) {
-    return new Date(start);
+  onClickPulse() {
+    this._dialog.open(PulseDialogComponent, {
+      width: '1000px',
+      height: '65vh',
+      data: {
+        name: this.instance.name,
+        instance: this.instance.id,
+        instanceStart: new Date(this.instance.instant * 1000),
+        start: new Date(this.request.start * 1000 - 1800000),
+        end: new Date(this.request.end * 1000 + 1800000)
+      }
+    });
+  }
+
+  navigateOnKpi(event: MouseEvent) {
+    var start = new Date(this.request.start * 1000);
+    var end = this.request.end ? new Date(this.request.end * 1000) : new Date();
+    this._router.navigateOnClick(event, ['/kpi/request', 'rest'], { queryParams: {host: this.request.host, env: this.instance.env, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
   }
 }

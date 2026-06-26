@@ -1,5 +1,6 @@
 .activity-container {
   display: flex;
+  flex: 1;
 }
 
 .stats-sidebar {
@@ -26,9 +27,6 @@
   align-items: center;
   gap: 12px;
   transition: transform 0.2s;
-}
-
-.stats-card {
   cursor: pointer;
   &.trace {
     &:hover {

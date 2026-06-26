@@ -1,4 +1,5 @@
 import {Component, inject, OnDestroy, OnInit} from "@angular/core";
+import {PageTitleService} from '../../../../service/page-title.service';
 import {ActivatedRoute} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
@@ -19,6 +20,8 @@ import {
 import {RequestType} from "../../../../model/request.model";
 import {getDataForRange, getErrorClassName, showifnotnull} from "../../../../shared/util";
 import {TabData} from "../../session/_component/detail-session.component";
+import {MatDialog} from "@angular/material/dialog";
+import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
 
 @Component({
   templateUrl: './detail-smtp.view.html',
@@ -31,6 +34,8 @@ export class DetailSmtpView implements OnInit, OnDestroy {
   private readonly pipe = new DatePipe('fr-FR');
   private readonly durationPipe = new DurationPipe();
   private readonly $destroy = new Subject<void>();
+  private readonly _dialog = inject(MatDialog);
+  private readonly _pageTitleService = inject(PageTitleService);
 
   private params: Partial<{ idSmtp: string, env: string }> = {};
 
@@ -58,6 +63,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([params, queryParams]) => {
         this.params = {idSmtp: params.id_request, env: queryParams.env || app.defaultEnv};
+        this._pageTitleService.set({ icon: 'outgoing_mail', iconOutlined: true, title: 'Flux SMTP • ' + params.id_request, subtitle: 'Communications externes' });
         this.getRequest();
       }
     });
@@ -98,6 +104,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
   ngOnDestroy() {
     this.$destroy.next();
     this.$destroy.complete();
+    this._pageTitleService.clear();
   }
 
   getRequest() {
@@ -158,7 +165,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
 
     this.dataArray.splice(0, 0, {
       title: '',
-      group: this.request.command,
+      group: this.request.command ? this.request.command : '<empty>',
       start: this.timelineStart,
       end: this.timelineEnd,
       content: (this.request.host || 'N/A'),
@@ -168,8 +175,8 @@ export class DetailSmtpView implements OnInit, OnDestroy {
 
     let groups: any[] = this.stages.map((a: MailRequestStage, i: number) => ({id: i, content: a?.name, treeLevel: 2}))
     groups.splice(0, 0, {
-      id: this.request.command,
-      content: this.request.command,
+      id: this.request.command ? this.request.command : '<empty>',
+      content: this.request.command ? this.request.command : '<empty>',
       treeLevel: 1,
       nestedGroups: groups.map(g => (g.id))
     })
@@ -189,8 +196,8 @@ export class DetailSmtpView implements OnInit, OnDestroy {
     }
 
     groups.splice(0, 0, {
-      id: this.request.command,
-      content: this.request.command,
+      id: this.request.command ? this.request.command : '<empty>',
+      content: this.request.command ? this.request.command : '<empty>',
       treeLevel: 1,
       nestedGroups: groups.map(g => (g.id))
     })
@@ -204,11 +211,6 @@ export class DetailSmtpView implements OnInit, OnDestroy {
         followMouse: true
       }
     }
-  }
-
-  navigateOnStatusIndicator(event: MouseEvent) {
-    var date = new Date(this.request.start * 1000);
-    this._router.navigateOnClick(event, ['/supervision', this.instance.type.toLowerCase(), this.instance.id], { queryParams: {start: new Date(date.getFullYear(), date.getMonth(), date.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(date.getFullYear(), date.getMonth(), date.getDate() + 1, 0, 0, 0, 0).toISOString(), env: this.instance?.env} });
   }
 
   navigate(event: MouseEvent, targetType: string, extraParam?: string) {
@@ -245,13 +247,33 @@ export class DetailSmtpView implements OnInit, OnDestroy {
         treeLevel: 2
       }))
       groups.splice(0, 0, {
-        id: this.request.command,
-        content: this.request.command,
+        id: this.request.command ? this.request.command : '<empty>',
+        content: this.request.command ? this.request.command : '<empty>',
         treeLevel: 1,
         nestedGroups: groups.map(g => (g.id))
       })
       timeline.setGroups(groups);
       timeline.setItems(d);
     });
+  }
+
+  onClickPulse() {
+    this._dialog.open(PulseDialogComponent, {
+      width: '1000px',
+      height: '65vh',
+      data: {
+        name: this.instance.name,
+        instance: this.instance.id,
+        instanceStart: new Date(this.instance.instant * 1000),
+        start: new Date(this.request.start * 1000 - 1800000),
+        end: new Date(this.request.end * 1000 + 1800000)
+      }
+    });
+  }
+
+  navigateOnKpi(event: MouseEvent) {
+    var start = new Date(this.request.start * 1000);
+    var end = this.request.end ? new Date(this.request.end * 1000) : new Date();
+    this._router.navigateOnClick(event, ['/kpi/request', 'smtp'], { queryParams: {host: this.request.host, env: this.instance.env, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
   }
 }

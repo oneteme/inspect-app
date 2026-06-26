@@ -42,3 +42,5 @@ export const app: Application = {
 | DEFAULT_ENV | **string** | dev      | 
 | DEFAULT_GRID_VIEW_PERIOD | **string** | LAST_30  |
 | DEFAULT_KPI_VIEW_PERIOD  | **string** | LAST_1440  | 
+
+## Authentification

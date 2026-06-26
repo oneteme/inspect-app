@@ -20,6 +20,8 @@ import {DatabaseRequestService} from "../../../service/jquery/database-request.s
 import {FtpRequestService} from "../../../service/jquery/ftp-request.service";
 import {SmtpRequestService} from "../../../service/jquery/smtp-request.service";
 import {LdapRequestService} from "../../../service/jquery/ldap-request.service";
+import {PageTitleService} from "../../../service/page-title.service";
+import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
 
 
 
@@ -50,8 +52,8 @@ export class SearchRequestView implements OnInit, OnDestroy {
 
 
   REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
+  private readonly _pageTitleService = inject(PageTitleService);
   nameDataList: any[];
-  displayedColumns: string[] = ['rangestatus', 'app_name', 'method/path', 'query', 'start', 'durée', 'user'];
   requests: any[];
   isLoading = true;
   serverNameIsLoading = true;
@@ -64,15 +66,15 @@ export class SearchRequestView implements OnInit, OnDestroy {
     })
   });
 
+  readonly periodQuickRanges = PERIOD_QUICK_RANGES;
+  emptyLabel = null;
   queryParams: Partial<QueryParams> = {};
   params: Partial<Params> = {};
   subscriptions: Subscription[] = [];
   hostSubscription: Subscription;
   RequestSubscription: Subscription;
   seviceType: { [key: string]: {service : RestRequestService | DatabaseRequestService | FtpRequestService | SmtpRequestService | LdapRequestService,
-                                filters: {icon: string, label: string,color: string, value: any}[]
-  }
-  } =
+                                filters: {icon: string, label: string,color: string, value: any}[] } } =
       {
         "rest": { service: this._restRequestService, filters:  [{icon: 'warning', label: '5xx', color:'#bb2124', value: '5xx'}, {icon: 'error', label: '4xx',color:'#f9ad4e', value:'4xx'}, {icon: 'done', label: '2xx',color:'#22bb33', value:'2xx'}, {icon: 'priority_high', label: '0', color:'gray', value:'0xx'}, {icon: 'pending', label: 'En cours', color:'#2196F3', value:'lazy'}]},
         "jdbc": { service: this._databaseRequestService, filters:  [{icon: 'warning', label: 'KO', color:'#bb2124', value: 'Ko'}, {icon: 'done', label: 'OK',color:'#22bb33', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'#2196F3', value:'lazy'}] },
@@ -118,18 +120,24 @@ export class SearchRequestView implements OnInit, OnDestroy {
       ]).subscribe({
       next: ([params, queryParams]) => {
           this.params.type = params.type || 'rest';
+          this._pageTitleService.set({
+            icon: Constants.REQUEST_MAPPING_TYPE[this.params.type]?.icon || 'api',
+            iconOutlined: true,
+            title: (Constants.REQUEST_MAPPING_TYPE[this.params.type]?.title || this.params.type) + ' • Suivi',
+            subtitle: Constants.REQUEST_MAPPING_TYPE[this.params.type]?.subtitle
+          });
           if(queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env ||  app.defaultEnv,null,!queryParams.host ? [] : Array.isArray(queryParams.host) ? queryParams.host : [queryParams.host],!queryParams.rangestatus ? []: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] )
           if(!queryParams.start && !queryParams.end){
             let period;
             if(queryParams.step && queryParams.from){
-                period = new IStepFrom(queryParams.step, queryParams.from);
+              period = new IStepFrom(Number(queryParams.step), Number(queryParams.from));
             } else if(queryParams.step){
-                period = new IStep(queryParams.step);
+              period = new IStep(Number(queryParams.step));
             }
             this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.env || app.defaultEnv, null, !queryParams.host ? [] : Array.isArray(queryParams.host) ? queryParams.host : [queryParams.host],!queryParams.rangestatus ? [/*this.seviceType[this.params.type].filters[0].value*/]: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] );
           }
           if(queryParams.q){
-            this.queryParams.optional = { 'q': queryParams.q }
+            this.queryParams.optional = { 'q': queryParams.q };
           }
           this.patchStatusValue(this.queryParams.rangestatus)
           this.patchHostValue(this.queryParams.hosts);
@@ -149,6 +157,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
     this.subscriptions.forEach(s => s.unsubscribe());
     this.hostSubscription.unsubscribe();
     this.RequestSubscription.unsubscribe();
+    this._pageTitleService.clear();
   }
 
   search() {
@@ -193,6 +202,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
       this.isLoading =false;
     }
     this.requests = null;
+    this.emptyLabel = null;
     this.isLoading = true;
     this.RequestSubscription = (<any>this.seviceType[this.params.type]).service.getRequests({
       'env': this.queryParams.env,
@@ -212,10 +222,11 @@ export class SearchRequestView implements OnInit, OnDestroy {
           if (d) {
             this.requests = d
           }
-          this.isLoading = false;
         },
-        error: err => {
-          this.isLoading = false;
+        error: error => {
+          if(error.status === 413) {
+            this.emptyLabel = error.error.message;
+          }
         }
       });
   }
@@ -251,8 +262,8 @@ export class SearchRequestView implements OnInit, OnDestroy {
   }
 
   selectedRest(event: { event: MouseEvent, row: any }) {
-    event.event.stopPropagation();
-    if (event.event.ctrlKey) {
+    if (event.event) event.event.stopPropagation();
+    if (event.event?.ctrlKey) {
       this._router.open(`#/request/rest/${event.row}`, '_blank')
     } else {
       this._router.navigate(['/request/rest', event.row], {
@@ -307,8 +318,29 @@ export class SearchRequestView implements OnInit, OnDestroy {
         });
       }
     }
-}
+  }
 
+  isDefaultPeriod(): boolean {
+    return isDefaultRelativePeriod(this.queryParams?.period);
+  }
+
+  resetPeriod(): void {
+    const defaultPeriod = getDefaultRelativePeriod();
+    this.queryParams.period = defaultPeriod;
+    this.patchDateValue(defaultPeriod.start, toDisplayedPeriodEnd(defaultPeriod.end));
+  }
+
+  applyQuickRange(range: PeriodQuickRange): void {
+    let period;
+    if (range === 'yesterday') {
+      const dates = getQuickRangeDates(range);
+      period = new IPeriod(dates.start, dates.end);
+    } else {
+      period = getQuickRangeStep(range);
+    }
+    this.queryParams.period = period;
+    this.patchDateValue(period.start, toDisplayedPeriodEnd(period.end));
+  }
 }
 
 

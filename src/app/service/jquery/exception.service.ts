@@ -21,7 +21,7 @@ export class ExceptionService {
             'database_request.start.ge': filters.start.toISOString(),
             'database_request.start.lt': filters.end.toISOString(),
             'join': 'instance',
-            'instance.environement': filters.env,
+            'instance.environement': `"${filters.env}"`,
             'type': 'JDBC',
             'order': 'count.desc'
         }
