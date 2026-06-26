@@ -155,7 +155,7 @@
                   <mat-icon class="detail-item-icon" [style.color]="row.status.color">{{ row.status.icon }}</mat-icon>
                   <span class="detail-item-value detail-item-value--bold" [style.color]="row.status.color">{{ row.status.value }}</span>
                 </span>
-                <span class="detail-keyed-item detail-keyed-item--flex" [matTooltip]="row.elapsed.value">
+                <span class="detail-keyed-item detail-keyed-item--flex" [matTooltip]="formatDuration(row.elapsed.value)">
                   <mat-icon class="detail-item-icon" [style.color]="row.elapsed.color">{{ row.elapsed.icon }}</mat-icon>
                   <span class="detail-item-value">{{ row.elapsed.value | duration }}</span>
                 </span>

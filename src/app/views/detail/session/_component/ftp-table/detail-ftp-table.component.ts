@@ -20,6 +20,10 @@ export class DetailFtpTableComponent {
     if (q) this.tableConfig = { ...this.tableConfig, search: { ...this.tableConfig.search, initialQuery: q } };
   }
 
+  @Input() set emptyLabel(value: string) {
+    this.tableConfig.labels.empty = value ?? null;
+  }
+
   @Input() set requests(requests: FtpRequestDto[]) {
     this._requests = requests;
   }

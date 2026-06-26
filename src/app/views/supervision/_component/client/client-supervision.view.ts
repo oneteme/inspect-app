@@ -344,9 +344,13 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
         ...this.period.buildParams()
       };
 
+      const newInstanceId = this.formGroup.controls.instance.value.id;
+      const currentInstanceId = this._activatedRoute.snapshot.params['instance'];
+      const instanceChanged = currentInstanceId !== newInstanceId;
+
       this.reloadInstances = false;
-      if (!shallowEqual(this._activatedRoute.snapshot.queryParams, newQueryParams)) {
-        this._router.navigate(['supervision', 'client', this.formGroup.controls.instance.value.id], {
+      if (instanceChanged || !shallowEqual(this._activatedRoute.snapshot.queryParams, newQueryParams)) {
+        this._router.navigate(['supervision', 'client', newInstanceId], {
           queryParams: newQueryParams,
         });
       } else {
@@ -425,7 +429,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   }
 
   openInstanceSelector() {
-    this.updateFormValues();
+    //this.updateFormValues();   todo : check if needed
     const dialogRef = this._dialog.open(ClientInstanceSelectorDialogComponent, {
       width: '500px',
       data: {

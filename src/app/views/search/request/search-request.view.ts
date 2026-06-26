@@ -54,7 +54,6 @@ export class SearchRequestView implements OnInit, OnDestroy {
   REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
   private readonly _pageTitleService = inject(PageTitleService);
   nameDataList: any[];
-  displayedColumns: string[] = ['rangestatus', 'app_name', 'method/path', 'query', 'start', 'durée', 'user'];
   requests: any[];
   isLoading = true;
   serverNameIsLoading = true;
@@ -68,7 +67,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
   });
 
   readonly periodQuickRanges = PERIOD_QUICK_RANGES;
-
+  emptyLabel = null;
   queryParams: Partial<QueryParams> = {};
   params: Partial<Params> = {};
   subscriptions: Subscription[] = [];
@@ -203,6 +202,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
       this.isLoading =false;
     }
     this.requests = null;
+    this.emptyLabel = null;
     this.isLoading = true;
     this.RequestSubscription = (<any>this.seviceType[this.params.type]).service.getRequests({
       'env': this.queryParams.env,
@@ -222,10 +222,11 @@ export class SearchRequestView implements OnInit, OnDestroy {
           if (d) {
             this.requests = d
           }
-          this.isLoading = false;
         },
-        error: err => {
-          this.isLoading = false;
+        error: error => {
+          if(error.status === 413) {
+            this.emptyLabel = error.error.message;
+          }
         }
       });
   }

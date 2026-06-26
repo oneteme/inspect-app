@@ -374,10 +374,13 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
       
       const periodParams = this.period.buildParams();
       const newQueryParams = { env: this.params.env, ...periodParams };
-      
-      if (!shallowEqual(this._activatedRoute.snapshot.queryParams, newQueryParams)) {
-        // Les params ont changé, naviguer
-        this._router.navigate(['supervision', 'server', this.formGroup.controls.instance.value.id], {
+      const newInstanceId = this.formGroup.controls.instance.value.id;
+      const currentInstanceId = this._activatedRoute.snapshot.params['instance'];
+      const instanceChanged = currentInstanceId !== newInstanceId;
+
+      if (instanceChanged || !shallowEqual(this._activatedRoute.snapshot.queryParams, newQueryParams)) {
+        // L'instance ou les params ont changé, naviguer (met à jour l'URL)
+        this._router.navigate(['supervision', 'server', newInstanceId], {
           queryParams: newQueryParams
         });
       } else {
@@ -428,6 +431,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
       if (result) {
         this.patchServerValue(result.server);
         this.patchInstanceValue(result.instance);
+        this.search();
       }
     });
   }

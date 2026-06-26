@@ -104,17 +104,18 @@ export class RestComponent implements OnInit {
     let actualGroup = this.getActualGroup(arr.chartConfig);
     let actualStack = this.getActualStack(arr.chartConfig);
     let actualFilter = this.getActualFilter(arr.chartConfig);
+    const instanceType = this.params.optional?.instanceType;
     if(event.eventType === 'default') {
       arr.loading = true;
       arr.data = [];
-      this._httpRequestService.getCustom({series: arr.chartConfig.series.items, indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks})
+      this._httpRequestService.getCustom({series: arr.chartConfig.series.items, indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks, instanceType})
       .pipe(finalize(() => arr.loading = false))
       .subscribe(data => {
         arr.data = data;
       });
     } else if(event.eventType === 'filter') {
       if(actualFilter) {
-        this._httpRequestService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts}).subscribe({
+        this._httpRequestService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, instanceType}).subscribe({
           next: (res: any[]) => {
             slice.data = res;
           }
@@ -132,18 +133,18 @@ export class RestComponent implements OnInit {
     let actualGroup = this.getActualGroup(arr.chartConfig);
     let actualStack = this.getActualStack(arr.chartConfig);
     let actualFilter = this.getActualFilter(arr.chartConfig);
+    const instanceType = this.params.optional?.instanceType;
     if(event.eventType === 'default') {
       arr.loading = true;
       arr.data = [];
-      console.log(event)
-      this._httpRequestService.getSizeCustom({series: arr.chartConfig.series.items, indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks})
+      this._httpRequestService.getSizeCustom({series: arr.chartConfig.series.items, indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks, instanceType})
       .pipe(finalize(() => arr.loading = false))
       .subscribe(data => {
         arr.data = data;
       });
     } else if(event.eventType === 'filter') {
       if(actualFilter) {
-        this._httpRequestService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts}).subscribe({
+        this._httpRequestService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, instanceType}).subscribe({
           next: (res: any[]) => {
             slice.data = res;
           }
@@ -155,6 +156,7 @@ export class RestComponent implements OnInit {
   }
 
   getUser() {
+    const instanceType = this.params.optional?.instanceType;
     let args: any = {
       'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
       'instance_env': 'instance.id',
@@ -165,6 +167,9 @@ export class RestComponent implements OnInit {
     }
     if(this.params.hosts?.length){
       args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    }
+    if(instanceType) {
+      args['instance.type'] = instanceType;
     }
     this.$userRepartition.loading = true;
     this._httpRequestService.getRestRequest(args).pipe(finalize(() => this.$userRepartition.loading = false)).subscribe({
@@ -181,17 +186,18 @@ export class RestComponent implements OnInit {
     let actualGroup = this.getActualGroup(event.chartConfig);
     let actualStack = this.getActualStack(event.chartConfig);
     let actualFilter = this.getActualFilter(event.chartConfig);
+    const instanceType = this.params.optional?.instanceType;
     if(event.eventType === 'default') {
       arr.loading = true;
       arr.data = [];
-      this._httpRequestService.getLatency2({serie: event.chartConfig.series.items[0], indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks})
+      this._httpRequestService.getLatency2({serie: event.chartConfig.series.items[0], indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks, instanceType})
       .pipe(finalize(() => arr.loading = false))
       .subscribe(data => {
         arr.data = data;
       });
     } else if(event.eventType === 'filter') {
       if(actualFilter) {
-        this._httpRequestService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts}).subscribe({
+        this._httpRequestService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, instanceType}).subscribe({
           next: (res: any[]) => {
             slice.data = res;
           }
@@ -203,6 +209,7 @@ export class RestComponent implements OnInit {
   }
 
   getDependencies() {
+    const instanceType = this.params.optional?.instanceType;
     let args: any = {
       'column': `instance.app_name:origin,host:target,count:count`,
       'instance_env': 'instance.id',
@@ -214,6 +221,9 @@ export class RestComponent implements OnInit {
     if(this.params.hosts?.length){
       args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
     }
+    if(instanceType) {
+      args['instance.type'] = instanceType;
+    }
     this.$dependencyRepartition.loading = true;
     this._httpRequestService.getRestRequest(args).pipe(finalize(() => this.$dependencyRepartition.loading = false)).subscribe({
       next: (res: any[]) => {
@@ -223,6 +233,7 @@ export class RestComponent implements OnInit {
   }
 
   getMediaType() {
+    const instanceType = this.params.optional?.instanceType;
     let args: any = {
       'column': `count:count,media.coalesce("Non renseigné"):media`,
       'instance_env': 'instance.id',
@@ -234,6 +245,9 @@ export class RestComponent implements OnInit {
     if(this.params.hosts?.length){
       args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
     }
+    if(instanceType) {
+      args['instance.type'] = instanceType;
+    }
     this.$mediaRepartition.loading = true;
     this._httpRequestService.getRestRequest(args).pipe(finalize(() => this.$mediaRepartition.loading = false)).subscribe({
       next: (res: any[]) => {
@@ -243,6 +257,7 @@ export class RestComponent implements OnInit {
   }
 
   getMethods() {
+    const instanceType = this.params.optional?.instanceType;
     let args: any = {
       'column': `count:count,method:method`,
       'instance_env': 'instance.id',
@@ -254,6 +269,9 @@ export class RestComponent implements OnInit {
     if(this.params.hosts?.length){
       args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
     }
+    if(instanceType) {
+      args['instance.type'] = instanceType;
+    }
     this.$methodRepartition.loading = true;
     this._httpRequestService.getRestRequest(args).pipe(finalize(() => this.$methodRepartition.loading = false)).subscribe({
       next: (res: any[]) => {
@@ -263,6 +281,7 @@ export class RestComponent implements OnInit {
   }
 
   getGlobalStatistics() {
+    const instanceType = this.params.optional?.instanceType;
     let args: any = {
       'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_error:count_error`,
       'instance_env': 'instance.id',
@@ -272,6 +291,9 @@ export class RestComponent implements OnInit {
     }
     if(this.params.hosts?.length){
       args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    }
+    if(instanceType) {
+      args['instance.type'] = instanceType;
     }
     this._httpRequestService.getRestRequest(args).subscribe({
       next: (res: any[]) => {

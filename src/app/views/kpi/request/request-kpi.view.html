@@ -6,8 +6,8 @@
               appearance="outline">
         <mat-label>Période</mat-label>
         <mat-date-range-input [formGroup]="filterForm.controls.dateRange" [rangePicker]="picker">
-          <input matStartDate formControlName="start" placeholder="Start date" readonly>
-          <input matEndDate formControlName="end" placeholder="End date" readonly>
+          <input matStartDate formControlName="start" placeholder="Start date">
+          <input matEndDate formControlName="end" placeholder="End date">
         </mat-date-range-input>
         <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
         <span matSuffix class="period-inline-separator" aria-hidden="true"></span>
@@ -44,6 +44,18 @@
        </mat-select>
        <mat-spinner *ngIf="serverNameIsLoading" [diameter]="18"></mat-spinner>
    </mat-form-field>
+
+   <mat-form-field class="no-subscript md-3 type-kpi-filter" appearance="outline" *ngIf="params.type === 'rest'" >
+     <mat-label>Type d'appel</mat-label>
+     <mat-select [formControl]="filterForm.controls.instanceType" multiple>
+       <mat-option *ngFor="let opt of INSTANCE_TYPE_OPTIONS"
+                   [value]="opt.value"
+                   (onSelectionChange)="onInstanceTypeOptionSelection($event)">
+         {{ opt.label }}
+       </mat-option>
+     </mat-select>
+   </mat-form-field>
+
     <div class="pp-actions">
       <button mat-mini-fab color="primary"  (click)="search()">
         <mat-icon matSuffix>search</mat-icon>

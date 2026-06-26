@@ -17,6 +17,7 @@ import {
 } from '../../model/tree.model';
 import {Constants} from "../constants";
 import {PageTitleService} from '../../service/page-title.service';
+import {formatDuration} from '../../shared/pipe/duration.pipe';
 
 
 @Component({
@@ -33,6 +34,8 @@ export class TreeView implements OnDestroy {
   private _treeService = inject(TreeService);
   private _cdr = inject(ChangeDetectorRef);
   private readonly _pageTitleService = inject(PageTitleService);
+
+  readonly formatDuration = formatDuration;
   subscriptions: Subscription[] = [];
   id: string;
   tree: any;
@@ -264,20 +267,22 @@ export class TreeView implements OnDestroy {
 
   navigateToRequest(item: any, event: MouseEvent) {
     event.stopPropagation();
-    const path = `#/request/${item.type}/${item.value}`;
+    const type = item.type?.toLowerCase();
+    const path = `#/request/${type}/${item.value}`;
     if (event.ctrlKey) {
       this._router.open(`${path}?env=${this.env}`, '_blank',)
     } else {
-      this._router.navigate(['/request', item.type, item.value], { queryParams: { env: this.env } });
+      this._router.navigate(['/request', type, item.value], { queryParams: { env: this.env } });
     }
   }
   navigateToSession(item: any, event: MouseEvent) {
     event.stopPropagation();
-    const path = `#/session/${item.type}/${item.value}`;
+    const type = item.type?.toLowerCase();
+    const path = `#/session/${type}/${item.value}`;
     if (event.ctrlKey) {
       this._router.open(`${path}?env=${this.env}`, '_blank',)
     } else {
-      this._router.navigate(['/session', item.type, item.value], { queryParams: { env: this.env } });
+      this._router.navigate(['/session', type, item.value], { queryParams: { env: this.env } });
     }
   }
 

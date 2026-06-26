@@ -20,6 +20,10 @@ export class DetailSmtpTableComponent {
     if (q) this.tableConfig = { ...this.tableConfig, search: { ...this.tableConfig.search, initialQuery: q } };
   }
 
+  @Input() set emptyLabel(value: string) {
+    if (value) this.tableConfig.labels.empty = value;
+  }
+
   @Input() set requests(requests: MailRequestDto[]) {
     this._requests = requests;
   }

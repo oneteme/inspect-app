@@ -21,6 +21,7 @@ import {RestSessionDto} from '../../../model/request.model';
 import {TableProvider} from '@oneteme/jquery-table';
 import {REST_SESSION_TABLE_CONFIG} from "../../../shared/_component/table/table.config";
 import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
+import {HttpErrorResponse} from "@angular/common/http";
 
 
 @Component({
@@ -182,12 +183,17 @@ export class SearchRestView implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
-
+    this.sessions = [];
     this._traceService.getRestSessions(params)
       .pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false))
       .subscribe({
         next: d => {
           this.sessions = d;
+        },
+        error: (error: HttpErrorResponse) => {
+          if(error.status === 413) {
+            this.tableConfig.labels.empty = error.error.message;
+          }
         }
       });
   }
