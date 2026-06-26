@@ -9,7 +9,7 @@ export class Interceptor implements  HttpInterceptor {
         return next.handle(req)
             .pipe(
                 catchError((error:HttpErrorResponse) => {
-                    if(error.status === 404){
+                    if(error.status === 404 || error.status === 413){
                         return throwError(()=>error)
                     }
                     if(!this._snackBar._openedSnackBarRef) {

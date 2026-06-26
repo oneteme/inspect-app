@@ -3,6 +3,7 @@ import {RestRequestDto} from "../../../../../model/request.model";
 import {TableProvider} from '@oneteme/jquery-table';
 import {REST_REQUEST_TABLE_CONFIG} from "../../../../../shared/_component/table/table.config";
 import {QueryParams} from "../../../../../model/conf.model";
+import {AbstractRequest} from "../../../../../model/trace.model";
 
 @Component({
   selector: 'rest-table',
@@ -19,6 +20,10 @@ export class DetailRestTableComponent {
 
   @Input() set initialQuery(q: string) {
     if (q) this.tableConfig = { ...this.tableConfig, search: { ...this.tableConfig.search, initialQuery: q } };
+  }
+
+  @Input() set emptyLabel(value: string) {
+    this.tableConfig.labels.empty = value ?? null;
   }
 
   @Input() isLoading: boolean;

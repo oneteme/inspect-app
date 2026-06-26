@@ -147,9 +147,9 @@ const routes: Route[] = [
         path: 'detail/:id_instance',
         component: InstanceComponent,
         title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          return `Supervision • Instance • ${route.paramMap.get('id_instance')}`;
+          return `Instance • ${route.paramMap.get('id_instance')}`;
         }
-      },
+      }
     ],
     canActivate: [authGuard]
   },
