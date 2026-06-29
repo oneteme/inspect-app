@@ -20,6 +20,10 @@ export class DetailDatabaseTableComponent {
     if (q) this.tableConfig = { ...this.tableConfig, search: { ...this.tableConfig.search, initialQuery: q } };
   }
 
+  @Input() set emptyLabel(value: string) {
+    this.tableConfig.labels.empty = value ?? null;
+  }
+
   @Input() set requests(requests: DatabaseRequestDto[]) {
     this._requests = requests;
   }

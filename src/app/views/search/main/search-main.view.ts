@@ -22,6 +22,7 @@ import {MainSessionDto} from "../../../model/request.model";
 import {TableProvider} from "@oneteme/jquery-table";
 import {MAIN_SESSION_TABLE_CONFIG} from "../../../shared/_component/table/table.config";
 import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
+import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
   templateUrl: './search-main.view.html',
@@ -45,10 +46,7 @@ export class SearchMainView implements OnInit, OnDestroy {
   MAPPING_TYPE = Constants.MAPPING_TYPE;
   filterConstants = FilterConstants;
   readonly periodQuickRanges = PERIOD_QUICK_RANGES;
-  tableConfig: TableProvider<MainSessionDto> = {
-    ...MAIN_SESSION_TABLE_CONFIG,
-    onRowSelected: (row, event) => this.selectedRequest(event, row)
-  };
+  tableConfig: TableProvider<MainSessionDto> = this.buildTableConfig();
   sessions: MainSessionDto[];
 
   serverNameIsLoading = true;
@@ -85,6 +83,7 @@ export class SearchMainView implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([params, queryParams]) => {
         this.type = params.type_main;
+        this.tableConfig = this.buildTableConfig(queryParams.q);
         this._pageTitleService.set({
           icon: Constants.MAPPING_TYPE[this.type]?.icon || 'search',
           iconOutlined: true,
@@ -100,12 +99,6 @@ export class SearchMainView implements OnInit, OnDestroy {
             period = new IStep(Number(queryParams.step));
           }
           this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.env || app.defaultEnv, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server], null, !queryParams.rangestatus ? [] : Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus]);
-        }
-        if (queryParams.q) {
-          this.tableConfig = {
-            ...this.tableConfig,
-            search: { ...this.tableConfig?.search, initialQuery: queryParams.q, searchColumns: ['exception'] }
-          }
         }
         this.patchStatusValue(this.queryParams.rangestatus)
         this.patchServerValue(this.queryParams.appname);
@@ -191,13 +184,30 @@ export class SearchMainView implements OnInit, OnDestroy {
     }
 
     this.isLoading = true;
+    this.sessions = [];
     this._traceService.getMainSessions(params)
     .pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false))
     .subscribe({
       next: d => {
         this.sessions = d;
+      },
+      error: (error: HttpErrorResponse) => {
+        if(error.status === 413) {
+          this.tableConfig.labels.empty = error.error.message;
+        }
       }
     });
+  }
+
+  private buildTableConfig(initialQuery?: string): TableProvider<MainSessionDto> {
+    return {
+      ...MAIN_SESSION_TABLE_CONFIG,
+      clearSearchInput: this.type || null,
+      search: initialQuery
+        ? { ...MAIN_SESSION_TABLE_CONFIG.search, initialQuery, searchColumns: ['exception'] }
+        : MAIN_SESSION_TABLE_CONFIG.search,
+      onRowSelected: (row, event) => this.selectedRequest(event, row)
+    };
   }
 
 

@@ -6,8 +6,8 @@
               appearance="outline">
         <mat-label>Période</mat-label>
         <mat-date-range-input [formGroup]="filterForm.controls.dateRange" [rangePicker]="picker">
-          <input matStartDate formControlName="start" placeholder="Start date" readonly>
-          <input matEndDate formControlName="end" placeholder="End date" readonly>
+          <input matStartDate formControlName="start" placeholder="Start date">
+          <input matEndDate formControlName="end" placeholder="End date">
         </mat-date-range-input>
         <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
         <span matSuffix class="period-inline-separator" aria-hidden="true"></span>

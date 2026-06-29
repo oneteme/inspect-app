@@ -28,7 +28,7 @@ function fmtDuration(start: number, end: number | null | undefined): string {
 export const DEFAULT_TABLE_CONFIG: TableProvider = {
   search: { enabled: true },
   view: { enabled: true, enableColumnRemoval: true },
-  pagination: { enabled: true, pageSize: 10, pageSizeOptions: [5, 10, 15, 20, 100], pageSizeOptionsGroupBy: [20, 50, 100, 200] },
+  pagination: { enabled: true, pageSize: 10, pageSizeOptions: [5, 10, 15, 20, 100], pageSizeOptionsGroupBy: [20, 50, 100, 200], showFirstLastButtons: true },
   labels: { empty: 'Aucun résultat', loading: 'Chargement des données...' },
 };
 

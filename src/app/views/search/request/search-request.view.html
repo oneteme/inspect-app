@@ -69,6 +69,7 @@
 </page-panel>
 
 <rest-table *ngIf="params.type=='rest'"
+            [emptyLabel]="emptyLabel"
             [requests]="requests"
             [isLoading]="isLoading"
             [initialSearch]="queryParams.optional?.q"
@@ -76,24 +77,24 @@
             (onClickRow)="selectedRest($event)">
 </rest-table>
 
-<ftp-table *ngIf="params.type=='ftp'" [requests]="requests"
+<ftp-table *ngIf="params.type=='ftp'" [emptyLabel]="emptyLabel" [requests]="requests"
            [isLoading]="isLoading"
            [initialSearch]="queryParams.optional?.q"
            (onClickRow)="selectedFtp($event)"></ftp-table>
 
-<smtp-table *ngIf="params.type=='smtp'" [requests]="requests"
+<smtp-table *ngIf="params.type=='smtp'" [emptyLabel]="emptyLabel" [requests]="requests"
             [isLoading]="isLoading"
             [initialSearch]="queryParams.optional?.q"
             (onClickRow)="selectedSmtp($event)" >
 </smtp-table>
 
-<ldap-table *ngIf="params.type=='ldap'" [requests]="requests"
+<ldap-table *ngIf="params.type=='ldap'" [emptyLabel]="emptyLabel" [requests]="requests"
             [isLoading]="isLoading"
             [initialSearch]="queryParams.optional?.q"
             (onClickRow)="selectedLdap($event)">
 </ldap-table>
 
-<database-table *ngIf="params.type=='jdbc'" [requests]="requests"
+<database-table *ngIf="params.type=='jdbc'" [emptyLabel]="emptyLabel" [requests]="requests"
                 [isLoading]="isLoading"
                 [initialSearch]="queryParams.optional?.q"
                 (onClickRow)="selectedQuery($event)">
