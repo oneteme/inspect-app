@@ -10,6 +10,8 @@ import {groupByColor} from "../../../shared/util";
 import {TabData} from "../session/_component/detail-session.component";
 import {EnvRouter} from "../../../service/router.service";
 import {TraceService} from "../../../service/trace.service";
+import {PageTitleService} from "../../../service/page-title.service";
+import {Constants} from "../../constants";
 
 @Component({
   selector: 'app-instance',
@@ -20,7 +22,7 @@ export class InstanceComponent implements OnInit, OnDestroy {
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _instanceService = inject(InstanceService);
   private readonly _traceService = inject(TraceService);
-  private readonly _router = inject(EnvRouter);
+  private readonly _pageTitleService = inject(PageTitleService);
 
   params: Partial<{id: string, env: string}> = {};
   private readonly $destroy = new Subject<void>();
@@ -55,6 +57,7 @@ export class InstanceComponent implements OnInit, OnDestroy {
       next: ([params, queryParams]) => {
         this.params.id = params.id_instance;
         this.params.env = queryParams.env;
+        this._pageTitleService.set({ icon: 'history', iconOutlined: true, title: 'Instance • ' + this.params.id, subtitle: 'Historique des démarrages' });
         this.getRequest();
       }
     });
