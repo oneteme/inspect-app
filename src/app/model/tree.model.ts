@@ -146,7 +146,7 @@ export class LinkRequestNode implements Link<Label> {
   }
 
   linkInfo(): any {
-    const elapsed  = this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null;
+    const elapsed  =formatDuration(this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null);
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
     const isOngoing = this.nodeObject?.end == null;
@@ -221,7 +221,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
   }
 
   linkInfo(): any {
-    const elapsed  = this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null;
+    const elapsed  = formatDuration(this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null);
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
     const isError   = this.nodeObject.failed
@@ -266,7 +266,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
   }
 
   linkInfo(): any {
-    const elapsed  = this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null;
+    const elapsed  = formatDuration(this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null);
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
     const isError   = this.nodeObject.failed
@@ -329,7 +329,7 @@ export class MailRequestNode implements Node<Label>, Link<Label> {
   }
 
   linkInfo(): any {
-    const elapsed  = this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null;
+    const elapsed  = formatDuration(this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null);
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
     const isError   = this.nodeObject.failed
@@ -388,7 +388,7 @@ export class LdapRequestNode implements Node<Label>, Link<Label> {
   }
 
   linkInfo(): any {
-    const elapsed  = this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null;
+    const elapsed  = formatDuration(this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null);
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
     const isError   = this.nodeObject.failed
@@ -456,7 +456,7 @@ export class RestRequestNode implements Node<Label>, Link<Label> {
   }
 
     linkInfo(): any {
-      const elapsed  = this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null;
+      const elapsed  =  elapsedLatence(this.nodeObject);
       const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
       const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
       const isOngoing = this.nodeObject?.end == null;
@@ -495,14 +495,7 @@ export class RestRequestNode implements Node<Label>, Link<Label> {
     switch (field) {
       case Label.ELAPSED_LATENSE: {
         if (this.nodeObject.end == null) return formatDuration(null);
-        const e1 = this.nodeObject.end - this.nodeObject.start;
-        if (!e1) return formatDuration(null);
-        let e2 = 0;
-        if (this.nodeObject.remoteTrace) {
-          const e3 = this.nodeObject.remoteTrace.end - this.nodeObject.remoteTrace.start;
-          if (e3) e2 = e1 - e3;
-        }
-        return formatDuration(e1) + (e2 >= 1 ? ` ~${formatDuration(e2)}` : '');
+        return elapsedLatence(this.nodeObject);
       }
       case Label.METHOD_RESOURCE: return `${this.nodeObject.method || "?"} ${this.nodeObject.path || "?"}`
       case Label.SIZE_COMPRESSION: return `${this.nodeObject.inDataSize < 0 ? 0 : sizeFormatter(this.nodeObject.inDataSize) } ↓↑ ${this.nodeObject.outDataSize < 0 ? 0 :sizeFormatter(this.nodeObject.outDataSize) }`
@@ -537,6 +530,14 @@ export enum Label {
   USER = "USER"
 }
 
+function elapsedLatence<T extends { end: number, start: number, remoteTrace?: { end: number, start: number } }>(nodeObject: T): string {
+  const e1 = nodeObject.end - nodeObject.start;
+  if (!e1) return formatDuration(null);
+  const remote = nodeObject.remoteTrace;
+  const e3 = remote ? (remote.end - remote.start) : 0;
+  const e2 = e3 ? e1 - e3 : 0;
+  return formatDuration(e1) + (e2 >= 0.2 ? ` ~${formatDuration(e2)}` : '')
+}
 
 function sizeFormatter(value:any){
   if(!value && value!= 0) return '';
