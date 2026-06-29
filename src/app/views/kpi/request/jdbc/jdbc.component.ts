@@ -179,7 +179,7 @@ export class JdbcComponent implements OnInit {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_request_error:count_error`,
+      'column': `percentileDisc(0.95).within(group.order(elapsedTime)):elapsedPercentile,count:count_request,count_request_error:count_error`,
       'instance_env': 'instance.id',
       'instance.environement': `"${this.params.env}"`,
       'start.ge': this.params.period.start.toISOString(),

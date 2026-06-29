@@ -1865,7 +1865,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
       label: 'Percentile (95%)'
     },
     jquery: {
-      value: (s: string) => `elapsed_percentile`,
+      value: (s: string) => `percentileDisc(0.95).within(group.order(elapsedTime))`,
       buildAlias: () => 'percentile',
       buildName: (chartItem) => 'Percentile (95%)',
       buildColor: () => '#0080ff'

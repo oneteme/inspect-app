@@ -109,7 +109,7 @@ export class BatchComponent implements OnInit {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_exception:count_error,count(name.distinct):count_batch`,
+      'column': `percentileDisc(0.95).within(group.order(elapsedTime)):elapsedPercentile,count:count_request,count_exception:count_error,count(name.distinct):count_batch`,
       'instance_env': 'instance.id',
       'instance.environement': `"${this.params.env}"`,
       'instance.type': 'SERVER',

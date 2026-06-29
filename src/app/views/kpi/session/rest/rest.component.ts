@@ -283,7 +283,7 @@ export class RestComponent implements OnInit {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_error:count_error,count(user.distinct):count_user`,
+      'column': `percentileDisc(0.95).within(group.order(elapsedTime)):elapsedPercentile,count:count_request,count_error:count_error,count(user.distinct):count_user`,
       'instance_env': 'instance.id',
       'instance.environement': `"${this.params.env}"`,
       'start.ge': this.params.period.start.toISOString(),
