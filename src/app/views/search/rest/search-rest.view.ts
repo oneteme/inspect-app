@@ -297,9 +297,7 @@ export class SearchRestView implements OnInit, OnDestroy {
     this.queryParams.period = period;
     this.patchDateValue(period.start, toDisplayedPeriodEnd(period.end));
   }
-
 }
-
 
 export function shallowEqual(
     a: {[key: string | symbol]: any},
@@ -342,5 +340,3 @@ export function equalArraysOrString(a: string | string[], b: string | string[]) 
     return a === b;
   }
 }
-
-
