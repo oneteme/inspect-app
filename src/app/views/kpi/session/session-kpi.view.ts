@@ -174,7 +174,6 @@ export class SessionKpiView implements OnInit, OnDestroy {
   }
 
   applyQuickRange(range: KpiPeriodQuickRange): void {
-    if (!this.params.queryParams) return;
     const {start, end} = getKpiQuickRangeDates(range);
     this.patchDateValue(start, toDisplayedPeriodEnd(end));
   }
