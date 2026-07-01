@@ -1,5 +1,5 @@
 import {Injectable, Type} from "@angular/core";
-import {RestComponent} from "../../kpi/request/rest/rest.component";
+import {RestKpiTestComponent} from "./rest/rest.component";
 import {JdbcComponent} from "../../kpi/request/jdbc/jdbc.component";
 import {FtpComponent} from "../../kpi/request/ftp/ftp.component";
 import {LdapComponent} from "../../kpi/request/ldap/ldap.component";
@@ -10,7 +10,7 @@ import {SmtpComponent} from "../../kpi/request/smtp/smtp.component";
 })
 export class RequestKpiTestComponentResolverService {
   private componentMap: { [key: string]: Type<any> } = {
-    'rest': RestComponent,
+    'rest': RestKpiTestComponent,
     'jdbc': JdbcComponent,
     'ftp': FtpComponent,
     'ldap': LdapComponent,

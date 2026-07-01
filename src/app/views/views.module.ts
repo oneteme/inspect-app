@@ -6,6 +6,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {SharedModule} from '../shared/shared.module';
 import {ChartComponent} from "@oneteme/jquery-echarts";
+import {OrganizerButtonModule} from "@oneteme/jquery-organizer";
 import {SearchRestView} from "./search/rest/search-rest.view";
 import {SearchMainView} from "./search/main/search-main.view";
 import {DetailSessionRestView} from "./detail/session/rest/detail-session-rest.view";
@@ -50,6 +51,7 @@ import {DashboardInstancesTableComponent} from './dashboard/components/instances
 import {DashboardDetailViewComponent} from './dashboard/components/detail-view/detail-view.component';
 import {RequestKpiView} from "./kpi/request/request-kpi.view";
 import {RequestKpiTestView} from "./kpi-test/request/request-kpi-test.view";
+import {RestKpiTestComponent} from "./kpi-test/request/rest/rest.component";
 import {RestComponent as RequestRestComponent} from "./kpi/request/rest/rest.component";
 import {RestComponent as SessionRestComponent} from "./kpi/session/rest/rest.component";
 import {StatusChartComponent} from "./kpi/_component/status-chart/status-chart.component";
@@ -57,7 +59,7 @@ import {PerformanceChartComponent} from "./kpi/_component/performance-chart/perf
 import {VolumetryChartComponent} from "./kpi/_component/volumetry-chart/volumetry-chart.component";
 import {ChartMenuComponent} from "./kpi/_component/chart-menu/chart-menu.component";
 import {LatencyChartComponent} from "./kpi/_component/latency-chart/latency-chart.component";
-import {SlicePanelComponent} from "@oneteme/jquery-table";
+import {SlicePanelComponent, TableComponent} from "@oneteme/jquery-table";
 import {JdbcComponent} from "./kpi/request/jdbc/jdbc.component";
 import {FtpComponent} from "./kpi/request/ftp/ftp.component";
 import {LdapComponent} from "./kpi/request/ldap/ldap.component";
@@ -81,7 +83,9 @@ import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.compone
     BrowserAnimationsModule,
     SharedModule,
     ChartComponent,
-    SlicePanelComponent
+    SlicePanelComponent,
+    TableComponent,
+    OrganizerButtonModule
   ],
   declarations: [
     SearchRestView,
@@ -125,6 +129,7 @@ import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.compone
     // New
     RequestKpiView,
     RequestKpiTestView,
+    RestKpiTestComponent,
     RequestRestComponent,
     SessionRestComponent,
     BatchComponent,

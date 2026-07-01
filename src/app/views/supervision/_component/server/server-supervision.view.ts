@@ -315,6 +315,17 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
       }
       this.instance = res;
       this.updatePageTitle();
+      // Si getInstances() n'a pas trouvé l'instance (ex: instance arrêtée avant la période courante),
+      // on utilise les données de getInstance() pour initialiser le champ server.
+      if (!this.formGroup.controls.server.value) {
+        const instanceAsRow = { id: res.id, appName: res.name, start: res.instant, end: res.end };
+        if (!this.servers.includes(res.name)) {
+          this.servers = [...this.servers, res.name];
+          this.instances = [...this.instances, instanceAsRow];
+        }
+        this.patchServerValue(res.name);
+        this.patchInstanceValue(instanceAsRow);
+      }
       return forkJoin([
         this.instance.end ? of([]) : this._instanceTraceService.getLastInstanceTrace({instance: [this.params.instance]}),
         this._machineUsageService.getResourceMachineByPeriod({instance: this.params.instance, start: this.params.start, end: this.params.end}),

@@ -56,7 +56,7 @@ export const REST_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig
             key: 'status_stack',
             selected: true,
             menu: {
-              label: 'Par statut'
+              label: 'Statut'
             },
             jquery: {
               value: () => 'status',
@@ -68,7 +68,7 @@ export const REST_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig
             key: 'status_tranche',
             selected: false,
             menu: {
-              label: 'Par tranche'
+              label: 'Tranche'
             },
             jquery: {
               value: () => 'status_tranche',
@@ -129,11 +129,11 @@ export const REST_SESSION_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartCon
             key: 'size_tranche',
             selected: true,
             menu: {
-              label: 'Par tranche'
+              label: 'Tranche'
             },
             jquery: {
-              value: (value) => value + '_tranche',
-              buildAlias: (value) => value +  '_tranche',
+              value: (serieAlias: string) => serieAlias + '_tranche',
+              buildAlias: () => 'undefined_tranche',
               buildName: (chartItem, value) => chartItem.menu.label + " " + SIZE_TRANCHE[value].label,
               buildColor: (value) => SIZE_TRANCHE[value].color
             }
@@ -379,7 +379,7 @@ export const BATCH_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfi
             key: 'status_tranche',
             selected: true,
             menu: {
-              label: 'Par tranche'
+              label: 'Tranche'
             },
             jquery: {
               value: () => 'status_main_tranche',
@@ -528,7 +528,7 @@ export const STARTUP_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartCon
             key: 'status_tranche',
             selected: true,
             menu: {
-              label: 'Par tranche'
+              label: 'Tranche'
             },
             jquery: {
               value: () => 'status_main_tranche',
@@ -674,7 +674,7 @@ export const REST_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
             key: 'status_stack',
             selected: true,
             menu: {
-              label: 'Par statut'
+              label: 'Statut'
             },
             jquery: {
               value: () => 'status',
@@ -686,7 +686,7 @@ export const REST_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
             key: 'status_tranche',
             selected: false,
             menu: {
-              label: 'Par tranche'
+              label: 'Tranche'
             },
             jquery: {
               value: () => 'status_tranche',
@@ -747,11 +747,11 @@ export const REST_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartConfig => (
             key: 'size_tranche',
             selected: true,
             menu: {
-              label: 'Par tranche'
+              label: 'Tranche'
             },
             jquery: {
-              value: (value: string) => value + '_tranche',
-              buildAlias: (value: string) => value + '_tranche',
+              value: (serieAlias: string) => serieAlias + '_tranche',
+              buildAlias: () => 'undefined_tranche',
               buildName: (chartItem, value) => chartItem.menu.label + " " + SIZE_TRANCHE[value].label,
               buildColor: (value) => SIZE_TRANCHE[value].color
             }
@@ -1033,7 +1033,7 @@ export const JDBC_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
             key: 'status_stack',
             selected: true,
             menu: {
-              label: 'Par statut'
+              label: 'Statut'
             },
             jquery: {
               value: () => 'failed',
@@ -1292,7 +1292,7 @@ export const FTP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
             key: 'status_stack',
             selected: true,
             menu: {
-              label: 'Par statut'
+              label: 'Statut'
             },
             jquery: {
               value: () => 'failed',
@@ -1507,7 +1507,7 @@ export const LDAP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
             key: 'status_stack',
             selected: true,
             menu: {
-              label: 'Par statut'
+              label: 'Statut'
             },
             jquery: {
               value: () => 'failed',
@@ -1678,7 +1678,7 @@ export const SMTP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
             key: 'status_stack',
             selected: true,
             menu: {
-              label: 'Par statut'
+              label: 'Statut'
             },
             jquery: {
               value: () => 'failed',
@@ -1833,7 +1833,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
           key: 'performance_tranche',
           selected: false,
           menu: {
-            label: 'Par tranche 1',
+            label: 'Tranche 1',
             icon: ''
           },
           jquery: {
@@ -1846,7 +1846,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
           key: 'performance_tranche2',
           selected: false,
           menu: {
-            label: 'Par tranche 2',
+            label: 'Tranche 2',
             icon: ''
           },
           jquery: {
@@ -1861,6 +1861,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
   }, {
     key: 'percentile',
     selected: true,
+    group: 'Indicateurs',
     menu: {
       label: 'Percentile (95%)'
     },
@@ -1873,6 +1874,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
   }, {
     key: 'median',
     selected: false,
+    group: 'Indicateurs',
     menu: {
       label: 'Médiane'
     },
@@ -1885,6 +1887,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
   }, {
     key: 'avg',
     selected: false,
+    group: 'Indicateurs',
     menu: {
       label: 'Moyenne'
     },
@@ -1897,6 +1900,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
   }, {
     key: 'min',
     selected: false,
+    group: 'Indicateurs',
     menu: {
       label: 'Minimum'
     },
@@ -1909,6 +1913,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
   }, {
     key: 'max',
     selected: false,
+    group: 'Indicateurs',
     menu: {
       label: 'Maximum'
     },
@@ -1968,6 +1973,7 @@ export interface ChartItem<TExtra = {}> {
   selected: boolean;
   menu: MenuConfig;         // affichage
   jquery: JQueryConfig;     // requête
+  group?: string;           // regroupement visuel dans l'organiseur (ex: 'Indicateurs')
   extra?: TExtra;           // données spécifiques au type d'item
 }
 
