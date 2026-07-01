@@ -132,7 +132,7 @@ export class RequestKpiView implements OnInit, OnDestroy {
     this.filterForm.controls.dateRange.patchValue({
       start: start,
       end: end
-    }, {emitEvent: false, onlySelf: true});
+    }, {emitEvent: false});
   }
 
   private loadComponent(componentType: any): void {
@@ -216,19 +216,19 @@ export class RequestKpiView implements OnInit, OnDestroy {
 
   applyQuickRange(range: KpiPeriodQuickRange): void {
     if (!this.params.queryParams) return;
-    const {start, end, queryEnd} = getKpiQuickRangeDates(range);
-    this.params.queryParams.period = new IPeriod(start, queryEnd);
+    const {start, end} = getKpiQuickRangeDates(range);
     this.patchDateValue(start, toDisplayedPeriodEnd(end));
   }
 
   isDefaultPeriod(): boolean {
-    return isDefaultTodayPeriod(this.params.queryParams?.period);
+    const start = this.filterForm.controls.dateRange.controls.start.value;
+    const end = this.filterForm.controls.dateRange.controls.end.value;
+    if (!start || !end) return isDefaultTodayPeriod(this.params.queryParams?.period);
+    return isDefaultTodayPeriod(new IPeriod(start, new Date(end.getTime() + 1)));
   }
 
   resetPeriod(): void {
-    if (!this.params.queryParams) return;
     const period = getDefaultTodayPeriod();
-    this.params.queryParams.period = period;
     this.patchDateValue(period.start, toDisplayedPeriodEnd(period.end));
   }
 }
