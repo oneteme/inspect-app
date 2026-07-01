@@ -325,8 +325,4 @@ export class SearchMainView implements OnInit, OnDestroy {
       this._filter.setFilterMap(this.advancedParams);
     }
   }
-
 }
-
-
-
