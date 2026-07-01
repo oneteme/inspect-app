@@ -49,7 +49,7 @@
     <mat-form-field class="no-subscript status-filter" appearance="outline">
       <mat-label>Status</mat-label>
       <mat-select [formControl]="serverFilterForm.controls.rangestatus" multiple (selectionChange)="onChangeStatus($event)">
-        <mat-option *ngFor="let s of filters" [value]="s" class="status-option">
+        <mat-option *ngFor="let s of filters" [value]="s">
           <span *ngIf="s.color; else plain"
                 [style.color]="s.color"
                 [style.background-color]="s.color + '1a'"
