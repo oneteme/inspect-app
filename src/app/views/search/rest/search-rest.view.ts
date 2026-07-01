@@ -23,7 +23,6 @@ import {REST_SESSION_TABLE_CONFIG} from "../../../shared/_component/table/table.
 import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
 import {HttpErrorResponse} from "@angular/common/http";
 
-
 @Component({
   templateUrl: './search-rest.view.html',
   styleUrls: ['./search-rest.view.scss'],
@@ -59,10 +58,10 @@ export class SearchRestView implements OnInit, OnDestroy {
   });
 
   filters: { icon: string; label: string; color: string; value: any }[] = [
-    { icon: 'warning', label: '5xx', color: '#bb2124', value: '5xx' },
-    { icon: 'error', label: '4xx', color: '#f9ad4e', value: '4xx' },
-    { icon: 'done', label: '2xx', color: '#22bb33', value: '2xx' },
-    { icon: 'pending', label: 'En cours', color: '#2196F3', value: 'lazy' }
+    { icon: 'warning', label: '5xx', color: '#F44336', value: '5xx' },
+    { icon: 'error', label: '4xx', color: '#F9AD4E', value: '4xx' },
+    { icon: 'done', label: '2xx', color: '#4CAF50', value: '2xx' },
+    { icon: 'pending', label: 'En cours', color: '', value: 'lazy' }
   ];
   readonly periodQuickRanges = PERIOD_QUICK_RANGES;
   advancedParams: Partial<{ [key: string]: any }> = {};
@@ -298,6 +297,7 @@ export class SearchRestView implements OnInit, OnDestroy {
     this.queryParams.period = period;
     this.patchDateValue(period.start, toDisplayedPeriodEnd(period.end));
   }
+
 }
 
 

@@ -55,8 +55,12 @@
           (+{{(requestFilterForm.controls.rangestatus.value?.length || 0) - 1}} {{requestFilterForm.controls.rangestatus.value.length === 2 ? 'autre' : 'autres'}})
           </span>
         </mat-select-trigger>
-        <mat-option *ngFor="let s of seviceType[params.type].filters" [value]="s">
-          {{s.label}}
+        <mat-option *ngFor="let s of seviceType[params.type].filters" [value]="s" class="status-option">
+          <span *ngIf="s.color; else plain"
+                [style.color]="s.color"
+                [style.background-color]="s.color + '1a'"
+                style="padding: 1px 8px; border-radius: 4px; font-weight: 500;">{{s.label}}</span>
+          <ng-template #plain>{{s.label}}</ng-template>
         </mat-option>
       </mat-select>
     </mat-form-field>

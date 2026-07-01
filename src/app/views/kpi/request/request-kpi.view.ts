@@ -132,7 +132,7 @@ export class RequestKpiView implements OnInit, OnDestroy {
     this.filterForm.controls.dateRange.patchValue({
       start: start,
       end: end
-    }, {emitEvent: false, onlySelf: true});
+    }, {emitEvent: false});
   }
 
   private loadComponent(componentType: any): void {
@@ -230,6 +230,7 @@ export class RequestKpiView implements OnInit, OnDestroy {
     const period = getDefaultTodayPeriod();
     this.params.queryParams.period = period;
     this.patchDateValue(period.start, toDisplayedPeriodEnd(period.end));
+    this.search();
   }
 }
 

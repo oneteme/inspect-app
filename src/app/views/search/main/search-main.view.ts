@@ -60,17 +60,11 @@ export class SearchMainView implements OnInit, OnDestroy {
   });
   nameDataList: any[];
   isLoading = false;
-  filters: { icon: string, label: string, color: string, value: any } [] = [{
-    icon: 'warning',
-    label: 'KO',
-    color: '#bb2124',
-    value: 'Ko'
-  }, {icon: 'done', label: 'OK', color: '#22bb33', value: 'Ok'}, {
-    icon: 'pending',
-    label: 'En cours',
-    color: '#2196F3',
-    value: 'lazy'
-  }];
+  filters: { icon: string, label: string, color: string, value: any }[] = [
+    { icon: 'warning', label: 'KO', color: '#F44336', value: 'Ko' },
+    { icon: 'done', label: 'OK', color: '#4CAF50', value: 'Ok' },
+    { icon: 'pending', label: 'En cours', color: '', value: 'lazy' }
+  ];
   advancedParams: Partial<{ [key: string]: any }>
   focusFieldName: any
   queryParams: Partial<QueryParams> = {};
@@ -331,6 +325,7 @@ export class SearchMainView implements OnInit, OnDestroy {
       this._filter.setFilterMap(this.advancedParams);
     }
   }
+
 }
 
 
