@@ -95,7 +95,6 @@ export class DetailTimelineComponent implements OnChanges {
     private computeDataItems(): DataItem[] {
         const filtered = this.getFilteredArray();
         if (this.dataArray.length > 50) {
-            console.log('ehre')
             return this.getDataForRange(filtered, this.timelineStart / 1000, this.timelineEnd / 1000)
                 .map((c: any, i: number) => this.maptype[c.typeTimeline](c, i));
         }
