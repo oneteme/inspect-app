@@ -142,7 +142,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
                             <span>${showifnotnull(a.args, () => a.args.join(', '))}</span>
                           </div>`,
         className: `ftp overflow ${getErrorClassName(a)}`,
-        title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end, 'HH:mm:ss.SSS')}</span> (⏱ ${this.durationPipe.transform((end / 1000) - (start / 1000))})<br>
+        title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end, 'HH:mm:ss.SSS')}</span> (⏱ ${this.durationPipe.transform(a.end - a.start)})<br>
                         <span>${showifnotnull(a.command, () => a.command)} ${showifnotnull(a.args, () => a.args.join(', '))}</span>`
       }
 

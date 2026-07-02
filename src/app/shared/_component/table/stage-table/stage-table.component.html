@@ -17,7 +17,7 @@
       En cours...
     </div>
     <div *ngIf="row.end" [matTooltip]="row.end * 1000 | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr'">
-      {{ {start: row.start, end: row.end} | duration }}
+      {{ {start: row.start, end: row.end} | duration: 2 }}
     </div>
   </ng-template>
 </jquery-table>
