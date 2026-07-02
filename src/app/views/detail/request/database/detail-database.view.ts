@@ -156,7 +156,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
                                 <span class="count" style="color: #2c3e50; font-weight: 500; font-size: 0.7rem;">${showifnotnull(c.count, () => `×${c.count}`)}</span>
                           </div>`,
         className: `jdbc overflow ${getErrorClassName(c)}`,
-        title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end, 'HH:mm:ss.SSS')}</span>  (⏱ ${this.durationPipe.transform((end / 1000) - (start / 1000))})<br>
+        title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end, 'HH:mm:ss.SSS')}</span>  (⏱ ${this.durationPipe.transform(c.end - c.start)})<br>
                         <span>${showifnotnull(c.command, () => c.command)}${showifnotnull(c.args, () => `(${c.args.join(', ')})`)} ${showifnotnull(c.count, () => `×${c.count}`)}</span>`
       }
     })

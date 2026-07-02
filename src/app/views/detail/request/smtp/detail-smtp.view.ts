@@ -158,7 +158,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
                             <span class="command" style="color: #1565c0; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">${showifnotnull(a.command, () => a.command)}</span>
                           </div>`,
         className: `smtp ${getErrorClassName(a)}`,
-        title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end, 'HH:mm:ss.SSS')}</span> (⏱ ${this.durationPipe.transform((end / 1000) - (start / 1000))})<br>
+        title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end, 'HH:mm:ss.SSS')}</span> (⏱ ${this.durationPipe.transform(a.end - a.start)})<br>
                         <span>${showifnotnull(a.command, () => a.command)}</span>`
       }
     });
