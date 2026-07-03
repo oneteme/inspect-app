@@ -163,10 +163,8 @@
 // Header
 .kpi-chart-header {
   display: flex;
-  align-items: center;
   justify-content: space-between;
-  padding: 14px 8px 10px 16px;
-  gap: 8px;
+  padding: 12px;
   height: 48px;
 }
 
@@ -267,12 +265,12 @@
   }
 }
 
-.kpi-chart-actions {
-  display: flex;
-  align-items: center;
-  gap: 0;
-  flex-shrink: 0;
-}
+// .kpi-chart-actions {
+//   display: flex;
+//   align-items: center;
+//   gap: 0;
+//   flex-shrink: 0;
+// }
 
 .kpi-action-btn {
   mat-icon { font-size: 18px; width: 18px; height: 18px; }

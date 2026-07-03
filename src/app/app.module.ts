@@ -35,6 +35,7 @@ import {AboutDialogComponent} from './components/about/about-dialog.component';
 import {ServerSupervisionView} from "./views/supervision/_component/server/server-supervision.view";
 import {ClientSupervisionView} from "./views/supervision/_component/client/client-supervision.view";
 import {RequestKpiView} from "./views/kpi/request/request-kpi.view";
+import {RequestKpiTestView} from "./views/kpi-test/request/request-kpi-test.view";
 import {SessionKpiView} from "./views/kpi/session/session-kpi.view";
 import {AuthService} from "./auth/auth.service";
 import {authGuard} from "./auth/auth.guard";
@@ -191,6 +192,14 @@ const routes: Route[] = [
     component: SessionKpiView,
     title:  (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
       return Constants.MAPPING_TYPE[route.paramMap.get('session_type')].title + ' • KPI';
+    },
+    canActivate: [authGuard]
+  },
+  {
+    path: 'kpi-test/request/:request_type',
+    component: RequestKpiTestView,
+    title:  (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+      return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('request_type')].title + ' • KPI (Test)';
     },
     canActivate: [authGuard]
   },
