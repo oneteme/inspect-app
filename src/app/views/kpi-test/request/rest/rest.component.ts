@@ -337,12 +337,14 @@ export class RestKpiTestComponent implements OnInit {
     this.$volumetryRepartition.loading = true;
     this.$volumetryRepartition.data = [];
     this._httpRequestService.getSizeCustom(
+      // { series: cfg.series.items.filter(s => s.selected), indicator: ind, group: grp, stack: stk, filter: flt },
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
       { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$volumetryFilteredValues.length ? this.$volumetryFilteredValues : undefined }
     ).pipe(finalize(() => this.$volumetryRepartition.loading = false))
     .subscribe(data => {
-      const series = buildSeries(cfg.series.items, ind, grp, stk, data);
-      const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, data) : data;
+      const selectedSeries = cfg.series.items.filter(s => s.selected);
+      const series = buildSeries(selectedSeries, ind, grp, stk, data);
+      const pivoted = stk ? pivotByStack(selectedSeries, ind, grp, stk, data) : data;
       this.$volumetryRepartition.data = pivoted;
       this.$volumetryRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
