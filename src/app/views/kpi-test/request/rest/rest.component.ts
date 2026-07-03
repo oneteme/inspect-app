@@ -322,7 +322,8 @@ export class RestKpiTestComponent implements OnInit {
       this.$performanceRepartition.data = pivoted;
       this.$performanceRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
-        series
+        series,
+        yUnit: ind?.unit
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });
@@ -356,7 +357,8 @@ export class RestKpiTestComponent implements OnInit {
       console.log('[REST-TEST] _fetchVolumetry - built series:', series);
       this.$volumetryRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
-        series: series
+        series,
+        yUnit: ind?.unit
       } as ChartProvider<string, number>;
       console.log('[REST-TEST] _fetchVolumetry - final chartProvider:', this.$volumetryRepartition.chartProvider);
       this._cdr.markForCheck();
@@ -381,7 +383,8 @@ export class RestKpiTestComponent implements OnInit {
       this.$latencyRepartition.data = pivoted;
       this.$latencyRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
-        series
+        series,
+        yUnit: ind?.unit
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });
@@ -458,7 +461,6 @@ export class RestKpiTestComponent implements OnInit {
         ) as Observable<any[]>,
         onExportVisual: () => this._statusChart?.exportImage('disponibilite'),
         onExportData:   () => this._statusChart?.exportData('disponibilite'),
-        switchView: { currentView: this.$statusView, onSwitch: v => { this.$statusView = v; this._cdr.markForCheck(); } },
       }),
       state: chartConfigToState(this.$statusRepartition.chartConfig)
     };
