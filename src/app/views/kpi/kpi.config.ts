@@ -826,9 +826,9 @@ export const REST_LATENCY_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
       unit: {
         baseUnit: 's',
         scales: [
-          { unit: 'µs', scale: 1000000, threshold: 0.001 },    // < 1ms
-          { unit: 'ms', scale: 1000, threshold: 1 },        // < 1s (DEFAULT)
-          { unit: 's',  scale: 1, threshold: Infinity }   // >= 1s
+          { unit: 'µs', scale: 1000000, threshold: 0.001 },  // < 1ms
+          { unit: 'ms', scale: 1000, threshold: 1 },  // < 1s (DEFAULT)
+          { unit: 's',  scale: 1, threshold: Infinity }  // >= 1s
         ]
       },
       menu: {
@@ -847,8 +847,8 @@ export const REST_LATENCY_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
         baseUnit: 's',
         scales: [
           { unit: 'µs', scale: 1000000, threshold: 0.001 },
-          { unit: 'ms', scale: 1000,    threshold: 1 },
-          { unit: 's',  scale: 1,       threshold: Infinity }
+          { unit: 'ms', scale: 1000, threshold: 1 },
+          { unit: 's',  scale: 1, threshold: Infinity }
         ]
       },
       menu: {
@@ -2006,11 +2006,11 @@ const SIZE_TRANCHE = {
 export interface ChartItem<TExtra = {}> {
   key: string;
   selected: boolean;
-  menu: MenuConfig;         // affichage
-  jquery: JQueryConfig;     // requête
-  group?: string;           // regroupement indicateurs ex "Durées"
+  menu: MenuConfig;  // affichage
+  jquery: JQueryConfig;  // requête
+  group?: string;  // regroupement indicateurs ex "Durées"
   unit?: string | UnitConfig;  // unité simple ('ms', 'o', '%') ou config dynamique avec auto-scaling
-  extra?: TExtra;           // données spécifiques au type d'item
+  extra?: TExtra;  // données spécifiques au type d'item
 }
 
 export interface ChartSection<TExtra = {}> {
@@ -2023,10 +2023,10 @@ export interface IndicatorExtra {
 }
 
 export interface ChartConfig {
-  series:     ChartSection;                   // séries fixes (sizeIn, sizeOut…)
-  indicators: ChartSection<IndicatorExtra>;   // indicateurs avec stacks éventuels
-  groups:     ChartSection;                   // regroupements
-  filters?:   ChartSection;                   // filtres (optionnel)
+  series: ChartSection;  // séries fixes (sizeIn, sizeOut…)
+  indicators: ChartSection<IndicatorExtra>;  // indicateurs avec stacks éventuels
+  groups: ChartSection;  // regroupements
+  filters?: ChartSection;  // filtres (optionnel)
 }
 
 export interface MenuConfig {

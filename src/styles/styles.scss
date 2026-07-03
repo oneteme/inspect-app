@@ -149,7 +149,6 @@ mat-form-field.no-subscript {
   z-index: 1;
 }
 
-// Ensure date picker popups appear above everything
 ::ng-deep .cdk-overlay-container {
   z-index: 10000 !important;
 }

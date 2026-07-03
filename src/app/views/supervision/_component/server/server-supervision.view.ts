@@ -315,8 +315,6 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
       }
       this.instance = res;
       this.updatePageTitle();
-      // Si getInstances() n'a pas trouvé l'instance (ex: instance arrêtée avant la période courante),
-      // on utilise les données de getInstance() pour initialiser le champ server.
       if (!this.formGroup.controls.server.value) {
         const instanceAsRow = { id: res.id, appName: res.name, start: res.instant, end: res.end };
         if (!this.servers.includes(res.name)) {

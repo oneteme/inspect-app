@@ -59,7 +59,8 @@ import {PerformanceChartComponent} from "./kpi/_component/performance-chart/perf
 import {VolumetryChartComponent} from "./kpi/_component/volumetry-chart/volumetry-chart.component";
 import {ChartMenuComponent} from "./kpi/_component/chart-menu/chart-menu.component";
 import {LatencyChartComponent} from "./kpi/_component/latency-chart/latency-chart.component";
-import {SlicePanelComponent, TableComponent} from "@oneteme/jquery-table";
+import {SlicePanelComponent} from "@oneteme/jquery-organizer";
+import {TableComponent} from "@oneteme/jquery-table";
 import {JdbcComponent} from "./kpi/request/jdbc/jdbc.component";
 import {FtpComponent} from "./kpi/request/ftp/ftp.component";
 import {LdapComponent} from "./kpi/request/ldap/ldap.component";

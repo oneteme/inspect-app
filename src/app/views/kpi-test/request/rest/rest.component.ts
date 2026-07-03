@@ -124,8 +124,6 @@ export class RestKpiTestComponent implements OnInit {
 
   ngOnInit() {}
 
-  // OrganizerEvent handlers (one per chart)
-
   onStatusViewChange(event: OrganizerButtonEvent): void {
     if (event.type === 'viewSwitched') {
       this.$statusView = event.state.viewMode ?? 'chart';
@@ -336,12 +334,6 @@ export class RestKpiTestComponent implements OnInit {
     const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
     const flt = cfg.filters?.items?.find(f => f.selected);
     
-    console.log('[REST-TEST] _fetchVolumetry - config:', cfg);
-    console.log('[REST-TEST] _fetchVolumetry - indicator:', ind);
-    console.log('[REST-TEST] _fetchVolumetry - group:', grp);
-    console.log('[REST-TEST] _fetchVolumetry - stack:', stk);
-    console.log('[REST-TEST] _fetchVolumetry - series items:', cfg.series.items);
-    
     this.$volumetryRepartition.loading = true;
     this.$volumetryRepartition.data = [];
     this._httpRequestService.getSizeCustom(
@@ -349,18 +341,14 @@ export class RestKpiTestComponent implements OnInit {
       { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$volumetryFilteredValues.length ? this.$volumetryFilteredValues : undefined }
     ).pipe(finalize(() => this.$volumetryRepartition.loading = false))
     .subscribe(data => {
-      console.log('[REST-TEST] _fetchVolumetry - raw data received:', data);
       const series = buildSeries(cfg.series.items, ind, grp, stk, data);
       const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, data) : data;
-      console.log('[REST-TEST] _fetchVolumetry - pivoted data:', pivoted);
       this.$volumetryRepartition.data = pivoted;
-      console.log('[REST-TEST] _fetchVolumetry - built series:', series);
       this.$volumetryRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
         series,
         yUnit: ind?.unit
       } as ChartProvider<string, number>;
-      console.log('[REST-TEST] _fetchVolumetry - final chartProvider:', this.$volumetryRepartition.chartProvider);
       this._cdr.markForCheck();
     });
   }
@@ -447,12 +435,7 @@ export class RestKpiTestComponent implements OnInit {
     });
   }
 
-  // ─── Helper: rebuild organizer configs from current chartConfigs ──────────────
-
   private _rebuildOrganizerConfigs(): void {
-    console.log('[REST-TEST] _rebuildOrganizerConfigs - Status config input:', this.$statusRepartition.chartConfig);
-    console.log('[REST-TEST] _rebuildOrganizerConfigs - Volumetry config input:', this.$volumetryRepartition.chartConfig);
-    
     this.$statusOrganizer = {
       config: chartConfigToOrganizer(this.$statusRepartition.chartConfig, {
         onFetchSliceData: (filterKey: string) => this._httpRequestService.getFilters(
@@ -497,9 +480,6 @@ export class RestKpiTestComponent implements OnInit {
       }),
       state: chartConfigToState(this.$latencyRepartition.chartConfig)
     };
-    
-    console.log('[REST-TEST] _rebuildOrganizerConfigs - Status result:', this.$statusOrganizer);
-    console.log('[REST-TEST] _rebuildOrganizerConfigs - Volumetry result:', this.$volumetryOrganizer);
   }
 
   statusTableColumns(): TableColumnProvider[] {
