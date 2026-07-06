@@ -57,7 +57,6 @@ export class RestRequestService {
     ): Observable<any[]> {
         const groupAlias = data.group.jquery.buildAlias();
         const stackAlias = data.stack?.jquery.buildAlias();
-        console.log(data, filters);
         // Une requête par série (size_in, size_out, ...)
         const requests = data.series.map(serie => {
             const serieAlias = data.indicator.jquery.buildAlias(serie.jquery.buildAlias());
