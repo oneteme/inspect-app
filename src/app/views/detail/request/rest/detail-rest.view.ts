@@ -136,7 +136,7 @@ export class DetailRestView implements OnInit, OnDestroy {
         type: end <= start ? 'point' : 'range',
         content: '',
         className: `rest ${getErrorClassName(a)}`,
-        title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end , 'HH:mm:ss.SSS')}</span> (${this.durationPipe.transform((end/1000) - (start/1000))})<br>`
+        title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end , 'HH:mm:ss.SSS')}</span> (⏱ ${this.durationPipe.transform(a.end - a.start)})<br>`
       };
     });
     items.splice(0,0,{
