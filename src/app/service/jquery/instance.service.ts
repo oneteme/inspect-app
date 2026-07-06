@@ -29,7 +29,7 @@ export class InstanceService {
     let args = {
       'column': 'app_name:appName',
       'distinct': true,
-      'appName.notNull': '',
+      'app_name.notNull': '',
       'environement': `"${env}"`,
       'type': type,
       'order': 'app_name.asc'
@@ -40,7 +40,7 @@ export class InstanceService {
   getLastServerStart(filters: { env: string }): Observable<LastServerStart[]> {
     return this.getInstance<any>({
       'column': `view1.id,view1.environement:env,view1.type,view1.appName,view1.version,view1.branch,view1.hash,view1.start,view1.end,view1.collector,view1.configuration,view1.restart,view1.minStart,view1.lastStart,view1.os,view1.re,view1.address,view1.user`,
-      'view': `select(id,environement,type,app_name,version,branch,hash,start,end,collector,configuration,os,re,user,address,start.min.over(partition(environement,app_name,version)):minStart,rank.over(partition(environement,app_name).order(end.coalesce(9999-12-31T00:00:00.000Z).desc,start.desc)):rk,count.over(partition(environement,app_name,version)):restart,start.max.over(partition(environement,app_name)):lastStart).filter(type.eq(SERVER).and(environement.eq("${filters.env}"))):view1`,
+      'cte': `select(id,environement,type,app_name,version,branch,hash,start,end,collector,configuration,os,re,user,address,start.min.over(partition(environement,app_name,version)):minStart,rank.over(partition(environement,app_name).order(end.coalesce(9999-12-31T00:00:00.000Z).desc,start.desc)):rk,count.over(partition(environement,app_name,version)):restart,start.max.over(partition(environement,app_name)):lastStart).criteria(type.eq(SERVER).and(environement.eq("${filters.env}"))):view1`,
       'view1.rk': '1', 'order': 'view1.start.desc'
     }).pipe(map(res => { return res.map(r => ({...r, configuration: r.configuration?.value ? JSON.parse(r.configuration?.value) : null})) }));
   }
@@ -66,7 +66,7 @@ export class InstanceService {
       'id': 'main_session.instance_env',
       'main_session.start.ge': start.toISOString(),
       'main_session.start.lt': end.toISOString(),
-      'appName.notNull': '',
+      'app_name.notNull': '',
       'environement': env,
       'main_session.type': 'VIEW',
       'order': 'app_name.asc'
@@ -85,7 +85,7 @@ export class InstanceService {
   }> {
     return this.getInstance<any>({
       'column': `view1.appName,view1.version,view1.collector,view1.start,view1.branch,view1.hash,view1.configuration`,
-      'view': `select(app_name,version,collector,start,branch,hash,configuration,rank.over(partition(environement,app_name).order(start.desc)):rk).filter(type.eq(SERVER).and(environement.eq(${`"${filters.env}"`})).and(app_name.eq("${filters.appName}"))):view1`,
+      'cte': `select(app_name,version,collector,start,branch,hash,configuration,rank.over(partition(environement,app_name).order(start.desc)):rk).criteria(type.eq(SERVER).and(environement.eq(${`"${filters.env}"`})).and(app_name.eq("${filters.appName}"))):view1`,
       'view1.rk': '1', 'order': 'view1.start.desc'
     }).pipe(map(res => { return res.map(r => ({...r, configuration: r.configuration?.value ? JSON.parse(r.configuration?.value) : null}))[0] }));
   }
@@ -168,7 +168,7 @@ export class InstanceService {
       'environement': `"${filters.env}"`,
       'type': 'SERVER',
       [criteria]: '',
-      'order': 'appName.asc,start.desc'
+      'order': 'app_name.asc,start.desc'
     }
     return this.getInstance(args);
   }
@@ -186,7 +186,7 @@ export class InstanceService {
       'environement': `"${filters.env}"`,
       'type': 'CLIENT',
       [criteria]: '',
-      'order': 'appName.asc,start.desc'
+      'order': 'app_name.asc,start.desc'
     }
     return this.getInstance(args);
   }
