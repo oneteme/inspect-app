@@ -140,8 +140,21 @@ export class CompareView implements OnInit, AfterViewChecked {
     const H_SPACE = 440;   // espace horizontal entre les deux nœuds
     const NODE_Y  = 60;    // marge haute (laisse de la place pour les labels au-dessus)
 
-    // Helper: add a child label cell at a relative position along an edge
-    // x: -1 = source end, 0 = center, 1 = target end  |  yOff: pixels above(<0)/below(>0) the edge
+    // Helper: child label sur un vertex
+    // x: 0=gauche, 0.5=centre, 1=droite | y: 0=haut, 0.5=centre, 1=bas (relatif aux dimensions du vertex)
+    const addVertexLabel = (vertex: any, text: string, x: number, y: number, extraStyle: string = '') => {
+      if (!text) return;
+      const geo = new mx.mxGeometry(x, y, 0, 0);
+      geo.relative = true;
+      const cell = new mx.mxCell(text, geo,
+        `resizable=0;html=0;align=center;verticalAlign=middle;` +
+        `fontFamily=Inter,system-ui,sans-serif;strokeColor=none;fillColor=none;${extraStyle}`);
+      cell.vertex = true;
+      graph.getModel().add(vertex, cell);
+    };
+
+    // Helper: child label sur une arête
+    // x: -1=source, 0=centre, 1=cible | yOff: pixels au-dessus(<0)/en-dessous(>0) de l'arête
     const addEdgeLabel = (edge: any, text: string, x: number, yOff: number, align: string = 'center') => {
       if (!text) return;
       const geo = new mx.mxGeometry(x, yOff, 0, 0);
@@ -158,16 +171,22 @@ export class CompareView implements OnInit, AfterViewChecked {
     graph.getModel().beginUpdate();
     try {
       // ── Caller node (left) ───────────────────────────────
-      const callerLabel = callerAppName + (callerEnv ? `\n[${callerEnv}]` : '');
-      const caller = graph.insertVertex(parent, null, callerLabel,
+      const caller = graph.insertVertex(parent, null, '',
         40, NODE_Y, NODE_W, NODE_H,
         `fillColor=#dbeafe;strokeColor=#3b82f6;`);
+      addVertexLabel(caller, callerAppName, 0.5, callerEnv ? 0.32 : 0.5,
+        `fontSize=12;fontStyle=1;fontColor=#1e293b;`);
+      addVertexLabel(caller, callerEnv, 0.5, 0.75,
+        `fontSize=9;fontStyle=1;fontColor=#0369a1;labelBackgroundColor=#e0f2fe;labelBorderColor=#bae6fd;labelPadding=3;`);
 
       // ── Callee node (right) ──────────────────────────────
-      const calleeLabel = calleeAppName + (calleeEnv ? `\n[${calleeEnv}]` : '');
-      const callee = graph.insertVertex(parent, null, calleeLabel,
+      const callee = graph.insertVertex(parent, null, '',
         40 + NODE_W + H_SPACE, NODE_Y, NODE_W, NODE_H,
         `fillColor=#ede9fe;strokeColor=#6366f1;`);
+      addVertexLabel(callee, calleeAppName, 0.5, calleeEnv ? 0.32 : 0.5,
+        `fontSize=12;fontStyle=1;fontColor=#1e293b;`);
+      addVertexLabel(callee, calleeEnv, 0.5, 0.75,
+        `fontSize=9;fontStyle=1;fontColor=#4338ca;labelBackgroundColor=#ede9fe;labelBorderColor=#a5b4fc;labelPadding=3;`);
 
       // ── Request arrow → (tiers supérieur du nœud, sortie à 28%) ─────
       const reqEdge = graph.insertEdge(parent, null, '', caller, callee,
