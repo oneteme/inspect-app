@@ -3,7 +3,7 @@ import {ChartComponent} from "@oneteme/jquery-echarts";
 import {TableColumnProvider} from "@oneteme/jquery-table";
 import {QueryParams} from "../../../../model/conf.model";
 import {RestRequestService} from "../../../../service/jquery/rest-request.service";
-import {finalize, Observable} from "rxjs";
+import {finalize, from, Observable, of} from "rxjs";
 import {
   buildSeries,
   ChartConfig,
@@ -15,7 +15,7 @@ import {
 } from "../../../kpi/kpi.config";
 import {periodManagement2} from "../../../../shared/util";
 import {ChartProvider, field} from "@oneteme/jquery-core";
-import {OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, chartConfigToOrganizer, chartConfigToState, applyOrganizerEventToChart} from "@oneteme/jquery-organizer";
+import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
 
 @Component({
   templateUrl: './rest.component.html',
@@ -50,21 +50,25 @@ export class RestKpiTestComponent implements OnInit {
   $statusView: 'chart' | 'table' = 'chart';
   $statusSlice: OrganizerSliceState | null = null;
   $statusFilteredValues: any[] = [];
+  $statusDisplayUnit = '';
 
   $performanceRepartition: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = { data: [], loading: true };
   $performanceOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $performanceSlice: OrganizerSliceState | null = null;
   $performanceFilteredValues: any[] = [];
+  $performanceDisplayUnit = '';
 
   $volumetryRepartition: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = { data: [], loading: true };
   $volumetryOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $volumetrySlice: OrganizerSliceState | null = null;
   $volumetryFilteredValues: any[] = [];
+  $volumetryDisplayUnit = '';
 
   $latencyRepartition: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = { data: [], loading: true };
   $latencyOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $latencySlice: OrganizerSliceState | null = null;
   $latencyFilteredValues: any[] = [];
+  $latencyDisplayUnit = '';
 
   $methodRepartition: {data: any[], loading: boolean} = { data: [], loading: true };
   $mediaRepartition: {data: any[], loading: boolean} = { data: [], loading: true };
@@ -97,10 +101,8 @@ export class RestKpiTestComponent implements OnInit {
 
   @Input() set queryParams(value: QueryParams) {
     if (value) {
-      console.log('[REST-TEST] queryParams setter called with:', value);
       this.params = value;
       this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
-      console.log('[REST-TEST] groupedBy:', this.groupedBy);
 
       // Initialize ChartConfigs and OrganizerConfigs
       this.$statusRepartition.chartConfig = REST_STATUS_CHART_CONFIG(this.groupedBy);
@@ -108,12 +110,7 @@ export class RestKpiTestComponent implements OnInit {
       this.$volumetryRepartition.chartConfig = REST_VOLUMETRY_CHART_CONFIG(this.groupedBy);
       this.$latencyRepartition.chartConfig = REST_LATENCY_CHART_CONFIG(this.groupedBy);
       
-      console.log('[REST-TEST] Status ChartConfig:', this.$statusRepartition.chartConfig);
-      console.log('[REST-TEST] Volumetry ChartConfig:', this.$volumetryRepartition.chartConfig);
-
       this._rebuildOrganizerConfigs();
-      console.log('[REST-TEST] Status Organizer Config:', this.$statusOrganizer);
-      console.log('[REST-TEST] Volumetry Organizer Config:', this.$volumetryOrganizer);
       
       this._fetchAllCharts();
       this.getMethods();
@@ -127,30 +124,13 @@ export class RestKpiTestComponent implements OnInit {
   onStatusViewChange(event: OrganizerButtonEvent): void {
     if (event.type === 'viewSwitched') {
       this.$statusView = event.state.viewMode ?? 'chart';
-      this.$statusOrganizer = {
-        config: chartConfigToOrganizer(this.$statusRepartition.chartConfig, {
-          onFetchSliceData: this.$statusOrganizer.config.onFetchSliceData,
-          onExportVisual: this.$statusOrganizer.config.onExportVisual,
-          onExportData: this.$statusOrganizer.config.onExportData,
-          switchView: { currentView: this.$statusView, onSwitch: v => { this.$statusView = v; this._cdr.markForCheck(); } }
-        }),
-        state: { ...event.state }
-      };
-      this._cdr.markForCheck();
-      return;
     }
-    applyOrganizerEventToChart(event, this.$statusRepartition.chartConfig);
-    if (event.type === 'ySelected') {
-      this.$statusOrganizer = {
-        config: chartConfigToOrganizer(this.$statusRepartition.chartConfig, { onFetchSliceData: this.$statusOrganizer.config.onFetchSliceData, onExportVisual: this.$statusOrganizer.config.onExportVisual, onExportData: this.$statusOrganizer.config.onExportData }),
-        state: chartConfigToState(this.$statusRepartition.chartConfig)
-      };
-    } else {
-      this.$statusOrganizer = { config: this.$statusOrganizer.config, state: event.state };
-    }
-    if (event.type !== 'sliceSelected') {
+    const result = this._handleOrganizerEvent(event, this.$statusRepartition.chartConfig, this.$statusOrganizer, this._statusOrganizerOptions());
+    this.$statusOrganizer = result.binding;
+    if (result.shouldRefetch) {
       this._fetchStatus();
     }
+    this._cdr.markForCheck();
   }
 
   onStatusSliceChange(sliceState: OrganizerSliceState | null): void {
@@ -162,18 +142,12 @@ export class RestKpiTestComponent implements OnInit {
   }
 
   onPerformanceViewChange(event: OrganizerButtonEvent): void {
-    applyOrganizerEventToChart(event, this.$performanceRepartition.chartConfig);
-    if (event.type === 'ySelected') {
-      this.$performanceOrganizer = {
-        config: chartConfigToOrganizer(this.$performanceRepartition.chartConfig, { onFetchSliceData: this.$performanceOrganizer.config.onFetchSliceData, onExportVisual: this.$performanceOrganizer.config.onExportVisual, onExportData: this.$performanceOrganizer.config.onExportData }),
-        state: chartConfigToState(this.$performanceRepartition.chartConfig)
-      };
-    } else {
-      this.$performanceOrganizer = { config: this.$performanceOrganizer.config, state: event.state };
-    }
-    if (event.type !== 'sliceSelected') {
+    const result = this._handleOrganizerEvent(event, this.$performanceRepartition.chartConfig, this.$performanceOrganizer, this._performanceOrganizerOptions());
+    this.$performanceOrganizer = result.binding;
+    if (result.shouldRefetch) {
       this._fetchPerformance();
     }
+    this._cdr.markForCheck();
   }
 
   onPerformanceSliceChange(sliceState: OrganizerSliceState | null): void {
@@ -185,18 +159,12 @@ export class RestKpiTestComponent implements OnInit {
   }
 
   onVolumetryViewChange(event: OrganizerButtonEvent): void {
-    applyOrganizerEventToChart(event, this.$volumetryRepartition.chartConfig);
-    if (event.type === 'ySelected') {
-      this.$volumetryOrganizer = {
-        config: chartConfigToOrganizer(this.$volumetryRepartition.chartConfig, { onFetchSliceData: this.$volumetryOrganizer.config.onFetchSliceData, onExportVisual: this.$volumetryOrganizer.config.onExportVisual, onExportData: this.$volumetryOrganizer.config.onExportData }),
-        state: chartConfigToState(this.$volumetryRepartition.chartConfig)
-      };
-    } else {
-      this.$volumetryOrganizer = { config: this.$volumetryOrganizer.config, state: event.state };
-    }
-    if (event.type !== 'sliceSelected') {
+    const result = this._handleOrganizerEvent(event, this.$volumetryRepartition.chartConfig, this.$volumetryOrganizer, this._volumetryOrganizerOptions());
+    this.$volumetryOrganizer = result.binding;
+    if (result.shouldRefetch) {
       this._fetchVolumetry();
     }
+    this._cdr.markForCheck();
   }
 
   onVolumetrySliceChange(sliceState: OrganizerSliceState | null): void {
@@ -208,18 +176,12 @@ export class RestKpiTestComponent implements OnInit {
   }
 
   onLatencyViewChange(event: OrganizerButtonEvent): void {
-    applyOrganizerEventToChart(event, this.$latencyRepartition.chartConfig);
-    if (event.type === 'ySelected') {
-      this.$latencyOrganizer = {
-        config: chartConfigToOrganizer(this.$latencyRepartition.chartConfig, { onFetchSliceData: this.$latencyOrganizer.config.onFetchSliceData, onExportVisual: this.$latencyOrganizer.config.onExportVisual, onExportData: this.$latencyOrganizer.config.onExportData }),
-        state: chartConfigToState(this.$latencyRepartition.chartConfig)
-      };
-    } else {
-      this.$latencyOrganizer = { config: this.$latencyOrganizer.config, state: event.state };
-    }
-    if (event.type !== 'sliceSelected') {
+    const result = this._handleOrganizerEvent(event, this.$latencyRepartition.chartConfig, this.$latencyOrganizer, this._latencyOrganizerOptions());
+    this.$latencyOrganizer = result.binding;
+    if (result.shouldRefetch) {
       this._fetchLatency();
     }
+    this._cdr.markForCheck();
   }
 
   onLatencySliceChange(sliceState: OrganizerSliceState | null): void {
@@ -258,6 +220,18 @@ export class RestKpiTestComponent implements OnInit {
     this._fetchLatency();
   }
 
+  private _fetchSliceData(chartConfig: ChartConfig, filterKey: string): Observable<any[]> {
+    const filter = chartConfig.filters?.items?.find(item => item.key === filterKey);
+    if (!filter) {
+      return of([]);
+    }
+
+    return this._httpRequestService.getFilters(
+      filter,
+      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts }
+    ) as Observable<any[]>;
+  }
+
   // Data fetching
 
   private _fetchAllCharts(): void {
@@ -274,12 +248,6 @@ export class RestKpiTestComponent implements OnInit {
     const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
     const flt = cfg.filters?.items?.find(f => f.selected);
     
-    console.log('[REST-TEST] _fetchStatus - config:', cfg);
-    console.log('[REST-TEST] _fetchStatus - indicator:', ind);
-    console.log('[REST-TEST] _fetchStatus - group:', grp);
-    console.log('[REST-TEST] _fetchStatus - stack:', stk);
-    console.log('[REST-TEST] _fetchStatus - series items:', cfg.series.items);
-    
     this.$statusRepartition.loading = true;
     this.$statusRepartition.data = [];
     this._httpRequestService.getCustom(
@@ -287,17 +255,16 @@ export class RestKpiTestComponent implements OnInit {
       { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
-      console.log('[REST-TEST] _fetchStatus - raw data received:', data);
       const series = buildSeries(cfg.series.items, ind, grp, stk, data);
       const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, data) : data;
       this.$statusRepartition.rawData = data;
       this.$statusRepartition.data = pivoted;
-      console.log('[REST-TEST] _fetchStatus - built series:', series);
+      const yAlias = ind?.jquery.buildAlias(cfg.series.items.find(s => s.selected)?.jquery.buildAlias() ?? '') ?? '';
+      this.$statusDisplayUnit = this._resolveDisplayUnit(ind?.unit, data, yAlias);
       this.$statusRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
         series: series
       } as ChartProvider<string, number>;
-      console.log('[REST-TEST] _fetchStatus - final chartProvider:', this.$statusRepartition.chartProvider);
       this._cdr.markForCheck();
     });
   }
@@ -318,6 +285,8 @@ export class RestKpiTestComponent implements OnInit {
       const series = buildSeries(cfg.series.items, ind, grp, stk, data);
       const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, data) : data;
       this.$performanceRepartition.data = pivoted;
+      const yAlias = ind?.jquery.buildAlias(cfg.series.items.find(s => s.selected)?.jquery.buildAlias() ?? '') ?? '';
+      this.$performanceDisplayUnit = this._resolveDisplayUnit(ind?.unit, data, yAlias);
       this.$performanceRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
         series,
@@ -346,6 +315,8 @@ export class RestKpiTestComponent implements OnInit {
       const series = buildSeries(selectedSeries, ind, grp, stk, data);
       const pivoted = stk ? pivotByStack(selectedSeries, ind, grp, stk, data) : data;
       this.$volumetryRepartition.data = pivoted;
+      const yAlias = ind?.jquery.buildAlias(selectedSeries[0]?.jquery.buildAlias() ?? '') ?? '';
+      this.$volumetryDisplayUnit = this._resolveDisplayUnit(ind?.unit, data, yAlias);
       this.$volumetryRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
         series,
@@ -368,9 +339,19 @@ export class RestKpiTestComponent implements OnInit {
       { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$latencyFilteredValues.length ? this.$latencyFilteredValues : undefined }
     ).pipe(finalize(() => this.$latencyRepartition.loading = false))
     .subscribe(data => {
-      const series = buildSeries(cfg.series.items, ind, grp, stk, data);
-      const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, data) : data;
+      let effectiveStk = stk;
+      if (stk && data.length > 0) {
+        const stackAlias = stk.jquery.buildAlias();
+        if (!(stackAlias in data[0])) {
+          effectiveStk = undefined;
+        }
+      }
+      
+      const series = buildSeries(cfg.series.items, ind, grp, effectiveStk, data);
+      const pivoted = effectiveStk ? pivotByStack(cfg.series.items, ind, grp, effectiveStk, data) : data;
       this.$latencyRepartition.data = pivoted;
+      const yAlias = ind?.jquery.buildAlias(cfg.series.items[0]?.jquery.buildAlias() ?? '') ?? '';
+      this.$latencyDisplayUnit = this._resolveDisplayUnit(ind?.unit, data, yAlias);
       this.$latencyRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
         series,
@@ -378,6 +359,22 @@ export class RestKpiTestComponent implements OnInit {
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });
+  }
+
+  private _resolveDisplayUnit(unit: string | any | undefined, data: any[], yAlias: string): string {
+    if (!unit) return '';
+    if (typeof unit === 'string') return unit;
+    const scales = ((unit as any).scales ?? []).slice()
+      .sort((a: any, b: any) => (a.threshold ?? Infinity) - (b.threshold ?? Infinity));
+    if (scales.length === 0) return (unit as any).baseUnit ?? '';
+    const rawValues = data
+      .map((d: any) => typeof d[yAlias] === 'number' ? d[yAlias] : parseFloat(d[yAlias]))
+      .filter((v: number) => isFinite(v) && v > 0);
+    const maxVal = rawValues.length > 0 ? Math.max(...rawValues) : 0;
+    for (const s of scales) {
+      if (maxVal <= (s.threshold ?? Infinity)) return s.unit;
+    }
+    return scales[scales.length - 1].unit;
   }
 
   getMediaType() {
@@ -438,50 +435,58 @@ export class RestKpiTestComponent implements OnInit {
   }
 
   private _rebuildOrganizerConfigs(): void {
-    this.$statusOrganizer = {
-      config: chartConfigToOrganizer(this.$statusRepartition.chartConfig, {
-        onFetchSliceData: (filterKey: string) => this._httpRequestService.getFilters(
-          this.$statusRepartition.chartConfig!.filters!.items!.find(f => f.key === filterKey)!,
-          { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts }
-        ) as Observable<any[]>,
-        onExportVisual: () => this._statusChart?.exportImage('disponibilite'),
-        onExportData:   () => this._statusChart?.exportData('disponibilite'),
-      }),
-      state: chartConfigToState(this.$statusRepartition.chartConfig)
+    this.$statusOrganizer = buildOrganizerChartBinding(this.$statusRepartition.chartConfig, this._statusOrganizerOptions());
+    this.$performanceOrganizer = buildOrganizerChartBinding(this.$performanceRepartition.chartConfig, this._performanceOrganizerOptions());
+    this.$volumetryOrganizer = buildOrganizerChartBinding(this.$volumetryRepartition.chartConfig, this._volumetryOrganizerOptions());
+    this.$latencyOrganizer = buildOrganizerChartBinding(this.$latencyRepartition.chartConfig, this._latencyOrganizerOptions());
+  }
+
+  private _statusOrganizerOptions(): OrganizerChartBridgeOptions {
+    return {
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$statusRepartition.chartConfig, filterKey),
+      onExportVisual: () => this._statusChart?.exportImage('disponibilite'),
+      onExportData: () => this._statusChart?.exportData('disponibilite'),
+      switchView: {
+        currentView: this.$statusView,
+        onSwitch: (newView: 'chart' | 'table') => {
+          this.$statusView = newView;
+          this._cdr.markForCheck();
+        }
+      }
     };
-    this.$performanceOrganizer = {
-      config: chartConfigToOrganizer(this.$performanceRepartition.chartConfig, {
-        onFetchSliceData: (filterKey: string) => this._httpRequestService.getFilters(
-          this.$performanceRepartition.chartConfig!.filters!.items!.find(f => f.key === filterKey)!,
-          { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts }
-        ) as Observable<any[]>,
-        onExportVisual: () => this._performanceChart?.exportImage('performance'),
-        onExportData:   () => this._performanceChart?.exportData('performance'),
-      }),
-      state: chartConfigToState(this.$performanceRepartition.chartConfig)
+  }
+
+  private _performanceOrganizerOptions(): OrganizerChartBridgeOptions {
+    return {
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$performanceRepartition.chartConfig, filterKey),
+      onExportVisual: () => this._performanceChart?.exportImage('performance'),
+      onExportData: () => this._performanceChart?.exportData('performance'),
     };
-    this.$volumetryOrganizer = {
-      config: chartConfigToOrganizer(this.$volumetryRepartition.chartConfig, {
-        onFetchSliceData: (filterKey: string) => this._httpRequestService.getFilters(
-          this.$volumetryRepartition.chartConfig!.filters!.items!.find(f => f.key === filterKey)!,
-          { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts }
-        ) as Observable<any[]>,
-        onExportVisual: () => this._volumetryChart?.exportImage('volumetrie'),
-        onExportData:   () => this._volumetryChart?.exportData('volumetrie'),
-      }),
-      state: chartConfigToState(this.$volumetryRepartition.chartConfig)
+  }
+
+  private _volumetryOrganizerOptions(): OrganizerChartBridgeOptions {
+    return {
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$volumetryRepartition.chartConfig, filterKey),
+      onExportVisual: () => this._volumetryChart?.exportImage('volumetrie'),
+      onExportData: () => this._volumetryChart?.exportData('volumetrie'),
     };
-    this.$latencyOrganizer = {
-      config: chartConfigToOrganizer(this.$latencyRepartition.chartConfig, {
-        onFetchSliceData: (filterKey: string) => this._httpRequestService.getFilters(
-          this.$latencyRepartition.chartConfig!.filters!.items!.find(f => f.key === filterKey)!,
-          { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts }
-        ) as Observable<any[]>,
-        onExportVisual: () => this._latencyChart?.exportImage('latence'),
-        onExportData:   () => this._latencyChart?.exportData('latence'),
-      }),
-      state: chartConfigToState(this.$latencyRepartition.chartConfig)
+  }
+
+  private _latencyOrganizerOptions(): OrganizerChartBridgeOptions {
+    return {
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$latencyRepartition.chartConfig, filterKey),
+      onExportVisual: () => this._latencyChart?.exportImage('latence'),
+      onExportData: () => this._latencyChart?.exportData('latence'),
     };
+  }
+
+  private _handleOrganizerEvent(
+    event: OrganizerButtonEvent,
+    chartConfig: ChartConfig,
+    currentBinding: OrganizerChartBinding,
+    options: OrganizerChartBridgeOptions
+  ) {
+    return handleOrganizerChartEvent(event, chartConfig, currentBinding, options);
   }
 
   statusTableColumns(): TableColumnProvider[] {
@@ -505,6 +510,18 @@ export class RestKpiTestComponent implements OnInit {
       cols.push({ key: k, header: stk.menu.label || stk.key, value: (row: any) => row[k], sortable: true });
     }
     return cols;
+  }
+
+  activeChartSubheaderLabel(chartConfig: ChartConfig, displayUnit: string): string {
+    const ind = chartConfig?.indicators?.items?.find(i => i.selected);
+    if (!ind) return '';
+    const indicatorName = (ind as any).jquery?.buildName?.() ?? ind.menu?.label ?? '';
+    if (displayUnit) {
+      const prefix = (ind as any).group ?? ind.menu?.label ?? '';
+      const label = prefix ? `${prefix} en ${displayUnit}` : displayUnit;
+      return indicatorName ? `${label} : ${indicatorName}` : label;
+    }
+    return indicatorName;
   }
 
   activeIndicatorLabel(chartConfig: ChartConfig): string {

@@ -27,7 +27,7 @@
       </div>
       <div class="kpi-stat-content">
         <div class="kpi-stat-value-row">
-          <span class="kpi-stat-value">{{$globalStatistic.elapsedPercentile | duration}}</span>
+          <span class="kpi-stat-value">{{$globalStatistic.elapsedPercentile | duration:0}}</span>
           <span class="kpi-badge">P.95</span>
         </div>
         <span class="kpi-stat-label">Temps de réponse max</span>
@@ -42,10 +42,8 @@
           <span class="kpi-accent-bar orange-bar"></span>
           <mat-icon class="kpi-chart-icon material-symbols-outlined">signal_cellular_alt</mat-icon>
           <span class="kpi-chart-title">Disponibilité</span>
-          <nav class="kpi-breadcrumb" *ngIf="activeIndicatorLabel($statusRepartition.chartConfig)">
-            <span class="kpi-breadcrumb-item">{{ activeIndicatorLabel($statusRepartition.chartConfig) }}</span>
+          <nav class="kpi-breadcrumb" *ngIf="activeStackLabel($statusRepartition.chartConfig) || activeGroupLabel($statusRepartition.chartConfig)">
             <ng-container *ngIf="activeStackLabel($statusRepartition.chartConfig)">
-              <mat-icon class="kpi-breadcrumb-sep">chevron_right</mat-icon>
               <span class="kpi-breadcrumb-item purple">{{ activeStackLabel($statusRepartition.chartConfig) }}</span>
             </ng-container>
             <ng-container *ngIf="activeGroupLabel($statusRepartition.chartConfig)">
@@ -65,7 +63,9 @@
         </div>
       </div>
       <div class="kpi-chart-subheader">
-        <span class="kpi-chart-period">{{(params.period.start | date: 'd MMM') + '–' + (params.period.end | date)}}</span>
+        <ng-container *ngIf="activeChartSubheaderLabel($statusRepartition.chartConfig, $statusDisplayUnit) as label">
+          <span class="kpi-chart-unit">{{ label }}</span>
+        </ng-container>
       </div>
       <div class="kpi-chart-body chart-body-with-organizer">
         <slice-panel
@@ -96,9 +96,6 @@
           <span class="kpi-chart-title">Méthodes HTTP</span>
         </div>
       </div>
-      <div class="kpi-chart-subheader">
-        <span class="kpi-chart-period">{{(params.period.start | date: 'd MMM') + '–' + (params.period.end | date)}}</span>
-      </div>
       <div class="kpi-chart-body">
         <chart type="donut"
                [config]="METHOD_PIE_CONFIG"
@@ -113,12 +110,8 @@
           <span class="kpi-accent-bar blue-bar"></span>
           <mat-icon class="kpi-chart-icon material-symbols-outlined">speed</mat-icon>
           <span class="kpi-chart-title">Performance</span>
-          <nav class="kpi-breadcrumb" *ngIf="activeIndicatorLabel($performanceRepartition.chartConfig)">
-            <span class="kpi-breadcrumb-item">{{ activeIndicatorLabel($performanceRepartition.chartConfig) }}</span>
-            <ng-container *ngIf="activeGroupLabel($performanceRepartition.chartConfig)">
-              <mat-icon class="kpi-breadcrumb-sep">chevron_right</mat-icon>
-              <span class="kpi-breadcrumb-item teal">{{ activeGroupLabel($performanceRepartition.chartConfig) }}</span>
-            </ng-container>
+          <nav class="kpi-breadcrumb" *ngIf="activeGroupLabel($performanceRepartition.chartConfig)">
+            <span class="kpi-breadcrumb-item teal">{{ activeGroupLabel($performanceRepartition.chartConfig) }}</span>
           </nav>
         </div>
         <div class="kpi-chart-actions">
@@ -132,7 +125,9 @@
         </div>
       </div>
       <div class="kpi-chart-subheader">
-        <span class="kpi-chart-period">{{(params.period.start | date: 'd MMM') + '–' + (params.period.end | date)}}</span>
+        <ng-container *ngIf="activeChartSubheaderLabel($performanceRepartition.chartConfig, $performanceDisplayUnit) as label">
+          <span class="kpi-chart-unit">{{ label }}</span>
+        </ng-container>
       </div>
       <div class="kpi-chart-body chart-body-with-organizer">
         <slice-panel
@@ -158,9 +153,6 @@
           <span class="kpi-chart-title">Media</span>
         </div>
       </div>
-      <div class="kpi-chart-subheader">
-        <span class="kpi-chart-period">{{(params.period.start | date: 'd MMM') + '–' + (params.period.end | date)}}</span>
-      </div>
       <div class="kpi-chart-body">
         <chart type="donut"
                [config]="MEDIA_PIE_CONFIG"
@@ -175,12 +167,8 @@
           <span class="kpi-accent-bar green-bar"></span>
           <mat-icon class="kpi-chart-icon material-symbols-outlined">bar_chart</mat-icon>
           <span class="kpi-chart-title">Volumétrie</span>
-          <nav class="kpi-breadcrumb" *ngIf="activeIndicatorLabel($volumetryRepartition.chartConfig)">
-            <span class="kpi-breadcrumb-item">{{ activeIndicatorLabel($volumetryRepartition.chartConfig) }}</span>
-            <ng-container *ngIf="activeGroupLabel($volumetryRepartition.chartConfig)">
-              <mat-icon class="kpi-breadcrumb-sep">chevron_right</mat-icon>
-              <span class="kpi-breadcrumb-item teal">{{ activeGroupLabel($volumetryRepartition.chartConfig) }}</span>
-            </ng-container>
+          <nav class="kpi-breadcrumb" *ngIf="activeGroupLabel($volumetryRepartition.chartConfig)">
+            <span class="kpi-breadcrumb-item teal">{{ activeGroupLabel($volumetryRepartition.chartConfig) }}</span>
           </nav>
         </div>
         <div class="kpi-chart-actions">
@@ -194,7 +182,9 @@
         </div>
       </div>
       <div class="kpi-chart-subheader">
-        <span class="kpi-chart-period">{{(params.period.start | date: 'd MMM') + '–' + (params.period.end | date)}}</span>
+        <ng-container *ngIf="activeChartSubheaderLabel($volumetryRepartition.chartConfig, $volumetryDisplayUnit) as label">
+          <span class="kpi-chart-unit">{{ label }}</span>
+        </ng-container>
       </div>
       <div class="kpi-chart-body chart-body-with-organizer">
         <slice-panel
@@ -218,12 +208,8 @@
           <span class="kpi-accent-bar red-bar"></span>
           <mat-icon class="kpi-chart-icon material-symbols-outlined">timer</mat-icon>
           <span class="kpi-chart-title">Latence</span>
-          <nav class="kpi-breadcrumb" *ngIf="activeIndicatorLabel($latencyRepartition.chartConfig)">
-            <span class="kpi-breadcrumb-item">{{ activeIndicatorLabel($latencyRepartition.chartConfig) }}</span>
-            <ng-container *ngIf="activeGroupLabel($latencyRepartition.chartConfig)">
-              <mat-icon class="kpi-breadcrumb-sep">chevron_right</mat-icon>
-              <span class="kpi-breadcrumb-item teal">{{ activeGroupLabel($latencyRepartition.chartConfig) }}</span>
-            </ng-container>
+          <nav class="kpi-breadcrumb" *ngIf="activeGroupLabel($latencyRepartition.chartConfig)">
+            <span class="kpi-breadcrumb-item teal">{{ activeGroupLabel($latencyRepartition.chartConfig) }}</span>
           </nav>
         </div>
         <div class="kpi-chart-actions">
@@ -237,7 +223,9 @@
         </div>
       </div>
       <div class="kpi-chart-subheader">
-        <span class="kpi-chart-period">{{(params.period.start | date: 'd MMM') + '–' + (params.period.end | date)}}</span>
+        <ng-container *ngIf="activeChartSubheaderLabel($latencyRepartition.chartConfig, $latencyDisplayUnit) as label">
+          <span class="kpi-chart-unit">{{ label }}</span>
+        </ng-container>
       </div>
       <div class="kpi-chart-body chart-body-with-organizer">
         <slice-panel

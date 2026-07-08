@@ -164,7 +164,7 @@
 .kpi-chart-header {
   display: flex;
   justify-content: space-between;
-  padding: 12px;
+  padding: 12px 12px 0 12px;
   height: 48px;
 }
 
@@ -281,12 +281,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px 10px;
+  padding: 0 16px;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.kpi-chart-period {
+.kpi-chart-unit, .kpi-chart-period {
   font-size: 11px;
   color: #94a3b8;
   font-weight: 500;
