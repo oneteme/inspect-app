@@ -37,6 +37,7 @@ import {ClientSupervisionView} from "./views/supervision/_component/client/clien
 import {RequestKpiView} from "./views/kpi/request/request-kpi.view";
 import {RequestKpiTestView} from "./views/kpi-test/request/request-kpi-test.view";
 import {SessionKpiView} from "./views/kpi/session/session-kpi.view";
+import {CompareView} from "./views/compare/compare.view";
 import {AuthService} from "./auth/auth.service";
 import {authGuard} from "./auth/auth.guard";
 import {OAuthModule} from "angular-oauth2-oidc";
@@ -63,10 +64,22 @@ const routes: Route[] = [
           },
           {
             path: ':id_request',
-            component: DetailRequestView,
-            title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-              return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' • Détail'
-            }
+            children: [
+              {
+                path: '',
+                component: DetailRequestView,
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                  return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' • Détail'
+                }
+              },
+              {
+                path: 'compare',
+                component: CompareView,
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                  return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' • Comparaison';
+                }
+              }
+            ]
           }
         ]
       },
