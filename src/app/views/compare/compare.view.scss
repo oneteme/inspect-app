@@ -12,22 +12,12 @@ $ongoing:      #3b82f6;
   overflow-y: auto;
 }
 
-// ─── Loading ────────────────────────────────────
-.compare-loading {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 200px;
-}
-
-// ─── Liste ──────────────────────────────────────
 .compare-list {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-// ─── Carte ──────────────────────────────────────
 .compare-item {
   background: #ffffff;
   border: 1px solid #e2e8f0;
@@ -37,7 +27,4 @@ $ongoing:      #3b82f6;
   overflow: hidden;
 }
 
-.graph-container {
-  overflow: hidden;
-  /* width/height are set dynamically by mxGraph */
-}
+.graph-container { overflow: hidden; }
