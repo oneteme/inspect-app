@@ -231,13 +231,31 @@
   min-width: 0;
 }
 
-.kpi-breadcrumb-sep {
-  font-size: 14px !important;
-  width: 14px !important;
-  height: 14px !important;
-  line-height: 14px !important;
-  color: #cbd5e1;
+.kpi-breadcrumb-label {
+  font-size: 9px;
+  font-weight: 500;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: 4px;
   flex-shrink: 0;
+}
+
+.kpi-breadcrumb-sep {
+  color: #cbd5e1;
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+.kpi-breadcrumb-icon {
+  font-size: 12px !important;
+  width: 12px !important;
+  height: 12px !important;
+  line-height: 12px !important;
+  color: #d1d5db;
+  opacity: 0.7;
+  flex-shrink: 0;
+  margin-right: 3px;
 }
 
 .kpi-breadcrumb-item {

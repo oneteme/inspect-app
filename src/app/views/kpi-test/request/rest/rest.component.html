@@ -43,12 +43,14 @@
           <mat-icon class="kpi-chart-icon material-symbols-outlined">signal_cellular_alt</mat-icon>
           <span class="kpi-chart-title">Disponibilité</span>
           <nav class="kpi-breadcrumb" *ngIf="activeStackLabel($statusRepartition.chartConfig) || activeGroupLabel($statusRepartition.chartConfig)">
-            <ng-container *ngIf="activeStackLabel($statusRepartition.chartConfig)">
-              <span class="kpi-breadcrumb-item purple">{{ activeStackLabel($statusRepartition.chartConfig) }}</span>
-            </ng-container>
             <ng-container *ngIf="activeGroupLabel($statusRepartition.chartConfig)">
-              <mat-icon class="kpi-breadcrumb-sep">chevron_right</mat-icon>
+              <span class="kpi-breadcrumb-label">Afficher par:</span>
               <span class="kpi-breadcrumb-item teal">{{ activeGroupLabel($statusRepartition.chartConfig) }}</span>
+            </ng-container>
+            <ng-container *ngIf="activeStackLabel($statusRepartition.chartConfig)">
+              <span class="kpi-breadcrumb-sep">·</span>
+              <span class="kpi-breadcrumb-label">Empilé par:</span>
+              <span class="kpi-breadcrumb-item purple">{{ activeStackLabel($statusRepartition.chartConfig) }}</span>
             </ng-container>
           </nav>
         </div>
@@ -111,6 +113,7 @@
           <mat-icon class="kpi-chart-icon material-symbols-outlined">speed</mat-icon>
           <span class="kpi-chart-title">Performance</span>
           <nav class="kpi-breadcrumb" *ngIf="activeGroupLabel($performanceRepartition.chartConfig)">
+            <span class="kpi-breadcrumb-label">Afficher par:</span>
             <span class="kpi-breadcrumb-item teal">{{ activeGroupLabel($performanceRepartition.chartConfig) }}</span>
           </nav>
         </div>
@@ -168,6 +171,7 @@
           <mat-icon class="kpi-chart-icon material-symbols-outlined">bar_chart</mat-icon>
           <span class="kpi-chart-title">Volumétrie</span>
           <nav class="kpi-breadcrumb" *ngIf="activeGroupLabel($volumetryRepartition.chartConfig)">
+            <span class="kpi-breadcrumb-label">Afficher par:</span>
             <span class="kpi-breadcrumb-item teal">{{ activeGroupLabel($volumetryRepartition.chartConfig) }}</span>
           </nav>
         </div>
@@ -209,6 +213,7 @@
           <mat-icon class="kpi-chart-icon material-symbols-outlined">timer</mat-icon>
           <span class="kpi-chart-title">Latence</span>
           <nav class="kpi-breadcrumb" *ngIf="activeGroupLabel($latencyRepartition.chartConfig)">
+            <span class="kpi-breadcrumb-label">Afficher par:</span>
             <span class="kpi-breadcrumb-item teal">{{ activeGroupLabel($latencyRepartition.chartConfig) }}</span>
           </nav>
         </div>

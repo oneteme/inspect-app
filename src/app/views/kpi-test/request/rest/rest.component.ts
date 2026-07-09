@@ -3,16 +3,8 @@ import {ChartComponent} from "@oneteme/jquery-echarts";
 import {TableColumnProvider} from "@oneteme/jquery-table";
 import {QueryParams} from "../../../../model/conf.model";
 import {RestRequestService} from "../../../../service/jquery/rest-request.service";
-import {finalize, from, Observable, of} from "rxjs";
-import {
-  buildSeries,
-  ChartConfig,
-  pivotByStack,
-  REST_LATENCY_CHART_CONFIG,
-  REST_PERFORMANCE_CHART_CONFIG,
-  REST_STATUS_CHART_CONFIG,
-  REST_VOLUMETRY_CHART_CONFIG
-} from "../../../kpi/kpi.config";
+import {finalize, Observable, of} from "rxjs";
+import {buildSeries,ChartConfig,pivotByStack,REST_LATENCY_CHART_CONFIG,REST_PERFORMANCE_CHART_CONFIG,REST_STATUS_CHART_CONFIG,REST_VOLUMETRY_CHART_CONFIG} from "../../../kpi/kpi.config";
 import {periodManagement2} from "../../../../shared/util";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
@@ -70,8 +62,8 @@ export class RestKpiTestComponent implements OnInit {
   $latencyFilteredValues: any[] = [];
   $latencyDisplayUnit = '';
 
-  $methodRepartition: {data: any[], loading: boolean} = { data: [], loading: true };
-  $mediaRepartition: {data: any[], loading: boolean} = { data: [], loading: true };
+  $methodRepartition: { data: any[], loading: boolean } = { data: [], loading: true };
+  $mediaRepartition: { data: any[], loading: boolean } = { data: [], loading: true };
   $globalStatistic = { totalRequest: 0, totalRequestError: 0, percentError: 0, elapsedPercentile: 0 };
 
   // Shared chart options (axes, tooltip, grid)
