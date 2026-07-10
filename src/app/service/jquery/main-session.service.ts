@@ -271,20 +271,17 @@ export class MainSessionService {
     getDependentsNew2(filters: {env: string, start: Date, end: Date, servers: string[], type: string}): Observable<{count: number, target: string, origin: string}[]> {
         let args: any = {
             'column': `rest_session_join.count:count,instance_join.app_name:target,instance.app_name:origin`,
-            'id': 'rest_request.parent',
+
             'type': filters.type,
-            'rest_request.id': 'rest_session_join.id',
             'rest_request.start.ge': filters.start.toISOString(),
             'rest_request.start.lt': filters.end.toISOString(),
-            'rest_session_join.instance_env': 'instance_join.id',
             'rest_session_join.start.ge': filters.start.toISOString(),
             'rest_session_join.start.lt': filters.end.toISOString(),
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            'instance_env': 'instance.id',
             'instance.environement': `"${filters.env}"`,
             'instance.type': 'SERVER',
-            'view': 'rest_session:rest_session_join,instance:instance_join',
+            'join': 'innerJoin(rest_request).criteria(id.eq(rest_request.parent)),innerJoin(rest_session:rest_session_join).criteria(rest_request.id.eq(rest_session_join.id)),innerJoin(instance:instance_join).criteria(instance_join.id.eq(rest_session_join.instance_env)),innerJoin(instance).criteria(instance_env.eq(instance.id))',
             'order': 'count.desc'
         }
         if(filters.servers?.length) {
