@@ -1,4 +1,4 @@
-import {AfterViewChecked, Component, ElementRef, inject, OnInit, QueryList, ViewChildren} from '@angular/core';
+import {AfterViewChecked, Component, ElementRef, inject, OnDestroy, OnInit, QueryList, ViewChildren} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 import {finalize} from 'rxjs';
 import {TraceService} from '../../service/trace.service';
@@ -60,18 +60,31 @@ type LabelFn = (vertex: any, text: string, x: number, y: number, style?: string,
   templateUrl: './compare.view.html',
   styleUrls: ['./compare.view.scss'],
 })
-export class CompareView implements OnInit, AfterViewChecked {
+export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
 
   id: string;
   data: CompareItem[];
   isLoading = false;
   private _graphsDrawn = false;
+  private _graphs: any[] = [];
+  private _resizeObservers: ResizeObserver[] = [];
 
   private readonly _pageTitleService = inject(PageTitleService);
 
   @ViewChildren('graphContainer') graphContainers: QueryList<ElementRef>;
 
   constructor(private readonly route: ActivatedRoute, private readonly traceService: TraceService) {}
+
+  ngOnDestroy(): void {
+    this._destroyGraphs();
+  }
+
+  private _destroyGraphs(): void {
+    this._resizeObservers.forEach(ro => ro.disconnect());
+    this._resizeObservers = [];
+    this._graphs.forEach(g => { try { g.destroy(); } catch { /* ignore */ } });
+    this._graphs = [];
+  }
 
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id_request');
@@ -81,6 +94,7 @@ export class CompareView implements OnInit, AfterViewChecked {
     this.traceService.getCompare(this.id)
       .pipe(finalize(() => this.isLoading = false))
       .subscribe((res: any) => {
+        this._destroyGraphs();
         if (Array.isArray(res)) {
           this.data = res;
         } else {
@@ -161,7 +175,13 @@ export class CompareView implements OnInit, AfterViewChecked {
   }
 
   private drawGraph(container: HTMLElement, item: CompareItem): void {
-    const remote        = item.remoteTrace;
+    const remote = item.remoteTrace;
+
+    if (!remote) {
+      container.style.cssText = `display:flex;align-items:center;justify-content:center;height:80px;color:#94a3b8;font-family:Inter,system-ui,sans-serif;font-size:13px;`;
+      container.textContent = 'Aucune trace distante disponible pour cet élément.';
+      return;
+    }
     const callerElapsed = item.end != null && item.start != null ? item.end - item.start : null;
     const calleeElapsed = remote?.end != null && remote?.start != null ? remote.end - remote.start : null;
     const colorItem     = this.getStatusColor(item.status);
@@ -179,6 +199,7 @@ export class CompareView implements OnInit, AfterViewChecked {
     graph.getCursorForCell = () => 'default';
     mx.mxEvent.disableContextMenu(container);
     this.applyDefaultStyles(graph);
+    this._graphs.push(graph);
 
     const parent  = graph.getDefaultParent();
     const NODE_W  = 250;
@@ -303,6 +324,11 @@ export class CompareView implements OnInit, AfterViewChecked {
 
     graph.getTooltipForCell = (cell: any): string => tooltipMap.get(cell) ?? '';
     this.resizeAndCenter(graph, container);
+
+    // ── ResizeObserver : re-centre le graphe si le container change de taille ──
+    const ro = new ResizeObserver(() => this.resizeAndCenter(graph, container));
+    ro.observe(container.parentElement ?? container);
+    this._resizeObservers.push(ro);
   }
 
   private resizeAndCenter(graph: any, container: HTMLElement): void {
