@@ -2,7 +2,7 @@ import {Component, inject, Input, OnInit} from "@angular/core";
 import {QueryParams} from "../../../../model/conf.model";
 import {ChartConfig, LDAP_PERFORMANCE_CHART_CONFIG, LDAP_STATUS_CHART_CONFIG} from "../../kpi.config";
 import {finalize} from "rxjs";
-import {periodManagement2} from "../../../../shared/util";
+import {periodManagement} from "../../../../shared/util";
 import {LdapRequestService} from "../../../../service/jquery/ldap-request.service";
 
 @Component({
@@ -28,7 +28,7 @@ export class LdapComponent implements OnInit {
   @Input() set queryParams(value: QueryParams) {
     if(value) {
       this.params = value;
-      this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
+      this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
       this.$statusRepartition.chartConfig = LDAP_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = LDAP_PERFORMANCE_CHART_CONFIG(this.groupedBy);
       this.getGlobalStatistics();

@@ -2,7 +2,7 @@ import {Component, inject, Input, OnInit} from "@angular/core";
 import {QueryParams} from "../../../../model/conf.model";
 import {finalize} from "rxjs";
 import {BATCH_SESSION_PERFORMANCE_CHART_CONFIG, BATCH_SESSION_STATUS_CHART_CONFIG, ChartConfig} from "../../kpi.config";
-import {periodManagement2} from "../../../../shared/util";
+import {periodManagement} from "../../../../shared/util";
 import {MainSessionService} from "../../../../service/jquery/main-session.service";
 
 @Component({
@@ -26,7 +26,7 @@ export class BatchComponent implements OnInit {
   @Input() set queryParams(value: QueryParams) {
     if(value) {
       this.params = value;
-      this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
+      this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
       this.$statusRepartition.chartConfig = BATCH_SESSION_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = BATCH_SESSION_PERFORMANCE_CHART_CONFIG(this.groupedBy);
       this.getUser();

@@ -74,15 +74,12 @@ export class SearchRequestView implements OnInit, OnDestroy {
   seviceType: { [key: string]: {service : RestRequestService | DatabaseRequestService | FtpRequestService | SmtpRequestService | LdapRequestService,
                                 filters: {icon: string, label: string,color: string, value: any}[] } } =
       {
-        "rest": { service: this._restRequestService, filters: [{icon: 'warning', label: '5xx', color:'#F44336', value: '5xx'}, {icon: 'error', label: '4xx', color:'#F9AD4E', value:'4xx'}, {icon: 'done', label: '2xx', color:'#4CAF50', value:'2xx'}, {icon: 'priority_high', label: '0', color:'', value:'0xx'}, {icon: 'pending', label: 'En cours', color:'', value:'lazy'}]},
-        "jdbc": { service: this._databaseRequestService, filters: [{icon: 'warning', label: 'KO', color:'#F44336', value: 'Ko'}, {icon: 'done', label: 'OK', color:'#4CAF50', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'', value:'lazy'}] },
-        "ftp" :  { service: this._ftpRequestService, filters: [{icon: 'warning', label: 'KO', color:'#F44336', value: 'Ko'}, {icon: 'done', label: 'OK', color:'#4CAF50', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'', value:'lazy'}] },
-        "smtp": { service: this._smtpRequestService, filters: [{icon: 'warning', label: 'KO', color:'#F44336', value: 'Ko'}, {icon: 'done', label: 'OK', color:'#4CAF50', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'', value:'lazy'}] },
-        "ldap": { service: this._ldapRequestService, filters: [{icon: 'warning', label: 'KO', color:'#F44336', value: 'Ko'}, {icon: 'done', label: 'OK', color:'#4CAF50', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'', value:'lazy'}] },
+        "rest": { service: this._restRequestService, filters: [{icon: 'warning', label: '5xx', color:'#F44336', value: '5xx'}, {icon: 'error', label: '4xx', color:'#F9AD4E', value:'4xx'}, {icon: 'done', label: '2xx', color:'#4CAF50', value:'2xx'}, {icon: 'priority_high', label: '0', color:'', value:'0xx'}, {icon: 'pending', label: 'En cours', color:'', value:'pending'}]},
+        "jdbc": { service: this._databaseRequestService, filters: [{icon: 'warning', label: 'KO', color:'#F44336', value: 'Ko'}, {icon: 'done', label: 'OK', color:'#4CAF50', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'', value:'pending'}] },
+        "ftp" :  { service: this._ftpRequestService, filters: [{icon: 'warning', label: 'KO', color:'#F44336', value: 'Ko'}, {icon: 'done', label: 'OK', color:'#4CAF50', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'', value:'pending'}] },
+        "smtp": { service: this._smtpRequestService, filters: [{icon: 'warning', label: 'KO', color:'#F44336', value: 'Ko'}, {icon: 'done', label: 'OK', color:'#4CAF50', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'', value:'pending'}] },
+        "ldap": { service: this._ldapRequestService, filters: [{icon: 'warning', label: 'KO', color:'#F44336', value: 'Ko'}, {icon: 'done', label: 'OK', color:'#4CAF50', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'', value:'pending'}] },
       }
-
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   onChangeStart(event) {
     this.requestFilterForm.controls.dateRangePicker.controls.end.updateValueAndValidity({onlySelf: true})
@@ -205,14 +202,8 @@ export class SearchRequestView implements OnInit, OnDestroy {
     this.RequestSubscription = (<any>this.seviceType[this.params.type]).service.getRequests({
       'env': this.queryParams.env,
       'host': this.queryParams.hosts,
-      'rangestatus': this.queryParams.rangestatus.filter(r => r != 'lazy').map(r => {
-        if(r == 'Ok') return false;
-        if(r == 'Ko') return true;
-        return r;
-      }),
-      'lazy': !!this.queryParams.rangestatus.find(r => r == 'lazy'),
-      'start': this.queryParams.period.start.toISOString(),
-      'end': this.queryParams.period.end.toISOString()
+      'start.ge': this.queryParams.period.start.toISOString(),
+      'end.lt': this.queryParams.period.end.toISOString()
     })
       .pipe(finalize(()=> this.isLoading = false))
       .subscribe({

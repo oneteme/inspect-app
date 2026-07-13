@@ -6,7 +6,7 @@ import {
   STARTUP_SESSION_PERFORMANCE_CHART_CONFIG,
   STARTUP_SESSION_STATUS_CHART_CONFIG
 } from "../../kpi.config";
-import {periodManagement2} from "../../../../shared/util";
+import {periodManagement} from "../../../../shared/util";
 import {MainSessionService} from "../../../../service/jquery/main-session.service";
 
 @Component({
@@ -30,7 +30,7 @@ export class StartupComponent implements OnInit {
   @Input() set queryParams(value: QueryParams) {
     if(value) {
       this.params = value;
-      this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
+      this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
       this.$statusRepartition.chartConfig = STARTUP_SESSION_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = STARTUP_SESSION_PERFORMANCE_CHART_CONFIG(this.groupedBy);
       this.getDependents();

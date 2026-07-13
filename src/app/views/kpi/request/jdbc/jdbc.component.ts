@@ -4,7 +4,7 @@ import {QueryParams} from "../../../../model/conf.model";
 import {DatabaseRequestService} from "../../../../service/jquery/database-request.service";
 import {ChartConfig, JDBC_PERFORMANCE_CHART_CONFIG, JDBC_STATUS_CHART_CONFIG} from "../../kpi.config";
 import {finalize} from "rxjs";
-import {periodManagement2} from "../../../../shared/util";
+import {periodManagement} from "../../../../shared/util";
 
 @Component({
   templateUrl: './jdbc.component.html',
@@ -46,7 +46,7 @@ export class JdbcComponent implements OnInit {
   @Input() set queryParams(value: QueryParams) {
     if(value) {
       this.params = value;
-      this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
+      this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
       this.$statusRepartition.chartConfig = JDBC_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = JDBC_PERFORMANCE_CHART_CONFIG(this.groupedBy);
       this.getGlobalStatistics();

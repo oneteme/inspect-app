@@ -271,7 +271,6 @@ export class MainSessionService {
     getDependentsNew2(filters: {env: string, start: Date, end: Date, servers: string[], type: string}): Observable<{count: number, target: string, origin: string}[]> {
         let args: any = {
             'column': `rest_session_join.count:count,instance_join.app_name:target,instance.app_name:origin`,
-
             'type': filters.type,
             'rest_request.start.ge': filters.start.toISOString(),
             'rest_request.start.lt': filters.end.toISOString(),

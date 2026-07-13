@@ -7,7 +7,7 @@ import {
   REST_SESSION_STATUS_CHART_CONFIG,
   REST_SESSION_VOLUMETRY_CHART_CONFIG
 } from "../../kpi.config";
-import {periodManagement2} from "../../../../shared/util";
+import {periodManagement} from "../../../../shared/util";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 import {RestSessionService} from "../../../../service/jquery/rest-session.service";
 import {EnvRouter} from "../../../../service/router.service";
@@ -90,7 +90,7 @@ export class RestComponent implements OnInit {
   @Input() set queryParams(value: QueryParams) {
     if(value) {
       this.params = value;
-      this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
+      this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
       this.$statusRepartition.chartConfig = REST_SESSION_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = REST_SESSION_PERFORMANCE_CHART_CONFIG(this.groupedBy);
       this.$volumetryRepartition.chartConfig = REST_SESSION_VOLUMETRY_CHART_CONFIG(this.groupedBy);

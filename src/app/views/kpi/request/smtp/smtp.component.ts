@@ -2,7 +2,7 @@ import {Component, inject, Input, OnInit} from "@angular/core";
 import {QueryParams} from "../../../../model/conf.model";
 import {ChartConfig, SMTP_PERFORMANCE_CHART_CONFIG, SMTP_STATUS_CHART_CONFIG} from "../../kpi.config";
 import {finalize} from "rxjs";
-import {periodManagement2} from "../../../../shared/util";
+import {periodManagement} from "../../../../shared/util";
 import {SmtpRequestService} from "../../../../service/jquery/smtp-request.service";
 
 @Component({
@@ -28,7 +28,7 @@ export class SmtpComponent implements OnInit {
   @Input() set queryParams(value: QueryParams) {
     if(value) {
       this.params = value;
-      this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
+      this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
       this.$statusRepartition.chartConfig = SMTP_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = SMTP_PERFORMANCE_CHART_CONFIG(this.groupedBy);
       this.getGlobalStatistics();

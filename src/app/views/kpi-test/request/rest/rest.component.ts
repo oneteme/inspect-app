@@ -13,7 +13,7 @@ import {
   REST_STATUS_CHART_CONFIG,
   REST_VOLUMETRY_CHART_CONFIG
 } from "../../../kpi/kpi.config";
-import {periodManagement2} from "../../../../shared/util";
+import {periodManagement} from "../../../../shared/util";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 import {OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, chartConfigToOrganizer, chartConfigToState, applyOrganizerEventToChart} from "@oneteme/jquery-organizer";
 
@@ -99,7 +99,7 @@ export class RestKpiTestComponent implements OnInit {
     if (value) {
       console.log('[REST-TEST] queryParams setter called with:', value);
       this.params = value;
-      this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
+      this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
       console.log('[REST-TEST] groupedBy:', this.groupedBy);
 
       // Initialize ChartConfigs and OrganizerConfigs
