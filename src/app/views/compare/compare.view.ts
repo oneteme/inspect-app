@@ -8,6 +8,9 @@ import mx from 'src/mxgraph';
 
 export interface RemoteTrace {
   appName?: string;
+  version?: string;
+  name?: string;
+  threadName?: string;
   os?: string;
   re?: string;
   address?: string;
@@ -29,6 +32,7 @@ export interface RemoteTrace {
 export interface CompareItem {
   '@type'?: string;
   appName?: string;       // application appelante (caller)
+  version?: string;
   os?: string;
   re?: string;            // environnement du caller
   address?: string;
@@ -40,6 +44,7 @@ export interface CompareItem {
   inDataSize?: number;    // octets reçus par le caller
   outDataSize?: number;   // octets envoyés par le caller
   sessionId?: string;
+  authScheme?: string;
   bodyContent?: string;
   branch?: string;
   hash?: string;
@@ -100,6 +105,10 @@ export class CompareView implements OnInit, AfterViewChecked {
     const remote        = item.remoteTrace;
     const callerAppName = item.appName    || 'Caller';
     const calleeAppName = remote?.appName || 'Callee';
+    const callerVersion = item.version;
+    const calleeVersion = remote?.version;
+    const calleeName    = remote?.name;
+    const calleeThread  = remote?.threadName;
     const callerEnv     = item.re;
     const calleeEnv     = remote?.re;
 
@@ -174,76 +183,131 @@ export class CompareView implements OnInit, AfterViewChecked {
     eStyle[mx.mxConstants.STYLE_EDGESTYLE]             = mx.mxConstants.NONE; // flèches droites
 
     const parent = graph.getDefaultParent();
-    const NODE_W  = 150;
-    const NODE_H  = 140;   // augmenté pour 5 lignes sur le callee
+    const NODE_W  = 250;
+    const NODE_H  = 250;
     const H_SPACE = 800;
     const NODE_Y  = 60;
 
-    // Helper: child label sur un vertex
-    // x: 0=gauche, 0.5=centre, 1=droite | y: 0=haut, 0.5=centre, 1=bas (relatif aux dimensions du vertex)
-    const addVertexLabel = (vertex: any, text: string, x: number, y: number, extraStyle: string = '') => {
+    let bodyCell: any = null;
+    const tooltipMap = new Map<any, string>();
+
+    // Helper: child label sur un vertex avec auto-troncature si availableWidthPx > 0
+    const addVertexLabel = (vertex: any, text: string, x: number, y: number, extraStyle: string = '', availableWidthPx: number = 0) => {
       if (!text) return;
+      let displayText = text;
+      if (availableWidthPx > 0) {
+        const fsMatch = /fontSize=(\d+)/.exec(extraStyle);
+        const fs = fsMatch ? Number.parseInt(fsMatch[1]) : 10;
+        const maxLen = Math.floor(availableWidthPx / (fs * 0.6));
+        if (text.length > maxLen) {
+          displayText = text.substring(0, maxLen) + '…';
+        }
+      }
       const geo = new mx.mxGeometry(x, y, 0, 0);
       geo.relative = true;
-      const cell = new mx.mxCell(text, geo,
+      const cell = new mx.mxCell(displayText, geo,
         `resizable=0;html=0;align=center;verticalAlign=middle;` +
         `fontFamily=Inter,system-ui,sans-serif;strokeColor=none;fillColor=none;${extraStyle}`);
       cell.vertex = true;
       graph.getModel().add(vertex, cell);
+      if (displayText !== text) tooltipMap.set(cell, text);
     };
 
-    // Helper: child label sur une arête — retourne la cellule créée
-    const addEdgeLabel = (edge: any, text: string, x: number, yOff: number, align: string = 'center', extraStyle: string = ''): any => {
+    // Helper: child label sur une arête avec auto-troncature si availableWidthPx > 0
+    // La fontSize est extraite de extraStyle (défaut 10). ~0.6px par char par pt de fontSize.
+    const addEdgeLabel = (edge: any, text: string, x: number, yOff: number, align: string = 'center', extraStyle: string = '', availableWidthPx: number = 0): any => {
       if (!text) return null;
+      let displayText = text;
+      if (availableWidthPx > 0) {
+        const fsMatch = /fontSize=(\d+)/.exec(extraStyle);
+        const fs = fsMatch ? Number.parseInt(fsMatch[1]) : 10;
+        const maxLen = Math.floor(availableWidthPx / (fs * 0.6));
+        if (text.length > maxLen) {
+          displayText = text.substring(0, maxLen) + '…';
+        }
+      }
       const geo = new mx.mxGeometry(x, yOff, 0, 0);
       geo.relative = true;
-      const cell = new mx.mxCell(text, geo,
+      const cell = new mx.mxCell(displayText, geo,
         `resizable=0;html=0;align=${align};verticalAlign=middle;` +
         `fontSize=10;fontFamily=Inter,system-ui,sans-serif;` +
         `labelBackgroundColor=#f8fafc;labelBorderColor=#e2e8f0;labelPadding=3;` +
         `strokeColor=none;fillColor=none;${extraStyle}`);
       cell.vertex = true;
       graph.getModel().add(edge, cell);
+      if (displayText !== text) tooltipMap.set(cell, text);
       return cell;
     };
-
-    let bodyCell: any = null;
     graph.getModel().beginUpdate();
     try {
       // ── Caller node (left) ───────────────────────────────
       const caller = graph.insertVertex(parent, null, '',
         40, NODE_Y, NODE_W, NODE_H,
         `fillColor=#dbeafe;strokeColor=#3b82f6;`);
-      addVertexLabel(caller, callerAppName,                                      0.5, 0.10, `fontSize=11;fontStyle=1;fontColor=#1e293b;`);
-      addVertexLabel(caller, user,                                               0.5, 0.27, `fontSize=9;fontStyle=1;fontColor=#f59e0b;`);
-      addVertexLabel(caller, [callerBranch, callerHash].filter(Boolean).join('@'), 0.5, 0.47, `fontSize=8;fontColor=#64748b;fontStyle=2;`);
-      addVertexLabel(caller, callerEnvironment,                                  0.5, 0.65, `fontSize=8;fontColor=#64748b;`);
-      addVertexLabel(caller, callerEnv,                                          0.5, 0.82, `fontSize=8;fontColor=#94a3b8;fontStyle=2;`);
-      addVertexLabel(caller, item.address,                                       0.5, 1.05, `fontSize=8;fontColor=#0369a1;`);
-      addVertexLabel(caller, item.os,                                            0.5, 1.15, `fontSize=7;fontColor=#94a3b8;`);
+      addVertexLabel(caller, callerAppName, 0.5, 0.05, `fontSize=11;fontStyle=1;fontColor=#1e293b;`, NODE_W);
+      addVertexLabel(caller, callerVersion, 0.5, 0.12, `fontSize=8;fontColor=#64748b;`, NODE_W);
+      addVertexLabel(caller, user,                                               0.99, 0.27, `fontSize=6;fontStyle=1;fontColor=#f59e0b;align=right;`, NODE_W * 0.5);
+      addVertexLabel(caller, [callerBranch, callerHash].filter(Boolean).join('@'), 0.5, 0.95, `fontSize=8;fontColor=#64748b;fontStyle=2;`, NODE_W);
+      addVertexLabel(caller, callerEnvironment,                                  0.9, -0.05, `fontSize=8;fontColor=#0369a1;`, NODE_W * 0.5);
+      addVertexLabel(caller, item.address,                                       0.5, 1.05, `fontSize=8;fontColor=#0369a1;`, NODE_W);
+      addVertexLabel(caller, [item.os, callerEnv].filter(Boolean).join('  '),    0.5, 1.11, `fontSize=7;fontColor=#94a3b8;`, NODE_W);
 
       // ── Callee node (right) ──────────────────────────────
       const callee = graph.insertVertex(parent, null, '',
         40 + NODE_W + H_SPACE, NODE_Y, NODE_W, NODE_H,
         `fillColor=#ede9fe;strokeColor=#6366f1;`);
-      addVertexLabel(callee, calleeAppName,                                        0.5, 0.10, `fontSize=11;fontStyle=1;fontColor=#1e293b;`);
-      addVertexLabel(callee, user,                                                 0.5, 0.27, `fontSize=9;fontStyle=1;fontColor=#f59e0b;`);
-      addVertexLabel(callee, [calleeBranch, calleeHash].filter(Boolean).join('@'), 0.5, 0.47, `fontSize=8;fontColor=#64748b;fontStyle=2;`);
-      addVertexLabel(callee, calleeEnvironment,                                    0.5, 0.65, `fontSize=8;fontColor=#64748b;`);
-      addVertexLabel(callee, calleeEnv,                                            0.5, 0.82, `fontSize=8;fontColor=#94a3b8;fontStyle=2;`);
-      addVertexLabel(callee, remote?.address,                                      0.5, 1.05, `fontSize=8;fontColor=#4338ca;`);
-      addVertexLabel(callee, remote?.os,                                           0.5, 1.15, `fontSize=7;fontColor=#94a3b8;`);
+      addVertexLabel(callee, calleeAppName, 0.5, 0.05, `fontSize=11;fontStyle=1;fontColor=#1e293b;`, NODE_W);
+      addVertexLabel(callee, calleeVersion, 0.5, 0.12, `fontSize=8;fontColor=#64748b;`, NODE_W);
+      addVertexLabel(callee, user,                                                 0.01, 0.27, `fontSize=6;fontStyle=1;fontColor=#f59e0b;align=left;`, NODE_W * 0.5);
+      addVertexLabel(callee, [calleeBranch, calleeHash].filter(Boolean).join('@'), 0.5, 0.95, `fontSize=8;fontColor=#64748b;fontStyle=2;`, NODE_W);
+      addVertexLabel(callee, calleeEnvironment,                                    0.1, -0.05, `fontSize=8;fontColor=#4338ca;`, NODE_W * 0.5);
+      addVertexLabel(callee, remote?.address,                                      0.5, 1.05, `fontSize=8;fontColor=#4338ca;`, NODE_W);
+      addVertexLabel(callee, [remote?.os,calleeEnv].filter(Boolean).join('  '),    0.5, 1.11, `fontSize=7;fontColor=#94a3b8;`, NODE_W);
+      addVertexLabel(callee, [remote?.status?.toString(), exception].filter(Boolean).join('  '), 0.5, 0.7, `fontSize=9;fontColor=${colorRemote};fontStyle=1;`, NODE_W);
+      // ── Vertex enfant : traitement effectué par le caller ────────
+      if (callerElapsed || item.sessionId) {
+        const callerDurationStr = callerElapsed ? formatDuration(callerElapsed, 2) : null;
+        const callerProcW = Math.round(0.54 * NODE_W);
+        const callerProcH = Math.round(0.28 * NODE_H);
+        const callerProcX = (NODE_W - callerProcW) / 2;
+        const callerProcY = (NODE_H - callerProcH) / 2;
+        const callerProcGeo = new mx.mxGeometry(callerProcX, callerProcY, callerProcW, callerProcH);
+        const callerProcCell = new mx.mxCell('', callerProcGeo,
+          `fillColor=#eff6ff;strokeColor=#3b82f6;strokeWidth=1.5;rounded=1;arcSize=12;whiteSpace=wrap;`);
+        callerProcCell.vertex = true;
+        graph.getModel().add(caller, callerProcCell);
+        addVertexLabel(callerProcCell, callerDurationStr, 0.99, 0.1, `fontSize=8;fontColor=#1e3a5f;fontStyle=1;align=right;`);
+        addVertexLabel(callerProcCell, item.sessionId,    0.5, 0.7, `fontSize=7;fontColor=#1e3a5f;fontStyle=0;`);
+      }
+
+      // ── Vertex enfant : traitement effectué par le callee ────────
+      if (calleeName || calleeElapsed || calleeThread) {
+        const durationStr = calleeElapsed ? formatDuration(calleeElapsed, 2) : null;
+        const procW = Math.round(0.54 * NODE_W);
+        const procH = Math.round(0.28 * NODE_H);
+        const procX = (NODE_W - procW) / 2;
+        const procY = (NODE_H - procH) / 2;
+        const procGeo = new mx.mxGeometry(procX, procY, procW, procH);
+        const procCell = new mx.mxCell('', procGeo,
+          `fillColor=#f5f3ff;strokeColor=#6366f1;strokeWidth=1.5;rounded=1;arcSize=12;whiteSpace=wrap;`);
+        procCell.vertex = true;
+        graph.getModel().add(callee, procCell);
+        addVertexLabel(procCell, durationStr,  0.99, 0.1, `fontSize=8;fontColor=#3b0764;fontStyle=1;align=right;`);
+        addVertexLabel(procCell, calleeName,   0.5, 0.3, `fontSize=8;fontColor=#3b0764;fontStyle=1;`);
+        addVertexLabel(procCell, calleeThread, 0.5, 0.9, `fontSize=7;fontColor=#3b0764;fontStyle=0;`);
+      }
 
       // ── Request arrow → (tiers supérieur du nœud, sortie à 28%) ─────
       const reqEdge = graph.insertEdge(parent, null, '', caller, callee,
         `strokeColor=#22c55e;exitX=1;exitY=0.28;exitDx=0;exitDy=0;entryX=0;entryY=0.28;entryDx=0;entryDy=0;edgeStyle=none;`);
 
       // Labels flèche requête (au-dessus)
-      addEdgeLabel(reqEdge, [new Date(item.start*1000).toISOString()].filter(Boolean).join('  '), -0.95, 10, 'left', 'fontSize=6;');
-      addEdgeLabel(reqEdge, [outSize != null ? `${outSize}o` : null].filter(Boolean).join('  '), -0.95, -10, 'left', 'fontSize=6;');
-      addEdgeLabel(reqEdge, [method, path].filter(Boolean).join('  '), 0, 10, 'center','fontSize=9;');
+      addEdgeLabel(reqEdge, [new Date(item.start*1000).toISOString()].filter(Boolean).join('  '), -0.95, 10, 'left', 'fontSize=6;', NODE_W);
+      addEdgeLabel(reqEdge, [outSize != null ? `${outSize}o` : null].filter(Boolean).join('  '), -0.95, -10, 'left', 'fontSize=6;', NODE_W);
+      const scheme = item.authScheme ?? null;
+      addEdgeLabel(reqEdge, [scheme != null ? '🔒' : null, method, path].filter(Boolean).join('  '), 0, 10, 'center', 'fontSize=9;', H_SPACE * 0.55);
       if(method != calleeMethod || path != calleePath) {
-        addEdgeLabel(reqEdge, [calleeMethod, calleePath].filter(Boolean).join('  '), 0, -10, 'center','fontSize=9;');
+        addEdgeLabel(reqEdge, [calleeMethod, calleePath].filter(Boolean).join('  '), 0, -10, 'center', 'fontSize=9;', H_SPACE * 0.55);
       }
 
       addEdgeLabel(reqEdge, [
@@ -251,8 +315,8 @@ export class CompareView implements OnInit, AfterViewChecked {
         //networkLatency != null && networkLatency > 0 ? `~${formatDuration(networkLatency, 2)}` : null,
         //status != null ? String(status) : null,
       ].filter(Boolean).join('  '), 0.95, -10, 'right');
-      addEdgeLabel(reqEdge, [new Date(remote.start*1000).toISOString(), `~${formatDuration(remote?.start - item?.start, 2)}`].filter(Boolean).join('  '), 0.95, 10, 'right', 'fontSize=6;');
-      addEdgeLabel(reqEdge, [calleeInSize != null ? `${calleeInSize}o` : null].filter(Boolean).join('  '), 0.95, -10, 'right', 'fontSize=6;');
+      addEdgeLabel(reqEdge, [new Date(remote.start*1000).toISOString(), `~${formatDuration(remote?.start - item?.start, 2)}`].filter(Boolean).join('  '), 0.95, 10, 'right', 'fontSize=6;', NODE_W);
+      addEdgeLabel(reqEdge, [calleeInSize != null ? `${calleeInSize}o` : null].filter(Boolean).join('  '), 0.95, -10, 'right', 'fontSize=6;', NODE_W);
 
       // ── Response arrow ← split en 2 couleurs ────────────────────────
       // Calcul du point de jonction au centre horizontal entre les deux nœuds
@@ -276,26 +340,25 @@ export class CompareView implements OnInit, AfterViewChecked {
       // Labels flèche réponse — distribués sur les deux demi-arêtes
       // ⚠ resHalf1 source=callee(droite) → x=-0.9 près callee
       // ⚠ resHalf2 target=caller(gauche) → x=+0.9 près caller
-      addEdgeLabel(resHalf1, [new Date(remote.end*1000).toISOString()].filter(Boolean).join(''), -0.9, -10, 'right', 'fontSize=6;');
-      addEdgeLabel(resHalf1, [`${calleeOutSize}o`].filter(Boolean).join(''), -0.9, 10, 'right', 'fontSize=6;');
+      addEdgeLabel(resHalf1, [new Date(remote.end*1000).toISOString()].filter(Boolean).join(''), -0.9, -10, 'right', 'fontSize=6;', NODE_W);
+      addEdgeLabel(resHalf1, [`${calleeOutSize}o`].filter(Boolean).join(''), -0.9, 10, 'right', 'fontSize=6;', NODE_W);
       // Au-dessus : remote.status + exception callee (colorRemote)
       const remoteLabel = [remote?.status.toString(), exception].filter(Boolean).join('  ');
-      addEdgeLabel(resHalf1, remoteLabel, 0.9, -10, 'center', `fontSize=9;fontColor=${colorRemote};fontStyle=1;`);
       // En-dessous : item.status + (exception caller OU bodyContent) (colorItem)
-      const itemSuffix = itemException
-        ? itemException
-        : (callerBodyContent ? (callerBodyContent.length > 60 ? callerBodyContent.substring(0, 60) + '…' : callerBodyContent) : '');
-      bodyCell = addEdgeLabel(resHalf1, [item.status.toString(), itemSuffix].filter(Boolean).join('  '), 0.9, 10, 'center', `fontSize=9;fontColor=${colorItem};`);
-      addEdgeLabel(resHalf2, [`${inSize}o`].filter(Boolean).join(''), 0.9, 10, 'left', 'fontSize=6;');
-      addEdgeLabel(resHalf2, [new Date(item.end*1000).toISOString(),  formatDuration(item?.end - remote?.end, 2)].filter(Boolean).join('  '), 0.9, -10, 'left', 'fontSize=6;');
+      if (remote?.status != item.status){
+        const itemSuffix = itemException || callerBodyContent || '';
+        bodyCell = addEdgeLabel(resHalf1, [item.status.toString(), itemSuffix].filter(Boolean).join('  '), 0.9, 10, 'center', `fontSize=9;fontColor=${colorItem};`, H_SPACE * 0.3);
+      }
+
+      addEdgeLabel(resHalf2, [`${inSize}o`].filter(Boolean).join(''), 0.9, 10, 'left', 'fontSize=6;', NODE_W);
+      addEdgeLabel(resHalf2, [new Date(item.end*1000).toISOString(),  `~${formatDuration(item?.end - remote?.end, 2)}`].filter(Boolean).join('  '), 0.9, -10, 'left', 'fontSize=6;', NODE_W);
     } finally {
       graph.getModel().endUpdate();
     }
 
-    // ── Tooltip sur le bodyContent tronqué ───────────────────────────
+    // ── Tooltip sur les textes tronqués ─────────────────────────────
     graph.getTooltipForCell = (cell: any): string => {
-      if (cell === bodyCell && callerBodyContent) return callerBodyContent;
-      return '';
+      return tooltipMap.get(cell) ?? '';
     };
 
     // ── Resize & center ──────────────────────────────────────────────
