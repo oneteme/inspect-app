@@ -45,6 +45,7 @@ export interface CompareItem {
   outDataSize?: number;
   sessionId?: string;
   authScheme?: string;
+  host?: string;
   bodyContent?: string;
   branch?: string;
   hash?: string;
@@ -121,9 +122,10 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
   }
 
   private extractException(ex: { type?: string; message?: string } | string | undefined): string | null {
+
     if (!ex) return null;
     if (typeof ex === 'string') return ex;
-    return ex.type || ex.message || null;
+    return (ex.type +":"+ ex.message)|| null;
   }
 
   private applyDefaultStyles(graph: any): void {
@@ -164,28 +166,23 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
 
   private populateCalleeNode(callee: any, remote: RemoteTrace, exception: string | null, colorRemote: string, addLabel: LabelFn, NODE_W: number): void {
     const hash = remote?.hash ? remote.hash.substring(0, 7) : null;
-    addLabel(callee, remote?.appName || 'Callee',                          0.5,  0.05, `fontSize=11;fontStyle=1;fontColor=#1e293b;`, NODE_W);
+    addLabel(callee, remote?.appName,                          0.5,  0.05, `fontSize=11;fontStyle=1;fontColor=#1e293b;`, NODE_W);
     addLabel(callee, remote?.version,                                      0.5,  0.12, `fontSize=8;fontColor=#64748b;`, NODE_W);
     addLabel(callee, remote?.user,                                         0.01, 0.27, `fontSize=6;fontStyle=1;fontColor=#f59e0b;align=left;`, NODE_W * 0.5);
     addLabel(callee, [remote?.branch, hash].filter(Boolean).join('@'),     0.5,  0.95, `fontSize=8;fontColor=#64748b;fontStyle=2;`, NODE_W);
     addLabel(callee, remote?.environment,                                  0.1, -0.05, `fontSize=9;fontColor=#4338ca;`, NODE_W * 0.5);
     addLabel(callee, remote?.address,                                      0.5,  1.05, `fontSize=8;fontColor=#4338ca;`, NODE_W);
     addLabel(callee, [remote?.os, remote?.re].filter(Boolean).join('  '), 0.5,  1.11, `fontSize=7;fontColor=#94a3b8;`, NODE_W);
-    addLabel(callee, [remote?.status?.toString(), exception].filter(Boolean).join('  '), 0.5, 0.7, `fontSize=9;fontColor=${colorRemote};fontStyle=1;`, NODE_W);
+    addLabel(callee, [exception].filter(Boolean).join('  '), 0.5, 0.7, `fontSize=9;fontColor=${colorRemote};fontStyle=1;`, NODE_W);
   }
 
   private drawGraph(container: HTMLElement, item: CompareItem): void {
-    const remote = item.remoteTrace;
-
-    if (!remote) {
-      container.style.cssText = `display:flex;align-items:center;justify-content:center;height:80px;color:#94a3b8;font-family:Inter,system-ui,sans-serif;font-size:13px;`;
-      container.textContent = 'Aucune trace distante disponible pour cet élément.';
-      return;
-    }
+    // Si remoteTrace absent, on crée un objet minimal avec item.host comme nom
+    const remote: RemoteTrace = item.remoteTrace ?? { appName: item.host ?? '?' };
     const callerElapsed = item.end != null && item.start != null ? item.end - item.start : null;
     const calleeElapsed = remote?.end != null && remote?.start != null ? remote.end - remote.start : null;
     const colorItem     = this.getStatusColor(item.status);
-    const colorRemote   = this.getStatusColor(remote?.status);
+    const colorRemote   = this.getStatusColor('status' in  remote ? remote.status : 0);
     const exception     = this.extractException(remote?.exception);
     const itemException = this.extractException(item.exception);
 
@@ -265,28 +262,28 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
       // ── Child boxes ──────────────────────────────────────────────────
       if (callerElapsed || item.sessionId) {
         const box = addChildBox(caller, '#eff6ff', '#3b82f6');
-        addVertexLabel(box, callerElapsed ? formatDuration(callerElapsed, 2) : null, 0.99, 0.1, `fontSize=8;fontColor=#1e3a5f;fontStyle=1;align=right;`);
+        addVertexLabel(box, callerElapsed ? formatDuration(callerElapsed, 2) : null, 0.95, 0.9, `fontSize=6;fontFamily=Inter,system-ui,sans-serif;labelBackgroundColor=#f8fafc;labelBorderColor=#e2e8f0;labelPadding=3;strokeColor=none;fillColor=none;align=right;`);
 
       }
       if (remote?.name || calleeElapsed || remote?.threadName) {
         const box = addChildBox(callee, '#f5f3ff', '#6366f1');
-        addVertexLabel(box, calleeElapsed ? formatDuration(calleeElapsed, 2) : null, 0.99, 0.1, `fontSize=8;fontColor=#3b0764;fontStyle=1;align=right;`);
-        addVertexLabel(box, remote?.name,       0.5, 0.3, `fontSize=8;fontColor=#3b0764;fontStyle=1;`);
-        addVertexLabel(box, remote?.threadName, 0.5, 0.9, `fontSize=7;fontColor=#3b0764;`);
+        addVertexLabel(box, calleeElapsed ? formatDuration(calleeElapsed, 2) : null, 0.95, 0.9, `fontSize=6;fontFamily=Inter,system-ui,sans-serif;labelBackgroundColor=#f8fafc;labelBorderColor=#e2e8f0;labelPadding=3;strokeColor=none;fillColor=none;align=right;`);
+        addVertexLabel(box, remote?.name,       0.5, 0.1, `fontSize=8;fontColor=#3b0764;fontStyle=1;`);
+        addVertexLabel(box, remote?.threadName, 0.5, 0.3, `fontSize=7;fontColor=#64748b;`);
       }
 
       // ── Request arrow ─────────────────────────────────────────────────
       const reqEdge = graph.insertEdge(parent, null, '', caller, callee,
         `strokeColor=#22c55e;exitX=1;exitY=0.28;exitDx=0;exitDy=0;entryX=0;entryY=0.28;entryDx=0;entryDy=0;edgeStyle=none;`);
 
-      addEdgeLabel(reqEdge, new Date(item.start * 1000).toISOString(), -0.95, 10, 'left', 'fontSize=6;', NODE_W);
-      addEdgeLabel(reqEdge, `${Math.max(item.outDataSize, 0)}o`,       -0.95, -10, 'left', 'fontSize=6;', NODE_W);
+      addEdgeLabel(reqEdge, item.start != null ? new Date(item.start * 1000).toISOString() : null, -0.95, 10, 'left', 'fontSize=6;', NODE_W);
+      addEdgeLabel(reqEdge, `${Math.max(item.outDataSize ?? 0, 0)}o`, -0.95, -10, 'left', 'fontSize=6;', NODE_W);
       addEdgeLabel(reqEdge, [item.authScheme ? '🔒' : null, item.method, item.path].filter(Boolean).join('  '), 0, 10, 'center', 'fontSize=9;', H_SPACE * 0.55);
       if (item.method !== remote?.method || item.path !== remote?.path) {
         addEdgeLabel(reqEdge, [remote?.method, remote?.path].filter(Boolean).join('  '), 0, -10, 'center', 'fontSize=9;', H_SPACE * 0.55);
       }
-      addEdgeLabel(reqEdge, `${new Date(remote.start * 1000).toISOString()}  ~${formatDuration(remote.start - item.start, 2)}`, 0.95, 10, 'right', 'fontSize=6;', NODE_W);
-      addEdgeLabel(reqEdge, remote?.inDataSize > 0 ? `${remote.inDataSize}o` : null, 0.95, -10, 'right', 'fontSize=6;', NODE_W);
+      addEdgeLabel(reqEdge, remote.start != null ? `${new Date(remote.start * 1000).toISOString()}  ~${formatDuration(remote.start - item.start, 2)}` : null, 0.95, 10, 'right', 'fontSize=6;', NODE_W);
+      addEdgeLabel(reqEdge, `${Math.max(remote.inDataSize ?? 0, 0)}o`, 0.95, -10, 'right', 'fontSize=6;', NODE_W);
 
       // ── Response arrow (split at midpoint) ───────────────────────────
       const midX = 40 + NODE_W + H_SPACE / 2;
@@ -305,9 +302,9 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
       graph.getModel().setGeometry(resHalf2, resGeo2);
 
       // Labels côté callee
-      addEdgeLabel(resHalf1, new Date(remote.end * 1000).toISOString(), -0.9, -10, 'right', 'fontSize=6;', NODE_W);
-      addEdgeLabel(resHalf1, `${Math.max(remote?.outDataSize, 0)}o`,    -0.9,  10, 'right', 'fontSize=6;', NODE_W);
-
+      addEdgeLabel(resHalf1, remote.end != null ? new Date(remote.end * 1000).toISOString() : null, -0.9, -10, 'right', 'fontSize=6;', NODE_W);
+      addEdgeLabel(resHalf1, `${Math.max(remote.outDataSize ?? 0, 0)}o`, -0.9, 10, 'right', 'fontSize=6;', NODE_W);
+      addEdgeLabel(resHalf1, [remote.status?.toString(), exception].filter(Boolean).join('  '), 0.9, -10, 'center', `fontSize=9;fontColor=${colorRemote};fontStyle=1;`, H_SPACE * 0.3);
 
       if (remote.status !== item.status) {
         const bodySuffix = item.bodyContent ? item.bodyContent.substring(0, 60) + (item.bodyContent.length > 60 ? '…' : '') : '';
@@ -316,8 +313,8 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
       }
 
       // Labels côté caller
-      addEdgeLabel(resHalf2, `${Math.max(item.inDataSize, 0)}o`, 0.9, 10, 'left', 'fontSize=6;', NODE_W);
-      addEdgeLabel(resHalf2, `${new Date(item.end * 1000).toISOString()}  ~${formatDuration(item.end - remote.end, 2)}`, 0.9, -10, 'left', 'fontSize=6;', NODE_W);
+      addEdgeLabel(resHalf2, `${Math.max(item.inDataSize ?? 0, 0)}o`, 0.9, 10, 'left', 'fontSize=6;', NODE_W);
+      addEdgeLabel(resHalf2, item.end != null && remote.end != null ? `${new Date(item.end * 1000).toISOString()}  ~${formatDuration(item.end - remote.end, 2)}` : null, 0.9, -10, 'left', 'fontSize=6;', NODE_W);
     } finally {
       graph.getModel().endUpdate();
     }
