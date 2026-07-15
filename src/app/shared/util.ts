@@ -267,13 +267,6 @@ export const formatters: any = {
     }
 }
 
-/**
- * Formate les dates des données du chart en français selon le groupement.
- * @param data Données brutes du serveur
- * @param groupedBy Clé du groupement ('year', 'month', 'week', 'date', 'hour')
- * @param datePipe Pipe de formatage de dates (new DatePipe('fr-FR'))
- * @returns Les données avec les dates formatées en français
- */
 export function formatChartDates(data: any[], groupedBy: string, datePipe: DatePipe): any[] {
     if (!data || data.length === 0) return data;
     if (!formatters[groupedBy]) {
