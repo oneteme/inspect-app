@@ -143,38 +143,62 @@ export const REST_SESSION_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartCon
     }, {
       key: 'sum',
       selected: false,
-      unit: 'o',
+      unit: {
+        baseUnit: 'o',
+        scales: [
+          { unit: 'o', scale: 1, threshold: 1024 },
+          { unit: 'Ko', scale: 1/1024, threshold: 1024 * 1024 },
+          { unit: 'Mo', scale: 1/(1024 * 1024), threshold: 1024 * 1024 * 1024 },
+          { unit: 'Go', scale: 1/(1024 * 1024 * 1024), threshold: Infinity }
+        ]
+      },
       menu: {
         label: 'Total'
       },
       jquery: {
         value:  (s: string) => `${s}.sum`,
         buildAlias: (value) => 'sum_' + value,
-        buildName: (chartItem, value) => 'Total ' + chartItem.menu.label,
+        buildName: (chartItem, value) => chartItem.menu.label,
       }
     }, {
       key: 'min',
       selected: false,
-      unit: 'o',
+      unit: {
+        baseUnit: 'o',
+        scales: [
+          { unit: 'o', scale: 1, threshold: 1024 },
+          { unit: 'Ko', scale: 1/1024, threshold: 1024 * 1024 },
+          { unit: 'Mo', scale: 1/(1024 * 1024), threshold: 1024 * 1024 * 1024 },
+          { unit: 'Go', scale: 1/(1024 * 1024 * 1024), threshold: Infinity }
+        ]
+      },
       menu: {
         label: 'Minimum'
       },
       jquery: {
         value:  (s: string) => `${s}.min`,
         buildAlias: (value) => 'min_' + value,
-        buildName: (chartItem, value) => 'Minimum ' + chartItem.menu.label,
+        buildName: (chartItem, value) => chartItem.menu.label,
       }
     }, {
       key: 'max',
       selected: false,
-      unit: 'o',
+      unit: {
+        baseUnit: 'o',
+        scales: [
+          { unit: 'o', scale: 1, threshold: 1024 },
+          { unit: 'Ko', scale: 1/1024, threshold: 1024 * 1024 },
+          { unit: 'Mo', scale: 1/(1024 * 1024), threshold: 1024 * 1024 * 1024 },
+          { unit: 'Go', scale: 1/(1024 * 1024 * 1024), threshold: Infinity }
+        ]
+      },
       menu: {
         label: 'Maximum'
       },
       jquery: {
         value:  (s: string) => `${s}.max`,
         buildAlias: (value) => 'max_' + value,
-        buildName: (chartItem, value) => 'Maximum ' + chartItem.menu.label,
+        buildName: (chartItem) => chartItem?.menu?.label ?? '',
       }
     }]
   },
@@ -743,7 +767,7 @@ export const REST_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
       xField: 'host',
       yField: 'count',
       groupBy: 'status_stack',
-      selectedSlices: []
+      selectedSlices: ["host"]
     },
     {
       id: 'status-by-api-tranche',
@@ -752,7 +776,7 @@ export const REST_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
       xField: 'media',
       yField: 'count',
       groupBy: 'status_tranche',
-      selectedSlices: []
+      // selectedSlices: []
     }
   ]
 });
@@ -816,40 +840,64 @@ export const REST_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartConfig => (
       key: 'sum',
       selected: false,
       group: 'Taille',
-      unit: 'o',
+      unit: {
+        baseUnit: 'o',
+        scales: [
+          { unit: 'o', scale: 1, threshold: 1024 },
+          { unit: 'Ko', scale: 1/1024, threshold: 1024 * 1024 },
+          { unit: 'Mo', scale: 1/(1024 * 1024), threshold: 1024 * 1024 * 1024 },
+          { unit: 'Go', scale: 1/(1024 * 1024 * 1024), threshold: Infinity }
+        ]
+      },
       menu: {
         label: 'Total'
       },
       jquery: {
         value: (s: string) => `${s}.sum`,
         buildAlias: (value) => 'sum_' + value,
-        buildName: (chartItem, value) => 'Total ' + chartItem.menu.label,
+        buildName: (chartItem) => chartItem?.menu?.label ?? '',
       }
     }, {
       key: 'min',
       selected: false,
       group: 'Taille',
-      unit: 'o',
+      unit: {
+        baseUnit: 'o',
+        scales: [
+          { unit: 'o', scale: 1, threshold: 1024 },
+          { unit: 'Ko', scale: 1/1024, threshold: 1024 * 1024 },
+          { unit: 'Mo', scale: 1/(1024 * 1024), threshold: 1024 * 1024 * 1024 },
+          { unit: 'Go', scale: 1/(1024 * 1024 * 1024), threshold: Infinity }
+        ]
+      },
       menu: {
         label: 'Minimum'
       },
       jquery: {
         value: (s: string) => `${s}.min`,
         buildAlias: (value) => 'min_' + value,
-        buildName: (chartItem, value) => 'Minimum ' + chartItem.menu.label,
+        buildName: (chartItem) => chartItem?.menu?.label ?? '',
       }
     }, {
       key: 'max',
       selected: false,
       group: 'Taille',
-      unit: 'o',
+      unit: {
+        baseUnit: 'o',
+        scales: [
+          { unit: 'o', scale: 1, threshold: 1024 },
+          { unit: 'Ko', scale: 1/1024, threshold: 1024 * 1024 },
+          { unit: 'Mo', scale: 1/(1024 * 1024), threshold: 1024 * 1024 * 1024 },
+          { unit: 'Go', scale: 1/(1024 * 1024 * 1024), threshold: Infinity }
+        ]
+      },
       menu: {
         label: 'Maximum'
       },
       jquery: {
         value: (s: string) => `${s}.max`,
         buildAlias: (value) => 'max_' + value,
-        buildName: (chartItem, value) => 'Maximum ' + chartItem.menu.label,
+        buildName: (chartItem) => chartItem?.menu?.label ?? '',
       }
     }]
   },

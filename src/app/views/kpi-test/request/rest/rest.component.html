@@ -44,7 +44,7 @@
           <span class="kpi-chart-title">Disponibilité</span>
           <nav class="kpi-breadcrumb" *ngIf="activeStackLabel($statusRepartition.chartConfig) || activeGroupLabel($statusRepartition.chartConfig)">
             <ng-container *ngIf="activeGroupLabel($statusRepartition.chartConfig)">
-              <span class="kpi-breadcrumb-label">Afficher par:</span>
+              <span class="kpi-breadcrumb-label">Affiché par:</span>
               <span class="kpi-breadcrumb-item teal">{{ activeGroupLabel($statusRepartition.chartConfig) }}</span>
             </ng-container>
             <ng-container *ngIf="activeStackLabel($statusRepartition.chartConfig)">
@@ -78,15 +78,11 @@
           [alwaysShow]="true"
           (filterChange)="onStatusFilterChange($event)">
         </slice-panel>
-        <chart #statusChart *ngIf="$statusView === 'chart'"
+        <chart #statusChart
                type="column"
                [config]="$statusRepartition.chartProvider || {series: []}"
                [data]="$statusRepartition.data"
                [isLoading]="$statusRepartition.loading"></chart>
-        <jquery-table *ngIf="$statusView === 'table'"
-               [columnsConfig]="statusTableColumns()"
-               [data]="$statusRepartition.rawData || []"
-               [isLoading]="$statusRepartition.loading"></jquery-table>
       </div>
     </div>
 
@@ -113,7 +109,7 @@
           <mat-icon class="kpi-chart-icon material-symbols-outlined">speed</mat-icon>
           <span class="kpi-chart-title">Performance</span>
           <nav class="kpi-breadcrumb" *ngIf="activeGroupLabel($performanceRepartition.chartConfig)">
-            <span class="kpi-breadcrumb-label">Afficher par:</span>
+            <span class="kpi-breadcrumb-label">Affiché par:</span>
             <span class="kpi-breadcrumb-item teal">{{ activeGroupLabel($performanceRepartition.chartConfig) }}</span>
           </nav>
         </div>
@@ -171,7 +167,7 @@
           <mat-icon class="kpi-chart-icon material-symbols-outlined">bar_chart</mat-icon>
           <span class="kpi-chart-title">Volumétrie</span>
           <nav class="kpi-breadcrumb" *ngIf="activeGroupLabel($volumetryRepartition.chartConfig)">
-            <span class="kpi-breadcrumb-label">Afficher par:</span>
+            <span class="kpi-breadcrumb-label">Affiché par:</span>
             <span class="kpi-breadcrumb-item teal">{{ activeGroupLabel($volumetryRepartition.chartConfig) }}</span>
           </nav>
         </div>
@@ -213,7 +209,7 @@
           <mat-icon class="kpi-chart-icon material-symbols-outlined">timer</mat-icon>
           <span class="kpi-chart-title">Latence</span>
           <nav class="kpi-breadcrumb" *ngIf="activeGroupLabel($latencyRepartition.chartConfig)">
-            <span class="kpi-breadcrumb-label">Afficher par:</span>
+            <span class="kpi-breadcrumb-label">Affiché par:</span>
             <span class="kpi-breadcrumb-item teal">{{ activeGroupLabel($latencyRepartition.chartConfig) }}</span>
           </nav>
         </div>

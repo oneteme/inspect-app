@@ -1,11 +1,12 @@
 import {ChangeDetectorRef, Component, inject, Input, OnInit, ViewChild} from "@angular/core";
-import {ChartComponent} from "@oneteme/jquery-echarts";
+import {DatePipe} from "@angular/common";
+import {ChartComponent, selectBestScale} from "@oneteme/jquery-echarts";
 import {TableColumnProvider} from "@oneteme/jquery-table";
 import {QueryParams} from "../../../../model/conf.model";
 import {RestRequestService} from "../../../../service/jquery/rest-request.service";
 import {finalize, Observable, of} from "rxjs";
 import {buildSeries,ChartConfig,pivotByStack,REST_LATENCY_CHART_CONFIG,REST_PERFORMANCE_CHART_CONFIG,REST_STATUS_CHART_CONFIG,REST_VOLUMETRY_CHART_CONFIG} from "../../../kpi/kpi.config";
-import {periodManagement2} from "../../../../shared/util";
+import {periodManagement2, formatChartDates} from "../../../../shared/util";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
 
@@ -16,6 +17,7 @@ import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, Org
 export class RestKpiTestComponent implements OnInit {
   private readonly _httpRequestService = inject(RestRequestService);
   private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly datePipe = inject(DatePipe);
 
   @ViewChild('statusChart') private _statusChart: ChartComponent<any, any>;
   @ViewChild('performanceChart') private _performanceChart: ChartComponent<any, any>;
@@ -28,7 +30,6 @@ export class RestKpiTestComponent implements OnInit {
     ],
     options: {
       legend: { orient: 'horizontal', bottom: 0, left: 'center' },
-      series: [{ label: { show: false }, labelLine: { show: false } }],
       tooltip: {
         formatter: (params: any) =>
           `${params.name} : <b>${params.value.toLocaleString('fr-FR')}</b> (${params.percent}%)`
@@ -71,7 +72,6 @@ export class RestKpiTestComponent implements OnInit {
     series: [{ data: { x: field('media'), y: field('count') } }],
     options: {
       legend: { orient: 'horizontal', bottom: 0, left: 'center' },
-      series: [{ label: { show: false }, labelLine: { show: false } }],
       tooltip: { formatter: (params: any) => `${params.name} : <b>${params.value.toLocaleString('fr-FR')}</b> (${params.percent}%)` }
     }
   };
@@ -130,7 +130,10 @@ export class RestKpiTestComponent implements OnInit {
     if (!sliceState) {
       this.$statusFilteredValues = [];
     }
-    this._fetchStatus();
+    // Refetch seulement si un filtre a été effectivement sélectionné
+    if (sliceState?.filterApplied === true) {
+      this._fetchStatus();
+    }
   }
 
   onPerformanceViewChange(event: OrganizerButtonEvent): void {
@@ -147,7 +150,10 @@ export class RestKpiTestComponent implements OnInit {
     if (!sliceState) {
       this.$performanceFilteredValues = [];
     }
-    this._fetchPerformance();
+    // Refetch seulement si un filtre a été effectivement sélectionné
+    if (sliceState?.filterApplied === true) {
+      this._fetchPerformance();
+    }
   }
 
   onVolumetryViewChange(event: OrganizerButtonEvent): void {
@@ -164,7 +170,10 @@ export class RestKpiTestComponent implements OnInit {
     if (!sliceState) {
       this.$volumetryFilteredValues = [];
     }
-    this._fetchVolumetry();
+    // Refetch seulement si un filtre a été effectivement sélectionné
+    if (sliceState?.filterApplied === true) {
+      this._fetchVolumetry();
+    }
   }
 
   onLatencyViewChange(event: OrganizerButtonEvent): void {
@@ -181,7 +190,10 @@ export class RestKpiTestComponent implements OnInit {
     if (!sliceState) {
       this.$latencyFilteredValues = [];
     }
-    this._fetchLatency();
+    // Refetch seulement si un filtre a été effectivement sélectionné
+    if (sliceState?.filterApplied === true) {
+      this._fetchLatency();
+    }
   }
 
   onStatusFilterChange(filterFn: (row: any) => boolean): void {
@@ -247,12 +259,13 @@ export class RestKpiTestComponent implements OnInit {
       { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
-      const series = buildSeries(cfg.series.items, ind, grp, stk, data);
-      const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, data) : data;
-      this.$statusRepartition.rawData = data;
+      const formattedData = formatChartDates(data, this.groupedBy, this.datePipe);
+      const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
+      const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
+      this.$statusRepartition.rawData = formattedData;
       this.$statusRepartition.data = pivoted;
       const yAlias = ind?.jquery.buildAlias(cfg.series.items.find(s => s.selected)?.jquery.buildAlias() ?? '') ?? '';
-      this.$statusDisplayUnit = this._resolveDisplayUnit(ind?.unit, data, yAlias);
+      this.$statusDisplayUnit = this._resolveDisplayUnit(ind?.unit, formattedData, yAlias);
       this.$statusRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
         series: series
@@ -274,11 +287,12 @@ export class RestKpiTestComponent implements OnInit {
       { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined }
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
-      const series = buildSeries(cfg.series.items, ind, grp, stk, data);
-      const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, data) : data;
+      const formattedData = formatChartDates(data, this.groupedBy, this.datePipe);
+      const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
+      const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
       this.$performanceRepartition.data = pivoted;
       const yAlias = ind?.jquery.buildAlias(cfg.series.items.find(s => s.selected)?.jquery.buildAlias() ?? '') ?? '';
-      this.$performanceDisplayUnit = this._resolveDisplayUnit(ind?.unit, data, yAlias);
+      this.$performanceDisplayUnit = this._resolveDisplayUnit(ind?.unit, formattedData, yAlias);
       this.$performanceRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
         series,
@@ -303,12 +317,14 @@ export class RestKpiTestComponent implements OnInit {
       { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$volumetryFilteredValues.length ? this.$volumetryFilteredValues : undefined }
     ).pipe(finalize(() => this.$volumetryRepartition.loading = false))
     .subscribe(data => {
+      const formattedData = formatChartDates(data, this.groupedBy, this.datePipe);
       const selectedSeries = cfg.series.items.filter(s => s.selected);
-      const series = buildSeries(selectedSeries, ind, grp, stk, data);
-      const pivoted = stk ? pivotByStack(selectedSeries, ind, grp, stk, data) : data;
+      const series = buildSeries(selectedSeries, ind, grp, stk, formattedData);
+      const pivoted = stk ? pivotByStack(selectedSeries, ind, grp, stk, formattedData) : formattedData;
       this.$volumetryRepartition.data = pivoted;
-      const yAlias = ind?.jquery.buildAlias(selectedSeries[0]?.jquery.buildAlias() ?? '') ?? '';
-      this.$volumetryDisplayUnit = this._resolveDisplayUnit(ind?.unit, data, yAlias);
+      // Calcule le maxVal sur toutes les séries sélectionnées, pas juste la première
+      const yAliases = selectedSeries.map(s => ind?.jquery.buildAlias(s?.jquery.buildAlias() ?? '') ?? '');
+      this.$volumetryDisplayUnit = this._resolveDisplayUnit(ind?.unit, formattedData, yAliases);
       this.$volumetryRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
         series,
@@ -331,19 +347,20 @@ export class RestKpiTestComponent implements OnInit {
       { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$latencyFilteredValues.length ? this.$latencyFilteredValues : undefined }
     ).pipe(finalize(() => this.$latencyRepartition.loading = false))
     .subscribe(data => {
+      const formattedData = formatChartDates(data, this.groupedBy, this.datePipe);
       let effectiveStk = stk;
-      if (stk && data.length > 0) {
+      if (stk && formattedData.length > 0) {
         const stackAlias = stk.jquery.buildAlias();
-        if (!(stackAlias in data[0])) {
+        if (!(stackAlias in formattedData[0])) {
           effectiveStk = undefined;
         }
       }
       
-      const series = buildSeries(cfg.series.items, ind, grp, effectiveStk, data);
-      const pivoted = effectiveStk ? pivotByStack(cfg.series.items, ind, grp, effectiveStk, data) : data;
+      const series = buildSeries(cfg.series.items, ind, grp, effectiveStk, formattedData);
+      const pivoted = effectiveStk ? pivotByStack(cfg.series.items, ind, grp, effectiveStk, formattedData) : formattedData;
       this.$latencyRepartition.data = pivoted;
       const yAlias = ind?.jquery.buildAlias(cfg.series.items[0]?.jquery.buildAlias() ?? '') ?? '';
-      this.$latencyDisplayUnit = this._resolveDisplayUnit(ind?.unit, data, yAlias);
+      this.$latencyDisplayUnit = this._resolveDisplayUnit(ind?.unit, formattedData, yAlias);
       this.$latencyRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
         series,
@@ -353,20 +370,20 @@ export class RestKpiTestComponent implements OnInit {
     });
   }
 
-  private _resolveDisplayUnit(unit: string | any | undefined, data: any[], yAlias: string): string {
+  private _resolveDisplayUnit(unit: string | any | undefined, data: any[], yAlias: string | string[]): string {
     if (!unit) return '';
     if (typeof unit === 'string') return unit;
-    const scales = ((unit as any).scales ?? []).slice()
-      .sort((a: any, b: any) => (a.threshold ?? Infinity) - (b.threshold ?? Infinity));
-    if (scales.length === 0) return (unit as any).baseUnit ?? '';
-    const rawValues = data
-      .map((d: any) => typeof d[yAlias] === 'number' ? d[yAlias] : parseFloat(d[yAlias]))
-      .filter((v: number) => isFinite(v) && v > 0);
-    const maxVal = rawValues.length > 0 ? Math.max(...rawValues) : 0;
-    for (const s of scales) {
-      if (maxVal <= (s.threshold ?? Infinity)) return s.unit;
-    }
-    return scales[scales.length - 1].unit;
+
+    // Collecte les valeurs de toutes les séries demandées
+    const aliases = Array.isArray(yAlias) ? yAlias : [yAlias];
+    const allValues: number[] = aliases.flatMap(alias =>
+      data
+        .map((d: any) => typeof d[alias] === 'number' ? d[alias] : parseFloat(d[alias]))
+        .filter((v: number) => isFinite(v) && v > 0)
+    );
+
+    // Délègue à la même fonction que le chart pour garantir la cohérence
+    return selectBestScale(unit, allValues).unit;
   }
 
   getMediaType() {
@@ -437,14 +454,7 @@ export class RestKpiTestComponent implements OnInit {
     return {
       onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$statusRepartition.chartConfig, filterKey),
       onExportVisual: () => this._statusChart?.exportImage('disponibilite'),
-      onExportData: () => this._statusChart?.exportData('disponibilite'),
-      switchView: {
-        currentView: this.$statusView,
-        onSwitch: (newView: 'chart' | 'table') => {
-          this.$statusView = newView;
-          this._cdr.markForCheck();
-        }
-      }
+      onExportData: () => this._statusChart?.exportData('disponibilite')
     };
   }
 
@@ -507,7 +517,7 @@ export class RestKpiTestComponent implements OnInit {
   activeChartSubheaderLabel(chartConfig: ChartConfig, displayUnit: string): string {
     const ind = chartConfig?.indicators?.items?.find(i => i.selected);
     if (!ind) return '';
-    const indicatorName = (ind as any).jquery?.buildName?.() ?? ind.menu?.label ?? '';
+    const indicatorName = ind.menu?.label ?? '';
     if (displayUnit) {
       const prefix = (ind as any).group ?? ind.menu?.label ?? '';
       const label = prefix ? `${prefix} en ${displayUnit}` : displayUnit;
