@@ -76,7 +76,7 @@ const routes: Route[] = [
                 path: 'compare',
                 component: CompareView,
                 title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-                  return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' • Comparaison';
+                  return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' • Décryptage du Flux';
                 }
               }
             ]
@@ -90,6 +90,7 @@ const routes: Route[] = [
     path: 'session', children: [
       {
         path: 'rest',
+
         children: [
           {
             path: '',
@@ -110,6 +111,11 @@ const routes: Route[] = [
                 data: {type: 'rest'},
                 component: TreeView,
                 title: Constants.MAPPING_TYPE['rest'].title + ' • Arbre d\'Appels'
+              },
+              {
+                path: 'compare',
+                component: CompareView,
+                title: Constants.MAPPING_TYPE['rest'].title +  ' • Décryptage du Flux'
               },
               {path: '**', pathMatch: 'full', redirectTo: `/session/rest/:id_session`}
             ]
