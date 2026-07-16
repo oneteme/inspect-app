@@ -100,7 +100,7 @@ export class StatusIndicatorComponent {
     let interval = value.date - (value.configuration?.scheduling.interval + 60 || 60 * 60) * 1000;
     if(value.end || !value.lastTrace) {
       this.class = 'offline';
-      this.tooltip = value.end ? `Serveur arrêté le ${this._datePipe.transform(new Date(value.end * 1000), 'dd/MM/yyyy à HH:mm:ss.SSS', 'fr')}` : 'Aucune trace remontée';
+      this.tooltip = value.end ? `Instance arrêtée le ${this._datePipe.transform(new Date(value.end * 1000), 'dd/MM/yyyy à HH:mm:ss.SSS', 'fr')}` : 'Aucune trace remontée';
     } else if(value.lastTrace < interval){
       this.class = 'pending';
       this.tooltip = `Dernière trace remontée le ${this._datePipe.transform(new Date(value.lastTrace), 'dd/MM/yyyy à HH:mm:ss.SSS', 'fr')}`;

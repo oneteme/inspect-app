@@ -36,11 +36,12 @@ $primary: #2563eb;
     flex-direction: row;
     flex-wrap: wrap;
     align-items: flex-end;
+    align-content: center;
     justify-content: center;
     gap: 16px;
     padding: 14px 40px 13px;
-    overflow-x: auto;
-    overflow-y: visible;
+    overflow: hidden;
+    min-height: auto;
     &::-webkit-scrollbar { height: 3px; }
     &::-webkit-scrollbar-thumb { background: rgba(15,23,42,.15); border-radius: 2px; }
 
@@ -55,9 +56,9 @@ $primary: #2563eb;
     ::ng-deep mat-form-field {
         width: auto !important;
         min-width: 180px;
-        flex: 1 1 240px;
         max-width: 240px;
-        flex-shrink: 0;
+        flex: 0 0 auto;
+        pointer-events: auto;
     }
 
     ::ng-deep mat-form-field.period-wide {
@@ -67,6 +68,16 @@ $primary: #2563eb;
         width: var(--period-field-width, 372px) !important;
         min-width: var(--period-field-width, 372px);
         transition: flex-basis .18s ease, max-width .18s ease, width .18s ease;
+        overflow: visible;
+    }
+
+    ::ng-deep mat-form-field.period-wide mat-date-range-input {
+        pointer-events: auto;
+        overflow: visible;
+    }
+
+    ::ng-deep mat-form-field.period-wide input {
+        pointer-events: auto;
     }
 
     ::ng-deep mat-form-field.host-filter {

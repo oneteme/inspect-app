@@ -57,7 +57,6 @@ export class RestRequestService {
     ): Observable<any[]> {
         const groupAlias = data.group.jquery.buildAlias();
         const stackAlias = data.stack?.jquery.buildAlias();
-        console.log(data, filters);
         // Une requête par série (size_in, size_out, ...)
         const requests = data.series.map(serie => {
             const serieAlias = data.indicator.jquery.buildAlias(serie.jquery.buildAlias());
@@ -149,6 +148,10 @@ export class RestRequestService {
             'start.lt': filters.end.toISOString(),
             'rest_session.start.ge': filters.start.toISOString(),
             'rest_session.start.lt': filters.end.toISOString(),
+        }
+        if(data.stack) {
+            args['column'] += `,${data.stack.jquery.value()}:${data.stack.jquery.buildAlias()}`;
+            args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
         }
         if(data.group.jquery.order){
             args['order'] = `${data.group.jquery.order}`;

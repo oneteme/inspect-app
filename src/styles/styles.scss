@@ -144,6 +144,21 @@ mat-form-field.no-subscript {
 .period-filter-wrapper {
   display: flex;
   align-items: center;
+  pointer-events: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.cdk-overlay-container {
+  z-index: 10000 !important;
+}
+
+.mat-datepicker-content {
+  pointer-events: auto !important;
+}
+
+.mat-datepicker-popup {
+  z-index: 10000 !important;
 }
 
 .period-field {

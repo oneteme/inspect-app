@@ -315,6 +315,17 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
       }
       this.instance = res;
       this.updatePageTitle();
+      if (!this.formGroup.controls.server.value) {
+        const instanceAsRow = { id: res.id, appName: res.name, start: res.instant, end: res.end };
+        if (!this.servers.includes(res.name)) {
+          this.servers = [...this.servers, res.name];
+        }
+        if (!this.instances.some(i => i.id === res.id)) {
+          this.instances = [...this.instances, instanceAsRow];
+        }
+        this.patchServerValue(res.name);
+        this.patchInstanceValue(instanceAsRow);
+      }
       return forkJoin([
         this.instance.end ? of([]) : this._instanceTraceService.getLastInstanceTrace({instance: [this.params.instance]}),
         this._machineUsageService.getResourceMachineByPeriod({instance: this.params.instance, start: this.params.start, end: this.params.end}),
