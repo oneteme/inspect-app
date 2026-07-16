@@ -119,7 +119,7 @@ export class RequestKpiTestView implements OnInit, OnDestroy {
     this.filterForm.controls.dateRange.patchValue({
       start: start,
       end: end
-    }, {emitEvent: false, onlySelf: true});
+    }, {emitEvent: false});
   }
 
   private loadComponent(componentType: any): void {
