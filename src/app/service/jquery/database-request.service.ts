@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {JdbcExceptionsByPeriodAndAppname, RepartitionRequestByPeriod} from "../../model/jquery.model";
+import {JdbcExceptionsByPeriodAndAppname} from "../../model/jquery.model";
 import {DatabaseRequestDto} from "../../model/request.model";
 import {ChartItem} from "../../views/kpi/kpi.config";
 
@@ -26,90 +26,11 @@ export class DatabaseRequestService {
         return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, { params: filters });
     }
 
-    getRepartitionTimeAndTypeResponseByPeriod(data: { column: string; order?: string }, filters: {env: string, start: Date, end: Date, groupedBy: string, hosts: string[],command?: string[], schema?: string[]}): Observable<{countSuccess: number, countError: number, elapsedTimeSlowest: number, elapsedTimeSlow: number, elapsedTimeMedium: number, elapsedTimeFast: number, elapsedTimeFastest: number, avg: number, max: number, date: number, year: number}[]> {
-        let args: any = {
-            'column': `count_request_success:countSuccess,count_request_error:countError,count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max`,
-            'instance_env': 'instance.id',
-            'instance.environement': `"${filters.env}"`,
-            'instance.type': 'SERVER',
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString(),
-        }
-        if(data?.column){
-            args['column'] += `,${data.column}`;
-        }
-        if(data?.order){
-            args['order'] = data.order;
-        }
-        if(filters.hosts?.length){
-            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
-        }
-        return this.getDatabaseRequest(args);
-    }
-
-    getRepartitionRequestByPeriod(filters: {start: Date, end: Date, groupedBy: string, database: string, env: string}): Observable<RepartitionRequestByPeriod> {
-        let args: any = {
-            'column': `count:count,count_request_error:countErrorServer,count_slowest:countSlowest,start.${filters.groupedBy}:date,start.year:year`,
-            'join': 'instance',
-            'instance.environement': `"${filters.env}"`,
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString(),
-            'db': filters.database,
-            'order': 'year.asc,date.asc'
-        }
-        return this.getDatabaseRequest(args);
-    }
-
-    getRepartitionTime(filters: {start: Date, end: Date, database: string, env: string}): Observable<{elapsedTimeSlowest: number, elapsedTimeSlow: number, elapsedTimeMedium: number, elapsedTimeFast: number, elapsedTimeFastest: number}[]> {
-        let args: any = {
-            'column': 'count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest',
-            'join': 'instance',
-            'instance.environement': `"${filters.env}"`,
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString(),
-            'db': filters.database
-        }
-        return this.getDatabaseRequest(args);
-    }
-
-    getRepartitionTimeByPeriod(filters: {start: Date, end: Date, groupedBy: string, database: string, env: string}): Observable<{elapsedTimeSlowest: number, elapsedTimeSlow: number, elapsedTimeMedium: number, elapsedTimeFast: number, elapsedTimeFastest: number, avg: number, max: number, date: number, year: number}[]> {
-        let args: any = {
-            'column': `count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max,start.${filters.groupedBy}:date,start.year:year`,
-            'join': 'instance',
-            'instance.environement': `"${filters.env}"`,
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString(),
-            'db': filters.database,
-            'order': `year.asc,date.asc`
-        }
-        return this.getDatabaseRequest(args);
-    }
-
-    getJdbcExceptions(data: { column: string; order?: string }, filters: { env: string, start: Date, end: Date, groupedBy: string, hosts: string[],command?: string[], schema?: string[] }): Observable<JdbcExceptionsByPeriodAndAppname[]> {
-        let args = {
-            'column': `exception.err_type.coalesce():errorType`,
-            'join': 'exception,instance',
-            'instance.environement': `"${filters.env}"`,
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString(),
-        }
-        if(data?.column){
-            args['column'] += `,${data.column}`;
-        }
-        if(data?.order){
-            args['order'] = data.order;
-        }
-        if(filters.hosts && filters.hosts.length){
-            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(",");
-        }
-        return this.getDatabaseRequest(args);
-    }
-
     getJdbcRestSessionExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<JdbcExceptionsByPeriodAndAppname[]> {
       let args = {
         'column': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
         'join': 'exception,instance',
-        'instance.environement': `"${filters.env}"`,
+        'instance.environement': filters.env,
         'start.ge': filters.start.toISOString(),
         'start.lt': filters.end.toISOString(),
         'order': 'date.asc'
@@ -120,25 +41,12 @@ export class DatabaseRequestService {
       return this.getDatabaseRequest(args);
     }
 
-    getSchemaList(filters: { start: Date, end: Date,env: string, host: string[] }): Observable<{schema: string}[]> {
-        let args: any = {
-            'column': `schema`,
-            'distinct': true,
-            'host':`"${filters.host}"`,
-            'join': 'instance',
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString(),
-            'instance.environement': `"${filters.env}"`,
-        }
-        return this.getDatabaseRequest(args);
-    }
-
     getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
               filters: {env: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], filters?: string[] }): Observable<any[]> {
         let args: any = {
             'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
             'instance_env': 'instance.id',
-            'instance.environement': `"${filters.env}"`,
+            'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
@@ -150,10 +58,10 @@ export class DatabaseRequestService {
             args['order'] = `${data.group.jquery.order}`;
         }
         if(data.filter && filters.filters?.length) {
-            args[`${data.filter.jquery.value()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
+            args[`${data.filter.jquery.value()}.in`] = filters.filters.join(',');
         }
         if(filters.hosts?.length && !args['host.in']){
-            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+            args['host.in'] = filters.hosts.join(',');
         }
         return this.getDatabaseRequest(args);
     }
@@ -162,13 +70,13 @@ export class DatabaseRequestService {
         let args: any = {
             'column': `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
             'distinct': 'true',
-            'instance_env': 'instance.id',
-            'instance.environement': `"${filters.env}"`,
+            'join': 'instance',
+            'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
         if(filters.hosts?.length){
-            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+            args['host.in'] = filters.hosts.join(',');
         }
         return this.getDatabaseRequest(args);
     }

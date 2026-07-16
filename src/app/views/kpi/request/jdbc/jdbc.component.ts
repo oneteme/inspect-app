@@ -100,14 +100,14 @@ export class JdbcComponent implements OnInit {
   getUser() {
     let args: any = {
       'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': `start.${this.groupedBy}.asc`
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['host.in'] = this.params.hosts.join(',');
     }
     this.$userRepartition.loading = true;
     this._jdbcRequestService.getDatabaseRequest(args).pipe(finalize(() => this.$userRepartition.loading = false)).subscribe({
@@ -120,14 +120,14 @@ export class JdbcComponent implements OnInit {
   getCommands() {
     let args: any = {
       'column': `count:count,command.coalesce("Non renseigné"):command`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['host.in'] = this.params.hosts.join(',');
     }
     this.$commandRepartition.loading = true;
     this._jdbcRequestService.getDatabaseRequest(args).pipe(finalize(() => this.$commandRepartition.loading = false)).subscribe({
@@ -140,14 +140,14 @@ export class JdbcComponent implements OnInit {
   getDatabases() {
     let args: any = {
       'column': `count:count,db_name:db_name`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['host.in'] = this.params.hosts.join(',');
     }
     this.$methodRepartition.loading = true;
     this._jdbcRequestService.getDatabaseRequest(args).pipe(finalize(() => this.$methodRepartition.loading = false)).subscribe({
@@ -160,14 +160,14 @@ export class JdbcComponent implements OnInit {
   getDependencies() {
     let args: any = {
       'column': `instance.app_name:origin,host:target,count:count`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.asc'
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['host.in'] = this.params.hosts.join(',');
     }
     this.$dependencyRepartition.loading = true;
     this._jdbcRequestService.getDatabaseRequest(args).pipe(finalize(() => this.$dependencyRepartition.loading = false)).subscribe({
@@ -179,14 +179,14 @@ export class JdbcComponent implements OnInit {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `percentileDisc(0.95).within(group.order(elapsedTime)):elapsedPercentile,count:count_request,count_request_error:count_error`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_request_error:count_error`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString()
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['host.in'] = this.params.hosts.join(',');
     }
     this._jdbcRequestService.getDatabaseRequest(args).subscribe({
       next: (res: any[]) => {

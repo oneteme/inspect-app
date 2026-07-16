@@ -11,7 +11,7 @@ export const REST_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartC
         label: ''
       },
       jquery: {
-        value: () => 'elapsedtime',
+        value: () => 'elapsed_time',
         buildAlias: () => 'elapsedtime'
       }
     }]
@@ -409,7 +409,7 @@ export const BATCH_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): Chart
         label: ''
       },
       jquery: {
-        value: () => 'elapsedtime',
+        value: () => 'elapsed_time',
         buildAlias: () => 'elapsedtime'
       }
     }]
@@ -558,7 +558,7 @@ export const STARTUP_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): Cha
         label: ''
       },
       jquery: {
-        value: () => 'elapsedtime',
+        value: () => 'elapsed_time',
         buildAlias: () => 'elapsedtime'
       }
     }]
@@ -632,7 +632,7 @@ export const REST_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig =>
         label: ''
       },
       jquery: {
-        value: () => 'elapsedtime',
+        value: () => 'elapsed_time',
         buildAlias: () => 'elapsedtime'
       }
     }]
@@ -813,7 +813,7 @@ export const REST_LATENCY_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
         label: ''
       },
       jquery: {
-        value: () => 'elapsedtime',
+        value: () => 'elapsed_time',
         buildAlias: () => 'elapsedtime'
       }
     }]
@@ -1090,7 +1090,7 @@ export const JDBC_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig =>
         label: ''
       },
       jquery: {
-        value: () => 'elapsedtime',
+        value: () => 'elapsed_time',
         buildAlias: () => 'elapsedtime',
         buildName: () => 'Temps'
       }
@@ -1349,7 +1349,7 @@ export const FTP_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => 
         label: ''
       },
       jquery: {
-        value: () => 'elapsedtime',
+        value: () => 'elapsed_time',
         buildAlias: () => 'elapsedtime',
         buildName: () => 'Temps'
       }
@@ -1564,7 +1564,7 @@ export const LDAP_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig =>
         label: ''
       },
       jquery: {
-        value: () => 'elapsedtime',
+        value: () => 'elapsed_time',
         buildAlias: () => 'elapsedtime',
         buildName: () => 'Temps'
       }
@@ -1735,7 +1735,7 @@ export const SMTP_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig =>
         label: ''
       },
       jquery: {
-        value: () => 'elapsedtime',
+        value: () => 'elapsed_time',
         buildAlias: () => 'elapsedtime',
         buildName: () => 'Temps'
       }
@@ -1897,7 +1897,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
       label: 'Percentile (95%)'
     },
     jquery: {
-      value: (s: string) => `percentileDisc(0.95).within(group.order(elapsedTime))`,
+      value: (s: string) => `percentileDisc(0.95).within(group.order(elapsed_time))`,
       buildAlias: () => 'percentile',
       buildName: (chartItem) => 'Percentile (95%)',
       buildColor: () => '#0080ff'
@@ -1911,7 +1911,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
       label: 'Médiane'
     },
     jquery: {
-      value: (s: string) => `elapsed_median`,
+      value: (s: string) => `percentileDisc(0.5).within(group.order(elapsed_time))`,
       buildAlias: () => 'median',
       buildName: (chartItem) => 'Médiane',
       buildColor: () => '#0080ff'

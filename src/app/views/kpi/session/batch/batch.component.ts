@@ -78,8 +78,8 @@ export class BatchComponent implements OnInit {
   getUser() {
     let args: any = {
       'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'instance.type': 'SERVER',
       'type': 'BATCH',
       'start.ge': this.params.period.start.toISOString(),
@@ -87,7 +87,7 @@ export class BatchComponent implements OnInit {
       'order': `start.${this.groupedBy}.asc`
     }
     if(this.params.hosts?.length){
-      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['instance.app_name.in'] = this.params.hosts.join(',');
     }
     this.$userRepartition.loading = true;
     this._mainSessionService.getMainSession(args).pipe(finalize(() => this.$userRepartition.loading = false)).subscribe({
@@ -100,7 +100,7 @@ export class BatchComponent implements OnInit {
   getDependents() {
     this.$dependentChart.loading = true;
     this.$dependentChart.data = [];
-    this._mainSessionService.getDependentsNew2({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts, type: 'BATCH'})
+    this._mainSessionService.getDependents({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts, type: 'BATCH'})
     .pipe(finalize(() => this.$dependentChart.loading = false))
     .subscribe({
       next: (res: any[]) => {this.$dependentChart.data = res}
@@ -109,16 +109,16 @@ export class BatchComponent implements OnInit {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `percentileDisc(0.95).within(group.order(elapsedTime)):elapsedPercentile,count:count_request,count_exception:count_error,count(name.distinct):count_batch`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_exception:count_error,count(name.distinct):count_batch`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'instance.type': 'SERVER',
       'type': 'BATCH',
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString()
     }
     if(this.params.hosts?.length){
-      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['instance.app_name.in'] = this.params.hosts.join(',');
     }
     this._mainSessionService.getMainSession(args).subscribe({
       next: (res: any[]) => {

@@ -363,7 +363,7 @@ export class RestKpiTestComponent implements OnInit {
     const flt = cfg.filters?.items?.find(f => f.selected);
     this.$latencyRepartition.loading = true;
     this.$latencyRepartition.data = [];
-    this._httpRequestService.getLatency2(
+    this._httpRequestService.getLatency(
       { serie: cfg.series.items[0], indicator: ind, group: grp, stack: stk, filter: flt },
       { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$latencyFilteredValues.length ? this.$latencyFilteredValues : undefined }
     ).pipe(finalize(() => this.$latencyRepartition.loading = false))

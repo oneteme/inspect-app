@@ -7,11 +7,12 @@ import {ChartItem} from "../../views/kpi/kpi.config";
 
 @Injectable({ providedIn: 'root' })
 export class RestRequestService {
+
+    server = `${localStorage.getItem('server')}/v3/query`;
+
     constructor(private http: HttpClient) {
 
     }
-
-    server = `${localStorage.getItem('server')}/v3/query`;
 
     getRestRequest<T>(params?: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/request/rest`;
@@ -22,33 +23,8 @@ export class RestRequestService {
         return this.http.get<Array<RestRequestDto>>(`${this.server}/request/rest`, { params: params });
     }
 
-    getRequestById(id: string): Observable<RestRequestDto> {
-        return this.http.get<RestRequestDto>(`${this.server}/request/rest/${id}`);
-    }
-
     getHost(type: string, filters: any): Observable<{ host: string }[]> {
         return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, { params: filters });
-    }
-
-    getRestExceptionsByHost(data: { column: string; order?: string }, filters: { env: string, start: Date, end: Date, groupedBy: string, hosts: string[],command?: string[]  }): Observable<RestSessionExceptionsByPeriodAndappname[]> {
-        let args = {
-            'column': `count:count,error_type`,
-            'join': 'exception,instance',
-            'instance.environement': `"${filters.env}"`,
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString(),
-        }
-        if(data?.column){
-            args['column'] += `,${data.column}`;
-        }
-        if(data?.order){
-            args['order'] = data.order;
-        }
-        if(filters.hosts && filters.hosts.length){
-            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
-        }
-
-        return this.getRestRequest(args);
     }
 
     getSizeCustom(
@@ -62,10 +38,10 @@ export class RestRequestService {
             const serieAlias = data.indicator.jquery.buildAlias(serie.jquery.buildAlias());
             const args: any = {
                 'column': `${data.indicator.jquery.value(serie.jquery.value())}:${serieAlias},${data.group.jquery.value()}:${groupAlias}`,
-                'instance_env': 'instance.id',
-                'instance.environement': `"${filters.env}"`,
+                'instance.environement': filters.env,
                 'start.ge': filters.start.toISOString(),
-                'start.lt': filters.end.toISOString()
+                'start.lt': filters.end.toISOString(),
+                'join': 'instance'
             };
             if (data.stack) {
                 args['column'] += `,${data.stack.jquery.value(serie.jquery.buildAlias())}:${stackAlias}`;
@@ -75,10 +51,10 @@ export class RestRequestService {
                 args['order'] = data.group.jquery.order;
             }
             if (data.filter && filters.filters?.length) {
-                args[`${data.filter.jquery.value()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
+                args[`${data.filter.jquery.value()}.in`] = filters.filters.join(',');
             }
             if (filters.hosts?.length && !args['host.in']) {
-                args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+                args['host.in'] = filters.hosts.join(',');
             }
             if (filters.instanceType) {
                 args['instance.type'] = filters.instanceType;
@@ -113,10 +89,10 @@ export class RestRequestService {
               filters: {env: string, start: Date, end: Date, hosts?: string[], filters?: string[], instanceType?: string }): Observable<any[]> {
         let args: any = {
             'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
-            'instance_env': 'instance.id',
-            'instance.environement': `"${filters.env}"`,
+            'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString()
+            'start.lt': filters.end.toISOString(),
+            'join': 'instance'
         }
         if(data.stack) {
             args['column'] += `,${data.stack.jquery.value()}:${data.stack.jquery.buildAlias()}`;
@@ -126,10 +102,10 @@ export class RestRequestService {
             args['order'] = `${data.group.jquery.order}`;
         }
         if(data.filter && filters.filters?.length) {
-            args[`${data.filter.jquery.value()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
+            args[`${data.filter.jquery.value()}.in`] = filters.filters.join(',');
         }
         if(filters.hosts?.length && !args['host.in']){
-            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+            args['host.in'] = filters.hosts.join(',');
         }
         if(filters.instanceType) {
             args['instance.type'] = filters.instanceType;
@@ -137,26 +113,27 @@ export class RestRequestService {
         return this.getRestRequest(args);
     }
 
-    getLatency2(data: {serie: ChartItem, indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
-                filters: {env: string, start: Date, end: Date, hosts?: string[], method?: string[], filters?: string[], instanceType?: string }): Observable<any[]> {
+    getLatency(data: {serie: ChartItem, indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
+               filters: {env: string, start: Date, end: Date, hosts?: string[], method?: string[], filters?: string[], instanceType?: string }): Observable<any[]> {
         let args: any = {
             'column': `${data.indicator.jquery.value()}(${data.serie.jquery.value()}.minus(rest_session.${data.serie.jquery.value()})):${data.indicator.jquery.buildAlias(data.serie.jquery.buildAlias())},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
-            'join': 'instance,rest_session_inner',
             'status.gt': 0,
-            'instance.environement': `"${filters.env}"`,
+            'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'rest_session.start.ge': filters.start.toISOString(),
             'rest_session.start.lt': filters.end.toISOString(),
+            'join': 'innerJoin(instance).criteria(instance_env.eq(instance.id)),innerJoin(rest_session).criteria(id.eq(rest_session.id))',
+
         }
         if(data.group.jquery.order){
             args['order'] = `${data.group.jquery.order}`;
         }
         if(data.filter && filters.filters?.length) {
-            args[`${data.filter.jquery.value()}.in`] = filters.filters.map(o => `"${o}"`).join(',');
+            args[`${data.filter.jquery.value()}.in`] = filters.filters.join(',');
         }
         if(filters.hosts?.length && !args['host.in']){
-            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+            args['host.in'] = filters.hosts.join(',');
         }
         if(filters.instanceType) {
             args['instance.type'] = filters.instanceType;
@@ -168,66 +145,13 @@ export class RestRequestService {
         let args: any = {
             'column': `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
             'distinct': 'true',
-            'instance_env': 'instance.id',
-            'instance.environement': `"${filters.env}"`,
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString()
-        }
-        if(filters.hosts?.length){
-            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
-        }
-        if(filters.instanceType) {
-            args['instance.type'] = filters.instanceType;
-        }
-        return this.getRestRequest(args);
-    }
-
-    getRepartitionTimeAndTypeResponseByPeriod(data: { column: string; order?: string }, filters: {env: string, start: Date, end: Date, groupedBy: string, hosts: string[], method?: string[], instanceType?: string }): Observable<{countSuccess: number, countError: number, elapsedTimeSlowest: number, elapsedTimeSlow: number, elapsedTimeMedium: number, elapsedTimeFast: number, elapsedTimeFastest: number, avg: number, max: number, date: number, year: number}[]> {
-        let args: any = {
-            'column': `size_out_avg:sizeOut,size_in_avg:sizeIn,count_succes:countSuccess,count_error_server:countErrorServer,count_error_client:countErrorClient,elapsed_time_arg(10,null):elapsedTimeSlowest,elapsed_time_arg(5,10):elapsedTimeSlow,elapsed_time_arg(3,5):elapsedTimeMedium,elapsed_time_arg(1,3):elapsedTimeFast,elapsed_time_arg(null,1):elapsedTimeFastest,elapsedtime.avg:avg,elapsedtime.max:max,count_unavailable_server:countServerUnavailableRows`,
-            'instance_env': 'instance.id',
-            'instance.environement': `"${filters.env}"`,
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString()
-        }
-        if(data?.column){
-            args['column'] += `,${data.column}`;
-        }
-        if(data?.order){
-            args['order'] = data.order;
-        }
-        if(filters.hosts?.length){
-            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
-        }
-        if(filters.instanceType) {
-            args['instance.type'] = filters.instanceType;
-        }
-        return this.getRestRequest(args);
-    }
-
-    getLatency(data: {base: string ,column?: string; order?: string, sliceFilter?: string },
-                     filters: { env: string, start: Date, end: Date, groupedBy: string, hosts: string[], instanceType?: string }): Observable<{ elapsedtime: number}[]> {
-        let args: any = {
-            'column': `${data.base}`,
-            'join': 'instance,rest_session_inner',
-            'status.gt': 0,
-            'instance.environement': `"${filters.env}"`,
+            'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            'rest_session.start.ge': filters.start.toISOString(),
-            'rest_session.start.lt': filters.end.toISOString(),
-        }
-        if(data?.column){
-            args['column'] += `,${data.column}`;
-        }
-        if(data?.order){
-            args['order'] = data.order;
+            'join': 'instance'
         }
         if(filters.hosts?.length){
-            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
-        }
-        if(data?.sliceFilter){
-            args[Object.keys(data.sliceFilter)[0]] = `"${Object.values(data.sliceFilter)[0]}"`;
+            args['host.in'] = filters.hosts.join(',');
         }
         if(filters.instanceType) {
             args['instance.type'] = filters.instanceType;
@@ -235,11 +159,11 @@ export class RestRequestService {
         return this.getRestRequest(args);
     }
 
-    getRestExceptions1(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<RestSessionExceptionsByPeriodAndappname[]> {
+    getRestExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<RestSessionExceptionsByPeriodAndappname[]> {
         let args = {
             'column': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,error_type,start.${filters.groupedBy}:date,start.year:year`,
             'join': 'exception,instance',
-            'instance.environement': `"${filters.env}"`,
+            'instance.environement': filters.env,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'order': 'date.asc'
@@ -248,21 +172,5 @@ export class RestRequestService {
             args['instance.app_name.in'] = filters.app_name;
         }
         return this.getRestRequest(args);
-    }
-
-    getCountByDate(filters: {env: string, start: Date, end: Date, appName: string, groupedBy: string}): Observable<{countSucces: number, countErrorClient: number, countErrorServer: number, countUnavailableServer: number, elapsedTimeSlowest: number, elapsedTimeSlow: number, elapsedTimeMedium: number, elapsedTimeFast: number, elapsedTimeFastest: number, date: number, year: number}[]> {
-        return this.getRestRequest({
-            'column': `count:count,count_succes:countSucces,count_error_client:countErrorClient,count_error_server:countErrorServer,count_unavailable_server:countUnavailableServer,count_slowest:elapsedTimeSlowest,count_slow:elapsedTimeSlow,count_medium:elapsedTimeMedium,count_fast:elapsedTimeFast,count_fastest:elapsedTimeFastest,start.${filters.groupedBy}:date,start.year:year`,
-            'parent': 'main_session.id',
-            'main_session.instance_env': 'instance.id',
-            'main_session.start.ge': filters.start.toISOString(),
-            'main_session.start.lt': filters.end.toISOString(),
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString(),
-            'instance.environement': filters.env,
-            'instance.app_name': `"${filters.appName}"`,
-            'instance.type': 'CLIENT',
-            'order': 'year.asc,date.asc'
-        });
     }
 }
