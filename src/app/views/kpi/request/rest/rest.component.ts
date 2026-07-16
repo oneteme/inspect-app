@@ -113,7 +113,7 @@ export class RestComponent implements OnInit {
       this._httpRequestService.getCustom({series: arr.chartConfig.series.items, indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks, instanceType})
       .pipe(finalize(() => arr.loading = false))
       .subscribe(data => {
-        arr.data = formatChartDates(data, this.groupedBy, this.datePipe);
+        arr.data = actualGroup?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
       });
     } else if(event.eventType === 'filter') {
       if(actualFilter) {
