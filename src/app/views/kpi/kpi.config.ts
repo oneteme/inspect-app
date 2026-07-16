@@ -133,7 +133,7 @@ export const REST_SESSION_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartCon
             },
             jquery: {
               value: (serieAlias: string) => serieAlias + '_tranche',
-              buildAlias: () => 'undefined_tranche',
+              buildAlias: () => 'size_tranche',
               buildName: (chartItem, value) => chartItem.menu.label + " " + SIZE_TRANCHE[value].label,
               buildColor: (value) => SIZE_TRANCHE[value].color
             }
@@ -829,7 +829,7 @@ export const REST_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartConfig => (
             },
             jquery: {
               value: (serieAlias: string) => serieAlias + '_tranche',
-              buildAlias: () => 'undefined_tranche',
+              buildAlias: () => 'size_tranche',
               buildName: (chartItem, value) => chartItem.menu.label + " " + SIZE_TRANCHE[value].label,
               buildColor: (value) => SIZE_TRANCHE[value].color
             }
