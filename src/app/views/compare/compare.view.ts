@@ -97,7 +97,7 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
   ngOnInit(): void {
     this.id = this.route.snapshot.paramMap.get('id_request') ?? this.route.snapshot.paramMap.get('id_session');
     this.isLoading = true;
-    this._pageTitleService.set({ icon: 'compare_arrows', iconOutlined: true, title: 'Comparaison', subtitle: this.id });
+    this._pageTitleService.set({ icon: 'compare_arrows', iconOutlined: true, title: 'Décryptage du Flux', subtitle: this.id });
 
     this.traceService.getCompare(this.id)
       .pipe(finalize(() => this.isLoading = false))
@@ -161,9 +161,10 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
 
   private populateCallerNode(caller: any, req: RequestInfo, addLabel: LabelFn, NODE_W: number): void {
     const hash = req.hash ? req.hash.substring(0, 7) : null;
+    console.log(req.user)
     addLabel(caller, req.appName || 'Client',                        0.5,  0.05, `fontSize=11;fontStyle=1;fontColor=#1e293b;`, NODE_W);
     addLabel(caller, req.version,                                    0.5,  0.12, `fontSize=8;fontColor=#64748b;`, NODE_W);
-    addLabel(caller, req.user,                                       0.99, 0.27, `fontSize=6;fontStyle=1;fontColor=#f59e0b;align=right;`, NODE_W * 0.5);
+    addLabel(caller, req.user,                                       0.99, 0.27, `fontSize=7;fontStyle=1;fontColor=#f59e0b;align=right;`, NODE_W * 0.5);
     addLabel(caller, [req.branch, hash].filter(Boolean).join('@'),   0.5,  0.95, `fontSize=8;fontColor=#64748b;fontStyle=2;`, NODE_W);
     addLabel(caller, req.environment,                                0.9, -0.05, `fontSize=9;fontColor=#0369a1;`, NODE_W * 0.5);
     addLabel(caller, req.address,                                    0.5,  1.05, `fontSize=8;fontColor=#0369a1;`, NODE_W);
@@ -174,7 +175,7 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
     const hash = remote?.hash ? remote.hash.substring(0, 7) : null;
     addLabel(callee, remote?.appName,                          0.5,  0.05, `fontSize=11;fontStyle=1;fontColor=#1e293b;`, NODE_W);
     addLabel(callee, remote?.version,                                      0.5,  0.12, `fontSize=8;fontColor=#64748b;`, NODE_W);
-    addLabel(callee, remote?.user,                                         0.01, 0.27, `fontSize=6;fontStyle=1;fontColor=#f59e0b;align=left;`, NODE_W * 0.5);
+    addLabel(callee, remote?.user,                                         0.01, 0.27, `fontSize=7;fontStyle=1;fontColor=#f59e0b;align=left;`, NODE_W * 0.5);
     addLabel(callee, [remote?.branch, hash].filter(Boolean).join('@'),     0.5,  0.95, `fontSize=8;fontColor=#64748b;fontStyle=2;`, NODE_W);
     addLabel(callee, remote?.environment,                                  0.1, -0.05, `fontSize=9;fontColor=#4338ca;`, NODE_W * 0.5);
     addLabel(callee, remote?.address,                                      0.5,  1.05, `fontSize=8;fontColor=#4338ca;`, NODE_W);
@@ -268,13 +269,13 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
       // ── Child boxes ──────────────────────────────────────────────────
       if (callerElapsed || req.sessionId) {
         const box = addChildBox(caller, '#eff6ff', '#3b82f6');
-        addVertexLabel(box, callerElapsed ? formatDuration(callerElapsed, 2) : null, 0.95, 0.85, `fontSize=6;labelBackgroundColor=#f8fafc;labelBorderColor=#e2e8f0;labelPadding=3;strokeColor=none;fillColor=none;align=right;`);
+        addVertexLabel(box, callerElapsed ? formatDuration(callerElapsed, 2) : null, 0.95, 0.85, `fontSize=7;labelBackgroundColor=#f8fafc;labelBorderColor=#e2e8f0;labelPadding=3;strokeColor=none;fillColor=none;align=right;`);
         addVertexLabel(box, req.name,       0.5, 0.1, `fontSize=8;fontColor=#1e3a5f;fontStyle=1;`);
         addVertexLabel(box, req.threadName, 0.5, 0.3, `fontSize=7;fontColor=#64748b;`);
       }
       if (remote?.name || calleeElapsed || remote?.threadName) {
         const box = addChildBox(callee, '#f5f3ff', '#6366f1');
-        addVertexLabel(box, calleeElapsed ? formatDuration(calleeElapsed, 2) : null, 0.95, 0.85, `fontSize=6;fontFamily=Inter,system-ui,sans-serif;labelBackgroundColor=#f8fafc;labelBorderColor=#e2e8f0;labelPadding=3;strokeColor=none;fillColor=none;align=right;`);
+        addVertexLabel(box, calleeElapsed ? formatDuration(calleeElapsed, 2) : null, 0.95, 0.85, `fontSize=7;fontFamily=Inter,system-ui,sans-serif;labelBackgroundColor=#f8fafc;labelBorderColor=#e2e8f0;labelPadding=3;strokeColor=none;fillColor=none;align=right;`);
         addVertexLabel(box, remote?.name,       0.5, 0.1, `fontSize=8;fontColor=#3b0764;fontStyle=1;`);
         addVertexLabel(box, remote?.threadName, 0.5, 0.3, `fontSize=7;fontColor=#64748b;`);
       }
@@ -283,14 +284,15 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
       const reqEdge = graph.insertEdge(parent, null, '', caller, callee,
         `strokeColor=#22c55e;exitX=1;exitY=0.28;exitDx=0;exitDy=0;entryX=0;entryY=0.28;entryDx=0;entryDy=0;edgeStyle=none;`);
 
-      addEdgeLabel(reqEdge, req.start != null ? new Date(req.start * 1000).toISOString() : null, -0.95, 10, 'left', 'fontSize=6;', NODE_W);
-      addEdgeLabel(reqEdge, `${Math.max(req.outDataSize ?? 0, 0)}o`, -0.95, -10, 'left', 'fontSize=6;', NODE_W);
+      addEdgeLabel(reqEdge, req.start != null ? new Date(req.start * 1000).toISOString() : null, -0.95, 10, 'left', 'fontSize=7;', NODE_W);
+      addEdgeLabel(reqEdge, req.outDataSize!= null ? `${Math.max(req.outDataSize, 0)}o`: null, -0.95, -10, 'left', 'fontSize=7;', NODE_W);
       addEdgeLabel(reqEdge, [req.authScheme ? '🔒' : null, req.method, req.path].filter(Boolean).join('  '), 0, 10, 'center', 'fontSize=9;', H_SPACE * 0.55);
       if (req.method !== remote.method || req.path !== remote.path) {
         addEdgeLabel(reqEdge, [remote.method, remote.path].filter(Boolean).join('  '), 0, -10, 'center', 'fontSize=9;', H_SPACE * 0.55);
       }
-      addEdgeLabel(reqEdge, remote.start != null ? `${new Date(remote.start * 1000).toISOString()}  ~${formatDuration(remote.start - req.start, 2)}` : null, 0.95, 10, 'right', 'fontSize=6;', NODE_W);
-      addEdgeLabel(reqEdge, remote.inDataSize!= null ? `${Math.max(remote.inDataSize, 0)}o`:null, 0.95, -10, 'right', 'fontSize=6;', NODE_W);
+      let lat = remote.start - req.start;
+      addEdgeLabel(reqEdge, remote.start != null ? `${new Date(remote.start * 1000).toISOString()}  ${remote.start && req.start != null ? (lat >=0.2 ?'~'+formatDuration(lat, 2):''):''}` : null, 0.95, 10, 'right', 'fontSize=7;', NODE_W);
+      addEdgeLabel(reqEdge, remote.inDataSize!= null ? `${Math.max(remote.inDataSize, 0)}o`:null, 0.95, -10, 'right', 'fontSize=7;', NODE_W);
 
       // ── Response arrow (split at midpoint) ───────────────────────────
       const midX = 40 + NODE_W + H_SPACE / 2;
@@ -309,8 +311,8 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
       graph.getModel().setGeometry(resHalf2, resGeo2);
 
       // Labels côté callee
-      addEdgeLabel(resHalf1, remote.end != null ? new Date(remote.end * 1000).toISOString() : null, -0.9, -10, 'right', 'fontSize=6;', NODE_W);
-      addEdgeLabel(resHalf1, remote.outDataSize!= null ? `${Math.max(remote.outDataSize, 0)}o`:null, -0.9, 10, 'right', 'fontSize=6;', NODE_W);
+      addEdgeLabel(resHalf1, remote.end != null ? new Date(remote.end * 1000).toISOString() : null, -0.9, -10, 'right', 'fontSize=7;', NODE_W);
+      addEdgeLabel(resHalf1, remote.outDataSize!= null ? `${Math.max(remote.outDataSize, 0)}o`:null, -0.9, 10, 'right', 'fontSize=7;', NODE_W);
       addEdgeLabel(resHalf1, [remote.status?.toString()].filter(Boolean).join('  '), 0.9, -10, 'center', `fontSize=9;fontColor=${colorRemote};fontStyle=1;`, H_SPACE * 0.3);
 
       if (remote.status !== req.status) {
@@ -320,8 +322,9 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
       }
 
       // Labels côté caller
-      addEdgeLabel(resHalf2, `${Math.max(req.inDataSize ?? 0, 0)}o`, 0.9, 10, 'left', 'fontSize=6;', NODE_W);
-      addEdgeLabel(resHalf2, req.end != null ? `${new Date(req.end * 1000).toISOString()}  ${req.end && remote.end != null ?'~'+formatDuration(req.end -remote.end, 2):''}` : null, 0.9, -10, 'left', 'fontSize=6;', NODE_W);
+      addEdgeLabel(resHalf2, req.inDataSize != null ? `${Math.max(req.inDataSize, 0)}o`: null, 0.9, 10, 'left', 'fontSize=7;', NODE_W);
+      lat = req.end - remote.end
+      addEdgeLabel(resHalf2, req.end != null ? `${new Date(req.end * 1000).toISOString()}  ${req.end && remote.end != null ? (lat >= 0.2? '~'+formatDuration(lat, 2):''):''}` : null, 0.9, -10, 'left', 'fontSize=7;', NODE_W);
     } finally {
       graph.getModel().endUpdate();
     }
