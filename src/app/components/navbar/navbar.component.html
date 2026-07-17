@@ -204,14 +204,22 @@
       </ng-container>
 
       <ng-container *ngIf="hasPanel$ | async">
-        <button class="nav-filter-btn"
-                [class.nav-filter-btn--open]="isPanelOpen$ | async"
-
-                (click)="onFilterClick()"
-                [matTooltip]="(isPanelOpen$ | async) ? 'Masquer les filtres' : 'Afficher les filtres'">
-          <mat-icon class="nfb-icon material-symbols-outlined">filter_list</mat-icon>
-          <mat-icon class="nfb-chevron">expand_more</mat-icon>
-        </button>
+        <div class="nav-filter-group">
+          <button *ngIf="periodLabel$ | async as label"
+                  class="nav-period-badge"
+                  [class.nav-period-badge--open]="isPanelOpen$ | async"
+                  (click)="onFilterClick()"
+                  [matTooltip]="(isPanelOpen$ | async) ? 'Masquer les filtres' : 'Afficher les filtres'">
+            <span class="npb-label">{{ label }}</span>
+          </button>
+          <button class="nav-filter-btn"
+                  [class.nav-filter-btn--open]="isPanelOpen$ | async"
+                  (click)="onFilterClick()"
+                  [matTooltip]="(isPanelOpen$ | async) ? 'Masquer les filtres' : 'Afficher les filtres'">
+            <mat-icon class="nfb-icon material-symbols-outlined">filter_list</mat-icon>
+            <mat-icon class="nfb-chevron">expand_more</mat-icon>
+          </button>
+        </div>
       </ng-container>
 
     </div>

@@ -149,6 +149,10 @@ export class RestRequestService {
             'rest_session.start.ge': filters.start.toISOString(),
             'rest_session.start.lt': filters.end.toISOString(),
         }
+        if(data.stack) {
+            args['column'] += `,${data.stack.jquery.value()}:${data.stack.jquery.buildAlias()}`;
+            args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
+        }
         if(data.group.jquery.order){
             args['order'] = `${data.group.jquery.order}`;
         }

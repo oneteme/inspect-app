@@ -10,6 +10,10 @@ export class RequestKpiTestComponentResolverService {
   };
 
   resolveComponent(type: string): Type<any> {
-    return this.componentMap[type];
+    const component = this.componentMap[type];
+    if (!component) {
+      throw new Error(`Unsupported KPI test request type: ${type}`);
+    }
+    return component;
   }
 }

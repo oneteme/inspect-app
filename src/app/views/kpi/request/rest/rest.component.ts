@@ -1,4 +1,5 @@
 import {Component, inject, Input, OnInit} from "@angular/core";
+import {DatePipe} from "@angular/common";
 import {QueryParams} from "../../../../model/conf.model";
 import {RestRequestService} from "../../../../service/jquery/rest-request.service";
 import {finalize} from "rxjs";
@@ -9,7 +10,7 @@ import {
   REST_STATUS_CHART_CONFIG,
   REST_VOLUMETRY_CHART_CONFIG
 } from "../../kpi.config";
-import {periodManagement2} from "../../../../shared/util";
+import {periodManagement2, formatChartDates} from "../../../../shared/util";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 
 @Component({
@@ -18,6 +19,7 @@ import {ChartProvider, field} from "@oneteme/jquery-core";
 })
 export class RestComponent implements OnInit {
   private readonly _httpRequestService = inject(RestRequestService);
+  private readonly datePipe = inject(DatePipe);
 
   readonly METHOD_PIE_CONFIG: ChartProvider<string, number> = {
     series: [
@@ -111,7 +113,7 @@ export class RestComponent implements OnInit {
       this._httpRequestService.getCustom({series: arr.chartConfig.series.items, indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks, instanceType})
       .pipe(finalize(() => arr.loading = false))
       .subscribe(data => {
-        arr.data = data;
+        arr.data = actualGroup?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
       });
     } else if(event.eventType === 'filter') {
       if(actualFilter) {
@@ -251,7 +253,7 @@ export class RestComponent implements OnInit {
     this.$mediaRepartition.loading = true;
     this._httpRequestService.getRestRequest(args).pipe(finalize(() => this.$mediaRepartition.loading = false)).subscribe({
       next: (res: any[]) => {
-        this.$mediaRepartition.data = res;
+        this.$mediaRepartition.data = formatChartDates(res, this.groupedBy, this.datePipe);
       }
     });
   }

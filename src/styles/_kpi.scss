@@ -164,7 +164,7 @@
 .kpi-chart-header {
   display: flex;
   justify-content: space-between;
-  padding: 12px;
+  padding: 12px 12px 0 12px;
   height: 48px;
 }
 
@@ -231,13 +231,31 @@
   min-width: 0;
 }
 
-.kpi-breadcrumb-sep {
-  font-size: 14px !important;
-  width: 14px !important;
-  height: 14px !important;
-  line-height: 14px !important;
-  color: #cbd5e1;
+.kpi-breadcrumb-label {
+  font-size: 9px;
+  font-weight: 500;
+  color: #a0aec0;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-right: 4px;
   flex-shrink: 0;
+}
+
+.kpi-breadcrumb-sep {
+  color: #cbd5e1;
+  margin: 0 4px;
+  flex-shrink: 0;
+}
+
+.kpi-breadcrumb-icon {
+  font-size: 12px !important;
+  width: 12px !important;
+  height: 12px !important;
+  line-height: 12px !important;
+  color: #d1d5db;
+  opacity: 0.7;
+  flex-shrink: 0;
+  margin-right: 3px;
 }
 
 .kpi-breadcrumb-item {
@@ -265,13 +283,6 @@
   }
 }
 
-// .kpi-chart-actions {
-//   display: flex;
-//   align-items: center;
-//   gap: 0;
-//   flex-shrink: 0;
-// }
-
 .kpi-action-btn {
   mat-icon { font-size: 18px; width: 18px; height: 18px; }
 }
@@ -281,12 +292,12 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 16px 10px;
+  padding: 0 16px;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.kpi-chart-period {
+.kpi-chart-unit, .kpi-chart-period {
   font-size: 11px;
   color: #94a3b8;
   font-weight: 500;

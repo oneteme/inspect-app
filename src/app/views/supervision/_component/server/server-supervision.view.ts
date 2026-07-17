@@ -319,6 +319,8 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
         const instanceAsRow = { id: res.id, appName: res.name, start: res.instant, end: res.end };
         if (!this.servers.includes(res.name)) {
           this.servers = [...this.servers, res.name];
+        }
+        if (!this.instances.some(i => i.id === res.id)) {
           this.instances = [...this.instances, instanceAsRow];
         }
         this.patchServerValue(res.name);
