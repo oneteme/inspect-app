@@ -290,7 +290,7 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
         addEdgeLabel(reqEdge, [remote.method, remote.path].filter(Boolean).join('  '), 0, -10, 'center', 'fontSize=9;', H_SPACE * 0.55);
       }
       let lat = remote.start - req.start;
-      addEdgeLabel(reqEdge, remote.start != null ? `${new Date(remote.start * 1000).toISOString()}  ${remote.start && req.start != null ? (lat >=0.2 ?'~'+formatDuration(lat, 2):''):''}` : null, 0.95, 10, 'right', 'fontSize=7;', NODE_W);
+      addEdgeLabel(reqEdge, remote.start != null ? `${new Date(remote.start * 1000).toISOString()}  ${remote.start && req.start != null ? (lat >=0.010 ?'~'+formatDuration(lat, 2):''):''}` : null, 0.95, 10, 'right', 'fontSize=7;', NODE_W);
       addEdgeLabel(reqEdge, remote.inDataSize!= null ? `${Math.max(remote.inDataSize, 0)}o`:null, 0.95, -10, 'right', 'fontSize=7;', NODE_W);
 
       // ── Response arrow (split at midpoint) ───────────────────────────
@@ -323,7 +323,7 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
       // Labels côté caller
       addEdgeLabel(resHalf2, req.inDataSize != null ? `${Math.max(req.inDataSize, 0)}o`: null, 0.9, 10, 'left', 'fontSize=7;', NODE_W);
       lat = req.end - remote.end
-      addEdgeLabel(resHalf2, req.end != null ? `${new Date(req.end * 1000).toISOString()}  ${req.end && remote.end != null ? (lat >= 0.2? '~'+formatDuration(lat, 2):''):''}` : null, 0.9, -10, 'left', 'fontSize=7;', NODE_W);
+      addEdgeLabel(resHalf2, req.end != null ? `${new Date(req.end * 1000).toISOString()}  ${req.end && remote.end != null ? (lat >= 0.010? '~'+formatDuration(lat, 2):''):''}` : null, 0.9, -10, 'left', 'fontSize=7;', NODE_W);
     } finally {
       graph.getModel().endUpdate();
     }
