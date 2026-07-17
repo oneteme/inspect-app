@@ -314,10 +314,11 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
       addEdgeLabel(resHalf1, remote.outDataSize!= null ? `${Math.max(remote.outDataSize, 0)}o`:null, -0.9, 10, 'right', 'fontSize=7;', NODE_W);
       addEdgeLabel(resHalf1, [remote.status?.toString()].filter(Boolean).join('  '), 0.9, -10, 'center', `fontSize=9;fontColor=${colorRemote};fontStyle=1;`, H_SPACE * 0.3);
 
-        const bodySuffix = req.bodyContent ? req.bodyContent.substring(0, 60) + (req.bodyContent.length > 60 ? '…' : '') : '';
-        const suffix = itemException || bodySuffix;
-        addEdgeLabel(resHalf1, [req.status?.toString(), suffix].filter(Boolean).join('  '), 0.9, 10, 'center', `fontSize=9;fontColor=${colorItem};`, H_SPACE * 0.3);
-      
+
+      const bodySuffix = req.bodyContent ? req.bodyContent.substring(0, 60) + (req.bodyContent.length > 60 ? '…' : '') : '';
+      const suffix = itemException || bodySuffix;
+      addEdgeLabel(resHalf1, [remote.status!== req.status? req.status?.toString():'' , suffix].filter(Boolean).join('  '), 0.9, 10, 'center', `fontSize=9;fontColor=${colorItem};`, H_SPACE * 0.3);
+
 
       // Labels côté caller
       addEdgeLabel(resHalf2, req.inDataSize != null ? `${Math.max(req.inDataSize, 0)}o`: null, 0.9, 10, 'left', 'fontSize=7;', NODE_W);
