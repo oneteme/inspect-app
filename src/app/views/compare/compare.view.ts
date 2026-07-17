@@ -161,7 +161,6 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
 
   private populateCallerNode(caller: any, req: RequestInfo, addLabel: LabelFn, NODE_W: number): void {
     const hash = req.hash ? req.hash.substring(0, 7) : null;
-    console.log(req.user)
     addLabel(caller, req.appName || 'Client',                        0.5,  0.05, `fontSize=11;fontStyle=1;fontColor=#1e293b;`, NODE_W);
     addLabel(caller, req.version,                                    0.5,  0.12, `fontSize=8;fontColor=#64748b;`, NODE_W);
     addLabel(caller, req.user,                                       0.99, 0.27, `fontSize=7;fontStyle=1;fontColor=#f59e0b;align=right;`, NODE_W * 0.5);
