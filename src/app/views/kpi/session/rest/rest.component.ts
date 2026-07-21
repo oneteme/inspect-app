@@ -1,16 +1,21 @@
-import {Component, inject, Input, OnInit} from "@angular/core";
+import {ChangeDetectorRef, Component, inject, Input, OnInit, ViewChild} from "@angular/core";
 import {QueryParams} from "../../../../model/conf.model";
-import {finalize} from "rxjs";
+import {finalize, Observable, of} from "rxjs";
 import {
   ChartConfig,
   REST_SESSION_PERFORMANCE_CHART_CONFIG,
   REST_SESSION_STATUS_CHART_CONFIG,
-  REST_SESSION_VOLUMETRY_CHART_CONFIG
+  REST_SESSION_VOLUMETRY_CHART_CONFIG,
+  buildSeries,
+  pivotByStack
 } from "../../kpi.config";
-import {periodManagement2} from "../../../../shared/util";
+import {periodManagement2, formatChartDates} from "../../../../shared/util";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 import {RestSessionService} from "../../../../service/jquery/rest-session.service";
 import {EnvRouter} from "../../../../service/router.service";
+import {ChartComponent, selectBestScale} from "@oneteme/jquery-echarts";
+import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
+import {DatePipe} from "@angular/common";
 
 @Component({
   templateUrl: './rest.component.html',
@@ -19,6 +24,13 @@ import {EnvRouter} from "../../../../service/router.service";
 export class RestComponent implements OnInit {
   private readonly _restSessionService = inject(RestSessionService);
   private readonly _router = inject(EnvRouter);
+  private readonly _cdr = inject(ChangeDetectorRef);
+  private readonly datePipe = inject(DatePipe);
+
+  @ViewChild('statusChart') private _statusChart: ChartComponent<any, any>;
+  @ViewChild('performanceChart') private _performanceChart: ChartComponent<any, any>;
+  @ViewChild('volumetryChart') private _volumetryChart: ChartComponent<any, any>;
+
 
   readonly METHOD_PIE_CONFIG: ChartProvider<string, number> = {
     series: [
@@ -70,11 +82,39 @@ export class RestComponent implements OnInit {
     }
   }
 
-  $statusRepartition: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig}> = { data: [], loading: true};
+  readonly STATUS_CHART_PROVIDER_BASE: Partial<ChartProvider<string, number>> = {
+    stacked: true,
+    series: [],
+    options: {
+      backgroundColor: 'transparent',
+      grid: { top: 16, bottom: 48, left: 8, right: 16, containLabel: true },
+      xAxis: { axisLine: { show: false }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { rotate: 30, overflow: 'truncate', width: 120, fontSize: 11, interval: 'auto' } },
+      yAxis: { axisLine: { show: false }, axisTick: { show: false }, splitLine: { lineStyle: { color: '#f1f5f9', type: 'dashed' } }, axisLabel: { fontSize: 11, color: '#94a3b8', formatter: (v: number) => v?.toLocaleString('fr-FR') } },
+      tooltip: { trigger: 'axis', borderRadius: 10, borderWidth: 0, backgroundColor: 'rgba(15,23,42,0.88)', textStyle: { color: '#f1f5f9', fontSize: 12, whiteSpace: 'normal', width: 300 }, confine: true }
+    }
+  };
+
+  $statusRepartition: Partial<{data: any[], rawData: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = { data: [], loading: true};
+  $statusOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
+  $statusView: 'chart' | 'table' = 'chart';
+  $statusSlice: OrganizerSliceState | null = null;
+  $statusFilteredValues: any[] = [];
+  $statusDisplayUnit = '';
+
+  $performanceRepartition: Partial<{data: any[], rawData: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = {data: [], loading: true};
+  $performanceOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
+  $performanceSlice: OrganizerSliceState | null = null;
+  $performanceFilteredValues: any[] = [];
+  $performanceDisplayUnit = '';
+
+  $volumetryRepartition : Partial<{data: any[], rawData: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = {data: [], loading: true};
+  $volumetryOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
+  $volumetrySlice: OrganizerSliceState | null = null;
+  $volumetryFilteredValues: any[] = [];
+  $volumetryDisplayUnit = '';
+
   $statusRepartitionSlice: {data: any[], loading: boolean} = { data: [], loading: true};
-  $performanceRepartition: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig}> = {data: [], loading: true};
   $performanceRepartitionSlice: { data: any[], loading: boolean } = {data: [], loading: true};
-  $volumetryRepartition : Partial<{data: any[], loading: boolean, chartConfig: ChartConfig}> = {data: [], loading: true};
   $volumetryRepartitionSlice : {data: any[], loading: boolean} = {data: [], loading: true};
   $methodRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
   $userAgentRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
@@ -91,9 +131,15 @@ export class RestComponent implements OnInit {
     if(value) {
       this.params = value;
       this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
+      
+      // Initialize ChartConfigs and OrganizerConfigs
       this.$statusRepartition.chartConfig = REST_SESSION_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = REST_SESSION_PERFORMANCE_CHART_CONFIG(this.groupedBy);
       this.$volumetryRepartition.chartConfig = REST_SESSION_VOLUMETRY_CHART_CONFIG(this.groupedBy);
+      
+      this._rebuildOrganizerConfigs();
+      
+      this._fetchAllCharts();
       this.getMethods();
       this.getUser();
       this.getUserAgents();
@@ -104,77 +150,265 @@ export class RestComponent implements OnInit {
     }
   };
 
-  ngOnInit() {
+  ngOnInit() {}
 
+  onStatusViewChange(event: OrganizerButtonEvent): void {
+    if (event.type === 'viewSwitched') {
+      this.$statusView = event.state.viewMode ?? 'chart';
+    }
+    const result = this._handleOrganizerEvent(event, this.$statusRepartition.chartConfig, this.$statusOrganizer, this._statusOrganizerOptions());
+    this.$statusOrganizer = result.binding;
+    if (result.shouldRefetch) {
+      this._fetchStatus();
+    }
+    this._cdr.markForCheck();
   }
 
-  onStatusChartChange(event: {eventType: 'default' | 'filter', chartConfig: ChartConfig, filteredTasks?: any[]}) {
-    this.getCustom(event, this.$statusRepartition, this.$statusRepartitionSlice);
-  }
-
-  onPerformanceChartChange(event: {eventType: 'default' | 'filter', chartConfig: ChartConfig, filteredTasks?: any[]}) {
-    this.getCustom(event, this.$performanceRepartition, this.$performanceRepartitionSlice);
-  }
-
-  onVolumetryChartChange(event: {eventType: 'default' | 'filter', chartConfig: ChartConfig}) {
-    this.getSizeCustom(event, this.$volumetryRepartition, this.$volumetryRepartitionSlice);
-  }
-
-  getCustom(event: {eventType: 'default' | 'filter', chartConfig: ChartConfig, filteredTasks?: any[]},
-            arr: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig}>,
-            slice: {data: any[], loading: boolean}) {
-    console.log("getCustom", event)
-    let actualIndicator = this.getActualIndicator(arr.chartConfig);
-    let actualGroup = this.getActualGroup(arr.chartConfig);
-    let actualStack = this.getActualStack(arr.chartConfig);
-    let actualFilter = this.getActualFilter(arr.chartConfig);
-    if(event.eventType === 'default') {
-      arr.loading = true;
-      arr.data = [];
-      this._restSessionService.getCustom({series: arr.chartConfig.series.items, indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks})
-      .pipe(finalize(() => arr.loading = false))
-      .subscribe(data => {
-        arr.data = data;
-      });
-    } else if(event.eventType === 'filter') {
-      if(actualFilter) {
-        this._restSessionService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts}).subscribe({
-          next: (res: any[]) => {
-            slice.data = res;
-          }
-        });
-      } else {
-        slice.data = [];
-      }
+  onStatusSliceChange(sliceState: OrganizerSliceState | null): void {
+    this.$statusSlice = sliceState;
+    if (!sliceState) {
+      this.$statusFilteredValues = [];
+    }
+    if (sliceState?.filterApplied === true) {
+      this._fetchStatus();
     }
   }
 
-  getSizeCustom(event: {eventType: 'default' | 'filter', chartConfig: ChartConfig, filteredTasks?: any[]},
-                arr: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig}>,
-                slice: {data: any[], loading: boolean}) {
-    let actualIndicator = this.getActualIndicator(arr.chartConfig);
-    let actualGroup = this.getActualGroup(arr.chartConfig);
-    let actualStack = this.getActualStack(arr.chartConfig);
-    let actualFilter = this.getActualFilter(arr.chartConfig);
-    if(event.eventType === 'default') {
-      arr.loading = true;
-      arr.data = [];
-      this._restSessionService.getSizeCustom({series: arr.chartConfig.series.items, indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks})
-      .pipe(finalize(() => arr.loading = false))
-      .subscribe(data => {
-        arr.data = data;
-      });
-    } else if(event.eventType === 'filter') {
-      if(actualFilter) {
-        this._restSessionService.getFilters(actualFilter, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts}).subscribe({
-          next: (res: any[]) => {
-            slice.data = res;
-          }
-        });
-      } else {
-        slice.data = [];
-      }
+  onPerformanceViewChange(event: OrganizerButtonEvent): void {
+    const result = this._handleOrganizerEvent(event, this.$performanceRepartition.chartConfig, this.$performanceOrganizer, this._performanceOrganizerOptions());
+    this.$performanceOrganizer = result.binding;
+    if (result.shouldRefetch) {
+      this._fetchPerformance();
     }
+    this._cdr.markForCheck();
+  }
+
+  onPerformanceSliceChange(sliceState: OrganizerSliceState | null): void {
+    this.$performanceSlice = sliceState;
+    if (!sliceState) {
+      this.$performanceFilteredValues = [];
+    }
+    if (sliceState?.filterApplied === true) {
+      this._fetchPerformance();
+    }
+  }
+
+  onVolumetryViewChange(event: OrganizerButtonEvent): void {
+    const result = this._handleOrganizerEvent(event, this.$volumetryRepartition.chartConfig, this.$volumetryOrganizer, this._volumetryOrganizerOptions());
+    this.$volumetryOrganizer = result.binding;
+    if (result.shouldRefetch) {
+      this._fetchVolumetry();
+    }
+    this._cdr.markForCheck();
+  }
+
+  onVolumetrySliceChange(sliceState: OrganizerSliceState | null): void {
+    this.$volumetrySlice = sliceState;
+    if (!sliceState) {
+      this.$volumetryFilteredValues = [];
+    }
+    if (sliceState?.filterApplied === true) {
+      this._fetchVolumetry();
+    }
+  }
+
+  onStatusFilterChange(filterFn: (row: any) => boolean): void {
+    if (!this.$statusSlice) return;
+    const columnKey = this.$statusSlice.sliceConfigs[0]?.columnKey;
+    this.$statusFilteredValues = this.$statusSlice.tasks.filter(filterFn).map(t => t[columnKey]);
+    this._fetchStatus();
+  }
+
+  onPerformanceFilterChange(filterFn: (row: any) => boolean): void {
+    if (!this.$performanceSlice) return;
+    const columnKey = this.$performanceSlice.sliceConfigs[0]?.columnKey;
+    this.$performanceFilteredValues = this.$performanceSlice.tasks.filter(filterFn).map(t => t[columnKey]);
+    this._fetchPerformance();
+  }
+
+  onVolumetryFilterChange(filterFn: (row: any) => boolean): void {
+    if (!this.$volumetrySlice) return;
+    const columnKey = this.$volumetrySlice.sliceConfigs[0]?.columnKey;
+    this.$volumetryFilteredValues = this.$volumetrySlice.tasks.filter(filterFn).map(t => t[columnKey]);
+    this._fetchVolumetry();
+  }
+
+  private _fetchSliceData(chartConfig: ChartConfig, filterKey: string): Observable<any[]> {
+    const filter = chartConfig.filters?.items?.find(item => item.key === filterKey);
+    if (!filter) {
+      return of([]);
+    }
+
+    return this._restSessionService.getFilters(
+      filter,
+      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts }
+    ) as Observable<any[]>;
+  }
+
+  private _fetchAllCharts(): void {
+    this._fetchStatus();
+    this._fetchPerformance();
+    this._fetchVolumetry();
+  }
+
+  private _fetchStatus(): void {
+    const cfg = this.$statusRepartition.chartConfig;
+    const ind = cfg.indicators.items.find(i => i.selected);
+    const grp = cfg.groups.items.find(g => g.selected);
+    const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
+    const flt = cfg.filters?.items?.find(f => f.selected);
+    
+    this.$statusRepartition.loading = true;
+    this.$statusRepartition.data = [];
+    this._restSessionService.getCustom(
+      { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
+      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined }
+    ).pipe(finalize(() => this.$statusRepartition.loading = false))
+    .subscribe(data => {
+      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
+      const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
+      const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
+      this.$statusRepartition.rawData = formattedData;
+      this.$statusRepartition.data = pivoted;
+      const yAlias = ind?.jquery.buildAlias(cfg.series.items.find(s => s.selected)?.jquery.buildAlias() ?? '') ?? '';
+      this.$statusDisplayUnit = this._resolveDisplayUnit(ind?.unit, formattedData, yAlias);
+      this.$statusRepartition.chartProvider = {
+        ...this.STATUS_CHART_PROVIDER_BASE,
+        series: series
+      } as ChartProvider<string, number>;
+      this._cdr.markForCheck();
+    });
+  }
+
+  private _fetchPerformance(): void {
+    const cfg = this.$performanceRepartition.chartConfig;
+    const ind = cfg.indicators.items.find(i => i.selected);
+    const grp = cfg.groups.items.find(g => g.selected);
+    const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
+    const flt = cfg.filters?.items?.find(f => f.selected);
+    this.$performanceRepartition.loading = true;
+    this.$performanceRepartition.data = [];
+    this._restSessionService.getCustom(
+      { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
+      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined }
+    ).pipe(finalize(() => this.$performanceRepartition.loading = false))
+    .subscribe(data => {
+      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
+      const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
+      const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
+      this.$performanceRepartition.data = pivoted;
+      const yAlias = ind?.jquery.buildAlias(cfg.series.items.find(s => s.selected)?.jquery.buildAlias() ?? '') ?? '';
+      this.$performanceDisplayUnit = this._resolveDisplayUnit(ind?.unit, formattedData, yAlias);
+      this.$performanceRepartition.chartProvider = {
+        ...this.STATUS_CHART_PROVIDER_BASE,
+        series,
+        yUnit: ind?.unit
+      } as ChartProvider<string, number>;
+      this._cdr.markForCheck();
+    });
+  }
+
+  private _fetchVolumetry(): void {
+    const cfg = this.$volumetryRepartition.chartConfig;
+    const ind = cfg.indicators.items.find(i => i.selected);
+    const grp = cfg.groups.items.find(g => g.selected);
+    const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
+    const flt = cfg.filters?.items?.find(f => f.selected);
+    
+    this.$volumetryRepartition.loading = true;
+    this.$volumetryRepartition.data = [];
+    this._restSessionService.getSizeCustom(
+      { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
+      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$volumetryFilteredValues.length ? this.$volumetryFilteredValues : undefined }
+    ).pipe(finalize(() => this.$volumetryRepartition.loading = false))
+    .subscribe(data => {
+      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
+      const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
+      const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
+      this.$volumetryRepartition.rawData = formattedData;
+      this.$volumetryRepartition.data = pivoted;
+      const yAlias = ind?.jquery.buildAlias(cfg.series.items.find(s => s.selected)?.jquery.buildAlias() ?? '') ?? '';
+      this.$volumetryDisplayUnit = this._resolveDisplayUnit(ind?.unit, formattedData, yAlias);
+      this.$volumetryRepartition.chartProvider = {
+        ...this.STATUS_CHART_PROVIDER_BASE,
+        series: series
+      } as ChartProvider<string, number>;
+      this._cdr.markForCheck();
+    });
+  }
+
+  private _resolveDisplayUnit(unit: string | any | undefined, data: any[], yAlias: string | string[]): string {
+    if (!unit) return '';
+    if (typeof unit === 'string') return unit;
+
+    const aliases = Array.isArray(yAlias) ? yAlias : [yAlias];
+    const allValues: number[] = aliases.flatMap(alias =>
+      data
+        .map((d: any) => typeof d[alias] === 'number' ? d[alias] : parseFloat(d[alias]))
+        .filter((v: number) => isFinite(v) && v > 0)
+    );
+
+    return selectBestScale(unit, allValues).unit;
+  }
+
+  private _rebuildOrganizerConfigs(): void {
+    this.$statusOrganizer = buildOrganizerChartBinding(this.$statusRepartition.chartConfig, this._statusOrganizerOptions());
+    this.$performanceOrganizer = buildOrganizerChartBinding(this.$performanceRepartition.chartConfig, this._performanceOrganizerOptions());
+    this.$volumetryOrganizer = buildOrganizerChartBinding(this.$volumetryRepartition.chartConfig, this._volumetryOrganizerOptions());
+  }
+
+  private _statusOrganizerOptions(): OrganizerChartBridgeOptions {
+    return {
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$statusRepartition.chartConfig, filterKey),
+      onExportVisual: () => this._statusChart?.exportImage('status'),
+      onExportData: () => this._statusChart?.exportData('status')
+    };
+  }
+
+  private _performanceOrganizerOptions(): OrganizerChartBridgeOptions {
+    return {
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$performanceRepartition.chartConfig, filterKey),
+      onExportVisual: () => this._performanceChart?.exportImage('performance'),
+      onExportData: () => this._performanceChart?.exportData('performance'),
+    };
+  }
+
+  private _volumetryOrganizerOptions(): OrganizerChartBridgeOptions {
+    return {
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$volumetryRepartition.chartConfig, filterKey),
+      onExportVisual: () => this._volumetryChart?.exportImage('volumetry'),
+      onExportData: () => this._volumetryChart?.exportData('volumetry')
+    };
+  }
+
+  private _handleOrganizerEvent(
+    event: OrganizerButtonEvent,
+    chartConfig: ChartConfig,
+    currentBinding: OrganizerChartBinding,
+    options: OrganizerChartBridgeOptions
+  ) {
+    return handleOrganizerChartEvent(event, chartConfig, currentBinding, options);
+  }
+
+  activeChartSubheaderLabel(chartConfig: ChartConfig, displayUnit: string): string {
+    const ind = chartConfig?.indicators?.items?.find(i => i.selected);
+    if (!ind) return '';
+    const indicatorName = ind.menu?.label ?? '';
+    if (displayUnit) {
+      const prefix = (ind as any).group ?? ind.menu?.label ?? '';
+      const label = prefix ? `${prefix} en ${displayUnit}` : displayUnit;
+      return indicatorName ? `${label} : ${indicatorName}` : label;
+    }
+    return indicatorName;
+  }
+
+  activeGroupLabel(chartConfig: ChartConfig): string {
+    return chartConfig?.groups?.items?.find(g => g.selected)?.menu?.label || '';
+  }
+
+  activeStackLabel(chartConfig: ChartConfig): string {
+    const ind = chartConfig?.indicators?.items?.find(i => i.selected);
+    return ind?.extra?.stacks?.items?.find(s => s.selected)?.menu?.label || '';
   }
 
   getUser() {
@@ -294,11 +528,11 @@ export class RestComponent implements OnInit {
     }
     this._restSessionService.getRestSession(args).subscribe({
       next: (res: any[]) => {
-        this.$globalStatistic.totalRequest = res[0].count_request;
-        this.$globalStatistic.totalRequestError = res[0].count_error;
-        this.$globalStatistic.percentError = (res[0].count_error / res[0].count_request) * 100 || 0;
-        this.$globalStatistic.elapsedPercentile = res[0].elapsedPercentile;
-        this.$globalStatistic.totalUser = res[0].count_user;
+        this.$globalStatistic.totalRequest = res[0]?.count_request ?? 0;
+        this.$globalStatistic.totalRequestError = res[0]?.count_error ?? 0;
+        this.$globalStatistic.percentError = res[0]?.count_request ? (res[0].count_error / res[0].count_request) * 100 : 0;
+        this.$globalStatistic.elapsedPercentile = res[0]?.elapsedPercentile ?? 0;
+        this.$globalStatistic.totalUser = res[0]?.count_user ?? 0;
       }
     });
   }
