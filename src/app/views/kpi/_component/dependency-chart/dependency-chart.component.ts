@@ -66,6 +66,7 @@ export class DependencyChartComponent {
         }
       },
       yAxis: {
+        minInterval: 1,
         axisLabel: {
           overflow: 'truncate',
           width: 130,

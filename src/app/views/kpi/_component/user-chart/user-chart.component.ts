@@ -34,6 +34,7 @@ export class UserChartComponent {
         }
       },
       yAxis: {
+        minInterval: 1,
         axisLine: { show: false },
         axisTick: { show: false },
         splitLine: {

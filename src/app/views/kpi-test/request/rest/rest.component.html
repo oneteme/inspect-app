@@ -1,36 +1,36 @@
 <div class="kpi-page">
   <div class="kpi-summary-row">
-    <div class="kpi-stat-card">
+    <div class="kpi-stat-card blue">
       <div class="kpi-stat-icon blue">
         <mat-icon class="material-symbols-outlined">swap_horiz</mat-icon>
       </div>
       <div class="kpi-stat-content">
-        <span class="kpi-stat-value">{{$globalStatistic.totalRequest | number}}</span>
         <span class="kpi-stat-label">Nombre de Requêtes</span>
+        <span class="kpi-stat-value">{{$globalStatistic.totalRequest | number}}</span>
       </div>
     </div>
-    <div class="kpi-stat-card">
+    <div class="kpi-stat-card red">
       <div class="kpi-stat-icon red">
         <mat-icon class="material-symbols-outlined">error_outline</mat-icon>
       </div>
       <div class="kpi-stat-content">
+        <span class="kpi-stat-label">Nombre d'Incidents</span>
         <div class="kpi-stat-value-row">
           <span class="kpi-stat-value">{{$globalStatistic.totalRequestError | number}}</span>
           <span class="kpi-badge error">soit {{$globalStatistic.percentError | number: '1.0-1'}}%</span>
         </div>
-        <span class="kpi-stat-label">Nombre d'Incidents</span>
       </div>
     </div>
-    <div class="kpi-stat-card">
+    <div class="kpi-stat-card purple">
       <div class="kpi-stat-icon purple">
         <mat-icon class="material-symbols-outlined">schedule</mat-icon>
       </div>
       <div class="kpi-stat-content">
+        <span class="kpi-stat-label">Temps de réponse max</span>
         <div class="kpi-stat-value-row">
           <span class="kpi-stat-value">{{$globalStatistic.elapsedPercentile | duration:0}}</span>
           <span class="kpi-badge">P.95</span>
         </div>
-        <span class="kpi-stat-label">Temps de réponse max</span>
       </div>
     </div>
   </div>
