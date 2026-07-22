@@ -1,7 +1,7 @@
 import { Component, inject, OnDestroy, OnInit, ViewChild } from '@angular/core';
 import { FormControl } from '@angular/forms';
 import { ActivatedRoute, Params } from '@angular/router';
-import { distinctUntilChanged, finalize, Subscription } from 'rxjs';
+import { distinctUntilChanged, finalize, map, Subscription } from 'rxjs';
 import { DomSanitizer } from '@angular/platform-browser';
 import { MatIconRegistry } from '@angular/material/icon';
 import { MatMenuTrigger } from '@angular/material/menu';
@@ -13,6 +13,8 @@ import { EnvRouter } from '../../service/router.service';
 import { InstanceService } from '../../service/jquery/instance.service';
 import { PageTitleService } from '../../service/page-title.service';
 import { PagePanelService } from '../../service/page-panel.service';
+import { PERIOD_QUICK_RANGES, toDisplayedPeriodEnd } from '../../shared/period-filter';
+import { DatePipe } from '@angular/common';
 import { AuthService } from 'src/app/auth/auth.service';
 
 interface SubNavItem {
@@ -45,6 +47,10 @@ export class NavbarComponent implements OnInit, OnDestroy {
   readonly pageTitle$ = inject(PageTitleService).config$;
   readonly hasPanel$    = this._panelSvc.hasPanel$;
   readonly isPanelOpen$ = this._panelSvc.isOpen$;
+
+  readonly periodLabel$ = this._activatedRoute.queryParams.pipe(
+    map(params => this._buildPeriodLabel(params))
+  );
 
   @ViewChild('mainTrigger') mainMenuTrigger: MatMenuTrigger;
 
@@ -79,6 +85,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
   ];
 
   private readonly _dialog = inject(MatDialog);
+
+  private readonly _datePipe = inject(DatePipe);
 
   constructor(private authService: AuthService) {
     const iconRegistry = inject(MatIconRegistry);
@@ -181,6 +189,30 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   onFilterClick(): void { this._panelSvc.toggle(); }
+
+  private _buildPeriodLabel(params: Params): string | null {
+    if (params['step']) {
+      const stepMin = Number(params['step']);
+      const found = PERIOD_QUICK_RANGES.find(r => {
+        const minuteMap: Record<string, number> = { '5m': 5, '15m': 15, '30m': 30, '1h': 60, '3h': 180, '6h': 360, '12h': 720, '24h': 1440, '2d': 2880, '7d': 10080 };
+        return minuteMap[r.value] === stepMin;
+      });
+      if (found) return found.label;
+      if (stepMin < 60) return `Dernières ${stepMin} min`;
+      if (stepMin < 1440) {
+        const h = stepMin / 60;
+        return h === 1 ? 'Dernière 1 heure' : `Dernières ${h}h`;
+      }
+      return `Derniers ${stepMin / 1440}j`;
+    }
+    if (params['start'] && params['end']) {
+      const start = new Date(params['start']);
+      const end = toDisplayedPeriodEnd(new Date(params['end']));
+      const fmt = (d: Date) => this._datePipe.transform(d, 'dd/MM/yyyy HH:mm') ?? '';
+      return `${fmt(start)} – ${fmt(end)}`;
+    }
+    return null;
+  }
 
   // Locale
   // private readonly mockUserData = {

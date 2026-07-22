@@ -73,6 +73,7 @@ import {MediaTypeChartComponent} from "./kpi/_component/media-type-chart/media-t
 import {DependentChartComponent} from "./kpi/_component/dependent-chart/dependent-chart.component";
 import {StartupComponent} from "./kpi/session/startup/startup.component";
 import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.component";
+import {CompareView} from "./compare/compare.view";
 
 @NgModule({
   imports: [
@@ -149,7 +150,8 @@ import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.compone
     DependencyChartComponent,
     DependentChartComponent,
     MediaTypeChartComponent,
-    UserChartComponent
+    UserChartComponent,
+    CompareView
   ]
 })
 export class ViewsModule { }

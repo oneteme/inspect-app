@@ -126,6 +126,10 @@ export class RestRequestService {
             'join': 'innerJoin(instance).criteria(instance_env.eq(instance.id)),innerJoin(rest_session).criteria(id.eq(rest_session.id))',
 
         }
+        if(data.stack) {
+            args['column'] += `,${data.stack.jquery.value()}:${data.stack.jquery.buildAlias()}`;
+            args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
+        }
         if(data.group.jquery.order){
             args['order'] = `${data.group.jquery.order}`;
         }

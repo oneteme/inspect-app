@@ -221,10 +221,20 @@ export const formatters: any = {
         });
     },
 
+    monthDay: function byMonthDay(r: any[], _datePipe: DatePipe, nameOutput: string = 'date') {
+        r.forEach(e => {
+            const ts = e['date'];
+            if (!ts) return;
+            const d = new Date(ts);
+            const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+            e[nameOutput] = _datePipe.transform(date, 'd MMM');
+        });
+    },
+
     date: function byDay(r: any[], _datePipe: DatePipe, nameOutput: string = 'date') {
         r.forEach(e => {
             const ts = e['date'];
-            // Construire la date en heure locale pour éviter le décalage UTC
+            if (!ts) return;
             const d = new Date(ts);
             const date = new Date(d.getFullYear(), d.getMonth(), d.getDate());
             e[nameOutput] = _datePipe.transform(date, 'd MMM yy');
@@ -237,6 +247,17 @@ export const formatters: any = {
             e[nameOutput] = _datePipe.transform(date, 'shortTime');
         });
     }
+}
+
+export function formatChartDates(data: any[], groupedBy: string, datePipe: DatePipe): any[] {
+    if (!data || data.length === 0) return data;
+    if (!formatters[groupedBy]) {
+        return data;
+    }
+    
+    const cloned = JSON.parse(JSON.stringify(data));
+    formatters[groupedBy](cloned, datePipe);
+    return cloned;
 }
 
 

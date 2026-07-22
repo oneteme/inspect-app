@@ -149,15 +149,15 @@ mat-form-field.no-subscript {
   z-index: 1;
 }
 
-::ng-deep .cdk-overlay-container {
+.cdk-overlay-container {
   z-index: 10000 !important;
 }
 
-::ng-deep .mat-datepicker-content {
+.mat-datepicker-content {
   pointer-events: auto !important;
 }
 
-::ng-deep .mat-datepicker-popup {
+.mat-datepicker-popup {
   z-index: 10000 !important;
 }
 

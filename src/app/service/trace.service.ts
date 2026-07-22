@@ -77,6 +77,10 @@ export class TraceService {
       this.http.get(`${this.server}/session/main/${id}/tree`);
   }
 
+  getCompare(id: string ){
+    return this.http.get(`${this.server}/request/rest/${id}/compare`);
+  }
+
   getSessionParent(type: string, id: string): Observable<{ id: string, type: string }> {
     return this.http.get<{ id: string, type: string }>(`${this.server}/${type}/${id}/parent`);
   }
