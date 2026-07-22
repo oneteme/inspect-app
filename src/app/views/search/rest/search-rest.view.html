@@ -1,6 +1,5 @@
 <page-panel panelTitle="Filtres" panelIcon="filter_list">
   <div class="panel-filter md-3" [formGroup]="serverFilterForm">
-    <advanced-filter-recap [filters]="advancedParams" (filterRemoved)="handleRemovedFilter($event)" (focusField)="focusField($event)"></advanced-filter-recap>
     <div class="period-filter-wrapper">
       <mat-form-field class="no-subscript period-wide period-field"
               [style.--period-field-width]="queryParams?.period && !isDefaultPeriod() ? '408px' : '372px'"
@@ -62,14 +61,6 @@
       <button mat-mini-fab color="primary"  (click)="search()">
         <mat-icon matSuffix>search</mat-icon>
       </button>
-      <advanced-filter-trigger [pageName]="'session-api'"
-                               [filterConfig]="filterConstants.SEARCH['rest']"
-                               [focusField]="focusFieldName"
-                               [additionalFilter]="{'start.ge':queryParams.period.start?.toISOString(),'start.lt': queryParams.period.end?.toISOString()}"
-                               (handleDialogclose)="handledialogclose($event)"
-                               (handlePresetSelection)="handlePresetSelection($event)"
-                               (handlePresetSelectionReset)="handlePresetSelectionReset()"
-                               (handleFilterReset)="handleFilterReset()"></advanced-filter-trigger>
     </div>
   </div>
 </page-panel>

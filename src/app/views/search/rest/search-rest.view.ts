@@ -39,11 +39,9 @@ export class SearchRestView implements OnInit, OnDestroy {
   private readonly _traceService = inject(TraceService);
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _location = inject(Location);
-  private readonly _filter = inject(FilterService);
   private readonly $destroy = new Subject<void>();
 
   MAPPING_TYPE = Constants.MAPPING_TYPE;
-  filterConstants = FilterConstants;
   nameDataList: any[];
   isLoading = false;
   serverNameIsLoading = true;
@@ -61,12 +59,10 @@ export class SearchRestView implements OnInit, OnDestroy {
     { icon: 'warning', label: '5xx', color: '#F44336', value: '5xx' },
     { icon: 'error', label: '4xx', color: '#F9AD4E', value: '4xx' },
     { icon: 'done', label: '2xx', color: '#4CAF50', value: '2xx' },
-    { icon: 'pending', label: 'En cours', color: '', value: 'lazy' }
+    { icon: 'pending', label: 'En cours', color: '', value: 'pending' }
   ];
   readonly periodQuickRanges = PERIOD_QUICK_RANGES;
-  advancedParams: Partial<{ [key: string]: any }> = {};
   queryParams: Partial<QueryParams> = {};
-  focusFieldName: any;
 
   tableConfig: TableProvider<RestSessionDto> = {
     ...REST_SESSION_TABLE_CONFIG,
@@ -115,7 +111,6 @@ export class SearchRestView implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this._filter.registerGetallFilters(this.filtersSupplier.bind(this));
     this._pageTitleService.set({
       icon: Constants.MAPPING_TYPE['rest']?.icon || 'http',
       title: (Constants.MAPPING_TYPE['rest']?.title || 'Services Exposés') + ' • Suivi',
@@ -170,16 +165,12 @@ export class SearchRestView implements OnInit, OnDestroy {
   getIncomingRequest(): void {
     this.$destroy.next();
     const params: any = {
-      env: this.queryParams.env,
-      appname: this.queryParams.appname,
-      rangestatus: this.queryParams.rangestatus.filter(r => r !== 'lazy'),
-      lazy: this.queryParams.rangestatus.some(r => r === 'lazy'),
-      start: this.queryParams.period.start.toISOString(),
-      end: this.queryParams.period.end.toISOString()
+      'env': this.queryParams.env,
+      'instance.app_name': this.queryParams.appname,
+      'status.origin': this.queryParams.rangestatus,
+      'start.ge': this.queryParams.period.start.toISOString(),
+      'end.lt': this.queryParams.period.end.toISOString()
     };
-    if (this.advancedParams) {
-      Object.assign(params, this.advancedParams);
-    }
 
     this.isLoading = true;
     this.sessions = [];
@@ -218,61 +209,6 @@ export class SearchRestView implements OnInit, OnDestroy {
       this._router.navigateOnClick(event, ['/session/rest', row.id], {
         queryParams: { env: this.queryParams.env }
       });
-    }
-  }
-
-  resetFilters(): void {
-    this.patchDateValue((extractPeriod(app.gridViewPeriod, 'gridViewPeriod') || makeDatePeriod(0)).start, (extractPeriod(app.gridViewPeriod, 'gridViewPeriod') || makeDatePeriod(0, 1)).end);
-    this.patchServerValue([]);
-    this.patchStatusValue([]);
-    this.advancedParams = {};
-    this._filter.setFilterMap({});
-  }
-
-  filtersSupplier(): BehaviorSubject<FilterMap> {
-    return new BehaviorSubject<FilterMap>({
-      appname: this.serverFilterForm.getRawValue().appname,
-      rangestatus: this.serverFilterForm.getRawValue().rangestatus.map((r: any) => r.value)
-    });
-  }
-
-  handlePresetSelection(filterPreset: FilterPreset): void {
-    const formControlNamelist = Object.keys(this.serverFilterForm.controls);
-    Object.entries(filterPreset.values).reduce((acc: any, [key, value]) => {
-      if (formControlNamelist.includes(key)) {
-        this.serverFilterForm.patchValue({ [key]: value });
-        this.queryParams[key] = value;
-        delete filterPreset.values[key];
-      }
-    }, {});
-    this.advancedParams = filterPreset.values;
-    this._filter.setFilterMap(this.advancedParams);
-    this.search();
-  }
-
-  handlePresetSelectionReset(): void {
-    this.resetFilters();
-    this.search();
-  }
-
-  handleFilterReset(): void {
-    this.resetFilters();
-  }
-
-  focusField(fieldName: string): void {
-    this.focusFieldName = [fieldName];
-  }
-
-  handledialogclose(filterMap: FilterMap): void {
-    this.advancedParams = filterMap;
-    this._filter.setFilterMap(this.advancedParams);
-    this.search();
-  }
-
-  handleRemovedFilter(filterName: string): void {
-    if (this.advancedParams[filterName]) {
-      delete this.advancedParams[filterName];
-      this._filter.setFilterMap(this.advancedParams);
     }
   }
 

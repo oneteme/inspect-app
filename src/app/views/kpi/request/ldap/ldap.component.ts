@@ -2,7 +2,7 @@ import {Component, inject, Input, OnInit} from "@angular/core";
 import {QueryParams} from "../../../../model/conf.model";
 import {ChartConfig, LDAP_PERFORMANCE_CHART_CONFIG, LDAP_STATUS_CHART_CONFIG} from "../../kpi.config";
 import {finalize} from "rxjs";
-import {periodManagement2} from "../../../../shared/util";
+import {periodManagement} from "../../../../shared/util";
 import {LdapRequestService} from "../../../../service/jquery/ldap-request.service";
 
 @Component({
@@ -28,7 +28,7 @@ export class LdapComponent implements OnInit {
   @Input() set queryParams(value: QueryParams) {
     if(value) {
       this.params = value;
-      this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
+      this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
       this.$statusRepartition.chartConfig = LDAP_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = LDAP_PERFORMANCE_CHART_CONFIG(this.groupedBy);
       this.getGlobalStatistics();
@@ -81,14 +81,14 @@ export class LdapComponent implements OnInit {
   getCommands() {
     let args: any = {
       'column': `count:count,command.coalesce("Non renseigné"):command`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['host.in'] = this.params.hosts.join(',');
     }
     this.$commandRepartition.loading = true;
     this._ldapRequestService.getLdap(args).pipe(finalize(() => this.$commandRepartition.loading = false)).subscribe({
@@ -101,14 +101,14 @@ export class LdapComponent implements OnInit {
   getDependencies() {
     let args: any = {
       'column': `instance.app_name:origin,host:target,count:count`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.asc'
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['host.in'] = this.params.hosts.join(',');
     }
     this.$dependencyRepartition.loading = true;
     this._ldapRequestService.getLdap(args).pipe(finalize(() => this.$dependencyRepartition.loading = false)).subscribe({
@@ -121,14 +121,14 @@ export class LdapComponent implements OnInit {
   getUser() {
     let args: any = {
       'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': `start.${this.groupedBy}.asc`
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['host.in'] = this.params.hosts.join(',');
     }
     this.$userRepartition.loading = true;
     this._ldapRequestService.getLdap(args).pipe(finalize(() => this.$userRepartition.loading = false)).subscribe({
@@ -140,14 +140,14 @@ export class LdapComponent implements OnInit {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_request_error:count_error`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_request_error:count_error`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString()
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['host.in'] = this.params.hosts.join(',');
     }
     this._ldapRequestService.getLdap(args).subscribe({
       next: (res: any[]) => {

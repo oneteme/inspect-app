@@ -413,7 +413,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     createServerFilter(): any {
         const servers = this.params.serveurs || [];
         if (servers.length > 0) {
-            return { app_name: servers.map(v => '"' + v + '"').join(',') };
+            return { app_name: servers.join(',') };
         }
         return { app_name: null };
     }
@@ -1061,9 +1061,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         const groupedBy = periodManagement(start, end);
         const p = { env, start, end, groupedBy, app_name };
         return {
-            restRequestExceptionsTable: { observable: this.buildExceptionObservable(this._restService.getRestExceptions1(p), groupedBy, 'REST', 'rest', start, end) },
+            restRequestExceptionsTable: { observable: this.buildExceptionObservable(this._restService.getRestExceptions(p), groupedBy, 'REST', 'rest', start, end) },
             databaseRequestExceptionsTable: { observable: this.buildExceptionObservable(this._datebaseService.getJdbcRestSessionExceptions(p), groupedBy, 'JDBC', 'jdbc', start, end) },
-            ftpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ftpService.getftpSessionExceptions(p), groupedBy, 'FTP', 'ftp', start, end) },
+            ftpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ftpService.getFtpSessionExceptions(p), groupedBy, 'FTP', 'ftp', start, end) },
             smtpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._smtpService.getSmtpExceptions(p), groupedBy, 'SMTP', 'smtp', start, end) },
             ldapRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ldapService.getLdapSessionExceptions(p), groupedBy, 'LDAP', 'ldap', start, end) },
         };

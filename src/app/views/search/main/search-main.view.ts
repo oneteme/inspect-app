@@ -40,11 +40,9 @@ export class SearchMainView implements OnInit, OnDestroy {
   private readonly _pageTitleService = inject(PageTitleService);
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _location = inject(Location);
-  private readonly _filter = inject(FilterService);
   private readonly $destroy = new Subject<void>();
 
   MAPPING_TYPE = Constants.MAPPING_TYPE;
-  filterConstants = FilterConstants;
   readonly periodQuickRanges = PERIOD_QUICK_RANGES;
   tableConfig: TableProvider<MainSessionDto> = this.buildTableConfig();
   sessions: MainSessionDto[];
@@ -61,12 +59,10 @@ export class SearchMainView implements OnInit, OnDestroy {
   nameDataList: any[];
   isLoading = false;
   filters: { icon: string, label: string, color: string, value: any }[] = [
-    { icon: 'warning', label: 'KO', color: '#F44336', value: 'Ko' },
-    { icon: 'done', label: 'OK', color: '#4CAF50', value: 'Ok' },
-    { icon: 'pending', label: 'En cours', color: '', value: 'lazy' }
+    { icon: 'warning', label: 'KO', color: '#F44336', value: 1 },
+    { icon: 'done', label: 'OK', color: '#4CAF50', value: 0 },
+    { icon: 'pending', label: 'En cours', color: '', value: -1 },
   ];
-  advancedParams: Partial<{ [key: string]: any }>
-  focusFieldName: any
   queryParams: Partial<QueryParams> = {};
   type: string = '';
 
@@ -142,14 +138,7 @@ export class SearchMainView implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this._filter.registerGetallFilters(this.filtersSupplier.bind(this));
-  }
 
-  filtersSupplier(): BehaviorSubject<FilterMap> { //change
-    return new BehaviorSubject<FilterMap>({
-      'appname': this.serverFilterForm.getRawValue().appname,
-      'rangestatus': this.serverFilterForm.getRawValue().rangestatus.map(r => (r.value))
-    });
   }
 
   ngOnDestroy(): void {
@@ -161,21 +150,13 @@ export class SearchMainView implements OnInit, OnDestroy {
   getMainRequests() {
     this.$destroy.next();
     let params = {
-      'appname': this.queryParams.appname,
       'env': this.queryParams.env,
-      'launchmode': this.type.toUpperCase(),
-      'failed': this.queryParams.rangestatus.filter(r => r != 'lazy').map(r => {
-        if (r == 'Ok') return true;
-        if (r == 'Ko') return false;
-        return r;
-      }),
-      'lazy': !!this.queryParams.rangestatus.find(r => r == 'lazy'),
-      'start': this.queryParams.period.start.toISOString(),
-      'end': this.queryParams.period.end.toISOString()
+      'instance.app_name': this.queryParams.appname,
+      'status.in': this.queryParams.rangestatus,
+      'type': this.type.toUpperCase(),
+      'start.ge': this.queryParams.period.start.toISOString(),
+      'end.lt': this.queryParams.period.end.toISOString()
     };
-    if (this.advancedParams) {
-      Object.assign(params, this.advancedParams);
-    }
 
     this.isLoading = true;
     this.sessions = [];
@@ -240,7 +221,7 @@ export class SearchMainView implements OnInit, OnDestroy {
 
   patchStatusValue(rangestatus: any[]) {
     this.serverFilterForm.patchValue({
-      rangestatus: this.filters.filter((f: any) => rangestatus.toString().includes(f.value))
+      rangestatus: this.filters.filter((f: any) => rangestatus.find(s => s == f.value))
     }, {emitEvent: false})
     this.queryParams.rangestatus = rangestatus;
   }
@@ -251,15 +232,6 @@ export class SearchMainView implements OnInit, OnDestroy {
         queryParams: {'env': this.queryParams.env}
       });
     }
-  }
-
-  resetFilters() {
-    this.patchDateValue((extractPeriod(app.gridViewPeriod, "gridViewPeriod") || makeDatePeriod(0)).start, (extractPeriod(app.gridViewPeriod, "gridViewPeriod") || makeDatePeriod(0, 1)).end);
-    this.patchServerValue([]);
-    this.patchStatusValue([]);
-    this.advancedParams = {};
-    this.advancedParams = {};
-    this._filter.setFilterMap({})
   }
 
   isDefaultPeriod(): boolean {
@@ -282,47 +254,5 @@ export class SearchMainView implements OnInit, OnDestroy {
     }
     this.queryParams.period = period;
     this.patchDateValue(period.start, toDisplayedPeriodEnd(period.end));
-  }
-
-  handlePresetSelection(filterPreset: FilterPreset) {
-    const formControlNamelist = Object.keys(this.serverFilterForm.controls);
-    Object.entries(filterPreset.values).reduce((accumulator: any, [key, value]) => {
-      if (formControlNamelist.includes(key)) {
-        this.serverFilterForm.patchValue({
-          [key]: value
-        })
-        this.queryParams[key] = value;
-        delete filterPreset.values[key];
-      }
-    }, {})
-    this.advancedParams = filterPreset.values
-    this._filter.setFilterMap(this.advancedParams);
-    this.search()
-  }
-
-  handlePresetSelectionReset() {
-    this.resetFilters();
-    this.search();
-  }
-
-  handleFilterReset() {
-    this.resetFilters();
-  }
-
-  focusField(fieldName: string) {
-    this.focusFieldName = [fieldName];
-  }
-
-  handledialogclose(filterMap: FilterMap) {
-    this.advancedParams = filterMap;
-    this._filter.setFilterMap(this.advancedParams);
-    this.search()
-  }
-
-  handleRemovedFilter(filterName: string) {
-    if (this.advancedParams[filterName]) {
-      delete this.advancedParams[filterName];
-      this._filter.setFilterMap(this.advancedParams);
-    }
   }
 }

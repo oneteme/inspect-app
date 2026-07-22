@@ -7,7 +7,7 @@ import {
   REST_SESSION_STATUS_CHART_CONFIG,
   REST_SESSION_VOLUMETRY_CHART_CONFIG
 } from "../../kpi.config";
-import {periodManagement2} from "../../../../shared/util";
+import {periodManagement} from "../../../../shared/util";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 import {RestSessionService} from "../../../../service/jquery/rest-session.service";
 import {EnvRouter} from "../../../../service/router.service";
@@ -90,7 +90,7 @@ export class RestComponent implements OnInit {
   @Input() set queryParams(value: QueryParams) {
     if(value) {
       this.params = value;
-      this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
+      this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
       this.$statusRepartition.chartConfig = REST_SESSION_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = REST_SESSION_PERFORMANCE_CHART_CONFIG(this.groupedBy);
       this.$volumetryRepartition.chartConfig = REST_SESSION_VOLUMETRY_CHART_CONFIG(this.groupedBy);
@@ -180,14 +180,14 @@ export class RestComponent implements OnInit {
   getUser() {
     let args: any = {
       'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': `start.${this.groupedBy}.asc`
     }
     if(this.params.hosts?.length){
-      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['instance.app_name.in'] = this.params.hosts.join(',');
     }
     this.$userRepartition.loading = true;
     this._restSessionService.getRestSession(args).pipe(finalize(() => this.$userRepartition.loading = false)).subscribe({
@@ -200,14 +200,14 @@ export class RestComponent implements OnInit {
   getMediaType() {
     let args: any = {
       'column': `count:count,media.coalesce("Non renseigné"):media`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
     }
     if(this.params.hosts?.length){
-      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['instance.app_name.in'] = this.params.hosts.join(',');
     }
     this.$mediaRepartition.loading = true;
     this._restSessionService.getRestSession(args).pipe(finalize(() => this.$mediaRepartition.loading = false)).subscribe({
@@ -220,14 +220,14 @@ export class RestComponent implements OnInit {
   getMethods() {
     let args: any = {
       'column': `count:count,method:method`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
     }
     if(this.params.hosts?.length){
-      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['instance.app_name.in'] = this.params.hosts.join(',');
     }
     this.$methodRepartition.loading = true;
     this._restSessionService.getRestSession(args).pipe(finalize(() => this.$methodRepartition.loading = false)).subscribe({
@@ -240,14 +240,14 @@ export class RestComponent implements OnInit {
   getUserAgents() {
     let args: any = {
       'column': `count:count,user_agt:user_agt`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
     }
     if(this.params.hosts?.length){
-      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['instance.app_name.in'] = this.params.hosts.join(',');
     }
     this.$userAgentRepartition.loading = true;
     this._restSessionService.getRestSession(args).pipe(finalize(() => this.$userAgentRepartition.loading = false)).subscribe({
@@ -263,18 +263,17 @@ export class RestComponent implements OnInit {
   getDependencies() {
     this.$dependencyRepartition.loading = true;
     this.$dependencyRepartition.data = [];
-    this._restSessionService.getDependenciesNew({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
+    this._restSessionService.getDependencies({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
       .pipe(finalize(() => this.$dependencyRepartition.loading = false))
       .subscribe({
         next: (res: any[]) => {this.$dependencyRepartition.data = res}
       })
-
   }
 
   getDependents() {
     this.$dependentRepartition.loading = true;
     this.$dependentRepartition.data = [];
-    this._restSessionService.getDependentsNew({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
+    this._restSessionService.getDependents({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
     .pipe(finalize(() => this.$dependentRepartition.loading = false))
     .subscribe({
       next: (res: any[]) => {this.$dependentRepartition.data = res}
@@ -283,14 +282,14 @@ export class RestComponent implements OnInit {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_error:count_error,count(user.distinct):count_user`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error,count(user.distinct):count_user`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString()
     }
     if(this.params.hosts?.length){
-      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['instance.app_name.in'] = this.params.hosts.join(',');
     }
     this._restSessionService.getRestSession(args).subscribe({
       next: (res: any[]) => {

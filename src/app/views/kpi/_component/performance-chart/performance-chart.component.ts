@@ -2,7 +2,7 @@ import {Component, EventEmitter, inject, Input, Output} from "@angular/core";
 import {DecimalPipe} from "@angular/common";
 import {ChartProvider} from "@oneteme/jquery-core";
 import {QueryParams} from "../../../../model/conf.model";
-import {periodManagement2} from "../../../../shared/util";
+import {periodManagement} from "../../../../shared/util";
 import {SliceConfig} from "@oneteme/jquery-table";
 import {buildSeries, ChartConfig, REST_PERFORMANCE_CHART_CONFIG, pivotByStack} from "../../kpi.config";
 

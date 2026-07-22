@@ -6,7 +6,7 @@ import {
   STARTUP_SESSION_PERFORMANCE_CHART_CONFIG,
   STARTUP_SESSION_STATUS_CHART_CONFIG
 } from "../../kpi.config";
-import {periodManagement2} from "../../../../shared/util";
+import {periodManagement} from "../../../../shared/util";
 import {MainSessionService} from "../../../../service/jquery/main-session.service";
 
 @Component({
@@ -30,7 +30,7 @@ export class StartupComponent implements OnInit {
   @Input() set queryParams(value: QueryParams) {
     if(value) {
       this.params = value;
-      this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
+      this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
       this.$statusRepartition.chartConfig = STARTUP_SESSION_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = STARTUP_SESSION_PERFORMANCE_CHART_CONFIG(this.groupedBy);
       this.getDependents();
@@ -82,8 +82,8 @@ export class StartupComponent implements OnInit {
   getUser() {
     let args: any = {
       'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'instance.type': 'SERVER',
       'type': 'STARTUP',
       'start.ge': this.params.period.start.toISOString(),
@@ -91,7 +91,7 @@ export class StartupComponent implements OnInit {
       'order': `start.${this.groupedBy}.asc`
     }
     if(this.params.hosts?.length){
-      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['instance.app_name.in'] = this.params.hosts.join(',');
     }
     this.$userRepartition.loading = true;
     this._mainSessionService.getMainSession(args).pipe(finalize(() => this.$userRepartition.loading = false)).subscribe({
@@ -104,7 +104,7 @@ export class StartupComponent implements OnInit {
   getDependents() {
     this.$dependentChart.loading = true;
     this.$dependentChart.data = [];
-    this._mainSessionService.getDependentsNew2({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts, type: 'STARTUP'})
+    this._mainSessionService.getDependents({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts, type: 'STARTUP'})
     .pipe(finalize(() => this.$dependentChart.loading = false))
     .subscribe({
       next: (res: any[]) => {this.$dependentChart.data = res}
@@ -113,16 +113,16 @@ export class StartupComponent implements OnInit {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_exception:count_error`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_exception:count_error`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'instance.type': 'SERVER',
       'type': 'STARTUP',
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString()
     }
     if(this.params.hosts?.length){
-      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['instance.app_name.in'] = this.params.hosts.join(',');
     }
     this._mainSessionService.getMainSession(args).subscribe({
       next: (res: any[]) => {

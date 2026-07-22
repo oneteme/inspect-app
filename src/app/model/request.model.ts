@@ -15,6 +15,7 @@ export interface RestSessionDto extends RestSession {
 export interface MainSessionDto extends MainSession {
   appName: string;
   address: string;
+  status: number;
 }
 
 export interface RestRequestDto extends RestRequest {

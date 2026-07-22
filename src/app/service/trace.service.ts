@@ -11,15 +11,22 @@ import {
   RestSessionDto
 } from "../model/request.model";
 import {
-  DatabaseRequest, DatabaseRequestStage,
+  DatabaseRequest,
+  DatabaseRequestStage,
   DirectoryRequest,
   DirectoryRequestStage,
   FtpRequest,
-  FtpRequestStage, HttpRequestStage, HttpSessionStage,
+  FtpRequestStage,
+  HttpRequestStage,
+  HttpSessionStage,
   InstanceEnvironment,
-  LocalRequest, LogEntry, Mail,
-  MailRequest, MailRequestStage,
-  MainSession, RestRequest,
+  LocalRequest,
+  LogEntry,
+  Mail,
+  MailRequest,
+  MailRequestStage,
+  MainSession,
+  RestRequest,
   RestSession
 } from "../model/trace.model";
 
@@ -33,15 +40,6 @@ export class TraceService {
 
   getRestSessions(params: any): Observable<Array<RestSessionDto>> {
     return this.http.get<Array<RestSessionDto>>(`${this.server}/session/rest`, {params: params});
-  }
-
-  getRestSessionsForDump(env: string, appName: string, start: Date, end: Date): Observable<Array<RestSession>> {
-    let params: any = {
-      'env': env,
-      'start': start.toISOString(),
-      'end': end.toISOString()
-    }
-    return this.http.get<Array<RestSession>>(`${this.server}/session/rest/${appName}/dump`, {params: params});
   }
 
   getRestSessionsByInstance(id: string, instanceStart: Date, start: Date, end: Date): Observable<RestSession[]> {
@@ -68,15 +66,6 @@ export class TraceService {
 
   getMainSessions(params: any): Observable<Array<MainSessionDto>> {
     return this.http.get<Array<MainSessionDto>>(`${this.server}/session/main`, {params: params});
-  }
-
-  getMainSessionsForDump(env: string, appName: string, start: Date, end: Date): Observable<Array<MainSession>> {
-    let params: any = {
-      'env': env,
-      'start': start.toISOString(),
-      'end': end.toISOString()
-    }
-    return this.http.get<Array<MainSession>>(`${this.server}/session/main/${appName}/dump`, {params: params});
   }
 
   getMainSession(id: string): Observable<MainSession> {

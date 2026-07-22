@@ -124,9 +124,9 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
     {
       key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
       value: (row: MainSessionDto) => {
-        if (!row.end) return 'En cours...';
-        if (row.exception) return 'KO';
-        if (!row.exception) return 'OK';
+        if (row.status == -1) return 'En cours...';
+        if (row.status == 0) return 'OK';
+        if (row.status == 1) return 'KO';
       }
     },
     {
@@ -152,8 +152,8 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
     }],
   defaultSort: { active: 'start', direction: 'desc' },
   rowClass: (row: MainSessionDto) => {
-    if (row.end && !row.exception) return 'row-ok';
-    if (row.end && row.exception) return 'row-ko';
+    if (row.status == 0) return 'row-ok';
+    if (row.status == 1) return 'row-ko';
     return '';
   }
 }

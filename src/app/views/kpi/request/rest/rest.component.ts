@@ -10,7 +10,7 @@ import {
   REST_STATUS_CHART_CONFIG,
   REST_VOLUMETRY_CHART_CONFIG
 } from "../../kpi.config";
-import {periodManagement2, formatChartDates} from "../../../../shared/util";
+import {periodManagement, formatChartDates} from "../../../../shared/util";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 
 @Component({
@@ -66,7 +66,7 @@ export class RestComponent implements OnInit {
   @Input() set queryParams(value: QueryParams) {
     if(value) {
       this.params = value;
-      this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
+      this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
       this.$statusRepartition.chartConfig = REST_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = REST_PERFORMANCE_CHART_CONFIG(this.groupedBy);
       this.$volumetryRepartition.chartConfig = REST_VOLUMETRY_CHART_CONFIG(this.groupedBy);
@@ -192,7 +192,7 @@ export class RestComponent implements OnInit {
     if(event.eventType === 'default') {
       arr.loading = true;
       arr.data = [];
-      this._httpRequestService.getLatency2({serie: event.chartConfig.series.items[0], indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks, instanceType})
+      this._httpRequestService.getLatency({serie: event.chartConfig.series.items[0], indicator: actualIndicator, group: actualGroup, stack: actualStack, filter: actualFilter}, {env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: event.filteredTasks, instanceType})
       .pipe(finalize(() => arr.loading = false))
       .subscribe(data => {
         arr.data = data;
@@ -214,14 +214,14 @@ export class RestComponent implements OnInit {
     const instanceType = this.params.optional?.instanceType;
     let args: any = {
       'column': `instance.app_name:origin,host:target,count:count`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.asc'
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['host.in'] = this.params.hosts.join(',');
     }
     if(instanceType) {
       args['instance.type'] = instanceType;
@@ -238,14 +238,14 @@ export class RestComponent implements OnInit {
     const instanceType = this.params.optional?.instanceType;
     let args: any = {
       'column': `count:count,media.coalesce("Non renseigné"):media`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['host.in'] = this.params.hosts.join(',');
     }
     if(instanceType) {
       args['instance.type'] = instanceType;
@@ -262,14 +262,14 @@ export class RestComponent implements OnInit {
     const instanceType = this.params.optional?.instanceType;
     let args: any = {
       'column': `count:count,method:method`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['host.in'] = this.params.hosts.join(',');
     }
     if(instanceType) {
       args['instance.type'] = instanceType;
@@ -285,14 +285,14 @@ export class RestComponent implements OnInit {
   getGlobalStatistics() {
     const instanceType = this.params.optional?.instanceType;
     let args: any = {
-      'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_error:count_error`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error`,
+      'join': 'instance',
+      'instance.environement': this.params.env,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString()
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['host.in'] = this.params.hosts.join(',');
     }
     if(instanceType) {
       args['instance.type'] = instanceType;

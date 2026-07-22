@@ -6,7 +6,7 @@ import {QueryParams} from "../../../../model/conf.model";
 import {RestRequestService} from "../../../../service/jquery/rest-request.service";
 import {finalize, Observable, of} from "rxjs";
 import {buildSeries,ChartConfig,pivotByStack,REST_LATENCY_CHART_CONFIG,REST_PERFORMANCE_CHART_CONFIG,REST_STATUS_CHART_CONFIG,REST_VOLUMETRY_CHART_CONFIG} from "../../../kpi/kpi.config";
-import {periodManagement2, formatChartDates} from "../../../../shared/util";
+import {periodManagement, formatChartDates} from "../../../../shared/util";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
 
@@ -94,7 +94,8 @@ export class RestKpiTestComponent implements OnInit {
   @Input() set queryParams(value: QueryParams) {
     if (value) {
       this.params = value;
-      this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
+      this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
+      console.log('[REST-TEST] groupedBy:', this.groupedBy);
 
       // Initialize ChartConfigs and OrganizerConfigs
       this.$statusRepartition.chartConfig = REST_STATUS_CHART_CONFIG(this.groupedBy);
@@ -342,7 +343,7 @@ export class RestKpiTestComponent implements OnInit {
     const flt = cfg.filters?.items?.find(f => f.selected);
     this.$latencyRepartition.loading = true;
     this.$latencyRepartition.data = [];
-    this._httpRequestService.getLatency2(
+    this._httpRequestService.getLatency(
       { serie: cfg.series.items[0], indicator: ind, group: grp, stack: stk, filter: flt },
       { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$latencyFilteredValues.length ? this.$latencyFilteredValues : undefined }
     ).pipe(finalize(() => this.$latencyRepartition.loading = false))
