@@ -8,6 +8,9 @@ import {DetailRestView} from "./rest/detail-rest.view";
 @Injectable({
   providedIn: 'root'
 })
+/**
+ * Maps request protocol identifiers to detail view components.
+ */
 export class DetailComponentResolverService {
   private componentMap: { [key: string]: Type<any> } = {
     'rest': DetailRestView,
@@ -17,6 +20,12 @@ export class DetailComponentResolverService {
     'smtp': DetailSmtpView
   };
 
+  /**
+   * Resolves the detail component to display for a protocol type.
+   *
+   * @param type Protocol key (rest, jdbc, ldap, ftp, smtp).
+   * @returns Angular component type, or `undefined` for unknown keys.
+   */
   resolveComponent(type: string): Type<any> {
     return this.componentMap[type];
   }

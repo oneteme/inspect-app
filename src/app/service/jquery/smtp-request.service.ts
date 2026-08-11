@@ -7,25 +7,53 @@ import {ChartItem} from "../../views/kpi/kpi.config";
 
 
 @Injectable({ providedIn: 'root' })
+/**
+ * Provides KPI-oriented SMTP request queries and aggregations.
+ */
 export class SmtpRequestService {
     constructor(private http: HttpClient) {
 
     }
     server = `${localStorage.getItem('server')}/v3/query`;
 
+    /**
+     * Executes an SMTP request query with typed response mapping.
+     *
+     * @param params Backend query parameters.
+     * @returns Observable of the response typed with `T`.
+     */
     getSmtp<T>(params: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/request/smtp`;
         return this.http.get<T>(url, { params: params });
     }
 
+    /**
+     * Retrieves SMTP request rows from v3 query endpoints.
+     *
+     * @param params Backend filter parameters.
+     * @returns Observable list of SMTP request DTOs.
+     */
     getRequests(params: any): Observable<Array<MailRequestDto>> {
         return this.http.get<Array<MailRequestDto>>(`${this.server}/request/smtp`, { params: params });
     }
 
+    /**
+     * Retrieves distinct hosts for a request protocol and filter set.
+     *
+     * @param type Request protocol used in the endpoint path.
+     * @param filters Query filters.
+     * @returns Observable list of host values.
+     */
     getHost(type: string, filters: any): Observable<{ host: string }[]> {
         return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, { params: filters });
     }
 
+    /**
+     * Retrieves SMTP exception counts grouped by period and application.
+     *
+     * @param filters Environment, period and optional host/command constraints.
+     * @returns Observable list of aggregated exception rows.
+     */
     getSmtpExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string,host?: string[],command?: string[] }): Observable<SmtpSessionExceptionsByPeriodAndappname[]> {
         let args = {
             'column': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
@@ -47,6 +75,13 @@ export class SmtpRequestService {
         return this.getSmtp(args);
     }
 
+    /**
+     * Builds and executes a configurable SMTP aggregation query for chart rendering.
+     *
+     * @param data Chart configuration (series, indicator, group and optional stack/filter).
+     * @param filters Runtime filters (environment, period and optional host/filter lists).
+     * @returns Observable list of aggregated rows ready for KPI charts.
+     */
     getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
               filters: {env: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], filters?: string[] }): Observable<any[]> {
         let args: any = {
@@ -72,6 +107,13 @@ export class SmtpRequestService {
         return this.getSmtp(args);
     }
 
+    /**
+     * Retrieves distinct values for one chart filter dimension.
+     *
+     * @param filter Chart item describing the requested dimension.
+     * @param filters Environment/time filters and optional host constraints.
+     * @returns Observable list of available distinct filter values.
+     */
     getFilters(filter: ChartItem, filters: {env: string, start: Date, end: Date, hosts?: string[] }) {
         let args: any = {
             'column': `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,

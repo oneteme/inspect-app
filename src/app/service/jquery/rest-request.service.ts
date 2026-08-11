@@ -6,6 +6,9 @@ import {RestRequestDto} from "../../model/request.model";
 import {ChartItem} from "../../views/kpi/kpi.config";
 
 @Injectable({ providedIn: 'root' })
+/**
+ * Provides KPI-oriented REST request queries and aggregations.
+ */
 export class RestRequestService {
 
     server = `${localStorage.getItem('server')}/v3/query`;
@@ -14,19 +17,45 @@ export class RestRequestService {
 
     }
 
+    /**
+     * Executes a REST request query with typed response mapping.
+     *
+     * @param params Backend query parameters.
+     * @returns Observable of the response typed with `T`.
+     */
     getRestRequest<T>(params?: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/request/rest`;
         return this.http.get<T>(url, { params: params });
     }
 
+    /**
+     * Retrieves REST request rows from v3 query endpoints.
+     *
+     * @param params Backend filter parameters.
+     * @returns Observable list of REST request DTOs.
+     */
     getRequests(params: any): Observable<Array<RestRequestDto>> {
         return this.http.get<Array<RestRequestDto>>(`${this.server}/request/rest`, { params: params });
     }
 
+    /**
+     * Retrieves distinct hosts for a request protocol and filter set.
+     *
+     * @param type Request protocol used in the endpoint path.
+     * @param filters Query filters.
+     * @returns Observable list of host values.
+     */
     getHost(type: string, filters: any): Observable<{ host: string }[]> {
         return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, { params: filters });
     }
 
+    /**
+     * Builds one query per series and merges them into one grouped dataset.
+     *
+     * @param data Chart configuration with series/indicator/group and optional stack/filter.
+     * @param filters Runtime constraints (env, date window, host/filter/type options).
+     * @returns Observable list of merged rows keyed by group and optional stack.
+     */
     getSizeCustom(
       data: { series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
       filters: { env: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], filters?: string[], instanceType?: string }
@@ -85,6 +114,13 @@ export class RestRequestService {
         );
     }
 
+    /**
+     * Builds and executes a configurable REST aggregation query for chart rendering.
+     *
+     * @param data Chart configuration (series, indicator, group and optional stack/filter).
+     * @param filters Runtime filters (environment, period and optional host/filter lists).
+     * @returns Observable list of aggregated rows ready for KPI charts.
+     */
     getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
               filters: {env: string, start: Date, end: Date, hosts?: string[], filters?: string[], instanceType?: string }): Observable<any[]> {
         let args: any = {
@@ -113,6 +149,13 @@ export class RestRequestService {
         return this.getRestRequest(args);
     }
 
+    /**
+     * Computes latency metrics by subtracting request timestamps from session timestamps.
+     *
+     * @param data Chart configuration for the latency projection.
+     * @param filters Runtime filters including environment, period and optional dimensions.
+     * @returns Observable list of aggregated latency rows.
+     */
     getLatency(data: {serie: ChartItem, indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
                filters: {env: string, start: Date, end: Date, hosts?: string[], method?: string[], filters?: string[], instanceType?: string }): Observable<any[]> {
         let args: any = {
@@ -145,6 +188,13 @@ export class RestRequestService {
         return this.getRestRequest(args);
     }
 
+    /**
+     * Retrieves distinct values for one chart filter dimension.
+     *
+     * @param filter Chart item describing the requested dimension.
+     * @param filters Environment/time filters and optional host/type constraints.
+     * @returns Observable list of available distinct filter values.
+     */
     getFilters(filter: ChartItem, filters: {env: string, start: Date, end: Date, hosts?: string[], instanceType?: string }) {
         let args: any = {
             'column': `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
@@ -163,6 +213,12 @@ export class RestRequestService {
         return this.getRestRequest(args);
     }
 
+    /**
+     * Retrieves REST exception counts grouped by period and application.
+     *
+     * @param filters Environment, time range and grouping configuration.
+     * @returns Observable list of aggregated exception rows.
+     */
     getRestExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<RestSessionExceptionsByPeriodAndappname[]> {
         let args = {
             'column': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,error_type,start.${filters.groupedBy}:date,start.year:year`,

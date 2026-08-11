@@ -4,6 +4,9 @@ import { BehaviorSubject, Observable, Subscription, catchError, combineLatest, f
 import { FilterPreset, FilterMap } from "src/app/views/constants";
 
 @Injectable({ providedIn: 'root' })
+/**
+ * Handles filter state sharing and local preset persistence across views.
+ */
 export class FilterService implements OnDestroy {
 
     private _router = inject(Router)
@@ -31,10 +34,23 @@ export class FilterService implements OnDestroy {
         });
     }
 
+    /**
+     * Registers a callback returning external filters managed outside this service.
+     *
+     * @param fns Function that returns current additional filters as an observable map.
+     * @returns void once the callback is stored.
+     */
     registerGetallFilters(fns: () => Observable<FilterMap>) {
         this.getOtherFilters = fns;
     }
 
+    /**
+     * Creates or updates a named preset in local storage for the given page.
+     *
+     * @param name Preset display name.
+     * @param pn Local storage key (page name).
+     * @returns Observable emitting the saved preset, or `null` when an error occurs.
+     */
     savePreset(name: string, pn: string): Observable<FilterPreset> {
 
         if (!name)
@@ -74,6 +90,13 @@ export class FilterService implements OnDestroy {
             ).pipe(first());
     }
 
+    /**
+     * Removes one preset by name from local storage.
+     *
+     * @param name Preset name to remove.
+     * @param pn Local storage key (page name).
+     * @returns Removed preset object when found; otherwise `undefined`.
+     */
     removePreset(name: string, pn: string): FilterPreset {
 
         const presets = this.getPresetsLocalStrorage(pn);
@@ -87,14 +110,31 @@ export class FilterService implements OnDestroy {
         }
     }
 
+    /**
+     * Replaces the active filter map emitted to subscribers.
+     *
+     * @param filterMap Full map of active filters.
+     * @returns void once the new map is published.
+     */
     setFilterMap(filterMap: FilterMap) {
         this.filters.next(filterMap);
     }
 
+    /**
+     * Releases router subscription used to reset filters on route changes.
+     *
+     * @returns void when cleanup is complete.
+     */
     ngOnDestroy(): void {
         this.routeSubscription.unsubscribe();
     }
 
+    /**
+     * Reads all presets for one page from local storage.
+     *
+     * @param pageName Local storage key used to store page presets.
+     * @returns Parsed preset list, or an empty array when nothing is stored.
+     */
     getPresetsLocalStrorage(pageName: string): FilterPreset[] {
         return JSON.parse(localStorage.getItem(pageName) || '[]');
     }

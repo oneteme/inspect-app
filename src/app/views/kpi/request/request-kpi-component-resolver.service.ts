@@ -8,6 +8,9 @@ import {SmtpComponent} from "./smtp/smtp.component";
 @Injectable({
   providedIn: 'root'
 })
+/**
+ * Maps request KPI identifiers to their dedicated chart components.
+ */
 export class RequestKpiComponentResolverService {
   private componentMap: { [key: string]: Type<any> } = {
     'rest': RestComponent,
@@ -17,6 +20,12 @@ export class RequestKpiComponentResolverService {
     'smtp': SmtpComponent
   };
 
+  /**
+   * Resolves the request KPI component for the provided protocol type.
+   *
+   * @param type Request protocol key.
+   * @returns Angular component type, or `undefined` when no mapping exists.
+   */
   resolveComponent(type: string): Type<any> {
     return this.componentMap[type];
   }

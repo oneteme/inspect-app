@@ -5,16 +5,31 @@ import {ExceptionsByPeriodAndAppname} from "src/app/model/jquery.model";
 import {ChartItem} from "../../views/kpi/kpi.config";
 
 @Injectable({ providedIn: 'root' })
+/**
+ * Provides KPI-oriented MAIN session queries (batch, startup, view and dependencies).
+ */
 export class MainSessionService {
     constructor(private http: HttpClient) {
 
     }
 
+    /**
+     * Executes a main session query with typed response mapping.
+     *
+     * @param params Backend query parameters.
+     * @returns Observable of the response typed with `T`.
+     */
     getMainSession<T>(params: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/session/main`;
         return this.http.get<T>(url, { params: params });
     }
 
+    /**
+     * Retrieves distinct server host names for a main session type and period.
+     *
+     * @param filters Environment, period and session type filters.
+     * @returns Observable list of host names.
+     */
     getHosts(filters: {start: Date, end: Date, env: string, type: string}): Observable<{ host: string }[]> {
         var args: any = {
             'column': `instance.app_name.distinct:host`,
@@ -30,6 +45,12 @@ export class MainSessionService {
         return this.getMainSession(args);
     }
 
+    /**
+     * Retrieves batch exception metrics grouped by period.
+     *
+     * @param filters Environment, period and optional application filter.
+     * @returns Observable list of aggregated exception rows.
+     */
     getMainExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<ExceptionsByPeriodAndAppname[]> {
         let args = {
             "column": `start.${filters.groupedBy}:date,err_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year,type:type`,
@@ -46,6 +67,12 @@ export class MainSessionService {
         return this.getMainSession(args);
     }
 
+    /**
+     * Retrieves startup exception metrics grouped by period.
+     *
+     * @param filters Environment, period and optional application filter.
+     * @returns Observable list of aggregated startup exception rows.
+     */
     getStartupExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<ExceptionsByPeriodAndAppname[]> {
         const args: any = {
             'column': `start.${filters.groupedBy}:date,err_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`,
@@ -62,6 +89,12 @@ export class MainSessionService {
         return this.getMainSession(args);
     }
 
+    /**
+     * Retrieves top batch jobs producing the most errors.
+     *
+     * @param filters Environment, period and optional application filter.
+     * @returns Observable list of job names with associated error counts.
+     */
     getTopBatchJobErrors(filters: { env: string, start: Date, end: Date, app_name: string }): Observable<{ name: string; count: number }[]> {
         const args: any = {
             'column': 'name,count:count',
@@ -80,6 +113,12 @@ export class MainSessionService {
         return this.getMainSession(args);
     }
 
+    /**
+     * Retrieves dependency direction data from origins to targets for chart graphs.
+     *
+     * @param filters Environment, period, source servers and session type.
+     * @returns Observable list of dependency links with call counts.
+     */
     getDependents(filters: {env: string, start: Date, end: Date, servers: string[], type: string}): Observable<{count: number, target: string, origin: string}[]> {
         let args: any = {
             'column': `rest_session_join.count:count,instance_join.app_name:target,instance.app_name:origin`,
@@ -101,6 +140,12 @@ export class MainSessionService {
         return this.getMainSession(args);
     }
 
+    /**
+     * Retrieves view exception metrics grouped by period.
+     *
+     * @param filters Environment, period and optional application filter.
+     * @returns Observable list of aggregated view exception rows.
+     */
     getViewExceptions(filters: { env: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<ExceptionsByPeriodAndAppname[]> {
         const args: any = {
             'column': `start.${filters.groupedBy}:date,err_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`,
@@ -117,6 +162,12 @@ export class MainSessionService {
         return this.getMainSession(args);
     }
 
+    /**
+     * Retrieves distinct users active in VIEW sessions on a given day.
+     *
+     * @param filters Environment and date anchor.
+     * @returns Observable list of distinct user identifiers.
+     */
     getUsersView(filters: {env: string, date: Date}): Observable<string[]> {
         return this.getMainSession({
             'column': 'user',
@@ -130,6 +181,13 @@ export class MainSessionService {
         }).pipe(map((data: {user: string}[]) => (data.map(d => d.user))));
     }
 
+    /**
+     * Builds and executes a configurable MAIN session aggregation query.
+     *
+     * @param data Chart configuration (series, indicator, group and optional stack/filter).
+     * @param filters Runtime filters (environment, period, optional hosts/filters and type).
+     * @returns Observable list of aggregated rows ready for KPI charts.
+     */
     getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
               filters: {env: string, start: Date, end: Date, hosts?: string[], filters?: string[], type: string }): Observable<any[]> {
         let args: any = {
@@ -157,6 +215,13 @@ export class MainSessionService {
         return this.getMainSession(args);
     }
 
+    /**
+     * Retrieves distinct values for one chart filter dimension.
+     *
+     * @param filter Chart item describing the requested dimension.
+     * @param filters Environment/time/type filters and optional host constraints.
+     * @returns Observable list of available distinct filter values.
+     */
     getFilters(filter: ChartItem, filters: {env: string, start: Date, end: Date, hosts: string[], type: string }) {
         let args: any = {
             'column': `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
