@@ -79,10 +79,11 @@
           (filterChange)="onStatusFilterChange($event)">
         </slice-panel>
         <chart #statusChart
-               type="column"
-               [config]="$statusRepartition.chartProvider || {series: []}"
-               [data]="$statusRepartition.data"
-               [isLoading]="$statusRepartition.loading"></chart>
+          type="column"
+          [config]="$statusRepartition.chartProvider || {series: []}"
+          [data]="$statusRepartition.data"
+          [isLoading]="$statusRepartition.loading">
+        </chart>
       </div>
     </div>
 
@@ -96,9 +97,10 @@
       </div>
       <div class="kpi-chart-body">
         <chart type="donut"
-               [config]="METHOD_PIE_CONFIG"
-               [data]="$methodRepartition.data"
-               [isLoading]="$methodRepartition.loading"></chart>
+          [config]="METHOD_PIE_CONFIG"
+          [data]="$methodRepartition.data"
+          [isLoading]="$methodRepartition.loading">
+        </chart>
       </div>
     </div>
 
@@ -138,9 +140,10 @@
           (filterChange)="onPerformanceFilterChange($event)">
         </slice-panel>
         <chart #performanceChart type="column"
-               [config]="$performanceRepartition.chartProvider || {series: []}"
-               [data]="$performanceRepartition.data"
-               [isLoading]="$performanceRepartition.loading"></chart>
+          [config]="$performanceRepartition.chartProvider || {series: []}"
+          [data]="$performanceRepartition.data"
+          [isLoading]="$performanceRepartition.loading">
+        </chart>
       </div>
     </div>
 
@@ -154,9 +157,10 @@
       </div>
       <div class="kpi-chart-body">
         <chart type="donut"
-               [config]="MEDIA_PIE_CONFIG"
-               [data]="$mediaRepartition.data"
-               [isLoading]="$mediaRepartition.loading"></chart>
+          [config]="MEDIA_PIE_CONFIG"
+          [data]="$mediaRepartition.data"
+          [isLoading]="$mediaRepartition.loading">
+        </chart>
       </div>
     </div>
 
@@ -196,9 +200,10 @@
           (filterChange)="onVolumetryFilterChange($event)">
         </slice-panel>
         <chart #volumetryChart type="column"
-               [config]="$volumetryRepartition.chartProvider || {series: []}"
-               [data]="$volumetryRepartition.data"
-               [isLoading]="$volumetryRepartition.loading"></chart>
+          [config]="$volumetryRepartition.chartProvider || {series: []}"
+          [data]="$volumetryRepartition.data"
+          [isLoading]="$volumetryRepartition.loading">
+        </chart>
       </div>
     </div>
 
@@ -238,17 +243,19 @@
           (filterChange)="onLatencyFilterChange($event)">
         </slice-panel>
         <chart #latencyChart type="column"
-               [config]="$latencyRepartition.chartProvider || {series: []}"
-               [data]="$latencyRepartition.data"
-               [isLoading]="$latencyRepartition.loading"></chart>
+          [config]="$latencyRepartition.chartProvider || {series: []}"
+          [data]="$latencyRepartition.data"
+          [isLoading]="$latencyRepartition.loading">
+        </chart>
       </div>
     </div>
 
     <div class="kpi-chart-card span-4">
       <user-chart
-              [data]="$userRepartition.data"
-              [loading]="$userRepartition.loading"
-              [queryParams]="params"></user-chart>
+        [data]="$userRepartition.data"
+        [loading]="$userRepartition.loading"
+        [queryParams]="params">
+      </user-chart>
     </div>
 
     <div class="kpi-chart-card span-4">
@@ -261,12 +268,12 @@
       </div>
       <div class="kpi-chart-body">
         <dependency-chart style="width: 100%"
-                          [data]="$dependencyRepartition.data"
-                          [loading]="$dependencyRepartition.loading"
-                          [queryParams]="params"></dependency-chart>
+          [data]="$dependencyRepartition.data"
+          [loading]="$dependencyRepartition.loading"
+          [queryParams]="params">
+        </dependency-chart>
       </div>
     </div>
 
   </div>
 </div>
-
