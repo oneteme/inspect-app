@@ -1,8 +1,5 @@
 import {ChartProvider, field} from "@oneteme/jquery-core";
 
-/**
- * Shared base configuration for all status/performance/volumetry/latency charts
- */
 export const STATUS_CHART_PROVIDER_BASE: Partial<ChartProvider<string, number>> = {
   stacked: true,
   series: [],
@@ -32,9 +29,6 @@ export const STATUS_CHART_PROVIDER_BASE: Partial<ChartProvider<string, number>> 
   }
 };
 
-/**
- * Factory for creating pie chart configurations
- */
 export class PieConfigFactory {
   static create(fieldX: string, fieldY: string): ChartProvider<string, number> {
     return {
