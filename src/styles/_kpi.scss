@@ -30,7 +30,6 @@
   position: relative;
   transition: background .15s ease;
 
-  // Micro-gradient de fond sémantique venant du haut
   &.blue   { background: linear-gradient(to bottom, #f0f7ff 0%, #fff 60%); }
   &.red    { background: linear-gradient(to bottom, #fff5f5 0%, #fff 60%); }
   &.purple { background: linear-gradient(to bottom, #faf5ff 0%, #fff 60%); }
@@ -38,7 +37,6 @@
   &.orange { background: linear-gradient(to bottom, #fff7ed 0%, #fff 60%); }
   &.teal   { background: linear-gradient(to bottom, #f0fdfa 0%, #fff 60%); }
 
-  // Séparateur vertical entre cards
   &:not(:last-child)::after {
     content: '';
     position: absolute;

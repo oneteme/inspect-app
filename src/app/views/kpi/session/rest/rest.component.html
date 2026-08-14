@@ -95,10 +95,11 @@
           (filterChange)="onStatusFilterChange($event)">
         </slice-panel>
         <chart #statusChart
-               type="column"
-               [config]="$statusRepartition.chartProvider || {series: []}"
-               [data]="$statusRepartition.data"
-               [isLoading]="$statusRepartition.loading"></chart>
+          type="column"
+          [config]="$statusRepartition.chartProvider || {series: []}"
+          [data]="$statusRepartition.data"
+          [isLoading]="$statusRepartition.loading">
+        </chart>
       </div>
     </div>
 
@@ -112,9 +113,10 @@
       </div>
       <div class="kpi-chart-body">
         <chart type="donut"
-               [config]="METHOD_PIE_CONFIG"
-               [data]="$methodRepartition.data"
-               [isLoading]="$methodRepartition.loading"></chart>
+          [config]="METHOD_PIE_CONFIG"
+          [data]="$methodRepartition.data"
+          [isLoading]="$methodRepartition.loading">
+        </chart>
       </div>
     </div>
 
@@ -161,18 +163,19 @@
           (filterChange)="onPerformanceFilterChange($event)">
         </slice-panel>
         <chart #performanceChart
-               type="column"
-               [config]="$performanceRepartition.chartProvider || {series: []}"
-               [data]="$performanceRepartition.data"
-               [isLoading]="$performanceRepartition.loading"></chart>
+          type="column"
+          [config]="$performanceRepartition.chartProvider || {series: []}"
+          [data]="$performanceRepartition.data"
+          [isLoading]="$performanceRepartition.loading">
+        </chart>
       </div>
     </div>
 
     <div class="kpi-chart-card">
       <media-type-chart
-              [data]="$mediaRepartition.data"
-              [loading]="$mediaRepartition.loading"
-              [queryParams]="params">
+        [data]="$mediaRepartition.data"
+        [loading]="$mediaRepartition.loading"
+        [queryParams]="params">
       </media-type-chart>
     </div>
 
@@ -219,10 +222,11 @@
           (filterChange)="onVolumetryFilterChange($event)">
         </slice-panel>
         <chart #volumetryChart
-               type="column"
-               [config]="$volumetryRepartition.chartProvider || {series: []}"
-               [data]="$volumetryRepartition.data"
-               [isLoading]="$volumetryRepartition.loading"></chart>
+          type="column"
+          [config]="$volumetryRepartition.chartProvider || {series: []}"
+          [data]="$volumetryRepartition.data"
+          [isLoading]="$volumetryRepartition.loading">
+        </chart>
       </div>
     </div>
 
@@ -236,17 +240,19 @@
       </div>
       <div class="kpi-chart-body">
         <chart type="donut"
-               [config]="USER_AGENT_PIE_CONFIG"
-               [data]="$userAgentRepartition.data"
-               [isLoading]="$userAgentRepartition.loading"></chart>
+          [config]="USER_AGENT_PIE_CONFIG"
+          [data]="$userAgentRepartition.data"
+          [isLoading]="$userAgentRepartition.loading">
+        </chart>
       </div>
     </div>
 
     <div class="kpi-chart-card span-3">
       <user-chart
-              [data]="$userRepartition.data"
-              [loading]="$userRepartition.loading"
-              [queryParams]="params"></user-chart>
+        [data]="$userRepartition.data"
+        [loading]="$userRepartition.loading"
+        [queryParams]="params">
+      </user-chart>
     </div>
 
     <div class="kpi-chart-card span-4">
@@ -259,13 +265,15 @@
       </div>
       <div class="kpi-chart-body">
         <dependency-chart style="width: 100%"
-                          [data]="$dependencyRepartition.data"
-                          [loading]="$dependencyRepartition.loading"
-                          [queryParams]="params"></dependency-chart>
+          [data]="$dependencyRepartition.data"
+          [loading]="$dependencyRepartition.loading"
+          [queryParams]="params">
+        </dependency-chart>
         <dependent-chart style="width: 100%" *ngIf="params.hosts?.length > 0"
-                [data]="$dependentRepartition.data"
-                [loading]="$dependentRepartition.loading"
-                [queryParams]="params"></dependent-chart>
+          [data]="$dependentRepartition.data"
+          [loading]="$dependentRepartition.loading"
+          [queryParams]="params">
+        </dependent-chart>
       </div>
     </div>
   </div>

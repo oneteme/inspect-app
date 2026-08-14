@@ -87,10 +87,11 @@
           (filterChange)="onStatusFilterChange($event)">
         </slice-panel>
         <chart #statusChart
-               type="column"
-               [config]="$statusRepartition.chartProvider || {series: []}"
-               [data]="$statusRepartition.data"
-               [isLoading]="$statusRepartition.loading"></chart>
+          type="column"
+          [config]="$statusRepartition.chartProvider || {series: []}"
+          [data]="$statusRepartition.data"
+          [isLoading]="$statusRepartition.loading">
+        </chart>
       </div>
     </div>
     
@@ -137,18 +138,20 @@
           (filterChange)="onPerformanceFilterChange($event)">
         </slice-panel>
         <chart #performanceChart
-               type="column"
-               [config]="$performanceRepartition.chartProvider || {series: []}"
-               [data]="$performanceRepartition.data"
-               [isLoading]="$performanceRepartition.loading"></chart>
+          type="column"
+          [config]="$performanceRepartition.chartProvider || {series: []}"
+          [data]="$performanceRepartition.data"
+          [isLoading]="$performanceRepartition.loading">
+        </chart>
       </div>
     </div>
     
     <div class="kpi-chart-card span-4">
       <user-chart
-              [data]="$userRepartition.data"
-              [loading]="$userRepartition.loading"
-              [queryParams]="params"></user-chart>
+        [data]="$userRepartition.data"
+        [loading]="$userRepartition.loading"
+        [queryParams]="params">
+      </user-chart>
     </div>
     
     <div class="kpi-chart-card span-4">
@@ -161,9 +164,10 @@
       </div>
       <div class="kpi-chart-body">
         <dependent-chart style="width: 100%"
-                [data]="$dependentChart.data"
-                [loading]="$dependentChart.loading"
-                [queryParams]="params"></dependent-chart>
+          [data]="$dependentChart.data"
+          [loading]="$dependentChart.loading"
+          [queryParams]="params">
+        </dependent-chart>
       </div>
     </div>
   </div>

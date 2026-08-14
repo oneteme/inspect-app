@@ -1,5 +1,3 @@
-// Override .kpi-chart-body pour les charts avec organizer-button
-// Le global a align-items:center / justify-content:center qui écrasent le chart
 .chart-body-with-organizer {
   align-items: stretch !important;
   justify-content: flex-start !important;
