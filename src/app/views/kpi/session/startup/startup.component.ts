@@ -14,6 +14,7 @@ import {ChartComponent, selectBestScale} from "@oneteme/jquery-echarts";
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
 import {DatePipe} from "@angular/common";
 import {ChartProvider} from "@oneteme/jquery-core";
+import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
 
 @Component({
   templateUrl: './startup.component.html',
@@ -43,17 +44,7 @@ export class StartupComponent {
   $dependentChart: {data: any[], loading: boolean} = {data: [], loading: true};
   $globalStatistic: {totalRequest: number, totalRequestError: number, percentError: number,  elapsedPercentile: number, totalName: number} = {totalRequest: 0, totalRequestError: 0, percentError: 0, elapsedPercentile: 0, totalName: 0};
 
-  readonly STATUS_CHART_PROVIDER_BASE: Partial<ChartProvider<string, number>> = {
-    stacked: true,
-    series: [],
-    options: {
-      backgroundColor: 'transparent',
-      grid: { top: 16, bottom: 48, left: 8, right: 16, containLabel: true },
-      xAxis: { axisLine: { show: false }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { rotate: 30, overflow: 'truncate', width: 120, fontSize: 11, interval: 'auto' } },
-      yAxis: { axisLine: { show: false }, axisTick: { show: false }, splitLine: { lineStyle: { color: '#f1f5f9', type: 'dashed' } }, axisLabel: { fontSize: 11, color: '#94a3b8', formatter: (v: number) => v?.toLocaleString('fr-FR') } },
-      tooltip: { trigger: 'axis', borderRadius: 10, borderWidth: 0, backgroundColor: 'rgba(15,23,42,0.88)', textStyle: { color: '#f1f5f9', fontSize: 12, whiteSpace: 'normal', width: 300 }, confine: true }
-    }
-  };
+  readonly STATUS_CHART_PROVIDER_BASE = STATUS_CHART_PROVIDER_BASE;
 
   groupedBy: string = '';
   params: QueryParams;

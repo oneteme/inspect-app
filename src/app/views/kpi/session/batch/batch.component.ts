@@ -2,6 +2,7 @@ import {ChangeDetectorRef, Component, inject, Input, ViewChild} from "@angular/c
 import {QueryParams} from "../../../../model/conf.model";
 import {finalize, Observable, of} from "rxjs";
 import {BATCH_SESSION_PERFORMANCE_CHART_CONFIG, BATCH_SESSION_STATUS_CHART_CONFIG, ChartConfig, buildSeries, pivotByStack} from "../../kpi.config";
+import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
 import {periodManagement2, formatChartDates} from "../../../../shared/util";
 import {MainSessionService} from "../../../../service/jquery/main-session.service";
 import {ChartComponent, selectBestScale} from "@oneteme/jquery-echarts";
@@ -37,17 +38,7 @@ export class BatchComponent {
   $dependentChart: {data: any[], loading: boolean} = {data: [], loading: true};
   $globalStatistic: {totalRequest: number, totalRequestError: number, percentError: number,  elapsedPercentile: number, totalName: number} = {totalRequest: 0, totalRequestError: 0, percentError: 0, elapsedPercentile: 0, totalName: 0};
 
-  readonly STATUS_CHART_PROVIDER_BASE: Partial<ChartProvider<string, number>> = {
-    stacked: true,
-    series: [],
-    options: {
-      backgroundColor: 'transparent',
-      grid: { top: 16, bottom: 48, left: 8, right: 16, containLabel: true },
-      xAxis: { axisLine: { show: false }, axisTick: { show: false }, splitLine: { show: false }, axisLabel: { rotate: 30, overflow: 'truncate', width: 120, fontSize: 11, interval: 'auto' } },
-      yAxis: { axisLine: { show: false }, axisTick: { show: false }, splitLine: { lineStyle: { color: '#f1f5f9', type: 'dashed' } }, axisLabel: { fontSize: 11, color: '#94a3b8', formatter: (v: number) => v?.toLocaleString('fr-FR') } },
-      tooltip: { trigger: 'axis', borderRadius: 10, borderWidth: 0, backgroundColor: 'rgba(15,23,42,0.88)', textStyle: { color: '#f1f5f9', fontSize: 12, whiteSpace: 'normal', width: 300 }, confine: true }
-    }
-  };
+  readonly STATUS_CHART_PROVIDER_BASE = STATUS_CHART_PROVIDER_BASE;
 
   groupedBy: string = '';
   params: QueryParams;
