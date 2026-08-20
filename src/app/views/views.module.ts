@@ -50,8 +50,6 @@ import {ParameterTableComponent} from "./detail/instance/_component/parameter-ta
 import {DashboardInstancesTableComponent} from './dashboard/components/instances-table/instances-table.component';
 import {DashboardDetailViewComponent} from './dashboard/components/detail-view/detail-view.component';
 import {RequestKpiView} from "./kpi/request/request-kpi.view";
-import {RequestKpiTestView} from "./kpi-test/request/request-kpi-test.view";
-import {RestKpiTestComponent} from "./kpi-test/request/rest/rest.component";
 import {RestComponent as RequestRestComponent} from "./kpi/request/rest/rest.component";
 import {RestComponent as SessionRestComponent} from "./kpi/session/rest/rest.component";
 import {StatusChartComponent} from "./kpi/_component/status-chart/status-chart.component";
@@ -129,8 +127,6 @@ import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.compone
 
     // New
     RequestKpiView,
-    RequestKpiTestView,
-    RestKpiTestComponent,
     RequestRestComponent,
     SessionRestComponent,
     BatchComponent,

@@ -45,31 +45,115 @@
   <div class="kpi-grid">
 
     <div class="kpi-chart-card span-4">
-      <status-chart
-              [chartConfig]="$statusRepartition.chartConfig"
-              [data]="$statusRepartition.data"
-              [loading]="$statusRepartition.loading"
-              [sliceData]="$statusRepartitionSlice.data"
-              [queryParams]="params"
-              (onChartChange)="onStatusChartChange($event)">
-      </status-chart>
+      <div class="kpi-chart-header">
+        <div class="kpi-chart-title-group">
+          <span class="kpi-accent-bar blue-bar"></span>
+          <mat-icon class="kpi-chart-icon material-symbols-outlined">signal_cellular_alt</mat-icon>
+          <span class="kpi-chart-title">Disponibilité</span>
+          <nav class="kpi-breadcrumb" *ngIf="activeStackLabel($statusRepartition.chartConfig) || activeGroupLabel($statusRepartition.chartConfig)">
+            <ng-container *ngIf="activeGroupLabel($statusRepartition.chartConfig)">
+              <span class="kpi-breadcrumb-label">Affiché par:</span>
+              <span class="kpi-breadcrumb-item teal">{{ activeGroupLabel($statusRepartition.chartConfig) }}</span>
+            </ng-container>
+            <ng-container *ngIf="activeStackLabel($statusRepartition.chartConfig)">
+              <span class="kpi-breadcrumb-sep">·</span>
+              <span class="kpi-breadcrumb-label">Empilé par:</span>
+              <span class="kpi-breadcrumb-item purple">{{ activeStackLabel($statusRepartition.chartConfig) }}</span>
+            </ng-container>
+          </nav>
+        </div>
+        <div class="kpi-chart-actions">
+          <organizer-button
+            [config]="$statusOrganizer.config"
+            [state]="$statusOrganizer.state"
+            [hideMenuValues]="true"
+            (viewChange)="onStatusViewChange($event)"
+            (sliceStateChange)="onStatusSliceChange($event)">
+          </organizer-button>
+        </div>
+      </div>
+      <div class="kpi-chart-subheader">
+        <ng-container *ngIf="activeChartSubheaderLabel($statusRepartition.chartConfig, $statusDisplayUnit) as label">
+          <span class="kpi-chart-unit">{{ label }}</span>
+        </ng-container>
+      </div>
+      <div class="kpi-chart-body chart-body-with-organizer">
+        <slice-panel
+          *ngIf="$statusSlice"
+          [sliceConfigs]="$statusSlice!.sliceConfigs"
+          [data]="$statusSlice!.tasks"
+          [showCounts]="false"
+          [alwaysShow]="true"
+          (filterChange)="onStatusFilterChange($event)">
+        </slice-panel>
+        <chart #statusChart
+          type="column"
+          [config]="$statusRepartition.chartProvider || {series: []}"
+          [data]="$statusRepartition.data"
+          [isLoading]="$statusRepartition.loading">
+        </chart>
+      </div>
     </div>
+    
     <div class="kpi-chart-card span-4">
-      <performance-chart
-              [chartConfig]="$performanceRepartition.chartConfig"
-              [data]="$performanceRepartition.data"
-              [loading]="$performanceRepartition.loading"
-              [sliceData]="$performanceRepartitionSlice.data"
-              [queryParams]="params"
-              (onChartChange)="onPerformanceChartChange($event)">
-      </performance-chart>
+      <div class="kpi-chart-header">
+        <div class="kpi-chart-title-group">
+          <span class="kpi-accent-bar teal-bar"></span>
+          <mat-icon class="kpi-chart-icon material-symbols-outlined">trending_up</mat-icon>
+          <span class="kpi-chart-title">Performance</span>
+          <nav class="kpi-breadcrumb" *ngIf="activeStackLabel($performanceRepartition.chartConfig) || activeGroupLabel($performanceRepartition.chartConfig)">
+            <ng-container *ngIf="activeGroupLabel($performanceRepartition.chartConfig)">
+              <span class="kpi-breadcrumb-label">Affiché par:</span>
+              <span class="kpi-breadcrumb-item teal">{{ activeGroupLabel($performanceRepartition.chartConfig) }}</span>
+            </ng-container>
+            <ng-container *ngIf="activeStackLabel($performanceRepartition.chartConfig)">
+              <span class="kpi-breadcrumb-sep">·</span>
+              <span class="kpi-breadcrumb-label">Empilé par:</span>
+              <span class="kpi-breadcrumb-item purple">{{ activeStackLabel($performanceRepartition.chartConfig) }}</span>
+            </ng-container>
+          </nav>
+        </div>
+        <div class="kpi-chart-actions">
+          <organizer-button
+            [config]="$performanceOrganizer.config"
+            [state]="$performanceOrganizer.state"
+            [hideMenuValues]="true"
+            (viewChange)="onPerformanceViewChange($event)"
+            (sliceStateChange)="onPerformanceSliceChange($event)">
+          </organizer-button>
+        </div>
+      </div>
+      <div class="kpi-chart-subheader">
+        <ng-container *ngIf="activeChartSubheaderLabel($performanceRepartition.chartConfig, $performanceDisplayUnit) as label">
+          <span class="kpi-chart-unit">{{ label }}</span>
+        </ng-container>
+      </div>
+      <div class="kpi-chart-body chart-body-with-organizer">
+        <slice-panel
+          *ngIf="$performanceSlice"
+          [sliceConfigs]="$performanceSlice!.sliceConfigs"
+          [data]="$performanceSlice!.tasks"
+          [showCounts]="false"
+          [alwaysShow]="true"
+          (filterChange)="onPerformanceFilterChange($event)">
+        </slice-panel>
+        <chart #performanceChart
+          type="column"
+          [config]="$performanceRepartition.chartProvider || {series: []}"
+          [data]="$performanceRepartition.data"
+          [isLoading]="$performanceRepartition.loading">
+        </chart>
+      </div>
     </div>
+    
     <div class="kpi-chart-card span-4">
       <user-chart
-              [data]="$userRepartition.data"
-              [loading]="$userRepartition.loading"
-              [queryParams]="params"></user-chart>
+        [data]="$userRepartition.data"
+        [loading]="$userRepartition.loading"
+        [queryParams]="params">
+      </user-chart>
     </div>
+    
     <div class="kpi-chart-card span-4">
       <div class="kpi-chart-header">
         <div class="kpi-chart-title-group">
@@ -78,16 +162,13 @@
           <span class="kpi-chart-title">Dépendances</span>
         </div>
       </div>
-      <div class="kpi-chart-subheader">
-        <span class="kpi-chart-period">{{(params.period.start | date: 'd MMM') + '–' + (params.period.end | date)}}</span>
-      </div>
       <div class="kpi-chart-body">
         <dependent-chart style="width: 100%"
-                [data]="$dependentChart.data"
-                [loading]="$dependentChart.loading"
-                [queryParams]="params"></dependent-chart>
+          [data]="$dependentChart.data"
+          [loading]="$dependentChart.loading"
+          [queryParams]="params">
+        </dependent-chart>
       </div>
     </div>
   </div>
 </div>
-
