@@ -169,7 +169,7 @@ export class SearchRestView implements OnInit, OnDestroy {
       'instance.app_name': this.queryParams.appname,
       'status.origin': this.queryParams.rangestatus,
       'start.ge': this.queryParams.period.start.toISOString(),
-      'end.lt': this.queryParams.period.end.toISOString()
+      'start.lt': this.queryParams.period.end.toISOString()
     };
 
     this.isLoading = true;

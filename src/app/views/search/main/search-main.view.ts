@@ -59,9 +59,9 @@ export class SearchMainView implements OnInit, OnDestroy {
   nameDataList: any[];
   isLoading = false;
   filters: { icon: string, label: string, color: string, value: any }[] = [
-    { icon: 'warning', label: 'KO', color: '#F44336', value: 1 },
-    { icon: 'done', label: 'OK', color: '#4CAF50', value: 0 },
-    { icon: 'pending', label: 'En cours', color: '', value: -1 },
+    { icon: 'warning', label: 'KO', color: '#F44336', value: '5xx' },
+    { icon: 'done', label: 'OK', color: '#4CAF50', value: '2xx' },
+    { icon: 'pending', label: 'En cours', color: '', value: 'pending' },
   ];
   queryParams: Partial<QueryParams> = {};
   type: string = '';
@@ -152,10 +152,10 @@ export class SearchMainView implements OnInit, OnDestroy {
     let params = {
       'env': this.queryParams.env,
       'instance.app_name': this.queryParams.appname,
-      'status.in': this.queryParams.rangestatus,
+      'status.origin': this.queryParams.rangestatus,
       'type': this.type.toUpperCase(),
       'start.ge': this.queryParams.period.start.toISOString(),
-      'end.lt': this.queryParams.period.end.toISOString()
+      'start.lt': this.queryParams.period.end.toISOString()
     };
 
     this.isLoading = true;
