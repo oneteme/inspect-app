@@ -5,9 +5,6 @@
     <span class="kpi-chart-title">Audience</span>
   </div>
 </div>
-<div class="kpi-chart-subheader">
-  <span class="kpi-chart-period">{{(queryParams.period.start | date: 'd MMM') + '–' + (queryParams.period.end | date)}}</span>
-</div>
 <div class="kpi-chart-body" >
   <chart type="line"
          [config]="chartProvider"
