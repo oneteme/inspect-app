@@ -72,12 +72,6 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
         if (!row.end) return 'En cours...';
         return row.status;
       }
-    },
-    {
-      key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', width: '13%',
-      value: (row: RestSessionDto) => {
-        return row.exception?.type;
-      }
     }
   ],
   slices: [
@@ -183,10 +177,6 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
         return row.status;
       }
     },
-    {
-      key: 'exception', header: 'Exception', sortable: true, optional: true, icon: 'error_outline',
-      value: (row: RestSessionDto) => row.exception?.type
-    },
     { key: 'action', header: 'Action', icon: 'touch_app', sliceable: false, groupable: false, sortable: false },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
@@ -228,10 +218,6 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
     {
       key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
-    },
-    {
-      key: 'exception', header: 'Exception', optional: true, icon: 'error_outline',
-      value: (row) => row.exception?.type
     },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
@@ -276,10 +262,6 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
       key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
     },
-    {
-      key: 'exception', header: 'Exception', optional: true, icon: 'error_outline',
-      value: (row) => row.exception?.type
-    },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
   slices: [
@@ -322,7 +304,6 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
       key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
     },
-    { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
   slices: [
@@ -407,7 +388,6 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
       key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
     },
-    { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
   slices: [

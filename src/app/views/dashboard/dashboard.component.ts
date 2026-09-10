@@ -684,11 +684,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
             ServerError: '5xx',
             ClientError: '4xx',
         };
-        const rangestatus = key === 'rest' ? (rangestatusMap[errorType] ?? '0xx') : 'Ko';
+        const rangestatus = key === 'rest' ? (rangestatusMap[errorType] ?? '0xx') : '5xx';
         this._router.navigate([target], {
             queryParams: this.buildNavigationQueryParams({
                 rangestatus,
-                ...(key !== 'rest' || !rangestatusMap[errorType] ? { q: errorType } : {}),
                 server: this.params.serveurs,
             })
         });
