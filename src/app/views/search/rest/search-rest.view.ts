@@ -73,7 +73,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   constructor() {
     this._activatedRoute.queryParams.subscribe({
       next: (params: Params) => {
-        if(params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.env ||  app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server],null,!params.rangestatus ? []: Array.isArray(params.rangestatus) ? params.rangestatus : [params.rangestatus] )
+        if(params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.namespace ||  app.defaultNamespace, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server],null,!params.rangestatus ? []: Array.isArray(params.rangestatus) ? params.rangestatus : [params.rangestatus] )
         if(!params.start && !params.end)  {
           let period;
           if(params.step && params.from){
@@ -81,7 +81,7 @@ export class SearchRestView implements OnInit, OnDestroy {
           } else if(params.step){
             period = new IStep(Number(params.step));
           }
-          this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), params.env || app.defaultEnv, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server], null, !params.rangestatus ? []: Array.isArray(params.rangestatus) ? params.rangestatus : [params.rangestatus]);
+          this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), params.namespace || app.defaultNamespace, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server], null, !params.rangestatus ? []: Array.isArray(params.rangestatus) ? params.rangestatus : [params.rangestatus]);
         }
         if(params.q){
           this.queryParams.optional = {q: params.q};
@@ -94,7 +94,7 @@ export class SearchRestView implements OnInit, OnDestroy {
         this.patchServerValue(this.queryParams.appname);
         this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
-        this._instanceService.getApplications('SERVER', this.queryParams.env)
+        this._instanceService.getApplications('SERVER', this.queryParams.namespace)
             .pipe(finalize(()=> this.serverNameIsLoading = false))
           .subscribe({
             next: res => {
@@ -165,7 +165,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   getIncomingRequest(): void {
     this.$destroy.next();
     const params: any = {
-      'env': this.queryParams.env,
+      'namespace': this.queryParams.namespace,
       'instance.app_name': this.queryParams.appname,
       'status.origin': this.queryParams.rangestatus,
       'start.ge': this.queryParams.period.start.toISOString(),
@@ -207,7 +207,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   selectedRequest(event: MouseEvent, row: RestSessionDto): void {
     if (row) {
       this._router.navigateOnClick(event, ['/session/rest', row.id], {
-        queryParams: { env: this.queryParams.env }
+        queryParams: { namespace: this.queryParams.namespace }
       });
     }
   }

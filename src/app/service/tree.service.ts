@@ -20,7 +20,7 @@ export class TreeService {
         return this.http.get(`${this.server}/session/request/database/stages/count`, {params: ids})
     }
 
-    getArchitecture(start: Date, end: Date, env: string): Observable<Architecture[]> {
-        return this.http.get<Architecture[]>(`${this.server}/architecture`, {params: {start: start.toISOString(), end: end.toISOString(), env: env}});
+    getArchitecture(start: Date, end: Date, namespace: string): Observable<Architecture[]> {
+        return this.http.get<Architecture[]>(`${this.server}/architecture`, {params: {start: start.toISOString(), end: end.toISOString(), namespace: namespace}});
     }
 }

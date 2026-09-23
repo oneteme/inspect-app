@@ -34,7 +34,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     sessionParent: { id: string, type: string };
     isLoading: boolean = false;
     parentLoading: boolean = false;
-    env: string;
+    namespace: string;
 
     ngOnInit() {
         combineLatest([
@@ -42,10 +42,10 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
             this._activatedRoute.queryParams
         ]).subscribe({
             next: ([params, queryParams]) => {
-                this.env = queryParams.env || app.defaultEnv;
+                this.namespace = queryParams.namespace || app.defaultNamespace;
                 this._pageTitleService.set({ icon: 'call_received', iconOutlined: true, title: 'Services Exposés • ' + params.id_session, subtitle: Constants.MAPPING_TYPE['rest']?.subtitle });
                 this.getSession(params.id_session);
-                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}`)
+                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.namespace}`)
             }
         });
     }

@@ -39,7 +39,7 @@ export class TreeView implements OnDestroy {
   subscriptions: Subscription[] = [];
   id: string;
   tree: any;
-  env: any;
+  namespace: any;
   isLoading: boolean;
   data: any;
   MAPPING_TYPE = Constants.MAPPING_TYPE;
@@ -98,21 +98,21 @@ export class TreeView implements OnDestroy {
     ]).subscribe({
       next: ([params, data, queryParams]) => {
         this.id = params['id_session'];
-        this.env = queryParams.env || app.defaultEnv;
+        this.namespace = queryParams.namespace || app.defaultNamespace;
         this.serverLbl = Label[queryParams.server_lbl] || Label.SERVER_IDENTITY;
         this.linkLbl = Label[queryParams.link_lbl] || Label.ELAPSED_LATENSE;
         this.patchDataView(this.serverLbl, this.linkLbl);
         this.data = data;
         this.getTree(this.data, this.serverLbl, this.linkLbl);
         this.subscriptions.push(this.ViewForm.controls.nodeView.valueChanges.subscribe(v => {
-          this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&server_lbl=${v}&link_lbl=${this.linkLbl}`);
+          this._location.replaceState(`${this._router.url.split('?')[0]}?namespace=${this.namespace}&server_lbl=${v}&link_lbl=${this.linkLbl}`);
           this.ViewEvent[v](Label[v]);
         }));
         this.subscriptions.push(this.ViewForm.controls.linkView.valueChanges.subscribe(v => {
-          this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&server_lbl=${this.serverLbl}&link_lbl=${v}`);
+          this._location.replaceState(`${this._router.url.split('?')[0]}?namespace=${this.namespace}&server_lbl=${this.serverLbl}&link_lbl=${v}`);
           this.ViewEvent[v](Label[v]);
         }));
-        this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}&server_lbl=${this.serverLbl}&link_lbl=${this.linkLbl}`);
+        this._location.replaceState(`${this._router.url.split('?')[0]}?namespace=${this.namespace}&server_lbl=${this.serverLbl}&link_lbl=${this.linkLbl}`);
       },
     }));
   }
@@ -270,9 +270,9 @@ export class TreeView implements OnDestroy {
     const type = item.type?.toLowerCase();
     const path = `#/request/${type}/${item.value}`;
     if (event.ctrlKey) {
-      this._router.open(`${path}?env=${this.env}`, '_blank',)
+      this._router.open(`${path}?namespace=${this.namespace}`, '_blank',)
     } else {
-      this._router.navigate(['/request', type, item.value], { queryParams: { env: this.env } });
+      this._router.navigate(['/request', type, item.value], { queryParams: { namespace: this.namespace } });
     }
   }
   navigateToSession(item: any, event: MouseEvent) {
@@ -280,9 +280,9 @@ export class TreeView implements OnDestroy {
     const type = item.type?.toLowerCase();
     const path = `#/session/${type}/${item.value}`;
     if (event.ctrlKey) {
-      this._router.open(`${path}?env=${this.env}`, '_blank',)
+      this._router.open(`${path}?namespace=${this.namespace}`, '_blank',)
     } else {
-      this._router.navigate(['/session', type, item.value], { queryParams: { env: this.env } });
+      this._router.navigate(['/session', type, item.value], { queryParams: { namespace: this.namespace } });
     }
   }
 

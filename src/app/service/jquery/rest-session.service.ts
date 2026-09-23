@@ -15,10 +15,10 @@ export class RestSessionService {
         return this.http.get<T>(url, { params: params });
     }
 
-    getHosts(filters: {start: Date, end: Date , env: string}): Observable<{ host: string }[]> {
+    getHosts(filters: {start: Date, end: Date , namespace: string}): Observable<{ host: string }[]> {
         var args: any = {
             'column': `instance.app_name.distinct:host`,
-            'instance.environement': filters.env,
+            'instance.namespace': filters.namespace,
             'instance.type': 'SERVER',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
@@ -29,7 +29,7 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getDependencies(filters: {env: string, start: Date, end: Date, servers: string[]}): Observable<{count: number, target: string, origin: string}[]> {
+    getDependencies(filters: {namespace: string, start: Date, end: Date, servers: string[]}): Observable<{count: number, target: string, origin: string}[]> {
         let args: any = {
             'column': `count:count,instance.app_name:origin,instance_join.app_name:target`,
             'rest_request.start.ge': filters.start.toISOString(),
@@ -38,7 +38,7 @@ export class RestSessionService {
             'rest_session_join.start.lt': filters.end.toISOString(),
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            'instance_join.environement': filters.env,
+            'instance_join.namespace': filters.namespace,
             'join': 'innerJoin(instance).criteria(instance_env.eq(instance.id)),innerJoin(rest_request).criteria(id.eq(rest_request.parent)),innerJoin(rest_session:rest_session_join).criteria(rest_request.id.eq(rest_session_join.id)),innerJoin(instance:instance_join).criteria(rest_session_join.instance_env.eq(instance_join.id))',
             'order': 'count.desc'
         }
@@ -48,7 +48,7 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getDependents(filters: {env: string, start: Date, end: Date, servers: string[]}): Observable<{count: number, target: string, origin: string}[]> {
+    getDependents(filters: {namespace: string, start: Date, end: Date, servers: string[]}): Observable<{count: number, target: string, origin: string}[]> {
         let args: any = {
             'column': `rest_session_join.count:count,instance_join.app_name:target,instance.app_name:origin`,
             'rest_request.start.ge': filters.start.toISOString(),
@@ -57,7 +57,7 @@ export class RestSessionService {
             'rest_session_join.start.lt': filters.end.toISOString(),
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            'instance.environement': filters.env,
+            'instance.namespace': filters.namespace,
             'join': 'innerJoin(instance).criteria(instance_env.eq(instance.id)),innerJoin(rest_request).criteria(id.eq(rest_request.parent)),innerJoin(rest_session:rest_session_join).criteria(rest_request.id.eq(rest_session_join.id)),innerJoin(instance:instance_join).criteria(rest_session_join.instance_env.eq(instance_join.id))',
             'order': 'count.desc'
         }
@@ -67,13 +67,13 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getSessionExceptions(filters: {env: string, start: Date, end: Date, groupedBy: string, server?: string, apiNames?: string, users?: string, versions?: string, others?: {[key: string]: any}  }): Observable<ExceptionsByPeriodAndAppname[]> {
+    getSessionExceptions(filters: {namespace: string, start: Date, end: Date, groupedBy: string, server?: string, apiNames?: string, users?: string, versions?: string, others?: {[key: string]: any}  }): Observable<ExceptionsByPeriodAndAppname[]> {
         let args: any = {
             "column": `start.${filters.groupedBy}:date,error_type_session:errorType,count:count,status,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year,instance.type:type`,
             'join': 'instance',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
-            'instance.environement': filters.env,
+            'instance.namespace': filters.namespace,
             'instance.type': 'SERVER',
             "order": "date.desc,count.desc"
         }
@@ -95,11 +95,11 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getCountByEnv(filters: {env: string, start: Date, end: Date}): Observable<{total: number, errors: number}> {
+    getCountByNamespace(filters: {namespace: string, start: Date, end: Date}): Observable<{total: number, errors: number}> {
         return this.getRestSession<{count: number, countErrorServer: number, countErrorClient: number}[]>({
             'column': 'count:count,count_error_server:countErrorServer,count_error_client:countErrorClient',
             'join': 'instance',
-            'instance.environement': filters.env,
+            'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }).pipe(map(data => {
@@ -110,7 +110,7 @@ export class RestSessionService {
 
     getSizeCustom(
       data: { series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
-      filters: { env: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], filters?: string[] }
+      filters: { namespace: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], filters?: string[] }
     ): Observable<any[]> {
         const groupAlias = data.group.jquery.buildAlias();
         const stackAlias = data.stack?.jquery.buildAlias();
@@ -121,7 +121,7 @@ export class RestSessionService {
             const args: any = {
                 'column': `${data.indicator.jquery.value(serie.jquery.value())}:${serieAlias},${data.group.jquery.value()}:${groupAlias}`,
                 'join': 'instance',
-                'instance.environement': filters.env,
+                'instance.namespace': filters.namespace,
                 'start.ge': filters.start.toISOString(),
                 'start.lt': filters.end.toISOString()
             };
@@ -165,12 +165,12 @@ export class RestSessionService {
     }
 
     getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
-              filters: {env: string, start: Date, end: Date, hosts?: string[], filters?: string[] }): Observable<any[]> {
+              filters: {namespace: string, start: Date, end: Date, hosts?: string[], filters?: string[] }): Observable<any[]> {
 
         let args: any = {
             'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
             'join': 'instance',
-            'instance.environement': filters.env,
+            'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
@@ -190,12 +190,12 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getFilters(filter: ChartItem, filters: {env: string, start: Date, end: Date, hosts: string[] }) {
+    getFilters(filter: ChartItem, filters: {namespace: string, start: Date, end: Date, hosts: string[] }) {
         let args: any = {
             'column': `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
             'distinct': 'true',
             'join': 'instance',
-            'instance.environement': filters.env,
+            'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }

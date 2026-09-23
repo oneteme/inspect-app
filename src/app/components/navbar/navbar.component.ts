@@ -7,6 +7,7 @@ import { MatIconRegistry } from '@angular/material/icon';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 import { AboutDialogComponent } from '../about/about-dialog.component';
+import { AddEnvironmentDialogComponent } from '../environment/add-environment-dialog.component';
 import { app, auth } from 'src/environments/environment';
 import { Constants } from '../../views/constants';
 import { EnvRouter } from '../../service/router.service';
@@ -56,9 +57,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   MAPPING_TYPE = Constants.MAPPING_TYPE;
 
-  envs: string[] = [];
-  env: FormControl<string> = new FormControl();
-  isLoadingEnv = false;
+  namespaces: string[] = [];
+  namespace: FormControl<string> = new FormControl();
+  isLoadingNamespace = false;
   subscriptions: Subscription[] = [];
   authEnabled = auth.enabled;
 
@@ -100,18 +101,18 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.envs = [app.defaultEnv];
+    this.namespaces = [app.defaultNamespace];
     if (!localStorage.getItem('server')) {
       localStorage.setItem('server', app.host);
     }
-    this.isLoadingEnv = true;
+    this.isLoadingNamespace = true;
     this.subscriptions.push(
-      this._service.getEnvironments()
-        .pipe(finalize(() => (this.isLoadingEnv = false)))
-        .subscribe({ next: res => { this.envs = res.map(r => r.environement); } })
+      this._service.getNamespaces()
+        .pipe(finalize(() => (this.isLoadingNamespace = false)))
+        .subscribe({ next: res => { this.namespaces = res.map(r => r.namespace); } })
     );
     this.subscriptions.push(
-      this.env.valueChanges
+      this.namespace.valueChanges
         .pipe(distinctUntilChanged((prev, curr) => prev === curr))
         .subscribe({
           next: value => {
@@ -125,9 +126,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this._activatedRoute.queryParams.subscribe({
         next: () => {
-          const envParam = this._activatedRoute.snapshot.queryParams['env'] || app.defaultEnv;
-          if (this.env.value !== envParam) {
-            this.env.setValue(envParam, { emitEvent: false });
+          const envParam = this._activatedRoute.snapshot.queryParams['env'] || app.defaultNamespace;
+          if (this.namespace.value !== envParam) {
+            this.namespace.setValue(envParam, { emitEvent: false });
           }
         }
       })
@@ -142,8 +143,19 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this._envRouter.navigateOnClick(event, ['home'], { queryParams: this.buildNavigationQueryParams() });
   }
 
-  selectEnv(value: string) {
-    this.env.setValue(value);
+  selectNamespace(value: string) {
+    this.namespace.setValue(value);
+  }
+
+  openAddNamespaceDialog(): void {
+    this._dialog.open(AddEnvironmentDialogComponent).afterClosed().subscribe((namespace?: string) => {
+      if (namespace && !this.namespaces.includes(namespace)) {
+        this.namespaces = [...this.namespaces, namespace];
+      }
+      if (namespace) {
+        this.selectNamespace(namespace);
+      }
+    });
   }
 
   navigateTo(event: MouseEvent, route: string) {
@@ -161,7 +173,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   private buildNavigationQueryParams(): Params {
     const currentQueryParams = this._activatedRoute.snapshot.queryParams;
-    const queryParams: Params = { env: this.env.value };
+    const queryParams: Params = { env: this.namespace.value };
 
     if (currentQueryParams.step && currentQueryParams.from) {
       queryParams.step = currentQueryParams.step;

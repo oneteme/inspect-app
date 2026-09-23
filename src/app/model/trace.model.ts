@@ -7,7 +7,6 @@ export interface RestSession extends AbstractSession, RestRequest {
   name: string;
   userAgent: string;
   cacheControl: string;
-  exception: ExceptionInfo;
 }
 
 export interface RestRequest extends AbstractRequest {
@@ -19,7 +18,6 @@ export interface RestRequest extends AbstractRequest {
   query: string;
   contentType: string;
   authScheme: string;
-  status: number;
   inDataSize: number;
   outDataSize: number;
   inContentEncoding: string;
@@ -38,7 +36,6 @@ export interface DatabaseRequest extends AbstractRequest {
   productName: string;
   productVersion: string;
   command: string;
-  failed: boolean;
 }
 
 export interface FtpRequest extends AbstractRequest {
@@ -47,7 +44,6 @@ export interface FtpRequest extends AbstractRequest {
   port: number;
   serverVersion: string;
   clientVersion: string;
-  failed: boolean;
 }
 
 export interface MailRequest extends AbstractRequest {
@@ -55,21 +51,18 @@ export interface MailRequest extends AbstractRequest {
   host: string;
   port: number;
   mails: Array<Mail>;
-  failed: boolean;
 }
 
 export interface DirectoryRequest extends AbstractRequest {
   protocol: string;
   host: string;
   port: number;
-  failed: boolean;
 }
 
 export interface LocalRequest extends AbstractRequest {
   name: string;
   type: string;
   location: string;
-  exception: ExceptionInfo;
 }
 
 export interface DatabaseRequestStage extends AbstractStage {
@@ -127,6 +120,7 @@ export interface AbstractRequest {
   sessionId: string;
   instanceId: string;
   id: string;
+  status: number;
 }
 
 export interface AbstractStage {
@@ -160,6 +154,7 @@ export interface InstanceEnvironment {
   version: string;
   address: string;
   env: string;
+  namespace: string;
   os: string;
   re: string;
   user: string;

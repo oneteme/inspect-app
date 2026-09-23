@@ -80,7 +80,7 @@ export class SearchMainView implements OnInit, OnDestroy {
           title: (Constants.MAPPING_TYPE[this.type]?.title || this.type) + ' • Suivi',
           subtitle: Constants.MAPPING_TYPE[this.type]?.subtitle
         });
-        if (queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env || app.defaultEnv, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server], null, !queryParams.rangestatus ? [] : Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus])
+        if (queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.namespace || app.defaultNamespace, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server], null, !queryParams.rangestatus ? [] : Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus])
         if (!queryParams.start && !queryParams.end) {
           let period;
           if (queryParams.step && queryParams.from) {
@@ -88,13 +88,13 @@ export class SearchMainView implements OnInit, OnDestroy {
           } else if (queryParams.step) {
             period = new IStep(Number(queryParams.step));
           }
-          this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.env || app.defaultEnv, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server], null, !queryParams.rangestatus ? [] : Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus]);
+          this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.namespace || app.defaultNamespace, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server], null, !queryParams.rangestatus ? [] : Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus]);
         }
         this.patchStatusValue(this.queryParams.rangestatus)
         this.patchServerValue(this.queryParams.appname);
         this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
-        this._instanceService.getApplications(this.type == 'view' ? 'CLIENT' : 'SERVER', this.queryParams.env)
+        this._instanceService.getApplications(this.type == 'view' ? 'CLIENT' : 'SERVER', this.queryParams.namespace)
           .pipe(finalize(() => this.serverNameIsLoading = false))
           .subscribe({
             next: res => {
@@ -150,7 +150,7 @@ export class SearchMainView implements OnInit, OnDestroy {
   getMainRequests() {
     this.$destroy.next();
     let params = {
-      'env': this.queryParams.env,
+      'namespace': this.queryParams.namespace,
       'instance.app_name': this.queryParams.appname,
       'status.origin': this.queryParams.rangestatus,
       'type': this.type.toUpperCase(),
@@ -229,7 +229,7 @@ export class SearchMainView implements OnInit, OnDestroy {
   selectedRequest(event: MouseEvent, row: MainSessionDto) {
     if (row) {
       this._router.navigateOnClick(event, ['/session', row.type.toLowerCase(), row.id], {
-        queryParams: {'env': this.queryParams.env}
+        queryParams: {'namespace': this.queryParams.namespace}
       });
     }
   }

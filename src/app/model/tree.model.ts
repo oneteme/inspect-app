@@ -8,6 +8,7 @@ import {
 } from "./request.model";
 import mx from "../../mxgraph";
 import {formatDuration} from "../shared/pipe/duration.pipe";
+import {ExceptionInfo} from "./trace.model";
 
 export interface SessionTree {
   os: string;
@@ -21,32 +22,37 @@ export interface SessionTree {
 }
 
 export interface RestSessionTree extends SessionTree, RestSessionDto {
-
+  exception: ExceptionInfo;
 }
 
 export interface MainSessionTree extends SessionTree, MainSessionDto {
-
+  exception: ExceptionInfo;
 }
 
 export interface RestRequestTree extends RestRequestDto {
   remoteTrace: RestSessionTree
+  exception: ExceptionInfo;
 }
 
 export interface DatabaseRequestTree extends DatabaseRequestDto {
   count: number;
+  exception: ExceptionInfo;
 }
 
 export interface FtpRequestTree extends FtpRequestDto {
   commands: string[];
+  exception: ExceptionInfo;
 }
 
 export interface MailRequestTree extends MailRequestDto {
   commands: string[];
   count: number;
+  exception: ExceptionInfo;
 }
 
 export interface DirectoryRequestTree extends DirectoryRequestDto {
   commands: string[];
+  exception: ExceptionInfo;
 }
 
 export interface Node<T> {
@@ -224,7 +230,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
     const elapsed  = formatDuration(this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null);
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
-    const isError   = this.nodeObject.failed
+    const isError   = this.nodeObject.status >= 400;
     const isOngoing = this.nodeObject?.end == null;
     const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
     const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
@@ -238,7 +244,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
 
    getLinkStyle(): string {
      if (this.nodeObject.end == null) return 'ONGOING';
-     return this.nodeObject.failed ? 'ERROR' : 'SUCCES'
+     return this.nodeObject.status >= 400 ? 'ERROR' : 'SUCCES'
    }
 
   formatLink(field: Label): string {
@@ -250,7 +256,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
       case Label.METHOD_RESOURCE: return `${this.nodeObject?.command || '?'} /${this.nodeObject?.schema || '?'}`;
       case Label.SIZE_COMPRESSION: return this.nodeObject?.count < 0 ? '0': this.nodeObject?.count!= undefined? this.nodeObject?.count.toString() : '?';
       case Label.PROTOCOL_SCHEME: return "JDBC/Basic"
-      case Label.STATUS_EXCEPTION: return this.nodeObject.failed && 'KO' || 'OK'
+      case Label.STATUS_EXCEPTION: return this.nodeObject.status >= 400 ? 'KO' : 'OK'
       case Label.USER: return `${this.nodeObject.user || '?'}`;
       default: return '?';
     }
@@ -269,7 +275,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
     const elapsed  = formatDuration(this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null);
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
-    const isError   = this.nodeObject.failed
+    const isError   = this.nodeObject.status >= 400;
     const isOngoing = this.nodeObject?.end == null;
     const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
     const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
@@ -317,7 +323,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
 
   getLinkStyle(): string {
     if (this.nodeObject.end == null) return 'ONGOING';
-    return this.nodeObject.failed ? 'ERROR' : 'SUCCES';
+    return this.nodeObject.status >= 400 ? 'ERROR' : 'SUCCES';
   }
 }
 
@@ -332,7 +338,7 @@ export class MailRequestNode implements Node<Label>, Link<Label> {
     const elapsed  = formatDuration(this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null);
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
-    const isError   = this.nodeObject.failed
+    const isError   = this.nodeObject.status >= 400;
     const isOngoing = this.nodeObject?.end == null;
     const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
     const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
@@ -376,7 +382,7 @@ export class MailRequestNode implements Node<Label>, Link<Label> {
 
   getLinkStyle(): string {
     if (this.nodeObject.end == null) return 'ONGOING';
-    return this.nodeObject.failed ? 'ERROR' : 'SUCCES';
+    return this.nodeObject.status >= 400 ? 'ERROR' : 'SUCCES';
   }
 }
 
@@ -391,7 +397,7 @@ export class LdapRequestNode implements Node<Label>, Link<Label> {
     const elapsed  = formatDuration(this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null);
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
-    const isError   = this.nodeObject.failed
+    const isError   = this.nodeObject.status >= 400;
     const isOngoing = this.nodeObject?.end == null;
     const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
     const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
@@ -434,7 +440,7 @@ export class LdapRequestNode implements Node<Label>, Link<Label> {
 
   getLinkStyle(): string {
     if (this.nodeObject.end == null) return 'ONGOING';
-    return this.nodeObject.failed ? 'ERROR' : 'SUCCES';
+    return this.nodeObject.status >= 400 ? 'ERROR' : 'SUCCES';
   }
 }
 

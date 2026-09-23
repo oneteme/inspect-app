@@ -36,7 +36,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
     private readonly _dialog = inject(MatDialog);
     private readonly _pageTitleService = inject(PageTitleService);
 
-    private params: Partial<{idLdap: string, env: string}> = {};
+    private params: Partial<{idLdap: string, namespace: string}> = {};
 
     REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
     options: TimelineOptions;
@@ -61,7 +61,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
             this._activatedRoute.queryParams
         ]).subscribe({
             next: ([params, queryParams]) => {
-                this.params = {idLdap: params.id_request, env: queryParams.env || app.defaultEnv};
+                this.params = {idLdap: params.id_request, namespace: queryParams.namespace || app.defaultNamespace};
         this._pageTitleService.set({ icon: 'user_attributes', iconOutlined: true, title: 'Flux LDAP • ' + params.id_request, subtitle: 'Communications externes' });
                 this.getRequest();
             }
@@ -196,7 +196,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
                 this._router.open(`#/${params.join('/')}`, '_blank')
             } else {
                 this._router.navigate(params, {
-                    queryParams: {env: this.params.env}
+                    queryParams: {namespace: this.params.namespace}
                 });
             }
         }

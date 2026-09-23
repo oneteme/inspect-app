@@ -19,23 +19,23 @@ export interface MainSessionDto extends MainSession {
 }
 
 export interface RestRequestDto extends RestRequest {
-  exception: ExceptionInfo;
+
 }
 
 export interface MailRequestDto extends MailRequest {
-  exception: ExceptionInfo;
+
 }
 
 export interface FtpRequestDto extends FtpRequest {
-  exception: ExceptionInfo;
+
 }
 
 export interface DirectoryRequestDto extends DirectoryRequest {
-  exception: ExceptionInfo;
+
 }
 
 export interface DatabaseRequestDto extends DatabaseRequest {
-  exception: ExceptionInfo;
+
 }
 
 export interface AnalyticDto extends MainSession {

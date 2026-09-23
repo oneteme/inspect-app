@@ -103,7 +103,7 @@ export class RequestKpiView implements OnInit, OnDestroy {
             hosts = [v.queryParams.host];
           }
         }
-        this.params.queryParams = new QueryParams(period, v.queryParams.env || app.defaultEnv, undefined, hosts)
+        this.params.queryParams = new QueryParams(period, v.queryParams.namespace || app.defaultNamespace, undefined, hosts)
         if (v.queryParams.instanceType) {
           this.params.queryParams.optional = { instanceType: v.queryParams.instanceType };
           this.filterForm.controls.instanceType.setValue([v.queryParams.instanceType], { emitEvent: false });
@@ -148,7 +148,7 @@ export class RequestKpiView implements OnInit, OnDestroy {
     }
     this.nameDataList = [];
     this.serverNameIsLoading = true;
-    this.hostSubscription = this.serviceType[this.params.type].service.getHost(this.params.type, { env: this.params.queryParams.env, start: this.params.queryParams.period.start.toISOString(), end: this.params.queryParams.period.end.toISOString()})
+    this.hostSubscription = this.serviceType[this.params.type].service.getHost(this.params.type, { namespace: this.params.queryParams.namespace, start: this.params.queryParams.period.start.toISOString(), end: this.params.queryParams.period.end.toISOString()})
         .pipe(finalize(()=> this.serverNameIsLoading = false))
         .subscribe({
           next: (res: any[]) => {

@@ -130,7 +130,7 @@ export class StartupComponent {
 
     return this._mainSessionService.getFilters(
       filter,
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, type: 'STARTUP' }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, type: 'STARTUP' }
     ) as Observable<any[]>;
   }
 
@@ -150,7 +150,7 @@ export class StartupComponent {
     this.$statusRepartition.data = [];
     this._mainSessionService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined, type: 'STARTUP' }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined, type: 'STARTUP' }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -178,7 +178,7 @@ export class StartupComponent {
     this.$performanceRepartition.data = [];
     this._mainSessionService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined, type: 'STARTUP' }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined, type: 'STARTUP' }
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -265,7 +265,7 @@ export class StartupComponent {
     let args: any = {
       'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
       'join': 'instance',
-      'instance.environement': this.params.env,
+      'instance.namespace': this.params.namespace,
       'instance.type': 'SERVER',
       'type': 'STARTUP',
       'start.ge': this.params.period.start.toISOString(),
@@ -286,7 +286,7 @@ export class StartupComponent {
   getDependents() {
     this.$dependentChart.loading = true;
     this.$dependentChart.data = [];
-    this._mainSessionService.getDependents({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts, type: 'STARTUP'})
+    this._mainSessionService.getDependents({namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts, type: 'STARTUP'})
     .pipe(finalize(() => this.$dependentChart.loading = false))
     .subscribe({
       next: (res: any[]) => {this.$dependentChart.data = res}
@@ -297,7 +297,7 @@ export class StartupComponent {
     let args: any = {
       'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_exception:count_error`,
       'join': 'instance',
-      'instance.environement': this.params.env,
+      'instance.namespace': this.params.namespace,
       'instance.type': 'SERVER',
       'type': 'STARTUP',
       'start.ge': this.params.period.start.toISOString(),

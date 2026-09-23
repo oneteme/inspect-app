@@ -102,7 +102,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }),
     });
     serverNameIsLoading = true;
-    params: Partial<{ env: string, start: Date, end: Date, serveurs: string[] }> = {};
+    params: Partial<{ namespace: string, start: Date, end: Date, serveurs: string[] }> = {};
     nameDataList: any[];
     groupedBy: string;
     period: IPeriod | IStep | IStepFrom;
@@ -163,7 +163,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private _chartsResolved = 0;
     private _tabsResolved = 0;
     private _loadGen = 0;
-    private _lastHealthEnv: string | null = null;
+    private _lastHealthNamespace: string | null = null;
     private _sessionCountByType: Record<string, { total: number; errors: number }> = {};
 
     constructor() {
@@ -172,7 +172,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             queryParams: this._activatedRoute.queryParams
         }).subscribe({
             next: (v: { params: Params, queryParams: Params }) => {
-                this.params.env = v.queryParams.env || app.defaultEnv;
+                this.params.namespace = v.queryParams.namespace || app.defaultNamespace;
                 if (v.queryParams.start && v.queryParams.end) {
                     this.period = new IPeriod(new Date(v.queryParams.start), new Date(v.queryParams.end));
                 } else if (v.queryParams.step && v.queryParams.from) {
@@ -184,7 +184,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 }
                 this.params.start = this.period.start;
                 this.params.end = this.period.end;
-                const currentEnv = this.params.env || app.defaultEnv;
+                const currentNamespace = this.params.namespace || app.defaultNamespace;
                 const currentStart = this.params.start;
                 const currentEnd = this.params.end;
                 this.groupedBy = periodManagement(currentStart, currentEnd);
@@ -195,7 +195,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 this.patchDateValue(currentStart, toDisplayedPeriodEnd(currentEnd));
                 this.serverNameIsLoading = true;
                 this._applicationsSub?.unsubscribe();
-                this._applicationsSub = this._instanceService.getApplications('SERVER', currentEnv)
+                this._applicationsSub = this._instanceService.getApplications('SERVER', currentNamespace)
                     .pipe(finalize(() => this.serverNameIsLoading = false))
                     .subscribe({
                         next: (appNames: { appName: string }[]) => {
@@ -208,8 +208,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
                 const serverParam = this.createServerFilter();
                 const effectiveEnd = currentEnd > new Date() ? new Date() : currentEnd;
-                this.chartRequests = this.REQUESTS(currentEnv, currentStart, effectiveEnd, serverParam.app_name);
-                this.tabRequests   = this.TAB_REQUESTS(currentEnv, currentStart, effectiveEnd, serverParam.app_name);
+                this.chartRequests = this.REQUESTS(currentNamespace, currentStart, effectiveEnd, serverParam.app_name);
+                this.tabRequests   = this.TAB_REQUESTS(currentNamespace, currentStart, effectiveEnd, serverParam.app_name);
                 this.sessionSubscriptions.forEach(s => s.unsubscribe());
                 this.sessionSubscriptions = [];
                 this.sessionSummaries = [];
@@ -218,8 +218,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 this.sessionCountLoading = true;
                 this.restSessionCountLoading = true;
                 this.restSessionCount = { total: 0, errors: 0 };
-                const envChanged = this.params.env !== this._lastHealthEnv;
-                if (envChanged) {
+                const namespaceChanged = this.params.namespace !== this._lastHealthNamespace;
+                if (namespaceChanged) {
                     this.deployTableRows = [];
                     this.filteredDeployRows = [];
                     this.serverHealthLoading = true;
@@ -229,11 +229,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 const gen = ++this._loadGen;
                 this.initTab(gen);
                 this.initCharts(gen);
-                if (envChanged) {
-                    this._lastHealthEnv = currentEnv;
-                    this.loadServerHealth(currentEnv, gen);
+                if (namespaceChanged) {
+                    this._lastHealthNamespace = currentNamespace;
+                    this.loadServerHealth(currentNamespace, gen);
                 }
-                this.sessionSubscriptions.push(this._sessionService.getCountByEnv({ env: currentEnv, start: currentStart, end: currentEnd })
+                this.sessionSubscriptions.push(this._sessionService.getCountByNamespace({ namespace: currentNamespace, start: currentStart, end: currentEnd })
                     .pipe(finalize(() => { if (this._loadGen === gen) { this.restSessionCountLoading = false; this._rebuildSessionSummaries(); } }))
                     .subscribe({ next: (data) => { if (this._loadGen === gen) { this.restSessionCount = data; } } }));
 
@@ -361,14 +361,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     this.patchDateValue(this.params.start, toDisplayedPeriodEnd(this.params.end));
                 }
                 const gen = ++this._loadGen;
-                const currentEnv = this.params.env || app.defaultEnv;
+                const currentNamespace = this.params.namespace || app.defaultNamespace;
                 const currentStart = this.params.start || this.period.start;
                 const currentEnd = this.params.end || this.period.end;
                 this.groupedBy = periodManagement(currentStart, currentEnd);
                 const serverParam = this.createServerFilter();
                 const effectiveEnd = currentEnd > new Date() ? new Date() : currentEnd;
-                this.chartRequests = this.REQUESTS(currentEnv, currentStart, effectiveEnd, serverParam.app_name);
-                this.tabRequests = this.TAB_REQUESTS(currentEnv, currentStart, effectiveEnd, serverParam.app_name);
+                this.chartRequests = this.REQUESTS(currentNamespace, currentStart, effectiveEnd, serverParam.app_name);
+                this.tabRequests = this.TAB_REQUESTS(currentNamespace, currentStart, effectiveEnd, serverParam.app_name);
                 this.initTab(gen);
                 this.initCharts(gen);
             }
@@ -427,7 +427,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 data: {
                     exceptions: exceptions,
                     serveurs: this.params.serveurs,
-                    env: this.params.env,
+                    namespace: this.params.namespace,
                     start: this.params.start,
                     groupedBy: this.groupedBy,
                     type: exceptions.type
@@ -467,7 +467,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     private buildQueryParams(appname: string[] = this.serverFilterForm.getRawValue().appname || []): Params {
         const queryParams: Params = {
-            env: this.params.env,
+            namespace: this.params.namespace,
             ...this.period.buildParams()
         };
 
@@ -504,12 +504,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this._computeTopErrors();
     }
 
-    loadServerHealth(env: string, gen: number) {
+    loadServerHealth(namespace: string, gen: number) {
         this.serverHealthLoading = true;
         this.serverHealthData = [];
         this.deployTableRows = [];
         this._serverHealthSub?.unsubscribe();
-        this._serverHealthSub = this._instanceService.getLastServerStart({ env })
+        this._serverHealthSub = this._instanceService.getLastServerStart({ namespace })
                 .pipe(
                     switchMap((servers: LastServerStart[]) => forkJoin({
                         servers: of(servers),
@@ -767,7 +767,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             TEST: 'test'
         };
         const queryParams = {
-            env: this.params.env,
+            namespace: this.params.namespace,
             ...this.period.buildParams()
         };
         const mappedKey = sessionKeyMap[key];
@@ -782,7 +782,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     private buildNavigationQueryParams(extraParams: Params = {}): Params {
         return {
-            env: this.params.env,
+            namespace: this.params.namespace,
             ...this.period.buildParams(),
             ...extraParams,
         };
@@ -792,21 +792,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     navigateOnStatusIndicator(event: MouseEvent, row: any): void {
         this._router.navigateOnClick(event, ['/supervision', row.type.toLowerCase(), row.id], {
-            queryParams: this.buildSupervisionQueryParams(row.env)
+            queryParams: this.buildSupervisionQueryParams(row.namespace)
         });
     }
 
     navigateOnSinceClick(event: MouseEvent, row: any): void {
-        this._router.navigateOnClick(event, ['/session/startup', row.id], { queryParams: { env: this.params.env } });
+        this._router.navigateOnClick(event, ['/session/startup', row.id], { queryParams: { namespace: this.params.namespace } });
     }
 
     navigateOnServerClick(event: MouseEvent, row: any): void {
-        this._router.navigateOnClick(event, ['/instance/detail', row.id], { queryParams: { env: this.params.env } });
+        this._router.navigateOnClick(event, ['/instance/detail', row.id], { queryParams: { namespace: this.params.namespace } });
     }
 
     navigateOnRestartClick(event: MouseEvent, start: number, server: string): void {
         this._router.navigateOnClick(event, ['/session/startup'], {
-            queryParams: { env: this.params.env, start: new Date(start).toISOString(), end: new Date().toISOString(), server }
+            queryParams: { namespace: this.params.namespace, start: new Date(start).toISOString(), end: new Date().toISOString(), server }
         });
     }
 
@@ -900,14 +900,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     navigateToSupervision(server: LastServerStart) {
         this._router.navigate(['/supervision/server', server.id], {
-            queryParams: this.buildSupervisionQueryParams(this.params.env)
+            queryParams: this.buildSupervisionQueryParams(this.params.namespace)
         });
     }
 
-    private buildSupervisionQueryParams(env?: string): Params {
+    private buildSupervisionQueryParams(namespace?: string): Params {
         const periodParams = this.period?.buildParams?.() || this.buildQueryParams();
         return {
-            env: env || this.params.env || app.defaultEnv,
+            namespace: namespace || this.params.namespace || app.defaultNamespace,
             ...periodParams
         };
     }
@@ -1002,18 +1002,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
         );
     }
 
-    TAB_REQUESTS = (env: string, start: Date, end: Date, app_name: string) => {
+    TAB_REQUESTS = (namespace: string, start: Date, end: Date, app_name: string) => {
         const groupedBy = this.groupedBy; // capturé une fois à la création
         return {
             sessionExceptionsTable: {
-                observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, server: app_name })
+                observable: this._sessionService.getSessionExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, server: app_name })
                     .pipe(map((result: any[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
                         return result;
                     }))
             },
             batchExceptionTable: {
-                observable: this._mainService.getMainExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
+                observable: this._mainService.getMainExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
                         const dateMap = new Map<string, number>();
@@ -1026,10 +1026,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     }))
             },
             batchTopJobsTable: {
-                observable: this._mainService.getTopBatchJobErrors({ env: env, start: start, end: end, app_name: app_name })
+                observable: this._mainService.getTopBatchJobErrors({ namespace: namespace, start: start, end: end, app_name: app_name })
             },
             viewExceptionTable: {
-                observable: this._mainService.getViewExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
+                observable: this._mainService.getViewExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
                         const dateMap = new Map<string, number>();
@@ -1042,7 +1042,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     }))
             },
             startupExceptionTable: {
-                observable: this._mainService.getStartupExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
+                observable: this._mainService.getStartupExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
                         const dateMap = new Map<string, number>();
@@ -1056,9 +1056,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
             }
         }
     }
-    REQUESTS = (env: string, start: Date, end: Date, app_name: string) => {
+    REQUESTS = (namespace: string, start: Date, end: Date, app_name: string) => {
         const groupedBy = periodManagement(start, end);
-        const p = { env, start, end, groupedBy, app_name };
+        const p = { namespace, start, end, groupedBy, app_name };
         return {
             restRequestExceptionsTable: { observable: this.buildExceptionObservable(this._restService.getRestExceptions(p), groupedBy, 'REST', 'rest', start, end) },
             databaseRequestExceptionsTable: { observable: this.buildExceptionObservable(this._datebaseService.getJdbcRestSessionExceptions(p), groupedBy, 'JDBC', 'jdbc', start, end) },

@@ -188,7 +188,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   lastTrace: number;
   unavailableStat:  number = 0;
   traceStat:  number = 0;
-  params: Partial<{instance: string, env: string, start: Date, end: Date}> = {};
+  params: Partial<{instance: string, namespace: string, start: Date, end: Date}> = {};
 
   isLoading = false;
   isLoadingInstances = false;
@@ -209,7 +209,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     ).subscribe({
       next: ([params, queryParams]: any) => {
         this.params.instance = params.instance;
-        this.params.env = queryParams.env;
+        this.params.namespace = queryParams.namespace;
         
         if (queryParams.start && queryParams.end) {
           this.period = new IPeriod(new Date(queryParams.start), new Date(queryParams.end));
@@ -274,7 +274,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     this.instances = [];
     this.servers = [];
     this.isLoadingInstances = true;
-    this._instanceService.getInstancesByPeriod({env: this.params.env, start: start, end: end})
+    this._instanceService.getInstancesByPeriod({namespace: this.params.namespace, start: start, end: end})
     .pipe(finalize(() => this.isLoadingInstances = false))
     .subscribe({
         next: res => {
@@ -304,8 +304,8 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     this.syncChartPeriodBounds();
     this._traceService.getInstance(this.params.instance)
     .pipe(switchMap(res => {
-      if(res?.env !== this.params.env) {
-        this._snackBar.open(`L'identifiant de cette instance ne correspond pas à l'environnement ${this.params.env}`, "Fermer",
+      if(res?.namespace !== this.params.namespace) {
+        this._snackBar.open(`L'identifiant de cette instance ne correspond pas à l'environnement ${this.params.namespace}`, "Fermer",
             {
               horizontalPosition: "center",
               verticalPosition: "top",
@@ -384,7 +384,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
       }
       
       const periodParams = this.period.buildParams();
-      const newQueryParams = { env: this.params.env, ...periodParams };
+      const newQueryParams = { namespace: this.params.namespace, ...periodParams };
       const newInstanceId = this.formGroup.controls.instance.value.id;
       const currentInstanceId = this._activatedRoute.snapshot.params['instance'];
       const instanceChanged = currentInstanceId !== newInstanceId;

@@ -121,7 +121,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
             title: (Constants.REQUEST_MAPPING_TYPE[this.params.type]?.title || this.params.type) + ' • Suivi',
             subtitle: Constants.REQUEST_MAPPING_TYPE[this.params.type]?.subtitle
           });
-          if(queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env ||  app.defaultEnv,null,!queryParams.host ? [] : Array.isArray(queryParams.host) ? queryParams.host : [queryParams.host],!queryParams.rangestatus ? []: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] )
+          if(queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.namespace ||  app.defaultNamespace,null,!queryParams.host ? [] : Array.isArray(queryParams.host) ? queryParams.host : [queryParams.host],!queryParams.rangestatus ? []: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] )
           if(!queryParams.start && !queryParams.end){
             let period;
             if(queryParams.step && queryParams.from){
@@ -129,7 +129,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
             } else if(queryParams.step){
               period = new IStep(Number(queryParams.step));
             }
-            this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.env || app.defaultEnv, null, !queryParams.host ? [] : Array.isArray(queryParams.host) ? queryParams.host : [queryParams.host],!queryParams.rangestatus ? [/*this.seviceType[this.params.type].filters[0].value*/]: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] );
+            this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.namespace || app.defaultNamespace, null, !queryParams.host ? [] : Array.isArray(queryParams.host) ? queryParams.host : [queryParams.host],!queryParams.rangestatus ? [/*this.seviceType[this.params.type].filters[0].value*/]: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] );
           }
           if(queryParams.q){
             this.queryParams.optional = { 'q': queryParams.q };
@@ -178,7 +178,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
     }
     this.nameDataList =null;
     this.serverNameIsLoading =true;
-    this.hostSubscription = this.seviceType[this.params.type].service.getHost(this.params.type, { env: this.queryParams.env, start: this.queryParams.period.start.toISOString(), end: this.queryParams.period.end.toISOString()})
+    this.hostSubscription = this.seviceType[this.params.type].service.getHost(this.params.type, { namespace: this.queryParams.namespace, start: this.queryParams.period.start.toISOString(), end: this.queryParams.period.end.toISOString()})
         .pipe(finalize(()=> this.serverNameIsLoading = false))
         .subscribe({
           next: res => {
@@ -200,7 +200,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
     this.emptyLabel = null;
     this.isLoading = true;
     this.RequestSubscription = (<any>this.seviceType[this.params.type]).service.getRequests({
-      'env': this.queryParams.env,
+      'namespace': this.queryParams.namespace,
       'host': this.queryParams.hosts,
       'status.origin': this.queryParams.rangestatus,
       'start.ge': this.queryParams.period.start.toISOString(),
@@ -257,7 +257,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
       this._router.open(`#/request/rest/${event.row}`, '_blank')
     } else {
       this._router.navigate(['/request/rest', event.row], {
-        queryParams: { env: this.queryParams.env }
+        queryParams: { namespace: this.queryParams.namespace }
       });
     }
   }
@@ -268,7 +268,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
         this._router.open(`#/request/smtp/${event.row}`, '_blank',)
       } else {
         this._router.navigate([`/request/smtp`, event.row], {
-          queryParams: { env: this.queryParams.env }
+          queryParams: { namespace: this.queryParams.namespace }
         });
       }
     }
@@ -280,7 +280,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
         this._router.open(`#/request/ldap/${event.row}`, '_blank',)
       } else {
         this._router.navigate([`/request/ldap`, event.row], {
-          queryParams: { env: this.queryParams.env }
+          queryParams: { namespace: this.queryParams.namespace }
         });
       }
     }
@@ -292,7 +292,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
         this._router.open(`#/request/ftp/${event.row}`, '_blank',)
       } else {
         this._router.navigate([`/request/ftp`, event.row], {
-          queryParams: { env: this.queryParams.env }
+          queryParams: { namespace: this.queryParams.namespace }
         });
       }
     }
@@ -304,7 +304,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
         this._router.open(`#/request/jdbc/${event.row}`, '_blank',)
       } else {
         this._router.navigate([`/request/jdbc`, event.row], {
-          queryParams: { env: this.queryParams.env }
+          queryParams: { namespace: this.queryParams.namespace }
         });
       }
     }

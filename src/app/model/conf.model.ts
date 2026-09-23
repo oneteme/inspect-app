@@ -1,6 +1,6 @@
 export interface Application {
     host: string;
-    defaultEnv: string;
+    defaultNamespace: string;
     gridViewPeriod: string;
     kpiViewPeriod: string;
 }
@@ -8,7 +8,7 @@ export interface Application {
 export class QueryParams {
     private _optional: { [key: string]: any } = {};
 
-    constructor(public _period: Period, public _env: string, public _appname?: string[], public _hosts?: string[], public _rangestatus?: string[], public _commands?: string[], public _schemas?: string[]) {
+    constructor(public _period: Period, public _namespace: string, public _appname?: string[], public _hosts?: string[], public _rangestatus?: string[], public _commands?: string[], public _schemas?: string[]) {
     }
 
     set period(period: Period) {
@@ -19,8 +19,8 @@ export class QueryParams {
         return this._period;
     }
 
-    get env(): string {
-        return this._env;
+    get namespace(): string {
+        return this._namespace;
     }
 
     set appname(appname: string[]) {
@@ -85,8 +85,8 @@ export class QueryParams {
         if (this.rangestatus && this.rangestatus.length > 0) {
             params = { ...params, rangestatus: this.rangestatus.length == 1 ? this.rangestatus[0] : this.rangestatus };
         }
-        if (this.env) {
-            params = { ...params, env: this.env };
+        if (this.namespace) {
+            params = { ...params, namespace: this.namespace };
         }
         if (this.commands && this.commands.length > 0) {
             params = { ...params, command: this.commands.toString() }

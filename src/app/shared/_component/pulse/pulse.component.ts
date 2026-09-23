@@ -175,7 +175,7 @@ const defaultRestDataItems = (sessions: Array<RestSession>, pipe: DatePipe, dura
     if (isInProgress) {
       item.className += ' in-progress';
     }
-    if (s.exception?.message || s.exception?.type) {
+    if (s.status >= 400) {
       item.className += ' error';
     }
     return item;
@@ -200,7 +200,7 @@ const defaultMainDataItems = (sessions: Array<MainSession>, pipe: DatePipe, dura
     if (isInProgress) {
       item.className += ' in-progress';
     }
-    if (s.exception?.message || s.exception?.type) {
+    if (s.status >= 400) {
       item.className += ' error';
     }
     return item;

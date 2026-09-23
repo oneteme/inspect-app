@@ -1,0 +1,28 @@
+<h2 mat-dialog-title>Ajouter un namespace</h2>
+
+<mat-dialog-content class="add-environment-content">
+  <form class="filter-container" (ngSubmit)="add()">
+    <mat-form-field class="md-3" appearance="outline">
+      <mat-label>Nom</mat-label>
+      <input matInput [formControl]="namespace" autocomplete="off">
+      <mat-error *ngIf="namespace.hasError('required')">Le nom est requis.</mat-error>
+      <mat-error *ngIf="namespace.hasError('pattern')">Le nom est invalide.</mat-error>
+    </mat-form-field>
+    <mat-form-field class="md-3" appearance="outline">
+      <mat-label>Mot de passe</mat-label>
+      <input matInput [type]="'text'" [formControl]="password">
+      <mat-error *ngIf="password.hasError('required')">Le mot de passe est requis.</mat-error>
+      <mat-error *ngIf="password.hasError('pattern')">Le mot de passe doit contenir au moins 6 caractères.</mat-error>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button mat-dialog-close [disabled]="isSubmitting">Annuler</button>
+  <button mat-raised-button color="primary" [disabled]="namespace.invalid || password.invalid || isSubmitting" (click)="add()">
+    <span class="submit-content">
+      <mat-spinner *ngIf="isSubmitting" [diameter]="18"></mat-spinner>
+      <span>Ajouter</span>
+    </span>
+  </button>
+</mat-dialog-actions>
