@@ -124,7 +124,7 @@ export class BatchComponent {
 
     return this._mainSessionService.getFilters(
       filter,
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, type: 'BATCH' }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, type: 'BATCH' }
     ) as Observable<any[]>;
   }
 
@@ -144,7 +144,7 @@ export class BatchComponent {
     this.$statusRepartition.data = [];
     this._mainSessionService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined, type: 'BATCH' }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined, type: 'BATCH' }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -172,7 +172,7 @@ export class BatchComponent {
     this.$performanceRepartition.data = [];
     this._mainSessionService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined, type: 'BATCH' }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined, type: 'BATCH' }
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -259,7 +259,7 @@ export class BatchComponent {
     let args: any = {
       'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
       'join': 'instance',
-      'instance.environement': this.params.env,
+      'instance.namespace': this.params.namespace,
       'instance.type': 'SERVER',
       'type': 'BATCH',
       'start.ge': this.params.period.start.toISOString(),
@@ -280,7 +280,7 @@ export class BatchComponent {
   getDependents() {
     this.$dependentChart.loading = true;
     this.$dependentChart.data = [];
-    this._mainSessionService.getDependents({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts, type: 'BATCH'})
+    this._mainSessionService.getDependents({namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts, type: 'BATCH'})
     .pipe(finalize(() => this.$dependentChart.loading = false))
     .subscribe({
       next: (res: any[]) => {this.$dependentChart.data = res}
@@ -291,7 +291,7 @@ export class BatchComponent {
     let args: any = {
       'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_exception:count_error,count(name.distinct):count_batch`,
       'join': 'instance',
-      'instance.environement': this.params.env,
+      'instance.namespace': this.params.namespace,
       'instance.type': 'SERVER',
       'type': 'BATCH',
       'start.ge': this.params.period.start.toISOString(),

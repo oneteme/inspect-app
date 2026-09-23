@@ -32,6 +32,7 @@ import {DetailRequestView} from "./views/detail/request/detail-request.view";
 import {InstanceComponent} from './views/detail/instance/instance.component';
 import {NavbarComponent} from './components/navbar/navbar.component';
 import {AboutDialogComponent} from './components/about/about-dialog.component';
+import {AddEnvironmentDialogComponent} from './components/environment/add-environment-dialog.component';
 import {ServerSupervisionView} from "./views/supervision/_component/server/server-supervision.view";
 import {ClientSupervisionView} from "./views/supervision/_component/client/client-supervision.view";
 import {RequestKpiView} from "./views/kpi/request/request-kpi.view";
@@ -238,7 +239,8 @@ const routes: Route[] = [
   declarations: [
     AppComponent,
     NavbarComponent,
-    AboutDialogComponent
+    AboutDialogComponent,
+    AddEnvironmentDialogComponent
   ],
   providers: [
     SizePipe,

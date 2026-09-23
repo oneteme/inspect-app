@@ -44,7 +44,7 @@ export class AnalyticView implements OnDestroy {
     sessions: AnalyticDto[] = [];
     count: number = 0;
 
-    params: Partial<{env: string, user: string, date: Date, offset: number, limit: number}> = {};
+    params: Partial<{namespace: string, user: string, date: Date, offset: number, limit: number}> = {};
 
     loading: boolean;
 
@@ -72,7 +72,7 @@ export class AnalyticView implements OnDestroy {
     }
 
     getUsers() {
-        this.$users = this._mainSessionService.getUsersView({env: this.params.env, date: this.params.date});
+        this.$users = this._mainSessionService.getUsersView({namespace: this.params.namespace, date: this.params.date});
     }
 
     onRouteChange() {
@@ -87,7 +87,7 @@ export class AnalyticView implements OnDestroy {
                     iconOutlined: true,
                     title: 'Parcours de l\'utilisateur ' + params.user
                 });
-                this.params.env = queryParams.env || app.defaultEnv;
+                this.params.namespace = queryParams.namespace || app.defaultNamespace;
                 this.params.date = new Date(queryParams.date);
                 this.params.offset = 0;
                 this.params.limit = 10;
@@ -112,7 +112,7 @@ export class AnalyticView implements OnDestroy {
             })
         ).subscribe(d => {
             this._router.navigate(['/analytic', d.user], {
-                queryParams: {date: d.date.toISOString(), env: this.params.env}
+                queryParams: {date: d.date.toISOString(), namespace: this.params.namespace}
             });
         });
     }

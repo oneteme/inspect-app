@@ -24,7 +24,7 @@ export class InstanceComponent implements OnInit, OnDestroy {
   private readonly _traceService = inject(TraceService);
   private readonly _pageTitleService = inject(PageTitleService);
 
-  params: Partial<{id: string, env: string}> = {};
+  params: Partial<{id: string, namespace: string}> = {};
   private readonly $destroy = new Subject<void>();
   private readonly pipe = new DatePipe('fr-FR');
   private readonly durationPipe = new DurationPipe();
@@ -56,7 +56,7 @@ export class InstanceComponent implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([params, queryParams]) => {
         this.params.id = params.id_instance;
-        this.params.env = queryParams.env;
+        this.params.namespace = queryParams.namespace;
         this._pageTitleService.set({ icon: 'history', iconOutlined: true, title: 'Instance • ' + this.params.id, subtitle: 'Historique des démarrages' });
         this.getRequest();
       }
@@ -76,7 +76,7 @@ export class InstanceComponent implements OnInit, OnDestroy {
         this.resourceData = this.toKeyValueArray( this.instance.resource);
         this.propertiesData = this.toKeyValueArray( this.instance.properties);
         return this._instanceService.getInstancesPeriodsByAppName({
-          env: this.params.env,
+          namespace: this.params.namespace,
           appName: this.instance.name,
           address: this.instance.type === 'CLIENT' ? this.instance.address : undefined
         })

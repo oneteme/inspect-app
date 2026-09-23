@@ -84,7 +84,7 @@ export class SessionKpiView implements OnInit, OnDestroy {
         if (v.queryParams.host) {
           hosts = Array.isArray(v.queryParams.host) ? v.queryParams.host : [v.queryParams.host];
         }
-        this.params.queryParams = new QueryParams(period, v.queryParams.env || app.defaultEnv, undefined, hosts)
+        this.params.queryParams = new QueryParams(period, v.queryParams.namespace || app.defaultNamespace, undefined, hosts)
         this.patchDateValue(this.params.queryParams.period.start, toDisplayedPeriodEnd(this.params.queryParams.period.end));
         this.getHosts();
         if(type) {
@@ -123,7 +123,7 @@ export class SessionKpiView implements OnInit, OnDestroy {
     }
     this.nameDataList = [];
     this.serverNameIsLoading = true;
-    this.hostSubscription = this.serviceType[this.params.type].service.getHosts({ env: this.params.queryParams.env, start: this.params.queryParams.period.start, end: this.params.queryParams.period.end, type: this.params.type.toUpperCase()})
+    this.hostSubscription = this.serviceType[this.params.type].service.getHosts({ namespace: this.params.queryParams.namespace, start: this.params.queryParams.period.start, end: this.params.queryParams.period.end, type: this.params.type.toUpperCase()})
         .pipe(finalize(()=> this.serverNameIsLoading = false))
         .subscribe({
           next: res => {

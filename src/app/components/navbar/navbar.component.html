@@ -227,17 +227,21 @@
     <div class="nav-actions">
       <div class="nav-divider"></div>
 
-      <button class="env-trigger" [matMenuTriggerFor]="envMenu" [ngClass]="'env-' + getEnvClass(env.value)" matTooltip="Changer l'environnement">
-        <span class="env-letter">{{ env.value?.charAt(0) | uppercase }}</span>
-        <span class="env-label">{{ env.value | uppercase }}</span>
+      <button class="env-trigger" [matMenuTriggerFor]="envMenu" [ngClass]="'env-' + getEnvClass(namespace.value)" matTooltip="Changer l'environnement">
+        <span class="env-letter">{{ namespace.value?.charAt(0) | uppercase }}</span>
+        <span class="env-label">{{ namespace.value | uppercase }}</span>
         <mat-icon>expand_more</mat-icon>
-        <mat-spinner *ngIf="isLoadingEnv" [diameter]="14"></mat-spinner>
+        <mat-spinner *ngIf="isLoadingNamespace" [diameter]="14"></mat-spinner>
       </button>
 
       <mat-menu #envMenu="matMenu" class="env-menu-panel">
-        <button mat-menu-item *ngFor="let e of envs" (click)="selectEnv(e)">
-          <mat-icon [style.visibility]="env.value === e ? 'visible' : 'hidden'">check</mat-icon>
+        <button mat-menu-item *ngFor="let e of namespaces" (click)="selectNamespace(e)">
+          <mat-icon [style.visibility]="namespace.value === e ? 'visible' : 'hidden'">check</mat-icon>
           <span>{{ e | uppercase }}</span>
+        </button>
+        <button mat-menu-item (click)="openAddNamespaceDialog()">
+          <mat-icon class="material-symbols-outlined">add</mat-icon>
+          <span>Ajouter</span>
         </button>
       </mat-menu>
 

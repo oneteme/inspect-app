@@ -36,7 +36,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
 
   REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
 
-  params: Partial<{ idJdbc: string, env: string }> = {};
+  params: Partial<{ idJdbc: string, namespace: string }> = {};
 
   options: TimelineOptions;
   dataItems: DataItem[];
@@ -77,7 +77,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
       this._activatedRoute.queryParams
     ]).subscribe({
       next: ([params, queryParams]) => {
-        this.params = {idJdbc: params.id_request, env: queryParams.env || app.defaultEnv};
+        this.params = {idJdbc: params.id_request, namespace: queryParams.namespace || app.defaultNamespace};
         this._pageTitleService.set({ icon: 'database', iconOutlined: true, title: 'Flux JDBC • ' + params.id_request, subtitle: 'Communications externes' });
         this.getRequest();
       }
@@ -220,7 +220,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
         this._router.open(`#/${params.join('/')}`, '_blank')
       } else {
         this._router.navigate(params, {
-          queryParams: {env: this.params.env}
+          queryParams: {namespace: this.params.namespace}
         });
       }
     }

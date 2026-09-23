@@ -31,7 +31,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
   private readonly _dialog = inject(MatDialog);
   private readonly _pageTitleService = inject(PageTitleService);
 
-  private params: Partial<{ idFtp: string, env: string }> = {};
+  private params: Partial<{ idFtp: string, namespace: string }> = {};
   REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
   options: TimelineOptions;
   dataItems: DataItem[];
@@ -57,7 +57,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
       this._activatedRoute.queryParams
     ]).subscribe({
       next: ([params, queryParams]) => {
-        this.params = {idFtp: params.id_request, env: queryParams.env || app.defaultEnv};
+        this.params = {idFtp: params.id_request, namespace: queryParams.namespace || app.defaultNamespace};
         this._pageTitleService.set({ icon: 'smb_share', iconOutlined: true, title: 'Flux FTP • ' + params.id_request, subtitle: 'Communications externes' });
         this.getRequest();
       }
@@ -204,7 +204,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
         this._router.open(`#/${params.join('/')}`, '_blank')
       } else {
         this._router.navigate(params, {
-          queryParams: {env: this.params.env}
+          queryParams: {namespace: this.params.namespace}
         });
       }
     }

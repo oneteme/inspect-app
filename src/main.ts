@@ -18,7 +18,7 @@ function loadConfig(){
   .then(res => res.json())
   .then((resp: Application) =>{
       matchRegex(resp.host, "host", HOST_PATTERN,) || delete resp.host;
-      matchRegex(resp.defaultEnv, "defaultEnv",ENV_PATTERN) || delete resp.defaultEnv;
+      matchRegex(resp.defaultNamespace, "defaultEnv",ENV_PATTERN) || delete resp.defaultNamespace;
       matchRegex(resp.gridViewPeriod, "gridViewPeriod", PERIOD_PATTERN) || delete resp.gridViewPeriod;
       matchRegex(resp.kpiViewPeriod, "kpiViewPeriod", PERIOD_PATTERN) || delete resp.kpiViewPeriod;
       return resp;

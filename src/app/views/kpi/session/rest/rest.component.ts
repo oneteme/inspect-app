@@ -229,7 +229,7 @@ export class RestComponent implements OnInit {
 
     return this._restSessionService.getFilters(
       filter,
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts }
     ) as Observable<any[]>;
   }
 
@@ -250,7 +250,7 @@ export class RestComponent implements OnInit {
     this.$statusRepartition.data = [];
     this._restSessionService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -278,7 +278,7 @@ export class RestComponent implements OnInit {
     this.$performanceRepartition.data = [];
     this._restSessionService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined }
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -307,7 +307,7 @@ export class RestComponent implements OnInit {
     this.$volumetryRepartition.data = [];
     this._restSessionService.getSizeCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$volumetryFilteredValues.length ? this.$volumetryFilteredValues : undefined }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$volumetryFilteredValues.length ? this.$volumetryFilteredValues : undefined }
     ).pipe(finalize(() => this.$volumetryRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -403,7 +403,7 @@ export class RestComponent implements OnInit {
     let args: any = {
       'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
       'join': 'instance',
-      'instance.environement': this.params.env,
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': `start.${this.groupedBy}.asc`
@@ -423,7 +423,7 @@ export class RestComponent implements OnInit {
     let args: any = {
       'column': `count:count,media.coalesce("Non renseigné"):media`,
       'join': 'instance',
-      'instance.environement': this.params.env,
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
@@ -443,7 +443,7 @@ export class RestComponent implements OnInit {
     let args: any = {
       'column': `count:count,method:method`,
       'join': 'instance',
-      'instance.environement': this.params.env,
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
@@ -463,7 +463,7 @@ export class RestComponent implements OnInit {
     let args: any = {
       'column': `count:count,user_agt:user_agt`,
       'join': 'instance',
-      'instance.environement': this.params.env,
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
@@ -485,7 +485,7 @@ export class RestComponent implements OnInit {
   getDependencies() {
     this.$dependencyRepartition.loading = true;
     this.$dependencyRepartition.data = [];
-    this._restSessionService.getDependencies({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
+    this._restSessionService.getDependencies({namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
       .pipe(finalize(() => this.$dependencyRepartition.loading = false))
       .subscribe({
         next: (res: any[]) => {this.$dependencyRepartition.data = res}
@@ -495,7 +495,7 @@ export class RestComponent implements OnInit {
   getDependents() {
     this.$dependentRepartition.loading = true;
     this.$dependentRepartition.data = [];
-    this._restSessionService.getDependents({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
+    this._restSessionService.getDependents({namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
     .pipe(finalize(() => this.$dependentRepartition.loading = false))
     .subscribe({
       next: (res: any[]) => {this.$dependentRepartition.data = res}
@@ -506,7 +506,7 @@ export class RestComponent implements OnInit {
     let args: any = {
       'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error,count(user.distinct):count_user`,
       'join': 'instance',
-      'instance.environement': this.params.env,
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString()
     }

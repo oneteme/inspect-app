@@ -48,7 +48,7 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
     edgeTypeFilters: { [key: string]: boolean } = { 'REST': true, 'VIEW': true, 'JDBC': true, 'FTP': true, 'SMTP': true, 'LDAP': true };
 
     subscriptions: Subscription[] = [];
-    params: Partial<{ env: string, start: Date, end: Date }> = {};
+    params: Partial<{ namespace: string, start: Date, end: Date }> = {};
     private _architectures: Architecture[] = [];   // données brutes conservées pour le filtre
     appNames: string[] = [];                       // liste des microservices disponibles
 
@@ -76,12 +76,12 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
             queryParams: this._activatedRoute.queryParams
         }).subscribe({
             next: (v: { params: Params, queryParams: Params }) => {
-                this.params.env = v.queryParams.env || app.defaultEnv;
+                this.params.namespace = v.queryParams.namespace || app.defaultNamespace;
                 this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(6).start;
                 this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(6, 1).end;
                 this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
                 this.init();
-                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}`);
+                this._location.replaceState(`${this._router.url.split('?')[0]}?namespace=${this.params.namespace}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}`);
             }
         }));
 
@@ -255,8 +255,8 @@ export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
         this.syntheseIsLoading = true;
 
         this.subscriptions.push(forkJoin({
-            mainSession: this._instanceService.getMainSessionApplication(this.params.start, this.params.end, this.params.env),
-            restSession: this._treeService.getArchitecture(this.params.start, this.params.end, this.params.env)
+            mainSession: this._instanceService.getMainSessionApplication(this.params.start, this.params.end, this.params.namespace),
+            restSession: this._treeService.getArchitecture(this.params.start, this.params.end, this.params.namespace)
         }).pipe(map(res => {
             res.restSession.push(...res.mainSession.map(m => ({name: m.appName, type: m.type, remoteServers: undefined})));
             return res.restSession;

@@ -139,7 +139,7 @@ export class FtpComponent implements OnInit {
 
     return this._ftpRequestService.getFilters(
       filter,
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts }
     ) as Observable<any[]>;
   }
 
@@ -159,7 +159,7 @@ export class FtpComponent implements OnInit {
     this.$statusRepartition.data = [];
     this._ftpRequestService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -187,7 +187,7 @@ export class FtpComponent implements OnInit {
     this.$performanceRepartition.data = [];
     this._ftpRequestService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined }
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -223,7 +223,7 @@ export class FtpComponent implements OnInit {
     const args: any = {
       'column': `count:count,command.coalesce("Non renseigné"):command`,
       'join': 'instance',
-      'instance.environement': this.params.env,
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
@@ -241,7 +241,7 @@ export class FtpComponent implements OnInit {
     const args: any = {
       'column': `instance.app_name:origin,host:target,count:count`,
       'join': 'instance',
-      'instance.environement': this.params.env,
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.asc'
@@ -259,7 +259,7 @@ export class FtpComponent implements OnInit {
     const args: any = {
       'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
       'join': 'instance',
-      'instance.environement': this.params.env,
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': `start.${this.groupedBy}.asc`
@@ -277,7 +277,7 @@ export class FtpComponent implements OnInit {
     const args: any = {
       'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_request_error:count_error`,
       'join': 'instance',
-      'instance.environement': this.params.env,
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString()
     };

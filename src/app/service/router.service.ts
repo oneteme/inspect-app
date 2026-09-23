@@ -5,12 +5,12 @@ import {Observable} from "rxjs";
 @Injectable()
 export class EnvRouter {
 
-    private _env: string;
+    private _namespace: string;
 
     constructor(private router: Router) { }
 
-    set env(env: string) {
-        this._env = env
+    set namespace(namespace: string) {
+        this._namespace = namespace
     }
 
     get events(): Observable<any> {
@@ -27,37 +27,37 @@ export class EnvRouter {
 
     navigate(commands: any[], extras?: NavigationExtras): Promise<boolean> {
         if (!extras?.queryParams?.env) {
-            if (this._env) {
+            if (this._namespace) {
                 if (!extras) {
                     extras = {}
                 }
                 if (!extras.queryParams) {
                     extras.queryParams = {}
                 }
-                extras.queryParams.env = this._env;
+                extras.queryParams.namespace = this._namespace;
             }
         }
         else {
-            this.env = extras.queryParams.env;
+            this.namespace = extras.queryParams.namespace;
         }
         return this.router.navigate(commands, extras);
         // return Promise.resolve(true);
     }
 
     createUrlTree(commands: any[], extras?: NavigationExtras): UrlTree {
-        if (!extras?.queryParams?.env) {
-            if (this._env) {
+        if (!extras?.queryParams?.namespace) {
+            if (this._namespace) {
                 if (!extras) {
                     extras = {}
                 }
                 if (!extras.queryParams) {
                     extras.queryParams = {}
                 }
-                extras.queryParams.env = this._env;
+                extras.queryParams.namespace = this._namespace;
             }
         }
         else {
-            this.env = extras.queryParams.env;
+            this.namespace = extras.queryParams.namespace;
         }
         return this.router.createUrlTree(commands, extras);
     }

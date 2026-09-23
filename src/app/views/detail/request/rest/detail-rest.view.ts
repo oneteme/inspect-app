@@ -30,7 +30,7 @@ export class DetailRestView implements OnInit, OnDestroy {
   private readonly _dialog = inject(MatDialog);
   private readonly _pageTitleService = inject(PageTitleService);
 
-  private params: Partial<{idRest: string, env: string}> = {};
+  private params: Partial<{idRest: string, namespace: string}> = {};
   REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
   tabs: TabData[] = [];
   selectedTabIndex: number = 0;
@@ -54,7 +54,7 @@ export class DetailRestView implements OnInit, OnDestroy {
       this._activatedRoute.queryParams
     ]).subscribe({
       next: ([params, queryParams]) => {
-        this.params = {idRest: params.id_request, env: queryParams.env || app.defaultEnv};
+        this.params = {idRest: params.id_request, namespace: queryParams.namespace || app.defaultNamespace};
         this._pageTitleService.set({ icon: 'public', iconOutlined: true, title: 'Flux HTTP • ' + params.id_request, subtitle: 'Communications externes' });
         this.getRequest();
       }
@@ -183,7 +183,7 @@ export class DetailRestView implements OnInit, OnDestroy {
         this._router.open(`#/${params.join('/')}`, '_blank')
       } else {
         this._router.navigate(params, {
-          queryParams: {env: this.params.env}
+          queryParams: {namespace: this.params.namespace}
         });
       }
   }

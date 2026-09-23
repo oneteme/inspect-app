@@ -31,7 +31,7 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
     completedSession: MainSessionView;
     instance: InstanceEnvironment;
     isLoading: boolean = false;
-    env: string;
+    namespace: string;
     type: string;
 
     ngOnInit() {
@@ -40,11 +40,11 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
             this._activatedRoute.queryParams
         ]).subscribe({
             next: ([params, queryParams]) => {
-                this.env = queryParams.env || app.defaultEnv;
+                this.namespace = queryParams.namespace || app.defaultNamespace;
                 this.type = params.type_main;
                 this._pageTitleService.set({ icon: Constants.MAPPING_TYPE[params.type_main]?.icon || 'manufacturing', iconOutlined: true, title: (Constants.MAPPING_TYPE[params.type_main]?.title || params.type_main) + ' • ' + params.id_session, subtitle: Constants.MAPPING_TYPE[params.type_main]?.subtitle });
                 this.getSession(params.id_session);
-                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}`)
+                this._location.replaceState(`${this._router.url.split('?')[0]}?namespace=${this.namespace}`)
             }
         });
     }
