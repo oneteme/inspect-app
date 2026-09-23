@@ -11,7 +11,7 @@ export class AnalyticService {
     constructor(private http: HttpClient) {
     }
 
-    getUserActionsByUser(user: string, date: Date, offset: number, limit: number): Observable<AnalyticDto[]> {
+    getUserActionsByUser(user: string, date: Date, offset?: number, limit?: number): Observable<AnalyticDto[]> {
         let params: any = {
             'date': date.toISOString()
         }

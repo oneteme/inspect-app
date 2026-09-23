@@ -72,6 +72,7 @@ import {DependentChartComponent} from "./kpi/_component/dependent-chart/dependen
 import {StartupComponent} from "./kpi/session/startup/startup.component";
 import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.component";
 import {CompareView} from "./compare/compare.view";
+import {NewAnalyticView} from "./newanalytics/newanalytic.view";
 
 @NgModule({
   imports: [
@@ -147,7 +148,8 @@ import {CompareView} from "./compare/compare.view";
     DependentChartComponent,
     MediaTypeChartComponent,
     UserChartComponent,
-    CompareView
+    CompareView,
+      NewAnalyticView
   ]
 })
 export class ViewsModule { }

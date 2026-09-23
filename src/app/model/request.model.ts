@@ -5,7 +5,7 @@ import {
   MailRequest,
   MainSession,
   RestRequest,
-  RestSession, UserAction
+  RestSession, SessionEvent, UserAction
 } from "./trace.model";
 
 export interface RestSessionDto extends RestSession {
@@ -39,7 +39,7 @@ export interface DatabaseRequestDto extends DatabaseRequest {
 }
 
 export interface AnalyticDto extends MainSession {
-  userActions: Array<UserAction>;
+  sessionEvents?: Array<SessionEvent>;
 }
 
 export interface MainSessionView extends MainSession {

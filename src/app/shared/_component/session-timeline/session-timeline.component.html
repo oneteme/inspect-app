@@ -1,0 +1,36 @@
+<div class="timeline-track">
+    <div *ngFor="let sessionEvent of displayedEvents; let last = last; let index = index" class="timeline-entry">
+        <div class="timeline-item"
+             [class.event-page]="getEventCategory(sessionEvent.type) === 'page'"
+             [class.event-user]="getEventCategory(sessionEvent.type) === 'user'"
+             [class.event-unknown]="getEventCategory(sessionEvent.type) === 'unknown'"
+             [class.is-last]="last"
+             [attr.title]="getEventCategoryLabel(sessionEvent.type)">
+            <div class="dot"><mat-icon class="event-icon">{{getEventIcon(sessionEvent.type)}}</mat-icon></div>
+            <div class="content">
+                <p class="event-sentence">
+                    <strong class="event-label">{{getEventLabel(sessionEvent.type)}}</strong>
+                    <span class="timestamp"> le {{sessionEvent.instant * 1000 | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr'}}</span>
+                    <span *ngIf="sessionEvent.value"> : « {{sessionEvent.value}} »</span>
+                    <span *ngIf="sessionEvent.location" class="event-location"> {{sessionEvent.location}}</span>
+                </p>
+            </div>
+        </div>
+        <div *ngIf="!last && getElapsedTime(sessionEvent, displayedEvents[index + 1]) as elapsed"
+             class="timeline-gap"
+             [attr.aria-label]="'Délai avant ' + getEventLabel(displayedEvents[index + 1].type)">
+            <span class="event-elapsed">{{elapsed}}</span>
+        </div>
+    </div>
+</div>
+<mat-paginator
+    *ngIf="events.length > pageSizeOptions[0]"
+    [length]="events.length"
+    [pageIndex]="pageIndex"
+    [pageSize]="pageSize"
+    [pageSizeOptions]="pageSizeOptions"
+    [showFirstLastButtons]="true"
+    aria-label="Pagination des événements de session"
+    (page)="onPageChange($event)">
+</mat-paginator>
+

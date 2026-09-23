@@ -113,6 +113,15 @@ export interface UserAction {
   start: Date;
 }
 
+export interface SessionEvent {
+  '@type': string;
+  instant: number;
+  type: string;
+  sessionId: string;
+  value?: string;
+  location?: string;
+}
+
 export interface AbstractSession {
   requestsMask: number;
   instanceId: string;
