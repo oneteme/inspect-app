@@ -90,12 +90,12 @@
 
 
 <mat-menu #menuEndPoint="matMenu" xPosition="after">
-  <a mat-menu-item [routerLink]="['/session', session?.type?.toLowerCase(), session?.id, 'tree']" [queryParams]="{env: instance?.env}">
+  <a mat-menu-item [routerLink]="['/session', session?.type?.toLowerCase(), session?.id, 'tree']" [queryParams]="{namespace: instance?.namespace}">
     <mat-icon class="material-symbols-outlined">lan</mat-icon>Arbre d'appels
   </a>
   <a mat-menu-item *ngIf="session?.type == 'VIEW'"
      [routerLink]="['/analytic', session?.user]"
-     [queryParams]="{env: instance?.env, date: getDate(session?.start * 1000, false).toISOString()}"
+     [queryParams]="{namespace: instance?.namespace, date: getDate(session?.start * 1000, false).toISOString()}"
      [ngStyle]="{'pointer-events': !session?.user ? 'none' : ''}"
      [disabled]="!session?.user">
     <mat-icon class="material-symbols-outlined">web_traffic</mat-icon>Parcours Utilisateur

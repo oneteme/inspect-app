@@ -50,8 +50,7 @@
 
         <!-- Exception -->
         <exception-display
-          [type]="session.status >= 200 && session.status < 400 ? 'success' : session.status >= 400 && session.status < 500 ? 'warning' : 'fail'"
-          [exception]="session.exception">
+          [type]="session.status >= 200 && session.status < 400 ? 'success' : session.status >= 400 && session.status < 500 ? 'warning' : 'fail'">
         </exception-display>
 
         <!-- Pied de carte -->
@@ -135,7 +134,7 @@
 </ng-template>
 
 <mat-menu #menuEndPoint="matMenu" xPosition="after">
-  <a mat-menu-item [disabled]="sessionParent == null" [ngStyle]="{'pointer-events': sessionParent == null ? 'none' : ''}" [routerLink]="sessionParent?.type == 'rest' ? ['/session', 'rest', sessionParent?.id] : ['/session', sessionParent?.type.toLowerCase(), sessionParent?.id]" [queryParams]="{env: instance?.env}">
+  <a mat-menu-item [disabled]="sessionParent == null" [ngStyle]="{'pointer-events': sessionParent == null ? 'none' : ''}" [routerLink]="sessionParent?.type == 'rest' ? ['/session', 'rest', sessionParent?.id] : ['/session', sessionParent?.type.toLowerCase(), sessionParent?.id]" [queryParams]="{namespace: instance?.namespace}">
     <div style="display: flex;">
       <mat-progress-spinner *ngIf="parentLoading"  style="margin-right: 16px" diameter="24" mode="indeterminate"
                             matTooltip="Chargement de l'appel parent">
@@ -144,7 +143,7 @@
       Origine Client
     </div>
   </a>
-  <a mat-menu-item [routerLink]="['/session', 'rest', session?.id, 'tree']" [queryParams]="{env: instance?.env}">
+  <a mat-menu-item [routerLink]="['/session', 'rest', session?.id, 'tree']" [queryParams]="{namespace: instance?.namespace}">
     <mat-icon class="material-symbols-outlined">lan</mat-icon>
     Arbre d'appels
   </a>

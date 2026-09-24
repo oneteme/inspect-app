@@ -118,7 +118,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
           next: value => {
             this._envRouter.navigate([], {
               queryParamsHandling: 'merge',
-              queryParams: { env: value }
+              queryParams: { namespace: value }
             });
           }
         })
@@ -126,9 +126,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this._activatedRoute.queryParams.subscribe({
         next: () => {
-          const envParam = this._activatedRoute.snapshot.queryParams['env'] || app.defaultNamespace;
-          if (this.namespace.value !== envParam) {
-            this.namespace.setValue(envParam, { emitEvent: false });
+          const namespaceParam = this._activatedRoute.snapshot.queryParams['namespace'] || app.defaultNamespace;
+          if (this.namespace.value !== namespaceParam) {
+            this.namespace.setValue(namespaceParam, { emitEvent: false });
           }
         }
       })
@@ -173,7 +173,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   private buildNavigationQueryParams(): Params {
     const currentQueryParams = this._activatedRoute.snapshot.queryParams;
-    const queryParams: Params = { env: this.namespace.value };
+    const queryParams: Params = { namespace: this.namespace.value };
 
     if (currentQueryParams.step && currentQueryParams.from) {
       queryParams.step = currentQueryParams.step;

@@ -187,20 +187,20 @@ export class DetailSessionComponent implements OnChanges {
 
   selectedRemote(event: { event: MouseEvent, row: any }) {
     if (event.row) {
-      this._router.navigateOnClick(event.event, ['/session', 'rest', event.row], { queryParams: { env: this.instance.env } }); // TODO remove env FIX BUG
+      this._router.navigateOnClick(event.event, ['/session', 'rest', event.row], { queryParams: { namespace: this.instance.namespace } }); // TODO remove env FIX BUG
     }
   }
 
   selectedRest(event: { event: MouseEvent, row: any }) {
     if (event.row) {
-      this._router.navigateOnClick(event.event, ['/request', 'rest', event.row], {queryParams: {env: this.instance.env}}); // TODO remove env FIX BUG
+      this._router.navigateOnClick(event.event, ['/request', 'rest', event.row], {queryParams: {namespace: this.instance.namespace}}); // TODO remove env FIX BUG
     }
   }
 
   selectedFtp(event: { event: MouseEvent, row: any }) { // TODO finish this
     if (event.row) {
       this._router.navigateOnClick(event.event, [`/request/ftp`, event.row], {
-        queryParams: { env: this.instance.env }
+        queryParams: { namespace: this.instance.namespace }
       });
     }
   }
@@ -208,7 +208,7 @@ export class DetailSessionComponent implements OnChanges {
   selectedLdap(event: { event: MouseEvent, row: any }) { // TODO finish this
     if (event.row) {
       this._router.navigateOnClick(event.event, [`/request/ldap`, event.row], {
-        queryParams: { env: this.instance.env }
+        queryParams: { namespace: this.instance.namespace }
       });
     }
   }
@@ -216,7 +216,7 @@ export class DetailSessionComponent implements OnChanges {
   selectedSmtp(event: { event: MouseEvent, row: string }) { // TODO finish this
     if (event.row) {
       this._router.navigateOnClick(event.event, [`/request/smtp`, event.row], {
-        queryParams: { env: this.instance.env }
+        queryParams: { namespace: this.instance.namespace }
       });
     }
   }
@@ -224,7 +224,7 @@ export class DetailSessionComponent implements OnChanges {
   selectedQuery(event: { event: MouseEvent, row: string }) { // TODO finish this
     if (event.row) {
       this._router.navigateOnClick(event.event, [`/request/jdbc`, event.row], {
-        queryParams: { env: this.instance.env }
+        queryParams: { namespace: this.instance.namespace }
       });
     }
   }

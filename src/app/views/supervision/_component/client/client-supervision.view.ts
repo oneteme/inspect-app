@@ -273,7 +273,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
     this.syncChartPeriodBounds();
     this._traceService.getInstance(this.params.instance)
     .pipe(switchMap(res => {
-      if(res?.env !== this.params.namespace) {
+      if(res?.namespace !== this.params.namespace) {
         this._snackBar.open(`L'identifiant de cette instance ne correspond pas à l'environnement ${this.params.namespace}`, "Fermer",
             {
               horizontalPosition: "center",
