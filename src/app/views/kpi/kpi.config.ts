@@ -409,7 +409,7 @@ export const BATCH_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfi
               label: 'Tranche'
             },
             jquery: {
-              value: () => 'status_main_tranche',
+              value: () => 'status_tranche',
               buildAlias: () => 'status_tranche',
               buildColor: (value: string) => REQUEST_STATUS_STACK[value].color,
               buildName: (chartItem, value) => REQUEST_STATUS_STACK[value].label
@@ -558,7 +558,7 @@ export const STARTUP_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartCon
               label: 'Tranche'
             },
             jquery: {
-              value: () => 'status_main_tranche',
+              value: () => 'status_tranche',
               buildAlias: () => 'status_tranche',
               buildColor: (value: string) => REQUEST_STATUS_STACK[value].color,
               buildName: (chartItem, value) => REQUEST_STATUS_STACK[value].label
