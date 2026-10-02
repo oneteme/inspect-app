@@ -40,8 +40,9 @@
         </div>
 
         <!-- Exception -->
-        <exception-display [exception]="session.exception"></exception-display>
-
+        <exception-display
+                [type]="session.status >= 200 && session.status < 400 ? 'success' : 'fail'">
+        </exception-display>
         <!-- Pied de carte -->
         <div class="session-footer">
           <div class="footer-section">
