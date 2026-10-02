@@ -28,8 +28,8 @@ export class SmtpRequestService {
 
     getSmtpExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string,host?: string[],command?: string[] }): Observable<SmtpSessionExceptionsByPeriodAndappname[]> {
         let args = {
-            'column': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
-            'join': 'exception,instance',
+            'column': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,error_type:errorType,start.${filters.groupedBy}:date,start.year:year`,
+            'join': 'instance',
             'instance.namespace': `"${filters.namespace}"`,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),

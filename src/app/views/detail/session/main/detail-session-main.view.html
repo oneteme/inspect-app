@@ -3,8 +3,8 @@
 
     <!-- ═══ CARTE SESSION MAIN ═══ -->
     <div class="session-card"
-         [ngClass]="{'success':     session.end && !session.exception?.type && !session.exception?.message,
-                     'fail':        session.end && (session.exception?.type || session.exception?.message),
+         [ngClass]="{'success': session.status >= 200 && session.status < 400,
+                     'fail': session.status >= 400,
                      'in-progress': !session.end}">
 
       <div class="session-card-inner">
@@ -18,9 +18,9 @@
             <div class="session-title-content">
               <div class="session-name-row">
                 <span *ngIf="session.end" class="status-pill"
-                      [ngClass]="{'success': !session.exception?.type && !session.exception?.message,
-                                  'fail':    session.exception?.type || session.exception?.message}">
-                  {{ (session.exception?.type || session.exception?.message) ? 'Echec' : 'Réussi' }}
+                      [ngClass]="{'success': session.status >= 200 && session.status < 400,
+                         'fail': session.status >= 400}">
+                  {{ session.status >= 400 ? 'Echec' : 'Réussi' }}
                 </span>
                 <span class="session-name ellipsis" [matTooltip]="session.name">
                   {{ session.name || 'N/A' }}

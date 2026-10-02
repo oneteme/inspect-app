@@ -13,9 +13,9 @@ import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 
 import {DatePipe, DecimalPipe, I18nPluralPipe, registerLocaleData} from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
-import {SearchRestView} from "./views/search/rest/search-rest.view";
+import {SearchRestView} from "./views/search/session/rest/search-rest.view";
 import {DetailSessionRestView} from "./views/detail/session/rest/detail-session-rest.view";
-import {SearchMainView} from "./views/search/main/search-main.view";
+import {SearchMainView} from "./views/search/session/main/search-main.view";
 import {DetailSessionMainView} from "./views/detail/session/main/detail-session-main.view";
 import {DashboardComponent} from "./views/dashboard/dashboard.component";
 import {EnvRouter} from "./service/router.service";

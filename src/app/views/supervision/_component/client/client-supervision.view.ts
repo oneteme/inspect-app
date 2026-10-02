@@ -23,7 +23,7 @@ import {
 import {PageTitleService} from '../../../../service/page-title.service';
 import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../../shared/period-filter';
 import {IPeriod, IStep, IStepFrom} from '../../../../model/conf.model';
-import {shallowEqual} from '../../../search/rest/search-rest.view';
+import {shallowEqual} from '../../../search/session/rest/search-rest.view';
 
 @Component({
   templateUrl: './client-supervision.view.html',

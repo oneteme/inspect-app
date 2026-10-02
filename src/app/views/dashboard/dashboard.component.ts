@@ -1009,7 +1009,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 observable: this._sessionService.getSessionExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, server: app_name })
                     .pipe(map((result: any[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
-                        return result;
+            return result;
                     }))
             },
             batchExceptionTable: {
@@ -1029,7 +1029,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 observable: this._mainService.getTopBatchJobErrors({ namespace: namespace, start: start, end: end, app_name: app_name })
             },
             viewExceptionTable: {
-                observable: this._mainService.getViewExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
+                            observable: this._mainService.getViewExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
                     .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
                         const dateMap = new Map<string, number>();
@@ -1061,10 +1061,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
         const p = { namespace, start, end, groupedBy, app_name };
         return {
             restRequestExceptionsTable: { observable: this.buildExceptionObservable(this._restService.getRestExceptions(p), groupedBy, 'REST', 'rest', start, end) },
-            databaseRequestExceptionsTable: { observable: this.buildExceptionObservable(this._datebaseService.getJdbcRestSessionExceptions(p), groupedBy, 'JDBC', 'jdbc', start, end) },
-            ftpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ftpService.getFtpSessionExceptions(p), groupedBy, 'FTP', 'ftp', start, end) },
+            databaseRequestExceptionsTable: { observable: this.buildExceptionObservable(this._datebaseService.getJdbcExceptions(p), groupedBy, 'JDBC', 'jdbc', start, end) },
+            ftpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ftpService.getFtpExceptions(p), groupedBy, 'FTP', 'ftp', start, end) },
             smtpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._smtpService.getSmtpExceptions(p), groupedBy, 'SMTP', 'smtp', start, end) },
-            ldapRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ldapService.getLdapSessionExceptions(p), groupedBy, 'LDAP', 'ldap', start, end) },
+            ldapRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ldapService.getLdapExceptions(p), groupedBy, 'LDAP', 'ldap', start, end) },
         };
     }
 

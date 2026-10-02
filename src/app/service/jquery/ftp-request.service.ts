@@ -28,10 +28,10 @@ export class FtpRequestService {
         return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, { params: filters });
     }
 
-    getFtpSessionExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<FtpSessionExceptionsByPeriodAndappname[]> {
+    getFtpExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<FtpSessionExceptionsByPeriodAndappname[]> {
         let args = {
-            'column': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,exception.err_type.coalesce():errorType,start.${filters.groupedBy}:date,start.year:year`,
-            'join': 'exception,instance',
+            'column': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,error_type:errorType,start.${filters.groupedBy}:date,start.year:year`,
+            'join': 'instance',
             'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),

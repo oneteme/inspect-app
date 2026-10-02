@@ -32,7 +32,7 @@ export class MainSessionService {
 
     getMainExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<ExceptionsByPeriodAndAppname[]> {
         let args = {
-            "column": `start.${filters.groupedBy}:date,err_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year,type:type`,
+            "column": `start.${filters.groupedBy}:date,error_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year,type:type`,
             'main_session.type': 'BATCH',
             'join': 'instance',
             'instance.namespace': filters.namespace,
@@ -48,7 +48,7 @@ export class MainSessionService {
 
     getStartupExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<ExceptionsByPeriodAndAppname[]> {
         const args: any = {
-            'column': `start.${filters.groupedBy}:date,err_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`,
+            'column': `start.${filters.groupedBy}:date,error_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`,
             'join': 'instance',
             'instance.namespace': filters.namespace,
             'type': 'STARTUP',
@@ -67,7 +67,7 @@ export class MainSessionService {
             'column': 'name,count:count',
             'join': 'instance',
             'type': 'BATCH',
-            'err_type.notNull': '',
+            'error_type.notNull': '',
             'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
@@ -103,7 +103,7 @@ export class MainSessionService {
 
     getViewExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<ExceptionsByPeriodAndAppname[]> {
         const args: any = {
-            'column': `start.${filters.groupedBy}:date,err_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`,
+            'column': `start.${filters.groupedBy}:date,error_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`,
             'join': 'instance',
             'instance.namespace': filters.namespace,
             'type': 'VIEW',
