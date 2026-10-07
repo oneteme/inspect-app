@@ -42,13 +42,13 @@ export class AssistantChatDialogComponent implements AfterViewChecked {
 
     this.chatService.sendMessage({
       message: content,
-      ...(this.conversationId ? { conversationId: this.conversationId } : {})
+      ...(this.conversationId ? { sessionId: this.conversationId } : {})
     }).subscribe({
       next: response => {
-        this.conversationId = response.conversationId ?? this.conversationId;
+        this.conversationId = response.sessionId ?? this.conversationId;
         this.messages = [...this.messages, {
           role: 'assistant',
-          content: response.answer
+          content: response.response
         }];
         this.isSending = false;
         this.shouldScroll = true;

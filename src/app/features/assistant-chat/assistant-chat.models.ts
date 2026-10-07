@@ -6,8 +6,10 @@ export interface ChatMessage {
 
 export interface AiChatRequest {
   message: string;
-  conversationId?: string;
-  context: AssistantChatContext;
+  sessionId?: string;
+  page?: AssistantPage;
+  id?: string;
+  context?: AssistantChatContext;
 }
 
 export enum AssistantPage {
@@ -35,6 +37,6 @@ export interface AssistantChatContext {
 }
 
 export interface AiChatResponse {
-  answer: string;
-  conversationId?: string;
+  response: string;
+  sessionId?: string;
 }

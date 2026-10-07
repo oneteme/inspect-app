@@ -12,14 +12,14 @@ import { AssistantChatDialogComponent } from './assistant-chat-dialog.component'
       aria-label="Ouvrir le chat avec l'assistant"
       matTooltip="Assistant IA"
       (click)="openChat()">
-      <mat-icon>smart_toy</mat-icon>
+      <mat-icon class="material-symbols-outlined">network_intel_node</mat-icon>
     </button>
   `,
   styles: [`
     .assistant-chat-launcher {
       position: fixed;
       right: 24px;
-      bottom: 24px;
+      bottom: 48px;
       z-index: 1000;
       width: 52px !important;
       height: 52px !important;

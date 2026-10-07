@@ -11,7 +11,7 @@ import {
 
 @Injectable({ providedIn: 'root' })
 export class AssistantChatService {
-  private readonly endpoint = '/api/ai/chat';
+  private readonly endpoint = `${localStorage.getItem('server')}/agent/inspect/chat`;
 
   constructor(
     private readonly http: HttpClient,
@@ -21,7 +21,9 @@ export class AssistantChatService {
   sendMessage(request: Omit<AiChatRequest, 'context'>): Observable<AiChatResponse> {
     return this.http.post<AiChatResponse>(this.endpoint, {
       ...request,
-      context: this.getCurrentContext()
+      type: 'rest',
+      id: this.getCurrentContext().id,
+      page: this.getCurrentContext().page
     });
   }
 
