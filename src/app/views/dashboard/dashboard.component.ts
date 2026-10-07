@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
-import {combineLatest, finalize, forkJoin, map, Observable, of, Subscription, switchMap, tap} from 'rxjs';
+import {combineLatest, finalize, forkJoin, map, Observable, of, Subscription, switchMap, tap, timer} from 'rxjs';
 import {DatePipe, DecimalPipe, Location} from '@angular/common';
 import {app} from 'src/environments/environment';
 import {EnvRouter} from "../../service/router.service";
@@ -511,24 +511,28 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this._serverHealthSub?.unsubscribe();
         this._serverHealthSub = this._instanceService.getLastServerStart({ namespace })
                 .pipe(
-                    switchMap((servers: LastServerStart[]) => forkJoin({
-                        servers: of(servers),
-                        traces: servers.length
-                            ? this._instanceTraceService.getLastInstanceTrace({ instance: servers.map(s => s.id) })
-                            : of([])
-                    })),
-                    finalize(() => { if (this._loadGen === gen) { this.serverHealthLoading = false; this._cdr.markForCheck(); } })
+                    switchMap((servers: LastServerStart[]) => {
+                        this.deployTableRows = servers;
+                        this.deployTableToday = new Date();
+                        this.versionColor = groupByColor(servers, (v: any) => v.version);
+                        this.serverHealthLoading = false;
+                        this._rebuildDeployStats();
+                        this._rebuildServerHealth();
+                        return servers.length
+                          ? timer(5000).pipe(
+                            switchMap(() =>
+                              this._instanceTraceService.getLastInstanceTrace({instance: servers.map(s => s.id)})
+                            )
+                          ) : of([])
+
+                    })
                 )
-                .subscribe({ next: ({ servers, traces }) => {
+                .subscribe({ next: res => {
                     if (this._loadGen !== gen) return;
-                    this.serverHealthData = servers;
-                    this.versionColor = groupByColor(servers, (v: any) => v.version);
-                    this.deployTableRows = servers.map(s => ({ ...s, lastTrace: traces.find((t: any) => t.id === s.id)?.date }));
-                    this.deployTableToday = new Date();
+                    this.deployTableRows = this.deployTableRows.map(s => ({ ...s, lastTrace: res.find((t: any) => t.id === s.id)?.date }));
                     this._rebuildDeployStats();
                     this._rebuildServerHealth();
                 }})
-
     }
 
     private _rebuildDeployStats(): void {
