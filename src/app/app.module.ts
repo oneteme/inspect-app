@@ -44,6 +44,7 @@ import {OAuthModule} from "angular-oauth2-oidc";
 import {AuthInterceptor} from "./auth/auth.interceptor";
 import {environment} from "../environments/environment";
 import {NgCollectorModule} from "@oneteme/inspect-ng-collector";
+import {AssistantChatModule} from './features/assistant-chat/assistant-chat.module';
 
 registerLocaleData(localeFr, 'fr-FR');
 
@@ -234,6 +235,7 @@ const routes: Route[] = [
     ReactiveFormsModule,
     SharedModule,
     ViewsModule,
+    AssistantChatModule,
     OAuthModule.forRoot()
   ],
   declarations: [

@@ -1,0 +1,55 @@
+<section class="chat-dialog">
+  <header class="chat-header">
+    <div class="assistant-avatar">
+      <mat-icon>smart_toy</mat-icon>
+    </div>
+    <div class="chat-heading">
+      <h2>Assistant IA</h2>
+      <span><span class="status-dot"></span>Prêt à vous aider</span>
+    </div>
+    <button mat-icon-button aria-label="Fermer le chat" (click)="close()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </header>
+
+  <main #messageList class="chat-messages" aria-live="polite" aria-relevant="additions">
+    <div
+      *ngFor="let message of messages"
+      class="message-row"
+      [class.user-row]="message.role === 'user'"
+      [class.assistant-row]="message.role === 'assistant'">
+      <div
+        class="message-bubble"
+        [class.user-bubble]="message.role === 'user'"
+        [class.assistant-bubble]="message.role === 'assistant'"
+        [class.error-bubble]="message.isError">
+        {{ message.content }}
+      </div>
+    </div>
+
+    <div *ngIf="isSending" class="message-row assistant-row" aria-label="L’assistant rédige une réponse">
+      <div class="message-bubble assistant-bubble typing-indicator">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </main>
+
+  <form class="chat-composer" (ngSubmit)="sendMessage()">
+    <textarea
+      name="message"
+      [(ngModel)]="draft"
+      [disabled]="isSending"
+      (keydown)="onInputKeydown($event)"
+      placeholder="Écrivez votre message…"
+      rows="1"
+      aria-label="Votre message"></textarea>
+    <button
+      mat-fab
+      color="primary"
+      type="submit"
+      aria-label="Envoyer le message"
+      [disabled]="!draft.trim() || isSending">
+      <mat-icon>arrow_upward</mat-icon>
+    </button>
+  </form>
+</section>
