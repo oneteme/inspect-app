@@ -7,8 +7,11 @@
     {{ (row.instant * 1000 | date:'HH:mm:ss.SSS') }}
   </ng-template>
 
+  <ng-template jqtCellDef="appName" let-row>
+    {{ row.appName || '—' }}
+  </ng-template>
+
   <ng-template jqtCellDef="message" let-row>
-    <span style="font-weight: bold;">{{ row.level | typeColumnFormat }}</span><br>
     {{ row.message }}
   </ng-template>
 

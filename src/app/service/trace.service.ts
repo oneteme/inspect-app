@@ -15,6 +15,7 @@ import {
   DatabaseRequestStage,
   DirectoryRequest,
   DirectoryRequestStage,
+  ExceptionInfo,
   FtpRequest,
   FtpRequestStage,
   HttpRequestStage,
@@ -70,6 +71,10 @@ export class TraceService {
 
   getMainSession(id: string): Observable<MainSession> {
     return this.http.get<MainSession>(`${this.server}/session/main/${id}`);
+  }
+
+  getSessionExceptions(sessionId: string): Observable<ExceptionInfo[]> {
+    return this.http.get<ExceptionInfo[]>(`${this.server}/session/${sessionId}/exception`);
   }
 
   getTree(id: string, type: string) {

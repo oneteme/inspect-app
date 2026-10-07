@@ -5,7 +5,7 @@ import {
   MailRequest,
   MainSession,
   RestRequest,
-  RestSession, SessionEvent, UserAction
+  RestSession, SessionEvent
 } from "./trace.model";
 
 export interface RestSessionDto extends RestSession {
@@ -43,13 +43,14 @@ export interface AnalyticDto extends MainSession {
 }
 
 export interface MainSessionView extends MainSession {
+  exceptions?: ExceptionInfo[];
   restRequests?: RestRequestDto[];
   databaseRequests?: DatabaseRequestDto[];
   ftpRequests?: FtpRequestDto[];
   mailRequests?: MailRequestDto[];
   ldapRequests?: DirectoryRequestDto[];
   localRequests?: LocalRequest[];
-  userActions?: UserAction[];
+  sessionEvents?: SessionEvent[];
   logEntries?: LogEntry[];
   httpSessionStages?: HttpSessionStage[];
 }

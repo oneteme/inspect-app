@@ -1,6 +1,17 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {map, Observable} from "rxjs";
+import {ActivityPeriodGroup} from '../../shared/util';
+
+export interface SequenceActivityEvent {
+  date: number;
+  appName: string;
+  instanceId: string;
+  pending: number;
+  attempts: number;
+  sequence: number;
+  traceCount: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class InstanceTraceService {
@@ -31,6 +42,45 @@ export class InstanceTraceService {
       'start.lt': filters.date.toISOString()
     }).pipe(map((res: {pending: number}[]) => res[0].pending || 0));
   }
+
+  getActivityByPeriod(filters: {namespace: string, start: Date, end: Date, groupedBy: ActivityPeriodGroup, app_name?: string[]}): Observable<{
+    [key: string]: any;
+    appName: string;
+    pending: number;
+    attempts: number;
+    traceCount: number;
+  }[]> {
+    const args: any = {
+      'column': `start.${filters.groupedBy}:${filters.groupedBy},instance.app_name:appName,pending.sum:pending,attempts.sum:attempts,trace_count.sum:traceCount`,
+      'join': 'instance',
+      'instance.namespace': filters.namespace,
+      //'instance.type': 'SERVER',
+      'start.ge': filters.start.toISOString(),
+      'start.lt': filters.end.toISOString(),
+      'order': `${filters.groupedBy}.asc`
+    };
+    if (filters.app_name?.length) {
+      args['instance.app_name.in'] = filters.app_name.join(',');
+    }
+    return this.getInstanceTrace(args);
+  }
+
+  getSequenceEventsByPeriod(filters: {namespace: string, start: Date, end: Date, app_name?: string[]}): Observable<SequenceActivityEvent[]> {
+    const args: any = {
+      'column': 'start:date,instance.app_name:appName,instance_env:instanceId,pending:pending,attempts:attempts,sequence,trace_count:traceCount',
+      'join': 'instance',
+      'instance.namespace': filters.namespace,
+      //'instance.type': 'SERVER',
+      'start.ge': filters.start.toISOString(),
+      'start.lt': filters.end.toISOString(),
+      'order': 'start.asc'
+    };
+    if (filters.app_name?.length) {
+      args['instance.app_name.in'] = filters.app_name.join(',');
+    }
+    return this.getInstanceTrace(args);
+  }
+
 
   getLastInstanceTrace(filters: {instance: string[]}): Observable<{id: string, date: number}[]> {
     let args: any = {

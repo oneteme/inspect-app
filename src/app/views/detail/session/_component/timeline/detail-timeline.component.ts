@@ -111,7 +111,7 @@ export class DetailTimelineComponent implements OnChanges {
                 this.timelineEnd = this.request.end ? this.request.end * 1000 : this.timelineStart + 3600000;
                 let padding = (Math.ceil((this.timelineEnd - this.timelineStart) * 0.01))
                 this.dataArray = [].concat(
-                    (this.request.hasOwnProperty('userActions') ? (<MainSessionView>this.request).userActions ?? [] : []).map(r => ({...r, typeTimeline: 'action'})),
+                    (this.request.hasOwnProperty('sessionEvents') ? (<MainSessionView>this.request).sessionEvents ?? [] : []).map(r => ({...r, typeTimeline: 'action'})), // todo check if working ?
                     (this.request.restRequests ?? []).map(r => ({...r, typeTimeline: 'rest'})),
                     (this.request.ftpRequests ?? []).map(r => ({...r, typeTimeline: 'ftp'})),
                     (this.request.mailRequests ?? []).map(r => ({...r, typeTimeline: 'smtp'})),

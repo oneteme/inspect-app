@@ -14,8 +14,8 @@ import {AnalyticDto} from "../../model/request.model";
 import {PageTitleService} from '../../service/page-title.service';
 
 @Component({
-    templateUrl: './newanalytic.view.html',
-    styleUrls: ['./newanalytic.view.scss'],
+    templateUrl: './analytics.view.html',
+    styleUrls: ['./analytics.view.scss'],
     providers: [
         {
             provide: DateAdapter, useClass: CustomDateAdapter
@@ -25,7 +25,7 @@ import {PageTitleService} from '../../service/page-title.service';
         }
     ]
 })
-export class NewAnalyticView implements OnDestroy {
+export class AnalyticsView implements OnDestroy {
     private readonly _analyticService = inject(AnalyticService);
     private readonly _activatedRoute = inject(ActivatedRoute);
     private readonly _router = inject(EnvRouter);
@@ -53,7 +53,7 @@ export class NewAnalyticView implements OnDestroy {
     private readonly _visibleDurations = new Map<string, number>();
     private _analysisTimestamp: number = Date.now() / 1000;
 
-    params: Partial<{env: string, user: string, date: Date, offset: number, limit: number}> = {};
+    params: Partial<{namespace: string, user: string, date: Date, offset: number, limit: number}> = {};
 
     loading: boolean;
 
@@ -213,7 +213,7 @@ export class NewAnalyticView implements OnDestroy {
 
 
     getUsers() {
-        this.$users = this._mainSessionService.getUsersView({env: this.params.env, date: this.params.date});
+        this.$users = this._mainSessionService.getUsersView({namespace: this.params.namespace, date: this.params.date});
     }
 
     onRouteChange() {
@@ -228,7 +228,7 @@ export class NewAnalyticView implements OnDestroy {
                     iconOutlined: true,
                     title: 'Parcours de l\'utilisateur ' + params.user
                 });
-                this.params.env = queryParams.env || app.defaultEnv;
+                this.params.namespace = queryParams.namespace || app.defaultNamespace;
                 this.params.date = new Date(queryParams.date);
                 this.params.offset = 0;
                 this.filterForm.patchValue({
@@ -251,8 +251,8 @@ export class NewAnalyticView implements OnDestroy {
                 );
             })
         ).subscribe(d => {
-            this._router.navigate(['/newanalytic', d.user], {
-                queryParams: {date: d.date.toISOString(), env: this.params.env}
+            this._router.navigate(['/analytics', d.user], {
+                queryParams: {date: d.date.toISOString(), env: this.params.namespace}
             });
         });
     }
@@ -270,3 +270,4 @@ export class NewAnalyticView implements OnDestroy {
         this.updateDisplayedSessions();
     }
 }
+

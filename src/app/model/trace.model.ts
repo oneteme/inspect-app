@@ -147,6 +147,7 @@ export interface AbstractStage {
 export interface ExceptionInfo {
   type: string;
   message: string;
+  offset?: number;
   stackTraceRows: StackTraceRow[];
   cause: ExceptionInfo;
 }
@@ -201,6 +202,7 @@ export interface TracingProperties {
 
 export interface LogEntry {
   instant: number;
+  appName: string;
   level: string;
   message: string;
   stackRows: StackTraceRow[];

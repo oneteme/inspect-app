@@ -199,6 +199,16 @@ export function periodManagement(start: Date, end: Date): string {
     return ChartGroup.byYear;
 }
 
+export type ActivityPeriodGroup = 'yearMonth' | 'yearWeek' | 'monthDay' | 'hourMinute';
+
+export function activityPeriodManagement(start: Date, end: Date): ActivityPeriodGroup {
+    const group = periodManagement(start, end);
+    if (group === ChartGroup.byHour) return 'hourMinute';
+    if (group === ChartGroup.monthDay) return 'monthDay';
+    if (group === ChartGroup.yearWeek) return 'yearWeek';
+    return 'yearMonth';
+}
+
 export const formatters: any = {
 
     year: function byYear(r: any[], _datePipe: DatePipe, nameOutput: string = 'date') {

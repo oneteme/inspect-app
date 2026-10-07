@@ -83,6 +83,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
     { label: Constants.MAPPING_TYPE['test'].title, icon: Constants.MAPPING_TYPE['test'].icon, id: 'test', route: 'session/test' },
     { label: Constants.MAPPING_TYPE['startup'].title, icon: Constants.MAPPING_TYPE['startup'].icon, id: 'startup', route: 'session/startup', kpiRoute: 'kpi/session/startup' },
     { label: Constants.MAPPING_TYPE['view'].title, icon: Constants.MAPPING_TYPE['view'].icon, id: 'view', route: 'session/view' },
+    { label: Constants.MAPPING_TYPE['architecture'].title, icon: Constants.MAPPING_TYPE['architecture'].icon, id: 'architecture', route: 'architecture' },
   ];
 
   private readonly _dialog = inject(MatDialog);
@@ -260,6 +261,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
     // return 'jean.dupont@example.com';
     const claims = this.getUserClaims();
     return claims?.email || '';
+  }
+
+  openServerActivity(event: MouseEvent): void {
+    this._envRouter.navigateOnClick(event, ['activity'], {
+      queryParams: {
+        ...this.buildNavigationQueryParams(),
+        namespace: this._activatedRoute.snapshot.queryParams.namespace || this.namespace.value || app.defaultNamespace
+      }
+    });
   }
 
   logout() {

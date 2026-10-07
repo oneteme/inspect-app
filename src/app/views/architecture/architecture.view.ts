@@ -1,771 +1,17 @@
 import {AfterViewInit, Component, ElementRef, inject, NgZone, OnDestroy, OnInit, ViewChild} from "@angular/core";
-import {ChartProvider, field, XaxisType, YaxisType} from "@oneteme/jquery-core";
-import {RestSessionService} from "../../service/jquery/rest-session.service";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {EnvRouter} from "../../service/router.service";
-import {ActivatedRoute, Params} from "@angular/router";
-import {combineLatest, finalize, forkJoin, fromEvent, map, Subscription} from "rxjs";
-import {app, makeDatePeriod} from "../../../environments/environment";
+import {ActivatedRoute} from "@angular/router";
 import {Location} from "@angular/common";
-import {TreeService} from "../../service/tree.service";
-import {ArchitectureTree} from "./model/architecture.model";
+import {debounceTime, finalize, forkJoin, fromEvent, map, Subscription} from "rxjs";
+import {mxCell} from "mxgraph";
 import mx from "../../../mxgraph";
+import {app, makeDatePeriod} from "../../../environments/environment";
+import {EnvRouter} from "../../service/router.service";
+import {TreeService} from "../../service/tree.service";
 import {InstanceService} from "../../service/jquery/instance.service";
-import {MainSessionService} from "../../service/jquery/main-session.service";
-import {NumberFormatterPipe} from "src/app/shared/pipe/number.pipe";
-import {SizePipe} from "../../shared/pipe/size.pipe";
 import {PageTitleService} from '../../service/page-title.service';
-
-@Component({
-    templateUrl: './architecture.view.html',
-    styleUrls: ['./architecture.view.scss'],
-})
-export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
-    private _treeService = inject(TreeService);
-    private _instanceService = inject(InstanceService);
-    private _router = inject(EnvRouter);
-    private _pageTitleService = inject(PageTitleService);
-    private _activatedRoute = inject(ActivatedRoute);
-    private _location = inject(Location);
-    private _numberFormatter = inject(NumberFormatterPipe);
-    private _sizeFormatter = inject(SizePipe);
-    private _zone = inject(NgZone);
-
-    rangesColorConfig = [ '#E9E9E9', '#AFB3EF', '#757DF4', '#3A47FA', '#0011FF' ]
-    tree: ArchitectureTree;
-    resizeSubscription: any;
-
-    syntheseIsLoading: boolean;
-
-    serverFilterForm = new FormGroup({
-        dateRangePicker: new FormGroup({
-            start: new FormControl<Date>(null, Validators.required),
-            end: new FormControl<Date>(null, Validators.required)
-        })
-    });
-
-    focusControl:   FormControl = new FormControl<string | null>(null);
-    edgeTypeFilters: { [key: string]: boolean } = { 'REST': true, 'VIEW': true, 'JDBC': true, 'FTP': true, 'SMTP': true, 'LDAP': true };
-
-    subscriptions: Subscription[] = [];
-    params: Partial<{ namespace: string, start: Date, end: Date }> = {};
-    private _architectures: Architecture[] = [];   // données brutes conservées pour le filtre
-    appNames: string[] = [];                       // liste des microservices disponibles
-
-    @ViewChild('graphContainer') graphContainer: ElementRef;
-    @ViewChild('outlineContainer') outlineContainer: ElementRef;
-    @ViewChild('searchInput') searchInputRef: ElementRef;
-
-    minimapVisible: boolean = JSON.parse(localStorage.getItem('arch_minimap') ?? 'true');
-    isFullscreen: boolean = false;
-    searchQuery: string = '';
-    searchResults: any[] = [];
-    currentSearchIndex: number = 0;
-    searchVisible: boolean = false;
-
-    selectedVertex: { name: string; type: string; incomingCount: number; outgoingCount: number; incomingNames: string[]; outgoingNames: string[] } | null = null;
-    hoveredVertex: { name: string; type: string; incomingCount: number; outgoingCount: number; x: number; y: number } | null = null;
-    searchHighlightedNodes: any[] = [];  // Nodes trouvés lors de la recherche
-
-    statsCards: { type: string; label: string; count: number; icon: string; color: string }[] = [];
-
-    ngOnInit() {
-        this._pageTitleService.set({ icon: 'lan', title: 'Architecture' });
-        this.subscriptions.push(combineLatest({
-            params: this._activatedRoute.params,
-            queryParams: this._activatedRoute.queryParams
-        }).subscribe({
-            next: (v: { params: Params, queryParams: Params }) => {
-                this.params.namespace = v.queryParams.namespace || app.defaultNamespace;
-                this.params.start = v.queryParams.start ? new Date(v.queryParams.start) : makeDatePeriod(6).start;
-                this.params.end = v.queryParams.end ? new Date(v.queryParams.end) : makeDatePeriod(6, 1).end;
-                this.patchDateValue(this.params.start, new Date(this.params.end.getFullYear(), this.params.end.getMonth(), this.params.end.getDate() - 1));
-                this.init();
-                this._location.replaceState(`${this._router.url.split('?')[0]}?namespace=${this.params.namespace}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}`);
-            }
-        }));
-
-
-        this.subscriptions.push(this.focusControl.valueChanges.subscribe(name => {
-            if (!this.tree || !this._architectures.length) return;
-            this.tree.clearAnimatedEdges();
-            this.tree.clearCells();
-            this.tree.draw(() => this.draw(this.tree, this._architectures, name));
-            if (name) {
-                setTimeout(() => this.tree.highlightFocusedNode(name), 100);
-            } else {
-                this.tree.clearHighlight();
-            }
-        }));
-    }
-
-    ngAfterViewInit() {
-        this.tree = ArchitectureTree.setup(this.graphContainer.nativeElement);
-        this.tree.setOutline(this.outlineContainer.nativeElement);
-
-        // Configure l'écouteur de click sur les vertices pour animer les edges des appelants
-        this.tree.setupVertexClickListener(
-            (vertex: any) => {
-                // Single-click : afficher la card
-                const vertexName = this.tree._graph.model.getValue(vertex);
-                const architecture = this._architectures.find(a => a.name === vertexName);
-                let nodeType = architecture?.type;
-                if (!nodeType) {
-                    for (const arch of this._architectures) {
-                        const rs = arch.remoteServers?.find(r => (r.schema ?? r.name) === vertexName);
-                        if (rs) { nodeType = rs.type === 'MAIN' ? (arch.type) : rs.type; break; }
-                    }
-                }
-                const incomingEdges = this.tree._graph.getIncomingEdges(vertex, null);
-                const outgoingEdges = this.tree._graph.getOutgoingEdges(vertex);
-
-                // Récupérer les noms des nodes appelants
-                const incomingNames = incomingEdges.map((edge: any) => {
-                    const source = edge.getTerminal(true);
-                    return this.tree._graph.model.getValue(source);
-                }).sort();
-
-                // Récupérer les noms des nodes appelés
-                const outgoingNames = outgoingEdges.map((edge: any) => {
-                    const target = edge.getTerminal(false);
-                    return this.tree._graph.model.getValue(target);
-                }).sort();
-
-                this.selectedVertex = {
-                    name: vertexName,
-                    type: nodeType ?? 'UNKNOWN',
-                    incomingCount: incomingEdges.length,
-                    outgoingCount: outgoingEdges.length,
-                    incomingNames: incomingNames,
-                    outgoingNames: outgoingNames
-                };
-
-                // N'animer que si aucun microservice n'est sélectionné dans le filtre
-                if (this.focusControl.value === null) {
-                    this.tree.animateIncomingEdges(vertex);
-                }
-            },
-            () => {
-                // Clic sur le fond : nettoyer les animations et la card
-                this.selectedVertex = null;
-                if (this.focusControl.value === null) {
-                    this.tree.clearAnimatedEdges();
-                }
-            },
-            (vertex: any) => {
-                // Double-click : focus automatique SEULEMENT pour REST et MAIN
-                const vertexName = this.tree._graph.model.getValue(vertex);
-                const architecture = this._architectures.find(a => a.name === vertexName);
-
-                // Vérifier que c'est un type focalisable (REST ou MAIN)
-                if (architecture && (architecture.type === 'REST' || architecture.type === 'MAIN')) {
-                    this.focusControl.setValue(vertexName);
-                }
-                // Sinon, le double-click n'a aucun effet sur les ressources
-            }
-        );
-
-        // Écouteurs de hover pour le tooltip
-        (this.tree as any).onVertexHover = (vertex: any, event: MouseEvent) => {
-            const vertexName = this.tree._graph.model.getValue(vertex);
-            const architecture = this._architectures.find(a => a.name === vertexName);
-            let nodeType = architecture?.type;
-            if (!nodeType) {
-                for (const arch of this._architectures) {
-                    const rs = arch.remoteServers?.find(r => (r.schema ?? r.name) === vertexName);
-                    if (rs) { nodeType = rs.type === 'MAIN' ? arch.type : rs.type; break; }
-                }
-            }
-            const incomingEdges = this.tree._graph.getIncomingEdges(vertex, null);
-            const outgoingEdges = this.tree._graph.getOutgoingEdges(vertex);
-            
-            this._zone.run(() => {
-                this.hoveredVertex = {
-                    name: vertexName,
-                    type: nodeType ?? 'UNKNOWN',
-                    incomingCount: incomingEdges.length,
-                    outgoingCount: outgoingEdges.length,
-                    x: event.clientX,
-                    y: event.clientY
-                };
-            });
-        };
-
-        (this.tree as any).onVertexHoverOut = () => {
-            this._zone.run(() => {
-                this.hoveredVertex = null;
-            });
-        };
-
-        this._zone.runOutsideAngular(() => {
-            this.resizeSubscription = fromEvent(window, 'resize').subscribe(() => {
-                this._zone.run(() => {
-                    if (this.tree) {
-                        this.tree.resizeAndCenter()
-                    }
-                })
-
-            });
-
-            fromEvent(document, 'fullscreenchange').subscribe(() => {
-                this._zone.run(() => {
-                    this.isFullscreen = !!document.fullscreenElement;
-                    setTimeout(() => this.tree?.resizeAndCenter(), 200);
-                });
-            });
-        });
-
-    }
-
-    ngOnDestroy(): void {
-        this.subscriptions.forEach(s => s.unsubscribe());
-        if (this.resizeSubscription) {
-            this.resizeSubscription.unsubscribe();
-        }
-        this._pageTitleService.clear();
-    }
-
-    patchDateValue(start: Date, end: Date) {
-        this.serverFilterForm.patchValue({
-            dateRangePicker: {
-                start: start,
-                end: end
-            }
-        }, { emitEvent: false });
-    }
-
-    search() {
-        if (this.serverFilterForm.valid) {
-            let start = this.serverFilterForm.getRawValue().dateRangePicker.start;
-            let end = this.serverFilterForm.getRawValue().dateRangePicker.end;
-            let excludedEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1)
-            if (start.toISOString() != this.params.start.toISOString() || excludedEnd.toISOString() != this.params.end.toISOString()) {
-                this._router.navigate([], {
-                    relativeTo: this._activatedRoute,
-                    queryParamsHandling: 'merge',
-                    queryParams: { start: start.toISOString(), end: excludedEnd.toISOString() }
-                });
-            } else {
-                this.init();
-            }
-        }
-    }
-
-    init() {
-        this.syntheseIsLoading = true;
-
-        this.subscriptions.push(forkJoin({
-            mainSession: this._instanceService.getMainSessionApplication(this.params.start, this.params.end, this.params.namespace),
-            restSession: this._treeService.getArchitecture(this.params.start, this.params.end, this.params.namespace)
-        }).pipe(map(res => {
-            res.restSession.push(...res.mainSession.map(m => ({name: m.appName, type: m.type, remoteServers: undefined})));
-            return res.restSession;
-        }), finalize(() => this.syntheseIsLoading = false)).subscribe({
-            next: res => {
-                this._architectures = res;
-                this.appNames = [...new Set(res.map((a: Architecture) => a.name))].sort();
-                this.focusControl.setValue(null, { emitEvent: false }); // reset filtre
-                this.tree.clearCells();
-                this.tree.draw(() => this.draw(this.tree, res));
-                this.computeStats(res);
-            }
-        }));
-    }
-
-    computeStats(architectures: Architecture[]) {
-        const appCounts: { [type: string]: Set<string> } = {};
-        const resCounts: { [type: string]: Set<string> } = {};
-
-        architectures.forEach(a => {
-            if (!appCounts[a.type]) appCounts[a.type] = new Set();
-            appCounts[a.type].add(a.name);
-            (a.remoteServers ?? []).forEach(r => {
-                if (!resCounts[r.type]) resCounts[r.type] = new Set();
-                resCounts[r.type].add(r.schema ?? r.name);
-            });
-        });
-
-        const typeConfig: { [t: string]: { label: string; icon: string; color: string } } = {
-            REST:  { label: 'Microservices',  icon: 'assets/mxgraph/microservice.drawio.svg', color: '#3b82f6' },
-            VIEW:  { label: 'Vues',           icon: 'assets/mxgraph/view.drawio.svg',         color: '#06b6d4' },
-            JDBC:  { label: 'Bases de données', icon: 'assets/mxgraph/database.drawio.svg',   color: '#f97316' },
-            FTP:   { label: 'Serveurs FTP',   icon: 'assets/mxgraph/ftp.drawio.svg',          color: '#0e7490' },
-            SMTP:  { label: 'Serveurs SMTP',  icon: 'assets/mxgraph/smtp.drawio.svg',         color: '#f59e0b' },
-            LDAP:  { label: 'Annuaires LDAP', icon: 'assets/mxgraph/ldap.drawio.svg',         color: '#7c3aed' },
-        };
-
-        const cards: typeof this.statsCards = [];
-        [...Object.entries(appCounts), ...Object.entries(resCounts)].forEach(([type, set]) => {
-            const existing = cards.find(c => c.type === type);
-            if (existing) { existing.count = set.size; return; }
-            const tc = typeConfig[type];
-            if (tc) cards.push({ type, label: tc.label, count: set.size, icon: tc.icon, color: tc.color });
-        });
-
-        // Ordre d'affichage
-        const order = ['REST', 'VIEW', 'JDBC', 'FTP', 'SMTP', 'LDAP'];
-        this.statsCards = cards.sort((a, b) => order.indexOf(a.type) - order.indexOf(b.type));
-    }
-
-    createRanges(arr: any[], field: string, isSize: boolean) {
-        const ranges: any[] = [{ from: 0, to: 0, name: `0`, color: this.rangesColorConfig[0] }];
-        if(arr.length){
-            let max = arr.reduce((acc: any, cur: any) => {
-                return cur[field] > acc ? cur[field] : acc
-            }, arr[0][field]);
-            const range = max / 4;
-            const parts = range != 0 ? 4 : 1;
-
-            for (let i = 0; i < parts; i++) {
-                const start = i * range != 0 ? Math.floor(i * range+1) : 1;
-                const end = Math.floor((i + 1) * range);
-                let name = isSize ?`${this._sizeFormatter.transform(start)} - ${this._sizeFormatter.transform(end)}`: `${this._numberFormatter.transform(start)} - ${this._numberFormatter.transform(end)}`;
-                ranges.push({ from: start, to: end, name: name, color: this.rangesColorConfig[i + 1] })
-            }
-        }
-        return ranges;
-    }
-
-
-    /**
-     * Calcul BFS des nœuds à inclure à partir de focusedApp
-     * dans les deux directions (appelants + appelés).
-     * Seuls les edges dont le type est actif dans edgeTypeFilters sont traversés.
-     */
-    private getIncludedNodes(architectures: Architecture[], focusedApp: string, enabledTypes: { [key: string]: boolean } = {}): Set<string> {
-        const included = new Set<string>([focusedApp]);
-        let frontier = new Set<string>([focusedApp]);
-
-        const isEdgeEnabled = (a: Architecture, r: RemoteServer): boolean =>
-            !!enabledTypes[this.effectiveType(a, r, architectures)];
-
-        // Un seul niveau : appelants et appelés directs
-        const next = new Set<string>();
-        frontier.forEach(node => {
-            architectures.forEach(a => {
-                if (!included.has(a.name) && a.remoteServers?.some(r => (r.schema ?? r.name) === node && isEdgeEnabled(a, r))) {
-                    included.add(a.name);
-                    next.add(a.name);
-                }
-            });
-            const currentArch = architectures.find(a => a.name === node);
-            currentArch?.remoteServers?.forEach(r => {
-                if (!isEdgeEnabled(currentArch, r)) return;
-                const key = r.schema ?? r.name;
-                if (!included.has(key)) {
-                    included.add(key);
-                    next.add(key);
-                }
-            });
-        });
-        return included;
-    }
-
-    draw(tree: ArchitectureTree, architectures: Architecture[], focusedApp?: string | null) {
-        const cfg = ServerConfig;
-        const W = cfg['REST'].width, H = cfg['REST'].height;
-        const nodeStyle = 'verticalLabelPosition=bottom;verticalAlign=top;fontSize=10;labelWidth=200;overflow=visible;whiteSpace=nowrap;';
-        const edgeStyle = 'rounded=1;curved=1;orthogonalLoop=1;jettySize=auto;fontSize=9;fontColor=#555;strokeWidth=1.5;endArrow=block;endFill=1;endSize=6;startArrow=none;sourcePerimeterSpacing=12;';
-
-        const enabledTypes = this.edgeTypeFilters;
-
-        // ── Filtrage BFS selon profondeur ─────────────────────────────────────
-        let includedNodes: Set<string> | null = null;
-        if (focusedApp) {
-            includedNodes = this.getIncludedNodes(architectures, focusedApp, enabledTypes);
-        }
-
-        const filtered = focusedApp && includedNodes
-            ? architectures.filter(a => includedNodes!.has(a.name))
-            : architectures;
-
-        const allNodes: { [k: string]: { type: string; vertex: any } } = {};
-
-        // Collecter tous les nœuds (sources ET cibles) qui participent à au moins un edge actif
-        const usedNodes = new Set<string>();
-        filtered.forEach(a => {
-            (a.remoteServers ?? []).forEach(r => {
-                const rawKey = r.schema ?? r.name;
-                if (enabledTypes[this.effectiveType(a, r, architectures)]) {
-                    usedNodes.add(a.name);
-                    usedNodes.add(rawKey);
-                }
-            });
-        });
-
-        // 1. Créer uniquement les nœuds applicatifs qui participent à au moins un edge actif
-        filtered.forEach(a => {
-            if (usedNodes.has(a.name) && !allNodes[a.name] && cfg[a.type]) {
-                allNodes[a.name] = { type: a.type, vertex: null };
-            }
-        });
-
-        // 2. Créer SEULEMENT les ressources utilisées (via des edges actives uniquement)
-        filtered.forEach(a => {
-            if (!allNodes[a.name]) return;
-            (a.remoteServers ?? []).forEach(r => {
-                const rawKey = r.schema ?? r.name;
-                const effType = this.effectiveType(a, r, architectures);
-                if (!enabledTypes[effType]) return;
-                if (!focusedApp || !includedNodes || includedNodes.has(rawKey)) {
-                    if (['REST', 'VIEW'].includes(effType)) {
-                        const targetArch = architectures.find(arch => arch.name === r.name);
-                        const targetType = targetArch?.type ?? effType;
-                        if (usedNodes.has(rawKey) && !allNodes[rawKey] && cfg[targetType]) {
-                            allNodes[rawKey] = { type: targetType, vertex: null };
-                        }
-                    } else if (effType !== 'MAIN' && usedNodes.has(rawKey) && !allNodes[rawKey] && cfg[effType]) {
-                        allNodes[rawKey] = { type: effType, vertex: null };
-                    }
-                }
-            });
-        });
-
-        // ── Insertion des nœuds (sans coords — laissées au layout) ───────────
-        const focusedStyle = 'verticalLabelPosition=bottom;verticalAlign=top;fontSize=10;labelWidth=200;overflow=visible;whiteSpace=nowrap;strokeColor=#f97316;strokeWidth=3;fillColor=#fff7ed;';
-        Object.entries(allNodes).forEach(([k, info]) => {
-            const icon = cfg[info.type]?.icon ?? cfg['REST'].icon;
-            const style = (focusedApp && k === focusedApp) ? icon + focusedStyle : icon + nodeStyle;
-            info.vertex = tree._graph.insertVertex(tree._parent, null, k, 0, 0, W, H, style);
-        });
-
-        // ── Edges ─────────────────────────────────────────────────────────────
-        filtered.forEach(a => {
-            const src = allNodes[a.name]?.vertex;
-            if (!src || !a.remoteServers) return;
-            a.remoteServers.forEach(r => {
-                const rawKey = r.schema ?? r.name;
-                const effType = this.effectiveType(a, r, architectures);
-                if (!enabledTypes[effType]) return;
-                const tgt = allNodes[rawKey]?.vertex;
-                if (!tgt || src === tgt) return;
-                if (tree._graph.getEdgesBetween(src, tgt).length > 0) return;
-                const edgeColor = effType === 'JDBC'  ? 'strokeColor=#FF7F00;'
-                                : effType === 'FTP'   ? 'strokeColor=#0d9488;'
-                                : effType === 'SMTP'  ? 'strokeColor=#f97316;'
-                                : effType === 'LDAP'  ? 'strokeColor=#8b5cf6;'
-                                : effType === 'REST'  ? 'strokeColor=#2563eb;'
-                                : effType === 'VIEW'  ? 'strokeColor=#06b6d4;'
-                                : effType === 'MAIN'  ? 'strokeColor=#16a34a;'
-                                : 'strokeColor=#78716c;';
-                tree._graph.insertEdge(tree._parent, null, '', src, tgt, edgeStyle + edgeColor);
-            });
-        });
-
-        // ── Layout hiérarchique automatique ────────────────────────────────────
-        const layout = new mx.mxHierarchicalLayout(tree._graph);
-        (layout as any).orientation           = mx.mxConstants.DIRECTION_NORTH;
-        (layout as any).intraCellSpacing      = 40;
-        (layout as any).interRankCellSpacing  = 100;
-        (layout as any).interHierarchySpacing = 40;
-        (layout as any).disableEdgeStyle      = false;
-        layout.execute(tree._parent);
-    }
-
-    // ── Toolbar controls ─────────────────────────────────────────────────────
-    toggleMinimap() {
-        this.minimapVisible = !this.minimapVisible;
-        localStorage.setItem('arch_minimap', JSON.stringify(this.minimapVisible));
-    }
-
-
-    toggleFullscreen() {
-        const el = document.getElementById('fixed-width-container');
-        if (!this.isFullscreen) {
-            el?.requestFullscreen().then(() => {
-                this.isFullscreen = true;
-                setTimeout(() => this.tree?.resizeAndCenter(), 200);
-            });
-        } else {
-            document.exitFullscreen().then(() => {
-                this.isFullscreen = false;
-                setTimeout(() => this.tree?.resizeAndCenter(), 200);
-            });
-        }
-    }
-
-    async exportPNG() {
-        const container = this.graphContainer.nativeElement as HTMLElement;
-        const svgEl = container.querySelector('svg');
-        if (!svgEl) return;
-        const svgClone = svgEl.cloneNode(true) as SVGElement;
-        const bbox = svgEl.getBoundingClientRect();
-        svgClone.setAttribute('width', String(bbox.width));
-        svgClone.setAttribute('height', String(bbox.height));
-        const imageEls = Array.from(svgClone.querySelectorAll('image'));
-        await Promise.all(imageEls.map(async (img) => {
-            const href = img.getAttribute('href') || img.getAttribute('xlink:href') || '';
-            if (!href || href.startsWith('data:')) return;
-            try {
-                const response = await fetch(href);
-                const blob = await response.blob();
-                const b64 = await new Promise<string>((resolve, reject) => {
-                    const reader = new FileReader();
-                    reader.onload = () => resolve(reader.result as string);
-                    reader.onerror = reject;
-                    reader.readAsDataURL(blob);
-                });
-                img.setAttribute('href', b64);
-                img.removeAttribute('xlink:href');
-            } catch { }
-        }));
-        const svgStr = new XMLSerializer().serializeToString(svgClone);
-        const canvas = document.createElement('canvas');
-        const scale = window.devicePixelRatio || 1;
-        canvas.width = bbox.width * scale;
-        canvas.height = bbox.height * scale;
-        const ctx = canvas.getContext('2d')!;
-        ctx.scale(scale, scale);
-        ctx.fillStyle = '#f8fafc';
-        ctx.fillRect(0, 0, bbox.width, bbox.height);
-        const img = new Image();
-        const svgBlob = new Blob([svgStr], { type: 'image/svg+xml;charset=utf-8' });
-        const url = URL.createObjectURL(svgBlob);
-        img.onload = async () => {
-            ctx.drawImage(img, 0, 0);
-
-            // ── Badge "INSPECT by @ONETEME/JARVIS" + logo GitHub en bas à droite ─────
-            const badgeText  = 'INSPECT';
-            const badgeSubtext = '@ONETEME/JARVIS';
-            const fontSize   = 12;
-            const fontSizeSmall = 10;
-            const padding    = 12;
-            const iconSize   = 20;
-            const gap        = 8;
-            const borderRadius = 10;
-            const borderWidth = 1.5;
-            
-            ctx.font = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
-            const textW = ctx.measureText(badgeText).width;
-            ctx.font = `500 ${fontSizeSmall}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
-            const subtextW = ctx.measureText(badgeSubtext).width;
-            const maxTextW = Math.max(textW, subtextW);
-            
-            const badgeW = iconSize + gap + maxTextW + padding * 2;
-            const badgeH = fontSize + fontSizeSmall + gap + padding * 2;
-            const bx = bbox.width  - badgeW - 12;
-            const by = bbox.height - badgeH - 12;
-
-            ctx.save();
-            
-            // Ombre du badge
-            ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-            ctx.shadowBlur = 12;
-            ctx.shadowOffsetX = 0;
-            ctx.shadowOffsetY = 4;
-            
-            // Fond avec gradient
-            const gradient = ctx.createLinearGradient(bx, by, bx, by + badgeH);
-            gradient.addColorStop(0, 'rgba(15, 23, 42, 0.95)');
-            gradient.addColorStop(1, 'rgba(30, 41, 59, 0.95)');
-            ctx.fillStyle = gradient;
-            
-            ctx.beginPath();
-            (ctx as any).roundRect?.(bx, by, badgeW, badgeH, borderRadius) ?? ctx.rect(bx, by, badgeW, badgeH);
-            ctx.fill();
-            
-            // Bordure avec gradient
-            const borderGradient = ctx.createLinearGradient(bx, by, bx, by + badgeH);
-            borderGradient.addColorStop(0, 'rgba(148, 163, 184, 0.5)');
-            borderGradient.addColorStop(1, 'rgba(100, 116, 139, 0.3)');
-            ctx.strokeStyle = borderGradient;
-            ctx.lineWidth = borderWidth;
-            ctx.shadowColor = 'transparent';
-            ctx.beginPath();
-            (ctx as any).roundRect?.(bx, by, badgeW, badgeH, borderRadius) ?? ctx.rect(bx, by, badgeW, badgeH);
-            ctx.stroke();
-
-            // Logo GitHub
-            try {
-                const ghImg = await new Promise<HTMLImageElement>((res, rej) => {
-                    const i = new Image();
-                    i.onload = () => res(i);
-                    i.onerror = rej;
-                    i.src = 'assets/github.svg';
-                });
-                const iy = by + (badgeH - iconSize) / 2;
-                ctx.drawImage(ghImg, bx + padding, iy, iconSize, iconSize);
-            } catch { /* logo indisponible */ }
-
-            // Texte principal (INSPECT)
-            ctx.fillStyle = '#ffffff';
-            ctx.font = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
-            ctx.textBaseline = 'top';
-            ctx.fillText(badgeText, bx + padding + iconSize + gap, by + padding - 1);
-            
-            // Texte secondaire (@ONETEME/JARVIS)
-            ctx.fillStyle = 'rgba(226, 232, 240, 0.8)';
-            ctx.font = `500 ${fontSizeSmall}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
-            ctx.fillText(badgeSubtext, bx + padding + iconSize + gap, by + padding + fontSize + 2);
-            
-            ctx.restore();
-            // ──────────────────────────────────────────────────────────────────
-
-            URL.revokeObjectURL(url);
-            const a = document.createElement('a');
-            a.download = `architecture.png`;
-            a.href = canvas.toDataURL('image/png');
-            a.click();
-        };
-        img.onerror = () => URL.revokeObjectURL(url);
-        img.src = url;
-    }
-
-    toggleSearch() {
-        this.searchVisible = !this.searchVisible;
-        if (this.searchVisible) {
-            setTimeout(() => this.searchInputRef?.nativeElement?.focus(), 320);
-        } else {
-            this.clearSearch();
-        }
-    }
-
-    onSearch() {
-        if (!this.tree || !this.searchQuery.trim()) { this.clearSearch(); return; }
-        const q = this.searchQuery.toLowerCase();
-        const vertices = this.tree._graph.getChildVertices(this.tree._parent);
-        this.searchResults = vertices.filter((v: any) => {
-            const label = this.tree._graph.getLabel(v);
-            return label && String(label).toLowerCase().includes(q);
-        });
-        this.currentSearchIndex = 0;
-        this.searchHighlightedNodes = this.searchResults;
-        this.applySearchHighlight();
-        this.focusSearchResult();
-    }
-
-    navigateSearch(direction: 1 | -1) {
-        if (!this.searchResults.length) return;
-        this.currentSearchIndex = (this.currentSearchIndex + direction + this.searchResults.length) % this.searchResults.length;
-        this.applySearchHighlight();
-        this.focusSearchResult();
-    }
-
-    focusSearchResult() {
-        if (!this.searchResults.length) return;
-        const cell = this.searchResults[this.currentSearchIndex];
-        this.tree._graph.setSelectionCell(cell);
-        this.tree._graph.scrollCellToVisible(cell, true);
-    }
-
-    clearSearch() {
-        this.searchQuery = '';
-        this.searchResults = [];
-        this.searchHighlightedNodes = [];
-        this.currentSearchIndex = 0;
-        this.clearSearchHighlight();
-        this.tree?._graph.clearSelection();
-    }
-
-    toggleEdgeTypeFilter(type: string) {
-        this.edgeTypeFilters[type] = !this.edgeTypeFilters[type];
-        if (!this.tree || !this._architectures.length) return;
-        const name = this.focusControl.value;
-        this.tree.clearAnimatedEdges();
-        this.tree.clearCells();
-        this.tree.draw(() => this.draw(this.tree, this._architectures, name));
-        if (name) {
-            setTimeout(() => this.tree.highlightFocusedNode(name), 100);
-        }
-    }
-
-    private effectiveType(a: Architecture, r: RemoteServer, architectures: Architecture[]): string {
-        if (r.type !== 'MAIN') return r.type;
-        if (a.type === 'VIEW') return 'VIEW';
-        const targetArch = architectures.find(arch => arch.name === r.name);
-        if (targetArch?.type === 'VIEW') return 'VIEW';
-        return 'REST';
-    }
-
-    /**
-     * Retourne l'URL de l'icône pour un type donné
-     */
-    getIconForType(type: string): string {
-        const icons: { [key: string]: string } = {
-            'REST': 'assets/mxgraph/microservice.drawio.svg',
-            'VIEW': 'assets/mxgraph/view.drawio.svg',
-            'JDBC': 'assets/mxgraph/database.drawio.svg',
-            'FTP': 'assets/mxgraph/ftp.drawio.svg',
-            'SMTP': 'assets/mxgraph/smtp.drawio.svg',
-            'LDAP': 'assets/mxgraph/ldap.drawio.svg',
-        };
-        return icons[type] || '';
-    }
-
-    /**
-     * Applique le highlighting pour la recherche
-     */
-    applySearchHighlight() {
-        this.clearSearchHighlight();
-        if (!this.tree || this.searchResults.length === 0) return;
-
-        const allVertices = this.tree._graph.getChildVertices(this.tree._parent);
-
-        // Appliquer le style à tous les vertices
-        allVertices.forEach((v: any) => {
-            const state = this.tree._graph.view.getState(v);
-            if (!state || !state.shape || !state.shape.node) return;
-
-            const node: HTMLElement = state.shape.node;
-            const isHighlighted = this.searchResults.includes(v);
-            const isCurrent = v === this.searchResults[this.currentSearchIndex];
-
-            if (isCurrent) {
-                // Node courant: glow vert intensif
-                node.style.filter = 'drop-shadow(0 0 12px rgba(34, 197, 94, 0.8))';
-                node.style.opacity = '1';
-            } else if (isHighlighted) {
-                // Autres résultats: glow vert léger
-                node.style.filter = 'drop-shadow(0 0 6px rgba(34, 197, 94, 0.5))';
-                node.style.opacity = '0.9';
-            } else {
-                // Non trouvés: estompés
-                node.style.opacity = '0.2';
-                node.style.filter = 'grayscale(100%)';
-            }
-        });
-
-        // Estomper aussi les edges
-        const allEdges = this.tree._graph.getEdges(this.tree._parent);
-        allEdges.forEach((e: any) => {
-            const state = this.tree._graph.view.getState(e);
-            if (!state || !state.shape || !state.shape.node) return;
-            const node: HTMLElement = state.shape.node;
-            const paths = node.querySelectorAll('path');
-            paths.forEach((p: SVGPathElement) => {
-                p.style.opacity = '0.1';
-            });
-        });
-    }
-
-    /**
-     * Nettoie le highlighting de la recherche
-     */
-    clearSearchHighlight() {
-        if (!this.tree) return;
-
-        const allVertices = this.tree._graph.getChildVertices(this.tree._parent);
-        allVertices.forEach((v: any) => {
-            const state = this.tree._graph.view.getState(v);
-            if (!state || !state.shape || !state.shape.node) return;
-            const node: HTMLElement = state.shape.node;
-            node.style.filter = '';
-            node.style.opacity = '';
-        });
-
-        // Restaurer les edges
-        const allEdges = this.tree._graph.getEdges(this.tree._parent);
-        allEdges.forEach((e: any) => {
-            const state = this.tree._graph.view.getState(e);
-            if (!state || !state.shape || !state.shape.node) return;
-            const node: HTMLElement = state.shape.node;
-            const paths = node.querySelectorAll('path');
-            paths.forEach((p: SVGPathElement) => {
-                p.style.opacity = '';
-            });
-        });
-    }
-}
+import {ArchitectureTree} from "./model/architecture.model";
+import {Constants} from "../constants";
 
 export class Architecture {
     name: string;
@@ -779,13 +25,571 @@ export class RemoteServer {
     schema?: string;
 }
 
-export const ServerConfig = {
-    JDBC: { icon: "shape=image;image=assets/mxgraph/database.drawio.svg;", width: 80, height: 30 },
-    REST: { icon: "shape=image;image=assets/mxgraph/microservice.drawio.svg;", width: 80, height: 30 },
-    SMTP: { icon: "shape=image;image=assets/mxgraph/smtp.drawio.svg;", width: 80, height: 30 },
-    FTP:  { icon: "shape=image;image=assets/mxgraph/ftp.drawio.svg;",  width: 80, height: 30 },
-    LDAP: { icon: "shape=image;image=assets/mxgraph/ldap.drawio.svg;", width: 80, height: 30 },
-    LINK: { icon: "shape=image;image=assets/mxgraph/parent.drawio.svg;", width: 30, height: 30 },
-    VIEW: { icon: "shape=image;image=assets/mxgraph/view.drawio.svg;", width: 80, height: 30 },
-    GHOST: { icon: "shape=image;image=assets/mxgraph/ghost.drawio.svg;", width: 30, height: 30 }
+interface TypeConfig { label: string; legend: string; icon: string; color: string; edgeColor: string; }
+
+/** Source unique de vérité : icônes, couleurs (cartes / edges / légende) par type. */
+export const ARCHITECTURE_TYPES: Record<string, TypeConfig> = {
+    REST: { label: 'Microservices',    legend: 'Serveur applicatif (REST)', icon: 'assets/mxgraph/microservice.drawio.svg', color: '#3b82f6', edgeColor: '#2563eb' },
+    VIEW: { label: 'Vues',             legend: 'Vue (VIEW)',                icon: 'assets/mxgraph/view.drawio.svg',         color: '#06b6d4', edgeColor: '#06b6d4' },
+    JDBC: { label: 'Bases de données', legend: 'Base de données (JDBC)',    icon: 'assets/mxgraph/database.drawio.svg',     color: '#f97316', edgeColor: '#FF7F00' },
+    FTP:  { label: 'Serveurs FTP',     legend: 'Serveur FTP',               icon: 'assets/mxgraph/ftp.drawio.svg',          color: '#0e7490', edgeColor: '#0d9488' },
+    SMTP: { label: 'Serveurs SMTP',    legend: 'Serveur SMTP',              icon: 'assets/mxgraph/smtp.drawio.svg',         color: '#f59e0b', edgeColor: '#f97316' },
+    LDAP: { label: 'Annuaires LDAP',   legend: 'Annuaire LDAP',             icon: 'assets/mxgraph/ldap.drawio.svg',         color: '#7c3aed', edgeColor: '#8b5cf6' },
+};
+export const ARCHITECTURE_TYPE_ORDER = ['REST', 'VIEW', 'JDBC', 'FTP', 'SMTP', 'LDAP'];
+
+const NODE_W = 80;
+const NODE_H = 30;
+const NODE_STYLE = 'verticalLabelPosition=bottom;verticalAlign=top;fontSize=10;labelWidth=200;overflow=visible;whiteSpace=nowrap;';
+const FOCUSED_NODE_STYLE = NODE_STYLE + 'strokeColor=#f97316;strokeWidth=3;fillColor=#fff7ed;';
+//const EDGE_STYLE ='sourcePerimeterSpacing=12;'
+const EDGE_STYLE = 'rounded=1;curved=1;orthogonalLoop=1;jettySize=auto;fontSize=9;fontColor=#555;strokeWidth=1.5;endArrow=block;endFill=1;endSize=6;startArrow=none;sourcePerimeterSpacing=12;';
+//const EDGE_STYLE = 'edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;parallelEdgeSpacing=14;fontSize=9;fontColor=#555;strokeWidth=1.25;endArrow=block;endFill=1;endSize=6;startArrow=none;exitPerimeter=1;entryPerimeter=1;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;';
+//const EDGE_STYLE = 'edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;parallelEdgeSpacing=14;fontSize=9;fontColor=#555;strokeWidth=1.25;endArrow=block;endFill=1;endSize=6;startArrow=none;sourcePerimeterSpacing=10;targetPerimeterSpacing=10;';
+const DEFAULT_EDGE_COLOR = '#78716c';
+
+interface SelectedVertex { name: string; type: string; incomingNames: string[]; outgoingNames: string[]; }
+interface HoveredVertex { name: string; type: string; incomingCount: number; outgoingCount: number; x: number; y: number; }
+interface StatsCard { type: string; label: string; count: number; icon: string; color: string; }
+
+@Component({
+    templateUrl: './architecture.view.html',
+    styleUrls: ['./architecture.view.scss'],
+})
+export class ArchitectureView implements OnInit, AfterViewInit, OnDestroy {
+    private readonly _treeService = inject(TreeService);
+    private readonly _instanceService = inject(InstanceService);
+    private readonly _router = inject(EnvRouter);
+    private readonly _pageTitleService = inject(PageTitleService);
+    private readonly _activatedRoute = inject(ActivatedRoute);
+    private readonly _location = inject(Location);
+    private readonly _zone = inject(NgZone);
+
+    @ViewChild('graphContainer') graphContainer: ElementRef<HTMLElement>;
+    @ViewChild('outlineContainer') outlineContainer: ElementRef<HTMLElement>;
+    @ViewChild('searchInput') searchInputRef: ElementRef<HTMLInputElement>;
+
+    readonly types = ARCHITECTURE_TYPES;
+    readonly typeOrder = ARCHITECTURE_TYPE_ORDER;
+
+    tree: ArchitectureTree;
+    syntheseIsLoading = false;
+
+    serverFilterForm = new FormGroup({
+        dateRangePicker: new FormGroup({
+            start: new FormControl<Date>(null, Validators.required),
+            end: new FormControl<Date>(null, Validators.required)
+        })
+    });
+    focusControl = new FormControl<string | null>(null);
+    /** Types sélectionnés : vide = tout afficher, sinon uniquement les nœuds de ces types (et les liens entre eux). */
+    typeFilters = new Set<string>();
+
+    params: { namespace?: string, start?: Date, end?: Date } = {};
+    appNames: string[] = [];
+    statsCards: StatsCard[] = [];
+
+    minimapVisible: boolean = JSON.parse(localStorage.getItem('arch_minimap') ?? 'true');
+    isFullscreen = false;
+
+    searchVisible = false;
+    searchQuery = '';
+    searchResults: mxCell[] = [];
+    currentSearchIndex = 0;
+
+    selectedVertex: SelectedVertex | null = null;
+    hoveredVertex: HoveredVertex | null = null;
+
+    private _architectures: Architecture[] = [];
+    private _nodeTypes = new Map<string, string>();   // label du vertex -> type affiché
+    private readonly _subscriptions = new Subscription();
+    private _loadSubscription?: Subscription;
+    private _hoverFrame?: number;
+    private _pendingHover?: { vertex: mxCell; event: MouseEvent };
+
+    ngOnInit() {
+        this._pageTitleService.set({
+            icon: Constants.MAPPING_TYPE['architecture'].icon,
+            title: Constants.MAPPING_TYPE['architecture'].title
+        });
+
+        this._subscriptions.add(this._activatedRoute.queryParams.subscribe(qp => {
+            const start = qp.start ? new Date(qp.start) : makeDatePeriod(6).start;
+            const end = qp.end ? new Date(qp.end) : makeDatePeriod(6, 1).end;
+            this.params = { namespace: qp.namespace || app.defaultNamespace, start, end };
+            // la date de fin affichée est inclusive, celle des params est exclusive
+            this.patchDateValue(start, new Date(end.getFullYear(), end.getMonth(), end.getDate() - 1));
+            this.load();
+            this._location.replaceState(this._router.url.split('?')[0],
+                `namespace=${encodeURIComponent(this.params.namespace)}&start=${start.toISOString()}&end=${end.toISOString()}`);
+        }));
+
+        this._subscriptions.add(this.focusControl.valueChanges.subscribe(() => this.redraw()));
+    }
+
+    ngAfterViewInit() {
+        // mxGraph enregistre de nombreux listeners DOM (mousemove...) : on les sort de la zone
+        // Angular pour éviter une détection de changement à chaque événement.
+        this._zone.runOutsideAngular(() => {
+            this.tree = ArchitectureTree.setup(this.graphContainer.nativeElement);
+            this.tree.setOutline(this.outlineContainer.nativeElement);
+            this.tree.setupListeners({
+                onVertexClick: v => this._zone.run(() => this.onVertexClick(v)),
+                onBackgroundClick: () => this._zone.run(() => this.onBackgroundClick()),
+                onVertexHover: (v, e) => {
+                    this._pendingHover = { vertex: v, event: e };
+                    if (this._hoverFrame !== undefined) return;
+                    this._hoverFrame = requestAnimationFrame(() => {
+                        this._hoverFrame = undefined;
+                        const hover = this._pendingHover;
+                        this._pendingHover = undefined;
+                        if (hover) this._zone.run(() => this.onVertexHover(hover.vertex, hover.event));
+                    });
+                },
+                onVertexHoverOut: () => {
+                    this._pendingHover = undefined;
+                    if (this._hoverFrame !== undefined) cancelAnimationFrame(this._hoverFrame);
+                    this._hoverFrame = undefined;
+                    this._zone.run(() => this.hoveredVertex = null);
+                }
+            });
+
+            this._subscriptions.add(fromEvent(window, 'resize').pipe(debounceTime(100))
+                .subscribe(() => this.tree.resizeAndCenter()));
+
+            this._subscriptions.add(fromEvent(document, 'fullscreenchange').subscribe(() => {
+                this._zone.run(() => this.isFullscreen = !!document.fullscreenElement);
+                setTimeout(() => this.tree.resizeAndCenter(), 200);
+            }));
+        });
+
+        // données éventuellement reçues avant l'initialisation de la vue
+        if (this._architectures.length) {
+            this.redraw();
+        }
+    }
+
+    ngOnDestroy(): void {
+        this._subscriptions.unsubscribe();
+        this._loadSubscription?.unsubscribe();
+        if (this._hoverFrame !== undefined) cancelAnimationFrame(this._hoverFrame);
+        this.tree?.destroy();
+        this._pageTitleService.clear();
+    }
+
+    patchDateValue(start: Date, end: Date) {
+        this.serverFilterForm.patchValue({ dateRangePicker: { start, end } }, { emitEvent: false });
+    }
+
+    search() {
+        if (!this.serverFilterForm.valid) return;
+        const { start, end } = this.serverFilterForm.getRawValue().dateRangePicker;
+        const excludedEnd = new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1);
+        if (start.getTime() !== this.params.start.getTime() || excludedEnd.getTime() !== this.params.end.getTime()) {
+            this._router.navigate([], {
+                relativeTo: this._activatedRoute,
+                queryParamsHandling: 'merge',
+                queryParams: { start: start.toISOString(), end: excludedEnd.toISOString() }
+            });
+        } else {
+            this.load();
+        }
+    }
+
+    private load() {
+        // annule la requête précédente : évite qu'une réponse lente écrase une plus récente
+        this._loadSubscription?.unsubscribe();
+        this.syntheseIsLoading = true;
+        const { start, end, namespace } = this.params;
+        this._loadSubscription = forkJoin({
+            mainSession: this._instanceService.getMainSessionApplication(start, end, namespace),
+            restSession: this._treeService.getArchitecture(start, end, namespace)
+        }).pipe(
+            map(({ mainSession, restSession }) => [
+                ...restSession,
+                ...mainSession.map(m => ({ name: m.appName, type: m.type } as Architecture))
+            ]),
+            finalize(() => this.syntheseIsLoading = false)
+        ).subscribe(architectures => {
+            this._architectures = architectures;
+            this.appNames = [...new Set(architectures.map(a => a.name))].sort((a, b) => a.localeCompare(b));
+            this.statsCards = this.computeStats(architectures);
+            this.selectedVertex = null;
+            this.focusControl.setValue(null, { emitEvent: false });
+            this.redraw();
+        });
+    }
+
+    /** Redessine entièrement le graphe en conservant focus / recherche / sélection. */
+    private redraw() {
+        if (!this.tree) return;
+        const focused = this.focusControl.value;
+        this.tree.draw(() => this.draw(this._architectures, focused));
+        this.tree.highlightFocusedNode(focused);
+
+        this.hoveredVertex = null;
+        if (this.selectedVertex) {
+            const v = this.tree.findVertex(this.selectedVertex.name);
+            this.selectedVertex = v ? this.describeVertex(v) : null;
+        }
+        // les cellules précédentes n'existent plus : on relance la recherche sur le nouveau graphe
+        if (this.searchQuery.trim()) this.onSearch();
+        else this.searchResults = [];
+    }
+
+    private computeStats(architectures: Architecture[]): StatsCard[] {
+        // union apps + ressources par type (un microservice appelé ET déclaré ne compte qu'une fois)
+        const byType = new Map<string, Set<string>>();
+        const add = (type: string, name: string) => {
+            if (!ARCHITECTURE_TYPES[type]) return;
+            if (!byType.has(type)) byType.set(type, new Set());
+            byType.get(type).add(name);
+        };
+        architectures.forEach(a => {
+            add(a.type, a.name);
+            a.remoteServers?.forEach(r => add(r.type, r.schema ?? r.name));
+        });
+        return ARCHITECTURE_TYPE_ORDER
+            .filter(t => byType.has(t))
+            .map(t => ({ type: t, label: this.types[t].label, count: byType.get(t).size, icon: this.types[t].icon, color: this.types[t].color }));
+    }
+
+    // ── Interactions graphe ──────────────────────────────────────────────────
+    private describeVertex(vertex: mxCell): SelectedVertex {
+        const graph = this.tree._graph;
+        const name = this.tree.getLabel(vertex);
+        return {
+            name,
+            type: this._nodeTypes.get(name) ?? 'UNKNOWN',
+            incomingNames: graph.getIncomingEdges(vertex, null).map(e => this.tree.getLabel(e.getTerminal(true))).sort(),
+            outgoingNames: graph.getOutgoingEdges(vertex, null).map(e => this.tree.getLabel(e.getTerminal(false))).sort()
+        };
+    }
+
+    private onVertexClick(vertex: mxCell) {
+        this.selectedVertex = this.describeVertex(vertex);
+        // n'animer que si aucun microservice n'est focalisé
+        if (!this.focusControl.value) this.tree.animateEdgesOf(vertex);
+    }
+
+    private onBackgroundClick() {
+        this.selectedVertex = null;
+        if (!this.focusControl.value) this.tree.clearAnimatedEdges();
+    }
+
+
+    private onVertexHover(vertex: mxCell, event: MouseEvent) {
+        const name = this.tree.getLabel(vertex);
+        this.hoveredVertex = {
+            name,
+            type: this._nodeTypes.get(name) ?? 'UNKNOWN',
+            incomingCount: this.tree._graph.getIncomingEdges(vertex, null).length,
+            outgoingCount: this.tree._graph.getOutgoingEdges(vertex, null).length,
+            x: event.clientX,
+            y: event.clientY
+        };
+    }
+
+
+    // ── Construction du graphe ───────────────────────────────────────────────
+    private draw(architectures: Architecture[], focusedApp: string | null) {
+        const graph = this.tree._graph;
+        const parent = this.tree._parent;
+
+        const byName = new Map<string, Architecture>();
+        architectures.forEach(a => { if (!byName.has(a.name)) byName.set(a.name, a); });
+
+        // ── 1. Collecte de tous les nœuds / edges candidats ─────────────────
+        const allNodes = new Map<string, string>();                  // nom -> type
+        const allEdges = new Map<string, { src: string; tgt: string; type: string }>();
+        architectures.forEach(a => {
+            if (!ARCHITECTURE_TYPES[a.type]) return;
+            a.remoteServers?.forEach(r => {
+                const type = this.effectiveType(a, r, byName);
+                const key = r.schema ?? r.name;
+                if (key === a.name) return;
+                const targetType = (type === 'REST' || type === 'VIEW') ? (byName.get(r.name)?.type ?? type) : type;
+                if (!ARCHITECTURE_TYPES[targetType]) return;
+                if (!allNodes.has(a.name)) allNodes.set(a.name, a.type);
+                if (!allNodes.has(key)) allNodes.set(key, targetType);
+                allEdges.set(`${a.name}\u0000${key}`, { src: a.name, tgt: key, type }); // dédoublonnage orienté
+            });
+        });
+        const focusedType = focusedApp && byName.get(focusedApp)?.type;
+        if (focusedType && ARCHITECTURE_TYPES[focusedType] && !allNodes.has(focusedApp)) {
+            allNodes.set(focusedApp, focusedType);
+        }
+
+        // Les pastilles comptent les sommets globaux dédupliqués, indépendamment des filtres actifs.
+        const globalCounts = new Map<string, number>();
+        allNodes.forEach(type => globalCounts.set(type, (globalCounts.get(type) ?? 0) + 1));
+        this.statsCards = this.statsCards.map(card => ({ ...card, count: globalCounts.get(card.type) ?? 0 }));
+
+        // ── 2. Filtre par type : uniquement les nœuds des types sélectionnés,
+        //       et uniquement les liens entre deux nœuds visibles ────────────
+        const filtering = this.typeFilters.size > 0;
+        const typeVisible = (name: string) => !filtering || this.typeFilters.has(allNodes.get(name));
+        let edges = [...allEdges.values()].filter(e => typeVisible(e.src) && typeVisible(e.tgt));
+        let nodes = new Map<string, string>();
+        if (filtering) {
+            allNodes.forEach((type, name) => { if (this.typeFilters.has(type)) nodes.set(name, type); });
+        } else {
+            nodes = allNodes;
+        }
+
+        // ── 3. Focus : nœud focalisé + voisins directs (1 niveau) ───────────
+        if (focusedApp) {
+            const included = new Set<string>([focusedApp]);
+            edges.forEach(e => {
+                if (e.src === focusedApp) included.add(e.tgt);   // appelé
+                if (e.tgt === focusedApp) included.add(e.src);   // appelant
+            });
+            edges = edges.filter(e => included.has(e.src) && included.has(e.tgt));
+            const focusedNodes = new Map<string, string>();
+            included.forEach(name => {
+                const type = nodes.get(name) ?? (name === focusedApp ? allNodes.get(name) : undefined);
+                if (type) focusedNodes.set(name, type);   // le nœud focalisé reste toujours visible
+            });
+            nodes = focusedNodes;
+        }
+        this._nodeTypes = nodes;
+
+        // ── Insertion (coordonnées laissées au layout) ──────────────────────
+        const vertices = new Map<string, mxCell>();
+        nodes.forEach((type, name) => {
+            const style = `shape=image;image=${ARCHITECTURE_TYPES[type].icon};` + (name === focusedApp ? FOCUSED_NODE_STYLE : NODE_STYLE);
+            vertices.set(name, graph.insertVertex(parent, null, name, 0, 0, NODE_W, NODE_H, style));
+        });
+        edges.forEach(({ src, tgt, type }) => {
+            const color = ARCHITECTURE_TYPES[type]?.edgeColor ?? DEFAULT_EDGE_COLOR;
+            graph.insertEdge(parent, null, '', vertices.get(src), vertices.get(tgt), `${EDGE_STYLE}strokeColor=${color};`);
+        });
+
+        // ── Layout hiérarchique ─────────────────────────────────────────────
+        const layout = new mx.mxHierarchicalLayout(graph, mx.mxConstants.DIRECTION_NORTH);
+        Object.assign(layout, { intraCellSpacing: 40, interRankCellSpacing: 100, interHierarchySpacing: 40, disableEdgeStyle: false });
+        layout.execute(parent);
+    }
+
+    private effectiveType(a: Architecture, r: RemoteServer, byName: Map<string, Architecture>): string {
+        if (r.type !== 'MAIN') return r.type;
+        if (a.type === 'VIEW' || byName.get(r.name)?.type === 'VIEW') return 'VIEW';
+        return 'REST';
+    }
+
+    // ── Toolbar ──────────────────────────────────────────────────────────────
+    toggleMinimap() {
+        this.minimapVisible = !this.minimapVisible;
+        localStorage.setItem('arch_minimap', JSON.stringify(this.minimapVisible));
+    }
+
+    toggleFullscreen() {
+        // l'état isFullscreen est mis à jour par l'écouteur 'fullscreenchange' (gère aussi la touche Échap)
+        const host = this.graphContainer.nativeElement.parentElement;
+        const request = document.fullscreenElement ? document.exitFullscreen() : host?.requestFullscreen();
+        request?.catch(() => { /* refusé par le navigateur */ });
+    }
+
+    toggleTypeFilter(type: string) {
+        if (this.typeFilters.has(type)) this.typeFilters.delete(type);
+        else this.typeFilters.add(type);
+        this.redraw();
+    }
+
+    clearTypeFilters() {
+        if (!this.typeFilters.size) return;
+        this.typeFilters.clear();
+        this.redraw();
+    }
+
+    getIconForType(type: string): string {
+        return this.types[type]?.icon ?? '';
+    }
+
+    async exportPNG() {
+        const svgEl = this.graphContainer.nativeElement.querySelector('svg');
+        if (!svgEl) return;
+        const { width, height } = svgEl.getBoundingClientRect();
+        const svgClone = svgEl.cloneNode(true) as SVGElement;
+        svgClone.setAttribute('width', String(width));
+        svgClone.setAttribute('height', String(height));
+
+        // les images doivent être inlinées sinon elles ne sont pas rendues dans le canvas
+        await Promise.all(Array.from(svgClone.querySelectorAll('image')).map(async img => {
+            const href = img.getAttribute('href') || img.getAttribute('xlink:href') || '';
+            if (!href || href.startsWith('data:')) return;
+            try {
+                img.setAttribute('href', await this.toDataUrl(href));
+                img.removeAttribute('xlink:href');
+            } catch { /* image ignorée */ }
+        }));
+
+        const scale = window.devicePixelRatio || 1;
+        const canvas = document.createElement('canvas');
+        canvas.width = width * scale;
+        canvas.height = height * scale;
+        const ctx = canvas.getContext('2d');
+        ctx.scale(scale, scale);
+        ctx.fillStyle = '#f8fafc';
+        ctx.fillRect(0, 0, width, height);
+
+        const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svgClone)], { type: 'image/svg+xml;charset=utf-8' }));
+        try {
+            ctx.drawImage(await this.loadImage(url), 0, 0);
+        } catch {
+            return;
+        } finally {
+            URL.revokeObjectURL(url);
+        }
+        await this.drawBadge(ctx, width, height);
+
+        const a = document.createElement('a');
+        a.download = 'architecture.png';
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+    }
+
+    /** Badge "INSPECT @ONETEME/JARVIS" + logo GitHub en bas à droite. */
+    private async drawBadge(ctx: CanvasRenderingContext2D, width: number, height: number) {
+        const title = 'INSPECT', subtitle = '@ONETEME/JARVIS';
+        const fontSize = 12, fontSizeSmall = 10, padding = 12, iconSize = 20, gap = 8, radius = 10;
+        const titleFont = `700 ${fontSize}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+        const subtitleFont = `500 ${fontSizeSmall}px -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial`;
+
+        ctx.font = titleFont;
+        const titleW = ctx.measureText(title).width;
+        ctx.font = subtitleFont;
+        const textW = Math.max(titleW, ctx.measureText(subtitle).width);
+
+        const w = iconSize + gap + textW + padding * 2;
+        const h = fontSize + fontSizeSmall + gap + padding * 2;
+        const x = width - w - 12;
+        const y = height - h - 12;
+        const path = () => {
+            ctx.beginPath();
+            // roundRect n'existe pas sur tous les navigateurs (et retourne undefined : pas de `??`)
+            if (typeof (ctx as any).roundRect === 'function') (ctx as any).roundRect(x, y, w, h, radius);
+            else ctx.rect(x, y, w, h);
+        };
+
+        ctx.save();
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = 12;
+        ctx.shadowOffsetY = 4;
+        const bg = ctx.createLinearGradient(x, y, x, y + h);
+        bg.addColorStop(0, 'rgba(15, 23, 42, 0.95)');
+        bg.addColorStop(1, 'rgba(30, 41, 59, 0.95)');
+        ctx.fillStyle = bg;
+        path();
+        ctx.fill();
+
+        ctx.shadowColor = 'transparent';
+        const border = ctx.createLinearGradient(x, y, x, y + h);
+        border.addColorStop(0, 'rgba(148, 163, 184, 0.5)');
+        border.addColorStop(1, 'rgba(100, 116, 139, 0.3)');
+        ctx.strokeStyle = border;
+        ctx.lineWidth = 1.5;
+        path();
+        ctx.stroke();
+
+        try {
+            ctx.drawImage(await this.loadImage('assets/github.svg'), x + padding, y + (h - iconSize) / 2, iconSize, iconSize);
+        } catch { /* logo indisponible */ }
+
+        const textX = x + padding + iconSize + gap;
+        ctx.textBaseline = 'top';
+        ctx.fillStyle = '#ffffff';
+        ctx.font = titleFont;
+        ctx.fillText(title, textX, y + padding - 1);
+        ctx.fillStyle = 'rgba(226, 232, 240, 0.8)';
+        ctx.font = subtitleFont;
+        ctx.fillText(subtitle, textX, y + padding + fontSize + 2);
+        ctx.restore();
+    }
+
+    private loadImage(src: string): Promise<HTMLImageElement> {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+            img.src = src;
+        });
+    }
+
+    private async toDataUrl(href: string): Promise<string> {
+        const blob = await (await fetch(href)).blob();
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(blob);
+        });
+    }
+
+    // ── Recherche ────────────────────────────────────────────────────────────
+    toggleSearch() {
+        this.searchVisible = !this.searchVisible;
+        if (this.searchVisible) {
+            setTimeout(() => this.searchInputRef?.nativeElement?.focus(), 320);
+        } else {
+            this.clearSearch();
+        }
+    }
+
+    onSearch() {
+        const q = this.searchQuery.trim().toLowerCase();
+        if (!this.tree || !q) {
+            this.resetSearchResults();
+            return;
+        }
+        this.searchResults = this.tree.getVertices().filter(v => String(this.tree.getLabel(v) ?? '').toLowerCase().includes(q));
+        this.currentSearchIndex = 0;
+        this.applySearchHighlight();
+        this.focusSearchResult();
+    }
+
+    navigateSearch(direction: 1 | -1) {
+        if (!this.searchResults.length) return;
+        this.currentSearchIndex = (this.currentSearchIndex + direction + this.searchResults.length) % this.searchResults.length;
+        this.applySearchHighlight();
+        this.focusSearchResult();
+    }
+
+    clearSearch() {
+        this.searchQuery = '';
+        this.resetSearchResults();
+    }
+
+    private resetSearchResults() {
+        this.searchResults = [];
+        this.currentSearchIndex = 0;
+        this.applySearchHighlight();
+    }
+
+    private focusSearchResult() {
+        const cell = this.searchResults[this.currentSearchIndex];
+        if (cell) this.tree._graph.scrollCellToVisible(cell, true);
+    }
+
+    /** Met en évidence les résultats (courant en vert vif), estompe le reste. Sans résultat : restaure. */
+    private applySearchHighlight() {
+        if (!this.tree) return;
+        const active = this.searchResults.length > 0;
+        const current = this.searchResults[this.currentSearchIndex];
+        const matches = new Set(this.searchResults);
+
+        this.tree.getVertices().forEach(v => {
+            const node: HTMLElement | undefined = this.tree._graph.view.getState(v)?.shape?.node;
+            if (!node) return;
+            if (!active)             { node.style.filter = '';                                             node.style.opacity = ''; }
+            else if (v === current)  { node.style.filter = 'drop-shadow(0 0 12px rgba(34, 197, 94, 0.8))'; node.style.opacity = '1'; }
+            else if (matches.has(v)) { node.style.filter = 'drop-shadow(0 0 6px rgba(34, 197, 94, 0.5))';  node.style.opacity = '0.9'; }
+            else                     { node.style.filter = 'grayscale(100%)';                              node.style.opacity = '0.2'; }
+        });
+
+        this.tree.getEdges().forEach(e => {
+            const node: Element | undefined = this.tree._graph.view.getState(e)?.shape?.node;
+            node?.querySelectorAll('path').forEach((p: SVGPathElement) => p.style.opacity = active ? '0.1' : '');
+        });
+    }
 }

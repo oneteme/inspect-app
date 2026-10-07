@@ -84,6 +84,8 @@
   box-shadow: 0 0 0 4px #ffffff;
 
   .event-icon {
+    align-items: center;
+    justify-content: center;
     width: 17px;
     height: 17px;
     color: #5b6b7c;
@@ -101,6 +103,49 @@
   .dot { background: var(--na-green-soft); box-shadow: 0 0 0 4px #ffffff; }
   .event-icon { color: var(--na-green); }
   .event-label { color: var(--na-green); }
+}
+
+.timeline-item.event-info {
+  .dot {
+    background: #e5f3ff;
+    box-shadow: 0 0 0 4px #ffffff;
+  }
+  .event-icon,
+  .event-label { color: #1769aa; }
+}
+
+.timeline-item.event-warn {
+  .dot {
+    background: #fff2d6;
+    box-shadow: 0 0 0 4px #ffffff;
+  }
+  .event-icon,
+  .event-label { color: #9a5b00; }
+}
+
+.timeline-item.event-error {
+  .dot {
+    background: #ffe5e5;
+    box-shadow: 0 0 0 4px #ffffff;
+  }
+  .event-icon,
+  .event-label { color: #b42318; }
+}
+
+.timeline-item.event-exception {
+  .dot {
+    background: #f7d7dc;
+    border: 1px solid #b42318;
+  }
+
+  .event-icon,
+  .event-label {
+    color: #8f1d2c;
+  }
+
+  .event-sentence {
+    font-weight: 500;
+  }
 }
 
 .timeline-item.event-unknown {
@@ -131,11 +176,24 @@
 }
 
 .event-sentence {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.1rem;
   margin: 0;
   color: var(--na-text);
   font-size: 0.88rem;
-  line-height: 1.8;
+  line-height: 1.45;
   overflow-wrap: anywhere;
+
+  .event-main-line {
+    display: block;
+  }
+
+  .event-date-line {
+    display: block;
+    font-size: 0.76rem;
+  }
 
   .event-location {
     color: #5b6b7c;

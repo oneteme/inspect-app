@@ -181,22 +181,6 @@
           <div class="npt-text">
             <div class="npt-top-row">
               <span class="npt-label">{{ pt.title }}</span>
-              <div class="nav-instance-info" *ngIf="pt.instanceContext">
-                <app-status-indicator
-                  [params]="{id: pt.instanceContext.instance.id, end: pt.instanceContext.instance.end, configuration: pt.instanceContext.instance.configuration, lastTrace: pt.instanceContext.lastTrace, date: pt.instanceContext.date}">
-                </app-status-indicator>
-                <app-version-badge
-                    [backgroundColor]="'#22577a'"
-                    [configuration]="pt.instanceContext.instance.configuration"
-                    [collector]="pt.instanceContext.instance.collector"
-                    [version]="pt.instanceContext.instance.version"
-                    [name]="pt.instanceContext.instance.name">
-                </app-version-badge>
-                <app-branch-chip
-                    [branch]="pt.instanceContext.instance.branch"
-                    [hash]="pt.instanceContext.instance.hash">
-                </app-branch-chip>
-              </div>
             </div>
             <span class="npt-sub" *ngIf="pt.subtitle">{{ pt.subtitle }}</span>
           </div>
@@ -260,6 +244,11 @@
           </div>
         </div>
         <div class="user-menu-divider"></div>
+        <button mat-menu-item
+                (click)="openServerActivity($event)">
+          <mat-icon class="material-symbols-outlined">activity_zone</mat-icon>
+          <span>Activité</span>
+        </button>
         <button mat-menu-item class="logout-item" (click)="logout()">
           <mat-icon class="material-symbols-outlined">logout</mat-icon>
           <span>Se déconnecter</span>

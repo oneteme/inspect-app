@@ -15,9 +15,17 @@ export class MachineUsageService {
     return this.http.get<T>(url, { params: params });
   }
 
-  getResourceMachineByPeriod(filters: {instance: string, start: Date, end: Date}): Observable<{date: number, usedHeap: number, commitedHeap: number, usedDiskSpace: number}[]> {
+  getResourceMachineByPeriod(filters: {instance: string, start: Date, end: Date}): Observable<{
+    date: number,
+    usedHeap: number,
+    commitedHeap: number,
+    usedDiskSpace: number,
+    nbActiveThread: number,
+    nbStartThread: number,
+    cpuUsage: number
+  }[]> {
     let args: any = {
-      'column': 'start:date,used_heap:usedHeap,commited_heap:commitedHeap,used_disk_space:usedDiskSpace',
+      'column': 'start:date,used_heap:usedHeap,commited_heap:commitedHeap,used_disk_space:usedDiskSpace,nb_active_thread:nbActiveThread,nb_start_thread:nbStartThread,cpu_usage.divide(100):cpuUsage',
       'instance_env.varchar': filters.instance,
       'start.ge': filters.start.toISOString(),
       'start.lt': filters.end.toISOString(),

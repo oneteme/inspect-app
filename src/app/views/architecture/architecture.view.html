@@ -30,15 +30,15 @@
 
         <!-- Zoom controls -->
         <div class="zoom-controls">
-            <button mat-icon-button class="zoom-btn" matTooltip="Zoom avant" (click)="tree._graph.zoomIn()">
+            <button mat-icon-button class="zoom-btn" matTooltip="Zoom avant" (click)="tree?._graph.zoomIn()">
                 <mat-icon>add</mat-icon>
             </button>
             <div class="zoom-divider"></div>
-            <button mat-icon-button class="zoom-btn" matTooltip="Zoom arrière" (click)="tree._graph.zoomOut()">
+            <button mat-icon-button class="zoom-btn" matTooltip="Zoom arrière" (click)="tree?._graph.zoomOut()">
                 <mat-icon>remove</mat-icon>
             </button>
             <div class="zoom-divider"></div>
-            <button mat-icon-button class="zoom-btn" matTooltip="Réinitialiser la vue" (click)="tree.resizeAndCenter()">
+            <button mat-icon-button class="zoom-btn" matTooltip="Réinitialiser la vue" (click)="tree?.resizeAndCenter()">
                 <mat-icon>center_focus_strong</mat-icon>
             </button>
             <div class="zoom-divider"></div>
@@ -61,7 +61,7 @@
             </button>
             <div class="zoom-divider"></div>
             <button mat-icon-button class="zoom-btn" matTooltip="Légende"
-                    #legendMenuTrigger="matMenuTrigger" [matMenuTriggerFor]="legendMenu">
+                    [matMenuTriggerFor]="legendMenu">
                 <mat-icon>info_outline</mat-icon>
             </button>
         </div>
@@ -98,8 +98,12 @@
             <div class="stat-chip"
                 *ngFor="let card of statsCards"
                 [matTooltip]="card.label"
-                [class.active]="edgeTypeFilters[card.type]"
-                (click)="toggleEdgeTypeFilter(card.type)"
+                [class.active]="typeFilters.has(card.type)"
+                [class.inactive]="typeFilters.size > 0 && !typeFilters.has(card.type)"
+                [attr.aria-pressed]="typeFilters.has(card.type)"
+                (click)="toggleTypeFilter(card.type)"
+                (keydown.enter)="toggleTypeFilter(card.type)"
+                (keydown.space)="$event.preventDefault(); toggleTypeFilter(card.type)"
                 role="button"
                 tabindex="0">
                 <div class="stat-chip-icon" [style.background]="card.color + '22'">
@@ -107,6 +111,16 @@
                 </div>
                 <span class="stat-chip-count" [style.color]="card.color">{{ card.count }}</span>
                 <span class="stat-chip-label">{{ card.label }}</span>
+            </div>
+            <div class="stat-chip"
+                *ngIf="typeFilters.size"
+                matTooltip="Réinitialiser les filtres"
+                (click)="clearTypeFilters()"
+                (keydown.enter)="clearTypeFilters()"
+                (keydown.space)="$event.preventDefault(); clearTypeFilters()"
+                role="button"
+                tabindex="0">
+                <mat-icon class="stat-chip-clear">filter_alt_off</mat-icon>
             </div>
         </div>
 
@@ -144,7 +158,7 @@
             <div class="card-content">
                 <!-- Appelants -->
                 <div class="card-section">
-                    <div class="card-section-title">Appelants ({{ selectedVertex.incomingCount }})</div>
+                    <div class="card-section-title">Appelants ({{ selectedVertex.incomingNames.length }})</div>
                     <div class="card-list" *ngIf="selectedVertex.incomingNames.length > 0; else noIncoming">
                         <div class="card-list-item" *ngFor="let name of selectedVertex.incomingNames">
                             <mat-icon class="list-icon">arrow_forward</mat-icon>
@@ -158,7 +172,7 @@
 
                 <!-- Appelés -->
                 <div class="card-section">
-                    <div class="card-section-title">Appelés ({{ selectedVertex.outgoingCount }})</div>
+                    <div class="card-section-title">Appelés ({{ selectedVertex.outgoingNames.length }})</div>
                     <div class="card-list" *ngIf="selectedVertex.outgoingNames.length > 0; else noOutgoing">
                         <div class="card-list-item" *ngFor="let name of selectedVertex.outgoingNames">
                             <mat-icon class="list-icon">arrow_forward</mat-icon>
@@ -178,20 +192,14 @@
 <mat-menu #legendMenu="matMenu" class="legend-menu">
   <div class="legend-menu-content">
     <div class="legend-section-title">Connexions</div>
-    <div class="legend-item"><span class="legend-line" style="background:#2563eb;"></span><span>REST</span></div>
-    <div class="legend-item"><span class="legend-line" style="background:#06b6d4;"></span><span>VIEW</span></div>
-    <div class="legend-item"><span class="legend-line" style="background:#FF7F00;"></span><span>JDBC</span></div>
-    <div class="legend-item"><span class="legend-line" style="background:#0d9488;"></span><span>FTP</span></div>
-    <div class="legend-item"><span class="legend-line" style="background:#f97316;"></span><span>SMTP</span></div>
-    <div class="legend-item"><span class="legend-line" style="background:#7c3aed;"></span><span>LDAP</span></div>
+    <div class="legend-item" *ngFor="let t of typeOrder">
+      <span class="legend-line" [style.background]="types[t].edgeColor"></span><span>{{ t }}</span>
+    </div>
     <div class="legend-divider"></div>
     <div class="legend-section-title">Nœuds</div>
-    <div class="legend-item"><img src="assets/mxgraph/microservice.drawio.svg" alt="REST" class="legend-icon"/><span>Serveur applicatif (REST)</span></div>
-    <div class="legend-item"><img src="assets/mxgraph/view.drawio.svg" alt="Vue" class="legend-icon"/><span>Vue (VIEW)</span></div>
-    <div class="legend-item"><img src="assets/mxgraph/database.drawio.svg" alt="JDBC" class="legend-icon"/><span>Base de données (JDBC)</span></div>
-    <div class="legend-item"><img src="assets/mxgraph/ftp.drawio.svg" alt="FTP" class="legend-icon"/><span>Serveur FTP</span></div>
-    <div class="legend-item"><img src="assets/mxgraph/smtp.drawio.svg" alt="SMTP" class="legend-icon"/><span>Serveur SMTP</span></div>
-    <div class="legend-item"><img src="assets/mxgraph/ldap.drawio.svg" alt="LDAP" class="legend-icon"/><span>Annuaire LDAP</span></div>
+    <div class="legend-item" *ngFor="let t of typeOrder">
+      <img [src]="types[t].icon" [alt]="t" class="legend-icon"/><span>{{ types[t].legend }}</span>
+    </div>
   </div>
 </mat-menu>
 

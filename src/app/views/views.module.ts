@@ -30,7 +30,6 @@ import {ArchitectureView} from "./architecture/architecture.view";
 import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
 import {NumberFormatterPipe, CompactNumberPipe} from '../shared/pipe/number.pipe';
 import {SearchRequestView} from "./search/request/search-request.view";
-import {AnalyticView} from "./analytic/analytic.view";
 import {DetailTimelineComponent} from "./detail/session/_component/timeline/detail-timeline.component";
 import {ActionTableComponent} from "./detail/session/_component/action-table/action-table.component";
 import {DetailRequestView} from "./detail/request/detail-request.view";
@@ -40,6 +39,7 @@ import {
   ServerInstanceSelectorDialogComponent
 } from "./supervision/_component/server/server-instance-selector-dialog/server-instance-selector-dialog.component";
 import {ServerSupervisionView} from "./supervision/_component/server/server-supervision.view";
+import {ServerActivityView} from "./supervision/_component/server/server-activity.view";
 import {ClientSupervisionView} from "./supervision/_component/client/client-supervision.view";
 import {
   ClientInstanceSelectorDialogComponent
@@ -72,7 +72,7 @@ import {DependentChartComponent} from "./kpi/_component/dependent-chart/dependen
 import {StartupComponent} from "./kpi/session/startup/startup.component";
 import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.component";
 import {CompareView} from "./compare/compare.view";
-import {NewAnalyticView} from "./newanalytics/newanalytic.view";
+import {AnalyticsView} from "./analytics/analytics.view";
 
 @NgModule({
   imports: [
@@ -113,13 +113,13 @@ import {NewAnalyticView} from "./newanalytics/newanalytic.view";
     TreeView,
     NumberFormatterPipe,
     CompactNumberPipe,
-    AnalyticView,
     ActionTableComponent,
     SearchRequestView,
     MailTableComponent,
     ServerInstanceSelectorDialogComponent,
     ClientInstanceSelectorDialogComponent,
     ServerSupervisionView,
+    ServerActivityView,
     ClientSupervisionView,
     InstanceComponent,
     InstanceTableComponent,
@@ -149,7 +149,7 @@ import {NewAnalyticView} from "./newanalytics/newanalytic.view";
     MediaTypeChartComponent,
     UserChartComponent,
     CompareView,
-      NewAnalyticView
+      AnalyticsView
   ]
 })
 export class ViewsModule { }

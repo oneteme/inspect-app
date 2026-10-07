@@ -443,7 +443,8 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'instant', header: 'Horodate', icon: 'schedule', sliceable: false, groupable: false },
-    { key: 'message', header: 'Message', icon: 'chat', sliceable: false, groupable: false, width: '70%' },
+    { key: 'appName', header: 'Application', icon: 'apps', sliceable: false, groupable: false, width: '18%' },
+    { key: 'message', header: 'Message', icon: 'chat', sliceable: false, groupable: false, width: '52%' },
     { key: 'action', header: 'Action', icon: 'touch_app', sliceable: false, groupable: false, sortable: false }
   ],
   slices: [
