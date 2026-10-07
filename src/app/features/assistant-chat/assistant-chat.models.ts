@@ -9,7 +9,6 @@ export interface AiChatRequest {
   sessionId?: string;
   page?: AssistantPage;
   id?: string;
-  context?: AssistantChatContext;
 }
 
 export enum AssistantPage {
@@ -18,7 +17,8 @@ export enum AssistantPage {
   REQUEST_DETAIL = 'REQUEST_DETAIL',
   REQUEST_COMPARE = 'REQUEST_COMPARE',
   SESSION_SEARCH = 'SESSION_SEARCH',
-  SESSION_DETAIL = 'SESSION_DETAIL',
+  SESSION_DETAIL_VIEW = 'SESSION_DETAIL_VIEW',
+  SESSION_DETAIL_REST = 'SESSION_DETAIL_REST',
   SESSION_TREE = 'SESSION_TREE',
   SESSION_COMPARE = 'SESSION_COMPARE',
   INSTANCE = 'INSTANCE',

@@ -19,17 +19,22 @@ export class AssistantChatService {
   ) {}
 
   sendMessage(request: Omit<AiChatRequest, 'context'>): Observable<AiChatResponse> {
+    const segments = this.getCurrentSegments();
+    const context = this.getCurrentContext(segments);
+
     return this.http.post<AiChatResponse>(this.endpoint, {
       ...request,
-      type: 'rest',
-      id: this.getCurrentContext().id,
-      page: this.getCurrentContext().page
+      id: context.id,
+      page: context.page
     });
   }
 
-  private getCurrentContext(): AssistantChatContext {
-    const segments = this.router.parseUrl(this.router.url)
+  private getCurrentSegments(): string[] {
+    return this.router.parseUrl(this.router.url)
       .root.children['primary']?.segments.map(segment => segment.path) ?? [];
+  }
+
+  private getCurrentContext(segments: string[]): AssistantChatContext {
     const id = this.getCurrentId();
 
     return {
@@ -48,7 +53,10 @@ export class AssistantChatService {
     if (root === 'session') {
       if (segments.includes('tree')) return AssistantPage.SESSION_TREE;
       if (segments.includes('compare')) return AssistantPage.SESSION_COMPARE;
-      return hasId ? AssistantPage.SESSION_DETAIL : AssistantPage.SESSION_SEARCH;
+      if (!hasId) return AssistantPage.SESSION_SEARCH;
+      return section === 'rest'
+        ? AssistantPage.SESSION_DETAIL_REST
+        : AssistantPage.SESSION_DETAIL_VIEW;
     }
     if (root === 'instance') return AssistantPage.INSTANCE;
     if (root === 'analytic') return AssistantPage.ANALYTIC;
