@@ -20,10 +20,10 @@
       [class.assistant-row]="message.role === 'assistant'">
       <div
         class="message-bubble"
+        [innerHTML]="message.content"
         [class.user-bubble]="message.role === 'user'"
         [class.assistant-bubble]="message.role === 'assistant'"
         [class.error-bubble]="message.isError">
-        {{ message.content }}
       </div>
     </div>
 
