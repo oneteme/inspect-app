@@ -117,11 +117,7 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
     { key: 'address', header: 'Adresse', icon: 'fingerprint', width: '13%', optional: true },
     {
       key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
-      value: (row: MainSessionDto) => {
-        if (!row.status) return 'En cours...';
-        if (row.status == 200) return 'OK';
-        if (row.status == 500) return 'KO';
-      }
+      value: (row: MainSessionDto) => !row.end ? 'En cours...' : row.status >= 400 ? 'KO' : 'OK'
     }
   ],
   slices: [
@@ -210,8 +206,8 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     { key: 'productName', header: 'Base de données', optional: true, icon: 'storage' },
     {
-      key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
-      value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
+      key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
+      value: (row) => !row.end ? 'En cours...' : row.status >= 400 ? 'KO' : 'OK'
     },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
@@ -253,8 +249,8 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     {
-      key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
-      value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
+      key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
+      value: (row) => !row.end ? 'En cours...' : row.status >= 400 ? 'KO' : 'OK'
     },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
@@ -295,8 +291,8 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     {
-      key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
-      value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
+      key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
+      value: (row) => !row.end ? 'En cours...' : row.status >= 400 ? 'KO' : 'OK'
     },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
@@ -337,8 +333,8 @@ export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     {
-      key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
-      value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
+      key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
+      value: (row) => !row.end ? 'En cours...' : row.status >= 400 ? 'KO' : 'OK'
     },
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
   ],
@@ -379,8 +375,8 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     {
-      key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
-      value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
+      key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
+      value: (row) => !row.end ? 'En cours...' : row.status >= 400 ? 'KO' : 'OK'
     },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
@@ -416,7 +412,7 @@ export const STAGE_TABLE_CONFIG: TableProvider<AbstractStage> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
     },
     {
-      key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
+      key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row) => !row.end ? 'En cours...' : row.exception ? 'KO' : 'OK'
     },
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }

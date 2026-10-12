@@ -289,7 +289,7 @@ export class BatchComponent {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_exception:count_error,count(name.distinct):count_batch`,
+      'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error,count(name.distinct):count_batch`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'instance.type': 'SERVER',

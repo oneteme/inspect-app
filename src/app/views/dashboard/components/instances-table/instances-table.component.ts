@@ -17,6 +17,7 @@ export class DashboardInstancesTableComponent implements OnChanges {
 
     @Input() rows: any[] = [];
     @Input() isLoading = true;
+    @Input() isStatusLoading = true;
     @Input() today: Date = new Date();
     @Input() versionColor: Record<string, string> = {};
     @Input() instanceSearchQuery = '';

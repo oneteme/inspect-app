@@ -56,5 +56,5 @@
 </ng-template>
 
 <mat-menu #menuServer="matMenu">
-    <a mat-menu-item [routerLink]="['/session', instance?.name, 'dump']" [queryParams]="{env: instance?.env, date: getDate(instance?.instant * 1000).toISOString()}"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
+    <a mat-menu-item [routerLink]="['/session', instance?.name, 'dump']" [queryParams]="{namespace: instance?.namespace, date: getDate(instance?.instant * 1000).toISOString()}"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
 </mat-menu>

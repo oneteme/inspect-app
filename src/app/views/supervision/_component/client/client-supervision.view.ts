@@ -23,7 +23,7 @@ import {
 import {PageTitleService} from '../../../../service/page-title.service';
 import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../../shared/period-filter';
 import {IPeriod, IStep, IStepFrom} from '../../../../model/conf.model';
-import {shallowEqual} from '../../../search/rest/search-rest.view';
+import {shallowEqual} from '../../../search/session/rest/search-rest.view';
 
 @Component({
   templateUrl: './client-supervision.view.html',
@@ -152,6 +152,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   instances: {id: string, appName: string, address:string,  start: number, end: number}[] = [];
   usageResourceByPeriod: any[] = [];
   instanceTraceByPeriod: {date: Date, pending: number, attempts: number, traceCount: number, queueCapacity: number}[] = [];
+  loadingInstanceTrace: boolean = false;
   logEntryByPeriod: any[] = [];
   lastTrace: number;
   unavailableStat:  number = 0;
@@ -273,7 +274,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
     this.syncChartPeriodBounds();
     this._traceService.getInstance(this.params.instance)
     .pipe(switchMap(res => {
-      if(res?.env !== this.params.namespace) {
+      if(res?.namespace !== this.params.namespace) {
         this._snackBar.open(`L'identifiant de cette instance ne correspond pas à l'environnement ${this.params.namespace}`, "Fermer",
             {
               horizontalPosition: "center",

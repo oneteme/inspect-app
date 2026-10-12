@@ -65,13 +65,6 @@ export class Utils {
         return { 'box-shadow': '4px 0px 0px 0px ' + this.getStateColor(completed) + ' inset' };
     }
 
-    static statusBorderCard(failed: any): { [key: string]: string } {
-        if (typeof failed == "boolean") {
-            return { 'border-left': '4px solid ' + this.getStateColorBool(!failed) };
-        }
-        return { 'border-left': '4px solid ' + this.getStateColor(failed) };
-    }
-
     convertSeconds = (seconds: number): string => {
         const hours = Math.round(Math.floor(seconds / 3600))
         const minutes = Math.round(Math.floor((seconds % 3600) / 60))

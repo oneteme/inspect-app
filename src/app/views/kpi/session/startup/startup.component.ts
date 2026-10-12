@@ -295,7 +295,7 @@ export class StartupComponent {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_exception:count_error`,
+      'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'instance.type': 'SERVER',

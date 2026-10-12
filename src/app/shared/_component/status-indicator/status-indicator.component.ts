@@ -5,12 +5,14 @@ import {DatePipe} from "@angular/common";
 @Component({
   selector: 'app-status-indicator',
   template: `
-    <div class="status-indicator"
+    <div class="status-indicator" *ngIf="!loading"
          (click)="navigate($event)"
-         [matTooltip]="loading ? '' : tooltip"
+         [matTooltip]="tooltip"
          [ngClass]="class">
+      
       <div class="status-dot"></div>
     </div>
+    <mat-spinner diameter="20" *ngIf="loading"></mat-spinner>
   `,
   styles: [`
       .status-indicator {
@@ -83,7 +85,7 @@ export class StatusIndicatorComponent {
   class: string;
   tooltip: string;
 
-  @Input() loading: boolean = true;
+  @Input() loading: boolean = false;
 
   @Input() set params(value: {id: string, end: number, configuration: InspectCollectorConfiguration, lastTrace: number, date: number}) {
     if(value) {
