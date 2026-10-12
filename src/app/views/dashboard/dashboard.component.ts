@@ -110,6 +110,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     serverHealthData: LastServerStart[] = [];
     serverHealthLoading = true;
+    instanceTraceLoading = true;
     deployTableRows: (LastServerStart & { lastTrace?: number })[] = [];
     deployTableToday: Date = new Date();
     versionColor: any = {};
@@ -511,19 +512,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this._serverHealthSub?.unsubscribe();
         this._serverHealthSub = this._instanceService.getLastServerStart({ namespace })
                 .pipe(
+                    tap((servers: LastServerStart[]) => {
+                        this.serverHealthLoading = false;
+                    }),
                     switchMap((servers: LastServerStart[]) => {
                         this.deployTableRows = servers;
                         this.deployTableToday = new Date();
                         this.versionColor = groupByColor(servers, (v: any) => v.version);
-                        this.serverHealthLoading = false;
                         this._rebuildDeployStats();
                         this._rebuildServerHealth();
                         return servers.length
-                          ? timer(5000).pipe(
-                            switchMap(() =>
-                              this._instanceTraceService.getLastInstanceTrace({instance: servers.map(s => s.id)})
-                            )
-                          ) : of([])
+                          ? this._instanceTraceService.getLastInstanceTrace({instance: servers.map(s => s.id)}).pipe(
+                            finalize(() => this.instanceTraceLoading = false))
+                          : of([]);
 
                     })
                 )

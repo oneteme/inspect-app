@@ -152,6 +152,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   instances: {id: string, appName: string, address:string,  start: number, end: number}[] = [];
   usageResourceByPeriod: any[] = [];
   instanceTraceByPeriod: {date: Date, pending: number, attempts: number, traceCount: number, queueCapacity: number}[] = [];
+  loadingInstanceTrace: boolean = false;
   logEntryByPeriod: any[] = [];
   lastTrace: number;
   unavailableStat:  number = 0;

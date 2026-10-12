@@ -54,6 +54,7 @@
       *ngIf="!hasSelectedInsights && showOverview"
       [rows]="filteredDeployRows"
       [isLoading]="serverHealthLoading"
+      [isStatusLoading]="instanceTraceLoading"
       [today]="deployTableToday"
       [versionColor]="versionColor"
       [instanceSearchQuery]="instanceSearchQuery"
@@ -81,7 +82,7 @@
   <aside class="db-sidebar">
 
     <!-- Stats instances compactes -->
-    <ng-container *ngIf="serverHealthLoading; else instancesBlock">
+    <ng-container *ngIf="serverHealthLoading || instanceTraceLoading; else instancesBlock">
       <div class="dov-stats-wrap dov-stats-skel">
         <div class="dov-stats-lbl">
           Instances actives
