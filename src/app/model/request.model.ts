@@ -50,7 +50,6 @@ export interface MainSessionView extends MainSession {
   ldapRequests?: DirectoryRequestDto[];
   localRequests?: LocalRequest[];
   userActions?: UserAction[];
-  logEntries?: LogEntry[];
   httpSessionStages?: HttpSessionStage[];
 }
 

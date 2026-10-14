@@ -110,15 +110,6 @@ export class DetailSessionComponent implements OnChanges {
         errorCount: 0
       },
       {
-        label: 'Log',
-        icon: 'chat_info',
-        count: this.session.logEntries?.length || 0,
-        visible: !!this.session.logEntries?.length,
-        type: 'log',
-        hasError: false,
-        errorCount: 0
-      },
-      {
         label: 'Chronologie',
         icon: 'view_timeline',
         count: 0,
