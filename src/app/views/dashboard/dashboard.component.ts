@@ -524,7 +524,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                         return servers.length
                           ? this._instanceTraceService.getLastInstanceTrace({instance: servers.map(s => s.id)}).pipe(
                             finalize(() => this.instanceTraceLoading = false))
-                          : of([]);
+                          : of([]).pipe(finalize(() => this.instanceTraceLoading = false));
 
                     })
                 )
@@ -661,11 +661,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this._rebuildSessionSummaries();
         }
         // batchTopJobsTable : pas de graphique associé
-    }
-
-    isRecentlyStarted(server: LastServerStart): boolean {
-        if (!server.lastStart || server.end) return false;
-        return (Date.now() - new Date(server.lastStart).getTime()) < 3_600_000;
     }
 
     private _rebuildInsightsAllClear(): void {
@@ -815,9 +810,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         });
     }
 
-    trackByKey(_: number, item: { key: string }): string { return item.key; }
-    trackByType(_: number, item: { type: string }): string { return item.type; }
-
     get detailContext(): DashboardDetailContext {
         return {
             selectedInsights: this.selectedInsights,
@@ -901,12 +893,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             })
             .filter(s => s.loading || s.total > 0);
         this._rebuildInsightsAllClear();
-    }
-
-    navigateToSupervision(server: LastServerStart) {
-        this._router.navigate(['/supervision/server', server.id], {
-            queryParams: this.buildSupervisionQueryParams(this.params.namespace)
-        });
     }
 
     private buildSupervisionQueryParams(namespace?: string): Params {

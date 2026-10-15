@@ -2,15 +2,6 @@ import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {MaterialModule} from './material/material.module';
 import {FilterRowPipe} from './pipe/filter-row.pipe';
-import {
-  AdvancedFilterTriggerComponent
-} from './_component/advanced-filter/advanced-filter-trigger/advanced-filter-trigger.component';
-import {
-  AdvancedFilterRecapComponent
-} from './_component/advanced-filter/advanced-filter-recap/advanced-filter-recap.component';
-import {
-  AdvancedFilterComponent
-} from './_component/advanced-filter/advanced-filter-modal/advanced-filter-modal.component';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {DurationPipe} from './pipe/duration.pipe';
 import {SizePipe} from './pipe/size.pipe';
@@ -34,6 +25,7 @@ import {EmptyStateComponent} from "./_component/empty-state/empty-state.componen
 import {ExceptionsTableComponent} from "./_component/table/exceptions-table/exceptions-table.component";
 import {ConfigDialogComponent} from './_component/config-dialog/config-dialog.component';
 import {PagePanelComponent} from './_component/page-panel/page-panel.component';
+
 export const MY_DATE_FORMATS = {
   parse: {
     dateInput: 'MM/YYYY',
@@ -59,9 +51,6 @@ export const MY_DATE_FORMATS = {
     JqtCellDefDirective
   ],
   declarations: [
-    AdvancedFilterComponent,
-    AdvancedFilterRecapComponent,
-    AdvancedFilterTriggerComponent,
     FilterRowPipe,
     DurationPipe,
     SizePipe,
@@ -87,9 +76,6 @@ export const MY_DATE_FORMATS = {
   ],
   exports: [
     MaterialModule,
-    AdvancedFilterComponent,
-    AdvancedFilterRecapComponent,
-    AdvancedFilterTriggerComponent,
     DurationPipe,
     SizePipe,
     TitleCasePipe,

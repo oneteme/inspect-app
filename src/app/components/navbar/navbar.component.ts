@@ -78,11 +78,19 @@ export class NavbarComponent implements OnInit, OnDestroy {
         { label: Constants.REQUEST_MAPPING_TYPE['ldap'].title.replace(/^Flux\s+/i, ''), icon: Constants.REQUEST_MAPPING_TYPE['ldap'].icon, id: 'ldap', route: 'request/ldap', kpiRoute: 'kpi/request/ldap' },
       ]
     },
-    { label: Constants.MAPPING_TYPE['rest'].title, icon: Constants.MAPPING_TYPE['rest'].icon, id: 'rest', route: 'session/rest', kpiRoute: 'kpi/session/rest' },
-    { label: Constants.MAPPING_TYPE['batch'].title, icon: Constants.MAPPING_TYPE['batch'].icon, id: 'batch', route: 'session/batch', kpiRoute: 'kpi/session/batch' },
-    { label: Constants.MAPPING_TYPE['test'].title, icon: Constants.MAPPING_TYPE['test'].icon, id: 'test', route: 'session/test' },
-    { label: Constants.MAPPING_TYPE['startup'].title, icon: Constants.MAPPING_TYPE['startup'].icon, id: 'startup', route: 'session/startup', kpiRoute: 'kpi/session/startup' },
-    { label: Constants.MAPPING_TYPE['view'].title, icon: Constants.MAPPING_TYPE['view'].icon, id: 'view', route: 'session/view' },
+    {
+      label: Constants.MAPPING_TYPE['treatment'].title,
+      icon: Constants.MAPPING_TYPE['treatment'].icon,
+      id: 'treatment',
+      children: [
+        { label: Constants.MAPPING_TYPE['rest'].title, icon: Constants.MAPPING_TYPE['rest'].icon, id: 'rest', route: 'session/rest', kpiRoute: 'kpi/session/rest' },
+        { label: Constants.MAPPING_TYPE['batch'].title, icon: Constants.MAPPING_TYPE['batch'].icon, id: 'batch', route: 'session/batch', kpiRoute: 'kpi/session/batch' },
+        { label: Constants.MAPPING_TYPE['test'].title, icon: Constants.MAPPING_TYPE['test'].icon, id: 'test', route: 'session/test' },
+        { label: Constants.MAPPING_TYPE['startup'].title, icon: Constants.MAPPING_TYPE['startup'].icon, id: 'startup', route: 'session/startup', kpiRoute: 'kpi/session/startup' },
+        { label: Constants.MAPPING_TYPE['view'].title, icon: Constants.MAPPING_TYPE['view'].icon, id: 'view', route: 'session/view' }
+      ]
+    },
+    { label: Constants.MAPPING_TYPE['architecture'].title, icon: Constants.MAPPING_TYPE['architecture'].icon, id: 'architecture', route: 'architecture'}
   ];
 
   private readonly _dialog = inject(MatDialog);

@@ -2,12 +2,11 @@ import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {Location} from '@angular/common';
 import {ActivatedRoute, Params} from '@angular/router';
-import {BehaviorSubject, finalize, Subject, takeUntil} from 'rxjs';
+import {finalize, Subject, takeUntil} from 'rxjs';
 import {extractPeriod} from '../../../../shared/util';
 import {TraceService} from '../../../../service/trace.service';
-import {app, makeDatePeriod} from '../../../../../environments/environment';
-import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../../constants';
-import {FilterService} from '../../../../service/filter.service';
+import {app} from '../../../../../environments/environment';
+import {Constants} from '../../../constants';
 import {EnvRouter} from '../../../../service/router.service';
 import {InstanceService} from '../../../../service/jquery/instance.service';
 import {PageTitleService} from '../../../../service/page-title.service';
@@ -20,7 +19,15 @@ import {IPeriod, IStep, IStepFrom, QueryParams} from '../../../../model/conf.mod
 import {RestSessionDto} from '../../../../model/request.model';
 import {TableProvider} from '@oneteme/jquery-table';
 import {REST_SESSION_TABLE_CONFIG} from "../../../../shared/_component/table/table.config";
-import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../../shared/period-filter';
+import {
+  getDefaultRelativePeriod,
+  getQuickRangeDates,
+  getQuickRangeStep,
+  isDefaultRelativePeriod,
+  PERIOD_QUICK_RANGES,
+  PeriodQuickRange,
+  toDisplayedPeriodEnd
+} from '../../../../shared/period-filter';
 import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
