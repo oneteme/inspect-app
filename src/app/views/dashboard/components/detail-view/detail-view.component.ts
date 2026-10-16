@@ -1,10 +1,11 @@
 ﻿import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
 import { DashboardDetailContext } from './detail-view.model';
+import {STATUS} from "../../../constants";
 
 @Component({
     selector: 'dashboard-detail-view',
-  templateUrl: './detail-view.component.html',
-  styleUrls: ['./detail-view.component.scss'],
+    templateUrl: './detail-view.component.html',
+    styleUrls: ['./detail-view.component.scss'],
     encapsulation: ViewEncapsulation.None
 })
 export class DashboardDetailViewComponent {
@@ -14,7 +15,6 @@ export class DashboardDetailViewComponent {
     @Output() requestProtocolNav = new EventEmitter<{ key: string; errorType: string }>();
     @Output() sessionTypeNav = new EventEmitter<{ type: string; server?: string }>();
     @Output() exceptionNav = new EventEmitter<{ type: string; tab: 'rest' | 'batch' | 'view' }>();
-    @Output() protocolDialogOpen = new EventEmitter<{ observable: any; type: string }>();
     @Output() instanceFilter = new EventEmitter<string>();
     @Output() viewAllClick = new EventEmitter<string>();
 
@@ -26,34 +26,6 @@ export class DashboardDetailViewComponent {
         return this.context.sparklinePercs[key] ?? 0;
     }
 
-    getSparklineSubtitle(key: string): string {
-        return this.context.sparklineTitles[key]?.subtitle ?? '';
-    }
-
-    getProtoErrBarWidth(errors: { count: number }[], count: number): number {
-        return errors?.[0]?.count ? Math.round((count / errors[0].count) * 100) : 0;
-    }
-
-    getProtoTotalRequests(key: string): number {
-        const def = this.context.protocolDefs.find(p => p.key === key);
-        if (!def) return 0;
-        const chart: any[] = this.context.chartRequests[def.reqKey]?.chart ?? [];
-        return chart.reduce((acc, obj) => ({ countok: acc.countok + obj.countok, count: acc.count + obj.count }), { countok: 0, count: 0 }).countok;
-    }
-
-    getTrend(key: string): 'up' | 'down' | 'stable' {
-        const def = this.context.protocolDefs.find(p => p.key === key);
-        if (!def) return 'stable';
-        const chart: any[] = this.context.chartRequests[def.reqKey]?.chart ?? [];
-        if (chart.length < 4) return 'stable';
-        const half = Math.floor(chart.length / 2);
-        const avgFirst = chart.slice(0, half).reduce((s: number, e: any) => s + (e.perc ?? 0), 0) / half;
-        const avgSecond = chart.slice(half).reduce((s: number, e: any) => s + (e.perc ?? 0), 0) / (chart.length - half);
-        if (avgSecond > avgFirst * 1.25) return 'up';
-        if (avgSecond < avgFirst * 0.75) return 'down';
-        return 'stable';
-    }
-
     get selectedKey(): string | null {
         return this.context.selectedInsights.values().next().value ?? null;
     }
@@ -61,10 +33,6 @@ export class DashboardDetailViewComponent {
     get isSessionInsight(): boolean {
         const sessionKeys = new Set(['SERVICE', 'BATCH', 'STARTUP', 'VIEW', 'TEST']);
         return !!this.selectedKey && sessionKeys.has(this.selectedKey);
-    }
-
-    get isFluxInsight(): boolean {
-        return !!this.selectedKey && !this.isSessionInsight;
     }
 
     get sessionChartData(): { stringDate: string; count: number }[] {
@@ -151,4 +119,6 @@ export class DashboardDetailViewComponent {
 
     trackByType(_: number, item: { type: string }): string { return item.type; }
     trackByKey(_: number, item: { key: string }): string { return item.key; }
+
+    protected readonly Status = STATUS;
 }

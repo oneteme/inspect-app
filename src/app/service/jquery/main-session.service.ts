@@ -30,52 +30,15 @@ export class MainSessionService {
         return this.getMainSession(args);
     }
 
-    getMainExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<ExceptionsByPeriodAndAppname[]> {
+    getMainExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, mainType: string}): Observable<ExceptionsByPeriodAndAppname[]> {
         let args = {
-            "column": `start.${filters.groupedBy}:date,error_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year,type:type`,
-            'main_session.type': 'BATCH',
+            "column": `start.${filters.groupedBy}:date,error_type,count:count,count.sum.over(partition(date)):countok,start.year:year,type:type`,
+            'main_session.type': filters.mainType,
             'join': 'instance',
             'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             "order": "date.desc,count.desc"
-        }
-        if(filters.app_name) {
-            args['instance.app_name.in'] = filters.app_name;
-        }
-        return this.getMainSession(args);
-    }
-
-    getStartupExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<ExceptionsByPeriodAndAppname[]> {
-        const args: any = {
-            'column': `start.${filters.groupedBy}:date,error_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`,
-            'join': 'instance',
-            'instance.namespace': filters.namespace,
-            'type': 'STARTUP',
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString(),
-            'order': 'date.desc,count.desc'
-        };
-        if (filters.app_name) {
-            args['instance.app_name.in'] = filters.app_name;
-        }
-        return this.getMainSession(args);
-    }
-
-    getTopBatchJobErrors(filters: { namespace: string, start: Date, end: Date, app_name: string }): Observable<{ name: string; count: number }[]> {
-        const args: any = {
-            'column': 'name,count:count',
-            'join': 'instance',
-            'type': 'BATCH',
-            'error_type.notNull': '',
-            'instance.namespace': filters.namespace,
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString(),
-            'order': 'count.desc',
-            'limit': '6'
-        };
-        if (filters.app_name) {
-            args['instance.app_name.in'] = filters.app_name;
         }
         return this.getMainSession(args);
     }
@@ -97,22 +60,6 @@ export class MainSessionService {
         }
         if(filters.servers?.length) {
             args['instance.app_name.in'] = filters.servers.join(',');
-        }
-        return this.getMainSession(args);
-    }
-
-    getViewExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<ExceptionsByPeriodAndAppname[]> {
-        const args: any = {
-            'column': `start.${filters.groupedBy}:date,error_type,count:count,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year`,
-            'join': 'instance',
-            'instance.namespace': filters.namespace,
-            'type': 'VIEW',
-            'start.ge': filters.start.toISOString(),
-            'start.lt': filters.end.toISOString(),
-            'order': 'date.desc,count.desc'
-        };
-        if (filters.app_name) {
-            args['instance.app_name.in'] = filters.app_name;
         }
         return this.getMainSession(args);
     }

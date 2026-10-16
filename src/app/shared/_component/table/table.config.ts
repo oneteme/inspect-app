@@ -98,6 +98,7 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
     if (code >= 500) return 'row-ko';
     if (code >= 400) return 'row-warning';
     if (code >= 200) return 'row-ok';
+    if (code == 0 && row.end) return 'row-unavailable';
     return '';
   }
 }
@@ -117,7 +118,10 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
     { key: 'address', header: 'Adresse', icon: 'fingerprint', width: '13%', optional: true },
     {
       key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
-      value: (row: MainSessionDto) => !row.end ? 'En cours...' : row.status >= 400 ? 'KO' : 'OK'
+      value: (row: RestSessionDto) => {
+        if (!row.end) return 'En cours...';
+        return row.status;
+      }
     }
   ],
   slices: [
@@ -136,9 +140,12 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
     }],
   defaultSort: { active: 'start', direction: 'desc' },
   rowClass: (row: MainSessionDto) => {
-    if (!row.status) return '';
-    else if (row.status >= 400) return 'row-ko';
-    else return 'row-ok';
+    const code = row.status;
+    if (code >= 500) return 'row-ko';
+    if (code >= 400) return 'row-warning';
+    if (code >= 200) return 'row-ok';
+    if (code == 0 && row.end) return 'row-unavailable';
+    return '';
   }
 }
 
@@ -207,7 +214,10 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
     { key: 'productName', header: 'Base de données', optional: true, icon: 'storage' },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
-      value: (row) => !row.end ? 'En cours...' : row.status >= 400 ? 'KO' : 'OK'
+      value: (row: DatabaseRequestDto) => {
+        if (!row.end) return 'En cours...';
+        return row.status;
+      }
     },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
@@ -223,10 +233,12 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: DatabaseRequestDto) => {
-    const failed = row.status >= 400;
-    if (row.end == null) return '';
-    if (failed) return 'row-ko';
-    if (!failed) return 'row-ok';
+    const code = row.status;
+    if (code >= 500) return 'row-ko';
+    if (code >= 400) return 'row-warning';
+    if (code >= 200) return 'row-ok';
+    if (code == 0 && row.end) return 'row-unavailable';
+    return '';
   }
 };
 
@@ -250,7 +262,10 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
-      value: (row) => !row.end ? 'En cours...' : row.status >= 400 ? 'KO' : 'OK'
+      value: (row: FtpRequestDto) => {
+        if (!row.end) return 'En cours...';
+        return row.status;
+      }
     },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
@@ -265,10 +280,12 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: FtpRequestDto) => {
-    const failed = row.status >= 400;
-    if (row.end == null) return '';
-    if (failed) return 'row-ko';
-    if (!failed) return 'row-ok';
+    const code = row.status;
+    if (code >= 500) return 'row-ko';
+    if (code >= 400) return 'row-warning';
+    if (code >= 200) return 'row-ok';
+    if (code == 0 && row.end) return 'row-unavailable';
+    return '';
   }
 }
 
@@ -292,7 +309,10 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
-      value: (row) => !row.end ? 'En cours...' : row.status >= 400 ? 'KO' : 'OK'
+      value: (row: DirectoryRequestDto) => {
+        if (!row.end) return 'En cours...';
+        return row.status;
+      }
     },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
@@ -307,10 +327,12 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: DirectoryRequestDto) => {
-    const failed = row.status >= 400;
-    if (row.end == null) return '';
-    if (failed) return 'row-ko';
-    if (!failed) return 'row-ok';
+    const code = row.status;
+    if (code >= 500) return 'row-ko';
+    if (code >= 400) return 'row-warning';
+    if (code >= 200) return 'row-ok';
+    if (code == 0 && row.end) return 'row-unavailable';
+    return '';
   }
 };
 
@@ -334,7 +356,10 @@ export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
-      value: (row) => !row.end ? 'En cours...' : row.status >= 400 ? 'KO' : 'OK'
+      value: (row: LocalRequest) => {
+        if (!row.end) return 'En cours...';
+        return row.status;
+      }
     },
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
   ],
@@ -349,10 +374,12 @@ export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: LocalRequest) => {
-    const failed = row.status >= 400;
-    if (row.end == null) return '';
-    if (failed) return 'row-ko';
-    if (!failed) return 'row-ok';
+    const code = row.status;
+    if (code >= 500) return 'row-ko';
+    if (code >= 400) return 'row-warning';
+    if (code >= 200) return 'row-ok';
+    if (code == 0 && row.end) return 'row-unavailable';
+    return '';
   }
 };
 
@@ -376,7 +403,10 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
-      value: (row) => !row.end ? 'En cours...' : row.status >= 400 ? 'KO' : 'OK'
+      value: (row: MailRequestDto) => {
+        if (!row.end) return 'En cours...';
+        return row.status;
+      }
     },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
@@ -391,10 +421,12 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: MailRequestDto) => {
-    const failed = row.status >= 400;
-    if (row.end == null) return '';
-    if (failed) return 'row-ko';
-    if (!failed) return 'row-ok';
+    const code = row.status;
+    if (code >= 500) return 'row-ko';
+    if (code >= 400) return 'row-warning';
+    if (code >= 200) return 'row-ok';
+    if (code == 0 && row.end) return 'row-unavailable';
+    return '';
   }
 };
 

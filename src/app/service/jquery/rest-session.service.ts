@@ -67,30 +67,15 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getSessionExceptions(filters: {namespace: string, start: Date, end: Date, groupedBy: string, server?: string, apiNames?: string, users?: string, versions?: string, others?: {[key: string]: any}  }): Observable<ExceptionsByPeriodAndAppname[]> {
+    getSessionExceptions(filters: {namespace: string, start: Date, end: Date, groupedBy: string}): Observable<ExceptionsByPeriodAndAppname[]> {
         let args: any = {
-            "column": `start.${filters.groupedBy}:date,error_type:errorType,count:count,status,count.sum.over(partition(date)):countok,count.divide(countok).multiply(100).round(2):pct,start.year:year,instance.type:type`,
+            "column": `start.${filters.groupedBy}:date,error_type:errorType,count:count,count.sum.over(partition(date)):countok,start.year:year`,
             'join': 'instance',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'instance.namespace': filters.namespace,
             'instance.type': 'SERVER',
             "order": "date.desc,count.desc"
-        }
-        if(filters.server) {
-            args['instance.app_name.in'] = filters.server;
-        }
-        if(filters.apiNames) {
-            args['api_name.in'] = filters.apiNames;
-        }
-        if(filters.versions) {
-            args['instance.version.in'] = filters.versions;
-        }
-        if (filters.users) {
-            args['user.in'] = filters.users;
-        }
-        if(filters.others) {
-            Object.entries(filters.others).forEach(([key, value]) => args[key] = value);
         }
         return this.getRestSession(args);
     }

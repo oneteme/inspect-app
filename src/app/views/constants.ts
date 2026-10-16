@@ -266,8 +266,9 @@ export const Operation = {
     like: { value: "like", display: "Contient" },
 }
 
-export const Status = {
-    "0xx": "Erreur de connexion",
-    "4xx": "Erreur applicative",
-    "5xx": "Erreur d'interface"
+export const STATUS = {
+    "0xx": {icon: 'priority_high', label: "Erreur de connexion", color: '#94A3B8'},
+    "2xx": {icon: 'done', label: "Succès", color: '#4CAF50'},
+    "4xx": {icon: 'error', label: "Erreur applicative", color: '#F9AD4E'},
+    "5xx": {icon: 'warning', label: "Erreur d'interface", color: '#F44336'}
 };

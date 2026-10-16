@@ -50,7 +50,9 @@
       <mat-label>Status</mat-label>
       <mat-select [formControl]="requestFilterForm.controls.rangestatus" multiple (selectionChange)="onChangeStatus($event)">
         <mat-select-trigger style="display: flex; gap: 0.5em; align-items: center">
-          {{requestFilterForm.controls.rangestatus.value?.[0]?.label || ''}}
+          <span [style.color]="requestFilterForm.controls.rangestatus.value?.[0]?.color"
+                [style.background-color]="requestFilterForm.controls.rangestatus.value?.[0]?.color + '1a'"
+                style="padding: 1px 8px; border-radius: 4px; font-weight: 500;">{{requestFilterForm.controls.rangestatus.value?.[0]?.label || ''}}</span>
           <span *ngIf="(requestFilterForm.controls.rangestatus.value?.length || 0) > 1" class="additional-selection">
           (+{{(requestFilterForm.controls.rangestatus.value?.length || 0) - 1}} {{requestFilterForm.controls.rangestatus.value.length === 2 ? 'autre' : 'autres'}})
           </span>

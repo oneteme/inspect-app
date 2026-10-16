@@ -220,7 +220,12 @@
 .dbi-nav { font-size: 14px; width: 14px; height: 14px; flex-shrink: 0; opacity: .2; transition: opacity .1s; color: rgba(0,0,0,.5); }
 
 .dbi-bar-wrap { flex: 3 1 0%; height: 3px; border-radius: 2px; background: rgba(34,36,38,.07); overflow: hidden; min-width: 40px; }
-.dbi-bar { height: 100%; border-radius: 2px; min-width: 3px; transition: width .3s ease; &.dbi-bar-err { background: #db2828; } &.dbi-bar-warn { background: #f59e0b; } }
+.dbi-bar {
+  height: 100%;
+  border-radius: 2px;
+  min-width: 3px;
+  transition: width .3s ease;
+}
 
 .dbi-skel-row {
   height: 28px;
@@ -239,7 +244,15 @@
   &.dbi-dot-err  { background: #db2828; }
 }
 
-.dbi-name { font-size: .74em; color: rgba(0,0,0,.72); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; flex: 2 0 0; min-width: 0; }
+.dbi-name {
+  font-size: .74em;
+  color: rgba(0,0,0,.72);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex: 2 0 0;
+  min-width: 0;
+}
 
 
 
@@ -264,7 +277,7 @@
   transition: background .1s, border-color .1s;
   &:hover { background: rgba(34,36,38,.09); border-color: rgba(34,36,38,.3); }
 }
-.dbi-badge { font-size: .7em; font-weight: 600; color: rgba(0,0,0,.55); flex: 0 0 44px; text-align: right; &.dbi-badge-warn { color: #d97706; font-weight: 700; } }
+.dbi-badge { font-size: .7em; font-weight: 600; color: rgba(0,0,0,.55); flex: 0 0 44px; text-align: right; &.dbi-badge-warn { font-weight: 700; } }
 .dbi-meta { font-size: .62em; color: rgba(0,0,0,.42); flex-shrink: 0; white-space: nowrap; }
 
 .dbi-skeleton { min-height: 90px; padding: 12px; display: flex; flex-direction: column; gap: 8px; justify-content: center; }

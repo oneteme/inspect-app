@@ -1,5 +1,6 @@
 import {field, UnitConfig} from "@oneteme/jquery-core";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
+import {STATUS} from "../constants";
 
 export const REST_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
   series: {
@@ -73,8 +74,8 @@ export const REST_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig
             jquery: {
               value: () => 'status_tranche',
               buildAlias: () => 'status_tranche',
-              buildColor: (value: string) => STATUS_TRANCHE[value].color,
-              buildName: (chartItem, value) => STATUS_TRANCHE[value].label
+              buildColor: (value: string) => STATUS[value].color,
+              buildName: (chartItem, value) => STATUS[value].label
             }
           }]
         }
@@ -403,7 +404,7 @@ export const BATCH_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfi
         stacks: {
           optional: false,
           items: [{
-            key: 'status',
+            key: 'status_stack',
             selected: true,
             menu: {
               label: 'Statut'
@@ -411,8 +412,20 @@ export const BATCH_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfi
             jquery: {
               value: () => 'status',
               buildAlias: () => 'status',
-              buildColor: (value: number) => value >= 400 ? REQUEST_STATUS_STACK['true'].color : REQUEST_STATUS_STACK['false'].color,
-              buildName: (chartItem, value: number) => value >= 400 ? REQUEST_STATUS_STACK['true'].label : REQUEST_STATUS_STACK['false'].label
+              buildName: (chartItem, value: string) => value,
+              buildColor: (value: string) => statusColor(value)
+            }
+          }, {
+            key: 'status_tranche',
+            selected: false,
+            menu: {
+              label: 'Tranche'
+            },
+            jquery: {
+              value: () => 'status_tranche',
+              buildAlias: () => 'status_tranche',
+              buildColor: (value: string) => STATUS[value].color,
+              buildName: (chartItem, value) => STATUS[value].label
             }
           }]
         }
@@ -552,7 +565,7 @@ export const STARTUP_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartCon
         stacks: {
           optional: false,
           items: [{
-            key: 'status',
+            key: 'status_stack',
             selected: true,
             menu: {
               label: 'Statut'
@@ -560,8 +573,20 @@ export const STARTUP_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartCon
             jquery: {
               value: () => 'status',
               buildAlias: () => 'status',
-              buildColor: (value: number) => value >= 400 ? REQUEST_STATUS_STACK['true'].color : REQUEST_STATUS_STACK['false'].color,
-              buildName: (chartItem, value: number) => value >= 400 ? REQUEST_STATUS_STACK['true'].label : REQUEST_STATUS_STACK['false'].label
+              buildName: (chartItem, value: string) => value,
+              buildColor: (value: string) => statusColor(value)
+            }
+          }, {
+            key: 'status_tranche',
+            selected: false,
+            menu: {
+              label: 'Tranche'
+            },
+            jquery: {
+              value: () => 'status_tranche',
+              buildAlias: () => 'status_tranche',
+              buildColor: (value: string) => STATUS[value].color,
+              buildName: (chartItem, value) => STATUS[value].label
             }
           }]
         }
@@ -749,8 +774,8 @@ export const REST_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
             jquery: {
               value: () => 'status_tranche',
               buildAlias: () => 'status_tranche',
-              buildColor: (value: string) => STATUS_TRANCHE[value].color,
-              buildName: (chartItem, value) => STATUS_TRANCHE[value].label
+              buildColor: (value: string) => STATUS[value].color,
+              buildName: (chartItem, value) => STATUS[value].label
             }
           }]
         }
@@ -1204,9 +1229,21 @@ export const JDBC_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
             },
             jquery: {
               value: () => 'status',
-              buildAlias: () => 'status_stack',
-              buildName: (chartItem, value: number) => value >= 400 ? REQUEST_STATUS_STACK['true'].label : REQUEST_STATUS_STACK['false'].label,
-              buildColor: (value) => value >= 400 ? REQUEST_STATUS_STACK['true'].color : REQUEST_STATUS_STACK['false'].color
+              buildAlias: () => 'status',
+              buildName: (chartItem, value: string) => value,
+              buildColor: (value: string) => statusColor(value)
+            }
+          }, {
+            key: 'status_tranche',
+            selected: false,
+            menu: {
+              label: 'Tranche'
+            },
+            jquery: {
+              value: () => 'status_tranche',
+              buildAlias: () => 'status_tranche',
+              buildColor: (value: string) => STATUS[value].color,
+              buildName: (chartItem, value) => STATUS[value].label
             }
           }]
         }
@@ -1463,9 +1500,21 @@ export const FTP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
             },
             jquery: {
               value: () => 'status',
-              buildAlias: () => 'status_stack',
-              buildName: (chartItem, value: number) => value >= 400 ? REQUEST_STATUS_STACK['true'].label : REQUEST_STATUS_STACK['false'].label,
-              buildColor: (value: number) => value >= 400 ? REQUEST_STATUS_STACK['true'].color : REQUEST_STATUS_STACK['false'].color
+              buildAlias: () => 'status',
+              buildName: (chartItem, value: string) => value,
+              buildColor: (value: string) => statusColor(value)
+            }
+          }, {
+            key: 'status_tranche',
+            selected: false,
+            menu: {
+              label: 'Tranche'
+            },
+            jquery: {
+              value: () => 'status_tranche',
+              buildAlias: () => 'status_tranche',
+              buildColor: (value: string) => STATUS[value].color,
+              buildName: (chartItem, value) => STATUS[value].label
             }
           }]
         }
@@ -1678,9 +1727,21 @@ export const LDAP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
             },
             jquery: {
               value: () => 'status',
-              buildAlias: () => 'status_stack',
-              buildName: (chartItem, value: number) => value >= 400 ? REQUEST_STATUS_STACK['true'].label : REQUEST_STATUS_STACK['false'].label,
-              buildColor: (value: number) => value >= 400 ? REQUEST_STATUS_STACK['true'].color : REQUEST_STATUS_STACK['false'].color
+              buildAlias: () => 'status',
+              buildName: (chartItem, value: string) => value,
+              buildColor: (value: string) => statusColor(value)
+            }
+          }, {
+            key: 'status_tranche',
+            selected: false,
+            menu: {
+              label: 'Tranche'
+            },
+            jquery: {
+              value: () => 'status_tranche',
+              buildAlias: () => 'status_tranche',
+              buildColor: (value: string) => STATUS[value].color,
+              buildName: (chartItem, value) => STATUS[value].label
             }
           }]
         }
@@ -1849,9 +1910,21 @@ export const SMTP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
             },
             jquery: {
               value: () => 'status',
-              buildAlias: () => 'status_stack',
-              buildName: (chartItem, value: number) => value >= 400 ? REQUEST_STATUS_STACK['true'].label : REQUEST_STATUS_STACK['false'].label,
-              buildColor: (value: number) => value >= 400 ? REQUEST_STATUS_STACK['true'].color : REQUEST_STATUS_STACK['false'].color
+              buildAlias: () => 'status',
+              buildName: (chartItem, value: string) => value,
+              buildColor: (value: string) => statusColor(value)
+            }
+          }, {
+            key: 'status_tranche',
+            selected: false,
+            menu: {
+              label: 'Tranche'
+            },
+            jquery: {
+              value: () => 'status_tranche',
+              buildAlias: () => 'status_tranche',
+              buildColor: (value: string) => STATUS[value].color,
+              buildName: (chartItem, value) => STATUS[value].label
             }
           }]
         }
@@ -2099,24 +2172,11 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
 });
 
 const STATUS_COLORS = {
+  0: ['#94a3b8', '#64748b', '#475569', '#334155'],
   2: ['#4ade80', '#22c55e', '#16a34a', '#15803d' ],
   3: ['#67e8f9', '#22d3ee', '#06b6d4', '#0891b2', '#0e7490'],
   4: ['#fcd34d', '#fbbf24', '#f59e0b', '#d97706', '#b45309'],
   5: ['#fca5a5', '#f87171', '#ef4444', '#dc2626', '#b91c1c']
-}
-
-const REQUEST_STATUS_STACK = {
-  false: {label: 'Succès', color: '#22c55e'},
-  true: {label: 'Échec', color: '#ef4444'}
-}
-
-const STATUS_TRANCHE = {
-  '1': {label: '0', color: '#94a3b8'},
-  '2': {label: '1xx', color: '#8b5cf6'},
-  '3': {label: '2xx', color: '#22c55e'},
-  '4': {label: '3xx', color: '#06b6d4'},
-  '5': {label: '4xx', color: '#f59e0b'},
-  '6': {label: '5xx', color: '#ef4444'}
 }
 
 const PERFORMANCE_TRANCHE1 = {

@@ -6,7 +6,7 @@ import {finalize, Subject, takeUntil} from 'rxjs';
 import {extractPeriod} from '../../../../shared/util';
 import {TraceService} from '../../../../service/trace.service';
 import {app} from '../../../../../environments/environment';
-import {Constants} from '../../../constants';
+import {Constants, STATUS} from '../../../constants';
 import {EnvRouter} from '../../../../service/router.service';
 import {InstanceService} from '../../../../service/jquery/instance.service';
 import {PageTitleService} from '../../../../service/page-title.service';
@@ -63,9 +63,10 @@ export class SearchRestView implements OnInit, OnDestroy {
   });
 
   filters: { icon: string; label: string; color: string; value: any }[] = [
-    { icon: 'warning', label: '5xx', color: '#F44336', value: '5xx' },
-    { icon: 'error', label: '4xx', color: '#F9AD4E', value: '4xx' },
-    { icon: 'done', label: '2xx', color: '#4CAF50', value: '2xx' },
+    { icon: STATUS['5xx'].icon, label: STATUS['5xx'].label, color:  STATUS['5xx'].color, value: '5xx' },
+    { icon: STATUS['4xx'].icon, label: STATUS['4xx'].label, color: STATUS['4xx'].color, value: '4xx' },
+    { icon: STATUS['2xx'].icon, label: STATUS['2xx'].label, color: STATUS['2xx'].color, value: '2xx' },
+    { icon: STATUS['0xx'].icon, label: STATUS['0xx'].label, color: STATUS['0xx'].color, value: '0xx' },
     { icon: 'pending', label: 'En cours', color: '', value: 'pending' }
   ];
   readonly periodQuickRanges = PERIOD_QUICK_RANGES;
