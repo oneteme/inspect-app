@@ -26,6 +26,7 @@ import {ExceptionsTableComponent} from "./_component/table/exceptions-table/exce
 import {ConfigDialogComponent} from './_component/config-dialog/config-dialog.component';
 import {PagePanelComponent} from './_component/page-panel/page-panel.component';
 
+import {SessionTimelineComponent} from './_component/session-timeline/session-timeline.component';
 export const MY_DATE_FORMATS = {
   parse: {
     dateInput: 'MM/YYYY',
@@ -72,7 +73,8 @@ export const MY_DATE_FORMATS = {
     EmptyStateComponent,
     ExceptionsTableComponent,
     ConfigDialogComponent,
-    PagePanelComponent
+    PagePanelComponent,
+    SessionTimelineComponent
   ],
   exports: [
     MaterialModule,
@@ -96,7 +98,8 @@ export const MY_DATE_FORMATS = {
     EmptyStateComponent,
     ExceptionsTableComponent,
     ConfigDialogComponent,
-    PagePanelComponent
+    PagePanelComponent,
+    SessionTimelineComponent
   ]
 })
 export class SharedModule { }

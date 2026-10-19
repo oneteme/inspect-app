@@ -1,6 +1,6 @@
-import {Component, inject, NgZone, OnDestroy, OnInit} from "@angular/core";
+import {Component, inject, OnDestroy, OnInit} from "@angular/core";
 import {ActivatedRoute} from "@angular/router";
-import {Location, DecimalPipe} from "@angular/common";
+import {DecimalPipe} from "@angular/common";
 import {combineLatest, EMPTY, finalize, forkJoin, of, Subject, switchMap, takeUntil} from "rxjs";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
 import {TraceService} from "../../../../service/trace.service";
@@ -30,15 +30,9 @@ import {shallowEqual} from '../../../search/session/rest/search-rest.view';
   templateUrl: './server-supervision.view.html',
   styleUrls: ['./server-supervision.view.scss'],
   providers: [
-    {
-      provide: DateAdapter, useClass: CustomDateAdapter
-    },
-    {
-      provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS
-    },
-    {
-      provide: MAT_DATE_RANGE_SELECTION_STRATEGY, useClass: CustomDateRangeSelectionStrategy
-    }
+    {provide: DateAdapter, useClass: CustomDateAdapter},
+    {provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS},
+    {provide: MAT_DATE_RANGE_SELECTION_STRATEGY, useClass: CustomDateRangeSelectionStrategy}
   ]
 })
 export class ServerSupervisionView implements OnInit, OnDestroy {
@@ -49,24 +43,22 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   private readonly _instanceTraceService = inject(InstanceTraceService);
   private readonly _instanceService = inject(InstanceService);
   private readonly _dialog = inject(MatDialog);
-  private readonly _decimalPipe: DecimalPipe = inject(DecimalPipe);
-  private readonly $destroy = new Subject<void>();
-  private readonly $requestCancel = new Subject<void>();
+  private readonly _decimalPipe = inject(DecimalPipe);
   private readonly _snackBar = inject(MatSnackBar);
   private readonly _pageTitleService = inject(PageTitleService);
+  private readonly $destroy = new Subject<void>();
+  private readonly $requestCancel = new Subject<void>();
 
   readonly formGroup = new FormGroup({
     range: new FormGroup({
       start: new FormControl<Date | null>(null, [Validators.required]),
-      end: new FormControl<Date | null>(null, [Validators.required]),
+      end: new FormControl<Date | null>(null, [Validators.required])
     }),
-    instance: new FormControl< {id: string, appName: string, start: number, end: number} | null>(null, [Validators.required]),
-    server: new FormControl< string | null>(null, [])
+    instance: new FormControl<{id: string; appName: string; start: number; end: number} | null>(null, [Validators.required]),
+    server: new FormControl<string | null>(null)
   });
 
   readonly USAGE_RESOURCE_BY_PERIOD_LINE: ChartProvider<string, number> = {
-    group: 'sync',
-    groupSync: ['tooltip', 'datazoom'],
     height: 300,
     stacked: false,
     ytitle: '',
@@ -74,13 +66,12 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
       {data: {x: field('date'), y: field('maxHeap')}, name: 'Maximum', type: 'area', color: '#feb019'},
       {data: {x: field('date'), y: field('commitedHeap')}, name: 'Allouée', color: '#00e396'},
       {data: {x: field('date'), y: field('usedHeap')}, name: 'Utilisée', color: '#008ffb'}
-
     ],
     options: {
       animation: false,
-      dataZoom: [{ type: 'inside', xAxisIndex: 0 }],
-      xAxis: { axisLabel: { hideOverlap: true } },
-      yAxis: { axisLabel: { formatter: (v: number) => this._decimalPipe.transform(v) } },
+      dataZoom: [{type: 'inside', xAxisIndex: 0}],
+      xAxis: {axisLabel: {hideOverlap: true}},
+      yAxis: {axisLabel: {formatter: (v: number) => this._decimalPipe.transform(v)}},
       series: [
         {
           lineStyle: { type: 'dashed' },
@@ -128,73 +119,56 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
       ]
     }
   };
-  readonly USAGE_INSTANCE_TRACE_BY_PERIOD_LINE: ChartProvider<string, number> = {
-    height: 335,
+  readonly USAGE_CPU_BY_PERIOD_LINE: ChartProvider<string, number> = {
     group: 'sync',
     groupSync: ['tooltip', 'datazoom'],
+    height: 300,
     stacked: false,
-    ytitle: '',
+    ytitle: '%',
     series: [
-      {data: {x: field('date'), y: field('traceCount')}, name: 'Traitements finalisés'},
-      {data: {x: field('date'), y: field('pending')}, name: 'Traitements en cours'},
-      {data: {x: field('date'), y: field('queueCapacity')}, name: 'Maximum', type: 'area', color: '#FEB019', visible: false}
+      {data: {x: field('date'), y: field('cpuUsage')}, name: 'CPU utilisée', color: '#7c3aed'}
     ],
     options: {
       animation: false,
-      dataZoom: [{ type: 'inside', xAxisIndex: 0 }],
-      xAxis: { axisLabel: { hideOverlap: true } },
-      yAxis: { axisLabel: { formatter: (v: number) => this._decimalPipe.transform(v) } },
-      series: [
-        {},
-        {},
-        {
-          lineStyle: { type: 'dashed' },
-          areaStyle: {
-            color: {
-              type: 'linear', x: 0, y: 0, x2: 0, y2: 1,
-              colorStops: [
-                { offset: 0, color: '#FEB019CC' },
-                { offset: 1, color: '#FEB01911' }
-              ]
-            }
-          }
-        }
-      ]
+      dataZoom: [{type: 'inside', xAxisIndex: 0}],
+      xAxis: {axisLabel: {hideOverlap: true}},
+      yAxis: {
+        min: 0,
+        max: 100,
+        axisLabel: {formatter: (v: number) => `${this._decimalPipe.transform(v)} %`}
+      },
+      legend: {show: true}
     }
   };
-  readonly ATTEMPT_INSTANCE_TRACE_BY_PERIOD_LINE: ChartProvider<string, number> = {
-    height: 335,
+  readonly USAGE_THREADS_BY_PERIOD_LINE: ChartProvider<string, number> = {
+    group: 'sync',
+    groupSync: ['tooltip', 'datazoom'],
+    height: 300,
     stacked: false,
-    ytitle: '',
+    ytitle: 'Threads',
     series: [
-      {data: {x: field('date'), y: field('attempts')}, name: 'Tentative'}
+      {data: {x: field('date'), y: field('nbActiveThread')}, name: 'Threads actifs', color: '#2563eb'},
+      {data: {x: field('date'), y: field('nbStartThread')}, name: 'Threads démarrés', color: '#ea580c'}
     ],
     options: {
       animation: false,
-      dataZoom: [{ type: 'inside', xAxisIndex: 0 }],
-      xAxis: { axisLabel: { hideOverlap: true } },
-      yAxis: { axisLabel: { formatter: (v: number) => this._decimalPipe.transform(v) } },
-      legend: { show: true }
+      dataZoom: [{type: 'inside', xAxisIndex: 0}],
+      xAxis: {axisLabel: {hideOverlap: true}},
+      yAxis: {axisLabel: {formatter: (v: number) => this._decimalPipe.transform(v)}},
+      legend: {show: true}
     }
   };
-
   date = new Date();
   servers: string[] = [];
   instance: Partial<InstanceEnvironment> = {};
   instances: {id: string, appName: string, start: number, end: number}[] = [];
   usageResourceByPeriod: any[] = [];
-  instanceTraceByPeriod: {date: Date, pending: number, attempts: number, traceCount: number, queueCapacity: number}[] = [];
-  logEntryByPeriod: any[] = [];
   lastTrace: number;
-  unavailableStat:  number = 0;
-  traceStat:  number = 0;
   params: Partial<{instance: string, namespace: string, start: Date, end: Date}> = {};
 
   isLoading = false;
   isLoadingInstances = false;
   reloadInstances = true;
-  activityDisplayType: 'TRACE' | 'ATTEMPT' | 'REPORT' = 'TRACE';
-
   selectedPeriod: Partial<{start: Date, end: Date}>;
   readonly periodQuickRanges = PERIOD_QUICK_RANGES;
   period: IPeriod | IStep | IStepFrom;
@@ -296,14 +270,11 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     this.isLoading = true;
     this.instance = null;
     this.usageResourceByPeriod = [];
-    this.instanceTraceByPeriod = [];
-    this.logEntryByPeriod = [];
     this.lastTrace = null;
-    this.unavailableStat = 0;
-    this.traceStat = 0;
     this.syncChartPeriodBounds();
     this._traceService.getInstance(this.params.instance)
     .pipe(switchMap(res => {
+        console.log(res.namespace, this.params.namespace)
       if(res?.namespace !== this.params.namespace) {
         this._snackBar.open(`L'identifiant de cette instance ne correspond pas à l'environnement ${this.params.namespace}`, "Fermer",
             {
@@ -328,28 +299,14 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
       }
       return forkJoin([
         this.instance.end ? of([]) : this._instanceTraceService.getLastInstanceTrace({instance: [this.params.instance]}),
-        this._machineUsageService.getResourceMachineByPeriod({instance: this.params.instance, start: this.params.start, end: this.params.end}),
-        this._instanceTraceService.getInstanceTraceByPeriod({instance: this.params.instance, start: this.params.start, end: this.params.end}),
-        this._instanceTraceService.getPendingSum({instance: this.params.instance, date: this.params.start}),
-        this._traceService.getLogEntryByPeriod(this.params.instance, this.params.start, this.params.end)
+        this._machineUsageService.getResourceMachineByPeriod({instance: this.params.instance, start: this.params.start, end: this.params.end})
       ]);
     }), finalize(() => (this.isLoading = false)), takeUntil(this.$requestCancel), takeUntil(this.$destroy)).subscribe({
-      next: ([last, usage, trace, pending, log]) => {
+      next: ([last, usage]) => {
         this.usageResourceByPeriod = usage?.length ? usage.map(r => ({...r, date: new Date(r.date), maxHeap: this.instance.resource.maxHeap, diskTotalSpace: this.instance.resource.diskTotalSpace})) : [];
-        let prv = pending;
-        this.instanceTraceByPeriod =
-          trace?.length
-            ? trace.map((acc: any) => {
-                acc.date = new Date(acc.date);
-                acc.pending = (prv = acc.pending + prv);
-                acc.queueCapacity = this.instance.configuration?.tracing?.queueCapacity;
-                return acc;
-              })
-            : [];
-        this.logEntryByPeriod = log;
+        console.log(usage)
         this.lastTrace = last[0]?.date;
         this.updatePageTitle();
-        this.getStatActivity();
         this.selectedPeriod = this.defaultSelectedPeriod();
       }
     });
@@ -361,12 +318,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
       icon: 'browse_activity',
       iconOutlined: true,
       title: this.instance.name,
-      subtitle: 'Supervision • Serveur',
-      instanceContext: {
-        instance: this.instance,
-        lastTrace: this.lastTrace,
-        date: this.date.getTime()
-      }
+      subtitle: 'Supervision • Serveur'
     });
   }
 
@@ -384,7 +336,11 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
       }
       
       const periodParams = this.period.buildParams();
-      const newQueryParams = { namespace: this.params.namespace, ...periodParams };
+      const newQueryParams = {
+        namespace: this.params.namespace,
+        app_name: this.formGroup.controls.server.value || null,
+        ...periodParams
+      };
       const newInstanceId = this.formGroup.controls.instance.value.id;
       const currentInstanceId = this._activatedRoute.snapshot.params['instance'];
       const instanceChanged = currentInstanceId !== newInstanceId;
@@ -447,61 +403,6 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     });
   }
 
-  getStatActivity() {
-    this.unavailableStat = this.getUnavailableStat();
-    this.traceStat = this.getCountStat();
-  }
-
-  getUnavailableStat(): number {
-    const intervalMs = this.instance.configuration?.scheduling.interval ? this.instance.configuration.scheduling.interval * 1000 : null;
-    if (!intervalMs) return;
-
-    const maxStart = this.getMaxDate(new Date(this.instance.instant * 1000), this.formGroup.controls.range.controls.start.value);
-    const minEnd = this.getMinDate(this.instance.end ? new Date(this.instance.end * 1000) : new Date(), this.formGroup.controls.range.controls.end.value);
-    const traces = this.instanceTraceByPeriod.filter(t => t.traceCount !== null && t.traceCount !== undefined);
-
-    let unavailable = 0;
-
-    if (traces.length) {
-      const diff = traces[0].date.getTime() - maxStart.getTime();
-      if (diff > intervalMs) {
-        let attempts = Math.trunc(diff / intervalMs) - 1;
-        unavailable += (intervalMs / 1000) * attempts;
-      }
-    }
-
-    let attempts = 0;
-    for (let i = 0; i < traces.length - 1; i++) {
-      if(traces[i].attempts > 1) {
-        attempts = traces[i].attempts;
-      } else {
-        unavailable += (intervalMs / 1000) * attempts;
-        attempts = 0;
-        if(i > 0) {
-          let diff = traces[i].date.getTime() - traces[i - 1].date.getTime();
-          if(diff > intervalMs) {
-            attempts = Math.trunc(diff / intervalMs) - 1;
-          }
-        }
-      }
-    }
-
-    if (traces.length) {
-      const diff = minEnd.getTime() - traces[traces.length - 1].date.getTime();
-      if (diff > intervalMs) {
-        let attempts = Math.trunc(diff / intervalMs) - 1;
-        unavailable += (intervalMs / 1000) * attempts;
-      }
-    }
-    return unavailable;
-  }
-
-  getCountStat(): number {
-    return this.instanceTraceByPeriod.reduce((acc, curr) => {
-      return acc + (curr.traceCount || 0);
-    }, 0);
-  }
-
   onClickPulse() {
     this._dialog.open(PulseDialogComponent, {
       width: '1000px',
@@ -540,8 +441,6 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     [
       this.USAGE_RESOURCE_BY_PERIOD_LINE,
       this.USAGE_DISK_BY_PERIOD_LINE,
-      this.USAGE_INSTANCE_TRACE_BY_PERIOD_LINE,
-      this.ATTEMPT_INSTANCE_TRACE_BY_PERIOD_LINE
     ].forEach((chartConfig) => {
       chartConfig.options = {
         ...chartConfig.options,

@@ -1,0 +1,143 @@
+<page-panel panelTitle="Filtres" panelIcon="person_search">
+    <div class="panel-filter" [formGroup]="filterForm">
+        <mat-form-field class="filter-field date-field no-subscript md-3" appearance="outline">
+            <mat-label>Choisir une date</mat-label>
+            <input matInput [matDatepicker]="picker" formControlName="date">
+            <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+            <mat-datepicker #picker></mat-datepicker>
+        </mat-form-field>
+        <mat-form-field class="filter-field user-field no-subscript md-3" appearance="outline">
+            <mat-label>Choisir un utilisateur</mat-label>
+            <mat-select formControlName="user">
+                <mat-option *ngFor="let user of $users | async" [value]="user">{{user}}</mat-option>
+            </mat-select>
+        </mat-form-field>
+    </div>
+</page-panel>
+
+<div class="timeline">
+    <div *ngIf="sessions.length > 0" class="activity-summary">
+        <div class="summary-item">
+            <span class="summary-icon summary-icon--blue"><mat-icon>account_tree</mat-icon></span>
+            <span class="summary-text">
+                <span class="summary-value">{{totalSessions}}</span>
+                <span class="summary-label">sessions</span>
+            </span>
+        </div>
+        <div class="summary-item">
+            <span class="summary-icon summary-icon--indigo"><mat-icon>timeline</mat-icon></span>
+            <span class="summary-text">
+                <span class="summary-value">{{count}}</span>
+                <span class="summary-label">événements affichés</span>
+            </span>
+        </div>
+        <div *ngIf="firstActivity && lastActivity" class="summary-item summary-period">
+            <span class="summary-icon summary-icon--slate"><mat-icon>schedule</mat-icon></span>
+            <span class="summary-text">
+                <span class="summary-value summary-value--sm">{{firstActivity * 1000 | date: 'HH:mm:ss': 'fr'}} → {{lastActivity * 1000 | date: 'HH:mm:ss': 'fr'}}</span>
+                <span class="summary-label">plage d'activité · {{formatElapsedDuration(lastActivity - firstActivity)}}</span>
+            </span>
+        </div>
+        <div class="summary-item summary-duration">
+            <span class="summary-icon summary-icon--slate"><mat-icon>timer</mat-icon></span>
+            <span class="summary-text">
+                <span class="summary-value summary-value--sm">{{formatElapsedDuration(totalSessionDuration)}}</span>
+                <span class="summary-label">durée totale</span>
+            </span>
+        </div>
+        <div class="summary-item summary-presence">
+            <span class="summary-icon summary-icon--green"><mat-icon>visibility</mat-icon></span>
+            <span class="summary-text">
+                <ng-container *ngIf="presenceMeasuredSessions > 0; else presenceNotMeasured">
+                    <span class="summary-value summary-value--sm">{{formatElapsedDuration(totalVisibleDuration)}}</span>
+                    <span class="summary-label">présence · {{presenceMeasuredSessions}}/{{sessions.length}} mesurée(s)</span>
+                </ng-container>
+                <ng-template #presenceNotMeasured>
+                    <span class="summary-value summary-value--sm">—</span>
+                    <span class="summary-label">présence non mesurée</span>
+                </ng-template>
+            </span>
+        </div>
+    </div>
+
+    <div *ngIf="sessions.length === 0 && !loading" class="no-data-container">
+        <mat-icon>travel_explore</mat-icon>
+        <p>Aucune donnée disponible pour cet utilisateur à cette date</p>
+        <span class="no-data-hint">Essayez de changer d'utilisateur ou de date dans les filtres ci-dessus.</span>
+    </div>
+    <div *ngIf="sessions.length === 0 && loading" class="no-data-container is-loading">
+        <mat-icon class="spin">progress_activity</mat-icon>
+        <p>Chargement du parcours…</p>
+        <mat-progress-bar class="loading-bar" mode="query"></mat-progress-bar>
+    </div>
+
+    <div *ngFor="let session of sessions" class="timeline-section">
+        <div class="session-header">
+            <div class="session-heading">
+                <span class="session-avatar"><mat-icon>tab</mat-icon></span>
+                <div class="session-heading-text">
+                    <div class="session-title-row">
+                        <span class="session-name">{{session.name}}</span>
+                        <span *ngIf="isSessionInProgress(session)" class="session-status session-status--live">
+                            <span class="status-dot"></span> En cours
+                        </span>
+                        <span class="session-count">
+                            {{session.sessionEvents?.length || 0}} événement(s)
+                        </span>
+                    </div>
+                    <div class="session-location">
+                        <mat-icon>language</mat-icon>
+                        <span [attr.title]="session.location">{{session.location}}</span>
+                    </div>
+                </div>
+            </div>
+            <button mat-stroked-button color="primary" class="open-session-button" (click)="onClickSession($event, session)">
+                Ouvrir <mat-icon>open_in_new</mat-icon>
+            </button>
+        </div>
+
+        <div class="session-meta">
+            <span class="meta-pill">
+                <mat-icon>date_range</mat-icon>
+                <span>
+                    {{session.start * 1000 | date: 'dd/MM/yyyy HH:mm:ss': 'fr'}}
+                    <span class="date-separator">→</span>
+                    <span *ngIf="isSessionInProgress(session); else completedSessionEnd" class="session-in-progress">En cours</span>
+                    <ng-template #completedSessionEnd>{{getSessionEnd(session) * 1000 | date: 'HH:mm:ss.SSS': 'fr'}}</ng-template>
+                </span>
+            </span>
+            <span class="meta-pill meta-pill--strong">
+                <mat-icon>timer</mat-icon>
+                <span>{{formatElapsedDuration(getSessionDuration(session))}}</span>
+            </span>
+            <span *ngIf="hasPresenceMeasurement(session); else sessionPresenceNotMeasured" class="meta-pill session-visible-duration">
+                <mat-icon>visibility</mat-icon>
+                <span>Présence {{formatElapsedDuration(getVisibleDuration(session))}}</span>
+                <small>{{getPresencePercentage(session)}} %</small>
+                <mat-progress-bar mode="determinate" [value]="getPresencePercentage(session)"></mat-progress-bar>
+            </span>
+            <ng-template #sessionPresenceNotMeasured>
+                <span class="meta-pill session-presence-unavailable">
+                    <mat-icon>visibility_off</mat-icon>
+                    Présence non mesurée
+                </span>
+            </ng-template>
+        </div>
+
+        <session-timeline [events]="session.sessionEvents || []"></session-timeline>
+    </div>
+
+    <mat-paginator
+        *ngIf="totalSessions > pageSize"
+        class="session-paginator"
+        [length]="totalSessions"
+        [pageIndex]="currentPage"
+        [pageSize]="pageSize"
+        [hidePageSize]="true"
+        [showFirstLastButtons]="true"
+        aria-label="Pagination des sessions"
+        (page)="onPageChange($event)">
+    </mat-paginator>
+</div>
+
+

@@ -68,10 +68,12 @@
       </database-table>
     </div>
 
-    <!-- Actions -->
+    <!-- Événements de session -->
     <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'action'" class="tab-panel">
-      <action-table [requests]="session['userActions']">
-      </action-table>
+      <session-timeline
+        [events]="sessionEvents"
+        [exceptions]="sessionExceptions">
+      </session-timeline>
     </div>
 
     <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'stage'" class="tab-panel">

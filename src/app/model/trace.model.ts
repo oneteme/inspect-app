@@ -106,6 +106,15 @@ export interface UserAction {
   start: Date;
 }
 
+export interface SessionEvent {
+  '@type': string;
+  instant: number;
+  type: string;
+  sessionId: string;
+  value?: string;
+  location?: string;
+}
+
 export interface AbstractSession {
   requestsMask: number;
   instanceId: string;
@@ -138,6 +147,7 @@ export interface AbstractStage {
 export interface ExceptionInfo {
   type: string;
   message: string;
+  offset?: number;
   stackTraceRows: StackTraceRow[];
   cause: ExceptionInfo;
 }
@@ -192,7 +202,10 @@ export interface TracingProperties {
 
 export interface LogEntry {
   instant: number;
+  appName: string;
   level: string;
   message: string;
+  thread: string;
+  action: string;
   stackRows: StackTraceRow[];
 }

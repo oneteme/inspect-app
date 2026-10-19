@@ -98,6 +98,7 @@ export class Constants {
         test: {title: 'Validation & Tests', subtitle: 'Lancements de tests automatisés et résultats', icon: 'rule'},
         startup: {title: 'Initialisation', subtitle: 'Chronologie et durée des démarrages d\'application', icon: 'restart_alt'},
         view: {title: 'Parcours Client', subtitle: 'Navigation utilisateurs et accès aux pages', icon: 'ads_click'},
+        architecture: {title: 'Architecture', subtitle: 'Diagramme des dépendances entre applications et ressources', icon: 'lan'},
         dashboard: {title:'Tableau de bord', icon: 'home'},
         architecture: {title:'Architecture', icon: 'lan'},
         deploiment: {title:'Instances Actives', subtitle: 'Suivi des applications en cours d\'exécution', icon:'deployed_code'},

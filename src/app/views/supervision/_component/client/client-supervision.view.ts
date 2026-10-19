@@ -320,12 +320,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
       icon: 'browse_activity',
       iconOutlined: true,
       title: this.instance.name,
-      subtitle: 'Supervision • Client',
-      instanceContext: {
-        instance: this.instance,
-        lastTrace: this.lastTrace,
-        date: this.date.getTime()
-      }
+      subtitle: 'Supervision • Client'
     });
   }
 

@@ -1,7 +1,7 @@
 import {Component, inject, Input, OnChanges, SimpleChanges} from "@angular/core";
 import {EnvRouter} from "../../../../service/router.service";
 import {MainSessionView, RestSessionView} from "../../../../model/request.model";
-import {InstanceEnvironment} from "../../../../model/trace.model";
+import {ExceptionInfo, InstanceEnvironment, SessionEvent} from "../../../../model/trace.model";
 
 export interface TabData {
   label: string;
@@ -28,6 +28,14 @@ export class DetailSessionComponent implements OnChanges {
   @Input() isLoading: boolean;
   tabs: TabData[] = [];
   selectedTabIndex: number = 0;
+
+  get sessionEvents(): SessionEvent[] {
+    return this.session && 'sessionEvents' in this.session ? this.session.sessionEvents ?? [] : [];
+  }
+
+  get sessionExceptions(): ExceptionInfo[] {
+    return this.session && 'exceptions' in this.session ? this.session.exceptions ?? [] : [];
+  }
 
   ngOnChanges(changes: SimpleChanges) {
     if (changes['completedSession'] && this.session) {
@@ -101,10 +109,10 @@ export class DetailSessionComponent implements OnChanges {
         errorCount: 0
       },
       {
-        label: 'Action',
+        label: 'Événements',
         icon: 'web_traffic',
-        count: this.session['userActions']?.length || 0,
-        visible: !!this.session['userActions']?.length,
+        count: this.sessionEvents.length + this.sessionExceptions.length,
+        visible: this.sessionEvents.length > 0 || this.sessionExceptions.length > 0,
         type: 'action',
         hasError: false,
         errorCount: 0

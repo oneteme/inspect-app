@@ -1,0 +1,112 @@
+<page-panel panelTitle="Paramètres">
+  <div class="pp-filters">
+    <mat-form-field class="no-subscript md-3 period-wide period-field" appearance="outline">
+      <mat-label>Période</mat-label>
+      <mat-date-range-input [formGroup]="formGroup.controls.range" [rangePicker]="picker">
+        <input matStartDate formControlName="start" placeholder="Date début">
+        <input matEndDate formControlName="end" placeholder="Date fin">
+      </mat-date-range-input>
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-date-range-picker #picker></mat-date-range-picker>
+    </mat-form-field>
+    <mat-form-field class="no-subscript md-3 host-filter" [class.loading]="isLoadingApps" appearance="outline">
+      <mat-label>Application</mat-label>
+      <mat-select [formControl]="appNameControl" [disabled]="isLoadingApps" multiple>
+        <mat-select-trigger>
+          {{ appNameControl.value.length ? appNameControl.value[0] : 'Toutes les applications' }}
+          <span *ngIf="appNameControl.value.length > 1">
+            (+{{ appNameControl.value.length - 1 }} {{ appNameControl.value.length === 2 ? 'autre' : 'autres' }})
+          </span>
+        </mat-select-trigger>
+        <mat-option *ngFor="let appName of appNames" [value]="appName">{{ appName }}</mat-option>
+      </mat-select>
+      <mat-spinner *ngIf="isLoadingApps" matSuffix [diameter]="18"></mat-spinner>
+    </mat-form-field>
+    <div class="pp-actions">
+      <button mat-mini-fab color="primary" (click)="search()" [disabled]="formGroup.invalid || isLoadingApps" matTooltip="Appliquer les filtres">
+        <mat-icon matSuffix>search</mat-icon>
+      </button>
+    </div>
+  </div>
+</page-panel>
+
+<section class="kpi-page activity-page" aria-label="Activité" [attr.aria-busy]="isLoading">
+  <div class="kpi-grid activity-grid">
+    <section class="kpi-chart-card" aria-labelledby="activity-traces-title">
+      <div class="kpi-chart-header">
+        <div class="kpi-chart-title-group">
+          <span class="kpi-accent-bar blue-bar"></span>
+          <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">equalizer</mat-icon>
+          <h2 id="activity-traces-title" class="kpi-chart-title">Traces</h2>
+        </div>
+        <span class="kpi-chart-badge">{{ isLoading ? '…' : (traceStat | number) }}</span>
+      </div>
+      <div class="kpi-chart-subheader">
+        <span class="kpi-chart-unit">Traitements finalisés et en cours</span>
+      </div>
+      <div class="kpi-chart-body">
+        <chart type="line" [config]="USAGE_INSTANCE_TRACE_BY_PERIOD_LINE"
+               [data]="instanceTraceByPeriod" [isLoading]="isLoading"></chart>
+      </div>
+    </section>
+
+    <section class="kpi-chart-card" aria-labelledby="activity-sequence-loss-title">
+      <div class="kpi-chart-header">
+        <div class="kpi-chart-title-group">
+          <span class="kpi-accent-bar orange-bar"></span>
+          <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">troubleshoot</mat-icon>
+          <h2 id="activity-sequence-loss-title" class="kpi-chart-title">Pertes de séquences et tentatives échouées</h2>
+        </div>
+        <span class="kpi-chart-badge">{{ sequenceLossData.length | number }}</span>
+      </div>
+      <div class="kpi-chart-subheader">
+        <span class="kpi-chart-unit">Séquences perdues et tentatives échouées par date et instance</span>
+      </div>
+      <div class="kpi-chart-body">
+        <chart type="bar" [config]="SEQUENCE_LOSS_BAR"
+               [data]="sequenceLossData" [isLoading]="isLoading"></chart>
+      </div>
+    </section>
+
+    <section class="kpi-chart-card activity-wide" aria-labelledby="activity-retry-occurrences-title">
+      <div class="kpi-chart-header">
+        <div class="kpi-chart-title-group">
+          <span class="kpi-accent-bar orange-bar"></span>
+          <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">warning</mat-icon>
+          <h2 id="activity-retry-occurrences-title" class="kpi-chart-title">Occurrences des séquences répétées</h2>
+        </div>
+      </div>
+      <div class="kpi-chart-subheader">
+        <span class="kpi-chart-unit">Occurrences par heure et application (séquences avec plus d’une tentative)</span>
+      </div>
+      <div class="kpi-chart-body">
+        <chart type="heatmap" [config]="RETRY_OCCURRENCES_HEATMAP"
+               [data]="retryOccurrencesHeatmapData" [isLoading]="isLoading"></chart>
+      </div>
+    </section>
+
+    <section class="kpi-chart-card activity-reports" aria-labelledby="activity-reports-title">
+      <div class="kpi-chart-header">
+        <div class="kpi-chart-title-group">
+          <span class="kpi-accent-bar orange-bar"></span>
+          <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">assignment</mat-icon>
+          <h2 id="activity-reports-title" class="kpi-chart-title">Rapports</h2>
+        </div>
+        <span class="kpi-chart-badge">{{ isLoading ? '…' : (logEntryByPeriod.length | number) }}</span>
+      </div>
+      <div class="kpi-chart-subheader">
+        <span class="kpi-chart-unit">Journaux d’activité du namespace</span>
+      </div>
+      <div class="kpi-chart-body">
+        <div *ngIf="isLoading" class="activity-status" role="status">
+          <mat-spinner [diameter]="28"></mat-spinner>
+          <span>Chargement des rapports…</span>
+        </div>
+        <p *ngIf="!isLoading && !logEntryByPeriod.length" class="activity-status" role="status">
+          Aucun rapport pour ce namespace sur cette période.
+        </p>
+        <log-table *ngIf="!isLoading && logEntryByPeriod.length" [requests]="logEntryByPeriod"></log-table>
+      </div>
+    </section>
+  </div>
+</section>

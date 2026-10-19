@@ -95,7 +95,6 @@ export class InstanceService {
     let args: any = {
       'column': 'id,app_name:appName,start,end',
       'namespace': filters.namespace,
-      'type': 'SERVER',
       [criteria]: '',
       'order': 'app_name.asc,start.desc'
     }

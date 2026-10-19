@@ -2,7 +2,7 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {AnalyticDto} from "../model/request.model";
-import {UserAction} from "../model/trace.model";
+import {SessionEvent} from "../model/trace.model";
 
 @Injectable({ providedIn: 'root' })
 export class AnalyticService {
@@ -11,7 +11,7 @@ export class AnalyticService {
     constructor(private http: HttpClient) {
     }
 
-    getUserActionsByUser(user: string, date: Date, offset: number, limit: number): Observable<AnalyticDto[]> {
+    getUserActionsByUser(user: string, date: Date, offset?: number, limit?: number): Observable<AnalyticDto[]> {
         let params: any = {
             'date': date.toISOString()
         }
@@ -20,7 +20,7 @@ export class AnalyticService {
         return this.http.get<AnalyticDto[]>(`${this.server}/session/user/${user}/action`, { params: params });
     }
 
-    getUserActionsBySession(idSession: string): Observable<UserAction[]> {
-        return this.http.get<UserAction[]>(`${this.server}/session/${idSession}/user/action`);
+    getSessionEventsBySession(idSession: string): Observable<SessionEvent[]> {
+        return this.http.get<SessionEvent[]>(`${this.server}/session/${idSession}/user/action`);
     }
 }

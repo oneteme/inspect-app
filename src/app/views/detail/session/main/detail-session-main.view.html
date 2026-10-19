@@ -3,8 +3,8 @@
 
     <!-- ═══ CARTE SESSION MAIN ═══ -->
     <div class="session-card"
-         [ngClass]="{'success': session.status >= 200 && session.status < 400,
-                     'fail': session.status >= 400,
+         [ngClass]="{'success':     session.end && !(session.exceptions?.length),
+                     'fail':        session.end && !!session.exceptions?.length,
                      'in-progress': !session.end}">
 
       <div class="session-card-inner">
@@ -18,9 +18,9 @@
             <div class="session-title-content">
               <div class="session-name-row">
                 <span *ngIf="session.end" class="status-pill"
-                      [ngClass]="{'success': session.status >= 200 && session.status < 400,
-                         'fail': session.status >= 400}">
-                  {{ session.status >= 400 ? 'Echec' : 'Réussi' }}
+                      [ngClass]="{'success': !(session.exceptions?.length),
+                                  'fail':    !!session.exceptions?.length}">
+                  {{ session.exceptions?.length ? 'Echec' : 'Réussi' }}
                 </span>
                 <span class="session-name ellipsis" [matTooltip]="session.name">
                   {{ session.name || 'N/A' }}
@@ -40,9 +40,10 @@
         </div>
 
         <!-- Exception -->
-        <exception-display
-                [type]="session.status >= 200 && session.status < 400 ? 'success' : 'fail'">
-        </exception-display>
+        <ng-container *ngFor="let exception of (session.exceptions || [])">
+          <exception-display [exception]="exception"></exception-display>
+        </ng-container>
+
         <!-- Pied de carte -->
         <div class="session-footer">
           <div class="footer-section">
@@ -95,7 +96,7 @@
     <mat-icon class="material-symbols-outlined">lan</mat-icon>Arbre d'appels
   </a>
   <a mat-menu-item *ngIf="session?.type == 'VIEW'"
-     [routerLink]="['/analytic', session?.user]"
+     [routerLink]="['/analytics', session?.user]"
      [queryParams]="{namespace: instance?.namespace, date: getDate(session?.start * 1000, false).toISOString()}"
      [ngStyle]="{'pointer-events': !session?.user ? 'none' : ''}"
      [disabled]="!session?.user">

@@ -18,6 +18,7 @@ export class LogTableComponent {
 
   @Input() set requests(requests: LogEntry[]) {
     this._requests = requests;
+    console.log(requests)
   }
 
   open(row: any) {

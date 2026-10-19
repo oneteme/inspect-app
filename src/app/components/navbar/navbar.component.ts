@@ -270,6 +270,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
     return claims?.email || '';
   }
 
+  openServerActivity(event: MouseEvent): void {
+    this._envRouter.navigateOnClick(event, ['activity'], {
+      queryParams: {
+        ...this.buildNavigationQueryParams(),
+        namespace: this._activatedRoute.snapshot.queryParams.namespace || this.namespace.value || app.defaultNamespace
+      }
+    });
+  }
+
   logout() {
     this.authService.logout();
   }

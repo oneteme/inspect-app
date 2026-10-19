@@ -25,7 +25,6 @@ import {NumberFormatterPipe} from './shared/pipe/number.pipe';
 import {TreeView} from './views/tree/tree.view';
 import {SizePipe} from "./shared/pipe/size.pipe";
 import {Interceptor} from "./shared/interceptor/interceptor";
-import {AnalyticView} from "./views/analytic/analytic.view";
 import {SearchRequestView} from "./views/search/request/search-request.view";
 import {Constants} from "./views/constants";
 import {DetailRequestView} from "./views/detail/request/detail-request.view";
@@ -34,6 +33,7 @@ import {NavbarComponent} from './components/navbar/navbar.component';
 import {AboutDialogComponent} from './components/about/about-dialog.component';
 import {AddEnvironmentDialogComponent} from './components/environment/add-environment-dialog.component';
 import {ServerSupervisionView} from "./views/supervision/_component/server/server-supervision.view";
+import {ServerActivityView} from "./views/supervision/_component/server/server-activity.view";
 import {ClientSupervisionView} from "./views/supervision/_component/client/client-supervision.view";
 import {RequestKpiView} from "./views/kpi/request/request-kpi.view";
 import {SessionKpiView} from "./views/kpi/session/session-kpi.view";
@@ -44,6 +44,7 @@ import {OAuthModule} from "angular-oauth2-oidc";
 import {AuthInterceptor} from "./auth/auth.interceptor";
 import {environment} from "../environments/environment";
 import {NgCollectorModule} from "@oneteme/inspect-ng-collector";
+import {AnalyticsView} from "./views/analytics/analytics.view";
 
 registerLocaleData(localeFr, 'fr-FR');
 
@@ -174,8 +175,8 @@ const routes: Route[] = [
     canActivate: [authGuard]
   },
   {
-    path: 'analytic/:user',
-    component: AnalyticView,
+    path: 'analytics/:user',
+    component: AnalyticsView,
     title: 'Parcours Utilisateur',
     canActivate: [authGuard]
   },
@@ -188,7 +189,13 @@ const routes: Route[] = [
   {
     path: 'architecture',
     component: ArchitectureView,
-    title: 'Architecture',
+    title: Constants.MAPPING_TYPE['architecture'].title,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'activity',
+    component: ServerActivityView,
+    title: 'Supervision • Activité',
     canActivate: [authGuard]
   },
   {
@@ -228,7 +235,6 @@ const routes: Route[] = [
     BrowserModule,
     BrowserAnimationsModule,
     RouterModule.forRoot(routes, {useHash: true}),
-    NgCollectorModule.forRoot(environment.application),
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,

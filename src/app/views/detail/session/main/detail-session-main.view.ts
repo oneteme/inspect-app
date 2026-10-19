@@ -4,7 +4,7 @@ import {ActivatedRoute, Params} from "@angular/router";
 import {TraceService} from "../../../../service/trace.service";
 import {EnvRouter} from "../../../../service/router.service";
 import {Location} from "@angular/common";
-import {combineLatest, defer, finalize, map, merge, of, Subject, switchMap, takeUntil} from "rxjs";
+import {catchError, combineLatest, defer, finalize, map, merge, of, Subject, switchMap, takeUntil} from "rxjs";
 import {app} from "../../../../../environments/environment";
 import {Constants} from "../../../constants";
 import {AnalyticService} from "../../../../service/analytic.service";
@@ -55,7 +55,6 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
         this.session = null;
         this.completedSession = null;
         this._traceService.getMainSession(id).pipe(
-                takeUntil(this.$destroy),
                 switchMap(s => {
                     return of(s).pipe(
                         map(s=>{
@@ -64,7 +63,8 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
                         switchMap((v)=> {
                             return merge( 
                                 this._traceService.getInstance(this.session.instanceId).pipe(map(d=>(this.instance = d))),
-                                this.session.type === 'VIEW' ? defer(() => {this.session.userActions = []; return this._analyticService.getUserActionsBySession(this.session.id).pipe(map(d=>(this.session.userActions = d)))}) : of(),
+                                this.loadSessionExceptions(this.session),
+                                this.session.type === 'VIEW' ? this.loadSessionEvents(this.session) : of(),
                                 (this.session.requestsMask & 4) > 0 ? defer(()=> {this.session.restRequests = []; return this._traceService.getRestRequests(this.session.id).pipe(map(d=>(this.session.restRequests = d)))}) : of(),
                                 (this.session.requestsMask & 2) > 0 ? defer(()=> {this.session.databaseRequests = []; return this._traceService.getDatabaseRequests(this.session.id).pipe(map(d=>{this.session.databaseRequests = d;}))}) : of(),
                                 (this.session.requestsMask & 1) > 0 ? defer(()=> {this.session.localRequests = []; return this._traceService.getLocalRequests(this.session.id).pipe(map(d=>(this.session.localRequests = d)))}) : of(),
@@ -74,9 +74,30 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
                             )
                         }));
                 }),
+                takeUntil(this.$destroy),
                 finalize(() => {this.completedSession = this.session; this.isLoading = false;})
             )
             .subscribe();
+    }
+
+    private loadSessionEvents(session: MainSessionView) {
+        return defer(() => {
+            session.sessionEvents = [];
+            return this._analyticService.getSessionEventsBySession(session.id).pipe(
+                map(events => session.sessionEvents = [...(events ?? [])]
+                    .sort((first, second) => first.instant - second.instant))
+            );
+        });
+    }
+
+    private loadSessionExceptions(session: MainSessionView) {
+        return defer(() => {
+            session.exceptions = [];
+            return this._traceService.getSessionExceptions(session.id).pipe(
+                map(exceptions => session.exceptions = [...(exceptions ?? [])]),
+                catchError(() => of([]))
+            );
+        });
     }
 
     getDate(start: number, complete: boolean) {

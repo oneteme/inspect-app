@@ -8,7 +8,12 @@
 }
 
 #container {
-  height: calc(100vh - 56px - 88px - 14px);
+  // Le panneau de filtres est fixe et ne prend pas de place dans le flux.
+  // Le graphe peut donc utiliser toute la zone sous la navigation (56px),
+  // moins le padding vertical global de 7px + 7px.
+  height: calc(100vh - 56px - 14px);
+  height: calc(100dvh - 56px - 14px);
+  min-height: 0;
   overflow-x: hidden;
   display: flex;
   flex-direction: column;
@@ -61,6 +66,10 @@
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.10);
   width: auto;
   min-width: 40px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-20px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
 }
 .zoom-btn {
   width: 32px !important;
@@ -93,6 +102,22 @@
   height: 1px;
   background: #e2e8f0;
   margin: 2px 0;
+}
+
+// Afficher les contrôles flottants uniquement lorsque le graphe est survolé ou focalisé.
+#fixed-width-container:hover,
+#fixed-width-container:focus-within {
+  .zoom-controls {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+  }
+
+  .stats-overlay {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 // Filtre microservice dans la toolbar
@@ -218,15 +243,38 @@
   position: absolute;
   bottom: 12px;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(20px);
   z-index: 2;
   display: flex;
   flex-direction: row;
   gap: 6px;
-  pointer-events: auto;
+  padding: 4px 8px;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  pointer-events: none;
   flex-wrap: wrap;
   max-width: 90%;
   justify-content: center;
+  opacity: 0;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .zoom-controls {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+  }
+
+  .stats-overlay {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(-50%) translateY(0);
+  }
 }
 
 .stat-chip {
@@ -257,6 +305,19 @@
       filter: brightness(1.1);
     }
   }
+
+  &.inactive {
+    opacity: 0.45;
+    filter: grayscale(60%);
+  }
+}
+
+.stat-chip-clear {
+  font-size: 18px;
+  width: 18px;
+  height: 18px;
+  margin-left: 4px;
+  color: #64748b;
 }
 
 .stat-chip-icon {
