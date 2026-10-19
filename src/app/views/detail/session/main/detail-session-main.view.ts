@@ -6,7 +6,7 @@ import {EnvRouter} from "../../../../service/router.service";
 import {Location} from "@angular/common";
 import {catchError, combineLatest, defer, finalize, map, merge, of, Subject, switchMap, takeUntil} from "rxjs";
 import {app} from "../../../../../environments/environment";
-import {Constants} from "../../../constants";
+import {Constants, STATUS} from "../../../constants";
 import {AnalyticService} from "../../../../service/analytic.service";
 import {MainSessionView} from "../../../../model/request.model";
 import {InstanceEnvironment} from "../../../../model/trace.model";
@@ -147,4 +147,6 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
             app_name: this.instance.name
         };
     }
+
+  protected readonly STATUS = STATUS;
 }

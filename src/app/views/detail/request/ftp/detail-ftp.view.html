@@ -3,9 +3,7 @@
 
     <!-- ═══ CARTE FTP ═══ -->
     <div class="session-card"
-         [ngClass]="{'success': request.status >= 200 && request.status < 400,
-                     'fail':    request.status >= 400,
-                     'in-progress': !request.end}">
+         [ngClass]="STATUS[request.end ? request.status.toString().charAt(0) + 'xx' : '-1']?.class">
       <div class="session-card-inner">
 
         <div class="session-header">
@@ -15,11 +13,13 @@
             </div>
             <div class="session-title-content">
               <div class="session-name-row">
-                <span *ngIf="request.end" class="status-pill"
-                      [ngClass]="{'success': request.status >= 200 && request.status < 400,
-                     'fail':    request.status >= 400}">
-                  {{ request.status >= 400 ? 'Echec' : 'Réussi' }}
+                <span class="status-pill"
+                      [ngClass]="STATUS[request.end ? request.status.toString().charAt(0) + 'xx' : '-1']?.class">
+                  {{ request.end ? STATUS[request.status.toString().charAt(0) + 'xx']?.label : STATUS['-1']?.label }}
                 </span>
+              </div>
+              <div class="session-url-row">
+                <span class="method-badge">{{ request.command || 'N/A' }}</span>
                 <span class="session-name ellipsis"
                       [matTooltip]="request.protocol + '://' + (request.host || 'N/A') + (request.port == -1 ? '' : ':' + request.port)">
                   {{ request.protocol + '://' + (request.host || 'N/A') + (request.port == -1 ? '' : ':' + request.port) }}

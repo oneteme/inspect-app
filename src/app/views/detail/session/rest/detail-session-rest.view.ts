@@ -11,7 +11,7 @@ import {RequestType, RestSessionView} from "../../../../model/request.model";
 import {HttpSessionStage, InstanceEnvironment} from "../../../../model/trace.model";
 import {MatDialog} from "@angular/material/dialog";
 import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
-import {Constants} from "../../../constants";
+import {Constants, STATUS} from "../../../constants";
 
 @Component({
     templateUrl: './detail-session-rest.view.html',
@@ -120,4 +120,6 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     navigateOnCompare(event: MouseEvent) {
         this._router.navigateOnClick(event, ['/session/rest', this.session.id, 'compare']);
     }
+
+    protected readonly STATUS = STATUS;
 }

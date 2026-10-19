@@ -3,9 +3,7 @@
 
     <!-- ═══ CARTE SESSION MAIN ═══ -->
     <div class="session-card"
-         [ngClass]="{'success':     session.end && !(session.exceptions?.length),
-                     'fail':        session.end && !!session.exceptions?.length,
-                     'in-progress': !session.end}">
+         [ngClass]="STATUS[session.end ? session.status.toString().charAt(0) + 'xx' : '-1']?.class">
 
       <div class="session-card-inner">
 
@@ -17,10 +15,9 @@
             </div>
             <div class="session-title-content">
               <div class="session-name-row">
-                <span *ngIf="session.end" class="status-pill"
-                      [ngClass]="{'success': !(session.exceptions?.length),
-                                  'fail':    !!session.exceptions?.length}">
-                  {{ session.exceptions?.length ? 'Echec' : 'Réussi' }}
+                <span class="status-pill"
+                      [ngClass]="STATUS[session.end ? session.status.toString().charAt(0) + 'xx' : '-1']?.class">
+                  {{ STATUS[session.end ? session.status.toString().charAt(0) + 'xx' : '-1']?.label }}
                 </span>
                 <span class="session-name ellipsis" [matTooltip]="session.name">
                   {{ session.name || 'N/A' }}
@@ -40,10 +37,9 @@
         </div>
 
         <!-- Exception -->
-        <ng-container *ngFor="let exception of (session.exceptions || [])">
-          <exception-display [exception]="exception"></exception-display>
-        </ng-container>
-
+        <exception-display
+                [type]="session.status >= 200 && session.status < 400 ? 'success' : 'fail'">
+        </exception-display>
         <!-- Pied de carte -->
         <div class="session-footer">
           <div class="footer-section">

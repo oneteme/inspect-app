@@ -8,7 +8,7 @@ import {DatePipe} from "@angular/common";
 import {app} from "../../../../../environments/environment";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {EnvRouter} from "../../../../service/router.service";
-import {Constants, INFINITY} from "../../../constants";
+import {Constants, INFINITY, STATUS} from "../../../constants";
 import {
     DirectoryRequest,
     DirectoryRequestStage,
@@ -235,4 +235,6 @@ export class DetailLdapView implements OnInit, OnDestroy {
     var end = this.request.end ? new Date(this.request.end * 1000) : new Date();
     this._router.navigateOnClick(event, ['/kpi/request', 'ldap'], { queryParams: {host: this.request.host, namespace: this.instance.namespace, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
   }
+
+  protected readonly STATUS = STATUS;
 }

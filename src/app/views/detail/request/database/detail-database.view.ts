@@ -10,7 +10,7 @@ import {app} from '../../../../../environments/environment';
 import {EnvRouter} from "../../../../service/router.service";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {getErrorClassName, showifnotnull, getDataForRange} from '../../../../shared/util';
-import {Constants, INFINITY} from "../../../constants";
+import {Constants, INFINITY, STATUS} from "../../../constants";
 import {DatabaseRequest, DatabaseRequestStage, ExceptionInfo, InstanceEnvironment} from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
 import {TabData} from "../../session/_component/detail-session.component";
@@ -280,5 +280,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     var end = this.request.end ? new Date(this.request.end * 1000) : new Date();
     this._router.navigateOnClick(event, ['/kpi/request', 'jdbc'], { queryParams: {host: this.request.host, namespace: this.instance.namespace, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
   }
+
+  protected readonly STATUS = STATUS;
 }
 

@@ -98,7 +98,6 @@ export class Constants {
         test: {title: 'Validation & Tests', subtitle: 'Lancements de tests automatisés et résultats', icon: 'rule'},
         startup: {title: 'Initialisation', subtitle: 'Chronologie et durée des démarrages d\'application', icon: 'restart_alt'},
         view: {title: 'Parcours Client', subtitle: 'Navigation utilisateurs et accès aux pages', icon: 'ads_click'},
-        architecture: {title: 'Architecture', subtitle: 'Diagramme des dépendances entre applications et ressources', icon: 'lan'},
         dashboard: {title:'Tableau de bord', icon: 'home'},
         deploiment: {title:'Instances Actives', subtitle: 'Suivi des applications en cours d\'exécution', icon:'deployed_code'},
         tree: {title: 'Arborescence des ressources', subtitle: 'Diagramme de bout en bout des flux d\'exécution', icon: 'account_tree'},
@@ -267,8 +266,9 @@ export const Operation = {
 }
 
 export const STATUS = {
-    "0xx": {icon: 'priority_high', label: "Erreur de connexion", color: '#94A3B8'},
-    "2xx": {icon: 'done', label: "Succès", color: '#4CAF50'},
-    "4xx": {icon: 'error', label: "Erreur applicative", color: '#F9AD4E'},
-    "5xx": {icon: 'warning', label: "Erreur d'interface", color: '#F44336'}
+    "-1": {icon: 'hourglass_empty', label: "En cours", color: '#4f46e5', class: 'in-progress'},
+    "0xx": {icon: 'priority_high', label: "Erreur de connexion", color: '#94A3B8', class: 'unavailable'},
+    "2xx": {icon: 'done', label: "Succès", color: '#4CAF50', class: 'success'},
+    "4xx": {icon: 'error', label: "Erreur applicative", color: '#F9AD4E', class: 'warning'},
+    "5xx": {icon: 'warning', label: "Erreur d'interface", color: '#F44336', class: 'fail'}
 };

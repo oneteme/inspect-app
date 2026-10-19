@@ -7,7 +7,7 @@ import {catchError, combineLatest, finalize, forkJoin, of, Subject, switchMap, t
 import {app} from "../../../../../environments/environment";
 import {RequestType} from "../../../../model/request.model";
 import {getErrorClassName, Utils} from "../../../../shared/util";
-import {Constants, INFINITY} from "../../../constants";
+import {Constants, INFINITY, STATUS} from "../../../constants";
 import {ExceptionInfo, HttpRequestStage, InstanceEnvironment, RestRequest} from "../../../../model/trace.model";
 import {DataGroup, DataItem, TimelineOptions} from "vis-timeline";
 import {DatePipe} from "@angular/common";
@@ -211,4 +211,6 @@ export class DetailRestView implements OnInit, OnDestroy {
   navigateOnCompare(event: MouseEvent) {
     this._router.navigateOnClick(event, ['/request/rest', this.request.id, 'compare']);
   }
+
+  protected readonly STATUS = STATUS;
 }
