@@ -100,7 +100,6 @@ export class Constants {
         view: {title: 'Parcours Client', subtitle: 'Navigation utilisateurs et accès aux pages', icon: 'ads_click'},
         architecture: {title: 'Architecture', subtitle: 'Diagramme des dépendances entre applications et ressources', icon: 'lan'},
         dashboard: {title:'Tableau de bord', icon: 'home'},
-        architecture: {title:'Architecture', icon: 'lan'},
         deploiment: {title:'Instances Actives', subtitle: 'Suivi des applications en cours d\'exécution', icon:'deployed_code'},
         tree: {title: 'Arborescence des ressources', subtitle: 'Diagramme de bout en bout des flux d\'exécution', icon: 'account_tree'},
     }
