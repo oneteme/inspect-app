@@ -176,6 +176,6 @@ export class TraceService {
   }
 
   getLogEntryBySession(sessionId): Observable<LogEntry[]> {
-    return this.http.get<LogEntry[]>(`${this.server}/session/${sessionId}/log/entry`);
+    return this.http.get<LogEntry[]>(`${this.server}/instance/${sessionId}/log/entry`);
   }
 }

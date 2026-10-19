@@ -29,39 +29,16 @@
   }
 }
 
+.activity-wide,
 .activity-reports {
   grid-column: 1 / -1;
+}
 
+.activity-reports {
   log-table {
     display: flex;
     height: clamp(320px, 50vh, 560px);
   }
-}
-
-.activity-anomalies {
-  grid-column: 1 / -1;
-}
-
-.activity-anomaly-table-wrap {
-  min-width: 0;
-}
-
-.activity-anomaly-table {
-  display: flex;
-  width: 100%;
-  min-width: 0;
-  height: clamp(320px, 50vh, 560px);
-
-  small {
-    display: block;
-    color: #64748b;
-  }
-}
-
-
-.activity-diagnostic-warning {
-  color: #9a3412;
-  font-weight: 600;
 }
 
 .activity-status {
@@ -75,13 +52,6 @@
   font-size: 13px;
 }
 
-.activity-error {
-  color: #b00020;
-  background: #fef2f2;
-  border-radius: 12px;
-  padding: 1rem;
-}
-
 @media (max-width: 768px) {
   .activity-grid {
     grid-template-columns: minmax(0, 1fr);
@@ -91,4 +61,3 @@
     padding: 12px;
   }
 }
-

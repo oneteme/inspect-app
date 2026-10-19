@@ -3,13 +3,6 @@ import {HttpClient} from "@angular/common/http";
 import {map, Observable} from "rxjs";
 import {LogEntry} from '../../model/trace.model';
 
-interface ActivityLogEntryResponse {
-  instant: number;
-  appName?: string;
-  logMessage: string;
-  level?: string;
-  stackRows?: LogEntry['stackRows'];
-}
 
 @Injectable({ providedIn: 'root' })
 export class LogEntryService {
@@ -24,22 +17,23 @@ export class LogEntryService {
 
   getActivityByPeriod(filters: {namespace: string, start: Date, end: Date, app_name?: string[]}): Observable<LogEntry[]> {
     const args: any = {
-      'column': 'start:instant,instance.app_name:appName,log_message',
+      'column': 'start:instant,instance.app_name:appName,log_message,stacktrace',
       'join': 'instance',
       'instance.namespace': filters.namespace,
       'start.ge': filters.start.toISOString(),
       'start.lt': filters.end.toISOString(),
-      'parent.isNull': '',
       'order': 'instant.asc'
     };
     if (filters.app_name?.length) {
       args['instance.app_name.in'] = filters.app_name.join(',');
     }
-    return this.getLogEntry<ActivityLogEntryResponse[]>(args).pipe(map(rows => rows.map(row => ({
+    return this.getLogEntry<any[]>(args).pipe(map(rows => rows.map(row => ({
       instant: row.instant / 1000,
       appName: row.appName ?? '',
       message: row.logMessage ?? '',
       level: row.level ?? '',
+      action: row. action ?? '',
+      thread: row.thread ?? '',
       stackRows: row.stackRows ?? []
     }))));
   }

@@ -205,5 +205,7 @@ export interface LogEntry {
   appName: string;
   level: string;
   message: string;
+  thread: string;
+  action: string;
   stackRows: StackTraceRow[];
 }

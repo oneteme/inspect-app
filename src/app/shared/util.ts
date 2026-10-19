@@ -192,11 +192,15 @@ export function periodManagement(start: Date, end: Date): string {
     return ChartGroup.byYear;
 }
 
-export type ActivityPeriodGroup = 'yearMonth' | 'yearWeek' | 'monthDay' | 'hourMinute';
+export type ActivityPeriodGroup = 'yearMonth' | 'yearWeek' | 'monthDay' | 'hour' | 'hourMinute';
 
 export function activityPeriodManagement(start: Date, end: Date): ActivityPeriodGroup {
     const group = periodManagement(start, end);
-    if (group === ChartGroup.byHour) return 'hourMinute';
+    if (group === ChartGroup.byHour) {
+        // Fenêtre ≤ 1 h (à la minute près) : regroupement par minute ; au-delà (jusqu'à 24 h) : par heure
+        const durationMinutes = Math.round((end.getTime() - start.getTime()) / (60 * 1000));
+        return durationMinutes <= 60 ? 'hourMinute' : 'hour';
+    }
     if (group === ChartGroup.monthDay) return 'monthDay';
     if (group === ChartGroup.yearWeek) return 'yearWeek';
     return 'yearMonth';

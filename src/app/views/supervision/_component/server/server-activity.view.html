@@ -1,10 +1,10 @@
-<page-panel panelTitle="Paramètres" panelIcon="tune">
+<page-panel panelTitle="Paramètres">
   <div class="pp-filters">
     <mat-form-field class="no-subscript md-3 period-wide period-field" appearance="outline">
       <mat-label>Période</mat-label>
       <mat-date-range-input [formGroup]="formGroup.controls.range" [rangePicker]="picker">
-        <input id="activity-period-start" matStartDate formControlName="start" placeholder="Date début">
-        <input id="activity-period-end" matEndDate formControlName="end" placeholder="Date fin">
+        <input matStartDate formControlName="start" placeholder="Date début">
+        <input matEndDate formControlName="end" placeholder="Date fin">
       </mat-date-range-input>
       <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
       <mat-date-range-picker #picker></mat-date-range-picker>
@@ -14,7 +14,7 @@
       <mat-select [formControl]="appNameControl" [disabled]="isLoadingApps" multiple>
         <mat-select-trigger>
           {{ appNameControl.value.length ? appNameControl.value[0] : 'Toutes les applications' }}
-          <span *ngIf="appNameControl.value.length > 1" class="additional-selection">
+          <span *ngIf="appNameControl.value.length > 1">
             (+{{ appNameControl.value.length - 1 }} {{ appNameControl.value.length === 2 ? 'autre' : 'autres' }})
           </span>
         </mat-select-trigger>
@@ -31,8 +31,6 @@
 </page-panel>
 
 <section class="kpi-page activity-page" aria-label="Activité" [attr.aria-busy]="isLoading">
-  <div *ngIf="errorMessage" class="activity-error" role="alert">{{ errorMessage }}</div>
-
   <div class="kpi-grid activity-grid">
     <section class="kpi-chart-card" aria-labelledby="activity-traces-title">
       <div class="kpi-chart-header">
@@ -52,112 +50,38 @@
       </div>
     </section>
 
-    <section class="kpi-chart-card" aria-labelledby="activity-attempts-title">
-      <div class="kpi-chart-header">
-        <div class="kpi-chart-title-group">
-          <span class="kpi-accent-bar purple-bar"></span>
-          <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">replay</mat-icon>
-                <h2 id="activity-attempts-title" class="kpi-chart-title">Tentatives par application</h2>
-        </div>
-        <span class="kpi-chart-badge">{{ isLoading ? '…' : (attemptStat | number) }}</span>
-      </div>
-      <div class="kpi-chart-subheader">
-        <span class="kpi-chart-unit">Intensité des tentatives au fil du temps</span>
-      </div>
-      <div class="kpi-chart-body">
-        <chart type="heatmap" [config]="ATTEMPT_INSTANCE_TRACE_BY_APP_HEATMAP"
-               [data]="attemptHeatmapData" [isLoading]="isLoading"></chart>
-      </div>
-    </section>
-
-    <section class="kpi-chart-card" aria-labelledby="activity-attempt-distribution-title">
+    <section class="kpi-chart-card" aria-labelledby="activity-sequence-loss-title">
       <div class="kpi-chart-header">
         <div class="kpi-chart-title-group">
           <span class="kpi-accent-bar orange-bar"></span>
-          <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">bar_chart</mat-icon>
-          <h2 id="activity-attempt-distribution-title" class="kpi-chart-title">Distribution des tentatives</h2>
-        </div>
-        <span class="kpi-chart-badge">{{ retryTotal | number }} retries</span>
-      </div>
-      <div class="kpi-chart-subheader">
-        <span class="kpi-chart-unit">Réceptions par nombre d’essais (3 = 3 ou plus)</span>
-        <span class="kpi-chart-unit">{{ retryReceptionCount | number }} réceptions avec retries supplémentaires</span>
-      </div>
-      <div class="kpi-chart-body">
-        <chart type="bar" [config]="ATTEMPT_DISTRIBUTION_BAR"
-               [data]="attemptDistributionData" [isLoading]="isLoading"></chart>
-      </div>
-    </section>
-
-    <section class="kpi-chart-card" aria-labelledby="activity-gaps-title">
-      <div class="kpi-chart-header">
-        <div class="kpi-chart-title-group">
-          <span class="kpi-accent-bar purple-bar"></span>
           <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">troubleshoot</mat-icon>
-          <h2 id="activity-gaps-title" class="kpi-chart-title">Écarts de séquence observés</h2>
+          <h2 id="activity-sequence-loss-title" class="kpi-chart-title">Pertes de séquences et tentatives échouées</h2>
         </div>
+        <span class="kpi-chart-badge">{{ sequenceLossData.length | number }}</span>
       </div>
       <div class="kpi-chart-subheader">
-        <span class="kpi-chart-unit">Saut positif = séquences potentiellement absentes · retour négatif = désordre ou reset possible</span>
-        <span *ngIf="sequenceDiagnosticUnavailable" class="activity-diagnostic-warning" role="status">
-          Les événements bruts de séquence n’ont pas pu être chargés.
-        </span>
+        <span class="kpi-chart-unit">Séquences perdues et tentatives échouées par date et instance</span>
       </div>
       <div class="kpi-chart-body">
-        <chart type="bar" [config]="SEQUENCE_GAP_BAR"
-               [data]="sequenceGapData" [isLoading]="isLoading"></chart>
+        <chart type="bar" [config]="SEQUENCE_LOSS_BAR"
+               [data]="sequenceLossData" [isLoading]="isLoading"></chart>
       </div>
     </section>
 
-    <section class="kpi-chart-card activity-anomalies" aria-labelledby="activity-anomalies-title">
+    <section class="kpi-chart-card activity-wide" aria-labelledby="activity-retry-occurrences-title">
       <div class="kpi-chart-header">
         <div class="kpi-chart-title-group">
           <span class="kpi-accent-bar orange-bar"></span>
           <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">warning</mat-icon>
-          <h2 id="activity-anomalies-title" class="kpi-chart-title">Réceptions à examiner</h2>
+          <h2 id="activity-retry-occurrences-title" class="kpi-chart-title">Occurrences des séquences répétées</h2>
         </div>
-        <span class="kpi-chart-badge">{{ sequenceAnomalies.length | number }}</span>
       </div>
       <div class="kpi-chart-subheader">
-        <span class="kpi-chart-unit">Les sauts indiquent un trou observé côté serveur, pas la preuve d’un échec d’envoi.</span>
+        <span class="kpi-chart-unit">Occurrences par heure et application (séquences avec plus d’une tentative)</span>
       </div>
-      <div class="kpi-chart-body activity-anomaly-table-wrap">
-        <jquery-table *ngIf="isLoading || !sequenceDiagnosticUnavailable"
-                      class="activity-anomaly-table"
-                      [config]="sequenceAnomaliesTableConfig"
-                      [data]="sequenceAnomalies"
-                      [isLoading]="isLoading">
-          <ng-template jqtCellDef="date" let-row>
-            {{ row.date | date:'d MMM y, HH:mm:ss' }}
-          </ng-template>
-          <ng-template jqtCellDef="appName" let-row>
-            {{ row.appName }}<small>{{ row.instanceId }}</small>
-          </ng-template>
-          <ng-template jqtCellDef="sequence" let-row>
-            {{ row.sequence | number }}
-          </ng-template>
-          <ng-template jqtCellDef="previousSequence" let-row>
-            {{ row.previousSequence === null ? '—' : (row.previousSequence | number) }}
-          </ng-template>
-          <ng-template jqtCellDef="sequenceDelta" let-row>
-            {{ row.sequenceDelta === null ? '—' : (row.sequenceDelta | number) }}
-          </ng-template>
-          <ng-template jqtCellDef="attempts" let-row>
-            {{ row.attempts | number }}
-          </ng-template>
-          <ng-template jqtCellDef="pending" let-row>
-            {{ row.pending | number }}
-          </ng-template>
-          <ng-template jqtCellDef="traceCount" let-row>
-            {{ row.traceCount | number }}
-          </ng-template>
-          <ng-template jqtCellDef="anomalyLabels" let-row>
-            {{ row.anomalyLabels.join(', ') }}
-          </ng-template>
-        </jquery-table>
-        <p *ngIf="!isLoading && sequenceDiagnosticUnavailable" class="activity-status" role="status">
-          Diagnostic indisponible : vérifiez la réponse de l’API des traces brutes.
-        </p>
+      <div class="kpi-chart-body">
+        <chart type="heatmap" [config]="RETRY_OCCURRENCES_HEATMAP"
+               [data]="retryOccurrencesHeatmapData" [isLoading]="isLoading"></chart>
       </div>
     </section>
 
@@ -178,7 +102,7 @@
           <mat-spinner [diameter]="28"></mat-spinner>
           <span>Chargement des rapports…</span>
         </div>
-        <p *ngIf="!isLoading && !errorMessage && !logEntryByPeriod.length" class="activity-status" role="status">
+        <p *ngIf="!isLoading && !logEntryByPeriod.length" class="activity-status" role="status">
           Aucun rapport pour ce namespace sur cette période.
         </p>
         <log-table *ngIf="!isLoading && logEntryByPeriod.length" [requests]="logEntryByPeriod"></log-table>
@@ -186,8 +110,3 @@
     </section>
   </div>
 </section>
-
-
-
-
-
