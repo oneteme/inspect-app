@@ -4,13 +4,17 @@ import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
 import {DateAdapter, MAT_DATE_FORMATS} from '@angular/material/core';
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from '@angular/material/datepicker';
+import {MatDialog} from '@angular/material/dialog';
 import {ChartProvider, field} from '@oneteme/jquery-core';
-import {catchError, finalize, forkJoin, of, Subject, switchMap, takeUntil, tap} from 'rxjs';
+import {TableProvider} from '@oneteme/jquery-table';
+import {catchError, EMPTY, finalize, merge, Subject, switchMap, takeUntil, tap} from 'rxjs';
 import {LogEntry} from '../../../../model/trace.model';
 import {LogEntryService} from '../../../../service/jquery/log-entry.service';
 import {InstanceTraceService, SequenceLossEvent} from '../../../../service/jquery/instance-trace.service';
 import {PageTitleService} from '../../../../service/page-title.service';
 import {InstanceService} from '../../../../service/jquery/instance.service';
+import {StacktraceDialogComponent} from '../../../../shared/_component/exception-display/stacktrace-dialog/stacktrace-dialog.component';
+import {LOG_TABLE_CONFIG} from '../../../../shared/_component/table/table.config';
 import {app} from '../../../../../environments/environment';
 import {getDefaultRelativePeriod} from '../../../../shared/period-filter';
 import {IPeriod, IStep, IStepFrom} from '../../../../model/conf.model';
@@ -58,8 +62,10 @@ export class ServerActivityView implements OnDestroy {
   private readonly _instanceService = inject(InstanceService);
   private readonly _pageTitleService = inject(PageTitleService);
   private readonly _decimalPipe = inject(DecimalPipe);
+  private readonly _dialog = inject(MatDialog);
   private readonly _destroy$ = new Subject<void>();
 
+  readonly tableConfig: TableProvider<LogEntry> = LOG_TABLE_CONFIG;
   readonly formGroup = new FormGroup({
     range: new FormGroup({
       start: new FormControl<Date | null>(null, [Validators.required]),
@@ -80,6 +86,10 @@ export class ServerActivityView implements OnDestroy {
   logEntryByPeriod: LogEntry[] = [];
   traceStat = 0;
   isLoading = false;
+  isLoadingTrace = false;
+  isLoadingRetryOccurrences = false;
+  isLoadingSequenceLosses = false;
+  isLoadingLogs = false;
 
   readonly USAGE_INSTANCE_TRACE_BY_PERIOD_LINE: ChartProvider<string, number> = {
     height: 335,
@@ -208,51 +218,57 @@ export class ServerActivityView implements OnDestroy {
           this.resetActivityData();
           this.syncActivityChartCategories([]);
           this.isLoading = true;
+          this.isLoadingTrace = true;
+          this.isLoadingRetryOccurrences = true;
+          this.isLoadingSequenceLosses = true;
+          this.isLoadingLogs = true;
 
-          return forkJoin({
-            trace: this._instanceTraceService.getActivityByPeriod({...this.params, groupedBy: this.groupedBy}),
-            retryOccurrences: this._instanceTraceService.getRetryOccurrencesHeatmap({
-              ...this.params,
-              groupedBy: this.groupedBy
-            }),
-            sequenceLosses: this._instanceTraceService.getSequenceLossesByPeriod({
-              ...this.params,
-              groupedBy: this.groupedBy
-            }).pipe(catchError(() => of([]))),
-            logs: this._logEntryService.getActivityByPeriod(this.params),
-            instances: this._instanceService.getInstancesByPeriod({namespace: this.params.namespace, start, end})
-          }).pipe(
-              tap(({trace, retryOccurrences, sequenceLosses, logs, instances}) => {
-                this.appNames = [...new Set(instances.map(instance => instance.appName).filter(Boolean))];
-                this.instanceTraceByPeriod = this.aggregateTraceByPeriod(trace);
-
-                this.retryOccurrencesHeatmapData = retryOccurrences
-                    .filter(row => row[this.groupedBy] !== null && row[this.groupedBy] !== undefined && Number.isFinite(Number(row.sum)))
-                    .map(row => ({
-                      ...row,
-                      [this.groupedBy]: String(row[this.groupedBy]),
-                      appName: row.appName || 'Application inconnue',
-                      sum: Number(row.sum) || 0
-                    }));
-                this.sequenceLossData = this.aggregateSequenceLossByPeriod(sequenceLosses);
-                this.syncActivityChartCategories(this.instanceTraceByPeriod);
-                this.syncRetryOccurrencesCategories();
-                this.syncSequenceLossCategories();
-                this.logEntryByPeriod = logs;
-                this.traceStat = trace.reduce((total, row) => total + (row.traceCount || 0), 0);
-              }),
-              catchError(() => {
-                this.resetActivityData();
-                this.syncActivityChartCategories([]);
-                this.syncRetryOccurrencesCategories();
-                this.syncSequenceLossCategories();
-                return of(null);
-              }),
-              finalize(() => {
-                this.isLoading = false;
-                this.isLoadingApps = false;
-              })
-          );
+          return merge(
+              this._instanceTraceService.getActivityByPeriod({...this.params, groupedBy: this.groupedBy}).pipe(
+                  tap(trace => {
+                    this.instanceTraceByPeriod = this.aggregateTraceByPeriod(trace);
+                    this.syncActivityChartCategories(this.instanceTraceByPeriod);
+                    this.traceStat = trace.reduce((total, row) => total + (row.traceCount || 0), 0);
+                  }),
+                  catchError(() => EMPTY),
+                  finalize(() => this.isLoadingTrace = false)
+              ),
+              this._instanceTraceService.getRetryOccurrencesHeatmap({...this.params, groupedBy: this.groupedBy}).pipe(
+                  tap(retryOccurrences => {
+                    this.retryOccurrencesHeatmapData = retryOccurrences
+                        .filter(row => row[this.groupedBy] !== null && row[this.groupedBy] !== undefined && Number.isFinite(Number(row.sum)))
+                        .map(row => ({
+                          ...row,
+                          [this.groupedBy]: String(row[this.groupedBy]),
+                          appName: row.appName || 'Application inconnue',
+                          sum: Number(row.sum) || 0
+                        }));
+                    this.syncRetryOccurrencesCategories();
+                  }),
+                  catchError(() => EMPTY),
+                  finalize(() => this.isLoadingRetryOccurrences = false)
+              ),
+              this._instanceTraceService.getSequenceLossesByPeriod({...this.params, groupedBy: this.groupedBy}).pipe(
+                  tap(sequenceLosses => {
+                    this.sequenceLossData = this.aggregateSequenceLossByPeriod(sequenceLosses);
+                    this.syncSequenceLossCategories();
+                  }),
+                  catchError(() => EMPTY),
+                  finalize(() => this.isLoadingSequenceLosses = false)
+              ),
+              this._logEntryService.getActivityByPeriod(this.params).pipe(
+                  tap(logs => this.logEntryByPeriod = logs),
+                  catchError(() => EMPTY),
+                  finalize(() => this.isLoadingLogs = false)
+              ),
+              this._instanceService.getInstancesByPeriod({namespace: this.params.namespace, start, end}).pipe(
+                  tap(instances => {
+                    this.appNames = [...new Set(instances.map(instance => instance.appName).filter(Boolean))];
+                  }),
+                  catchError(() => EMPTY),
+                  finalize(() => this.isLoadingApps = false)
+              )
+          ).pipe(finalize(() => this.isLoading = false));
         }),
         takeUntil(this._destroy$)
     ).subscribe();
@@ -279,6 +295,12 @@ export class ServerActivityView implements OnDestroy {
       },
       queryParamsHandling: 'merge',
       replaceUrl: false
+    });
+  }
+
+  openLogStacktrace(row: LogEntry): void {
+    this._dialog.open(StacktraceDialogComponent, {
+      data: {message: row.message, stackTraceRows: row.stackRows}
     });
   }
 
@@ -409,4 +431,3 @@ export class ServerActivityView implements OnDestroy {
     };
   }
 }
-

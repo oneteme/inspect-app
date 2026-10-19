@@ -473,14 +473,14 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
     { key: 'instant', header: 'Horodate', icon: 'schedule', sliceable: false, groupable: false },
     { key: 'appName', header: 'Application', icon: 'apps', sliceable: false, groupable: false, width: '18%' },
     { key: 'message', header: 'Message', icon: 'chat', sliceable: false, groupable: false, width: '52%' },
-    { key: 'thread', header: 'Thread', icon: 'chat', sliceable: false, groupable: false  },
-    { key: 'actions', header: 'Actions', icon: 'chat', sliceable: false, groupable: false },
+    { key: 'thread', header: 'Thread',  sliceable: false, groupable: false  },
+    { key: 'actions', header: 'Actions',  sliceable: false, groupable: false },
     { key: 'action', header: 'Action', icon: 'touch_app', sliceable: false, groupable: false, sortable: false }
   ],
   slices: [
     {
-      title: 'Type de log',
-      columnKey: 'level',
+      title: 'Actions',
+      columnKey: 'actions',
       icon: 'label',
       hidden: true
     }

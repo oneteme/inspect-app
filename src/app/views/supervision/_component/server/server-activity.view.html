@@ -39,14 +39,14 @@
           <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">equalizer</mat-icon>
           <h2 id="activity-traces-title" class="kpi-chart-title">Traces</h2>
         </div>
-        <span class="kpi-chart-badge">{{ isLoading ? '…' : (traceStat | number) }}</span>
+        <span class="kpi-chart-badge">{{ isLoadingTrace ? '…' : (traceStat | number) }}</span>
       </div>
       <div class="kpi-chart-subheader">
         <span class="kpi-chart-unit">Traitements finalisés et en cours</span>
       </div>
       <div class="kpi-chart-body">
         <chart type="line" [config]="USAGE_INSTANCE_TRACE_BY_PERIOD_LINE"
-               [data]="instanceTraceByPeriod" [isLoading]="isLoading"></chart>
+               [data]="instanceTraceByPeriod" [isLoading]="isLoadingTrace"></chart>
       </div>
     </section>
 
@@ -64,7 +64,7 @@
       </div>
       <div class="kpi-chart-body">
         <chart type="bar" [config]="SEQUENCE_LOSS_BAR"
-               [data]="sequenceLossData" [isLoading]="isLoading"></chart>
+               [data]="sequenceLossData" [isLoading]="isLoadingSequenceLosses"></chart>
       </div>
     </section>
 
@@ -81,7 +81,7 @@
       </div>
       <div class="kpi-chart-body">
         <chart type="heatmap" [config]="RETRY_OCCURRENCES_HEATMAP"
-               [data]="retryOccurrencesHeatmapData" [isLoading]="isLoading"></chart>
+               [data]="retryOccurrencesHeatmapData" [isLoading]="isLoadingRetryOccurrences"></chart>
       </div>
     </section>
 
@@ -92,20 +92,34 @@
           <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">assignment</mat-icon>
           <h2 id="activity-reports-title" class="kpi-chart-title">Rapports</h2>
         </div>
-        <span class="kpi-chart-badge">{{ isLoading ? '…' : (logEntryByPeriod.length | number) }}</span>
+        <span class="kpi-chart-badge">{{ isLoadingLogs ? '…' : (logEntryByPeriod.length | number) }}</span>
       </div>
       <div class="kpi-chart-subheader">
         <span class="kpi-chart-unit">Journaux d’activité du namespace</span>
       </div>
       <div class="kpi-chart-body">
-        <div *ngIf="isLoading" class="activity-status" role="status">
-          <mat-spinner [diameter]="28"></mat-spinner>
-          <span>Chargement des rapports…</span>
-        </div>
-        <p *ngIf="!isLoading && !logEntryByPeriod.length" class="activity-status" role="status">
-          Aucun rapport pour ce namespace sur cette période.
-        </p>
-        <log-table *ngIf="!isLoading && logEntryByPeriod.length" [requests]="logEntryByPeriod"></log-table>
+        <jquery-table class="flex-table" [config]="tableConfig" [data]="logEntryByPeriod" [isLoading]="isLoadingLogs">
+          <ng-template jqtCellDef="instant" let-row>
+            {{ row.instant * 1000 | date:'dd/MM/yyyy' }}
+            <br>
+            {{ row.instant * 1000 | date:'HH:mm:ss.SSS' }}
+          </ng-template>
+
+          <ng-template jqtCellDef="appName" let-row>
+            {{ row.appName || '—' }}
+          </ng-template>
+
+          <ng-template jqtCellDef="message" let-row>
+            {{ row.message }}
+          </ng-template>
+
+          <ng-template jqtCellDef="action" let-row>
+            <button mat-icon-button color="primary" [class.hidden]="!row.stackRows?.length"
+                    (click)="openLogStacktrace(row)" matTooltip="Consulter la Stack">
+              <mat-icon class="material-symbols-outlined">visibility</mat-icon>
+            </button>
+          </ng-template>
+        </jquery-table>
       </div>
     </section>
   </div>

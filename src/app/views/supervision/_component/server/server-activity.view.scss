@@ -19,7 +19,7 @@
   }
 
   chart,
-  log-table {
+  jquery-table {
     width: 100%;
     min-width: 0;
   }
@@ -35,21 +35,10 @@
 }
 
 .activity-reports {
-  log-table {
+  jquery-table {
     display: flex;
     height: clamp(320px, 50vh, 560px);
   }
-}
-
-.activity-status {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 12px;
-  padding: 24px;
-  margin: 0;
-  color: #64748b;
-  font-size: 13px;
 }
 
 @media (max-width: 768px) {
