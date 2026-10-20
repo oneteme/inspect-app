@@ -65,7 +65,7 @@
 // En-tête
 .session-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   padding: 14px 8px 10px 16px;
   gap: 0.5em;
@@ -169,14 +169,12 @@
 .method-badge {
   display: inline-flex;
   align-items: center;
-  padding: 1px 8px;
+  padding: 2px 10px;
   border-radius: 6px;
   font-size: 11px;
   font-weight: 700;
   background: #eff6ff;
   color: #1d4ed8;
-  border: 1px solid #bfdbfe;
-  letter-spacing: 0.04em;
   flex-shrink: 0;
 }
 

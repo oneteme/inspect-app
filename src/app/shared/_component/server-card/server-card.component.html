@@ -19,33 +19,28 @@
             <span class="server-name" (click)="navigateOnServerClick($event)">
               {{ _instance.name }}
             </span>
-            <app-status-indicator
-              [loading]="_isLoadingLastTrace"
-              (onClick)="navigate($event)"
-              [params]="{id: _instance.id, end: _instance.end, configuration: _instance.configuration, lastTrace: _lastTrace, date: date.getTime()}">
-            </app-status-indicator>
+          </div>
+          <div class="server-version-row">
+            <app-version-badge
+              class="server-version"
+              [version]="_instance?.version"
+              [collector]="_instance?.collector"
+              [configuration]="_instance?.configuration"
+              [name]="_instance?.name">
+            </app-version-badge>
           </div>
         </div>
+        <app-status-indicator
+          class="server-status"
+          [loading]="_isLoadingLastTrace"
+          (onClick)="navigate($event)"
+          [params]="{id: _instance.id, end: _instance.end, configuration: _instance.configuration, lastTrace: _lastTrace, date: date.getTime()}">
+        </app-status-indicator>
       </div>
 
       <button mat-icon-button *ngIf="menu" [matMenuTriggerFor]="menu" class="menu-btn">
         <mat-icon>more_vert</mat-icon>
       </button>
-    </div>
-
-    <!-- Infos compactes : version · branche · OS -->
-    <div class="server-content">
-      <div class="info-chips">
-
-        <!-- Version -->
-        <app-version-badge
-          [version]="_instance?.version"
-          [collector]="_instance?.collector"
-          [configuration]="_instance?.configuration"
-          [name]="_instance?.name">
-        </app-version-badge>
-
-      </div>
     </div>
 
     <!-- Pied de carte -->
@@ -85,4 +80,3 @@
 
   </div>
 </div>
-
