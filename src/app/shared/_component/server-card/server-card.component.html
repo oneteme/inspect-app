@@ -45,35 +45,41 @@
           [name]="_instance?.name">
         </app-version-badge>
 
-        <!-- Branche / hash -->
-        <app-branch-chip [branch]="_instance?.branch" [hash]="_instance?.hash"/>
-
-        <!-- OS / Runtime -->
-        <div class="info-chip os-chip" *ngIf="_instance?.os"
-             [matTooltip]="_instance.re ? (_instance.os + ' · ' + _instance.re) : _instance.os">
-          <mat-icon class="material-symbols-outlined chip-icon">
-            {{ _instance.type === 'CLIENT' ? 'devices' : 'data_table' }}
-          </mat-icon>
-          <span class="chip-value ellipsis">{{ _instance.os }}</span>
-          <span class="chip-sep" *ngIf="_instance?.re">·</span>
-          <span class="chip-runtime" *ngIf="_instance?.re">{{ _instance.re }}</span>
-        </div>
-
       </div>
     </div>
 
     <!-- Pied de carte -->
     <div class="server-footer">
-      <div class="meta-chip">
-        <mat-icon class="material-symbols-outlined meta-icon">person</mat-icon>
-        <span>{{ _instance.user || 'N/A' }}</span>
+      <div class="footer-section">
+        <div class="meta-chip">
+          <mat-icon class="material-symbols-outlined meta-icon">person</mat-icon>
+          <span>{{ _instance.user || 'N/A' }}</span>
+        </div>
+        <div class="meta-chip">
+          <mat-icon class="material-symbols-outlined meta-icon">schedule</mat-icon>
+          <span>{{ (_instance.instant * 1000) | date: 'dd/MM/yyyy HH:mm:ss' }}</span>
+        </div>
       </div>
-      <div class="meta-chip">
-        <mat-icon class="material-symbols-outlined meta-icon">schedule</mat-icon>
-        <span>{{ (_instance.instant * 1000) | date: 'dd/MM/yyyy HH:mm:ss' }}</span>
-        <ng-container *ngIf="_instance.end">
-          &nbsp;·&nbsp;<span class="duration">{{ (_instance.end - _instance.instant) | duration }}</span>
-        </ng-container>
+      <div class="footer-section">
+        <div class="meta-icon-btn"
+             [class.disabled]="!_instance?.branch"
+             [matTooltip]="_instance?.branch + ' - ' + _instance?.hash">
+          <mat-icon class="material-symbols-outlined">code_blocks</mat-icon>
+        </div>
+        <div class="meta-icon-btn"
+             [class.disabled]="!_instance?.os"
+             [matTooltip]="_instance?.os + ' - ' + _instance?.re">
+          <mat-icon class="material-symbols-outlined">{{ _instance.type === 'CLIENT' ? 'devices' : 'data_table' }}</mat-icon>
+        </div>
+      </div>
+      <div class="footer-section">
+        <div class="stat-item">
+          <mat-icon class="material-symbols-outlined stat-icon">timer</mat-icon>
+          <span class="stat-value stat-duration"
+                [matTooltip]="((_instance.end * 1000) | date: 'dd/MM/yyyy HH:mm:ss')">
+                {{ { start: _instance.instant, end: _instance.end } | duration }}
+          </span>
+        </div>
       </div>
     </div>
 
