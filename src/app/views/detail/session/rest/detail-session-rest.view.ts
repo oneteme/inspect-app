@@ -45,7 +45,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
                 this.namespace = queryParams.namespace || app.defaultNamespace;
                 this._pageTitleService.set({ icon: 'call_received', iconOutlined: true, title: 'Services Exposés • ' + params.id_session, subtitle: Constants.MAPPING_TYPE['rest']?.subtitle });
                 this.getSession(params.id_session);
-                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.namespace}`)
+                this._location.replaceState(`${this._router.url.split('?')[0]}?namespace=${this.namespace}`)
             }
         });
     }
