@@ -180,8 +180,8 @@ export class TraceService {
     return this.http.get<LogEntry[]>(`${this.server}/instance/${sessionId}/log/entry`);
   }
 
-  getSessionEvents(): Observable<SessionEventDto[]> {
-    return this.http.get<SessionEventDto[]>(`${this.server}/session/event`);
+  getSessionEvents(params: any): Observable<SessionEventDto[]> {
+    return this.http.get<SessionEventDto[]>(`${this.server}/session/event`, {params: params});
   }
 
 }
