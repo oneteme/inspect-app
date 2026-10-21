@@ -174,7 +174,6 @@ export class ServerActivityView implements OnDestroy {
           const period = String(item?.axisValue ?? item?.name ?? '');
           const row = this.sequenceLossData.find(item => String(item[this.groupedBy]) === period);
           return `Période : ${period || '—'}<br/>` +
-              `Date : ${row ? this.formatDateRange(row.firstStart, row.lastStart) : '—'}<br/>` +
               `Séquences perdues : ${row?.seq ?? 0}<br/>` +
               `Tentatives échouées : ${row?.atm ?? 0}`;
         }
@@ -342,7 +341,7 @@ export class ServerActivityView implements OnDestroy {
     const period = (options?.xAxis as {data?: string[]})?.data?.[periodIndex] ?? '';
     const appName = (options?.yAxis as {data?: string[]})?.data?.[appIndex] || 'Application inconnue';
     return `${appName}<br/>${period}<br/>` +
-        `<strong>${Number(sum).toLocaleString('fr-FR')} occurrences</strong>`;
+        `<strong>${Number(sum).toLocaleString('fr-FR')} séquences avec au moins 2 tentatives</strong>`;
   }
 
   private aggregateTraceByPeriod(rows: PeriodTraceRow[]): PeriodTraceRow[] {

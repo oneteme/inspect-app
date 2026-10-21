@@ -73,11 +73,11 @@
         <div class="kpi-chart-title-group">
           <span class="kpi-accent-bar orange-bar"></span>
           <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">warning</mat-icon>
-          <h2 id="activity-retry-occurrences-title" class="kpi-chart-title">Occurrences des séquences répétées</h2>
+          <h2 id="activity-retry-occurrences-title" class="kpi-chart-title">Séquences avec tentatives multiples</h2>
         </div>
       </div>
       <div class="kpi-chart-subheader">
-        <span class="kpi-chart-unit">Occurrences par heure et application (séquences avec plus d’une tentative)</span>
+        <span class="kpi-chart-unit">Nombre de séquences ayant nécessité au moins 2 tentatives, par heure et application</span>
       </div>
       <div class="kpi-chart-body">
         <chart type="heatmap" [config]="RETRY_OCCURRENCES_HEATMAP"
