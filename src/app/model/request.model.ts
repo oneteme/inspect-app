@@ -56,6 +56,7 @@ export interface MainSessionView extends MainSession {
 }
 
 export interface RestSessionView extends RestSession {
+  exceptions?: ExceptionInfo[];
   restRequests?: RestRequestDto[];
   databaseRequests?: DatabaseRequestDto[];
   ftpRequests?: FtpRequestDto[];
