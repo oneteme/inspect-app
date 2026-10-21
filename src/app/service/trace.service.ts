@@ -8,7 +8,8 @@ import {
   MailRequestDto,
   MainSessionDto,
   RestRequestDto,
-  RestSessionDto
+  RestSessionDto,
+  SessionEventDto
 } from "../model/request.model";
 import {
   DatabaseRequest,
@@ -178,4 +179,9 @@ export class TraceService {
   getLogEntryBySession(sessionId): Observable<LogEntry[]> {
     return this.http.get<LogEntry[]>(`${this.server}/instance/${sessionId}/log/entry`);
   }
+
+  getSessionEvents(): Observable<SessionEventDto[]> {
+    return this.http.get<SessionEventDto[]>(`${this.server}/session/event`);
+  }
+
 }

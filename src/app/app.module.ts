@@ -42,9 +42,8 @@ import {AuthService} from "./auth/auth.service";
 import {authGuard} from "./auth/auth.guard";
 import {OAuthModule} from "angular-oauth2-oidc";
 import {AuthInterceptor} from "./auth/auth.interceptor";
-import {environment} from "../environments/environment";
-import {NgCollectorModule} from "@oneteme/inspect-ng-collector";
 import {AnalyticsView} from "./views/analytics/analytics.view";
+import {SearchMainEventView} from "./views/search/event/main/search-main-event.view";
 
 registerLocaleData(localeFr, 'fr-FR');
 
@@ -173,6 +172,11 @@ const routes: Route[] = [
       }
     ],
     canActivate: [authGuard]
+  },
+  {
+    path: 'event',
+    component: SearchMainEventView,
+    title: Constants.MAPPING_TYPE['event'].title
   },
   {
     path: 'analytics/:user',
