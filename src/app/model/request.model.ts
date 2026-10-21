@@ -74,3 +74,7 @@ export enum RequestType {
   SMTP = 'smtp',
   LDAP = 'ldap'
 }
+
+export interface SessionEventDto extends SessionEvent {
+  appName?: string;
+}
