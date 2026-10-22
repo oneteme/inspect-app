@@ -90,6 +90,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
         { label: Constants.MAPPING_TYPE['view'].title, icon: Constants.MAPPING_TYPE['view'].icon, id: 'view', route: 'session/view' }
       ]
     },
+    { label: Constants.MAPPING_TYPE['event'].title, icon: Constants.MAPPING_TYPE['event'].icon, id: 'event', route: 'event'},
     { label: Constants.MAPPING_TYPE['architecture'].title, icon: Constants.MAPPING_TYPE['architecture'].icon, id: 'architecture', route: 'architecture'}
   ];
 

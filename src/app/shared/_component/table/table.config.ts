@@ -1,5 +1,5 @@
 import { SliceConfig, TableProvider } from '@oneteme/jquery-table';
-import { DatabaseRequestDto, DirectoryRequestDto, FtpRequestDto, MailRequestDto, MainSessionDto, RestRequestDto, RestSessionDto } from '../../../model/request.model';
+import { DatabaseRequestDto, DirectoryRequestDto, FtpRequestDto, MailRequestDto, MainSessionDto, RestRequestDto, RestSessionDto, SessionEventDto } from '../../../model/request.model';
 import { AbstractStage, LocalRequest, LogEntry } from "../../../model/trace.model";
 import { LastServerStart } from "../../../model/jquery.model";
 import { formatDuration } from '../../pipe/duration.pipe';
@@ -518,4 +518,24 @@ export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTra
       ]
     }
   ]
+}
+
+export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
+  ...DEFAULT_TABLE_CONFIG,
+  columns: [
+    {
+      key: 'instant', header: 'Date', icon: 'schedule', width: '15%', groupable: false, sliceable: false,
+      searchValue: (row: SessionEventDto) => fmtStart(row.instant)
+    },
+    { key: 'type', header: 'Niveau', icon: 'label', width: '10%' },
+    { key: 'value', header: 'Message', groupable: false, sliceable: false, icon: 'category' },
+    { key: 'scope', header: 'Scope', width: '15%' },
+    { key: 'location', header: 'Ressource', groupable: false, sliceable: false, icon: 'category' },
+  ],
+  defaultSort: { active: 'instant', direction: 'desc' },
+  rowClass: (row: SessionEventDto) => {
+    if (row.type === 'ERROR') return 'row-ko';
+    if (row.type === 'WARN') return 'row-warning';
+    return '';
+  }
 }

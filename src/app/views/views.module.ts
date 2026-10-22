@@ -73,6 +73,7 @@ import {StartupComponent} from "./kpi/session/startup/startup.component";
 import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.component";
 import {CompareView} from "./compare/compare.view";
 import {AnalyticsView} from "./analytics/analytics.view";
+import {SearchMainEventView} from "./search/event/main/search-main-event.view";
 
 @NgModule({
   imports: [
@@ -91,6 +92,7 @@ import {AnalyticsView} from "./analytics/analytics.view";
   declarations: [
     SearchRestView,
     SearchMainView,
+    SearchMainEventView,
     DetailRequestView,
     DetailSessionRestView,
     DetailSessionMainView,

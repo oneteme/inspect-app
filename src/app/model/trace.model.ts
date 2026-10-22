@@ -112,6 +112,7 @@ export interface SessionEvent {
   type: string;
   sessionId: string;
   value?: string;
+  scope?: string;
   location?: string;
 }
 
@@ -208,4 +209,14 @@ export interface LogEntry {
   thread: string;
   action: string;
   stackRows: StackTraceRow[];
+}
+
+export interface MainEvent extends AbstractSession, LocalRequest {
+
+}
+
+export interface RestEvent extends AbstractSession, RestRequest {
+  name: string;
+  userAgent: string;
+  cacheControl: string;
 }
