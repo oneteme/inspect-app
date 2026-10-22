@@ -52,10 +52,10 @@ export class SessionKpiView implements OnInit, OnDestroy {
     })
   });
   hostSubscription: Subscription;
-  params: Partial<{type: 'rest' | 'batch' | 'startup', queryParams: QueryParams}> = {};
+  params: Partial<{type: 'rest' | 'schedule' | 'startup', queryParams: QueryParams}> = {};
   serviceType: { [key: string]: {service : RestSessionService | MainSessionService }  } = {
     "rest": { service: this._restSessionService },
-    "batch": { service: this._mainSessionService },
+    "schedule": { service: this._mainSessionService },
     "startup": { service: this._mainSessionService }
   };
 
@@ -64,7 +64,7 @@ export class SessionKpiView implements OnInit, OnDestroy {
       params: this._activatedRoute.params,
       queryParams: this._activatedRoute.queryParams}).subscribe({
       next: (v: { params: Params, queryParams: Params }) => {
-        const type = v.params.session_type as 'rest' | 'batch' | 'startup';
+        const type = v.params.session_type as 'rest' | 'schedule' | 'startup';
         this.params.type = type;
         this._pageTitleService.set({
           icon: 'finance_mode',

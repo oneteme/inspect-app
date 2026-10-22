@@ -94,7 +94,7 @@ export class Constants {
         request: {title: 'Flux', subtitle: 'Communications externes',icon: 'call_made'},
         treatment: {title: 'Traitements', subtitle: '', icon: 'settings_suggest'},
         rest: {title: 'Services Exposés', subtitle: 'Appels API et distribution de ressources statiques', icon: 'call_received'},
-        batch: {title: 'Tâches planifiées', subtitle: 'Historique des jobs asynchrones et tâches de fond', icon: 'manufacturing'},
+        schedule: {title: 'Tâches planifiées', subtitle: 'Historique des jobs asynchrones et tâches de fond', icon: 'manufacturing'},
         test: {title: 'Validation & Tests', subtitle: 'Lancements de tests automatisés et résultats', icon: 'rule'},
         startup: {title: 'Initialisation', subtitle: 'Chronologie et durée des démarrages d\'application', icon: 'restart_alt'},
         view: {title: 'Parcours Client', subtitle: 'Navigation utilisateurs et accès aux pages', icon: 'ads_click'},

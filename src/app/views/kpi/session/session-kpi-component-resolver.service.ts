@@ -1,6 +1,6 @@
 import {Injectable, Type} from "@angular/core";
 import {RestComponent} from "./rest/rest.component";
-import {BatchComponent} from "./batch/batch.component";
+import {ScheduleComponent} from "./schedule/schedule.component";
 import {StartupComponent} from "./startup/startup.component";
 
 @Injectable({
@@ -9,7 +9,7 @@ import {StartupComponent} from "./startup/startup.component";
 export class SessionKpiComponentResolverService {
   private componentMap: { [key: string]: Type<any> } = {
     'rest': RestComponent,
-    'batch': BatchComponent,
+    'schedule': ScheduleComponent,
     'startup': StartupComponent
   };
 

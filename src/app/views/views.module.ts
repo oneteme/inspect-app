@@ -64,7 +64,7 @@ import {FtpComponent} from "./kpi/request/ftp/ftp.component";
 import {LdapComponent} from "./kpi/request/ldap/ldap.component";
 import {SmtpComponent} from "./kpi/request/smtp/smtp.component";
 import {SessionKpiView} from "./kpi/session/session-kpi.view";
-import {BatchComponent} from "./kpi/session/batch/batch.component";
+import {ScheduleComponent} from "./kpi/session/schedule/schedule.component";
 import {CommandChartComponent} from "./kpi/_component/command-chart/command-chart.component";
 import {DependencyChartComponent} from "./kpi/_component/dependency-chart/dependency-chart.component";
 import {MediaTypeChartComponent} from "./kpi/_component/media-type-chart/media-type-chart.component";
@@ -131,7 +131,7 @@ import {AnalyticsView} from "./analytics/analytics.view";
     RequestKpiView,
     RequestRestComponent,
     SessionRestComponent,
-    BatchComponent,
+    ScheduleComponent,
     StartupComponent,
     JdbcComponent,
     FtpComponent,

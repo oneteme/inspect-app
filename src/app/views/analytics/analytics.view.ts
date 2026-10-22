@@ -1,5 +1,5 @@
 import {Component, inject, OnDestroy} from "@angular/core";
-import {AnalyticService} from "../../service/analytic.service";
+import {SessionEventService} from "../../service/session-event.service";
 import {combineLatest, distinctUntilChanged, filter, finalize, Observable, Subject, takeUntil} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {EnvRouter} from "../../service/router.service";
@@ -26,7 +26,7 @@ import {PageTitleService} from '../../service/page-title.service';
     ]
 })
 export class AnalyticsView implements OnDestroy {
-    private readonly _analyticService = inject(AnalyticService);
+    private readonly _sessionEventService = inject(SessionEventService);
     private readonly _activatedRoute = inject(ActivatedRoute);
     private readonly _router = inject(EnvRouter);
     private readonly _mainSessionService = inject(MainSessionService);
@@ -71,7 +71,7 @@ export class AnalyticsView implements OnDestroy {
     getUserActions() {
         this.loading = true;
 
-        this._analyticService.getUserActionsByUser(this.params.user, this.params.date)
+        this._sessionEventService.getUserActionsByUser(this.params.user, this.params.date)
             .pipe(takeUntil(this.$destroy), finalize(() => this.loading = false))
             .subscribe({
                 next: result => {

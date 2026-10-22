@@ -63,6 +63,7 @@ export interface RestSessionView extends RestSession {
   mailRequests?: MailRequestDto[];
   ldapRequests?: DirectoryRequestDto[];
   localRequests?: LocalRequest[];
+  sessionEvents?: SessionEvent[];
   httpSessionStages?: HttpSessionStage[];
   logEntries?: LogEntry[];
 }

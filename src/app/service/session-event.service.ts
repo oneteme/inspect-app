@@ -5,7 +5,7 @@ import {AnalyticDto} from "../model/request.model";
 import {SessionEvent} from "../model/trace.model";
 
 @Injectable({ providedIn: 'root' })
-export class AnalyticService {
+export class SessionEventService {
     server = `${localStorage.getItem('server')}/v3/query`;
 
     constructor(private http: HttpClient) {
@@ -21,6 +21,6 @@ export class AnalyticService {
     }
 
     getSessionEventsBySession(idSession: string): Observable<SessionEvent[]> {
-        return this.http.get<SessionEvent[]>(`${this.server}/session/${idSession}/user/action`);
+        return this.http.get<SessionEvent[]>(`${this.server}/session/${idSession}/event`);
     }
 }

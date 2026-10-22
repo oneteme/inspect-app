@@ -14,7 +14,7 @@ export class DashboardDetailViewComponent {
 
     @Output() requestProtocolNav = new EventEmitter<{ key: string; errorType: string }>();
     @Output() sessionTypeNav = new EventEmitter<{ type: string; server?: string }>();
-    @Output() exceptionNav = new EventEmitter<{ type: string; tab: 'rest' | 'batch' | 'view' }>();
+    @Output() exceptionNav = new EventEmitter<{ type: string; tab: 'rest' | 'schedule' | 'view' }>();
     @Output() instanceFilter = new EventEmitter<string>();
     @Output() viewAllClick = new EventEmitter<string>();
 
@@ -31,12 +31,12 @@ export class DashboardDetailViewComponent {
     }
 
     get isSessionInsight(): boolean {
-        const sessionKeys = new Set(['SERVICE', 'BATCH', 'STARTUP', 'VIEW', 'TEST']);
+        const sessionKeys = new Set(['SERVICE', 'SCHEDULE', 'STARTUP', 'VIEW', 'TEST']);
         return !!this.selectedKey && sessionKeys.has(this.selectedKey);
     }
 
     get sessionChartData(): { stringDate: string; count: number }[] {
-        if (this.selectedKey === 'BATCH') return this.context.batchExceptionChart;
+        if (this.selectedKey === 'SCHEDULE') return this.context.batchExceptionChart;
         if (this.selectedKey === 'VIEW') return this.context.viewExceptionChart;
         if (this.selectedKey === 'STARTUP') return this.context.startupExceptionChart;
         return this.context.sessionExceptionChart;
@@ -44,7 +44,7 @@ export class DashboardDetailViewComponent {
 
     get sessionChartSubtitle(): string {
         switch (this.selectedKey) {
-            case 'BATCH': return ' — Tâches planifiées';
+            case 'SCHEDULE': return ' — Tâches planifiées';
             case 'VIEW': return ' — Parcours client';
             case 'STARTUP': return ' — Initialisation';
             default: return ' — Services exposés';
@@ -72,7 +72,7 @@ export class DashboardDetailViewComponent {
         const key = this.selectedKey;
         if (!key) return false;
         if (key === 'SERVICE') return this.context.tabRequests['sessionExceptionsTable']?.isLoading !== false;
-        if (key === 'BATCH')   return this.context.tabRequests['batchExceptionTable']?.isLoading !== false;
+        if (key === 'SCHEDULE')   return this.context.tabRequests['batchExceptionTable']?.isLoading !== false;
         if (key === 'VIEW')    return this.context.tabRequests['viewExceptionTable']?.isLoading !== false;
         if (key === 'STARTUP' || key === 'TEST') return this.context.tabRequests['startupExceptionTable']?.isLoading !== false;
         const protoDef = this.context.protocolDefs.find(p => p.key === key);
@@ -86,7 +86,7 @@ export class DashboardDetailViewComponent {
 
     /** Loading du graphique selon le type de session sélectionné */
     get sessionChartLoading(): boolean {
-        if (this.selectedKey === 'BATCH')   return this.context.tabRequests['batchExceptionTable']?.isLoading || this.context.tabRequests['batchTopJobsTable']?.isLoading;
+        if (this.selectedKey === 'SCHEDULE')   return this.context.tabRequests['batchExceptionTable']?.isLoading || this.context.tabRequests['batchTopJobsTable']?.isLoading;
         if (this.selectedKey === 'VIEW')    return this.context.tabRequests['viewExceptionTable']?.isLoading;
         if (this.selectedKey === 'STARTUP') return this.context.tabRequests['startupExceptionTable']?.isLoading;
         return this.context.tabRequests['sessionExceptionsTable']?.isLoading;
@@ -99,7 +99,7 @@ export class DashboardDetailViewComponent {
         switch (key) {
             case 'SERVICE':
                 return this.context.tabRequests['sessionExceptionsTable']?.isLoading === false && !this.context.topSessionErrors.length;
-            case 'BATCH':
+            case 'SCHEDULE':
                 return this.context.tabRequests['batchExceptionTable']?.isLoading === false && !this.context.topBatchErrors.length;
             case 'VIEW':
                 return this.context.tabRequests['viewExceptionTable']?.isLoading === false && !this.context.topViewErrors.length && !this.context.sessionWebErrors;

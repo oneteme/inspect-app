@@ -683,13 +683,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
         });
     }
 
-    navigateToException(exception: { type: string; tab: 'rest' | 'batch' | 'view' }) {
+    navigateToException(exception: { type: string; tab: 'rest' | 'schedule' | 'view' }) {
         const { type, tab } = exception;
         if (tab === 'view') {
             this.navigateToSessionByType('VIEW', type);
             return;
         }
-        const target = tab === 'rest' ? '/session/rest' : '/session/batch';
+        const target = tab === 'rest' ? '/session/rest' : '/session/schedule';
         const rangestatus = [exception.type];
         this._router.navigate([target], {
             queryParams: this.buildNavigationQueryParams({
@@ -724,7 +724,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (!key) return;
         const sessionKeyMap: Record<string, string> = {
             SERVICE: 'rest',
-            BATCH: 'batch',
+            BATCH: 'schedule',
             STARTUP: 'startup',
             VIEW: 'view',
             TEST: 'test'
@@ -839,7 +839,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private _rebuildSessionSummaries(): void {
         const types = [
             { key: 'SERVICE', type: 'REST', label: 'Services exposés' },
-            { key: 'BATCH', type: 'BATCH', label: 'Tâches planifiées' },
+            { key: 'SCHEDULE', type: 'SCHEDULE', label: 'Tâches planifiées' },
             { key: 'STARTUP', type: 'STARTUP', label: 'Initialisation' },
             { key: 'VIEW', type: 'VIEW', label: 'Parcours client' },
             { key: 'TEST', type: 'TEST', label: 'Test' },
