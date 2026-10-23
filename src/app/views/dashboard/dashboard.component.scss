@@ -432,6 +432,21 @@
   transition: width .4s ease;
 }
 
+.sbd-track-split {
+  display: flex;
+  background: rgba(34, 36, 38, .07);
+}
+
+.sbd-fill-warn {
+  height: 100%;
+  background: #f5c518;
+}
+
+.sbd-fill-error {
+  height: 100%;
+  background: #db2828;
+}
+
 .sbd-count {
   font-size: .68em;
   font-weight: 600;

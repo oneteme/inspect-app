@@ -112,7 +112,6 @@ export interface SessionEvent {
   type: string;
   sessionId: string;
   value?: string;
-  scope?: string;
   location?: string;
 }
 

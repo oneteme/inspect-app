@@ -101,6 +101,8 @@ export class Constants {
         dashboard: {title:'Tableau de bord', icon: 'home'},
         deploiment: {title:'Instances Actives', subtitle: 'Suivi des applications en cours d\'exécution', icon:'deployed_code'},
         event: {title: 'Événements', icon: 'event'},
+        log: {title: 'Événements', subtitle: 'Logs', icon: 'browse_activity'},
+        user: {title: 'Événements', subtitle: 'Utilisateurs', icon: 'person'},
         architecture: {title: 'Architecture', icon: 'lan'},
         tree: {title: 'Arborescence des ressources', subtitle: 'Diagramme de bout en bout des flux d\'exécution', icon: 'account_tree'},
     }

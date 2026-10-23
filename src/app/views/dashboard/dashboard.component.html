@@ -1,181 +1,181 @@
 ﻿<page-panel panelTitle="Filtres" panelIcon="calendar_month">
-  <form [formGroup]="serverFilterForm" class="panel-filter">
-    <div class="period-filter-wrapper">
-    <mat-form-field class="no-subscript period-wide period-field"
-            [style.--period-field-width]="isDefaultPeriod() ? '372px' : '408px'"
-                    appearance="outline">
-      <mat-label>Période</mat-label>
-      <mat-date-range-input [formGroup]="serverFilterForm.controls.dateRangePicker" [rangePicker]="picker">
-        <input matStartDate formControlName="start" placeholder="Start date" (dateChange)="onChangeStart($event)">
-        <input matEndDate formControlName="end" placeholder="End date" (dateChange)="onChangeEnd($event)">
-      </mat-date-range-input>
-      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-      <span matSuffix class="period-inline-separator" aria-hidden="true"></span>
-      <button mat-icon-button
-              matSuffix
-              type="button"
-              [matMenuTriggerFor]="quickRangesMenu"
-              matTooltip="Plages de temps rapides"
-              class="period-action-btn">
-        <mat-icon class="material-symbols-outlined">schedule</mat-icon>
-      </button>
-      <button *ngIf="!isDefaultPeriod()"
-              mat-icon-button
-              matSuffix
-              type="button"
-              matTooltip="Réinitialiser à la date du jour"
-              (click)="resetPeriod()"
-              class="period-action-btn">
-        <mat-icon class="material-symbols-outlined">restart_alt</mat-icon>
-      </button>
-      <mat-date-range-picker #picker></mat-date-range-picker>
-    </mat-form-field>
-    <mat-menu #quickRangesMenu="matMenu" class="period-quick-ranges-menu">
-      <button *ngFor="let quickRange of periodQuickRanges" mat-menu-item (click)="applyQuickRange(quickRange.value)">
-        <span>{{ quickRange.label }}</span>
-      </button>
-    </mat-menu>
-    </div>
+    <form [formGroup]="serverFilterForm" class="panel-filter">
+        <div class="period-filter-wrapper">
+            <mat-form-field class="no-subscript period-wide period-field"
+                            [style.--period-field-width]="isDefaultPeriod() ? '372px' : '408px'"
+                            appearance="outline">
+                <mat-label>Période</mat-label>
+                <mat-date-range-input [formGroup]="serverFilterForm.controls.dateRangePicker" [rangePicker]="picker">
+                    <input matStartDate formControlName="start" placeholder="Start date" (dateChange)="onChangeStart($event)">
+                    <input matEndDate formControlName="end" placeholder="End date" (dateChange)="onChangeEnd($event)">
+                </mat-date-range-input>
+                <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                <span matSuffix class="period-inline-separator" aria-hidden="true"></span>
+                <button mat-icon-button
+                        matSuffix
+                        type="button"
+                        [matMenuTriggerFor]="quickRangesMenu"
+                        matTooltip="Plages de temps rapides"
+                        class="period-action-btn">
+                    <mat-icon class="material-symbols-outlined">schedule</mat-icon>
+                </button>
+                <button *ngIf="!isDefaultPeriod()"
+                        mat-icon-button
+                        matSuffix
+                        type="button"
+                        matTooltip="Réinitialiser à la date du jour"
+                        (click)="resetPeriod()"
+                        class="period-action-btn">
+                    <mat-icon class="material-symbols-outlined">restart_alt</mat-icon>
+                </button>
+                <mat-date-range-picker #picker></mat-date-range-picker>
+            </mat-form-field>
+            <mat-menu #quickRangesMenu="matMenu" class="period-quick-ranges-menu">
+                <button *ngFor="let quickRange of periodQuickRanges" mat-menu-item (click)="applyQuickRange(quickRange.value)">
+                    <span>{{ quickRange.label }}</span>
+                </button>
+            </mat-menu>
+        </div>
 
-    <div class="pp-actions">
-      <button mat-mini-fab color="primary" (click)="search()">
-        <mat-icon matSuffix>search</mat-icon>
-      </button>
-    </div>
-  </form>
+        <div class="pp-actions">
+            <button mat-mini-fab color="primary" (click)="search()">
+                <mat-icon matSuffix>search</mat-icon>
+            </button>
+        </div>
+    </form>
 </page-panel>
 
 <div class="db-grid">
-  <!-- Colonne principale : liste des protocoles -->
-  <section class="db-main">
+    <!-- Colonne principale : liste des protocoles -->
+    <section class="db-main">
 
-    <!-- Vue d'ensemble : tableau des instances serveur -->
-    <dashboard-instances-table
-      *ngIf="!hasSelectedInsights && showOverview"
-      [rows]="filteredDeployRows"
-      [isLoading]="serverHealthLoading"
-      [isStatusLoading]="instanceTraceLoading"
-      [today]="deployTableToday"
-      [versionColor]="versionColor"
-      [instanceSearchQuery]="instanceSearchQuery"
-      (statusIndicatorClick)="navigateOnStatusIndicator($event.event, $event.row)"
-      (serverClick)="navigateOnServerClick($event.event, $event.row)"
-      (sinceClick)="navigateOnSinceClick($event.event, $event.row)"
-      (restartClick)="navigateOnRestartClick($event.event, $event.minStart, $event.appName)">
-    </dashboard-instances-table>
+        <!-- Vue d'ensemble : tableau des instances serveur -->
+        <dashboard-instances-table
+                *ngIf="!hasSelectedInsights && showOverview"
+                [rows]="filteredDeployRows"
+                [isLoading]="serverHealthLoading"
+                [isStatusLoading]="instanceTraceLoading"
+                [today]="deployTableToday"
+                [versionColor]="versionColor"
+                [instanceSearchQuery]="instanceSearchQuery"
+                (statusIndicatorClick)="navigateOnStatusIndicator($event.event, $event.row)"
+                (serverClick)="navigateOnServerClick($event.event, $event.row)"
+                (sinceClick)="navigateOnSinceClick($event.event, $event.row)"
+                (restartClick)="navigateOnRestartClick($event.event, $event.minStart, $event.appName)">
+        </dashboard-instances-table>
 
-    <!-- Vue détail : affiché au clic sur une ligne Request ou Session -->
-    <dashboard-detail-view
-      *ngIf="hasSelectedInsights"
-      [context]="detailContext"
-      (requestProtocolNav)="navigateToRequestProtocol($event.key, $event.errorType)"
-      (sessionTypeNav)="navigateToSessionByType($event.type, undefined, $event.server)"
-      (exceptionNav)="navigateToException($event)"
-      (instanceFilter)="navigateToInstancesWithFilter($event)"
-      (viewAllClick)="onViewAllClick($event)">
-    </dashboard-detail-view>
+        <!-- Vue détail : affiché au clic sur une ligne Request ou Session -->
+        <dashboard-detail-view
+                *ngIf="hasSelectedInsights"
+                [context]="detailContext"
+                (requestProtocolNav)="navigateToRequestProtocol($event.key, $event.errorType)"
+                (sessionTypeNav)="navigateToSessionByType($event.type, undefined, $event.server)"
+                (exceptionNav)="navigateToException($event)"
+                (instanceFilter)="navigateToInstancesWithFilter($event)"
+                (viewAllClick)="onViewAllClick($event)">
+        </dashboard-detail-view>
 
-  </section>
+    </section>
 
-  <!-- Sidebar : KPIs globaux + serveurs -->
-  <aside class="db-sidebar">
+    <!-- Sidebar : KPIs globaux + serveurs -->
+    <aside class="db-sidebar">
 
-    <!-- Stats instances compactes -->
-    <ng-container *ngIf="serverHealthLoading || instanceTraceLoading; else instancesBlock">
-      <div class="dov-stats-wrap dov-stats-skel">
-        <div class="dov-stats-lbl">
-          Instances actives
-          <mat-icon class="dov-stats-lbl-info material-symbols-outlined" title="Les instances actives ne dépendent pas de la période sélectionnée">info</mat-icon>
-        </div>
-        <div class="dov-stats-sidebar">
-          <div class="dov-stat-sb-skel" *ngFor="let _ of statSkeletonRows"></div>
-        </div>
-      </div>
-    </ng-container>
-    <ng-template #instancesBlock>
-    <div class="dov-stats-wrap">
-      <div class="dov-stats-lbl">
-        Instances actives
-        <mat-icon class="dov-stats-lbl-info material-symbols-outlined" title="Les instances actives ne dépendent pas de la période sélectionnée">info</mat-icon>
-      </div>
-    <div class="dov-stats-sidebar">
-      <button type="button" class="dov-stat-sb sb-total"
-              (click)="selectServerStatus('all')"
-              [class.dov-stat-sb-active]="serverStatusFilter === 'all' && showOverview">
-        <span class="dov-stat-sb-val">{{ hasNoData ? '--' : deployTableRows.length }}</span>
-        <span class="dov-stat-sb-lbl">Total</span>
-      </button>
-      <button type="button" class="dov-stat-sb sb-pending"
-              (click)="selectServerStatus('pending')"
-              [class.dov-stat-sb-active]="serverStatusFilter === 'pending' && showOverview">
-        <span class="dov-stat-sb-val">{{ hasNoData ? '--' : pendingServerStat }}</span>
-        <span class="dov-stat-sb-lbl">En attente</span>
-      </button>
-      <button type="button" class="dov-stat-sb sb-offline"
-              (click)="selectServerStatus('offline')"
-              [class.dov-stat-sb-active]="serverStatusFilter === 'offline' && showOverview">
-        <span class="dov-stat-sb-val">{{ hasNoData ? '--' : offlineServerStat }}</span>
-        <span class="dov-stat-sb-lbl">Hors ligne</span>
-      </button>
-    </div>
-    </div>
-    </ng-template>
-
-    <!-- Distribution traitement -->
-    <ng-container *ngIf="sessionCountLoading; else sessionBlock">
-      <div class="sb-block sb-distribution-block sb-skel-block">
-        <div class="sbd-title">Traitements</div>
-        <ng-container *ngFor="let _ of skeletonRows">
-          <div class="sbd-skel-main">
-            <div class="sbd-skel-top">
-              <div class="sbd-skel-label"></div>
-              <div class="sbd-skel-count"></div>
+        <!-- Stats instances compactes -->
+        <ng-container *ngIf="serverHealthLoading || instanceTraceLoading; else instancesBlock">
+            <div class="dov-stats-wrap dov-stats-skel">
+                <div class="dov-stats-lbl">
+                    Instances actives
+                    <mat-icon class="dov-stats-lbl-info material-symbols-outlined" title="Les instances actives ne dépendent pas de la période sélectionnée">info</mat-icon>
+                </div>
+                <div class="dov-stats-sidebar">
+                    <div class="dov-stat-sb-skel" *ngFor="let _ of statSkeletonRows"></div>
+                </div>
             </div>
-            <div class="sbd-skel-track"></div>
-          </div>
-          <div class="sbd-skel-rate"></div>
         </ng-container>
-      </div>
-    </ng-container>
-    <ng-template #sessionBlock>
-    <div class="sb-block sb-distribution-block">
-      <div class="sbd-title">Traitements</div>
-      <div class="sbd-empty" *ngIf="sessionSummaries.length === 0 && !restSessionCountLoading">
-        <mat-icon>info_outline</mat-icon>
-        <span>Aucun traitement sur la période</span>
-      </div>
-      <ng-container *ngFor="let s of sessionSummaries">
-        <ng-container *ngIf="s.loading">
-          <div class="sbd-skel-main">
-            <div class="sbd-skel-top">
-              <div class="sbd-skel-label"></div>
-              <div class="sbd-skel-count"></div>
+        <ng-template #instancesBlock>
+            <div class="dov-stats-wrap">
+                <div class="dov-stats-lbl">
+                    Instances actives
+                    <mat-icon class="dov-stats-lbl-info material-symbols-outlined" title="Les instances actives ne dépendent pas de la période sélectionnée">info</mat-icon>
+                </div>
+                <div class="dov-stats-sidebar">
+                    <button type="button" class="dov-stat-sb sb-total"
+                            (click)="selectServerStatus('all')"
+                            [class.dov-stat-sb-active]="serverStatusFilter === 'all' && showOverview">
+                        <span class="dov-stat-sb-val">{{ hasNoData ? '--' : deployTableRows.length }}</span>
+                        <span class="dov-stat-sb-lbl">Total</span>
+                    </button>
+                    <button type="button" class="dov-stat-sb sb-pending"
+                            (click)="selectServerStatus('pending')"
+                            [class.dov-stat-sb-active]="serverStatusFilter === 'pending' && showOverview">
+                        <span class="dov-stat-sb-val">{{ hasNoData ? '--' : pendingServerStat }}</span>
+                        <span class="dov-stat-sb-lbl">En attente</span>
+                    </button>
+                    <button type="button" class="dov-stat-sb sb-offline"
+                            (click)="selectServerStatus('offline')"
+                            [class.dov-stat-sb-active]="serverStatusFilter === 'offline' && showOverview">
+                        <span class="dov-stat-sb-val">{{ hasNoData ? '--' : offlineServerStat }}</span>
+                        <span class="dov-stat-sb-lbl">Hors ligne</span>
+                    </button>
+                </div>
             </div>
-            <div class="sbd-skel-track"></div>
-          </div>
-          <div class="sbd-skel-rate"></div>
+        </ng-template>
+
+        <!-- Distribution traitement -->
+        <ng-container *ngIf="sessionCountLoading; else sessionBlock">
+            <div class="sb-block sb-distribution-block sb-skel-block">
+                <div class="sbd-title">Traitements</div>
+                <ng-container *ngFor="let _ of skeletonRows">
+                    <div class="sbd-skel-main">
+                        <div class="sbd-skel-top">
+                            <div class="sbd-skel-label"></div>
+                            <div class="sbd-skel-count"></div>
+                        </div>
+                        <div class="sbd-skel-track"></div>
+                    </div>
+                    <div class="sbd-skel-rate"></div>
+                </ng-container>
+            </div>
         </ng-container>
-        <div class="sbd-row" *ngIf="!s.loading"
-          [class.sbd-row-selected]="selectedInsights.has(s.key)"
-          [class.sbd-row-clickable]="true"
-          [title]="s.title"
-          tabindex="0"
-          (click)="toggleInsight(s.key)"
-          (keydown.enter)="toggleInsight(s.key)">
-          <div class="sbd-main">
-            <div class="sbd-top">
-              <span class="sbd-label">{{ s.label }}</span>
-              <span class="sbd-count">{{ s.total | compact }}</span>
+        <ng-template #sessionBlock>
+            <div class="sb-block sb-distribution-block">
+                <div class="sbd-title">Traitements</div>
+                <div class="sbd-empty" *ngIf="sessionSummaries.length === 0 && !restSessionCountLoading">
+                    <mat-icon>info_outline</mat-icon>
+                    <span>Aucun traitement sur la période</span>
+                </div>
+                <ng-container *ngFor="let s of sessionSummaries">
+                    <ng-container *ngIf="s.loading">
+                        <div class="sbd-skel-main">
+                            <div class="sbd-skel-top">
+                                <div class="sbd-skel-label"></div>
+                                <div class="sbd-skel-count"></div>
+                            </div>
+                            <div class="sbd-skel-track"></div>
+                        </div>
+                        <div class="sbd-skel-rate"></div>
+                    </ng-container>
+                    <div class="sbd-row" *ngIf="!s.loading"
+                         [class.sbd-row-selected]="selectedInsights.has(s.key)"
+                         [class.sbd-row-clickable]="true"
+                         [title]="s.title"
+                         tabindex="0"
+                         (click)="toggleInsight(s.key)"
+                         (keydown.enter)="toggleInsight(s.key)">
+                        <div class="sbd-main">
+                            <div class="sbd-top">
+                                <span class="sbd-label">{{ s.label }}</span>
+                                <span class="sbd-count">{{ s.total | compact }}</span>
+                            </div>
+                            <div class="sbd-track" [class.track-active]="s.total > 0">
+                                <div class="sbd-fill" [style.width.%]="s.total > 0 ? (100 - s.rate) : 0"></div>
+                            </div>
+                        </div>
+                        <span class="sbd-rate" [class.c-ok]="s.total > 0 && s.rate === 0" [class.c-err]="s.rate > 0">{{ s.rate === 0 ? '100%' : (s.rate | number:'1.2-2') + '%' }}</span>
+                    </div>
+                </ng-container>
             </div>
-            <div class="sbd-track" [class.track-active]="s.total > 0">
-              <div class="sbd-fill" [style.width.%]="s.total > 0 ? (100 - s.rate) : 0"></div>
-            </div>
-          </div>
-          <span class="sbd-rate" [class.c-ok]="s.total > 0 && s.rate === 0" [class.c-err]="s.rate > 0">{{ s.rate === 0 ? '100%' : (s.rate | number:'1.2-2') + '%' }}</span>
-        </div>
-      </ng-container>
-    </div>
-    </ng-template>
+        </ng-template>
 
     <!-- Distribution Flux (ex-Request) -->
     <div class="sb-block sb-distribution-block">
@@ -215,6 +215,62 @@
         </div>
       </ng-container>
     </div>
-  </aside>
+        <!-- Distribution Événements -->
+        <div class="sb-block sb-distribution-block">
+            <div class="sbd-title">Événements</div>
+            <div class="sbd-empty" *ngIf="!eventCountsLoading && eventWarnCount === 0 && eventErrorCount === 0">
+                <mat-icon>info_outline</mat-icon>
+                <span>Aucun événement sur la période</span>
+            </div>
+            <ng-container *ngIf="eventCountsLoading">
+                <div class="sbd-skel-main">
+                    <div class="sbd-skel-top">
+                        <div class="sbd-skel-label"></div>
+                        <div class="sbd-skel-count"></div>
+                    </div>
+                    <div class="sbd-skel-track"></div>
+                </div>
+                <div class="sbd-skel-rate"></div>
+            </ng-container>
+            <div class="sbd-row"
+                 [class.sbd-row-clickable]="true"
+                 (click)="navigateToEventLogs()"
+                 *ngIf="!eventCountsLoading && (eventWarnCount > 0 || eventErrorCount > 0)">
+                <div class="sbd-main">
+                    <div class="sbd-top">
+                        <span class="sbd-label">Logs</span>
+                        <span class="sbd-count">
+                    <span class="c-warn">{{ eventWarnCount | compact }} WARN</span>
+                     -
+                    <span class="c-err">{{ eventErrorCount | compact }} ERROR</span>
+                </span>
+                    </div>
+                    <div class="sbd-track sbd-track-split">
+                    <!-- adding the calcul in style because otherwise the user logs are visible in the range -->
+                        <div class="sbd-fill-warn" [style.width.%]="(eventWarnCount + eventErrorCount) > 0 ? (eventWarnCount / (eventWarnCount + eventErrorCount)) * 100 : 0"></div>
+                        <div class="sbd-fill-error" [style.width.%]="(eventErrorCount) > 0 ? (eventErrorCount / (eventWarnCount + eventErrorCount)) * 100 : 0"></div>
+                    </div>
+                </div>
+                <span class="sbd-rate">{{ (eventWarnCount + eventErrorCount) | compact }}</span>
+            </div>
+            <div class="sbd-row"
+                 [class.sbd-row-clickable]="true"
+                 (click)="navigateToEventUser()"
+                 *ngIf="!eventCountsLoading && (eventUserCount > 0)">
+                <div class="sbd-main">
+                    <div class="sbd-top">
+                        <span class="sbd-label">Utilisateurs</span>
+                        <span class="sbd-count">
+                </span>
+                    </div>
+                    <div class="sbd-track sbd-track-split">
+                        <div class="sbd-fill" [style.width.%]="(eventUserCount) > 0 ? (eventUserCount / (eventUserCount)) * 100 : 0"></div>
+                    </div>
+                </div>
+                <span class="sbd-rate" [class.c-ok]="eventUserCount > 0">{{ (eventUserCount) | compact }}</span>
+            </div>
+
+        </div>
+    </aside>
 
 </div>

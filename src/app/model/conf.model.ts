@@ -8,7 +8,7 @@ export interface Application {
 export class QueryParams {
     private _optional: { [key: string]: any } = {};
 
-    constructor(public _period: Period, public _namespace: string, public _appname?: string[], public _hosts?: string[], public _rangestatus?: string[], public _commands?: string[], public _schemas?: string[]) {
+    constructor(public _period: Period, public _namespace: string, public _appname?: string[], public _hosts?: string[], public _rangestatus?: string[], public _commands?: string[], public _schemas?: string[], public _types?: string[]) {
     }
 
     set period(period: Period) {
@@ -45,6 +45,14 @@ export class QueryParams {
 
     get rangestatus(): string[] {
         return this._rangestatus;
+    }
+
+    set types(types: string[]) {
+        this._types = types;
+    }
+
+    get types(): string[] {
+        return this._types;
     }
 
 
@@ -84,6 +92,9 @@ export class QueryParams {
         }
         if (this.rangestatus && this.rangestatus.length > 0) {
             params = { ...params, rangestatus: this.rangestatus.length == 1 ? this.rangestatus[0] : this.rangestatus };
+        }
+        if (this.types && this.types.length > 0) {
+            params = { ...params, type: this.types.length == 1 ? this.types[0] : this.types };
         }
         if (this.namespace) {
             params = { ...params, namespace: this.namespace };

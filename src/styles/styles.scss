@@ -613,6 +613,11 @@ tr.mat-mdc-row {
     border-left: 3px solid #94A3B8 !important;
     background: linear-gradient(90deg, rgba(148, 163, 184, 0.08) 0%, transparent 100%) !important;
   }
+
+  &.row-progress > td.mat-mdc-cell:first-of-type {
+    border-left: 3px solid #2196F3 !important;
+    background: linear-gradient(90deg, rgba(33, 150, 243, 0.08) 0%, transparent 100%) !important;
+  }
 }
 
 button.nav-item-with-kpi {

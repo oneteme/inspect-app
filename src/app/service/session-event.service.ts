@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {AnalyticDto} from "../model/request.model";
+import {AnalyticDto, SessionEventDto} from "../model/request.model";
 import {SessionEvent} from "../model/trace.model";
 
 @Injectable({ providedIn: 'root' })
@@ -23,4 +23,10 @@ export class SessionEventService {
     getSessionEventsBySession(idSession: string): Observable<SessionEvent[]> {
         return this.http.get<SessionEvent[]>(`${this.server}/session/${idSession}/event`);
     }
+
+    getSessionEvents(params: any): Observable<SessionEventDto[]> {
+        return this.http.get<SessionEventDto[]>(`${this.server}/session/event`, {params: params});
+    }
+
+
 }

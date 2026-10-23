@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
-import {combineLatest, finalize, forkJoin, map, Observable, of, Subscription, switchMap, tap, timer} from 'rxjs';
+import {combineLatest, finalize, map, Observable, of, Subscription, switchMap, tap} from 'rxjs';
 import {DatePipe, DecimalPipe, Location} from '@angular/common';
 import {app} from 'src/environments/environment';
 import {EnvRouter} from "../../service/router.service";
@@ -11,7 +11,6 @@ import {formatters, groupByColor, periodManagement} from 'src/app/shared/util';
 import {IPeriod, IStep, IStepFrom} from '../../model/conf.model';
 import {getDefaultTodayPeriod, getQuickRangeStep, getQuickRangeDates, isDefaultTodayPeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../shared/period-filter';
 import {MatDialog} from '@angular/material/dialog';
-import {ProtocolExceptionComponent} from './components/protocol-exception-modal/protocol-exception-modal.component';
 import {InstanceService} from 'src/app/service/jquery/instance.service';
 import {RestSessionService} from 'src/app/service/jquery/rest-session.service';
 import {MainSessionService} from 'src/app/service/jquery/main-session.service';
@@ -31,6 +30,7 @@ import {CustomDateAdapter} from '../../shared/material/custom-date-adapter';
 import {MY_DATE_FORMATS} from '../../shared/shared.module';
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from '@angular/material/datepicker';
 import {CustomDateRangeSelectionStrategy} from '../../shared/material/custom-date-range-selection-strategy';
+import {SessionEventService} from "../../service/session-event.service";
 
 @Component({
     templateUrl: './dashboard.component.html',
@@ -70,6 +70,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly _instanceTraceService = inject(InstanceTraceService);
     private readonly _cdr = inject(ChangeDetectorRef);
     private readonly _pageTitleService = inject(PageTitleService);
+    private readonly _sessionEventService = inject(SessionEventService);
+
 
     sparklineTitles: {
         rest: {title: string, subtitle: string},
@@ -158,7 +160,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // résumés calculés après chargement
     protocolSummaries: { key: string; label: string; rate: number; count: number; total: number; loading: boolean; title: string }[] = [];
     sessionSummaries: { key: string; label: string; errors: number; total: number; rate: number; barPct: number; loading: boolean; title: string }[] = [];
+    eventSummaries: { key: string; label: string; errors: number; total: number; rate: number; loading: boolean; title: string }[] = [];
     sessionTotal = 0;
+    eventWarnCount = 0;
+    eventErrorCount = 0;
+    eventUserCount = 0;
+    eventCountsLoading = true;
 
     private _chartsResolved = 0;
     private _tabsResolved = 0;
@@ -238,6 +245,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     .subscribe({ next: (data) => { if (this._loadGen === gen) { this.restSessionCount = data; } } }));
 
                 this._location.replaceState(`${this._router.url.split('?')[0]}?${this.buildQueryPath(this.buildQueryParams())}`)
+                const eventParams: any = {
+                    'instance.namespace': currentNamespace,
+                    'start.ge': currentStart.toISOString(),
+                    'start.lt': effectiveEnd.toISOString()
+                };
+                if (this.params.serveurs?.length) {
+                    eventParams['instance.app_name'] = this.params.serveurs;
+                }
+                this.sessionSubscriptions.push(this._sessionEventService.getSessionEvents(eventParams)
+                    .pipe(finalize(() => { if (this._loadGen === gen) { this.eventCountsLoading = false; this._cdr.markForCheck(); } }))
+                    .subscribe({
+                        next: (events) => {
+                            if (this._loadGen !== gen || !events) return;
+                            this.eventWarnCount = events.filter(e => e.type === 'WARN').length;
+                            this.eventErrorCount = events.filter(e => e.type === 'ERROR').length;
+                            this.eventUserCount = events.filter(e => e.type != 'ERROR' && e.type != 'WARN').length;
+                        },
+                        error: () => { if (this._loadGen === gen) { this.eventWarnCount = 0; this.eventErrorCount = 0; this.eventUserCount = 0; } }
+                    }));
             }
         }));
     }
@@ -267,7 +293,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             { key: 'smtp',  label: 'SMTP',  rate: 0, count: 0, total: 0, loading: true, title: '' },
             { key: 'ldap',  label: 'LDAP',  rate: 0, count: 0, total: 0, loading: true, title: '' },
         ];
-
         this._chartsResolved = 0;
         const totalCharts = keys.length;
         keys.forEach(k => {
@@ -729,15 +754,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
             VIEW: 'view',
             TEST: 'test'
         };
+        const eventKeyMap: Record<string, string> = {
+            LOG: 'log',
+            USER: 'user'
+        }
         const queryParams = {
             namespace: this.params.namespace,
             ...this.period.buildParams()
         };
         const mappedKey = sessionKeyMap[key];
+        const mappedEventKey = eventKeyMap[key];
         if (mappedKey) {
             // Session type
             this._router.navigate([`/session/${mappedKey}`], { queryParams });
-        } else {
+        }
+        else if (mappedEventKey) {
+            // Event type
+            this._router.navigate([`/event/${mappedEventKey}`], { queryParams });
+        }
+        else {
             // Request protocol (rest, jdbc, ftp, smtp, ldap)
             this._router.navigate(['/request', key], { queryParams });
         }
@@ -1037,6 +1072,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this._dialog.closeAll();
         }
         this._pageTitleService.clear();
+    }
+
+    navigateToEventLogs(): void {
+        this._router.navigate(['/event/log'], {
+            queryParams: this.buildNavigationQueryParams()
+        });
+    }
+
+    navigateToEventUser(): void {
+        this._router.navigate(['/event/user'], {
+            queryParams: this.buildNavigationQueryParams()
+        });
     }
 }
 
