@@ -26,7 +26,7 @@ export class EnvRouter {
     }
 
     navigate(commands: any[], extras?: NavigationExtras): Promise<boolean> {
-        if (!extras?.queryParams?.env) {
+        if (!extras?.queryParams?.namespace) {
             if (this._namespace) {
                 if (!extras) {
                     extras = {}

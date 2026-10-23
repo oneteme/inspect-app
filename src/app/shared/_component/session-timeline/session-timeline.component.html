@@ -23,8 +23,9 @@
                             <span *ngIf="item.event?.location" class="event-location"> {{item.event?.location}}</span>
                         </ng-container>
                         <ng-template #exceptionSentence>
-                            <span *ngIf="item.exception?.type"> : {{item.exception?.type}}</span>
-                            <span *ngIf="item.exception?.message"> — {{item.exception?.message}}</span>
+                            <exception-display
+                                    [type]="'fail'" [exception]="item.exception">
+                            </exception-display>
                         </ng-template>
                     </span>
                     <span *ngIf="item.kind === 'event'" class="timestamp event-date-line">
@@ -44,14 +45,3 @@
         </div>
     </div>
 </div>
-<mat-paginator
-    *ngIf="itemCount > pageSizeOptions[0]"
-    [length]="itemCount"
-    [pageIndex]="pageIndex"
-    [pageSize]="pageSize"
-    [pageSizeOptions]="pageSizeOptions"
-    [showFirstLastButtons]="true"
-    aria-label="Pagination des événements de session"
-    (page)="onPageChange($event)">
-</mat-paginator>
-
