@@ -2,6 +2,7 @@ import {Component, inject, Input, OnChanges, SimpleChanges} from "@angular/core"
 import {EnvRouter} from "../../../../service/router.service";
 import {MainSessionView, RestSessionView} from "../../../../model/request.model";
 import {ExceptionInfo, InstanceEnvironment, SessionEvent} from "../../../../model/trace.model";
+import {Constants} from "../../../constants";
 
 export interface TabData {
   label: string;
@@ -47,7 +48,7 @@ export class DetailSessionComponent implements OnChanges {
     this.tabs = [
       {
         label: 'HTTP',
-        icon: 'call_made',
+        icon: Constants.REQUEST_MAPPING_TYPE['rest'].icon,
         count: this.session.restRequests?.length || 0,
         visible: (this.session.requestsMask & 4) > 0,
         type: 'rest',
@@ -56,7 +57,7 @@ export class DetailSessionComponent implements OnChanges {
       },
       {
         label: 'JDBC',
-        icon: 'database',
+        icon: Constants.REQUEST_MAPPING_TYPE['jdbc'].icon,
         count: this.session.databaseRequests?.length || 0,
         visible: (this.session.requestsMask & 2) > 0,
         type: 'database',
@@ -65,7 +66,7 @@ export class DetailSessionComponent implements OnChanges {
       },
       {
         label: 'FTP',
-        icon: 'smb_share',
+        icon: Constants.REQUEST_MAPPING_TYPE['ftp'].icon,
         count: this.session.ftpRequests?.length || 0,
         visible: (this.session.requestsMask & 8) > 0,
         type: 'ftp',
@@ -74,7 +75,7 @@ export class DetailSessionComponent implements OnChanges {
       },
       {
         label: 'SMTP',
-        icon: 'outgoing_mail',
+        icon: Constants.REQUEST_MAPPING_TYPE['smtp'].icon,
         count: this.session.mailRequests?.length || 0,
         visible: (this.session.requestsMask & 16) > 0,
         type: 'smtp',
@@ -83,7 +84,7 @@ export class DetailSessionComponent implements OnChanges {
       },
       {
         label: 'LDAP',
-        icon: 'user_attributes',
+        icon: Constants.REQUEST_MAPPING_TYPE['ldap'].icon,
         count: this.session.ldapRequests?.length || 0,
         visible: (this.session.requestsMask & 32) > 0,
         type: 'ldap',
@@ -109,8 +110,8 @@ export class DetailSessionComponent implements OnChanges {
         errorCount: 0
       },
       {
-        label: 'Événements',
-        icon: 'web_traffic',
+        label: 'Événement',
+        icon: Constants.MAPPING_TYPE['event'].icon,
         count: this.sessionEvents.length + this.sessionExceptions.length,
         visible: this.sessionEvents.length > 0 || this.sessionExceptions.length > 0,
         type: 'action',

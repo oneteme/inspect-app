@@ -9,14 +9,16 @@
   --na-indigo-soft: #ecefff;
   --na-green: var(--inspect-dark-green, #277b00);
   --na-green-soft: #e6f6e2;
-  display: block;
+  display: flex;
+  height: 100%;
+  flex-direction: column;
 }
 
 /* ---------- Timeline track ---------- */
 .timeline-track {
   position: relative;
-  margin-top: 1rem;
-  padding-left: 0.5rem;
+  flex: 1 1 0;
+  overflow: auto;
 }
 
 .timeline-entry {

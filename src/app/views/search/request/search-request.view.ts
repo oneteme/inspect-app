@@ -247,7 +247,9 @@ export class SearchRequestView implements OnInit, OnDestroy {
     if (event.event.ctrlKey) {
       this._router.open(`#/session/rest/${event.row}`, '_blank')
     } else {
-      this._router.navigate(['/session/rest', event.row]);
+      this._router.navigate(['/session/rest', event.row], {
+        queryParams: { namespace: this.queryParams.namespace }
+      });
     }
   }
 
