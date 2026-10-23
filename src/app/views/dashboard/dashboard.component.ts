@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
-import {combineLatest, finalize, forkJoin, map, Observable, of, Subscription, switchMap, tap, timer} from 'rxjs';
+import {combineLatest, finalize, map, Observable, of, Subscription, switchMap, tap} from 'rxjs';
 import {DatePipe, DecimalPipe, Location} from '@angular/common';
 import {app} from 'src/environments/environment';
 import {EnvRouter} from "../../service/router.service";
@@ -11,7 +11,6 @@ import {formatters, groupByColor, periodManagement} from 'src/app/shared/util';
 import {IPeriod, IStep, IStepFrom} from '../../model/conf.model';
 import {getDefaultTodayPeriod, getQuickRangeStep, getQuickRangeDates, isDefaultTodayPeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../shared/period-filter';
 import {MatDialog} from '@angular/material/dialog';
-import {ProtocolExceptionComponent} from './components/protocol-exception-modal/protocol-exception-modal.component';
 import {InstanceService} from 'src/app/service/jquery/instance.service';
 import {RestSessionService} from 'src/app/service/jquery/rest-session.service';
 import {MainSessionService} from 'src/app/service/jquery/main-session.service';
@@ -158,6 +157,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // résumés calculés après chargement
     protocolSummaries: { key: string; label: string; rate: number; count: number; total: number; loading: boolean; title: string }[] = [];
     sessionSummaries: { key: string; label: string; errors: number; total: number; rate: number; barPct: number; loading: boolean; title: string }[] = [];
+    eventSummaries: { key: string; label: string; errors: number; total: number; rate: number; loading: boolean; title: string }[] = [];
     sessionTotal = 0;
 
     private _chartsResolved = 0;
@@ -267,7 +267,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             { key: 'smtp',  label: 'SMTP',  rate: 0, count: 0, total: 0, loading: true, title: '' },
             { key: 'ldap',  label: 'LDAP',  rate: 0, count: 0, total: 0, loading: true, title: '' },
         ];
-
         this._chartsResolved = 0;
         const totalCharts = keys.length;
         keys.forEach(k => {
@@ -729,15 +728,25 @@ export class DashboardComponent implements OnInit, OnDestroy {
             VIEW: 'view',
             TEST: 'test'
         };
+        const eventKeyMap: Record<string, string> = {
+            LOG: 'log',
+            USER: 'user'
+        }
         const queryParams = {
             namespace: this.params.namespace,
             ...this.period.buildParams()
         };
         const mappedKey = sessionKeyMap[key];
+        const mappedEventKey = eventKeyMap[key];
         if (mappedKey) {
             // Session type
             this._router.navigate([`/session/${mappedKey}`], { queryParams });
-        } else {
+        }
+        else if (mappedEventKey) {
+            // Event type
+            this._router.navigate([`/event/${mappedEventKey}`], { queryParams });
+        }
+        else {
             // Request protocol (rest, jdbc, ftp, smtp, ldap)
             this._router.navigate(['/request', key], { queryParams });
         }
