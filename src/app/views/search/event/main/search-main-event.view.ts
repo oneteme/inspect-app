@@ -41,8 +41,8 @@ export class SearchMainEventView {
     queryParams: Partial<QueryParams> = {};
 
     private readonly _baseFilters: { icon: string; label: string; color: string; value: any }[] = [
-        { icon: STATUS['5xx'].icon, label: 'ERROR', color: STATUS['5xx'].color, value: 'ERROR' },
-        { icon: STATUS['4xx'].icon, label: 'WARN', color: STATUS['4xx'].color, value: 'WARN' }
+        {icon: STATUS['5xx'].icon, label: 'ERROR', color: STATUS['5xx'].color, value: 'ERROR'},
+        {icon: STATUS['4xx'].icon, label: 'WARN', color: STATUS['4xx'].color, value: 'WARN'}
     ];
 
     filters: { icon: string; label: string; color: string; value: any }[] = [...this._baseFilters];
@@ -53,7 +53,7 @@ export class SearchMainEventView {
         return {
             ...SESSION_EVENT_TABLE_CONFIG,
             search: initialQuery
-                ? { ...SESSION_EVENT_TABLE_CONFIG.search, initialQuery, searchColumns: ['exception'] }
+                ? {...SESSION_EVENT_TABLE_CONFIG.search, initialQuery, searchColumns: ['exception']}
                 : SESSION_EVENT_TABLE_CONFIG.search,
             onRowSelected: (row, event) => this.selectedRequest(event, row)
         };
@@ -69,18 +69,18 @@ export class SearchMainEventView {
                 });
                 const typeParam = params.type || params.rangestatus;
                 const types = !typeParam ? [] : Array.isArray(typeParam) ? typeParam : [typeParam];
-                if(params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.namespace ||  app.defaultNamespace, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server], null, null, null, null, types);
-                if(!params.start && !params.end)  {
+                if (params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.namespace || app.defaultNamespace, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server], null, null, null, null, types);
+                if (!params.start && !params.end) {
                     let period;
-                    if(params.step && params.from){
+                    if (params.step && params.from) {
                         period = new IStepFrom(Number(params.step), Number(params.from));
-                    } else if(params.step){
+                    } else if (params.step) {
                         period = new IStep(Number(params.step));
                     }
                     this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), params.namespace || app.defaultNamespace, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server], null, null, null, null, types);
                 }
                 if (params.q) {
-                    this.queryParams.optional = { q: params.q };
+                    this.queryParams.optional = {q: params.q};
                     this.tableConfig = this.buildTableConfig(params.q);
                 }
                 this.patchTypeValue(this.queryParams.types);
@@ -88,7 +88,7 @@ export class SearchMainEventView {
                 this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
                 this._instanceService.getApplications('SERVER', this.queryParams.namespace)
-                    .pipe(finalize(()=> this.serverNameIsLoading = false))
+                    .pipe(finalize(() => this.serverNameIsLoading = false))
                     .subscribe({
                         next: res => {
                             this.nameDataList = res.map(r => r.appName);
@@ -102,7 +102,6 @@ export class SearchMainEventView {
             }
         });
     }
-
 
 
     getEvents() {
@@ -187,15 +186,6 @@ export class SearchMainEventView {
         }, {emitEvent: false});
     }
 
-    isDefaultPeriod(): boolean {
-        return isDefaultRelativePeriod(this.queryParams?.period);
-    }
-
-    resetPeriod(): void {
-        const defaultPeriod = getDefaultRelativePeriod();
-        this.queryParams.period = defaultPeriod;
-        this.patchDateValue(defaultPeriod.start, toDisplayedPeriodEnd(defaultPeriod.end));
-    }
 
     onChangeStart(event) {
         this.serverFilterForm.controls.dateRangePicker.controls.end.updateValueAndValidity({onlySelf: true})
@@ -222,6 +212,16 @@ export class SearchMainEventView {
             color: string,
             value: any
         }) => f.value);
+    }
+
+    isDefaultPeriod(): boolean {
+        return isDefaultRelativePeriod(this.queryParams?.period);
+    }
+
+    resetPeriod(): void {
+        const defaultPeriod = getDefaultRelativePeriod();
+        this.queryParams.period = defaultPeriod;
+        this.patchDateValue(defaultPeriod.start, toDisplayedPeriodEnd(defaultPeriod.end));
     }
 
     applyQuickRange(range: PeriodQuickRange): void {

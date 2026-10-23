@@ -42,14 +42,6 @@
   font-size: 0.75em;
 }
 
-.title {
+.event-log-title {
   font-weight: 600;
-
-  &.warn {
-    color: #f5c518;
-  }
-
-  &.error {
-    color: #db2828;
-  }
 }

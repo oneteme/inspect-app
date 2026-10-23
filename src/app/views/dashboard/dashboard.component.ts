@@ -253,7 +253,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 if (this.params.serveurs?.length) {
                     eventParams['instance.app_name'] = this.params.serveurs;
                 }
-                this.sessionSubscriptions.push(this._sessionEventService.getSessionEvents(eventParams)
+                this.sessionSubscriptions.push(this._sessionEventService.getSessionEventTypeCount(eventParams)
                     .pipe(finalize(() => { if (this._loadGen === gen) { this.eventCountsLoading = false; this._cdr.markForCheck(); } }))
                     .subscribe({
                         next: (events) => {
