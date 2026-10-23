@@ -84,4 +84,12 @@
         <br>
         {{ (row.instant*1000 | date:'HH:mm:ss.SSS')}}
     </ng-template>
+
+    <ng-template jqtCellDef="resource" let-row>
+        <span [class]="row.type === 'ERROR' ? 'title error' : row.type === 'WARN' ? 'title warn' : 'title'">[{{ row.type }}]</span>
+        <br>
+        <span>{{ row.value }}</span>
+    </ng-template>
+
+
 </jquery-table>

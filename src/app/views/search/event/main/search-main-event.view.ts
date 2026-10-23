@@ -36,15 +36,28 @@ export class SearchMainEventView {
     readonly periodQuickRanges = PERIOD_QUICK_RANGES;
     serverNameIsLoading = true;
     nameDataList: any[];
-    tableConfig: TableProvider<SessionEventDto> = SESSION_EVENT_TABLE_CONFIG;
     events: SessionEventDto[];
     isLoading = false;
     queryParams: Partial<QueryParams> = {};
 
-    filters: { icon: string; label: string; color: string; value: any }[] = [
-        { icon: STATUS['5xx'].icon, label: 'ERROR', color:  STATUS['5xx'].color, value: 'ERROR' },
+    private readonly _baseFilters: { icon: string; label: string; color: string; value: any }[] = [
+        { icon: STATUS['5xx'].icon, label: 'ERROR', color: STATUS['5xx'].color, value: 'ERROR' },
         { icon: STATUS['4xx'].icon, label: 'WARN', color: STATUS['4xx'].color, value: 'WARN' }
     ];
+
+    filters: { icon: string; label: string; color: string; value: any }[] = [...this._baseFilters];
+
+    tableConfig: TableProvider<SessionEventDto> = this.buildTableConfig();
+
+    private buildTableConfig(initialQuery?: string): TableProvider<SessionEventDto> {
+        return {
+            ...SESSION_EVENT_TABLE_CONFIG,
+            search: initialQuery
+                ? { ...SESSION_EVENT_TABLE_CONFIG.search, initialQuery, searchColumns: ['exception'] }
+                : SESSION_EVENT_TABLE_CONFIG.search,
+            onRowSelected: (row, event) => this.selectedRequest(event, row)
+        };
+    }
 
     constructor() {
         this._activatedRoute.queryParams.subscribe({
@@ -66,12 +79,9 @@ export class SearchMainEventView {
                     }
                     this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), params.namespace || app.defaultNamespace, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server], null, null, null, null, types);
                 }
-                if(params.q){
-                    this.queryParams.optional = {q: params.q};
-                    this.tableConfig = {
-                        ...this.tableConfig,
-                        search: { ...this.tableConfig?.search, initialQuery: params.q, searchColumns: ['exception'] }
-                    }
+                if (params.q) {
+                    this.queryParams.optional = { q: params.q };
+                    this.tableConfig = this.buildTableConfig(params.q);
                 }
                 this.patchTypeValue(this.queryParams.types);
                 this.patchServerValue(this.queryParams.appname);
@@ -129,7 +139,10 @@ export class SearchMainEventView {
                     if (isLogRoute) {
                         this.events = d.filter(event => logTypes.has(event.type));
                     } else {
-                        this.events = d.filter(event => !logTypes.has(event.type));
+                        this.events = d.filter(e => !logTypes.has(e.type));
+                        this.filters = [...new Set(this.events.map(e => e.type))].map(type => ({
+                            icon: STATUS['-1'].icon, label: type, color: STATUS['-1'].color, value: type
+                        }));
                     }
                 },
                 error: (error: HttpErrorResponse) => {
@@ -233,6 +246,18 @@ export class SearchMainEventView {
     patchServerValue(servers: any[]): void {
         this.serverFilterForm.patchValue({ appname: servers }, { emitEvent: false });
         this.queryParams.appname = servers;
+    }
+
+
+    selectedRequest(event: MouseEvent, row: SessionEventDto) {
+        if (row && row.sessionId) {
+            //TODO: change REST and get the real value with sessionId
+            const sessionType = (row as any).sessionType?.toLowerCase() || 'rest';
+
+            this._router.navigateOnClick(event, ['/session', sessionType, row.sessionId], {
+                queryParams: { namespace: this.queryParams.namespace }
+            });
+        }
     }
 
 }

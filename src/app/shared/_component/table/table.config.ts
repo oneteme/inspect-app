@@ -528,8 +528,9 @@ export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
       key: 'instant', header: 'Date', icon: 'schedule', width: '10%', groupable: false, sliceable: false,
       searchValue: (row: SessionEventDto) => fmtStart(row.instant)
     },
-    { key: 'type', header: 'Type', icon: 'label', width: '10%' },
-    { key: 'value', header: 'Message', groupable: false, sliceable: false, icon: 'info' , width: '50%'}
+    { key: 'resource', header: 'Message', groupable: false, sliceable: false, icon: 'info' , width: '50%',
+      searchValue: (row: SessionEventDto) => fmtMethod(row.type) + ' ' + (row.value || '')
+    }
   ],
   defaultSort: { active: 'instant', direction: 'desc' },
   rowClass: (row: SessionEventDto) => {
