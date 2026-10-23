@@ -178,6 +178,7 @@ export interface InstanceEnvironment {
   resource: MachineResource;
   configuration: InspectCollectorConfiguration;
   properties:any;
+  additionalProperties?: Record<string, unknown> | null;
 }
 
 export interface InspectCollectorConfiguration {

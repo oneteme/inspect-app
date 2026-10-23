@@ -38,8 +38,15 @@
                       [items]="dataItems">
         </app-timeline>
       </div>
-      <div *ngIf="tabs[selectedTabIndex]?.type === 'resource'" class="tab-panel">
-        <parameter-table [data]="resourceData"></parameter-table>
+      <div *ngIf="tabs[selectedTabIndex]?.type === 'technical'" class="tab-panel technical-panel">
+        <section *ngIf="instance.resource" class="technical-section">
+          <h3>Configuration</h3>
+          <parameter-table [data]="resourceData"></parameter-table>
+        </section>
+        <section *ngIf="instance.additionalProperties" class="technical-section">
+          <h3>Environnement</h3>
+          <parameter-table [data]="additionalPropertiesData"></parameter-table>
+        </section>
       </div>
       <div *ngIf="tabs[selectedTabIndex]?.type === 'property'" class="tab-panel">
         <parameter-table [data]="propertiesData"></parameter-table>
@@ -56,5 +63,5 @@
 </ng-template>
 
 <mat-menu #menuServer="matMenu">
-    <a mat-menu-item [routerLink]="['/session', instance?.name, 'dump']" [queryParams]="{namespace: instance?.namespace, date: getDate(instance?.instant * 1000).toISOString()}"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
+    <a mat-menu-item [routerLink]="['/session', instance?.name, 'dump']" [queryParams]="{namespace: instance?.namespace, date: instance?.instant? getDate(instance.instant).toISOString(): null}"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
 </mat-menu>

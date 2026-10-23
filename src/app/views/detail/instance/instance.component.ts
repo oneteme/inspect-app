@@ -42,6 +42,7 @@ export class InstanceComponent implements OnInit, OnDestroy {
   selectedTabIndex: number = 0;
   resourceData: { key: string; value: any }[] = [];
   propertiesData: { key: string; value: any }[] = [];
+  additionalPropertiesData: { key: string; value: unknown }[] = [];
   versionColor: any;
 
   ngOnDestroy() {
@@ -75,6 +76,7 @@ export class InstanceComponent implements OnInit, OnDestroy {
         this.versionColor = groupByColor([instance], (v: any) => v.version)
         this.resourceData = this.toKeyValueArray( this.instance.resource);
         this.propertiesData = this.toKeyValueArray( this.instance.properties);
+        this.additionalPropertiesData = this.toKeyValueArray(this.instance.additionalProperties);
         return this._instanceService.getInstancesPeriodsByAppName({
           namespace: this.params.namespace,
           appName: this.instance.name,
@@ -123,11 +125,11 @@ export class InstanceComponent implements OnInit, OnDestroy {
         errorCount: 0
       },
       {
-        label: 'Paramètres ',
+        label: 'Détails techniques',
         icon: 'tune',
         count: 0,
-        visible: !!this.instance.resource,
-        type: 'resource',
+        visible: !!this.instance.resource || !!this.instance.additionalProperties,
+        type: 'technical',
         hasError: false,
         errorCount: 0,
       },

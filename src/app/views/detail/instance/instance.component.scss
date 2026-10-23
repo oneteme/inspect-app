@@ -8,3 +8,26 @@
 .tab-panel {
   height: calc(100vh - 56px - 7px - 180px - 1em);
 }
+
+.technical-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5em;
+  overflow: auto;
+}
+
+.technical-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 20rem;
+
+  h3 {
+    margin: 0 0 0.75em;
+  }
+
+  parameter-table {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+  }
+}
