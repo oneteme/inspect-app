@@ -529,8 +529,7 @@ export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
       searchValue: (row: SessionEventDto) => fmtStart(row.instant)
     },
     { key: 'type', header: 'Type', icon: 'label', width: '10%' },
-    { key: 'value', header: 'Message', groupable: false, sliceable: false, icon: 'info' , width: '50%'},
-    { key: 'location', header: 'Ressource', groupable: false, sliceable: false, icon: 'workspaces' },
+    { key: 'value', header: 'Message', groupable: false, sliceable: false, icon: 'info' , width: '50%'}
   ],
   defaultSort: { active: 'instant', direction: 'desc' },
   rowClass: (row: SessionEventDto) => {

@@ -1,6 +1,5 @@
-import {Component, OnInit, inject} from '@angular/core';
+import {Component, inject} from '@angular/core';
 import {finalize} from 'rxjs';
-import {TraceService} from '../../../../service/trace.service';
 import {TableProvider} from "@oneteme/jquery-table";
 import {HttpErrorResponse} from "@angular/common/http";
 import {SessionEventDto} from "../../../../model/request.model";
@@ -21,6 +20,7 @@ import {Constants, STATUS} from "../../../constants";
 import {InstanceService} from "../../../../service/jquery/instance.service";
 import {Location} from "@angular/common";
 import {PageTitleService} from "../../../../service/page-title.service";
+import {SessionEventService} from "../../../../service/session-event.service";
 
 @Component({
     templateUrl: './search-main-event.view.html',
@@ -29,7 +29,7 @@ import {PageTitleService} from "../../../../service/page-title.service";
 export class SearchMainEventView {
     private readonly _router = inject(EnvRouter);
     private readonly _pageTitleService = inject(PageTitleService);
-    private readonly _traceService = inject(TraceService);
+    private readonly _sessionEventService = inject(SessionEventService);
     private readonly _instanceService = inject(InstanceService);
     private readonly _activatedRoute = inject(ActivatedRoute);
     private readonly _location = inject(Location);
@@ -116,7 +116,7 @@ export class SearchMainEventView {
         }
         const isLogRoute = this._activatedRoute.snapshot.data['isLogRoute'];
 
-        this._traceService.getSessionEvents(params)
+        this._sessionEventService.getSessionEvents(params)
             .pipe(finalize(() => this.isLoading = false))
             .subscribe({
                 next: d => {
