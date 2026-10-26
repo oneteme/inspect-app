@@ -21,10 +21,20 @@ import {InstanceService} from "../../../../service/jquery/instance.service";
 import {Location} from "@angular/common";
 import {PageTitleService} from "../../../../service/page-title.service";
 import {SessionEventService} from "../../../../service/session-event.service";
+import {DateAdapter, MAT_DATE_FORMATS} from "@angular/material/core";
+import {CustomDateAdapter} from "../../../../shared/material/custom-date-adapter";
+import {MY_DATE_FORMATS} from "../../../../shared/shared.module";
+import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
+import {CustomDateRangeSelectionStrategy} from "../../../../shared/material/custom-date-range-selection-strategy";
 
 @Component({
     templateUrl: './search-main-event.view.html',
-    styleUrls: ['./search-main-event.view.scss']
+    styleUrls: ['./search-main-event.view.scss'],
+    providers: [
+        { provide: DateAdapter, useClass: CustomDateAdapter },
+        { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
+        { provide: MAT_DATE_RANGE_SELECTION_STRATEGY, useClass: CustomDateRangeSelectionStrategy }
+    ]
 })
 export class SearchMainEventView {
     private readonly _router = inject(EnvRouter);
@@ -66,6 +76,7 @@ export class SearchMainEventView {
                     icon: Constants.MAPPING_TYPE['event'].icon,
                     iconOutlined: true,
                     title: (Constants.MAPPING_TYPE['event'].title) + ' ',
+                    subtitle: this._activatedRoute.snapshot.data['isLogRoute'] ? Constants.MAPPING_TYPE['log'].subtitle : Constants.MAPPING_TYPE['user'].subtitle,
                 });
                 const typeParam = params.type || params.rangestatus;
                 const types = !typeParam ? [] : Array.isArray(typeParam) ? typeParam : [typeParam];
@@ -251,7 +262,6 @@ export class SearchMainEventView {
 
     selectedRequest(event: MouseEvent, row: SessionEventDto) {
         if (row && row.sessionId) {
-            //TODO: change REST and get the real value with sessionId
             const sessionType = (row as any).sessionType?.toLowerCase() || 'rest';
 
             this._router.navigateOnClick(event, ['/session', sessionType, row.sessionId], {
