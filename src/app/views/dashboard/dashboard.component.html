@@ -218,7 +218,7 @@
         <!-- Distribution Événements -->
         <div class="sb-block sb-distribution-block">
             <div class="sbd-title">Événements</div>
-            <div class="sbd-empty" *ngIf="!eventCountsLoading && eventWarnCount === 0 && eventErrorCount === 0">
+            <div class="sbd-empty" *ngIf="!eventCountsLoading && eventWarnCount === 0 && eventErrorCount === 0 && eventInfoCount === 0">
                 <mat-icon>info_outline</mat-icon>
                 <span>Aucun événement sur la période</span>
             </div>
@@ -240,6 +240,8 @@
                     <div class="sbd-top">
                         <span class="sbd-label">Logs applicatifs</span>
                         <span class="sbd-count">
+                    <span class="c-ok">{{ eventInfoCount | compact }} INFO</span>
+                    -
                     <span class="c-warn">{{ eventWarnCount | compact }} WARN</span>
                      -
                     <span class="c-err">{{ eventErrorCount | compact }} ERROR</span>
@@ -247,11 +249,12 @@
                     </div>
                     <div class="sbd-track sbd-track-split">
                     <!-- adding the calcul in style because otherwise the user logs are visible in the range -->
-                        <div class="sbd-fill-warn" [style.width.%]="(eventWarnCount + eventErrorCount) > 0 ? (eventWarnCount / (eventWarnCount + eventErrorCount)) * 100 : 0"></div>
-                        <div class="sbd-fill-error" [style.width.%]="(eventErrorCount) > 0 ? (eventErrorCount / (eventWarnCount + eventErrorCount)) * 100 : 0"></div>
+                        <div class="sbd-fill-info" [style.width.%]="(eventInfoCount) > 0 ? (eventInfoCount / (eventWarnCount + eventErrorCount + eventInfoCount)) * 100 : 0"></div>
+                        <div class="sbd-fill-warn" [style.width.%]="(eventWarnCount + eventErrorCount + eventInfoCount) > 0 ? (eventWarnCount / (eventWarnCount + eventErrorCount + eventInfoCount)) * 100 : 0"></div>
+                        <div class="sbd-fill-error" [style.width.%]="(eventErrorCount) > 0 ? (eventErrorCount / (eventWarnCount + eventErrorCount + eventInfoCount)) * 100 : 0"></div>
                     </div>
                 </div>
-                <span class="sbd-rate">{{ (eventWarnCount + eventErrorCount) | compact }}</span>
+                <span class="sbd-rate">{{ (eventWarnCount + eventErrorCount + eventInfoCount) | compact }}</span>
             </div>
             <div class="sbd-row"
                  [class.sbd-row-clickable]="true"

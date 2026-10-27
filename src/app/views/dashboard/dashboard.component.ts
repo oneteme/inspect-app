@@ -164,6 +164,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     sessionTotal = 0;
     eventWarnCount = 0;
     eventErrorCount = 0;
+    eventInfoCount = 0;
     eventUserCount = 0;
     eventCountsLoading = true;
 
@@ -268,8 +269,12 @@ export class DashboardComponent implements OnInit, OnDestroy {
                                 .filter(e => e.type === 'ERROR')
                                 .reduce((acc, e) => acc + getCount(e), 0);
 
+                            this.eventInfoCount = events
+                                .filter(e => e.type === 'INFO')
+                                .reduce((acc, e) => acc + getCount(e), 0);
+
                             this.eventUserCount = events
-                                .filter(e => e.type !== 'ERROR' && e.type !== 'WARN')
+                                .filter(e => e.type !== 'ERROR' && e.type !== 'WARN' && e.type !== 'INFO')
                                 .reduce((acc, e) => acc + getCount(e), 0);
 
                             this._cdr.markForCheck();
@@ -278,6 +283,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                             if (this._loadGen === gen) {
                                 this.eventWarnCount = 0;
                                 this.eventErrorCount = 0;
+                                this.eventInfoCount = 0;
                                 this.eventUserCount = 0;
                                 this._cdr.markForCheck();
                             }

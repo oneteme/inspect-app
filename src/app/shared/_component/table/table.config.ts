@@ -534,6 +534,7 @@ export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
   ],
   defaultSort: { active: 'instant', direction: 'desc' },
   rowClass: (row: SessionEventDto) => {
+    if (row.type === 'INFO') return 'row-ok';
     if (row.type === 'ERROR') return 'row-ko';
     if (row.type === 'WARN') return 'row-warning';
     return 'row-progress';

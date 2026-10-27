@@ -26,6 +26,7 @@ import {CustomDateAdapter} from "../../../../shared/material/custom-date-adapter
 import {MY_DATE_FORMATS} from "../../../../shared/shared.module";
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
 import {CustomDateRangeSelectionStrategy} from "../../../../shared/material/custom-date-range-selection-strategy";
+import {MainSessionService} from "../../../../service/jquery/main-session.service";
 
 @Component({
     templateUrl: './search-main-event.view.html',
@@ -43,6 +44,7 @@ export class SearchMainEventView {
     private readonly _instanceService = inject(InstanceService);
     private readonly _activatedRoute = inject(ActivatedRoute);
     private readonly _location = inject(Location);
+    private readonly _mainSessionService = inject(MainSessionService);
     readonly periodQuickRanges = PERIOD_QUICK_RANGES;
     serverNameIsLoading = true;
     nameDataList: any[];
@@ -51,8 +53,9 @@ export class SearchMainEventView {
     queryParams: Partial<QueryParams> = {};
 
     private readonly _baseFilters: { icon: string; label: string; color: string; value: any }[] = [
+        {icon: STATUS['2xx'].icon, label: 'INFO', color: STATUS['2xx'].color, value: 'INFO'},
         {icon: STATUS['5xx'].icon, label: 'ERROR', color: STATUS['5xx'].color, value: 'ERROR'},
-        {icon: STATUS['4xx'].icon, label: 'WARN', color: STATUS['4xx'].color, value: 'WARN'}
+        {icon: STATUS['4xx'].icon, label: 'WARN', color: STATUS['4xx'].color, value: 'WARN'},
     ];
 
     filters: { icon: string; label: string; color: string; value: any }[] = [...this._baseFilters];
@@ -141,7 +144,7 @@ export class SearchMainEventView {
             .subscribe({
                 next: d => {
 
-                    const logTypes = new Set(['WARN', 'ERROR']);
+                    const logTypes = new Set(['INFO', 'WARN', 'ERROR']);
                     if (!d) {
                         this.events = [];
                         return;
