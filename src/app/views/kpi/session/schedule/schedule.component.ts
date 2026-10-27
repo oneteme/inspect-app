@@ -11,10 +11,10 @@ import {DatePipe} from "@angular/common";
 import {ChartProvider} from "@oneteme/jquery-core";
 
 @Component({
-  templateUrl: './batch.component.html',
-  styleUrls: ['./batch.component.scss']
+  templateUrl: './schedule.component.html',
+  styleUrls: ['./schedule.component.scss']
 })
-export class BatchComponent {
+export class ScheduleComponent {
   private readonly _mainSessionService = inject(MainSessionService);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly datePipe = inject(DatePipe);
@@ -124,7 +124,7 @@ export class BatchComponent {
 
     return this._mainSessionService.getFilters(
       filter,
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, type: 'BATCH' }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, type: 'SCHEDULE' }
     ) as Observable<any[]>;
   }
 
@@ -144,7 +144,7 @@ export class BatchComponent {
     this.$statusRepartition.data = [];
     this._mainSessionService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined, type: 'BATCH' }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined, type: 'SCHEDULE' }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -172,7 +172,7 @@ export class BatchComponent {
     this.$performanceRepartition.data = [];
     this._mainSessionService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined, type: 'BATCH' }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined, type: 'SCHEDULE' }
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -261,7 +261,7 @@ export class BatchComponent {
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'instance.type': 'SERVER',
-      'type': 'BATCH',
+      'type': 'SCHEDULE',
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': `start.${this.groupedBy}.asc`
@@ -280,7 +280,7 @@ export class BatchComponent {
   getDependents() {
     this.$dependentChart.loading = true;
     this.$dependentChart.data = [];
-    this._mainSessionService.getDependents({namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts, type: 'BATCH'})
+    this._mainSessionService.getDependents({namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts, type: 'SCHEDULE'})
     .pipe(finalize(() => this.$dependentChart.loading = false))
     .subscribe({
       next: (res: any[]) => {this.$dependentChart.data = res}
@@ -293,7 +293,7 @@ export class BatchComponent {
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'instance.type': 'SERVER',
-      'type': 'BATCH',
+      'type': 'SCHEDULE',
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString()
     }

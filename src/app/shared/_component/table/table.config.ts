@@ -523,19 +523,20 @@ export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTra
 export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
+    { key: 'appName', header: 'Application', width: '15%', icon:'web_asset' },
     {
-      key: 'instant', header: 'Date', icon: 'schedule', width: '15%', groupable: false, sliceable: false,
+      key: 'instant', header: 'Date', icon: 'schedule', width: '10%', groupable: false, sliceable: false,
       searchValue: (row: SessionEventDto) => fmtStart(row.instant)
     },
-    { key: 'type', header: 'Niveau', icon: 'label', width: '10%' },
-    { key: 'value', header: 'Message', groupable: false, sliceable: false, icon: 'category' },
-    { key: 'scope', header: 'Scope', width: '15%' },
-    { key: 'location', header: 'Ressource', groupable: false, sliceable: false, icon: 'category' },
+    { key: 'resource', header: 'Message', groupable: false, sliceable: false, icon: 'info' , width: '50%',
+      searchValue: (row: SessionEventDto) => fmtMethod(row.type) + ' ' + (row.value || '')
+    }
   ],
   defaultSort: { active: 'instant', direction: 'desc' },
   rowClass: (row: SessionEventDto) => {
+    if (row.type === 'INFO') return 'row-ok';
     if (row.type === 'ERROR') return 'row-ko';
     if (row.type === 'WARN') return 'row-warning';
-    return '';
+    return 'row-progress';
   }
 }

@@ -16,7 +16,7 @@ interface TimelineItem {
 export class SessionTimelineComponent {
     private _events: SessionEvent[] = [];
     private _exceptions: ExceptionInfo[] = [];
-    readonly pageSizeOptions = [10, 50, 100];
+    readonly pageSizeOptions = [4, 50, 100];
     pageSize = 50;
     pageIndex = 0;
     displayedItems: TimelineItem[] = [];
@@ -113,7 +113,7 @@ export class SessionTimelineComponent {
     }
 
     getItemLabel(item: TimelineItem): string {
-        return item.kind === 'exception' ? 'Exception' : this.getEventLabel(item.event?.type ?? '');
+        return item.kind === 'exception' ? '' : this.getEventLabel(item.event?.type ?? '');
     }
 
     getItemIcon(item: TimelineItem): string {

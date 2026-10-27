@@ -7,7 +7,7 @@ import {Location} from "@angular/common";
 import {catchError, combineLatest, defer, finalize, map, merge, of, Subject, switchMap, takeUntil} from "rxjs";
 import {app} from "../../../../../environments/environment";
 import {Constants, STATUS} from "../../../constants";
-import {AnalyticService} from "../../../../service/analytic.service";
+import {SessionEventService} from "../../../../service/session-event.service";
 import {MainSessionView} from "../../../../model/request.model";
 import {InstanceEnvironment} from "../../../../model/trace.model";
 import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
@@ -20,7 +20,7 @@ import {MatDialog} from "@angular/material/dialog";
 export class DetailSessionMainView implements OnInit, OnDestroy {
     private readonly _activatedRoute = inject(ActivatedRoute);
     private readonly _traceService = inject(TraceService);
-    private readonly _analyticService = inject(AnalyticService);
+    private readonly _sessionEventService = inject(SessionEventService);
     private readonly _location = inject(Location);
     private readonly $destroy = new Subject<void>();
     private readonly _dialog = inject(MatDialog);
@@ -64,7 +64,7 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
                             return merge( 
                                 this._traceService.getInstance(this.session.instanceId).pipe(map(d=>(this.instance = d))),
                                 this.loadSessionExceptions(this.session),
-                                this.session.type === 'VIEW' ? this.loadSessionEvents(this.session) : of(),
+                                this.loadSessionEvents(this.session),
                                 (this.session.requestsMask & 4) > 0 ? defer(()=> {this.session.restRequests = []; return this._traceService.getRestRequests(this.session.id).pipe(map(d=>(this.session.restRequests = d)))}) : of(),
                                 (this.session.requestsMask & 2) > 0 ? defer(()=> {this.session.databaseRequests = []; return this._traceService.getDatabaseRequests(this.session.id).pipe(map(d=>{this.session.databaseRequests = d;}))}) : of(),
                                 (this.session.requestsMask & 1) > 0 ? defer(()=> {this.session.localRequests = []; return this._traceService.getLocalRequests(this.session.id).pipe(map(d=>(this.session.localRequests = d)))}) : of(),
@@ -83,9 +83,10 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
     private loadSessionEvents(session: MainSessionView) {
         return defer(() => {
             session.sessionEvents = [];
-            return this._analyticService.getSessionEventsBySession(session.id).pipe(
+            return this._sessionEventService.getSessionEventsBySession(session.id).pipe(
                 map(events => session.sessionEvents = [...(events ?? [])]
-                    .sort((first, second) => first.instant - second.instant))
+                    .sort((first, second) => first.instant - second.instant)),
+                catchError(() => of([]))
             );
         });
     }

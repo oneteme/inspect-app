@@ -176,8 +176,20 @@ const routes: Route[] = [
   },
   {
     path: 'event',
-    component: SearchMainEventView,
-    title: Constants.MAPPING_TYPE['event'].title
+    children: [
+      {
+        title: 'Logs Applicatifs',
+        path: 'log',
+        component: SearchMainEventView,
+        data: { isLogRoute: true }
+      },
+      {
+        title: 'Actions Utilisateur',
+        path: 'user',
+        component: SearchMainEventView,
+        data: { isLogRoute: false }
+      }
+    ]
   },
   {
     path: 'analytics/:user',

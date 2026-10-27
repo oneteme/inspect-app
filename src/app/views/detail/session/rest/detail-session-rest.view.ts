@@ -7,11 +7,12 @@ import {catchError, combineLatest, defer, finalize, map, merge, of, Subject, swi
 import {app} from "../../../../../environments/environment";
 import {Utils} from "../../../../shared/util";
 import {EnvRouter} from "../../../../service/router.service";
-import {RequestType, RestSessionView} from "../../../../model/request.model";
+import {MainSessionView, RequestType, RestSessionView} from "../../../../model/request.model";
 import {HttpSessionStage, InstanceEnvironment} from "../../../../model/trace.model";
 import {MatDialog} from "@angular/material/dialog";
 import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
 import {Constants, STATUS} from "../../../constants";
+import {SessionEventService} from "../../../../service/session-event.service";
 
 @Component({
     templateUrl: './detail-session-rest.view.html',
@@ -20,6 +21,7 @@ import {Constants, STATUS} from "../../../constants";
 export class DetailSessionRestView implements OnInit, OnDestroy {
     private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
     private readonly _traceService: TraceService = inject(TraceService);
+    private readonly _sessionEventService = inject(SessionEventService);
     private readonly _location: Location = inject(Location);
     private readonly $destroy = new Subject<void>();
     protected readonly _router: EnvRouter = inject(EnvRouter);
@@ -67,6 +69,8 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
                         switchMap((v)=> {
                             return merge(
                                 this._traceService.getInstance(this.session.instanceId).pipe(map(d=>(this.instance=d))),
+                                this.loadSessionExceptions(this.session),
+                                this.loadSessionEvents(this.session),
                                 this._traceService.getRestSessionStages(this.session.id).pipe(map(d=>(this.session.httpSessionStages=d))),
                                 this.session.linked ? defer(() => { this.parentLoading = true; return this._traceService.getSessionParent(RequestType.REST, this.session.id).pipe(catchError(() => of(null)), finalize(()=>(this.parentLoading = false)), map(d => this.sessionParent = d))}) : of(),
                                 (this.session.requestsMask & 4) > 0 ? defer(()=> {this.session.restRequests = []; return this._traceService.getRestRequests(this.session.id).pipe(map(d=>(this.session.restRequests=d)))}) : of(),
@@ -83,12 +87,29 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
             .subscribe();
     }
 
-    getSessionUrl() {
-        return Utils.getSessionUrl(this.session);
+    private loadSessionExceptions(session: RestSessionView) {
+        return defer(() => {
+            session.exceptions = [];
+            return this._traceService.getSessionExceptions(session.id).pipe(
+                map(exceptions => session.exceptions = [...(exceptions ?? [])]),
+                catchError(() => of([]))
+            );
+        });
     }
 
-    getDate(start: number) {
-        return new Date(start);
+    private loadSessionEvents(session: RestSessionView) {
+        return defer(() => {
+            session.sessionEvents = [];
+            return this._sessionEventService.getSessionEventsBySession(session.id).pipe(
+                map(events => session.sessionEvents = [...(events ?? [])]
+                    .sort((first, second) => first.instant - second.instant)),
+                catchError(() => of([]))
+            );
+        });
+    }
+
+    getSessionUrl() {
+        return Utils.getSessionUrl(this.session);
     }
 
     ngOnDestroy() {

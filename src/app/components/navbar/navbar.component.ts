@@ -84,13 +84,17 @@ export class NavbarComponent implements OnInit, OnDestroy {
       id: 'treatment',
       children: [
         { label: Constants.MAPPING_TYPE['rest'].title, icon: Constants.MAPPING_TYPE['rest'].icon, id: 'rest', route: 'session/rest', kpiRoute: 'kpi/session/rest' },
-        { label: Constants.MAPPING_TYPE['batch'].title, icon: Constants.MAPPING_TYPE['batch'].icon, id: 'batch', route: 'session/batch', kpiRoute: 'kpi/session/batch' },
+        { label: Constants.MAPPING_TYPE['schedule'].title, icon: Constants.MAPPING_TYPE['schedule'].icon, id: 'schedule', route: 'session/schedule', kpiRoute: 'kpi/session/schedule' },
         { label: Constants.MAPPING_TYPE['test'].title, icon: Constants.MAPPING_TYPE['test'].icon, id: 'test', route: 'session/test' },
         { label: Constants.MAPPING_TYPE['startup'].title, icon: Constants.MAPPING_TYPE['startup'].icon, id: 'startup', route: 'session/startup', kpiRoute: 'kpi/session/startup' },
         { label: Constants.MAPPING_TYPE['view'].title, icon: Constants.MAPPING_TYPE['view'].icon, id: 'view', route: 'session/view' }
       ]
     },
-    { label: Constants.MAPPING_TYPE['event'].title, icon: Constants.MAPPING_TYPE['event'].icon, id: 'event', route: 'event'},
+    { label: Constants.MAPPING_TYPE['event'].title, icon: Constants.MAPPING_TYPE['event'].icon, id: 'event',
+    children: [
+      { label: Constants.MAPPING_TYPE['log'].subtitle, icon: Constants.MAPPING_TYPE['log'].icon, id: 'log', route: 'event/log' },
+      { label: Constants.MAPPING_TYPE['user'].subtitle, icon: Constants.MAPPING_TYPE['user'].icon, id: 'user', route: 'event/user' },
+    ]},
     { label: Constants.MAPPING_TYPE['architecture'].title, icon: Constants.MAPPING_TYPE['architecture'].icon, id: 'architecture', route: 'architecture'}
   ];
 
