@@ -7,27 +7,43 @@
 
 .tab-panel {
   height: calc(100vh - 56px - 7px - 180px - 1em);
+  display: flex;
+  flex-direction: column;
 }
 
 .technical-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 1.5em;
-  overflow: auto;
+  overflow: hidden;
 }
 
-.technical-section {
+.technical-tabs {
+  height: 100%;
   display: flex;
   flex-direction: column;
-  flex: 1 0 20rem;
 
-  h3 {
-    margin: 0 0 0.75em;
+  ::ng-deep .mat-mdc-tab-header {
+    flex-shrink: 0;
   }
 
-  parameter-table {
+  ::ng-deep .mat-mdc-tab-body-wrapper {
     flex: 1;
-    height: auto;
-    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
   }
+
+  ::ng-deep .mat-mdc-tab-body {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+  }
+
+  ::ng-deep .mat-mdc-tab-body-content {
+    flex: 1;
+    overflow: hidden;
+  }
+}
+
+.technical-table {
+  height: 100%;
+  width: 100%;
 }
