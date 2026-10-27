@@ -258,11 +258,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     .subscribe({
                         next: (events) => {
                             if (this._loadGen !== gen || !events) return;
-                            this.eventWarnCount = events.filter(e => e.type === 'WARN').length;
-                            this.eventErrorCount = events.filter(e => e.type === 'ERROR').length;
-                            this.eventUserCount = events.filter(e => e.type != 'ERROR' && e.type != 'WARN').length;
+                            const getCount = (e: any): number => Number(e['COUNT(*)'] ?? e.count ?? 0) || 0;
+
+                            this.eventWarnCount = events
+                                .filter(e => e.type === 'WARN')
+                                .reduce((acc, e) => acc + getCount(e), 0);
+
+                            this.eventErrorCount = events
+                                .filter(e => e.type === 'ERROR')
+                                .reduce((acc, e) => acc + getCount(e), 0);
+
+                            this.eventUserCount = events
+                                .filter(e => e.type !== 'ERROR' && e.type !== 'WARN')
+                                .reduce((acc, e) => acc + getCount(e), 0);
+
+                            this._cdr.markForCheck();
                         },
-                        error: () => { if (this._loadGen === gen) { this.eventWarnCount = 0; this.eventErrorCount = 0; this.eventUserCount = 0; } }
+                        error: () => {
+                            if (this._loadGen === gen) {
+                                this.eventWarnCount = 0;
+                                this.eventErrorCount = 0;
+                                this.eventUserCount = 0;
+                                this._cdr.markForCheck();
+                            }
+                        }
                     }));
             }
         }));

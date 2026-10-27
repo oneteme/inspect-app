@@ -209,13 +209,3 @@ export interface LogEntry {
   action: string;
   stackRows: StackTraceRow[];
 }
-
-export interface MainEvent extends AbstractSession, LocalRequest {
-
-}
-
-export interface RestEvent extends AbstractSession, RestRequest {
-  name: string;
-  userAgent: string;
-  cacheControl: string;
-}
