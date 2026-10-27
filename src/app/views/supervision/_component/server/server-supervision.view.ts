@@ -59,6 +59,8 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   });
 
   readonly USAGE_RESOURCE_BY_PERIOD_LINE: ChartProvider<string, number> = {
+    group: 'sync',
+    groupSync: ['tooltip', 'datazoom'],
     height: 300,
     stacked: false,
     ytitle: '',
@@ -197,7 +199,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
         
         this.params.start = this.period.start;
         this.params.end = this.period.end;
-        this.syncChartPeriodBounds();
+        // this.syncChartPeriodBounds();
         
         this.patchDateValue(this.params.start, toDisplayedPeriodEnd(this.params.end));
         
@@ -271,7 +273,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     this.instance = null;
     this.usageResourceByPeriod = [];
     this.lastTrace = null;
-    this.syncChartPeriodBounds();
+    // this.syncChartPeriodBounds();
     this._traceService.getInstance(this.params.instance)
     .pipe(switchMap(res => {
         console.log(res.namespace, this.params.namespace)
