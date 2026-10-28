@@ -59,9 +59,9 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   });
 
   readonly USAGE_RESOURCE_BY_PERIOD_LINE: ChartProvider<string, number> = {
+    height: 300,
     group: 'sync',
     groupSync: ['tooltip', 'datazoom'],
-    height: 300,
     stacked: false,
     ytitle: '',
     series: [
@@ -136,7 +136,6 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
       xAxis: {axisLabel: {hideOverlap: true}},
       yAxis: {
         min: 0,
-        max: 100,
         axisLabel: {formatter: (v: number) => `${this._decimalPipe.transform(v)} %`}
       },
       legend: {show: true}
