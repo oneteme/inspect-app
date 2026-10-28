@@ -17,7 +17,7 @@ import {StacktraceDialogComponent} from '../../../../shared/_component/exception
 import {LOG_TABLE_CONFIG} from '../../../../shared/_component/table/table.config';
 import {app} from '../../../../../environments/environment';
 import {getDefaultRelativePeriod} from '../../../../shared/period-filter';
-import {IPeriod, IStep, IStepFrom} from '../../../../model/conf.model';
+import {IPeriod} from '../../../../model/conf.model';
 import {CustomDateAdapter} from '../../../../shared/material/custom-date-adapter';
 import {CustomDateRangeSelectionStrategy} from '../../../../shared/material/custom-date-range-selection-strategy';
 import {MY_DATE_FORMATS} from '../../../../shared/shared.module';
@@ -31,18 +31,16 @@ interface ActivityFilters {
 }
 
 interface PeriodTraceRow {
-  [key: string]: any;
-  traceCount: number;
-  pending: number;
+  date: string | number;
+  year?: string | number;
+  traceCount: number | null;
+  pending: number | null;
 }
 
 interface SequenceLossRow {
-  [key: string]: any;
+  date: string;
   seq: number;
   atm: number;
-  eventCount: number;
-  firstStart: number;
-  lastStart: number;
 }
 
 @Component({
@@ -80,16 +78,18 @@ export class ServerActivityView implements OnDestroy {
     namespace: app.defaultNamespace, start: new Date(), end: new Date()
   };
   groupedBy: ActivityPeriodGroup = 'hourMinute';
-  instanceTraceByPeriod: any[] = [];
-  retryOccurrencesHeatmapData: any[] = [];
+  instanceTraceByPeriod: PeriodTraceRow[] = [];
   sequenceLossData: SequenceLossRow[] = [];
   logEntryByPeriod: LogEntry[] = [];
   traceStat = 0;
   isLoading = false;
   isLoadingTrace = false;
-  isLoadingRetryOccurrences = false;
   isLoadingSequenceLosses = false;
   isLoadingLogs = false;
+
+  get sequenceLossPeriodsWithEvents(): number {
+    return this.sequenceLossData.filter(row => row.seq > 0 || row.atm > 0).length;
+  }
 
   readonly USAGE_INSTANCE_TRACE_BY_PERIOD_LINE: ChartProvider<string, number> = {
     height: 335,
@@ -98,64 +98,28 @@ export class ServerActivityView implements OnDestroy {
     stacked: false,
     ytitle: '',
     series: [
-      {data: {x: field(this.groupedBy), y: field('traceCount')}, name: 'Traitements finalisés'},
-      {data: {x: field(this.groupedBy), y: field('pending')}, name: 'Traitements en cours'}
+      {data: {x: field('date'), y: field('traceCount')}, name: 'Traitements finalisés'},
+      {data: {x: field('date'), y: field('pending')}, name: 'Traitements en cours'}
     ],
     options: {
       animation: false,
       dataZoom: [{type: 'inside', xAxisIndex: 0}],
-      xAxis: {axisLabel: {hideOverlap: true}},
+      xAxis: {axisLabel: {hideOverlap: true, rotate: 45}},
       yAxis: {axisLabel: {formatter: (value: number) => this._decimalPipe.transform(value)}},
       // Marqueurs visibles : une seule période (ex. une journée) reste affichée sur la courbe
       series: [{symbolSize: 6}, {symbolSize: 6}]
     }
   };
 
-  readonly RETRY_OCCURRENCES_HEATMAP: ChartProvider<string, number> = {
-    height: 335,
-    series: [{data: {x: field(this.groupedBy), y: field('sum')}, name: field('appName')}],
-    options: {
-      animation: false,
-      grid: {top: 12, bottom: 56, left: 12, right: 12, containLabel: true},
-      xAxis: {type: 'category', axisLabel: {hideOverlap: true}},
-      yAxis: {type: 'category', axisLabel: {hideOverlap: true}},
-      visualMap: {
-        dimension: 2,
-        calculable: true,
-        orient: 'horizontal',
-        left: 'center',
-        bottom: 0,
-        text: ['Élevé', 'Faible'],
-        inRange: {color: ['#93c5fd', '#60a5fa', '#3b82f6', '#1d4ed8', '#1e3a8a']}
-      },
-      series: [{
-        label: {
-          show: true,
-          color: '#ffffff',
-          fontSize: 11,
-          fontWeight: 700,
-          textBorderColor: '#7f1d1d',
-          textBorderWidth: 1,
-          formatter: (params: any) => params.value?.[2] > 0 ? params.value[2].toLocaleString('fr-FR') : ''
-        },
-        itemStyle: {borderColor: '#ffffff', borderWidth: 1}
-      }],
-      tooltip: {
-        position: 'top',
-        formatter: (params: any) => this.formatRetryOccurrencesTooltip(params)
-      }
-    }
-  };
-
   readonly SEQUENCE_LOSS_BAR: ChartProvider<string, number> = {
     height: 335,
     series: [
-      {data: {x: field(this.groupedBy), y: field('seq')}, name: 'Séquences perdues'},
-      {data: {x: field(this.groupedBy), y: field('atm')}, name: 'Tentatives échouées'}
+      {data: {x: field('date'), y: field('seq')}, name: 'Séquences perdues'},
+      {data: {x: field('date'), y: field('atm')}, name: 'Tentatives échouées'}
     ],
     options: {
       animation: false,
-      xAxis: {type: 'category', name: 'Période', axisLabel: {hideOverlap: true}},
+      xAxis: {type: 'category', name: 'Période', axisLabel: {hideOverlap: true, rotate: 45}},
       yAxis: {
         type: 'value',
         name: 'Nombre',
@@ -172,7 +136,7 @@ export class ServerActivityView implements OnDestroy {
         formatter: (params: any) => {
           const item = Array.isArray(params) ? params[0] : params;
           const period = String(item?.axisValue ?? item?.name ?? '');
-          const row = this.sequenceLossData.find(item => String(item[this.groupedBy]) === period);
+          const row = this.sequenceLossData.find(item => item.date === period);
           return `Période : ${period || '—'}<br/>` +
               `Séquences perdues : ${row?.seq ?? 0}<br/>` +
               `Tentatives échouées : ${row?.atm ?? 0}`;
@@ -186,21 +150,19 @@ export class ServerActivityView implements OnDestroy {
     this._route.queryParams.pipe(
         switchMap(queryParams => {
           const period = this.resolvePeriod(queryParams);
+          const {start, end} = period;
 
-          if (!queryParams.start || !queryParams.end) {
-            const periodParams = period instanceof IPeriod
-                ? period.buildParams()
-                : {start: period.start.toISOString(), end: period.end.toISOString()};
+          if (new Date(queryParams.start).getTime() !== start.getTime() ||
+              new Date(queryParams.end).getTime() !== end.getTime()) {
             this._router.navigate([], {
               relativeTo: this._route,
-              queryParams: periodParams,
+              queryParams: {...period.buildParams(), step: null, from: null},
               queryParamsHandling: 'merge',
               replaceUrl: true
             });
+            return EMPTY;
           }
 
-          const start = period.start;
-          const end = period.end;
           this.groupedBy = activityPeriodManagement(start, end);
 
           this.params = {
@@ -216,9 +178,9 @@ export class ServerActivityView implements OnDestroy {
           this.isLoadingApps = true;
           this.resetActivityData();
           this.syncActivityChartCategories([]);
+          this.syncSequenceLossCategories();
           this.isLoading = true;
           this.isLoadingTrace = true;
-          this.isLoadingRetryOccurrences = true;
           this.isLoadingSequenceLosses = true;
           this.isLoadingLogs = true;
 
@@ -227,25 +189,10 @@ export class ServerActivityView implements OnDestroy {
                   tap(trace => {
                     this.instanceTraceByPeriod = this.aggregateTraceByPeriod(trace);
                     this.syncActivityChartCategories(this.instanceTraceByPeriod);
-                    this.traceStat = trace.reduce((total, row) => total + (row.traceCount || 0), 0);
+                    this.traceStat = this.instanceTraceByPeriod.reduce((total, row) => total + (row.traceCount ?? 0), 0);
                   }),
                   catchError(() => EMPTY),
                   finalize(() => this.isLoadingTrace = false)
-              ),
-              this._instanceTraceService.getRetryOccurrencesHeatmap({...this.params, groupedBy: this.groupedBy}).pipe(
-                  tap(retryOccurrences => {
-                    this.retryOccurrencesHeatmapData = retryOccurrences
-                        .filter(row => row[this.groupedBy] !== null && row[this.groupedBy] !== undefined && Number.isFinite(Number(row.sum)))
-                        .map(row => ({
-                          ...row,
-                          [this.groupedBy]: String(row[this.groupedBy]),
-                          appName: row.appName || 'Application inconnue',
-                          sum: Number(row.sum) || 0
-                        }));
-                    this.syncRetryOccurrencesCategories();
-                  }),
-                  catchError(() => EMPTY),
-                  finalize(() => this.isLoadingRetryOccurrences = false)
               ),
               this._instanceTraceService.getSequenceLossesByPeriod({...this.params, groupedBy: this.groupedBy}).pipe(
                   tap(sequenceLosses => {
@@ -282,7 +229,7 @@ export class ServerActivityView implements OnDestroy {
   search(): void {
     const start = this.formGroup.controls.range.controls.start.value;
     const end = this.formGroup.controls.range.controls.end.value;
-    if (!start || !end || !this.formGroup.controls.range.valid) {
+    if (!start || !end || start >= end || !this.formGroup.controls.range.valid) {
       return;
     }
     this._router.navigate([], {
@@ -290,6 +237,8 @@ export class ServerActivityView implements OnDestroy {
       queryParams: {
         start: start.toISOString(),
         end: end.toISOString(),
+        step: null,
+        from: null,
         app_name: this.appNameControl.value.length ? this.appNameControl.value : null
       },
       queryParamsHandling: 'merge',
@@ -304,8 +253,8 @@ export class ServerActivityView implements OnDestroy {
   }
 
   private resetActivityData(): void {
+    this.appNames = [];
     this.instanceTraceByPeriod = [];
-    this.retryOccurrencesHeatmapData = [];
     this.sequenceLossData = [];
     this.logEntryByPeriod = [];
     this.traceStat = 0;
@@ -319,81 +268,77 @@ export class ServerActivityView implements OnDestroy {
     return names.length ? [...new Set(names)] : undefined;
   }
 
-  private resolvePeriod(queryParams: { [key: string]: any }): IPeriod | IStep | IStepFrom {
+  private resolvePeriod(queryParams: { [key: string]: any }): IPeriod {
     if (queryParams.start && queryParams.end) {
       const start = new Date(queryParams.start);
       const end = new Date(queryParams.end);
-      if (!Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime())) {
+      if (start < end) {
         return new IPeriod(start, end);
       }
-    } else if (queryParams.step && queryParams.from) {
-      return new IStepFrom(Number(queryParams.step), Number(queryParams.from));
-    } else if (queryParams.step) {
-      return new IStep(Number(queryParams.step));
     }
-    return getDefaultRelativePeriod();
+    const fallback = getDefaultRelativePeriod(24);
+    return new IPeriod(fallback.start, fallback.end);
   }
 
-  private formatRetryOccurrencesTooltip(params: any): string {
-    // La heatmap fournit [indexPériode, indexApplication, valeur].
-    const [periodIndex, appIndex, sum = 0] = params.value ?? [];
-    const options = this.RETRY_OCCURRENCES_HEATMAP.options;
-    const period = (options?.xAxis as {data?: string[]})?.data?.[periodIndex] ?? '';
-    const appName = (options?.yAxis as {data?: string[]})?.data?.[appIndex] || 'Application inconnue';
-    return `${appName}<br/>${period}<br/>` +
-        `<strong>${Number(sum).toLocaleString('fr-FR')} séquences avec au moins 2 tentatives</strong>`;
+  private getChartCategories(rows: {date: string | number}[]): string[] {
+    // Conserver uniquement les dates reçues, dans l'ordre des résultats API.
+    return [...new Set(rows
+        .map(row => row.date)
+        .filter(date => date !== null && date !== undefined && String(date).trim() !== '')
+        .map(String))];
+  }
+
+  private finiteNumber(value: unknown): number {
+    const number = Number(value);
+    return Number.isFinite(number) ? number : 0;
   }
 
   private aggregateTraceByPeriod(rows: PeriodTraceRow[]): PeriodTraceRow[] {
     const periods = new Map<string, PeriodTraceRow>();
     rows.forEach(row => {
-      const period = row[this.groupedBy].toString();
-      if (period === null || period === undefined) return;
-      const key = String(period);
-      const current: PeriodTraceRow = periods.get(key) ?? {[this.groupedBy]: period, traceCount: 0, pending: 0};
-      current.traceCount += Number(row.traceCount) || 0;
-      current.pending += Number(row.pending) || 0;
-      periods.set(key, current);
+      if (row.date === null || row.date === undefined || String(row.date).trim() === '') return;
+      const period = String(row.date);
+      const current = periods.get(period) ?? {date: period, traceCount: null, pending: null};
+      current.traceCount = (current.traceCount ?? 0) + this.finiteNumber(row.traceCount);
+      if (row.pending !== null && row.pending !== undefined) {
+        current.pending = (current.pending ?? 0) + this.finiteNumber(row.pending);
+      }
+      periods.set(period, current);
     });
-    return [...periods.values()];
+    let cumulativePending = 0;
+    let hasPendingValue = false;
+    return [...periods.values()].map(row => {
+      if (row.pending !== null) {
+        cumulativePending += row.pending;
+        hasPendingValue = true;
+      }
+      return {...row, pending: hasPendingValue ? cumulativePending : null};
+    });
   }
 
   private aggregateSequenceLossByPeriod(events: SequenceLossEvent[]): SequenceLossRow[] {
     const periods = new Map<string, SequenceLossRow>();
     events.forEach(event => {
-      const period = (event as SequenceLossEvent & Record<string, any>)[this.groupedBy]?.toString();
-      const timestamp = Number(event.start);
+      if (event.date === null || event.date === undefined || String(event.date).trim() === '') return;
       // Une valeur négative correspond à un reset de séquence, pas à une perte
-      const seq = Math.max(0, Number(event.seq) || 0);
-      const atm = Math.max(0, Number(event.atm) || 0);
-      if (period === null || period === undefined || !Number.isFinite(timestamp) || (seq === 0 && atm === 0)) return;
-      const key = String(period);
-      const current: SequenceLossRow = periods.get(key) ?? {
-        [this.groupedBy]: period, seq: 0, atm: 0, eventCount: 0, firstStart: timestamp, lastStart: timestamp
-      };
+      const seq = Math.max(0, this.finiteNumber(event.seq));
+      const atm = Math.max(0, this.finiteNumber(event.atm));
+      if (seq === 0 && atm === 0) return;
+      const period = String(event.date);
+      const current = periods.get(period) ?? {date: period, seq: 0, atm: 0};
       current.seq += seq;
       current.atm += atm;
-      current.eventCount += 1;
-      current.firstStart = Math.min(current.firstStart, timestamp);
-      current.lastStart = Math.max(current.lastStart, timestamp);
-      periods.set(key, current);
+      periods.set(period, current);
     });
     return [...periods.values()];
   }
 
-  private formatDateRange(first: number, last: number): string {
-    const from = new Date(first).toLocaleString('fr-FR');
-    return first === last ? from : `${from} → ${new Date(last).toLocaleString('fr-FR')}`;
-  }
-
-  private syncActivityChartCategories(rows: any[]): void {
-    const categories = [...new Set(rows
-        .map(row => row[this.groupedBy].toString())
-        .filter(value => value !== null && value !== undefined))];
+  private syncActivityChartCategories(rows: PeriodTraceRow[]): void {
+    const categories = this.getChartCategories(rows);
     const xAxis = {type: 'category', data: categories};
     this.USAGE_INSTANCE_TRACE_BY_PERIOD_LINE.series = [
-      {data: {x: field(this.groupedBy), y: field('traceCount')}, name: 'Traitements finalisés'},
-      {data: {x: field(this.groupedBy), y: field('pending')}, name: 'Traitements en cours'}
+      {data: {x: field('date'), y: field('traceCount')}, name: 'Traitements finalisés'},
+      {data: {x: field('date'), y: field('pending')}, name: 'Traitements en cours'}
     ];
     this.USAGE_INSTANCE_TRACE_BY_PERIOD_LINE.options = {
       ...this.USAGE_INSTANCE_TRACE_BY_PERIOD_LINE.options,
@@ -401,31 +346,17 @@ export class ServerActivityView implements OnDestroy {
     };
   }
 
-  private syncRetryOccurrencesCategories(): void {
-    const categories = [...new Set(this.retryOccurrencesHeatmapData.map(row => row[this.groupedBy]))];
-    const appCategories = [...new Set(this.retryOccurrencesHeatmapData.map(row => row.appName || 'Application inconnue'))];
-    this.RETRY_OCCURRENCES_HEATMAP.series = [
-      {data: {x: field(this.groupedBy), y: field('sum')}, name: field('appName')}
-    ];
-    this.RETRY_OCCURRENCES_HEATMAP.options = {
-      ...this.RETRY_OCCURRENCES_HEATMAP.options,
-      xAxis: {...(this.RETRY_OCCURRENCES_HEATMAP.options?.xAxis as any), data: categories},
-      yAxis: {...(this.RETRY_OCCURRENCES_HEATMAP.options?.yAxis as any), data: appCategories}
-    };
-  }
 
   private syncSequenceLossCategories(): void {
     this.SEQUENCE_LOSS_BAR.series = [
-      {data: {x: field(this.groupedBy), y: field('seq')}, name: 'Séquences perdues'},
-      {data: {x: field(this.groupedBy), y: field('atm')}, name: 'Tentatives échouées'}
+      {data: {x: field('date'), y: field('seq')}, name: 'Séquences perdues'},
+      {data: {x: field('date'), y: field('atm')}, name: 'Tentatives échouées'}
     ];
     this.SEQUENCE_LOSS_BAR.options = {
       ...this.SEQUENCE_LOSS_BAR.options,
       xAxis: {
         ...(this.SEQUENCE_LOSS_BAR.options?.xAxis as any),
-        data: [...new Set(this.sequenceLossData
-            .map(row => row[this.groupedBy])
-            .filter(value => value !== null && value !== undefined))]
+        data: this.getChartCategories(this.sequenceLossData)
       }
     };
   }

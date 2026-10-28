@@ -59,9 +59,9 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   });
 
   readonly USAGE_RESOURCE_BY_PERIOD_LINE: ChartProvider<string, number> = {
+    height: 300,
     group: 'sync',
     groupSync: ['tooltip', 'datazoom'],
-    height: 300,
     stacked: false,
     ytitle: '',
     series: [
