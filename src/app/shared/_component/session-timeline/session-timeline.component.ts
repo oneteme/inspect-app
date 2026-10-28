@@ -16,7 +16,6 @@ interface TimelineItem {
 export class SessionTimelineComponent {
     private _events: SessionEvent[] = [];
     private _exceptions: ExceptionInfo[] = [];
-    readonly pageSizeOptions = [4, 50, 100];
     pageSize = 50;
     pageIndex = 0;
     displayedItems: TimelineItem[] = [];

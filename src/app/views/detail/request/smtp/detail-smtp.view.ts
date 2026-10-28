@@ -77,17 +77,17 @@ export class DetailSmtpView implements OnInit, OnDestroy {
         count: this.stages.length || 0 ,
         visible: true,
         type: 'stage',
-        hasError: this.stages.some(s => s.exception),
-        errorCount: this.stages.filter(s => s.exception).length || 0
+        hasError: this.exceptions?.length > 0,
+        errorCount: this.exceptions?.length || 0
       },
       {
-        label: 'Événement',
+        label: 'Événements',
         icon: Constants.MAPPING_TYPE['event'].icon,
         count: this.exceptions?.length,
         visible: this.exceptions?.length > 0,
         type: 'action',
-        hasError: false,
-        errorCount: 0
+        hasError: this.exceptions?.length > 0,
+        errorCount: this.exceptions?.length || 0
       },
       {
         label: 'Chronologie',
