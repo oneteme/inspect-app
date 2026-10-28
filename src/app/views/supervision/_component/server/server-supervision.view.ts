@@ -136,7 +136,6 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
       xAxis: {axisLabel: {hideOverlap: true}},
       yAxis: {
         min: 0,
-        max: 100,
         axisLabel: {formatter: (v: number) => `${this._decimalPipe.transform(v)} %`}
       },
       legend: {show: true}
