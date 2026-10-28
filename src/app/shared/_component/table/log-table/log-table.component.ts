@@ -23,7 +23,7 @@ export class LogTableComponent {
 
   open(row: any) {
     this._dialog.open(StacktraceDialogComponent, {
-      data: { message: row.message, stackTraceRows: row.stackRows }
+      data: {message: row.message, stackRows: row.stackRows}
     });
   }
 }

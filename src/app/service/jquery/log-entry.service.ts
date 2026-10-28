@@ -17,9 +17,9 @@ export class LogEntryService {
 
   getActivityByPeriod(filters: {namespace: string, start: Date, end: Date, app_name?: string[]}): Observable<LogEntry[]> {
     const args: any = {
-      'column': 'start:instant,instance.app_name:appName,log_message,thread,action,stacktrace',
+      'column': 'start:instant,instance.app_name:appName,log_message,thread,action,stacktrace:stackRows',
       'join': 'left_instance',
-      'instance.namespace': filters.namespace,
+      //'instance.namespace': filters.namespace,
       'start.ge': filters.start.toISOString(),
       'start.lt': filters.end.toISOString(),
       'order': 'instant.asc'
