@@ -1,6 +1,8 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, OnDestroy} from '@angular/core';
 import {PageEvent} from '@angular/material/paginator';
 import {ExceptionInfo, SessionEvent} from '../../../model/trace.model';
+import {MatDialog} from '@angular/material/dialog';
+import {StacktraceDialogComponent} from '../exception-display/stacktrace-dialog/stacktrace-dialog.component';
 
 interface TimelineItem {
     kind: 'event' | 'exception';
@@ -13,7 +15,14 @@ interface TimelineItem {
     templateUrl: './session-timeline.component.html',
     styleUrls: ['./session-timeline.component.scss']
 })
-export class SessionTimelineComponent {
+export class SessionTimelineComponent implements OnDestroy {
+    copiedItem: TimelineItem | null = null;
+    copyFeedback = '';
+    copySucceeded = false;
+    private copyTimer?: ReturnType<typeof setTimeout>;
+
+    constructor(private dialog: MatDialog) {}
+
     private _events: SessionEvent[] = [];
     private _exceptions: ExceptionInfo[] = [];
     pageSize = 50;
@@ -122,6 +131,41 @@ export class SessionTimelineComponent {
 
     getItemCategoryLabel(item: TimelineItem): string {
         return item.kind === 'exception' ? 'Exception applicative' : this.getEventCategoryLabel(item.event?.type ?? '');
+    }
+
+    getItemClipboardText(item: TimelineItem): string {
+        if (item.kind === 'exception') {
+            const exception = item.exception;
+            return `${exception?.type ? `${exception.type}: ` : ''}${exception?.message ?? ''}`;
+        }
+
+        return [this.getItemLabel(item), item.event?.value, item.event?.location]
+            .filter(Boolean)
+            .join(' : ');
+    }
+
+    onItemCopied(item: TimelineItem, success: boolean): void {
+        this.copiedItem = item;
+        this.copySucceeded = success;
+        this.copyFeedback = success ? 'Copié !' : 'Échec de la copie';
+        clearTimeout(this.copyTimer);
+        this.copyTimer = setTimeout(() => this.copiedItem = null, 2000);
+    }
+
+    showExceptionStacktrace(exception: ExceptionInfo): void {
+        this.dialog.open(StacktraceDialogComponent, {
+            width: '80vw',
+            height: '60vh',
+            data: {
+                type: exception.type,
+                message: exception.message,
+                stackTraceRows: exception.stackTraceRows
+            }
+        });
+    }
+
+    ngOnDestroy(): void {
+        clearTimeout(this.copyTimer);
     }
 
     getElapsedTimeBetween(current: TimelineItem, next?: TimelineItem): string | null {
@@ -253,4 +297,3 @@ export class SessionTimelineComponent {
         }
     }
 }
-
