@@ -208,5 +208,5 @@ export interface LogEntry {
   message: string;
   thread: string;
   action: string;
-  stackRows: StackTraceRow[];
+  stackRows: StackTraceRow[] | string;
 }
