@@ -38,8 +38,15 @@
                       [items]="dataItems">
         </app-timeline>
       </div>
-      <div *ngIf="tabs[selectedTabIndex]?.type === 'resource'" class="tab-panel">
-        <parameter-table [data]="resourceData"></parameter-table>
+      <div *ngIf="tabs[selectedTabIndex]?.type === 'technical'" class="tab-panel technical-panel">
+        <mat-tab-group animationDuration="0ms" class="technical-tabs">
+          <mat-tab *ngIf="instance.resource" label="Configuration">
+            <parameter-table class="technical-table" [data]="resourceData"></parameter-table>
+          </mat-tab>
+          <mat-tab *ngIf="instance.additionalProperties" label="Environnement">
+            <parameter-table class="technical-table" [data]="additionalPropertiesData"></parameter-table>
+          </mat-tab>
+        </mat-tab-group>
       </div>
       <div *ngIf="tabs[selectedTabIndex]?.type === 'property'" class="tab-panel">
         <parameter-table [data]="propertiesData"></parameter-table>
