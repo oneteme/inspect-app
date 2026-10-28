@@ -6,6 +6,8 @@ import {ActivityPeriodGroup} from '../../shared/util';
 export interface SequenceLossEvent {
   instanceId: string;
   start: number;
+  date: string | number;
+  year: number;
   seq: number;
   atm: number;
 }
@@ -41,19 +43,19 @@ export class InstanceTraceService {
   }
 
   getActivityByPeriod(filters: {namespace: string, start: Date, end: Date, groupedBy: ActivityPeriodGroup, app_name?: string[]}): Observable<{
-    [key: string]: any;
+    date: string | number;
     appName: string;
     pending: number;
     attempts: number;
     traceCount: number;
   }[]> {
     const args: any = {
-      'column': `start.${filters.groupedBy}:${filters.groupedBy},instance.app_name:appName,pending.sum:pending,attempts.sum:attempts,trace_count.sum:traceCount`,
+      'column': `start.${filters.groupedBy}:date,instance.app_name:appName,pending.sum:pending,attempts.sum:attempts,trace_count.sum:traceCount`,
       'join': 'instance',
       'instance.namespace': filters.namespace,
       'start.ge': filters.start.toISOString(),
       'start.lt': filters.end.toISOString(),
-      'order': `${filters.groupedBy}.asc`
+      'order': 'date.asc'
     };
     if (filters.app_name?.length) {
       args['instance.app_name.in'] = filters.app_name.join(',');
@@ -61,35 +63,13 @@ export class InstanceTraceService {
     return this.getInstanceTrace(args);
   }
 
-  getRetryOccurrencesHeatmap(filters: {namespace: string, start: Date, end: Date, groupedBy: ActivityPeriodGroup, app_name?: string[]}): Observable<{
-    hourMinute: string;
-    appName: string;
-    sum: number;
-  }[]> {
-    const criteria = [
-      'attempts.gt(1)',
-      `instance.namespace.eq(${filters.namespace})`,
-      `instance.start.ge(${filters.start.toISOString()})`,
-      `instance.start.lt(${filters.end.toISOString()})`
-    ];
-    if (filters.app_name?.length) {
-      criteria.push(`instance.app_name.in(${filters.app_name.join(',')})`);
-    }
-    const criteriaExpression = criteria[0] + criteria.slice(1).map(item => `.and(${item})`).join('');
-    const args: any = {
-      'column': `v1.${filters.groupedBy},v1.appName,v1.occurrences.sum:sum`,
-      'cte': `select(instance.start.${filters.groupedBy}:${filters.groupedBy},instance.app_name:appName,sequence,sequence.count:occurrences).join(left_instance).criteria(${criteriaExpression}):v1`,
-      'order': `v1.${filters.groupedBy}.asc`
-    };
-    return this.getInstanceTrace(args);
-  }
 
-
-  getSequenceLossesByPeriod(filters: {start: Date, end: Date, groupedBy: ActivityPeriodGroup, app_name?: string[]}): Observable<SequenceLossEvent[]> {
+  getSequenceLossesByPeriod(filters: {namespace: string, start: Date, end: Date, groupedBy: ActivityPeriodGroup, app_name?: string[]}): Observable<SequenceLossEvent[]> {
     const args: any = {
-      'column': `v1.instanceId,v1.start:start,v1.start.${filters.groupedBy}:${filters.groupedBy},v1.sequence.minus(v1.prev_seq).minus(1):seq,v1.attempts.minus(1):atm`,
-      'cte': 'select(instance_env:instanceId,instance.app_name:appName,start,sequence,attempts,sequence.lag.over(partition(instance_env).order(start.asc)):prev_seq,attempts.lag.over(partition(instance_env).order(start.asc)):prev_atm).join(left_instance):v1',
+      'column': `v1.instanceId,v1.start:start,v1.start.${filters.groupedBy}:date,v1.sequence.minus(v1.prev_seq).minus(1):seq,v1.attempts.minus(1):atm`,
+      'cte': 'select(instance_env:instanceId,instance.namespace:namespace,instance.app_name:appName,start,sequence,attempts,sequence.lag.over(partition(instance_env).order(start.asc)):prev_seq,attempts.lag.over(partition(instance_env).order(start.asc)):prev_atm).join(left_instance):v1',
       'seq.gt(0).or(atm.gt(0))': '',
+      'v1.namespace': filters.namespace,
       'v1.start.ge': filters.start.toISOString(),
       'v1.start.lt': filters.end.toISOString(),
       'order': 'v1.start.asc'

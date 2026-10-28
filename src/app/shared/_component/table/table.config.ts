@@ -474,13 +474,13 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
     { key: 'appName', header: 'Application', icon: 'apps', sliceable: false, groupable: false, width: '18%' },
     { key: 'message', header: 'Message', icon: 'chat', sliceable: false, groupable: false, width: '52%' },
     { key: 'thread', header: 'Thread',  sliceable: false, groupable: false  },
-    { key: 'actions', header: 'Actions',  sliceable: false, groupable: false },
-    { key: 'action', header: 'Action', icon: 'touch_app', sliceable: false, groupable: false, sortable: false }
+    { key: 'action', header: 'Action',  sliceable: false, groupable: false },
+    { key: 'stack', header: 'Stack', icon: 'touch_app', sliceable: false, groupable: false, sortable: false }
   ],
   slices: [
     {
-      title: 'Actions',
-      columnKey: 'actions',
+      title: 'Action',
+      columnKey: 'action',
       icon: 'label',
       hidden: true
     }
