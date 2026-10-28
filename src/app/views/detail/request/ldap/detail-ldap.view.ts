@@ -135,6 +135,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
         this.dataArray = this.stages.map((a: DirectoryRequestStage, i: number) => {
             let start= Math.trunc(a.start * 1000);
             let end = a.end? Math.trunc(a.end * 1000) : INFINITY;
+            const args = a.payload?.args;
             return {
                 group: `${i}`,
                 start: start,
@@ -142,11 +143,11 @@ export class DetailLdapView implements OnInit, OnDestroy {
                 type: end <= start ? 'point' : 'range',
                 content: `<div class="content" style="display: flex; align-items: center; gap: 0.5rem; flex-direction: row;">
                                 <span class="command" style="color: #1565c0; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">${showifnotnull(a.command, ()=> a.command)}</span>
-                                <span>${showifnotnull(a.args, ()=> a.args.join(', '))}</span>
+                                <span>${showifnotnull(args, ()=> args.join(', '))}</span>
                          </div>`,
                 className: `ldap ${getErrorClassName(a)}`,
                 title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end , 'HH:mm:ss.SSS')}</span> (⏱ ${this.durationPipe.transform(a.end - a.start)})<br>
-                        <span>${showifnotnull(a.command, ()=> a.command)} ${showifnotnull(a.args, ()=> a.args.join(', '))}</span>`
+                        <span>${showifnotnull(a.command, ()=> a.command)} ${showifnotnull(args, ()=> args.join(', '))}</span>`
             };
         });
         this.dataArray.splice(0,0,{
