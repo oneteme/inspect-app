@@ -44,7 +44,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
   dataArray: any[] = [];
   request: DatabaseRequest;
   stages: DatabaseRequestStage[];
-  exception: ExceptionInfo;
+  exceptions: ExceptionInfo[];
   instance: InstanceEnvironment;
 
   sessionParent: { id: string, type: string };
@@ -96,6 +96,15 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
         errorCount: this.stages.filter(s => s.exception).length || 0
       },
       {
+        label: 'Événement',
+        icon: Constants.MAPPING_TYPE['event'].icon,
+        count: this.exceptions?.length,
+        visible: this.exceptions?.length > 0,
+        type: 'action',
+        hasError: false,
+        errorCount: 0
+      },
+      {
         label: 'Chronologie',
         icon: 'view_timeline',
         count: 0,
@@ -132,7 +141,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
         this.instance = result.instance;
         this.request = result.request;
         this.stages = result.stages;
-        this.exception = result.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
+        this.exceptions = result.stages.filter(s => s.exception).map(s => s.exception);
         this.initTabs();
         this.createTimeline();
       }

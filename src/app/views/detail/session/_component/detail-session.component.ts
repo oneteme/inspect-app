@@ -31,11 +31,11 @@ export class DetailSessionComponent implements OnChanges {
   selectedTabIndex: number = 0;
 
   get sessionEvents(): SessionEvent[] {
-    return this.session && 'sessionEvents' in this.session ? this.session.sessionEvents ?? [] : [];
+    return this.session.sessionEvents;
   }
 
   get sessionExceptions(): ExceptionInfo[] {
-    return this.session && 'exceptions' in this.session ? this.session.exceptions ?? [] : [];
+    return this.session.exceptions;
   }
 
   ngOnChanges(changes: SimpleChanges) {

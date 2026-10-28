@@ -38,7 +38,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
   dataArray: any[] = [];
   request: FtpRequest;
   stages: FtpRequestStage[];
-  exception: ExceptionInfo;
+  exceptions: ExceptionInfo[];
   instance: InstanceEnvironment;
   isLoading: boolean;
 
@@ -73,6 +73,15 @@ export class DetailFtpView implements OnInit, OnDestroy {
         type: 'stage',
         hasError: this.stages.some(s => s.exception),
         errorCount: this.stages.filter(s => s.exception).length || 0
+      },
+      {
+        label: 'Événement',
+        icon: Constants.MAPPING_TYPE['event'].icon,
+        count: this.exceptions?.length,
+        visible: this.exceptions?.length > 0,
+        type: 'action',
+        hasError: false,
+        errorCount: 0
       },
       {
         label: 'Chronologie',
@@ -118,7 +127,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
         this.instance = result.instance;
         this.request = result.request;
         this.stages = result.stages;
-        this.exception = result.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
+        this.exceptions = result.stages.filter(s => s.exception).map(s => s.exception);
         this.initTabs();
         this.createTimeline();
       }

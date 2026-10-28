@@ -32,8 +32,6 @@
           </button>
         </div>
 
-        <exception-display [exception]="exception"></exception-display>
-
         <div class="session-footer">
           <div class="footer-section">
             <div class="meta-chip">
@@ -86,6 +84,12 @@
         <app-timeline [options]="options" [groups]="dataGroups" [items]="dataItems"
                       (onTimelineCreated)="onTimelineCreate($event)">
         </app-timeline>
+      </div>
+      <div *ngIf="tabs[selectedTabIndex]?.type === 'action'" class="tab-panel">
+        <session-timeline
+            [events]="[]"
+            [exceptions]="exceptions">
+        </session-timeline>
       </div>
     </div>
   </div>

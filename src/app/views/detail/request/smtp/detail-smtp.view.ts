@@ -46,7 +46,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
   dataArray: any[] = [];
   request: MailRequest;
   stages: MailRequestStage[];
-  exception: ExceptionInfo;
+  exceptions: ExceptionInfo[];
   instance: InstanceEnvironment;
   isLoading: boolean;
   tabs: TabData[] = [];
@@ -79,6 +79,15 @@ export class DetailSmtpView implements OnInit, OnDestroy {
         type: 'stage',
         hasError: this.stages.some(s => s.exception),
         errorCount: this.stages.filter(s => s.exception).length || 0
+      },
+      {
+        label: 'Événement',
+        icon: Constants.MAPPING_TYPE['event'].icon,
+        count: this.exceptions?.length,
+        visible: this.exceptions?.length > 0,
+        type: 'action',
+        hasError: false,
+        errorCount: 0
       },
       {
         label: 'Chronologie',
@@ -135,6 +144,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
         this.request = result.request;
         this.stages = result.stages;
         this.request.mails = result.mails;
+        this.exceptions = result.stages.filter(s => s.exception).map(s => s.exception);
         this.initTabs();
         this.createTimeline();
       }

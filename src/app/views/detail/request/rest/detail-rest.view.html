@@ -37,12 +37,6 @@
           </button>
         </div>
 
-        <!-- Exception -->
-        <exception-display
-          [type]="request.status >= 200 && request.status < 400 ? 'success' : request.status >= 400 && request.status < 500 ? 'warning' : 'fail'"
-          [exception]="$any(exception)">
-        </exception-display>
-
         <!-- Pied de carte -->
         <div class="session-footer">
 
@@ -131,6 +125,12 @@
       </div>
       <div *ngIf="tabs[selectedTabIndex]?.type === 'timeline'" class="tab-panel">
         <app-timeline [options]="options" [groups]="dataGroups" [items]="dataItems"></app-timeline>
+      </div>
+      <div *ngIf="tabs[selectedTabIndex]?.type === 'action'" class="tab-panel">
+        <session-timeline
+            [events]="[]"
+            [exceptions]="exceptions">
+        </session-timeline>
       </div>
     </div>
   </div>
