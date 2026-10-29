@@ -51,7 +51,7 @@ export const DEFAULT_DURATION_SLICE_CONFIG: SliceConfig = {
 export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'Hôte', icon: 'dns', width: '18%' },
+    { key: 'appName', header: 'APPLICATION', icon: 'web_asset', width: '18%' },
     {
       key: 'resource', header: 'Ressource', groupable: false, sliceable: false, icon: 'category',
       searchValue: (row: RestSessionDto) => fmtMethod(row.method) + ' ' + (row.path || '')
@@ -106,7 +106,7 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
 export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'Hôte', icon: 'dns', width: '13%' },
+    { key: 'appName', header: 'APPLICATION', icon: 'web_asset', width: '13%' },
     { key: 'name', header: 'Nom', icon: 'label', width: '13%' },
     { key: 'location', header: 'Ressource', icon: 'category' },
     { key: 'start', header: 'Début', groupable: false, sliceable: false, icon: 'schedule', width: '13%' },
@@ -152,7 +152,7 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
 export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'host', header: 'Hôte', icon: 'dns' },
+    { key: 'host', header: 'SERVEUR', icon: 'dns' },
     {
       key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false,
       searchValue: (row: RestRequestDto) => fmtMethod(row.method) + ' ' + (row.path || '')
@@ -196,7 +196,7 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
 export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'host', header: 'Hôte', icon: 'dns' },
+    { key: 'host', header: 'Serveur', icon: 'dns' },
     {
       key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false,
       searchValue: (row: DatabaseRequestDto) => fmtMethod(row.command) + ' ' + (row.schema || row.name || 'N/A')
@@ -245,7 +245,7 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
 export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'host', header: 'Hôte', icon: 'dns' },
+    { key: 'host', header: 'SERVEUR', icon: 'dns' },
     {
       key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false,
       searchValue: (row: FtpRequestDto) => fmtMethod(row.command)
@@ -292,7 +292,7 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
 export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'host', header: 'Hôte', icon: 'dns' },
+    { key: 'host', header: 'SERVEUR', icon: 'dns' },
     {
       key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false,
       searchValue: (row: DirectoryRequestDto) => fmtMethod(row.command)
@@ -386,7 +386,7 @@ export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
 export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'host', header: 'Hôte', icon: 'dns' },
+    { key: 'host', header: 'Serveur', icon: 'dns' },
     {
       key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false,
       searchValue: (row: MailRequestDto) => fmtMethod((row as any).command)
