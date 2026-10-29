@@ -111,7 +111,7 @@ export class DetailTimelineComponent implements OnChanges {
                 this.timelineEnd = this.request.end ? this.request.end * 1000 : this.timelineStart + 3600000;
                 let padding = (Math.ceil((this.timelineEnd - this.timelineStart) * 0.01))
                 this.dataArray = [].concat(
-                    (this.request.hasOwnProperty('sessionEvents') ? (<MainSessionView>this.request).sessionEvents ?? [] : []).map(r => ({...r, typeTimeline: 'action'})), // todo check if working ?
+                    (this.request.sessionEvents ?? []).map(r => ({...r, start: r.instant, name: r.value, nodeName: r.location, threadName: r.scope, typeTimeline: 'action'})),
                     (this.request.restRequests ?? []).map(r => ({...r, typeTimeline: 'rest'})),
                     (this.request.ftpRequests ?? []).map(r => ({...r, typeTimeline: 'ftp'})),
                     (this.request.mailRequests ?? []).map(r => ({...r, typeTimeline: 'smtp'})),
@@ -179,16 +179,25 @@ export class DetailTimelineComponent implements OnChanges {
         const isInProgress = !c.end && c.typeTimeline != 'action';
         let end = c.typeTimeline == 'action' ? c.start * 1000 :
             c.end ? c.end * 1000 :  new Date().getTime();
+        const analytic = c.typeTimeline === 'action'
+            ? this.ANALYTIC_MAPPING[c.type]
+            : undefined;
+
+        const actionLabel = analytic?.label ?? c.type ?? 'Événement';
+
+        const actionText = analytic
+            ? analytic.text(c)
+            : c.value ?? c.name ?? c.type ?? 'Événement';
 
         let o = {
             id: c.id ?`${c.id}_${c.typeTimeline}_${id}`: id,
             group: this.isWebApp ? 0 : c.threadName || '?',
-            content: c.typeTimeline == 'action' ? this.ANALYTIC_MAPPING[c.type].label : (c.schema || c.name || c.host || c.level || 'N/A'),
+            content: c.typeTimeline === 'action' ? actionLabel : (c.schema || c.name || c.host || c.level || 'N/A'),
             start: c.start * 1000,
             end: end,
             title: c.typeTimeline == 'action' ?
                 `${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')}</span><br>
-                     <h4>${this.ANALYTIC_MAPPING[c['type']].text(c)}</h4>` :
+                     <h4>${actionText}</h4>` :
                 `${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${c.end ? this.pipe.transform(new Date(end), 'HH:mm:ss.SSS'):"En cours..."}</span> ${c.end ? `(${this.durationPipe.transform({start: c.start, end: end / 1000})})`:""}<br>
                  <h4>${c['path'] || ''}</h4>`,
             className: c.typeTimeline,
