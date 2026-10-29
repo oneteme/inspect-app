@@ -1,0 +1,15 @@
+<div class="compare-page">
+
+  <ng-container *ngIf="data else noDataTemplate">
+    <div class="compare-list" *ngIf="data?.length > 0">
+      <div class="compare-item" *ngFor="let item of data">
+        <div #graphContainer class="graph-container"></div>
+      </div>
+    </div>
+  </ng-container>
+
+  <ng-template #noDataTemplate>
+    <app-empty-state [loading]="isLoading" icon="compare_arrows"></app-empty-state>
+  </ng-template>
+
+</div>

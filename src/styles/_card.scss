@@ -65,7 +65,7 @@
 // En-tête
 .session-header {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   padding: 14px 8px 10px 16px;
   gap: 0.5em;
@@ -162,20 +162,19 @@
   &.warning    { background: #fff7ed; color: #9a3412; }
   &.fail       { background: #fee2e2; color: #991b1b; }
   &.unavailable{ background: #f1f5f9; color: #475569; }
+  &.in-progress{ background: #EAF4FF; color: #4f46e5; }
 }
 
 // Badge méthode HTTP
 .method-badge {
   display: inline-flex;
   align-items: center;
-  padding: 1px 8px;
+  padding: 2px 10px;
   border-radius: 6px;
   font-size: 11px;
   font-weight: 700;
   background: #eff6ff;
   color: #1d4ed8;
-  border: 1px solid #bfdbfe;
-  letter-spacing: 0.04em;
   flex-shrink: 0;
 }
 

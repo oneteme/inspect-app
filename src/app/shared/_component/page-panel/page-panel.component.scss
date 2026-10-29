@@ -97,7 +97,7 @@ $primary: #2563eb;
 
     ::ng-deep mat-form-field.status-filter {
         flex: 0 0 180px;
-        max-width: 180px;
+        min-width: 220px;
     }
 
     ::ng-deep .pp-actions {

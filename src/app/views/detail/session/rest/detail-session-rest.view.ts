@@ -7,11 +7,12 @@ import {catchError, combineLatest, defer, finalize, map, merge, of, Subject, swi
 import {app} from "../../../../../environments/environment";
 import {Utils} from "../../../../shared/util";
 import {EnvRouter} from "../../../../service/router.service";
-import {RequestType, RestSessionView} from "../../../../model/request.model";
+import {MainSessionView, RequestType, RestSessionView} from "../../../../model/request.model";
 import {HttpSessionStage, InstanceEnvironment} from "../../../../model/trace.model";
 import {MatDialog} from "@angular/material/dialog";
 import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
-import {Constants} from "../../../constants";
+import {Constants, STATUS} from "../../../constants";
+import {SessionEventService} from "../../../../service/session-event.service";
 
 @Component({
     templateUrl: './detail-session-rest.view.html',
@@ -20,6 +21,7 @@ import {Constants} from "../../../constants";
 export class DetailSessionRestView implements OnInit, OnDestroy {
     private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
     private readonly _traceService: TraceService = inject(TraceService);
+    private readonly _sessionEventService = inject(SessionEventService);
     private readonly _location: Location = inject(Location);
     private readonly $destroy = new Subject<void>();
     protected readonly _router: EnvRouter = inject(EnvRouter);
@@ -34,7 +36,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     sessionParent: { id: string, type: string };
     isLoading: boolean = false;
     parentLoading: boolean = false;
-    env: string;
+    namespace: string;
 
     ngOnInit() {
         combineLatest([
@@ -42,10 +44,10 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
             this._activatedRoute.queryParams
         ]).subscribe({
             next: ([params, queryParams]) => {
-                this.env = queryParams.env || app.defaultEnv;
+                this.namespace = queryParams.namespace || app.defaultNamespace;
                 this._pageTitleService.set({ icon: 'call_received', iconOutlined: true, title: 'Services Exposés • ' + params.id_session, subtitle: Constants.MAPPING_TYPE['rest']?.subtitle });
                 this.getSession(params.id_session);
-                this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.env}`)
+                this._location.replaceState(`${this._router.url.split('?')[0]}?namespace=${this.namespace}`)
             }
         });
     }
@@ -67,6 +69,8 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
                         switchMap((v)=> {
                             return merge(
                                 this._traceService.getInstance(this.session.instanceId).pipe(map(d=>(this.instance=d))),
+                                this.loadSessionExceptions(this.session),
+                                this.loadSessionEvents(this.session),
                                 this._traceService.getRestSessionStages(this.session.id).pipe(map(d=>(this.session.httpSessionStages=d))),
                                 this.session.linked ? defer(() => { this.parentLoading = true; return this._traceService.getSessionParent(RequestType.REST, this.session.id).pipe(catchError(() => of(null)), finalize(()=>(this.parentLoading = false)), map(d => this.sessionParent = d))}) : of(),
                                 (this.session.requestsMask & 4) > 0 ? defer(()=> {this.session.restRequests = []; return this._traceService.getRestRequests(this.session.id).pipe(map(d=>(this.session.restRequests=d)))}) : of(),
@@ -74,8 +78,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
                                 (this.session.requestsMask & 1) > 0 ? defer(()=> {this.session.localRequests = []; return this._traceService.getLocalRequests(this.session.id).pipe(map(d=>(this.session.localRequests=d)))}) : of(),
                                 (this.session.requestsMask & 8) > 0 ? defer(()=> {this.session.ftpRequests = []; return this._traceService.getFtpRequests(this.session.id).pipe(map(d=>(this.session.ftpRequests=d)))}) : of(),
                                 (this.session.requestsMask & 16) > 0 ? defer(()=> {this.session.mailRequests = []; return this._traceService.getSmtpRequests(this.session.id).pipe(map(d=>(this.session.mailRequests=d)))}) : of(),
-                                (this.session.requestsMask & 32) > 0 ? defer(()=> {this.session.ldapRequests = []; return this._traceService.getLdapRequests(this.session.id).pipe(map(d=>(this.session.ldapRequests=d)))}) : of(),
-                                defer(()=> {this.session.logEntries = []; return this._traceService.getLogEntryBySession(this.session.id).pipe(map(d=>(this.session.logEntries = d)))})
+                                (this.session.requestsMask & 32) > 0 ? defer(()=> {this.session.ldapRequests = []; return this._traceService.getLdapRequests(this.session.id).pipe(map(d=>(this.session.ldapRequests=d)))}) : of()
                             )
                         }))
                 }),
@@ -84,12 +87,29 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
             .subscribe();
     }
 
-    getSessionUrl() {
-        return Utils.getSessionUrl(this.session);
+    private loadSessionExceptions(session: RestSessionView) {
+        return defer(() => {
+            session.exceptions = [];
+            return this._traceService.getSessionExceptions(session.id).pipe(
+                map(exceptions => session.exceptions = [...(exceptions ?? [])]),
+                catchError(() => of([]))
+            );
+        });
     }
 
-    getDate(start: number) {
-        return new Date(start);
+    private loadSessionEvents(session: RestSessionView) {
+        return defer(() => {
+            session.sessionEvents = [];
+            return this._sessionEventService.getSessionEventsBySession(session.id).pipe(
+                map(events => session.sessionEvents = [...(events ?? [])]
+                    .sort((first, second) => first.instant - second.instant)),
+                catchError(() => of([]))
+            );
+        });
+    }
+
+    getSessionUrl() {
+        return Utils.getSessionUrl(this.session);
     }
 
     ngOnDestroy() {
@@ -115,6 +135,12 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     navigate(event: MouseEvent) {
         var start = new Date(this.session.start * 1000);
         var end = this.session.end ? new Date(this.session.end * 1000) : new Date();
-        this._router.navigateOnClick(event, ['/kpi/session', 'rest'], { queryParams: {host: this.instance?.name, env: this.instance?.env, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
+        this._router.navigateOnClick(event, ['/kpi/session', 'rest'], { queryParams: {host: this.instance?.name, namespace: this.instance?.namespace, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
     }
+
+    navigateOnCompare(event: MouseEvent) {
+        this._router.navigateOnClick(event, ['/session/rest', this.session.id, 'compare']);
+    }
+
+    protected readonly STATUS = STATUS;
 }

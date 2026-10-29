@@ -56,7 +56,7 @@ export class ProtocolExceptionComponent {
             this._router.navigate([uri], {
                 queryParams: {
                     ...queryParams,
-                    env: this.data.env,
+                    namespace: this.data.namespace,
                     start: result.start.toISOString(),
                     end: result.end.toISOString(),
                     ...params

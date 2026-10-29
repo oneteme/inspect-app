@@ -1,7 +1,8 @@
 import {Component, inject, Input, OnChanges, SimpleChanges} from "@angular/core";
 import {EnvRouter} from "../../../../service/router.service";
 import {MainSessionView, RestSessionView} from "../../../../model/request.model";
-import {InstanceEnvironment} from "../../../../model/trace.model";
+import {ExceptionInfo, InstanceEnvironment, SessionEvent} from "../../../../model/trace.model";
+import {Constants} from "../../../constants";
 
 export interface TabData {
   label: string;
@@ -29,6 +30,14 @@ export class DetailSessionComponent implements OnChanges {
   tabs: TabData[] = [];
   selectedTabIndex: number = 0;
 
+  get sessionEvents(): SessionEvent[] {
+    return this.session.sessionEvents;
+  }
+
+  get sessionExceptions(): ExceptionInfo[] {
+    return this.session.exceptions;
+  }
+
   ngOnChanges(changes: SimpleChanges) {
     if (changes['completedSession'] && this.session) {
       this.initTabs();
@@ -39,7 +48,7 @@ export class DetailSessionComponent implements OnChanges {
     this.tabs = [
       {
         label: 'HTTP',
-        icon: 'call_made',
+        icon: Constants.REQUEST_MAPPING_TYPE['rest'].icon,
         count: this.session.restRequests?.length || 0,
         visible: (this.session.requestsMask & 4) > 0,
         type: 'rest',
@@ -48,7 +57,7 @@ export class DetailSessionComponent implements OnChanges {
       },
       {
         label: 'JDBC',
-        icon: 'database',
+        icon: Constants.REQUEST_MAPPING_TYPE['jdbc'].icon,
         count: this.session.databaseRequests?.length || 0,
         visible: (this.session.requestsMask & 2) > 0,
         type: 'database',
@@ -57,7 +66,7 @@ export class DetailSessionComponent implements OnChanges {
       },
       {
         label: 'FTP',
-        icon: 'smb_share',
+        icon: Constants.REQUEST_MAPPING_TYPE['ftp'].icon,
         count: this.session.ftpRequests?.length || 0,
         visible: (this.session.requestsMask & 8) > 0,
         type: 'ftp',
@@ -66,7 +75,7 @@ export class DetailSessionComponent implements OnChanges {
       },
       {
         label: 'SMTP',
-        icon: 'outgoing_mail',
+        icon: Constants.REQUEST_MAPPING_TYPE['smtp'].icon,
         count: this.session.mailRequests?.length || 0,
         visible: (this.session.requestsMask & 16) > 0,
         type: 'smtp',
@@ -75,7 +84,7 @@ export class DetailSessionComponent implements OnChanges {
       },
       {
         label: 'LDAP',
-        icon: 'user_attributes',
+        icon: Constants.REQUEST_MAPPING_TYPE['ldap'].icon,
         count: this.session.ldapRequests?.length || 0,
         visible: (this.session.requestsMask & 32) > 0,
         type: 'ldap',
@@ -92,7 +101,7 @@ export class DetailSessionComponent implements OnChanges {
         errorCount: this.getLocalErrorCount()
       },
       {
-        label: 'Stage',
+        label: 'Stages',
         icon: 'view_object_track',
         count: 0,
         visible: !!this.session['httpSessionStages']?.length,
@@ -101,22 +110,13 @@ export class DetailSessionComponent implements OnChanges {
         errorCount: 0
       },
       {
-        label: 'Action',
-        icon: 'web_traffic',
-        count: this.session['userActions']?.length || 0,
-        visible: !!this.session['userActions']?.length,
+        label: 'Événements',
+        icon: Constants.MAPPING_TYPE['event'].icon,
+        count: this.sessionEvents.length + this.sessionExceptions.length,
+        visible: this.sessionEvents.length > 0 || this.sessionExceptions.length > 0,
         type: 'action',
-        hasError: false,
-        errorCount: 0
-      },
-      {
-        label: 'Log',
-        icon: 'chat_info',
-        count: this.session.logEntries?.length || 0,
-        visible: !!this.session.logEntries?.length,
-        type: 'log',
-        hasError: false,
-        errorCount: 0
+        hasError: this.sessionExceptions.length > 0,
+        errorCount: this.sessionExceptions.length || 0
       },
       {
         label: 'Chronologie',
@@ -146,61 +146,61 @@ export class DetailSessionComponent implements OnChanges {
   }
 
   private hasLocalErrors(): boolean {
-    return this.session.localRequests?.some(req => req.exception) || false;
+    return this.session.localRequests?.some(req => req.status && (req.status >= 400 || req.status == 0)) || false;
   }
 
   private getLocalErrorCount(): number {
-    return this.session.localRequests?.filter(req => req.exception).length || 0;
+    return this.session.localRequests?.filter(req => req.status && (req.status >= 400 || req.status == 0)).length || 0;
   }
 
   private hasFtpErrors(): boolean {
-    return this.session.ftpRequests?.some(req => req.failed) || false;
+    return this.session.ftpRequests?.some(req => req.status && (req.status >= 400 || req.status == 0)) || false;
   }
 
   private getFtpErrorCount(): number {
-    return this.session.ftpRequests?.filter(req => req.failed).length || 0;
+    return this.session.ftpRequests?.filter(req => req.status && (req.status >= 400 || req.status == 0)).length || 0;
   }
 
   private hasSmtpErrors(): boolean {
-    return this.session.mailRequests?.some(req => req.failed) || false;
+    return this.session.mailRequests?.some(req => req.status && (req.status >= 400 || req.status == 0)) || false;
   }
 
   private getSmtpErrorCount(): number {
-    return this.session.mailRequests?.filter(req => req.failed).length || 0;
+    return this.session.mailRequests?.filter(req => req.status && (req.status >= 400 || req.status == 0)).length || 0;
   }
 
   private hasLdapErrors(): boolean {
-    return this.session.ldapRequests?.some(req => req.failed) || false;
+    return this.session.ldapRequests?.some(req => req.status && (req.status >= 400 || req.status == 0)) || false;
   }
 
   private getLdapErrorCount(): number {
-    return this.session.ldapRequests?.filter(req => req.failed).length || 0;
+    return this.session.ldapRequests?.filter(req => req.status && (req.status >= 400 || req.status == 0)).length || 0;
   }
 
   private hasDatabaseErrors(): boolean {
-    return this.session.databaseRequests?.some(req => req.failed) || false;
+    return this.session.databaseRequests?.some(req => req.status && (req.status >= 400 || req.status == 0)) || false;
   }
 
   private getDatabaseErrorCount(): number {
-    return this.session.databaseRequests?.filter(req => req.failed).length || 0;
+    return this.session.databaseRequests?.filter(req => req.status && (req.status >= 400 || req.status == 0)).length || 0;
   }
 
   selectedRemote(event: { event: MouseEvent, row: any }) {
     if (event.row) {
-      this._router.navigateOnClick(event.event, ['/session', 'rest', event.row], { queryParams: { env: this.instance.env } }); // TODO remove env FIX BUG
+      this._router.navigateOnClick(event.event, ['/session', 'rest', event.row], { queryParams: { namespace: this.instance.namespace } }); // TODO remove env FIX BUG
     }
   }
 
   selectedRest(event: { event: MouseEvent, row: any }) {
     if (event.row) {
-      this._router.navigateOnClick(event.event, ['/request', 'rest', event.row], {queryParams: {env: this.instance.env}}); // TODO remove env FIX BUG
+      this._router.navigateOnClick(event.event, ['/request', 'rest', event.row], {queryParams: {namespace: this.instance.namespace}}); // TODO remove env FIX BUG
     }
   }
 
   selectedFtp(event: { event: MouseEvent, row: any }) { // TODO finish this
     if (event.row) {
       this._router.navigateOnClick(event.event, [`/request/ftp`, event.row], {
-        queryParams: { env: this.instance.env }
+        queryParams: { namespace: this.instance.namespace }
       });
     }
   }
@@ -208,7 +208,7 @@ export class DetailSessionComponent implements OnChanges {
   selectedLdap(event: { event: MouseEvent, row: any }) { // TODO finish this
     if (event.row) {
       this._router.navigateOnClick(event.event, [`/request/ldap`, event.row], {
-        queryParams: { env: this.instance.env }
+        queryParams: { namespace: this.instance.namespace }
       });
     }
   }
@@ -216,7 +216,7 @@ export class DetailSessionComponent implements OnChanges {
   selectedSmtp(event: { event: MouseEvent, row: string }) { // TODO finish this
     if (event.row) {
       this._router.navigateOnClick(event.event, [`/request/smtp`, event.row], {
-        queryParams: { env: this.instance.env }
+        queryParams: { namespace: this.instance.namespace }
       });
     }
   }
@@ -224,7 +224,7 @@ export class DetailSessionComponent implements OnChanges {
   selectedQuery(event: { event: MouseEvent, row: string }) { // TODO finish this
     if (event.row) {
       this._router.navigateOnClick(event.event, [`/request/jdbc`, event.row], {
-        queryParams: { env: this.instance.env }
+        queryParams: { namespace: this.instance.namespace }
       });
     }
   }

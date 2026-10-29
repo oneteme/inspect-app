@@ -3,11 +3,7 @@
 
     <!-- ═══ CARTE SESSION REST ═══ -->
     <div class="session-card"
-         [ngClass]="{'success': session.status >= 200 && session.status < 400,
-                     'warning': session.status >= 400 && session.status < 500,
-                     'fail': session.status >= 500,
-                     'unavailable': session.status == 0 && session.end,
-                     'in-progress': !session.end}">
+         [ngClass]="STATUS[session.end ? session.status.toString().charAt(0) + 'xx' : '-1']?.class">
 
 
       <div class="session-card-inner">
@@ -21,12 +17,9 @@
 
             <div class="session-title-content">
               <div class="session-name-row">
-                <span *ngIf="session.end" class="status-pill"
-                      [ngClass]="{'success': session.status >= 200 && session.status < 400,
-                                  'warning': session.status >= 400 && session.status < 500,
-                                  'fail': session.status >= 500,
-                                  'unavailable': session.status == 0}">
-                  {{ session.status }}
+                <span class="status-pill"
+                      [ngClass]="STATUS[session.end ? session.status.toString().charAt(0) + 'xx' : '-1']?.class">
+                  {{ session.end ? session.status + ' - ' + STATUS[session.status.toString().charAt(0) + 'xx']?.label : STATUS['-1']?.label }}
                 </span>
                 <span class="session-name ellipsis" [matTooltip]="session.name">
                   {{ session.name || 'N/A' }}
@@ -50,8 +43,7 @@
 
         <!-- Exception -->
         <exception-display
-          [type]="session.status >= 200 && session.status < 400 ? 'success' : session.status >= 400 && session.status < 500 ? 'warning' : 'fail'"
-          [exception]="session.exception">
+          [type]="session.status >= 200 && session.status < 400 ? 'success' : session.status >= 400 && session.status < 500 ? 'warning' : 'fail'">
         </exception-display>
 
         <!-- Pied de carte -->
@@ -135,7 +127,7 @@
 </ng-template>
 
 <mat-menu #menuEndPoint="matMenu" xPosition="after">
-  <a mat-menu-item [disabled]="sessionParent == null" [ngStyle]="{'pointer-events': sessionParent == null ? 'none' : ''}" [routerLink]="sessionParent?.type == 'rest' ? ['/session', 'rest', sessionParent?.id] : ['/session', sessionParent?.type.toLowerCase(), sessionParent?.id]" [queryParams]="{env: instance?.env}">
+  <a mat-menu-item [disabled]="sessionParent == null" [ngStyle]="{'pointer-events': sessionParent == null ? 'none' : ''}" [routerLink]="sessionParent?.type == 'rest' ? ['/session', 'rest', sessionParent?.id] : ['/session', sessionParent?.type.toLowerCase(), sessionParent?.id]" [queryParams]="{namespace: instance?.namespace}">
     <div style="display: flex;">
       <mat-progress-spinner *ngIf="parentLoading"  style="margin-right: 16px" diameter="24" mode="indeterminate"
                             matTooltip="Chargement de l'appel parent">
@@ -144,11 +136,14 @@
       Origine Client
     </div>
   </a>
-  <a mat-menu-item [routerLink]="['/session', 'rest', session?.id, 'tree']" [queryParams]="{env: instance?.env}">
+  <a mat-menu-item [routerLink]="['/session', 'rest', session?.id, 'tree']" [queryParams]="{namespace: instance?.namespace}">
     <mat-icon class="material-symbols-outlined">lan</mat-icon>
     Arbre d'appels
   </a>
   <a mat-menu-item (click)="navigate($event)"><mat-icon class="material-symbols-outlined">finance_mode</mat-icon>KPI</a>
+  <a mat-menu-item (click)="navigateOnCompare($event)">
+      <mat-icon class="material-symbols-outlined">compare_arrows</mat-icon>Décryptage du Flux
+  </a>
 </mat-menu>
 
 <mat-menu #menuServer="matMenu">

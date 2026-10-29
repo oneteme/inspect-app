@@ -1,6 +1,6 @@
 import {ChangeDetectionStrategy, ChangeDetectorRef, Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {ActivatedRoute, Params} from '@angular/router';
-import {combineLatest, finalize, forkJoin, map, Observable, of, Subscription, switchMap, tap} from 'rxjs';
+import {combineLatest, finalize, map, Observable, of, Subscription, switchMap, tap} from 'rxjs';
 import {DatePipe, DecimalPipe, Location} from '@angular/common';
 import {app} from 'src/environments/environment';
 import {EnvRouter} from "../../service/router.service";
@@ -11,7 +11,6 @@ import {formatters, groupByColor, periodManagement} from 'src/app/shared/util';
 import {IPeriod, IStep, IStepFrom} from '../../model/conf.model';
 import {getDefaultTodayPeriod, getQuickRangeStep, getQuickRangeDates, isDefaultTodayPeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../shared/period-filter';
 import {MatDialog} from '@angular/material/dialog';
-import {ProtocolExceptionComponent} from './components/protocol-exception-modal/protocol-exception-modal.component';
 import {InstanceService} from 'src/app/service/jquery/instance.service';
 import {RestSessionService} from 'src/app/service/jquery/rest-session.service';
 import {MainSessionService} from 'src/app/service/jquery/main-session.service';
@@ -31,6 +30,7 @@ import {CustomDateAdapter} from '../../shared/material/custom-date-adapter';
 import {MY_DATE_FORMATS} from '../../shared/shared.module';
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from '@angular/material/datepicker';
 import {CustomDateRangeSelectionStrategy} from '../../shared/material/custom-date-range-selection-strategy';
+import {SessionEventService} from "../../service/session-event.service";
 
 @Component({
     templateUrl: './dashboard.component.html',
@@ -70,6 +70,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly _instanceTraceService = inject(InstanceTraceService);
     private readonly _cdr = inject(ChangeDetectorRef);
     private readonly _pageTitleService = inject(PageTitleService);
+    private readonly _sessionEventService = inject(SessionEventService);
+
 
     sparklineTitles: {
         rest: {title: string, subtitle: string},
@@ -102,7 +104,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }),
     });
     serverNameIsLoading = true;
-    params: Partial<{ env: string, start: Date, end: Date, serveurs: string[] }> = {};
+    params: Partial<{ namespace: string, start: Date, end: Date, serveurs: string[] }> = {};
     nameDataList: any[];
     groupedBy: string;
     period: IPeriod | IStep | IStepFrom;
@@ -110,6 +112,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     serverHealthData: LastServerStart[] = [];
     serverHealthLoading = true;
+    instanceTraceLoading = true;
     deployTableRows: (LastServerStart & { lastTrace?: number })[] = [];
     deployTableToday: Date = new Date();
     versionColor: any = {};
@@ -125,7 +128,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     sessionCountLoading = true;
     restSessionCountLoading = true;
     restSessionCount: { total: number; errors: number } = { total: 0, errors: 0 };
-    globalKpi: { globalErrorRate: number; totalSessions: number; totalErrors: number } | null = null;
     kpiLoading = true;
     sparklinePercs: { rest: number; jdbc: number; ftp: number; smtp: number; ldap: number } = { rest: 0, jdbc: 0, ftp: 0, smtp: 0, ldap: 0 };
     topErrors: Record<string, { type: string; count: number }[]> = {};
@@ -158,12 +160,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // résumés calculés après chargement
     protocolSummaries: { key: string; label: string; rate: number; count: number; total: number; loading: boolean; title: string }[] = [];
     sessionSummaries: { key: string; label: string; errors: number; total: number; rate: number; barPct: number; loading: boolean; title: string }[] = [];
+    eventSummaries: { key: string; label: string; errors: number; total: number; rate: number; loading: boolean; title: string }[] = [];
     sessionTotal = 0;
+    eventWarnCount = 0;
+    eventErrorCount = 0;
+    eventInfoCount = 0;
+    eventUserCount = 0;
+    eventCountsLoading = true;
 
     private _chartsResolved = 0;
     private _tabsResolved = 0;
     private _loadGen = 0;
-    private _lastHealthEnv: string | null = null;
+    private _lastHealthNamespace: string | null = null;
     private _sessionCountByType: Record<string, { total: number; errors: number }> = {};
 
     constructor() {
@@ -172,7 +180,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             queryParams: this._activatedRoute.queryParams
         }).subscribe({
             next: (v: { params: Params, queryParams: Params }) => {
-                this.params.env = v.queryParams.env || app.defaultEnv;
+                this.params.namespace = v.queryParams.namespace || app.defaultNamespace;
                 if (v.queryParams.start && v.queryParams.end) {
                     this.period = new IPeriod(new Date(v.queryParams.start), new Date(v.queryParams.end));
                 } else if (v.queryParams.step && v.queryParams.from) {
@@ -184,7 +192,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 }
                 this.params.start = this.period.start;
                 this.params.end = this.period.end;
-                const currentEnv = this.params.env || app.defaultEnv;
+                const currentNamespace = this.params.namespace || app.defaultNamespace;
                 const currentStart = this.params.start;
                 const currentEnd = this.params.end;
                 this.groupedBy = periodManagement(currentStart, currentEnd);
@@ -195,7 +203,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 this.patchDateValue(currentStart, toDisplayedPeriodEnd(currentEnd));
                 this.serverNameIsLoading = true;
                 this._applicationsSub?.unsubscribe();
-                this._applicationsSub = this._instanceService.getApplications('SERVER', currentEnv)
+                this._applicationsSub = this._instanceService.getApplications('SERVER', currentNamespace)
                     .pipe(finalize(() => this.serverNameIsLoading = false))
                     .subscribe({
                         next: (appNames: { appName: string }[]) => {
@@ -208,8 +216,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
                 const serverParam = this.createServerFilter();
                 const effectiveEnd = currentEnd > new Date() ? new Date() : currentEnd;
-                this.chartRequests = this.REQUESTS(currentEnv, currentStart, effectiveEnd, serverParam.app_name);
-                this.tabRequests   = this.TAB_REQUESTS(currentEnv, currentStart, effectiveEnd, serverParam.app_name);
+                this.chartRequests = this.REQUESTS(currentNamespace, currentStart, effectiveEnd, serverParam.app_name);
+                this.tabRequests   = this.TAB_REQUESTS(currentNamespace, currentStart, effectiveEnd, serverParam.app_name);
                 this.sessionSubscriptions.forEach(s => s.unsubscribe());
                 this.sessionSubscriptions = [];
                 this.sessionSummaries = [];
@@ -218,8 +226,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 this.sessionCountLoading = true;
                 this.restSessionCountLoading = true;
                 this.restSessionCount = { total: 0, errors: 0 };
-                const envChanged = this.params.env !== this._lastHealthEnv;
-                if (envChanged) {
+                const namespaceChanged = this.params.namespace !== this._lastHealthNamespace;
+                if (namespaceChanged) {
                     this.deployTableRows = [];
                     this.filteredDeployRows = [];
                     this.serverHealthLoading = true;
@@ -229,20 +237,62 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 const gen = ++this._loadGen;
                 this.initTab(gen);
                 this.initCharts(gen);
-                if (envChanged) {
-                    this._lastHealthEnv = currentEnv;
-                    this.loadServerHealth(currentEnv, gen);
+                if (namespaceChanged) {
+                    this._lastHealthNamespace = currentNamespace;
+                    this.loadServerHealth(currentNamespace, gen);
                 }
-                this.sessionSubscriptions.push(this._sessionService.getCountByEnv({ env: currentEnv, start: currentStart, end: currentEnd })
+                this.sessionSubscriptions.push(this._sessionService.getCountByNamespace({ namespace: currentNamespace, start: currentStart, end: currentEnd })
                     .pipe(finalize(() => { if (this._loadGen === gen) { this.restSessionCountLoading = false; this._rebuildSessionSummaries(); } }))
                     .subscribe({ next: (data) => { if (this._loadGen === gen) { this.restSessionCount = data; } } }));
 
                 this._location.replaceState(`${this._router.url.split('?')[0]}?${this.buildQueryPath(this.buildQueryParams())}`)
+                const eventParams: any = {
+                    'instance.namespace': currentNamespace,
+                    'start.ge': currentStart.toISOString(),
+                    'start.lt': effectiveEnd.toISOString()
+                };
+                if (this.params.serveurs?.length) {
+                    eventParams['instance.app_name'] = this.params.serveurs;
+                }
+                this.sessionSubscriptions.push(this._sessionEventService.getSessionEventTypeCount(eventParams)
+                    .pipe(finalize(() => { if (this._loadGen === gen) { this.eventCountsLoading = false; this._cdr.markForCheck(); } }))
+                    .subscribe({
+                        next: (events) => {
+                            if (this._loadGen !== gen || !events) return;
+                            const getCount = (e: any): number => Number(e['COUNT(*)'] ?? e.count ?? 0) || 0;
+
+                            this.eventWarnCount = events
+                                .filter(e => e.type === 'WARN')
+                                .reduce((acc, e) => acc + getCount(e), 0);
+
+                            this.eventErrorCount = events
+                                .filter(e => e.type === 'ERROR')
+                                .reduce((acc, e) => acc + getCount(e), 0);
+
+                            this.eventInfoCount = events
+                                .filter(e => e.type === 'INFO')
+                                .reduce((acc, e) => acc + getCount(e), 0);
+
+                            this.eventUserCount = events
+                                .filter(e => e.type !== 'ERROR' && e.type !== 'WARN' && e.type !== 'INFO')
+                                .reduce((acc, e) => acc + getCount(e), 0);
+
+                            this._cdr.markForCheck();
+                        },
+                        error: () => {
+                            if (this._loadGen === gen) {
+                                this.eventWarnCount = 0;
+                                this.eventErrorCount = 0;
+                                this.eventInfoCount = 0;
+                                this.eventUserCount = 0;
+                                this._cdr.markForCheck();
+                            }
+                        }
+                    }));
             }
         }));
     }
     initCharts(gen: number) {
-        this.globalKpi = null;
         this.kpiLoading = true;
         this.sparklinePercs = { rest: 0, jdbc: 0, ftp: 0, smtp: 0, ldap: 0 };
         this.sparklineTitles = {
@@ -268,7 +318,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             { key: 'smtp',  label: 'SMTP',  rate: 0, count: 0, total: 0, loading: true, title: '' },
             { key: 'ldap',  label: 'LDAP',  rate: 0, count: 0, total: 0, loading: true, title: '' },
         ];
-
         this._chartsResolved = 0;
         const totalCharts = keys.length;
         keys.forEach(k => {
@@ -361,14 +410,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     this.patchDateValue(this.params.start, toDisplayedPeriodEnd(this.params.end));
                 }
                 const gen = ++this._loadGen;
-                const currentEnv = this.params.env || app.defaultEnv;
+                const currentNamespace = this.params.namespace || app.defaultNamespace;
                 const currentStart = this.params.start || this.period.start;
                 const currentEnd = this.params.end || this.period.end;
                 this.groupedBy = periodManagement(currentStart, currentEnd);
                 const serverParam = this.createServerFilter();
                 const effectiveEnd = currentEnd > new Date() ? new Date() : currentEnd;
-                this.chartRequests = this.REQUESTS(currentEnv, currentStart, effectiveEnd, serverParam.app_name);
-                this.tabRequests = this.TAB_REQUESTS(currentEnv, currentStart, effectiveEnd, serverParam.app_name);
+                this.chartRequests = this.REQUESTS(currentNamespace, currentStart, effectiveEnd, serverParam.app_name);
+                this.tabRequests = this.TAB_REQUESTS(currentNamespace, currentStart, effectiveEnd, serverParam.app_name);
                 this.initTab(gen);
                 this.initCharts(gen);
             }
@@ -413,28 +462,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     createServerFilter(): any {
         const servers = this.params.serveurs || [];
         if (servers.length > 0) {
-            return { app_name: servers.map(v => '"' + v + '"').join(',') };
+            return { app_name: servers.join(',') };
         }
         return { app_name: null };
-    }
-
-    openProtocolDialog(exceptions: { observable: any, type: string }) {
-        if (exceptions.observable.data?.length > 0) {
-            this._dialog.open(ProtocolExceptionComponent, {
-                width: "70%",
-                height: "60vh",
-                panelClass: "exception-modal",
-                data: {
-                    exceptions: exceptions,
-                    serveurs: this.params.serveurs,
-                    env: this.params.env,
-                    start: this.params.start,
-                    groupedBy: this.groupedBy,
-                    type: exceptions.type
-                },
-
-            })
-        }
     }
 
     patchServerValue(servers: any[]) {
@@ -467,7 +497,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     private buildQueryParams(appname: string[] = this.serverFilterForm.getRawValue().appname || []): Params {
         const queryParams: Params = {
-            env: this.params.env,
+            namespace: this.params.namespace,
             ...this.period.buildParams()
         };
 
@@ -495,40 +525,39 @@ export class DashboardComponent implements OnInit, OnDestroy {
             totalErrors += sum.count;
             totalRequests += sum.countok;
         });
-        this.globalKpi = {
-            globalErrorRate: totalRequests > 0 ? (totalErrors * 100) / totalRequests : 0,
-            totalSessions: totalRequests,
-            totalErrors
-        };
         this.kpiLoading = false;
         this._computeTopErrors();
     }
 
-    loadServerHealth(env: string, gen: number) {
+    loadServerHealth(namespace: string, gen: number) {
         this.serverHealthLoading = true;
         this.serverHealthData = [];
         this.deployTableRows = [];
         this._serverHealthSub?.unsubscribe();
-        this._serverHealthSub = this._instanceService.getLastServerStart({ env })
+        this._serverHealthSub = this._instanceService.getLastServerStart({ namespace })
                 .pipe(
-                    switchMap((servers: LastServerStart[]) => forkJoin({
-                        servers: of(servers),
-                        traces: servers.length
-                            ? this._instanceTraceService.getLastInstanceTrace({ instance: servers.map(s => s.id) })
-                            : of([])
-                    })),
-                    finalize(() => { if (this._loadGen === gen) { this.serverHealthLoading = false; this._cdr.markForCheck(); } })
+                    tap((servers: LastServerStart[]) => {
+                        this.serverHealthLoading = false;
+                    }),
+                    switchMap((servers: LastServerStart[]) => {
+                        this.deployTableRows = servers;
+                        this.deployTableToday = new Date();
+                        this.versionColor = groupByColor(servers, (v: any) => v.version);
+                        this._rebuildDeployStats();
+                        this._rebuildServerHealth();
+                        return servers.length
+                          ? this._instanceTraceService.getLastInstanceTrace({instance: servers.map(s => s.id)}).pipe(
+                            finalize(() => this.instanceTraceLoading = false))
+                          : of([]).pipe(finalize(() => this.instanceTraceLoading = false));
+
+                    })
                 )
-                .subscribe({ next: ({ servers, traces }) => {
+                .subscribe({ next: res => {
                     if (this._loadGen !== gen) return;
-                    this.serverHealthData = servers;
-                    this.versionColor = groupByColor(servers, (v: any) => v.version);
-                    this.deployTableRows = servers.map(s => ({ ...s, lastTrace: traces.find((t: any) => t.id === s.id)?.date }));
-                    this.deployTableToday = new Date();
+                    this.deployTableRows = this.deployTableRows.map(s => ({ ...s, lastTrace: res.find((t: any) => t.id === s.id)?.date }));
                     this._rebuildDeployStats();
                     this._rebuildServerHealth();
                 }})
-
     }
 
     private _rebuildDeployStats(): void {
@@ -658,11 +687,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         // batchTopJobsTable : pas de graphique associé
     }
 
-    isRecentlyStarted(server: LastServerStart): boolean {
-        if (!server.lastStart || server.end) return false;
-        return (Date.now() - new Date(server.lastStart).getTime()) < 3_600_000;
-    }
-
     private _rebuildInsightsAllClear(): void {
         this.sessionInitErrors = this.sessionCountData.find(d => d.type === 'STARTUP')?.errors ?? 0;
         this.sessionWebErrors  = this.sessionCountData.find(d => d.type === 'VIEW')?.errors ?? 0;
@@ -680,16 +704,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
         };
         const target = routes[key];
         if (!target) return;
-        const rangestatusMap: Record<string, string> = {
-            ServerError: '5xx',
-            ClientError: '4xx',
-        };
-        const rangestatus = key === 'rest' ? (rangestatusMap[errorType] ?? '0xx') : 'Ko';
+        const rangestatus = [errorType];
         this._router.navigate([target], {
             queryParams: this.buildNavigationQueryParams({
                 rangestatus,
-                ...(key !== 'rest' || !rangestatusMap[errorType] ? { q: errorType } : {}),
-                server: this.params.serveurs,
             })
         });
     }
@@ -710,27 +728,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (!target) return;
         this._router.navigate([target], {
             queryParams: this.buildNavigationQueryParams({
-                server: serverOverride ?? this.params.serveurs,
-                rangestatus: ['Ko'],
-                ...(errorType ? { q: errorType } : {}),
+                rangestatus: [errorType]
             })
         });
     }
 
-    navigateToException(exception: { type: string; tab: 'rest' | 'batch' | 'view' }) {
+    navigateToException(exception: { type: string; tab: 'rest' | 'schedule' | 'view' }) {
         const { type, tab } = exception;
         if (tab === 'view') {
             this.navigateToSessionByType('VIEW', type);
             return;
         }
-        const target = tab === 'rest' ? '/session/rest' : '/session/batch';
-        const rangestatus = tab === 'rest'
-            ? (type === 'ClientError' ? ['4xx'] : ['5xx'])
-            : ['Ko'];
+        const target = tab === 'rest' ? '/session/rest' : '/session/schedule';
+        const rangestatus = [exception.type];
         this._router.navigate([target], {
             queryParams: this.buildNavigationQueryParams({
-                ...(type !== 'ClientError' && tab === 'rest' ? { q: type } : {}),
-                server: this.params.serveurs,
                 rangestatus
             })
         });
@@ -762,20 +774,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (!key) return;
         const sessionKeyMap: Record<string, string> = {
             SERVICE: 'rest',
-            BATCH: 'batch',
+            BATCH: 'schedule',
             STARTUP: 'startup',
             VIEW: 'view',
             TEST: 'test'
         };
+        const eventKeyMap: Record<string, string> = {
+            LOG: 'log',
+            USER: 'user'
+        }
         const queryParams = {
-            env: this.params.env,
+            namespace: this.params.namespace,
             ...this.period.buildParams()
         };
         const mappedKey = sessionKeyMap[key];
+        const mappedEventKey = eventKeyMap[key];
         if (mappedKey) {
             // Session type
             this._router.navigate([`/session/${mappedKey}`], { queryParams });
-        } else {
+        }
+        else if (mappedEventKey) {
+            // Event type
+            this._router.navigate([`/event/${mappedEventKey}`], { queryParams });
+        }
+        else {
             // Request protocol (rest, jdbc, ftp, smtp, ldap)
             this._router.navigate(['/request', key], { queryParams });
         }
@@ -783,7 +805,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     private buildNavigationQueryParams(extraParams: Params = {}): Params {
         return {
-            env: this.params.env,
+            namespace: this.params.namespace,
             ...this.period.buildParams(),
             ...extraParams,
         };
@@ -793,26 +815,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     navigateOnStatusIndicator(event: MouseEvent, row: any): void {
         this._router.navigateOnClick(event, ['/supervision', row.type.toLowerCase(), row.id], {
-            queryParams: this.buildSupervisionQueryParams(row.env)
+            queryParams: this.buildSupervisionQueryParams(row.namespace)
         });
     }
 
     navigateOnSinceClick(event: MouseEvent, row: any): void {
-        this._router.navigateOnClick(event, ['/session/startup', row.id], { queryParams: { env: this.params.env } });
+        this._router.navigateOnClick(event, ['/session/startup', row.id], { queryParams: { namespace: this.params.namespace } });
     }
 
     navigateOnServerClick(event: MouseEvent, row: any): void {
-        this._router.navigateOnClick(event, ['/instance/detail', row.id], { queryParams: { env: this.params.env } });
+        this._router.navigateOnClick(event, ['/instance/detail', row.id], { queryParams: { namespace: this.params.namespace } });
     }
 
     navigateOnRestartClick(event: MouseEvent, start: number, server: string): void {
         this._router.navigateOnClick(event, ['/session/startup'], {
-            queryParams: { env: this.params.env, start: new Date(start).toISOString(), end: new Date().toISOString(), server }
+            queryParams: { namespace: this.params.namespace, start: new Date(start).toISOString(), end: new Date().toISOString(), server }
         });
     }
-
-    trackByKey(_: number, item: { key: string }): string { return item.key; }
-    trackByType(_: number, item: { type: string }): string { return item.type; }
 
     get detailContext(): DashboardDetailContext {
         return {
@@ -880,7 +899,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private _rebuildSessionSummaries(): void {
         const types = [
             { key: 'SERVICE', type: 'REST', label: 'Services exposés' },
-            { key: 'BATCH', type: 'BATCH', label: 'Tâches planifiées' },
+            { key: 'SCHEDULE', type: 'SCHEDULE', label: 'Tâches planifiées' },
             { key: 'STARTUP', type: 'STARTUP', label: 'Initialisation' },
             { key: 'VIEW', type: 'VIEW', label: 'Parcours client' },
             { key: 'TEST', type: 'TEST', label: 'Test' },
@@ -899,16 +918,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this._rebuildInsightsAllClear();
     }
 
-    navigateToSupervision(server: LastServerStart) {
-        this._router.navigate(['/supervision/server', server.id], {
-            queryParams: this.buildSupervisionQueryParams(this.params.env)
-        });
-    }
-
-    private buildSupervisionQueryParams(env?: string): Params {
+    private buildSupervisionQueryParams(namespace?: string): Params {
         const periodParams = this.period?.buildParams?.() || this.buildQueryParams();
         return {
-            env: env || this.params.env || app.defaultEnv,
+            namespace: namespace || this.params.namespace || app.defaultNamespace,
             ...periodParams
         };
     }
@@ -1003,18 +1016,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
         );
     }
 
-    TAB_REQUESTS = (env: string, start: Date, end: Date, app_name: string) => {
+    TAB_REQUESTS = (namespace: string, start: Date, end: Date, app_name: string) => {
         const groupedBy = this.groupedBy; // capturé une fois à la création
         return {
             sessionExceptionsTable: {
-                observable: this._sessionService.getSessionExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, server: app_name })
+                observable: this._sessionService.getSessionExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy })
                     .pipe(map((result: any[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
                         return result;
                     }))
             },
             batchExceptionTable: {
-                observable: this._mainService.getMainExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
+                observable: this._mainService.getMainExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, mainType: 'BATCH' })
                     .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
                         const dateMap = new Map<string, number>();
@@ -1026,11 +1039,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
                         return result.filter(r => r.errorType != null);
                     }))
             },
-            batchTopJobsTable: {
-                observable: this._mainService.getTopBatchJobErrors({ env: env, start: start, end: end, app_name: app_name })
-            },
             viewExceptionTable: {
-                observable: this._mainService.getViewExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
+                            observable: this._mainService.getMainExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, mainType: 'VIEW' })
                     .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
                         const dateMap = new Map<string, number>();
@@ -1043,7 +1053,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     }))
             },
             startupExceptionTable: {
-                observable: this._mainService.getStartupExceptions({ env: env, start: start, end: end, groupedBy: groupedBy, app_name: app_name })
+                observable: this._mainService.getMainExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, mainType: 'STARTUP' })
                     .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
                         const dateMap = new Map<string, number>();
@@ -1057,15 +1067,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
             }
         }
     }
-    REQUESTS = (env: string, start: Date, end: Date, app_name: string) => {
+    REQUESTS = (namespace: string, start: Date, end: Date, app_name: string) => {
         const groupedBy = periodManagement(start, end);
-        const p = { env, start, end, groupedBy, app_name };
+        const p = { namespace, start, end, groupedBy, app_name };
         return {
-            restRequestExceptionsTable: { observable: this.buildExceptionObservable(this._restService.getRestExceptions1(p), groupedBy, 'REST', 'rest', start, end) },
-            databaseRequestExceptionsTable: { observable: this.buildExceptionObservable(this._datebaseService.getJdbcRestSessionExceptions(p), groupedBy, 'JDBC', 'jdbc', start, end) },
-            ftpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ftpService.getftpSessionExceptions(p), groupedBy, 'FTP', 'ftp', start, end) },
+            restRequestExceptionsTable: { observable: this.buildExceptionObservable(this._restService.getRestExceptions(p), groupedBy, 'REST', 'rest', start, end) },
+            databaseRequestExceptionsTable: { observable: this.buildExceptionObservable(this._datebaseService.getJdbcExceptions(p), groupedBy, 'JDBC', 'jdbc', start, end) },
+            ftpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ftpService.getFtpExceptions(p), groupedBy, 'FTP', 'ftp', start, end) },
             smtpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._smtpService.getSmtpExceptions(p), groupedBy, 'SMTP', 'smtp', start, end) },
-            ldapRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ldapService.getLdapSessionExceptions(p), groupedBy, 'LDAP', 'ldap', start, end) },
+            ldapRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ldapService.getLdapExceptions(p), groupedBy, 'LDAP', 'ldap', start, end) },
         };
     }
 
@@ -1087,6 +1097,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
             this._dialog.closeAll();
         }
         this._pageTitleService.clear();
+    }
+
+    navigateToEventLogs(): void {
+        this._router.navigate(['/event/log'], {
+            queryParams: this.buildNavigationQueryParams()
+        });
+    }
+
+    navigateToEventUser(): void {
+        this._router.navigate(['/event/user'], {
+            queryParams: this.buildNavigationQueryParams()
+        });
     }
 }
 

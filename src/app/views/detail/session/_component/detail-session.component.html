@@ -68,19 +68,17 @@
       </database-table>
     </div>
 
-    <!-- Actions -->
+    <!-- Événements de session -->
     <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'action'" class="tab-panel">
-      <action-table [requests]="session['userActions']">
-      </action-table>
+      <session-timeline
+        [events]="sessionEvents"
+        [exceptions]="sessionExceptions">
+      </session-timeline>
     </div>
 
     <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'stage'" class="tab-panel">
       <stage-table [requests]="session['httpSessionStages']">
       </stage-table>
-    </div>
-    <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'log'" class="tab-panel">
-      <log-table [requests]="session.logEntries">
-      </log-table>
     </div>
     <!-- Timeline -->
     <div [class.hidden]="tabs[selectedTabIndex]?.type !== 'timeline'" class="tab-panel">

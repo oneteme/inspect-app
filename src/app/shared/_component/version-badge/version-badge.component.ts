@@ -11,7 +11,6 @@ import {MatDialog} from "@angular/material/dialog";
          [class.clickable]="configuration"
          (click)="configuration ? openConfig(configuration, $event) : null"
          [matTooltip]="collector || ''">
-      <mat-icon class="material-symbols-outlined chip-action" [style.color]="backgroundColor || null" *ngIf="configuration">settings</mat-icon>
       <span class="chip-value" [style.color]="backgroundColor || null">{{ version }}</span>
     </div>
   `,

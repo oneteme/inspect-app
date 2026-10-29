@@ -3,11 +3,7 @@
 
     <!-- ═══ CARTE REQUEST REST ═══ -->
     <div class="session-card"
-         [ngClass]="{'success': request.status >= 200 && request.status < 400,
-                     'warning': request.status >= 400 && request.status < 500,
-                     'fail':    request.status >= 500,
-                     'unavailable': request.end && request.status == 0,
-                     'in-progress': !request.end}">
+         [ngClass]="STATUS[request.end ? request.status.toString().charAt(0) + 'xx' : '-1']?.class">
 
       <div class="session-card-inner">
 
@@ -19,12 +15,9 @@
             </div>
             <div class="session-title-content">
               <div class="session-name-row">
-                <span *ngIf="request.end" class="status-pill"
-                      [ngClass]="{'success': request.status >= 200 && request.status < 400,
-                                  'warning': request.status >= 400 && request.status < 500,
-                                  'fail':    request.status >= 500,
-                                  'unavailable': request.status == 0}">
-                  {{ request.status }}
+                <span class="status-pill"
+                      [ngClass]="STATUS[request.end ? request.status.toString().charAt(0) + 'xx' : '-1']?.class">
+                  {{ request.end ? request.status + ' - ' + STATUS[request.status.toString().charAt(0) + 'xx']?.label : STATUS['-1']?.label }}
                 </span>
                 <span class="session-name ellipsis" [matTooltip]="request.path">
                   {{ request.path || 'N/A' }}
@@ -43,12 +36,6 @@
             <mat-icon>more_vert</mat-icon>
           </button>
         </div>
-
-        <!-- Exception -->
-        <exception-display
-          [type]="request.status >= 200 && request.status < 400 ? 'success' : request.status >= 400 && request.status < 500 ? 'warning' : 'fail'"
-          [exception]="$any(exception)">
-        </exception-display>
 
         <!-- Pied de carte -->
         <div class="session-footer">
@@ -139,6 +126,12 @@
       <div *ngIf="tabs[selectedTabIndex]?.type === 'timeline'" class="tab-panel">
         <app-timeline [options]="options" [groups]="dataGroups" [items]="dataItems"></app-timeline>
       </div>
+      <div *ngIf="tabs[selectedTabIndex]?.type === 'action'" class="tab-panel">
+        <session-timeline
+            [events]="[]"
+            [exceptions]="exceptions">
+        </session-timeline>
+      </div>
     </div>
   </div>
 </ng-container>
@@ -172,6 +165,9 @@
     </div>
     <a mat-menu-item (click)="navigateOnKpi($event)">
       <mat-icon class="material-symbols-outlined">finance_mode</mat-icon>KPI
+    </a>
+    <a mat-menu-item (click)="navigateOnCompare($event)">
+      <mat-icon class="material-symbols-outlined">compare_arrows</mat-icon>Décryptage du Flux
     </a>
 </mat-menu>
 

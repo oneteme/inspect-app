@@ -1,0 +1,79 @@
+<div class="timeline-track">
+    <div *ngFor="let item of displayedItems; let last = last; let index = index" class="timeline-entry">
+        <div class="timeline-item"
+             [class.event-page]="getItemCategory(item) === 'page'"
+             [class.event-user]="getItemCategory(item) === 'user'"
+             [class.event-info]="item.kind === 'event' && (item.event?.type === 'info' || item.event?.type === 'INFO')"
+             [class.event-warn]="item.kind === 'event' && (item.event?.type === 'warn' || item.event?.type === 'WARN')"
+             [class.event-error]="item.kind === 'event' && (item.event?.type === 'error' || item.event?.type === 'ERROR')"
+             [class.event-exception]="getItemCategory(item) === 'exception'"
+             [class.event-unknown]="getItemCategory(item) === 'unknown'"
+             [class.is-last]="last">
+            <mat-icon class="event-icon material-symbols-outlined" [attr.title]="getItemCategoryLabel(item)">{{getItemIcon(item)}}</mat-icon>
+            <div class="content"
+                 #copyContent
+                 role="button"
+                 tabindex="0"
+                 aria-label="Copier le contenu"
+                 [cdkCopyToClipboard]="getItemClipboardText(item)"
+                 (cdkCopyToClipboardCopied)="onItemCopied(item, $event)"
+                 (keydown.enter)="$event.preventDefault(); copyContent.click()"
+                 (keydown.space)="$event.preventDefault(); copyContent.click()">
+                <p class="event-sentence">
+                    <span class="event-main-line">
+                        <strong *ngIf="getItemCategory(item) !== 'status'" class="event-label">{{getItemLabel(item)}}</strong>
+                        <ng-container *ngIf="item.kind === 'event'; else exceptionSentence">
+                            <span *ngIf="item.event?.value">
+                                <ng-container *ngIf="getItemCategory(item) !== 'status'"> : </ng-container>
+                                « {{item.event?.value}} »
+                            </span>
+                            <span *ngIf="item.event?.location" class="event-location"> {{item.event?.location}}</span>
+                        </ng-container>
+                        <ng-template #exceptionSentence>
+                            <span *ngIf="item.exception?.type || item.exception?.message"
+                                  class="exception-bar fail">
+                                <span class="exception-text">
+                                    <span *ngIf="item.exception?.type" class="exception-type">{{item.exception?.type}}</span>
+                                    <span *ngIf="item.exception?.type && item.exception?.message" class="exception-separator">·</span>
+                                    <span *ngIf="item.exception?.message"
+                                          class="exception-message"
+                                          [matTooltip]="item.exception?.message">
+                                        {{item.exception?.message}}
+                                    </span>
+                                </span>
+                                <span class="exception-actions">
+                                    <button *ngIf="item.exception?.stackTraceRows"
+                                            class="exception-action"
+                                            (click)="$event.stopPropagation(); showExceptionStacktrace(item.exception!)"
+                                            (keydown)="$event.stopPropagation()"
+                                            matTooltip="Voir la stacktrace">
+                                        <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
+                                    </button>
+                                </span>
+                            </span>
+                        </ng-template>
+                    </span>
+                    <span *ngIf="item.kind === 'event'" class="timestamp event-date-line">
+                        le {{item.event?.instant * 1000 | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr'}}
+                    </span>
+                    <span *ngIf="item.kind === 'exception' && getExceptionTimestamp(item.exception!) as timestamp"
+                          class="timestamp event-date-line">
+                        le {{timestamp * 1000 | date: 'dd/MM/yyyy à HH:mm:ss.SSS': 'fr'}}
+                    </span>
+                </p>
+                <span *ngIf="copiedItem === item"
+                      class="copy-feedback"
+                      [class.copy-failed]="!copySucceeded"
+                      role="status">
+                    <mat-icon>{{copySucceeded ? 'check_circle' : 'error_outline'}}</mat-icon>
+                    {{copyFeedback}}
+                </span>
+            </div>
+        </div>
+        <div *ngIf="!last && getElapsedTimeBetween(item, displayedItems[index + 1]) as elapsed"
+             class="timeline-gap"
+             [attr.aria-label]="'Délai avant ' + getItemLabel(displayedItems[index + 1])">
+            <span class="event-elapsed">{{elapsed}}</span>
+        </div>
+    </div>
+</div>

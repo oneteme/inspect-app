@@ -10,7 +10,7 @@ import {
   pivotByStack
 } from "../../kpi.config";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
-import {periodManagement2, formatChartDates} from "../../../../shared/util";
+import {periodManagement, formatChartDates} from "../../../../shared/util";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 import {RestSessionService} from "../../../../service/jquery/rest-session.service";
 import {EnvRouter} from "../../../../service/router.service";
@@ -118,15 +118,15 @@ export class RestComponent implements OnInit {
   @Input() set queryParams(value: QueryParams) {
     if(value) {
       this.params = value;
-      this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
-      
+      this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
+
       // Initialize ChartConfigs and OrganizerConfigs
       this.$statusRepartition.chartConfig = REST_SESSION_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = REST_SESSION_PERFORMANCE_CHART_CONFIG(this.groupedBy);
       this.$volumetryRepartition.chartConfig = REST_SESSION_VOLUMETRY_CHART_CONFIG(this.groupedBy);
-      
+
       this._rebuildOrganizerConfigs();
-      
+
       this._fetchAllCharts();
       this.getMethods();
       this.getUser();
@@ -229,7 +229,7 @@ export class RestComponent implements OnInit {
 
     return this._restSessionService.getFilters(
       filter,
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts }
     ) as Observable<any[]>;
   }
 
@@ -245,12 +245,12 @@ export class RestComponent implements OnInit {
     const grp = cfg.groups.items.find(g => g.selected);
     const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
     const flt = cfg.filters?.items?.find(f => f.selected);
-    
+
     this.$statusRepartition.loading = true;
     this.$statusRepartition.data = [];
     this._restSessionService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -278,7 +278,7 @@ export class RestComponent implements OnInit {
     this.$performanceRepartition.data = [];
     this._restSessionService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined }
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -302,12 +302,12 @@ export class RestComponent implements OnInit {
     const grp = cfg.groups.items.find(g => g.selected);
     const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
     const flt = cfg.filters?.items?.find(f => f.selected);
-    
+
     this.$volumetryRepartition.loading = true;
     this.$volumetryRepartition.data = [];
     this._restSessionService.getSizeCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$volumetryFilteredValues.length ? this.$volumetryFilteredValues : undefined }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$volumetryFilteredValues.length ? this.$volumetryFilteredValues : undefined }
     ).pipe(finalize(() => this.$volumetryRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -402,14 +402,14 @@ export class RestComponent implements OnInit {
   getUser() {
     let args: any = {
       'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': `start.${this.groupedBy}.asc`
     }
     if(this.params.hosts?.length){
-      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['instance.app_name.in'] = this.params.hosts.join(',');
     }
     this.$userRepartition.loading = true;
     this._restSessionService.getRestSession(args).pipe(finalize(() => this.$userRepartition.loading = false)).subscribe({
@@ -422,14 +422,14 @@ export class RestComponent implements OnInit {
   getMediaType() {
     let args: any = {
       'column': `count:count,media.coalesce("Non renseigné"):media`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
     }
     if(this.params.hosts?.length){
-      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['instance.app_name.in'] = this.params.hosts.join(',');
     }
     this.$mediaRepartition.loading = true;
     this._restSessionService.getRestSession(args).pipe(finalize(() => this.$mediaRepartition.loading = false)).subscribe({
@@ -442,14 +442,14 @@ export class RestComponent implements OnInit {
   getMethods() {
     let args: any = {
       'column': `count:count,method:method`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
     }
     if(this.params.hosts?.length){
-      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['instance.app_name.in'] = this.params.hosts.join(',');
     }
     this.$methodRepartition.loading = true;
     this._restSessionService.getRestSession(args).pipe(finalize(() => this.$methodRepartition.loading = false)).subscribe({
@@ -462,14 +462,14 @@ export class RestComponent implements OnInit {
   getUserAgents() {
     let args: any = {
       'column': `count:count,user_agt:user_agt`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
     }
     if(this.params.hosts?.length){
-      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['instance.app_name.in'] = this.params.hosts.join(',');
     }
     this.$userAgentRepartition.loading = true;
     this._restSessionService.getRestSession(args).pipe(finalize(() => this.$userAgentRepartition.loading = false)).subscribe({
@@ -485,18 +485,17 @@ export class RestComponent implements OnInit {
   getDependencies() {
     this.$dependencyRepartition.loading = true;
     this.$dependencyRepartition.data = [];
-    this._restSessionService.getDependenciesNew({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
+    this._restSessionService.getDependencies({namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
       .pipe(finalize(() => this.$dependencyRepartition.loading = false))
       .subscribe({
         next: (res: any[]) => {this.$dependencyRepartition.data = res}
       })
-
   }
 
   getDependents() {
     this.$dependentRepartition.loading = true;
     this.$dependentRepartition.data = [];
-    this._restSessionService.getDependentsNew({env: this.params.env, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
+    this._restSessionService.getDependents({namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, servers: this.params.hosts})
     .pipe(finalize(() => this.$dependentRepartition.loading = false))
     .subscribe({
       next: (res: any[]) => {this.$dependentRepartition.data = res}
@@ -505,14 +504,14 @@ export class RestComponent implements OnInit {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_error:count_error,count(user.distinct):count_user`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error,count(user.distinct):count_user`,
+      'join': 'instance',
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString()
     }
     if(this.params.hosts?.length){
-      args['instance.app_name.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['instance.app_name.in'] = this.params.hosts.join(',');
     }
     this._restSessionService.getRestSession(args).subscribe({
       next: (res: any[]) => {

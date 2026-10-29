@@ -9,7 +9,7 @@ import {app} from "../../../../../environments/environment";
 import {EnvRouter} from "../../../../service/router.service";
 import {getErrorClassName, showifnotnull, getDataForRange,} from "../../../../shared/util";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
-import {Constants, INFINITY} from "../../../constants";
+import {Constants, INFINITY, STATUS} from "../../../constants";
 import {ExceptionInfo, FtpRequest, FtpRequestStage, InstanceEnvironment} from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
 import {TabData} from "../../session/_component/detail-session.component";
@@ -18,8 +18,7 @@ import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/p
 
 @Component({
   templateUrl: './detail-ftp.view.html',
-  styleUrls: ['./detail-ftp.view.scss'],
-  host: { 'data-view': 'detail-ftp' }
+  styleUrls: ['./detail-ftp.view.scss']
 })
 export class DetailFtpView implements OnInit, OnDestroy {
   private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
@@ -31,7 +30,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
   private readonly _dialog = inject(MatDialog);
   private readonly _pageTitleService = inject(PageTitleService);
 
-  private params: Partial<{ idFtp: string, env: string }> = {};
+  private params: Partial<{ idFtp: string, namespace: string }> = {};
   REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
   options: TimelineOptions;
   dataItems: DataItem[];
@@ -39,7 +38,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
   dataArray: any[] = [];
   request: FtpRequest;
   stages: FtpRequestStage[];
-  exception: ExceptionInfo;
+  exceptions: ExceptionInfo[];
   instance: InstanceEnvironment;
   isLoading: boolean;
 
@@ -57,7 +56,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
       this._activatedRoute.queryParams
     ]).subscribe({
       next: ([params, queryParams]) => {
-        this.params = {idFtp: params.id_request, env: queryParams.env || app.defaultEnv};
+        this.params = {idFtp: params.id_request, namespace: queryParams.namespace || app.defaultNamespace};
         this._pageTitleService.set({ icon: 'smb_share', iconOutlined: true, title: 'Flux FTP • ' + params.id_request, subtitle: 'Communications externes' });
         this.getRequest();
       }
@@ -72,8 +71,17 @@ export class DetailFtpView implements OnInit, OnDestroy {
         count: this.stages.length || 0,
         visible: true,
         type: 'stage',
-        hasError: this.stages.some(s => s.exception),
-        errorCount: this.stages.filter(s => s.exception).length || 0
+        hasError: this.exceptions?.length > 0,
+        errorCount: this.exceptions?.length || 0
+      },
+      {
+        label: 'Événements',
+        icon: Constants.MAPPING_TYPE['event'].icon,
+        count: this.exceptions?.length,
+        visible: this.exceptions?.length > 0,
+        type: 'action',
+        hasError: this.exceptions?.length > 0,
+        errorCount: this.exceptions?.length || 0
       },
       {
         label: 'Chronologie',
@@ -119,7 +127,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
         this.instance = result.instance;
         this.request = result.request;
         this.stages = result.stages;
-        this.exception = result.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
+        this.exceptions = result.stages.filter(s => s.exception).map(s => s.exception);
         this.initTabs();
         this.createTimeline();
       }
@@ -132,6 +140,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
     this.dataArray = this.stages.map((a: FtpRequestStage, i: number) => {
       let start = Math.trunc(a.start * 1000);
       let end = a.end ? Math.trunc(a.end * 1000) : INFINITY;
+      const args = a.payload?.args;
       return {
         group: `${i}`,
         start: start,
@@ -139,11 +148,11 @@ export class DetailFtpView implements OnInit, OnDestroy {
         type: end <= start ? 'point' : 'range',
         content: `<div>
                             <span class="command" style="color: #1565c0; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">${showifnotnull(a.command, () => a.command)}</span>
-                            <span>${showifnotnull(a.args, () => a.args.join(', '))}</span>
+                            <span>${showifnotnull(args, () => args.join(', '))}</span>
                           </div>`,
         className: `ftp overflow ${getErrorClassName(a)}`,
         title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end, 'HH:mm:ss.SSS')}</span> (⏱ ${this.durationPipe.transform(a.end - a.start)})<br>
-                        <span>${showifnotnull(a.command, () => a.command)} ${showifnotnull(a.args, () => a.args.join(', '))}</span>`
+                        <span>${showifnotnull(a.command, () => a.command)} ${showifnotnull(args, () => args.join(', '))}</span>`
       }
 
     });
@@ -204,7 +213,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
         this._router.open(`#/${params.join('/')}`, '_blank')
       } else {
         this._router.navigate(params, {
-          queryParams: {env: this.params.env}
+          queryParams: {namespace: this.params.namespace}
         });
       }
     }
@@ -255,6 +264,8 @@ export class DetailFtpView implements OnInit, OnDestroy {
   navigateOnKpi(event: MouseEvent) {
     var start = new Date(this.request.start * 1000);
     var end = this.request.end ? new Date(this.request.end * 1000) : new Date();
-    this._router.navigateOnClick(event, ['/kpi/request', 'ftp'], { queryParams: {host: this.request.host, env: this.instance.env, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
+    this._router.navigateOnClick(event, ['/kpi/request', 'ftp'], { queryParams: {host: this.request.host, namespace: this.instance.namespace, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
   }
+
+  protected readonly STATUS = STATUS;
 }

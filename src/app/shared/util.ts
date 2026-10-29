@@ -1,5 +1,5 @@
 import { DatePipe } from "@angular/common";
-import {ChartGroup, ChartGroup2} from "../model/chart.model";
+import {ChartGroup} from "../model/chart.model";
 import { Filter, FilterMap, Operation } from "../views/constants";
 import { makeDateTimePeriod, makeDateTimePeriodFrom } from "src/environments/environment";
 
@@ -63,13 +63,6 @@ export class Utils {
             return { 'box-shadow': '4px 0px 0px 0px ' + this.getStateColorBool(completed) + ' inset' };
         }
         return { 'box-shadow': '4px 0px 0px 0px ' + this.getStateColor(completed) + ' inset' };
-    }
-
-    static statusBorderCard(failed: any): { [key: string]: string } {
-        if (typeof failed == "boolean") {
-            return { 'border-left': '4px solid ' + this.getStateColorBool(!failed) };
-        }
-        return { 'border-left': '4px solid ' + this.getStateColor(failed) };
     }
 
     convertSeconds = (seconds: number): string => {
@@ -188,33 +181,28 @@ export function periodManagement(start: Date, end: Date): string {
         return ChartGroup.byHour;
     }
     if (dayDiff <= 24) {
-        return ChartGroup.byDay;
+        return ChartGroup.monthDay;
     }
     if (Math.round(dayDiff / 7) <= 24) {
-        return ChartGroup.byWeek;
+        return ChartGroup.yearWeek;
     }
     if (Math.round(dayDiff / 30) <= 24) {
-        return ChartGroup.byMonth;
+        return ChartGroup.yearMonth;
     }
     return ChartGroup.byYear;
 }
 
-export function periodManagement2(start: Date, end: Date): string {
-    var dayDiff = (end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000);
+export type ActivityPeriodGroup = 'yearMonth' | 'yearWeek' | 'monthDay' | 'hour' | 'hourMinute';
 
-    if (dayDiff <= 1) { // 24 heures
-        return ChartGroup2.byHour;
+export function activityPeriodManagement(start: Date, end: Date): ActivityPeriodGroup {
+    const group = periodManagement(start, end);
+    if (group === ChartGroup.byHour) {
+        const durationMinutes = (end.getTime() - start.getTime()) / (60 * 1000);
+        return durationMinutes <= 24 ? 'hourMinute' : 'hour';
     }
-    if (dayDiff <= 24) {
-        return ChartGroup2.monthDay;
-    }
-    if (Math.round(dayDiff / 7) <= 24) {
-        return ChartGroup2.yearWeek;
-    }
-    if (Math.round(dayDiff / 30) <= 24) {
-        return ChartGroup2.yearMonth;
-    }
-    return ChartGroup2.byYear;
+    if (group === ChartGroup.monthDay) return 'monthDay';
+    if (group === ChartGroup.yearWeek) return 'yearWeek';
+    return 'yearMonth';
 }
 
 export const formatters: any = {

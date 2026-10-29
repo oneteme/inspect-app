@@ -7,7 +7,7 @@ import {ActivatedRoute, Params} from '@angular/router';
 import {combineLatest, finalize, Subscription} from 'rxjs';
 import {extractPeriod} from 'src/app/shared/util';
 import {app} from 'src/environments/environment';
-import {Constants} from '../../constants';
+import {Constants, STATUS} from '../../constants';
 import {EnvRouter} from "../../../service/router.service";
 import {DateAdapter, MAT_DATE_FORMATS,} from "@angular/material/core";
 import {CustomDateAdapter} from "../../../shared/material/custom-date-adapter";
@@ -74,15 +74,12 @@ export class SearchRequestView implements OnInit, OnDestroy {
   seviceType: { [key: string]: {service : RestRequestService | DatabaseRequestService | FtpRequestService | SmtpRequestService | LdapRequestService,
                                 filters: {icon: string, label: string,color: string, value: any}[] } } =
       {
-        "rest": { service: this._restRequestService, filters: [{icon: 'warning', label: '5xx', color:'#F44336', value: '5xx'}, {icon: 'error', label: '4xx', color:'#F9AD4E', value:'4xx'}, {icon: 'done', label: '2xx', color:'#4CAF50', value:'2xx'}, {icon: 'priority_high', label: '0', color:'', value:'0xx'}, {icon: 'pending', label: 'En cours', color:'', value:'lazy'}]},
-        "jdbc": { service: this._databaseRequestService, filters: [{icon: 'warning', label: 'KO', color:'#F44336', value: 'Ko'}, {icon: 'done', label: 'OK', color:'#4CAF50', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'', value:'lazy'}] },
-        "ftp" :  { service: this._ftpRequestService, filters: [{icon: 'warning', label: 'KO', color:'#F44336', value: 'Ko'}, {icon: 'done', label: 'OK', color:'#4CAF50', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'', value:'lazy'}] },
-        "smtp": { service: this._smtpRequestService, filters: [{icon: 'warning', label: 'KO', color:'#F44336', value: 'Ko'}, {icon: 'done', label: 'OK', color:'#4CAF50', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'', value:'lazy'}] },
-        "ldap": { service: this._ldapRequestService, filters: [{icon: 'warning', label: 'KO', color:'#F44336', value: 'Ko'}, {icon: 'done', label: 'OK', color:'#4CAF50', value: 'Ok'}, {icon: 'pending', label: 'En cours', color:'', value:'lazy'}] },
+        "rest": { service: this._restRequestService, filters: [{icon: STATUS['5xx'].icon, label: STATUS['5xx'].label, color: STATUS['5xx'].color, value: '5xx'}, {icon: STATUS['4xx'].icon, label: STATUS['4xx'].label, color: STATUS['4xx'].color, value:'4xx'}, {icon: STATUS['2xx'].icon, label: STATUS['2xx'].label, color: STATUS['2xx'].color, value:'2xx'}, {icon: STATUS['0xx'].icon, label: STATUS['0xx'].label, color: STATUS['0xx'].color, value:'0xx'}, {icon: 'pending', label: 'En cours', color:'', value:'pending'}]},
+        "jdbc": { service: this._databaseRequestService, filters:  [{icon: STATUS['5xx'].icon, label: STATUS['5xx'].label, color: STATUS['5xx'].color, value: '5xx'}, {icon: STATUS['4xx'].icon, label: STATUS['4xx'].label, color: STATUS['4xx'].color, value:'4xx'}, {icon: STATUS['2xx'].icon, label: STATUS['2xx'].label, color: STATUS['2xx'].color, value:'2xx'}, {icon: STATUS['0xx'].icon, label: STATUS['0xx'].label, color: STATUS['0xx'].color, value:'0xx'}, {icon: 'pending', label: 'En cours', color:'', value:'pending'}]},
+        "ftp" :  { service: this._ftpRequestService, filters:  [{icon: STATUS['5xx'].icon, label: STATUS['5xx'].label, color: STATUS['5xx'].color, value: '5xx'}, {icon: STATUS['4xx'].icon, label: STATUS['4xx'].label, color: STATUS['4xx'].color, value:'4xx'}, {icon: STATUS['2xx'].icon, label: STATUS['2xx'].label, color: STATUS['2xx'].color, value:'2xx'}, {icon: STATUS['0xx'].icon, label: STATUS['0xx'].label, color: STATUS['0xx'].color, value:'0xx'}, {icon: 'pending', label: 'En cours', color:'', value:'pending'}] },
+        "smtp": { service: this._smtpRequestService, filters:  [{icon: STATUS['5xx'].icon, label: STATUS['5xx'].label, color: STATUS['5xx'].color, value: '5xx'}, {icon: STATUS['4xx'].icon, label: STATUS['4xx'].label, color: STATUS['4xx'].color, value:'4xx'}, {icon: STATUS['2xx'].icon, label: STATUS['2xx'].label, color: STATUS['2xx'].color, value:'2xx'}, {icon: STATUS['0xx'].icon, label: STATUS['0xx'].label, color: STATUS['0xx'].color, value:'0xx'}, {icon: 'pending', label: 'En cours', color:'', value:'pending'}] },
+        "ldap": { service: this._ldapRequestService, filters:  [{icon: STATUS['5xx'].icon, label: STATUS['5xx'].label, color: STATUS['5xx'].color, value: '5xx'}, {icon: STATUS['4xx'].icon, label: STATUS['4xx'].label, color: STATUS['4xx'].color, value:'4xx'}, {icon: STATUS['2xx'].icon, label: STATUS['2xx'].label, color: STATUS['2xx'].color, value:'2xx'}, {icon: STATUS['0xx'].icon, label: STATUS['0xx'].label, color: STATUS['0xx'].color, value:'0xx'}, {icon: 'pending', label: 'En cours', color:'', value:'pending'}] },
       }
-
-  @ViewChild(MatPaginator) paginator: MatPaginator;
-  @ViewChild(MatSort, { static: true }) sort: MatSort;
 
   onChangeStart(event) {
     this.requestFilterForm.controls.dateRangePicker.controls.end.updateValueAndValidity({onlySelf: true})
@@ -124,7 +121,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
             title: (Constants.REQUEST_MAPPING_TYPE[this.params.type]?.title || this.params.type) + ' • Suivi',
             subtitle: Constants.REQUEST_MAPPING_TYPE[this.params.type]?.subtitle
           });
-          if(queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env ||  app.defaultEnv,null,!queryParams.host ? [] : Array.isArray(queryParams.host) ? queryParams.host : [queryParams.host],!queryParams.rangestatus ? []: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] )
+          if(queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.namespace ||  app.defaultNamespace,null,!queryParams.host ? [] : Array.isArray(queryParams.host) ? queryParams.host : [queryParams.host],!queryParams.rangestatus ? []: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] )
           if(!queryParams.start && !queryParams.end){
             let period;
             if(queryParams.step && queryParams.from){
@@ -132,7 +129,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
             } else if(queryParams.step){
               period = new IStep(Number(queryParams.step));
             }
-            this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.env || app.defaultEnv, null, !queryParams.host ? [] : Array.isArray(queryParams.host) ? queryParams.host : [queryParams.host],!queryParams.rangestatus ? [/*this.seviceType[this.params.type].filters[0].value*/]: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] );
+            this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.namespace || app.defaultNamespace, null, !queryParams.host ? [] : Array.isArray(queryParams.host) ? queryParams.host : [queryParams.host],!queryParams.rangestatus ? [/*this.seviceType[this.params.type].filters[0].value*/]: Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus] );
           }
           if(queryParams.q){
             this.queryParams.optional = { 'q': queryParams.q };
@@ -181,7 +178,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
     }
     this.nameDataList =null;
     this.serverNameIsLoading =true;
-    this.hostSubscription = this.seviceType[this.params.type].service.getHost(this.params.type, { env: this.queryParams.env, start: this.queryParams.period.start.toISOString(), end: this.queryParams.period.end.toISOString()})
+    this.hostSubscription = this.seviceType[this.params.type].service.getHost(this.params.type, { namespace: this.queryParams.namespace, start: this.queryParams.period.start.toISOString(), end: this.queryParams.period.end.toISOString()})
         .pipe(finalize(()=> this.serverNameIsLoading = false))
         .subscribe({
           next: res => {
@@ -203,16 +200,11 @@ export class SearchRequestView implements OnInit, OnDestroy {
     this.emptyLabel = null;
     this.isLoading = true;
     this.RequestSubscription = (<any>this.seviceType[this.params.type]).service.getRequests({
-      'env': this.queryParams.env,
+      'namespace': this.queryParams.namespace,
       'host': this.queryParams.hosts,
-      'rangestatus': this.queryParams.rangestatus.filter(r => r != 'lazy').map(r => {
-        if(r == 'Ok') return false;
-        if(r == 'Ko') return true;
-        return r;
-      }),
-      'lazy': !!this.queryParams.rangestatus.find(r => r == 'lazy'),
-      'start': this.queryParams.period.start.toISOString(),
-      'end': this.queryParams.period.end.toISOString()
+      'status.origin': this.queryParams.rangestatus,
+      'start.ge': this.queryParams.period.start.toISOString(),
+      'start.lt': this.queryParams.period.end.toISOString()
     })
       .pipe(finalize(()=> this.isLoading = false))
       .subscribe({
@@ -255,7 +247,9 @@ export class SearchRequestView implements OnInit, OnDestroy {
     if (event.event.ctrlKey) {
       this._router.open(`#/session/rest/${event.row}`, '_blank')
     } else {
-      this._router.navigate(['/session/rest', event.row]);
+      this._router.navigate(['/session/rest', event.row], {
+        queryParams: { namespace: this.queryParams.namespace }
+      });
     }
   }
 
@@ -265,7 +259,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
       this._router.open(`#/request/rest/${event.row}`, '_blank')
     } else {
       this._router.navigate(['/request/rest', event.row], {
-        queryParams: { env: this.queryParams.env }
+        queryParams: { namespace: this.queryParams.namespace }
       });
     }
   }
@@ -276,7 +270,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
         this._router.open(`#/request/smtp/${event.row}`, '_blank',)
       } else {
         this._router.navigate([`/request/smtp`, event.row], {
-          queryParams: { env: this.queryParams.env }
+          queryParams: { namespace: this.queryParams.namespace }
         });
       }
     }
@@ -288,7 +282,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
         this._router.open(`#/request/ldap/${event.row}`, '_blank',)
       } else {
         this._router.navigate([`/request/ldap`, event.row], {
-          queryParams: { env: this.queryParams.env }
+          queryParams: { namespace: this.queryParams.namespace }
         });
       }
     }
@@ -300,7 +294,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
         this._router.open(`#/request/ftp/${event.row}`, '_blank',)
       } else {
         this._router.navigate([`/request/ftp`, event.row], {
-          queryParams: { env: this.queryParams.env }
+          queryParams: { namespace: this.queryParams.namespace }
         });
       }
     }
@@ -312,7 +306,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
         this._router.open(`#/request/jdbc/${event.row}`, '_blank',)
       } else {
         this._router.navigate([`/request/jdbc`, event.row], {
-          queryParams: { env: this.queryParams.env }
+          queryParams: { namespace: this.queryParams.namespace }
         });
       }
     }

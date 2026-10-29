@@ -5,7 +5,7 @@ import {
   MailRequest,
   MainSession,
   RestRequest,
-  RestSession, UserAction
+  RestSession, SessionEvent
 } from "./trace.model";
 
 export interface RestSessionDto extends RestSession {
@@ -15,51 +15,55 @@ export interface RestSessionDto extends RestSession {
 export interface MainSessionDto extends MainSession {
   appName: string;
   address: string;
+  status: number;
 }
 
 export interface RestRequestDto extends RestRequest {
-  exception: ExceptionInfo;
+
 }
 
 export interface MailRequestDto extends MailRequest {
-  exception: ExceptionInfo;
+
 }
 
 export interface FtpRequestDto extends FtpRequest {
-  exception: ExceptionInfo;
+
 }
 
 export interface DirectoryRequestDto extends DirectoryRequest {
-  exception: ExceptionInfo;
+
 }
 
 export interface DatabaseRequestDto extends DatabaseRequest {
-  exception: ExceptionInfo;
+
 }
 
 export interface AnalyticDto extends MainSession {
-  userActions: Array<UserAction>;
+  sessionEvents?: Array<SessionEvent>;
 }
 
 export interface MainSessionView extends MainSession {
+  exceptions?: ExceptionInfo[];
   restRequests?: RestRequestDto[];
   databaseRequests?: DatabaseRequestDto[];
   ftpRequests?: FtpRequestDto[];
   mailRequests?: MailRequestDto[];
   ldapRequests?: DirectoryRequestDto[];
   localRequests?: LocalRequest[];
-  userActions?: UserAction[];
+  sessionEvents?: SessionEvent[];
   logEntries?: LogEntry[];
   httpSessionStages?: HttpSessionStage[];
 }
 
 export interface RestSessionView extends RestSession {
+  exceptions?: ExceptionInfo[];
   restRequests?: RestRequestDto[];
   databaseRequests?: DatabaseRequestDto[];
   ftpRequests?: FtpRequestDto[];
   mailRequests?: MailRequestDto[];
   ldapRequests?: DirectoryRequestDto[];
   localRequests?: LocalRequest[];
+  sessionEvents?: SessionEvent[];
   httpSessionStages?: HttpSessionStage[];
   logEntries?: LogEntry[];
 }
@@ -70,4 +74,9 @@ export enum RequestType {
   FTP = 'ftp',
   SMTP = 'smtp',
   LDAP = 'ldap'
+}
+
+export interface SessionEventDto extends SessionEvent {
+  sessionId: string;
+  appName?: string;
 }

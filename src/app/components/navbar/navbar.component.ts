@@ -7,6 +7,7 @@ import { MatIconRegistry } from '@angular/material/icon';
 import { MatMenuTrigger } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 import { AboutDialogComponent } from '../about/about-dialog.component';
+import { AddEnvironmentDialogComponent } from '../environment/add-environment-dialog.component';
 import { app, auth } from 'src/environments/environment';
 import { Constants } from '../../views/constants';
 import { EnvRouter } from '../../service/router.service';
@@ -56,9 +57,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   MAPPING_TYPE = Constants.MAPPING_TYPE;
 
-  envs: string[] = [];
-  env: FormControl<string> = new FormControl();
-  isLoadingEnv = false;
+  namespaces: string[] = [];
+  namespace: FormControl<string> = new FormControl();
+  isLoadingNamespace = false;
   subscriptions: Subscription[] = [];
   authEnabled = auth.enabled;
 
@@ -77,11 +78,24 @@ export class NavbarComponent implements OnInit, OnDestroy {
         { label: Constants.REQUEST_MAPPING_TYPE['ldap'].title.replace(/^Flux\s+/i, ''), icon: Constants.REQUEST_MAPPING_TYPE['ldap'].icon, id: 'ldap', route: 'request/ldap', kpiRoute: 'kpi/request/ldap' },
       ]
     },
-    { label: Constants.MAPPING_TYPE['rest'].title, icon: Constants.MAPPING_TYPE['rest'].icon, id: 'rest', route: 'session/rest', kpiRoute: 'kpi/session/rest' },
-    { label: Constants.MAPPING_TYPE['batch'].title, icon: Constants.MAPPING_TYPE['batch'].icon, id: 'batch', route: 'session/batch', kpiRoute: 'kpi/session/batch' },
-    { label: Constants.MAPPING_TYPE['test'].title, icon: Constants.MAPPING_TYPE['test'].icon, id: 'test', route: 'session/test' },
-    { label: Constants.MAPPING_TYPE['startup'].title, icon: Constants.MAPPING_TYPE['startup'].icon, id: 'startup', route: 'session/startup', kpiRoute: 'kpi/session/startup' },
-    { label: Constants.MAPPING_TYPE['view'].title, icon: Constants.MAPPING_TYPE['view'].icon, id: 'view', route: 'session/view' },
+    {
+      label: Constants.MAPPING_TYPE['treatment'].title,
+      icon: Constants.MAPPING_TYPE['treatment'].icon,
+      id: 'treatment',
+      children: [
+        { label: Constants.MAPPING_TYPE['rest'].title, icon: Constants.MAPPING_TYPE['rest'].icon, id: 'rest', route: 'session/rest', kpiRoute: 'kpi/session/rest' },
+        { label: Constants.MAPPING_TYPE['schedule'].title, icon: Constants.MAPPING_TYPE['schedule'].icon, id: 'schedule', route: 'session/schedule', kpiRoute: 'kpi/session/schedule' },
+        { label: Constants.MAPPING_TYPE['test'].title, icon: Constants.MAPPING_TYPE['test'].icon, id: 'test', route: 'session/test' },
+        { label: Constants.MAPPING_TYPE['startup'].title, icon: Constants.MAPPING_TYPE['startup'].icon, id: 'startup', route: 'session/startup', kpiRoute: 'kpi/session/startup' },
+        { label: Constants.MAPPING_TYPE['view'].title, icon: Constants.MAPPING_TYPE['view'].icon, id: 'view', route: 'session/view' }
+      ]
+    },
+    { label: Constants.MAPPING_TYPE['event'].title, icon: Constants.MAPPING_TYPE['event'].icon, id: 'event',
+    children: [
+      { label: Constants.MAPPING_TYPE['log'].subtitle, icon: Constants.MAPPING_TYPE['log'].icon, id: 'log', route: 'event/log' },
+      { label: Constants.MAPPING_TYPE['user'].subtitle, icon: Constants.MAPPING_TYPE['user'].icon, id: 'user', route: 'event/user' },
+    ]},
+    { label: Constants.MAPPING_TYPE['architecture'].title, icon: Constants.MAPPING_TYPE['architecture'].icon, id: 'architecture', route: 'architecture'}
   ];
 
   private readonly _dialog = inject(MatDialog);
@@ -100,24 +114,24 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this.envs = [app.defaultEnv];
+    this.namespaces = [app.defaultNamespace];
     if (!localStorage.getItem('server')) {
       localStorage.setItem('server', app.host);
     }
-    this.isLoadingEnv = true;
+    this.isLoadingNamespace = true;
     this.subscriptions.push(
-      this._service.getEnvironments()
-        .pipe(finalize(() => (this.isLoadingEnv = false)))
-        .subscribe({ next: res => { this.envs = res.map(r => r.environement); } })
+      this._service.getNamespaces()
+        .pipe(finalize(() => (this.isLoadingNamespace = false)))
+        .subscribe({ next: res => { this.namespaces = res.map(r => r.namespace); } })
     );
     this.subscriptions.push(
-      this.env.valueChanges
+      this.namespace.valueChanges
         .pipe(distinctUntilChanged((prev, curr) => prev === curr))
         .subscribe({
           next: value => {
             this._envRouter.navigate([], {
               queryParamsHandling: 'merge',
-              queryParams: { env: value }
+              queryParams: { namespace: value }
             });
           }
         })
@@ -125,9 +139,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.subscriptions.push(
       this._activatedRoute.queryParams.subscribe({
         next: () => {
-          const envParam = this._activatedRoute.snapshot.queryParams['env'] || app.defaultEnv;
-          if (this.env.value !== envParam) {
-            this.env.setValue(envParam, { emitEvent: false });
+          const namespaceParam = this._activatedRoute.snapshot.queryParams['namespace'] || app.defaultNamespace;
+          if (this.namespace.value !== namespaceParam) {
+            this.namespace.setValue(namespaceParam, { emitEvent: false });
           }
         }
       })
@@ -142,8 +156,19 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this._envRouter.navigateOnClick(event, ['home'], { queryParams: this.buildNavigationQueryParams() });
   }
 
-  selectEnv(value: string) {
-    this.env.setValue(value);
+  selectNamespace(value: string) {
+    this.namespace.setValue(value);
+  }
+
+  openAddNamespaceDialog(): void {
+    this._dialog.open(AddEnvironmentDialogComponent).afterClosed().subscribe((namespace?: string) => {
+      if (namespace && !this.namespaces.includes(namespace)) {
+        this.namespaces = [...this.namespaces, namespace];
+      }
+      if (namespace) {
+        this.selectNamespace(namespace);
+      }
+    });
   }
 
   navigateTo(event: MouseEvent, route: string) {
@@ -161,7 +186,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   private buildNavigationQueryParams(): Params {
     const currentQueryParams = this._activatedRoute.snapshot.queryParams;
-    const queryParams: Params = { env: this.env.value };
+    const queryParams: Params = { namespace: this.namespace.value };
 
     if (currentQueryParams.step && currentQueryParams.from) {
       queryParams.step = currentQueryParams.step;
@@ -248,6 +273,15 @@ export class NavbarComponent implements OnInit, OnDestroy {
     // return 'jean.dupont@example.com';
     const claims = this.getUserClaims();
     return claims?.email || '';
+  }
+
+  openServerActivity(event: MouseEvent): void {
+    this._envRouter.navigateOnClick(event, ['activity'], {
+      queryParams: {
+        ...this.buildNavigationQueryParams(),
+        namespace: this._activatedRoute.snapshot.queryParams.namespace || this.namespace.value || app.defaultNamespace
+      }
+    });
   }
 
   logout() {

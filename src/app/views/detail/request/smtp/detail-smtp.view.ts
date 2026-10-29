@@ -9,7 +9,7 @@ import {app} from "../../../../../environments/environment";
 import {EnvRouter} from "../../../../service/router.service";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {MatTableDataSource} from "@angular/material/table";
-import {Constants, INFINITY} from "../../../constants";
+import {Constants, INFINITY, STATUS} from "../../../constants";
 import {
   ExceptionInfo,
   InstanceEnvironment,
@@ -37,7 +37,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
   private readonly _dialog = inject(MatDialog);
   private readonly _pageTitleService = inject(PageTitleService);
 
-  private params: Partial<{ idSmtp: string, env: string }> = {};
+  private params: Partial<{ idSmtp: string, namespace: string }> = {};
 
   REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
   options: TimelineOptions;
@@ -46,7 +46,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
   dataArray: any[] = [];
   request: MailRequest;
   stages: MailRequestStage[];
-  exception: ExceptionInfo;
+  exceptions: ExceptionInfo[];
   instance: InstanceEnvironment;
   isLoading: boolean;
   tabs: TabData[] = [];
@@ -62,7 +62,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
       this._activatedRoute.queryParams
     ]).subscribe({
       next: ([params, queryParams]) => {
-        this.params = {idSmtp: params.id_request, env: queryParams.env || app.defaultEnv};
+        this.params = {idSmtp: params.id_request, namespace: queryParams.namespace || app.defaultNamespace};
         this._pageTitleService.set({ icon: 'outgoing_mail', iconOutlined: true, title: 'Flux SMTP • ' + params.id_request, subtitle: 'Communications externes' });
         this.getRequest();
       }
@@ -77,8 +77,17 @@ export class DetailSmtpView implements OnInit, OnDestroy {
         count: this.stages.length || 0 ,
         visible: true,
         type: 'stage',
-        hasError: this.stages.some(s => s.exception),
-        errorCount: this.stages.filter(s => s.exception).length || 0
+        hasError: this.exceptions?.length > 0,
+        errorCount: this.exceptions?.length || 0
+      },
+      {
+        label: 'Événements',
+        icon: Constants.MAPPING_TYPE['event'].icon,
+        count: this.exceptions?.length,
+        visible: this.exceptions?.length > 0,
+        type: 'action',
+        hasError: this.exceptions?.length > 0,
+        errorCount: this.exceptions?.length || 0
       },
       {
         label: 'Chronologie',
@@ -135,7 +144,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
         this.request = result.request;
         this.stages = result.stages;
         this.request.mails = result.mails;
-        this.exception = result.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
+        this.exceptions = result.stages.filter(s => s.exception).map(s => s.exception);
         this.initTabs();
         this.createTimeline();
       }
@@ -224,7 +233,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
         this._router.open(`#/${params.join('/')}`, '_blank')
       } else {
         this._router.navigate(params, {
-          queryParams: {env: this.params.env}
+          queryParams: {namespace: this.params.namespace}
         });
       }
     }
@@ -274,6 +283,8 @@ export class DetailSmtpView implements OnInit, OnDestroy {
   navigateOnKpi(event: MouseEvent) {
     var start = new Date(this.request.start * 1000);
     var end = this.request.end ? new Date(this.request.end * 1000) : new Date();
-    this._router.navigateOnClick(event, ['/kpi/request', 'smtp'], { queryParams: {host: this.request.host, env: this.instance.env, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
+    this._router.navigateOnClick(event, ['/kpi/request', 'smtp'], { queryParams: {host: this.request.host, namespace: this.instance.namespace, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
   }
+
+  protected readonly STATUS = STATUS;
 }

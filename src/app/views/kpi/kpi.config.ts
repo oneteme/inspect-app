@@ -1,5 +1,6 @@
 import {field, UnitConfig} from "@oneteme/jquery-core";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
+import {STATUS} from "../constants";
 
 export const REST_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
   series: {
@@ -11,7 +12,7 @@ export const REST_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartC
         label: ''
       },
       jquery: {
-        value: () => 'elapsedtime',
+        value: () => 'elapsed_time',
         buildAlias: () => 'elapsedtime'
       }
     }]
@@ -61,7 +62,7 @@ export const REST_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig
             jquery: {
               value: () => 'status',
               buildAlias: () => 'status',
-              buildName: (chartItem, value) => value,
+              buildName: (chartItem, value: string) => value,
               buildColor: (value: string) => statusColor(value)
             }
           }, {
@@ -73,8 +74,8 @@ export const REST_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig
             jquery: {
               value: () => 'status_tranche',
               buildAlias: () => 'status_tranche',
-              buildColor: (value: string) => STATUS_TRANCHE[value].color,
-              buildName: (chartItem, value) => STATUS_TRANCHE[value].label
+              buildColor: (value: string) => STATUS[value].color,
+              buildName: (chartItem, value) => STATUS[value].label
             }
           }]
         }
@@ -403,16 +404,28 @@ export const BATCH_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfi
         stacks: {
           optional: false,
           items: [{
-            key: 'status_tranche',
+            key: 'status_stack',
             selected: true,
+            menu: {
+              label: 'Statut'
+            },
+            jquery: {
+              value: () => 'status',
+              buildAlias: () => 'status',
+              buildName: (chartItem, value: string) => value,
+              buildColor: (value: string) => statusColor(value)
+            }
+          }, {
+            key: 'status_tranche',
+            selected: false,
             menu: {
               label: 'Tranche'
             },
             jquery: {
-              value: () => 'status_main_tranche',
+              value: () => 'status_tranche',
               buildAlias: () => 'status_tranche',
-              buildColor: (value: string) => REQUEST_STATUS_STACK[value].color,
-              buildName: (chartItem, value) => REQUEST_STATUS_STACK[value].label
+              buildColor: (value: string) => STATUS[value].color,
+              buildName: (chartItem, value) => STATUS[value].label
             }
           }]
         }
@@ -433,7 +446,7 @@ export const BATCH_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): Chart
         label: ''
       },
       jquery: {
-        value: () => 'elapsedtime',
+        value: () => 'elapsed_time',
         buildAlias: () => 'elapsedtime'
       }
     }]
@@ -552,16 +565,28 @@ export const STARTUP_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartCon
         stacks: {
           optional: false,
           items: [{
-            key: 'status_tranche',
+            key: 'status_stack',
             selected: true,
+            menu: {
+              label: 'Statut'
+            },
+            jquery: {
+              value: () => 'status',
+              buildAlias: () => 'status',
+              buildName: (chartItem, value: string) => value,
+              buildColor: (value: string) => statusColor(value)
+            }
+          }, {
+            key: 'status_tranche',
+            selected: false,
             menu: {
               label: 'Tranche'
             },
             jquery: {
-              value: () => 'status_main_tranche',
+              value: () => 'status_tranche',
               buildAlias: () => 'status_tranche',
-              buildColor: (value: string) => REQUEST_STATUS_STACK[value].color,
-              buildName: (chartItem, value) => REQUEST_STATUS_STACK[value].label
+              buildColor: (value: string) => STATUS[value].color,
+              buildName: (chartItem, value) => STATUS[value].label
             }
           }]
         }
@@ -582,7 +607,7 @@ export const STARTUP_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): Cha
         label: ''
       },
       jquery: {
-        value: () => 'elapsedtime',
+        value: () => 'elapsed_time',
         buildAlias: () => 'elapsedtime'
       }
     }]
@@ -656,7 +681,7 @@ export const REST_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig =>
         label: ''
       },
       jquery: {
-        value: () => 'elapsedtime',
+        value: () => 'elapsed_time',
         buildAlias: () => 'elapsedtime'
       }
     }]
@@ -737,7 +762,7 @@ export const REST_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
             jquery: {
               value: () => 'status',
               buildAlias: () => 'status',
-              buildName: (chartItem, value) => value,
+              buildName: (chartItem, value: string) => value,
               buildColor: (value: string) => statusColor(value)
             }
           }, {
@@ -749,8 +774,8 @@ export const REST_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
             jquery: {
               value: () => 'status_tranche',
               buildAlias: () => 'status_tranche',
-              buildColor: (value: string) => STATUS_TRANCHE[value].color,
-              buildName: (chartItem, value) => STATUS_TRANCHE[value].label
+              buildColor: (value: string) => STATUS[value].color,
+              buildName: (chartItem, value) => STATUS[value].label
             }
           }]
         }
@@ -915,7 +940,7 @@ export const REST_LATENCY_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
         label: ''
       },
       jquery: {
-        value: () => 'elapsedtime',
+        value: () => 'elapsed_time',
         buildAlias: () => 'elapsedtime'
       }
     }]
@@ -1175,7 +1200,7 @@ export const JDBC_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
         label: ''
       },
       jquery: {
-        value: () => 'failed',
+        value: () => 'status',
         buildAlias: () => 'status'
       }
     }]
@@ -1203,10 +1228,22 @@ export const JDBC_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
               label: 'Statut'
             },
             jquery: {
-              value: () => 'failed',
-              buildAlias: () => 'status_stack',
-              buildName: (chartItem, value) => REQUEST_STATUS_STACK[value].label,
-              buildColor: (value) => REQUEST_STATUS_STACK[value].color
+              value: () => 'status',
+              buildAlias: () => 'status',
+              buildName: (chartItem, value: string) => value,
+              buildColor: (value: string) => statusColor(value)
+            }
+          }, {
+            key: 'status_tranche',
+            selected: false,
+            menu: {
+              label: 'Tranche'
+            },
+            jquery: {
+              value: () => 'status_tranche',
+              buildAlias: () => 'status_tranche',
+              buildColor: (value: string) => STATUS[value].color,
+              buildName: (chartItem, value) => STATUS[value].label
             }
           }]
         }
@@ -1227,7 +1264,7 @@ export const JDBC_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig =>
         label: ''
       },
       jquery: {
-        value: () => 'elapsedtime',
+        value: () => 'elapsed_time',
         buildAlias: () => 'elapsedtime',
         buildName: () => 'Temps'
       }
@@ -1434,7 +1471,7 @@ export const FTP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
         label: ''
       },
       jquery: {
-        value: () => 'failed',
+        value: () => 'status',
         buildAlias: () => 'status'
       }
     }]
@@ -1462,10 +1499,22 @@ export const FTP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
               label: 'Statut'
             },
             jquery: {
-              value: () => 'failed',
-              buildAlias: () => 'status_stack',
-              buildName: (chartItem, value) => REQUEST_STATUS_STACK[value].label,
-              buildColor: (value) => REQUEST_STATUS_STACK[value].color
+              value: () => 'status',
+              buildAlias: () => 'status',
+              buildName: (chartItem, value: string) => value,
+              buildColor: (value: string) => statusColor(value)
+            }
+          }, {
+            key: 'status_tranche',
+            selected: false,
+            menu: {
+              label: 'Tranche'
+            },
+            jquery: {
+              value: () => 'status_tranche',
+              buildAlias: () => 'status_tranche',
+              buildColor: (value: string) => STATUS[value].color,
+              buildName: (chartItem, value) => STATUS[value].label
             }
           }]
         }
@@ -1486,7 +1535,7 @@ export const FTP_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => 
         label: ''
       },
       jquery: {
-        value: () => 'elapsedtime',
+        value: () => 'elapsed_time',
         buildAlias: () => 'elapsedtime',
         buildName: () => 'Temps'
       }
@@ -1649,7 +1698,7 @@ export const LDAP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
         label: ''
       },
       jquery: {
-        value: () => 'failed',
+        value: () => 'status',
         buildAlias: () => 'status'
       }
     }]
@@ -1677,10 +1726,22 @@ export const LDAP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
               label: 'Statut'
             },
             jquery: {
-              value: () => 'failed',
-              buildAlias: () => 'status_stack',
-              buildName: (chartItem, value) => REQUEST_STATUS_STACK[value].label,
-              buildColor: (value) => REQUEST_STATUS_STACK[value].color
+              value: () => 'status',
+              buildAlias: () => 'status',
+              buildName: (chartItem, value: string) => value,
+              buildColor: (value: string) => statusColor(value)
+            }
+          }, {
+            key: 'status_tranche',
+            selected: false,
+            menu: {
+              label: 'Tranche'
+            },
+            jquery: {
+              value: () => 'status_tranche',
+              buildAlias: () => 'status_tranche',
+              buildColor: (value: string) => STATUS[value].color,
+              buildName: (chartItem, value) => STATUS[value].label
             }
           }]
         }
@@ -1701,7 +1762,7 @@ export const LDAP_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig =>
         label: ''
       },
       jquery: {
-        value: () => 'elapsedtime',
+        value: () => 'elapsed_time',
         buildAlias: () => 'elapsedtime',
         buildName: () => 'Temps'
       }
@@ -1820,7 +1881,7 @@ export const SMTP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
         label: ''
       },
       jquery: {
-        value: () => 'failed',
+        value: () => 'status',
         buildAlias: () => 'status'
       }
     }]
@@ -1848,10 +1909,22 @@ export const SMTP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
               label: 'Statut'
             },
             jquery: {
-              value: () => 'failed',
-              buildAlias: () => 'status_stack',
-              buildName: (chartItem, value) => REQUEST_STATUS_STACK[value].label,
-              buildColor: (value) => REQUEST_STATUS_STACK[value].color
+              value: () => 'status',
+              buildAlias: () => 'status',
+              buildName: (chartItem, value: string) => value,
+              buildColor: (value: string) => statusColor(value)
+            }
+          }, {
+            key: 'status_tranche',
+            selected: false,
+            menu: {
+              label: 'Tranche'
+            },
+            jquery: {
+              value: () => 'status_tranche',
+              buildAlias: () => 'status_tranche',
+              buildColor: (value: string) => STATUS[value].color,
+              buildName: (chartItem, value) => STATUS[value].label
             }
           }]
         }
@@ -1872,7 +1945,7 @@ export const SMTP_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig =>
         label: ''
       },
       jquery: {
-        value: () => 'elapsedtime',
+        value: () => 'elapsed_time',
         buildAlias: () => 'elapsedtime',
         buildName: () => 'Temps'
       }
@@ -2034,7 +2107,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
       label: 'Percentile (95%)'
     },
     jquery: {
-      value: (s: string) => `elapsed_percentile`,
+      value: (s: string) => `percentileDisc(0.95).within(group.order(elapsed_time))`,
       buildAlias: () => 'percentile',
       buildName: (chartItem) => 'Percentile (95%)',
       buildColor: () => '#0080ff'
@@ -2048,7 +2121,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
       label: 'Médiane'
     },
     jquery: {
-      value: (s: string) => `elapsed_median`,
+      value: (s: string) => `percentileDisc(0.5).within(group.order(elapsed_time))`,
       buildAlias: () => 'median',
       buildName: (chartItem) => 'Médiane',
       buildColor: () => '#0080ff'
@@ -2099,24 +2172,11 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
 });
 
 const STATUS_COLORS = {
+  0: ['#94a3b8', '#64748b', '#475569', '#334155'],
   2: ['#4ade80', '#22c55e', '#16a34a', '#15803d' ],
   3: ['#67e8f9', '#22d3ee', '#06b6d4', '#0891b2', '#0e7490'],
   4: ['#fcd34d', '#fbbf24', '#f59e0b', '#d97706', '#b45309'],
   5: ['#fca5a5', '#f87171', '#ef4444', '#dc2626', '#b91c1c']
-}
-
-const REQUEST_STATUS_STACK = {
-  false: {label: 'Succès', color: '#22c55e'},
-  true: {label: 'Échec', color: '#ef4444'}
-}
-
-const STATUS_TRANCHE = {
-  '1': {label: '0', color: '#94a3b8'},
-  '2': {label: '1xx', color: '#8b5cf6'},
-  '3': {label: '2xx', color: '#22c55e'},
-  '4': {label: '3xx', color: '#06b6d4'},
-  '5': {label: '4xx', color: '#f59e0b'},
-  '6': {label: '5xx', color: '#ef4444'}
 }
 
 const PERFORMANCE_TRANCHE1 = {
@@ -2175,8 +2235,8 @@ export interface MenuConfig {
 export interface JQueryConfig {
   value: (value?: string) => string;
   buildAlias: (value?: string) => string;
-  buildName?: (chartItem: ChartItem, value?: string) => string;
-  buildColor?: (value?: string) => string;
+  buildName?: (chartItem: ChartItem, value?: string | number) => string;
+  buildColor?: (value?: string | number) => string;
   order?: string;
 }
 

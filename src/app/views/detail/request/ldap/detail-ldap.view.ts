@@ -8,7 +8,7 @@ import {DatePipe} from "@angular/common";
 import {app} from "../../../../../environments/environment";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {EnvRouter} from "../../../../service/router.service";
-import {Constants, INFINITY} from "../../../constants";
+import {Constants, INFINITY, STATUS} from "../../../constants";
 import {
     DirectoryRequest,
     DirectoryRequestStage,
@@ -23,8 +23,7 @@ import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/p
 
 @Component({
     templateUrl: './detail-ldap.view.html',
-    styleUrls: ['./detail-ldap.view.scss'],
-    host: { 'data-view': 'detail-ldap' }
+    styleUrls: ['./detail-ldap.view.scss']
 })
 export class DetailLdapView implements OnInit, OnDestroy {
     private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
@@ -36,7 +35,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
     private readonly _dialog = inject(MatDialog);
     private readonly _pageTitleService = inject(PageTitleService);
 
-    private params: Partial<{idLdap: string, env: string}> = {};
+    private params: Partial<{idLdap: string, namespace: string}> = {};
 
     REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
     options: TimelineOptions;
@@ -45,7 +44,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
     dataArray: any[] = [];
     request: DirectoryRequest;
     stages: DirectoryRequestStage[];
-    exception: ExceptionInfo;
+    exceptions: ExceptionInfo[];
     instance: InstanceEnvironment;
     isLoading: boolean;
     tabs: TabData[] = [];
@@ -61,7 +60,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
             this._activatedRoute.queryParams
         ]).subscribe({
             next: ([params, queryParams]) => {
-                this.params = {idLdap: params.id_request, env: queryParams.env || app.defaultEnv};
+                this.params = {idLdap: params.id_request, namespace: queryParams.namespace || app.defaultNamespace};
         this._pageTitleService.set({ icon: 'user_attributes', iconOutlined: true, title: 'Flux LDAP • ' + params.id_request, subtitle: 'Communications externes' });
                 this.getRequest();
             }
@@ -76,8 +75,17 @@ export class DetailLdapView implements OnInit, OnDestroy {
         count: this.stages.length || 0,
         visible: true,
         type: 'stage',
-        hasError: this.stages.some(s => s.exception),
-        errorCount: this.stages.filter(s => s.exception).length || 0
+        hasError: this.exceptions?.length > 0,
+        errorCount: this.exceptions?.length || 0
+      },
+      {
+        label: 'Événements',
+        icon: Constants.MAPPING_TYPE['event'].icon,
+        count: this.exceptions?.length,
+        visible: this.exceptions?.length > 0,
+        type: 'action',
+        hasError: this.exceptions?.length > 0,
+        errorCount: this.exceptions?.length || 0
       },
       {
         label: 'Chronologie',
@@ -122,7 +130,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
                 this.instance = result.instance;
                 this.request = result.request;
                 this.stages = result.stages;
-                this.exception = result.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
+                this.exceptions = result.stages.filter(s => s.exception).map(s => s.exception);
                 this.initTabs();
                 this.createTimeline();
             }
@@ -136,6 +144,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
         this.dataArray = this.stages.map((a: DirectoryRequestStage, i: number) => {
             let start= Math.trunc(a.start * 1000);
             let end = a.end? Math.trunc(a.end * 1000) : INFINITY;
+            const args = a.payload?.args;
             return {
                 group: `${i}`,
                 start: start,
@@ -143,11 +152,11 @@ export class DetailLdapView implements OnInit, OnDestroy {
                 type: end <= start ? 'point' : 'range',
                 content: `<div class="content" style="display: flex; align-items: center; gap: 0.5rem; flex-direction: row;">
                                 <span class="command" style="color: #1565c0; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">${showifnotnull(a.command, ()=> a.command)}</span>
-                                <span>${showifnotnull(a.args, ()=> a.args.join(', '))}</span>
+                                <span>${showifnotnull(args, ()=> args.join(', '))}</span>
                          </div>`,
                 className: `ldap ${getErrorClassName(a)}`,
                 title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end , 'HH:mm:ss.SSS')}</span> (⏱ ${this.durationPipe.transform(a.end - a.start)})<br>
-                        <span>${showifnotnull(a.command, ()=> a.command)} ${showifnotnull(a.args, ()=> a.args.join(', '))}</span>`
+                        <span>${showifnotnull(a.command, ()=> a.command)} ${showifnotnull(args, ()=> args.join(', '))}</span>`
             };
         });
         this.dataArray.splice(0,0,{
@@ -196,7 +205,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
                 this._router.open(`#/${params.join('/')}`, '_blank')
             } else {
                 this._router.navigate(params, {
-                    queryParams: {env: this.params.env}
+                    queryParams: {namespace: this.params.namespace}
                 });
             }
         }
@@ -233,6 +242,8 @@ export class DetailLdapView implements OnInit, OnDestroy {
   navigateOnKpi(event: MouseEvent) {
     var start = new Date(this.request.start * 1000);
     var end = this.request.end ? new Date(this.request.end * 1000) : new Date();
-    this._router.navigateOnClick(event, ['/kpi/request', 'ldap'], { queryParams: {host: this.request.host, env: this.instance.env, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
+    this._router.navigateOnClick(event, ['/kpi/request', 'ldap'], { queryParams: {host: this.request.host, namespace: this.instance.namespace, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
   }
+
+  protected readonly STATUS = STATUS;
 }

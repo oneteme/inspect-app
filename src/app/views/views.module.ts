@@ -7,8 +7,8 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {SharedModule} from '../shared/shared.module';
 import {ChartComponent} from "@oneteme/jquery-echarts";
 import {OrganizerButtonModule} from "@oneteme/jquery-organizer";
-import {SearchRestView} from "./search/rest/search-rest.view";
-import {SearchMainView} from "./search/main/search-main.view";
+import {SearchRestView} from "./search/session/rest/search-rest.view";
+import {SearchMainView} from "./search/session/main/search-main.view";
 import {DetailSessionRestView} from "./detail/session/rest/detail-session-rest.view";
 import {DetailSessionMainView} from "./detail/session/main/detail-session-main.view";
 import {DetailDatabaseView} from "./detail/request/database/detail-database.view";
@@ -30,7 +30,6 @@ import {ArchitectureView} from "./architecture/architecture.view";
 import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
 import {NumberFormatterPipe, CompactNumberPipe} from '../shared/pipe/number.pipe';
 import {SearchRequestView} from "./search/request/search-request.view";
-import {AnalyticView} from "./analytic/analytic.view";
 import {DetailTimelineComponent} from "./detail/session/_component/timeline/detail-timeline.component";
 import {ActionTableComponent} from "./detail/session/_component/action-table/action-table.component";
 import {DetailRequestView} from "./detail/request/detail-request.view";
@@ -40,6 +39,7 @@ import {
   ServerInstanceSelectorDialogComponent
 } from "./supervision/_component/server/server-instance-selector-dialog/server-instance-selector-dialog.component";
 import {ServerSupervisionView} from "./supervision/_component/server/server-supervision.view";
+import {ServerActivityView} from "./supervision/_component/server/server-activity.view";
 import {ClientSupervisionView} from "./supervision/_component/client/client-supervision.view";
 import {
   ClientInstanceSelectorDialogComponent
@@ -64,13 +64,16 @@ import {FtpComponent} from "./kpi/request/ftp/ftp.component";
 import {LdapComponent} from "./kpi/request/ldap/ldap.component";
 import {SmtpComponent} from "./kpi/request/smtp/smtp.component";
 import {SessionKpiView} from "./kpi/session/session-kpi.view";
-import {BatchComponent} from "./kpi/session/batch/batch.component";
+import {ScheduleComponent} from "./kpi/session/schedule/schedule.component";
 import {CommandChartComponent} from "./kpi/_component/command-chart/command-chart.component";
 import {DependencyChartComponent} from "./kpi/_component/dependency-chart/dependency-chart.component";
 import {MediaTypeChartComponent} from "./kpi/_component/media-type-chart/media-type-chart.component";
 import {DependentChartComponent} from "./kpi/_component/dependent-chart/dependent-chart.component";
 import {StartupComponent} from "./kpi/session/startup/startup.component";
 import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.component";
+import {CompareView} from "./compare/compare.view";
+import {AnalyticsView} from "./analytics/analytics.view";
+import {SearchMainEventView} from "./search/event/main/search-main-event.view";
 
 @NgModule({
   imports: [
@@ -89,6 +92,7 @@ import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.compone
   declarations: [
     SearchRestView,
     SearchMainView,
+    SearchMainEventView,
     DetailRequestView,
     DetailSessionRestView,
     DetailSessionMainView,
@@ -111,13 +115,13 @@ import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.compone
     TreeView,
     NumberFormatterPipe,
     CompactNumberPipe,
-    AnalyticView,
     ActionTableComponent,
     SearchRequestView,
     MailTableComponent,
     ServerInstanceSelectorDialogComponent,
     ClientInstanceSelectorDialogComponent,
     ServerSupervisionView,
+    ServerActivityView,
     ClientSupervisionView,
     InstanceComponent,
     InstanceTableComponent,
@@ -129,7 +133,7 @@ import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.compone
     RequestKpiView,
     RequestRestComponent,
     SessionRestComponent,
-    BatchComponent,
+    ScheduleComponent,
     StartupComponent,
     JdbcComponent,
     FtpComponent,
@@ -145,7 +149,9 @@ import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.compone
     DependencyChartComponent,
     DependentChartComponent,
     MediaTypeChartComponent,
-    UserChartComponent
+    UserChartComponent,
+    CompareView,
+      AnalyticsView
   ]
 })
 export class ViewsModule { }

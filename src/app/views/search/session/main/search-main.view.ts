@@ -1,27 +1,34 @@
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
-import {BehaviorSubject, combineLatest, finalize, Subject, takeUntil} from 'rxjs';
+import {combineLatest, finalize, Subject, takeUntil} from 'rxjs';
 import {Location} from '@angular/common';
-import {extractPeriod,} from 'src/app/shared/util';
-import {TraceService} from 'src/app/service/trace.service';
-import {app, makeDatePeriod} from 'src/environments/environment';
-import {Constants, FilterConstants, FilterMap, FilterPreset} from '../../constants';
-import {FilterService} from 'src/app/service/filter.service';
-import {EnvRouter} from "../../../service/router.service";
-import {InstanceService} from "../../../service/jquery/instance.service";
-import {PageTitleService} from "../../../service/page-title.service";
+import {extractPeriod,} from '../../../../shared/util';
+import {TraceService} from '../../../../service/trace.service';
+import {app} from '../../../../../environments/environment';
+import {Constants, STATUS} from '../../../constants';
+import {EnvRouter} from "../../../../service/router.service";
+import {InstanceService} from "../../../../service/jquery/instance.service";
+import {PageTitleService} from "../../../../service/page-title.service";
 import {DateAdapter, MAT_DATE_FORMATS} from "@angular/material/core";
-import {CustomDateAdapter} from "../../../shared/material/custom-date-adapter";
-import {MY_DATE_FORMATS} from "../../../shared/shared.module";
+import {CustomDateAdapter} from "../../../../shared/material/custom-date-adapter";
+import {MY_DATE_FORMATS} from "../../../../shared/shared.module";
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
-import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-date-range-selection-strategy";
-import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../model/conf.model";
+import {CustomDateRangeSelectionStrategy} from "../../../../shared/material/custom-date-range-selection-strategy";
+import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../../model/conf.model";
 import {shallowEqual} from "../rest/search-rest.view";
-import {MainSessionDto} from "../../../model/request.model";
+import {MainSessionDto} from "../../../../model/request.model";
 import {TableProvider} from "@oneteme/jquery-table";
-import {MAIN_SESSION_TABLE_CONFIG} from "../../../shared/_component/table/table.config";
-import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
+import {MAIN_SESSION_TABLE_CONFIG} from "../../../../shared/_component/table/table.config";
+import {
+  getDefaultRelativePeriod,
+  getQuickRangeDates,
+  getQuickRangeStep,
+  isDefaultRelativePeriod,
+  PERIOD_QUICK_RANGES,
+  PeriodQuickRange,
+  toDisplayedPeriodEnd
+} from '../../../../shared/period-filter';
 import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
@@ -40,11 +47,9 @@ export class SearchMainView implements OnInit, OnDestroy {
   private readonly _pageTitleService = inject(PageTitleService);
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _location = inject(Location);
-  private readonly _filter = inject(FilterService);
   private readonly $destroy = new Subject<void>();
 
   MAPPING_TYPE = Constants.MAPPING_TYPE;
-  filterConstants = FilterConstants;
   readonly periodQuickRanges = PERIOD_QUICK_RANGES;
   tableConfig: TableProvider<MainSessionDto> = this.buildTableConfig();
   sessions: MainSessionDto[];
@@ -61,12 +66,12 @@ export class SearchMainView implements OnInit, OnDestroy {
   nameDataList: any[];
   isLoading = false;
   filters: { icon: string, label: string, color: string, value: any }[] = [
-    { icon: 'warning', label: 'KO', color: '#F44336', value: 'Ko' },
-    { icon: 'done', label: 'OK', color: '#4CAF50', value: 'Ok' },
-    { icon: 'pending', label: 'En cours', color: '', value: 'lazy' }
+    { icon: STATUS['5xx'].icon, label: STATUS['5xx'].label, color:  STATUS['5xx'].color, value: '5xx' },
+    { icon: STATUS['4xx'].icon, label: STATUS['4xx'].label, color: STATUS['4xx'].color, value: '4xx' },
+    { icon: STATUS['2xx'].icon, label: STATUS['2xx'].label, color: STATUS['2xx'].color, value: '2xx' },
+    { icon: STATUS['0xx'].icon, label: STATUS['0xx'].label, color: STATUS['0xx'].color, value: '0xx' },
+    { icon: 'pending', label: 'En cours', color: '', value: 'pending' }
   ];
-  advancedParams: Partial<{ [key: string]: any }>
-  focusFieldName: any
   queryParams: Partial<QueryParams> = {};
   type: string = '';
 
@@ -84,7 +89,7 @@ export class SearchMainView implements OnInit, OnDestroy {
           title: (Constants.MAPPING_TYPE[this.type]?.title || this.type) + ' • Suivi',
           subtitle: Constants.MAPPING_TYPE[this.type]?.subtitle
         });
-        if (queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.env || app.defaultEnv, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server], null, !queryParams.rangestatus ? [] : Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus])
+        if (queryParams.start && queryParams.end) this.queryParams = new QueryParams(new IPeriod(new Date(queryParams.start), new Date(queryParams.end)), queryParams.namespace || app.defaultNamespace, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server], null, !queryParams.rangestatus ? [] : Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus])
         if (!queryParams.start && !queryParams.end) {
           let period;
           if (queryParams.step && queryParams.from) {
@@ -92,13 +97,13 @@ export class SearchMainView implements OnInit, OnDestroy {
           } else if (queryParams.step) {
             period = new IStep(Number(queryParams.step));
           }
-          this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.env || app.defaultEnv, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server], null, !queryParams.rangestatus ? [] : Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus]);
+          this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), queryParams.namespace || app.defaultNamespace, !queryParams.server ? [] : Array.isArray(queryParams.server) ? queryParams.server : [queryParams.server], null, !queryParams.rangestatus ? [] : Array.isArray(queryParams.rangestatus) ? queryParams.rangestatus : [queryParams.rangestatus]);
         }
         this.patchStatusValue(this.queryParams.rangestatus)
         this.patchServerValue(this.queryParams.appname);
         this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
-        this._instanceService.getApplications(this.type == 'view' ? 'CLIENT' : 'SERVER', this.queryParams.env)
+        this._instanceService.getApplications(this.type == 'view' ? 'CLIENT' : 'SERVER', this.queryParams.namespace)
           .pipe(finalize(() => this.serverNameIsLoading = false))
           .subscribe({
             next: res => {
@@ -142,14 +147,7 @@ export class SearchMainView implements OnInit, OnDestroy {
   }
 
   ngOnInit() {
-    this._filter.registerGetallFilters(this.filtersSupplier.bind(this));
-  }
 
-  filtersSupplier(): BehaviorSubject<FilterMap> { //change
-    return new BehaviorSubject<FilterMap>({
-      'appname': this.serverFilterForm.getRawValue().appname,
-      'rangestatus': this.serverFilterForm.getRawValue().rangestatus.map(r => (r.value))
-    });
   }
 
   ngOnDestroy(): void {
@@ -161,21 +159,13 @@ export class SearchMainView implements OnInit, OnDestroy {
   getMainRequests() {
     this.$destroy.next();
     let params = {
-      'appname': this.queryParams.appname,
-      'env': this.queryParams.env,
-      'launchmode': this.type.toUpperCase(),
-      'failed': this.queryParams.rangestatus.filter(r => r != 'lazy').map(r => {
-        if (r == 'Ok') return true;
-        if (r == 'Ko') return false;
-        return r;
-      }),
-      'lazy': !!this.queryParams.rangestatus.find(r => r == 'lazy'),
-      'start': this.queryParams.period.start.toISOString(),
-      'end': this.queryParams.period.end.toISOString()
+      'namespace': this.queryParams.namespace,
+      'instance.app_name': this.queryParams.appname,
+      'status.origin': this.queryParams.rangestatus,
+      'type': this.type.toUpperCase(),
+      'start.ge': this.queryParams.period.start.toISOString(),
+      'start.lt': this.queryParams.period.end.toISOString()
     };
-    if (this.advancedParams) {
-      Object.assign(params, this.advancedParams);
-    }
 
     this.isLoading = true;
     this.sessions = [];
@@ -240,7 +230,7 @@ export class SearchMainView implements OnInit, OnDestroy {
 
   patchStatusValue(rangestatus: any[]) {
     this.serverFilterForm.patchValue({
-      rangestatus: this.filters.filter((f: any) => rangestatus.toString().includes(f.value))
+      rangestatus: this.filters.filter((f: any) => rangestatus.find(s => s == f.value))
     }, {emitEvent: false})
     this.queryParams.rangestatus = rangestatus;
   }
@@ -248,18 +238,9 @@ export class SearchMainView implements OnInit, OnDestroy {
   selectedRequest(event: MouseEvent, row: MainSessionDto) {
     if (row) {
       this._router.navigateOnClick(event, ['/session', row.type.toLowerCase(), row.id], {
-        queryParams: {'env': this.queryParams.env}
+        queryParams: {'namespace': this.queryParams.namespace}
       });
     }
-  }
-
-  resetFilters() {
-    this.patchDateValue((extractPeriod(app.gridViewPeriod, "gridViewPeriod") || makeDatePeriod(0)).start, (extractPeriod(app.gridViewPeriod, "gridViewPeriod") || makeDatePeriod(0, 1)).end);
-    this.patchServerValue([]);
-    this.patchStatusValue([]);
-    this.advancedParams = {};
-    this.advancedParams = {};
-    this._filter.setFilterMap({})
   }
 
   isDefaultPeriod(): boolean {
@@ -282,47 +263,5 @@ export class SearchMainView implements OnInit, OnDestroy {
     }
     this.queryParams.period = period;
     this.patchDateValue(period.start, toDisplayedPeriodEnd(period.end));
-  }
-
-  handlePresetSelection(filterPreset: FilterPreset) {
-    const formControlNamelist = Object.keys(this.serverFilterForm.controls);
-    Object.entries(filterPreset.values).reduce((accumulator: any, [key, value]) => {
-      if (formControlNamelist.includes(key)) {
-        this.serverFilterForm.patchValue({
-          [key]: value
-        })
-        this.queryParams[key] = value;
-        delete filterPreset.values[key];
-      }
-    }, {})
-    this.advancedParams = filterPreset.values
-    this._filter.setFilterMap(this.advancedParams);
-    this.search()
-  }
-
-  handlePresetSelectionReset() {
-    this.resetFilters();
-    this.search();
-  }
-
-  handleFilterReset() {
-    this.resetFilters();
-  }
-
-  focusField(fieldName: string) {
-    this.focusFieldName = [fieldName];
-  }
-
-  handledialogclose(filterMap: FilterMap) {
-    this.advancedParams = filterMap;
-    this._filter.setFilterMap(this.advancedParams);
-    this.search()
-  }
-
-  handleRemovedFilter(filterName: string) {
-    if (this.advancedParams[filterName]) {
-      delete this.advancedParams[filterName];
-      this._filter.setFilterMap(this.advancedParams);
-    }
   }
 }

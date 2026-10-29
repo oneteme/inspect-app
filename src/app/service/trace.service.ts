@@ -11,15 +11,23 @@ import {
   RestSessionDto
 } from "../model/request.model";
 import {
-  DatabaseRequest, DatabaseRequestStage,
+  DatabaseRequest,
+  DatabaseRequestStage,
   DirectoryRequest,
   DirectoryRequestStage,
+  ExceptionInfo,
   FtpRequest,
-  FtpRequestStage, HttpRequestStage, HttpSessionStage,
+  FtpRequestStage,
+  HttpRequestStage,
+  HttpSessionStage,
   InstanceEnvironment,
-  LocalRequest, LogEntry, Mail,
-  MailRequest, MailRequestStage,
-  MainSession, RestRequest,
+  LocalRequest,
+  LogEntry,
+  Mail,
+  MailRequest,
+  MailRequestStage,
+  MainSession,
+  RestRequest,
   RestSession
 } from "../model/trace.model";
 
@@ -33,15 +41,6 @@ export class TraceService {
 
   getRestSessions(params: any): Observable<Array<RestSessionDto>> {
     return this.http.get<Array<RestSessionDto>>(`${this.server}/session/rest`, {params: params});
-  }
-
-  getRestSessionsForDump(env: string, appName: string, start: Date, end: Date): Observable<Array<RestSession>> {
-    let params: any = {
-      'env': env,
-      'start': start.toISOString(),
-      'end': end.toISOString()
-    }
-    return this.http.get<Array<RestSession>>(`${this.server}/session/rest/${appName}/dump`, {params: params});
   }
 
   getRestSessionsByInstance(id: string, instanceStart: Date, start: Date, end: Date): Observable<RestSession[]> {
@@ -70,22 +69,21 @@ export class TraceService {
     return this.http.get<Array<MainSessionDto>>(`${this.server}/session/main`, {params: params});
   }
 
-  getMainSessionsForDump(env: string, appName: string, start: Date, end: Date): Observable<Array<MainSession>> {
-    let params: any = {
-      'env': env,
-      'start': start.toISOString(),
-      'end': end.toISOString()
-    }
-    return this.http.get<Array<MainSession>>(`${this.server}/session/main/${appName}/dump`, {params: params});
-  }
-
   getMainSession(id: string): Observable<MainSession> {
     return this.http.get<MainSession>(`${this.server}/session/main/${id}`);
+  }
+
+  getSessionExceptions(sessionId: string): Observable<ExceptionInfo[]> {
+    return this.http.get<ExceptionInfo[]>(`${this.server}/session/${sessionId}/exception`);
   }
 
   getTree(id: string, type: string) {
     return type == "rest" ? this.http.get(`${this.server}/session/rest/${id}/tree`) :
       this.http.get(`${this.server}/session/main/${id}/tree`);
+  }
+
+  getCompare(id: string ){
+    return this.http.get(`${this.server}/request/rest/${id}/compare`);
   }
 
   getSessionParent(type: string, id: string): Observable<{ id: string, type: string }> {
@@ -178,6 +176,7 @@ export class TraceService {
   }
 
   getLogEntryBySession(sessionId): Observable<LogEntry[]> {
-    return this.http.get<LogEntry[]>(`${this.server}/session/${sessionId}/log/entry`);
+    return this.http.get<LogEntry[]>(`${this.server}/instance/${sessionId}/log/entry`);
   }
+
 }

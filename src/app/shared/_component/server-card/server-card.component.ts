@@ -46,19 +46,19 @@ export class ServerCardComponent {
   }
 
   navigateOnServerClick(event: MouseEvent) {
-    this._router.navigateOnClick(event, ['/instance/detail', this._instance.id], { queryParams: {env: this._instance.env} });
+    this._router.navigateOnClick(event, ['/instance/detail', this._instance.id], { queryParams: {namespace: this._instance.namespace} });
   }
 
   private buildSupervisionQueryParams(): Params {
     if (this.supervisionQueryParams) {
       return {
-        env: this._instance.env,
+        namespace: this._instance.namespace,
         ...this.supervisionQueryParams
       };
     }
 
     const currentQueryParams = this._activatedRoute.snapshot.queryParams;
-    const queryParams: Params = { env: this._instance.env };
+    const queryParams: Params = { namespace: this._instance.namespace };
 
     if (currentQueryParams.step && currentQueryParams.from) {
       queryParams.step = currentQueryParams.step;

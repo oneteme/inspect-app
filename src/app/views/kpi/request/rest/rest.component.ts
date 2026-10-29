@@ -6,7 +6,7 @@ import {QueryParams} from "../../../../model/conf.model";
 import {RestRequestService} from "../../../../service/jquery/rest-request.service";
 import {finalize, Observable, of} from "rxjs";
 import {buildSeries,ChartConfig,pivotByStack,REST_LATENCY_CHART_CONFIG,REST_PERFORMANCE_CHART_CONFIG,REST_STATUS_CHART_CONFIG,REST_VOLUMETRY_CHART_CONFIG} from "./../../kpi.config";
-import {periodManagement2, formatChartDates} from "../../../../shared/util";
+import {periodManagement, formatChartDates} from "../../../../shared/util";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
@@ -87,16 +87,16 @@ export class RestComponent implements OnInit {
   @Input() set queryParams(value: QueryParams) {
     if (value) {
       this.params = value;
-      this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
+      this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
 
       // Initialize ChartConfigs and OrganizerConfigs
       this.$statusRepartition.chartConfig = REST_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = REST_PERFORMANCE_CHART_CONFIG(this.groupedBy);
       this.$volumetryRepartition.chartConfig = REST_VOLUMETRY_CHART_CONFIG(this.groupedBy);
       this.$latencyRepartition.chartConfig = REST_LATENCY_CHART_CONFIG(this.groupedBy);
-      
+
       this._rebuildOrganizerConfigs();
-      
+
       this._fetchAllCharts();
       this.getMethods();
       this.getMediaType();
@@ -229,7 +229,7 @@ export class RestComponent implements OnInit {
 
     return this._httpRequestService.getFilters(
       filter,
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts }
     ) as Observable<any[]>;
   }
 
@@ -248,12 +248,12 @@ export class RestComponent implements OnInit {
     const grp = cfg.groups.items.find(g => g.selected);
     const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
     const flt = cfg.filters?.items?.find(f => f.selected);
-    
+
     this.$statusRepartition.loading = true;
     this.$statusRepartition.data = [];
     this._httpRequestService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -281,7 +281,7 @@ export class RestComponent implements OnInit {
     this.$performanceRepartition.data = [];
     this._httpRequestService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined }
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -305,12 +305,12 @@ export class RestComponent implements OnInit {
     const grp = cfg.groups.items.find(g => g.selected);
     const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
     const flt = cfg.filters?.items?.find(f => f.selected);
-    
+
     this.$volumetryRepartition.loading = true;
     this.$volumetryRepartition.data = [];
     this._httpRequestService.getSizeCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$volumetryFilteredValues.length ? this.$volumetryFilteredValues : undefined }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$volumetryFilteredValues.length ? this.$volumetryFilteredValues : undefined }
     ).pipe(finalize(() => this.$volumetryRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -338,9 +338,9 @@ export class RestComponent implements OnInit {
     const flt = cfg.filters?.items?.find(f => f.selected);
     this.$latencyRepartition.loading = true;
     this.$latencyRepartition.data = [];
-    this._httpRequestService.getLatency2(
+    this._httpRequestService.getLatency(
       { serie: cfg.series.items[0], indicator: ind, group: grp, stack: stk, filter: flt },
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$latencyFilteredValues.length ? this.$latencyFilteredValues : undefined }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$latencyFilteredValues.length ? this.$latencyFilteredValues : undefined }
     ).pipe(finalize(() => this.$latencyRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -351,7 +351,7 @@ export class RestComponent implements OnInit {
           effectiveStk = undefined;
         }
       }
-      
+
       const series = buildSeries(cfg.series.items, ind, grp, effectiveStk, formattedData);
       const pivoted = effectiveStk ? pivotByStack(cfg.series.items, ind, grp, effectiveStk, formattedData) : formattedData;
       this.$latencyRepartition.data = pivoted;
@@ -383,16 +383,20 @@ export class RestComponent implements OnInit {
   }
 
   getMediaType() {
+    const instanceType = this.params.optional?.instanceType;
     const args: any = {
       'column': `count:count,media.coalesce("Non renseigné"):media`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
     };
-    if (this.params.hosts?.length) {
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    if(this.params.hosts?.length){
+      args['host.in'] = this.params.hosts.join(',');
+    }
+    if(instanceType) {
+      args['instance.type'] = instanceType;
     }
     this.$mediaRepartition.loading = true;
     this._httpRequestService.getRestRequest(args)
@@ -401,16 +405,20 @@ export class RestComponent implements OnInit {
   }
 
   getMethods() {
+    const instanceType = this.params.optional?.instanceType;
     const args: any = {
       'column': `count:count,method:method`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
-    };
-    if (this.params.hosts?.length) {
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    }
+    if(this.params.hosts?.length){
+      args['host.in'] = this.params.hosts.join(',');
+    }
+    if(instanceType) {
+      args['instance.type'] = instanceType;
     }
     this.$methodRepartition.loading = true;
     this._httpRequestService.getRestRequest(args)
@@ -419,15 +427,19 @@ export class RestComponent implements OnInit {
   }
 
   getGlobalStatistics() {
+    const instanceType = this.params.optional?.instanceType;
     const args: any = {
-      'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_error:count_error`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error`,
+      'join': 'instance',
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString()
-    };
-    if (this.params.hosts?.length) {
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    }
+    if(this.params.hosts?.length){
+      args['host.in'] = this.params.hosts.join(',');
+    }
+    if(instanceType) {
+      args['instance.type'] = instanceType;
     }
     this._httpRequestService.getRestRequest(args).subscribe({
       next: (res: any[]) => {
@@ -536,16 +548,20 @@ export class RestComponent implements OnInit {
   }
 
   getUser(): void {
+    const instanceType = this.params.optional?.instanceType;
     const args: any = {
       'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
       'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'instance.namespace': `"${this.params.namespace}"`,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': `start.${this.groupedBy}.asc`
-    };
-    if (this.params.hosts?.length) {
+    }
+    if(this.params.hosts?.length){
       args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    }
+    if(instanceType) {
+      args['instance.type'] = instanceType;
     }
     this.$userRepartition.loading = true;
     this._httpRequestService.getRestRequest(args)
@@ -554,16 +570,20 @@ export class RestComponent implements OnInit {
   }
 
   getDependencies(): void {
+    const instanceType = this.params.optional?.instanceType;
     const args: any = {
       'column': `instance.app_name:origin,host:target,count:count`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.asc'
     };
     if (this.params.hosts?.length) {
       args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    }
+    if(instanceType) {
+      args['instance.type'] = instanceType;
     }
     this.$dependencyRepartition.loading = true;
     this._httpRequestService.getRestRequest(args)

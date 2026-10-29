@@ -7,7 +7,6 @@ export interface RestSession extends AbstractSession, RestRequest {
   name: string;
   userAgent: string;
   cacheControl: string;
-  exception: ExceptionInfo;
 }
 
 export interface RestRequest extends AbstractRequest {
@@ -19,7 +18,6 @@ export interface RestRequest extends AbstractRequest {
   query: string;
   contentType: string;
   authScheme: string;
-  status: number;
   inDataSize: number;
   outDataSize: number;
   inContentEncoding: string;
@@ -38,7 +36,6 @@ export interface DatabaseRequest extends AbstractRequest {
   productName: string;
   productVersion: string;
   command: string;
-  failed: boolean;
 }
 
 export interface FtpRequest extends AbstractRequest {
@@ -47,7 +44,6 @@ export interface FtpRequest extends AbstractRequest {
   port: number;
   serverVersion: string;
   clientVersion: string;
-  failed: boolean;
 }
 
 export interface MailRequest extends AbstractRequest {
@@ -55,34 +51,30 @@ export interface MailRequest extends AbstractRequest {
   host: string;
   port: number;
   mails: Array<Mail>;
-  failed: boolean;
 }
 
 export interface DirectoryRequest extends AbstractRequest {
   protocol: string;
   host: string;
   port: number;
-  failed: boolean;
 }
 
 export interface LocalRequest extends AbstractRequest {
   name: string;
   type: string;
   location: string;
-  exception: ExceptionInfo;
 }
 
 export interface DatabaseRequestStage extends AbstractStage {
-  count: number[];
-  args: string[];
+  payload?: StagePayload;
 }
 
 export interface DirectoryRequestStage extends AbstractStage {
-  args: string[];
+  payload?: StagePayload;
 }
 
 export interface FtpRequestStage extends AbstractStage {
-  args: string[];
+  payload?: StagePayload;
 }
 
 export interface HttpRequestStage extends AbstractStage {
@@ -113,6 +105,15 @@ export interface UserAction {
   start: Date;
 }
 
+export interface SessionEvent {
+  '@type': string;
+  instant: number;
+  type: string;
+  sessionId: string;
+  value?: string;
+  location?: string;
+}
+
 export interface AbstractSession {
   requestsMask: number;
   instanceId: string;
@@ -127,6 +128,7 @@ export interface AbstractRequest {
   sessionId: string;
   instanceId: string;
   id: string;
+  status: number;
 }
 
 export interface AbstractStage {
@@ -144,6 +146,7 @@ export interface AbstractStage {
 export interface ExceptionInfo {
   type: string;
   message: string;
+  offset?: number;
   stackTraceRows: StackTraceRow[];
   cause: ExceptionInfo;
 }
@@ -160,6 +163,7 @@ export interface InstanceEnvironment {
   version: string;
   address: string;
   env: string;
+  namespace: string;
   os: string;
   re: string;
   user: string;
@@ -172,6 +176,7 @@ export interface InstanceEnvironment {
   resource: MachineResource;
   configuration: InspectCollectorConfiguration;
   properties:any;
+  additionalProperties?: Record<string, unknown> | null;
 }
 
 export interface InspectCollectorConfiguration {
@@ -197,7 +202,15 @@ export interface TracingProperties {
 
 export interface LogEntry {
   instant: number;
+  appName: string;
   level: string;
   message: string;
-  stackRows: StackTraceRow[];
+  thread: string;
+  action: string;
+  stackRows: StackTraceRow[] | string;
+}
+
+export interface StagePayload {
+  args: string[];
+  count: number[];
 }

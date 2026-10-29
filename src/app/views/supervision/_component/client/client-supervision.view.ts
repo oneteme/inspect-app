@@ -23,7 +23,7 @@ import {
 import {PageTitleService} from '../../../../service/page-title.service';
 import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../../shared/period-filter';
 import {IPeriod, IStep, IStepFrom} from '../../../../model/conf.model';
-import {shallowEqual} from '../../../search/rest/search-rest.view';
+import {shallowEqual} from '../../../search/session/rest/search-rest.view';
 
 @Component({
   templateUrl: './client-supervision.view.html',
@@ -152,11 +152,12 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
   instances: {id: string, appName: string, address:string,  start: number, end: number}[] = [];
   usageResourceByPeriod: any[] = [];
   instanceTraceByPeriod: {date: Date, pending: number, attempts: number, traceCount: number, queueCapacity: number}[] = [];
+  loadingInstanceTrace: boolean = false;
   logEntryByPeriod: any[] = [];
   lastTrace: number;
   unavailableStat:  number = 0;
   traceStat:  number = 0;
-  params: Partial<{instance: string, env: string, start: Date, end: Date, app_name?: string}> = {};
+  params: Partial<{instance: string, namespace: string, start: Date, end: Date, app_name?: string}> = {};
   isLoading = false;
   isLoadingInstances = false;
   reloadInstances = true;
@@ -181,9 +182,9 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
       this._activatedRoute.queryParams
     ]).subscribe({
       next: ([params, queryParams]) => {
-        this.reloadInstances = !!(this.params.env && queryParams.env && this.params.env !== queryParams.env);
+        this.reloadInstances = !!(this.params.namespace && queryParams.namespace && this.params.namespace !== queryParams.namespace);
         this.params.instance = params.instance;
-        this.params.env = queryParams.env;
+        this.params.namespace = queryParams.namespace;
 
         if (queryParams.start && queryParams.end) {
           this.period = new IPeriod(new Date(queryParams.start), new Date(queryParams.end));
@@ -242,7 +243,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
     this.instances = [];
     this.servers = [];
     this.isLoadingInstances = true;
-    this._instanceService.getClientInstanceByPeriodAndAddress({env: this.params.env, start: start, end: end})
+    this._instanceService.getClientInstanceByPeriodAndAddress({namespace: this.params.namespace, start: start, end: end})
     .pipe(finalize(() => this.isLoadingInstances = false))
     .subscribe({
         next: res => {
@@ -273,8 +274,8 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
     this.syncChartPeriodBounds();
     this._traceService.getInstance(this.params.instance)
     .pipe(switchMap(res => {
-      if(res?.env !== this.params.env) {
-        this._snackBar.open(`L'identifiant de cette instance ne correspond pas à l'environnement ${this.params.env}`, "Fermer",
+      if(res?.namespace !== this.params.namespace) {
+        this._snackBar.open(`L'identifiant de cette instance ne correspond pas à l'environnement ${this.params.namespace}`, "Fermer",
             {
               horizontalPosition: "center",
               verticalPosition: "top",
@@ -284,7 +285,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
       }
       this.instance = res;
       this.updatePageTitle();
-      this._location.replaceState(`${this._router.url.split('?')[0]}?env=${this.params.env}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}&app_name=${this.instance.name}&_reload=${new Date().getTime()}`);
+      this._location.replaceState(`${this._router.url.split('?')[0]}?namespace=${this.params.namespace}&start=${this.params.start.toISOString()}&end=${this.params.end.toISOString()}&app_name=${this.instance.name}&_reload=${new Date().getTime()}`);
       return forkJoin([
         this.instance.end ? of([]) : this._instanceTraceService.getLastInstanceTrace({instance: [this.params.instance]}),
         this._machineUsageService.getResourceMachineByPeriod({instance: this.params.instance, start: this.params.start, end: this.params.end}),
@@ -319,12 +320,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
       icon: 'browse_activity',
       iconOutlined: true,
       title: this.instance.name,
-      subtitle: 'Supervision • Client',
-      instanceContext: {
-        instance: this.instance,
-        lastTrace: this.lastTrace,
-        date: this.date.getTime()
-      }
+      subtitle: 'Supervision • Client'
     });
   }
 
@@ -339,7 +335,7 @@ export class ClientSupervisionView implements OnInit, OnDestroy {
       }
 
       const newQueryParams: any = {
-        env: this.params.env,
+        namespace: this.params.namespace,
         app_name: appName,
         ...this.period.buildParams()
       };

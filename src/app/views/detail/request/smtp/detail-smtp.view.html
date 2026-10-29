@@ -3,9 +3,7 @@
 
     <!-- ═══ CARTE SMTP ═══ -->
     <div class="session-card"
-         [ngClass]="{'success': request.end && !request.failed,
-                     'fail':    request.end && request.failed,
-                     'in-progress': !request.end}">
+         [ngClass]="STATUS[request.end ? request.status.toString().charAt(0) + 'xx' : '-1']?.class">
       <div class="session-card-inner">
 
         <div class="session-header">
@@ -15,10 +13,13 @@
             </div>
             <div class="session-title-content">
               <div class="session-name-row">
-                <span *ngIf="request.end" class="status-pill"
-                      [ngClass]="{'success': !request.failed, 'fail': request.failed}">
-                  {{ request.failed ? 'Echec' : 'Réussi' }}
+                <span class="status-pill"
+                      [ngClass]="STATUS[request.end ? request.status.toString().charAt(0) + 'xx' : '-1']?.class">
+                  {{ request.end ? STATUS[request.status.toString().charAt(0) + 'xx']?.label : STATUS['-1']?.label }}
                 </span>
+              </div>
+              <div class="session-url-row">
+                <span class="method-badge">{{ request.command || 'N/A' }}</span>
                 <span class="session-name ellipsis"
                       [matTooltip]="'smtp://' + (request.host || 'N/A') + (request.port == -1 ? '' : ':' + request.port)">
                   {{ 'smtp://' + (request.host || 'N/A') + (request.port == -1 ? '' : ':' + request.port) }}
@@ -30,8 +31,6 @@
             <mat-icon>more_vert</mat-icon>
           </button>
         </div>
-
-        <exception-display [exception]="exception"></exception-display>
 
         <div class="session-footer">
           <div class="footer-section">
@@ -88,6 +87,12 @@
       </div>
       <div *ngIf="tabs[selectedTabIndex]?.type === 'mail'" class="tab-panel">
         <request-mail-table [mails]="request.mails"></request-mail-table>
+      </div>
+      <div *ngIf="tabs[selectedTabIndex]?.type === 'action'" class="tab-panel">
+        <session-timeline
+            [events]="[]"
+            [exceptions]="exceptions">
+        </session-timeline>
       </div>
     </div>
   </div>

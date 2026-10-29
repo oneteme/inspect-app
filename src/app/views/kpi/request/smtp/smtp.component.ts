@@ -5,7 +5,7 @@ import {QueryParams} from "../../../../model/conf.model";
 import {SmtpRequestService} from "../../../../service/jquery/smtp-request.service";
 import {finalize, Observable, of} from "rxjs";
 import {buildSeries,ChartConfig,pivotByStack,SMTP_STATUS_CHART_CONFIG,SMTP_PERFORMANCE_CHART_CONFIG} from "../../kpi.config";
-import {periodManagement2, formatChartDates} from "../../../../shared/util";
+import {periodManagement, formatChartDates} from "../../../../shared/util";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
@@ -58,14 +58,14 @@ export class SmtpComponent implements OnInit {
   @Input() set queryParams(value: QueryParams) {
     if (value) {
       this.params = value;
-      this.groupedBy = periodManagement2(this.params.period.start, this.params.period.end);
+      this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
 
       // Initialize ChartConfigs and OrganizerConfigs
       this.$statusRepartition.chartConfig = SMTP_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = SMTP_PERFORMANCE_CHART_CONFIG(this.groupedBy);
-      
+
       this._rebuildOrganizerConfigs();
-      
+
       this._fetchAllCharts();
       this.getCommands();
       this.getUser();
@@ -139,7 +139,7 @@ export class SmtpComponent implements OnInit {
 
     return this._smtpRequestService.getFilters(
       filter,
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts }
     ) as Observable<any[]>;
   }
 
@@ -154,12 +154,12 @@ export class SmtpComponent implements OnInit {
     const grp = cfg.groups.items.find(g => g.selected);
     const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
     const flt = cfg.filters?.items?.find(f => f.selected);
-    
+
     this.$statusRepartition.loading = true;
     this.$statusRepartition.data = [];
     this._smtpRequestService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -187,7 +187,7 @@ export class SmtpComponent implements OnInit {
     this.$performanceRepartition.data = [];
     this._smtpRequestService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { env: this.params.env, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined }
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -222,14 +222,14 @@ export class SmtpComponent implements OnInit {
   getCommands() {
     const args: any = {
       'column': `count:count,command.coalesce("Non renseigné"):command`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.desc'
-    };
-    if (this.params.hosts?.length) {
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    }
+    if(this.params.hosts?.length){
+      args['host.in'] = this.params.hosts.join(',');
     }
     this.$commandRepartition.loading = true;
     this._smtpRequestService.getSmtp(args)
@@ -237,52 +237,52 @@ export class SmtpComponent implements OnInit {
       .subscribe({ next: (res: any[]) => { this.$commandRepartition.data = res; } });
   }
 
-  getUser(): void {
-    const args: any = {
-      'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
-      'start.ge': this.params.period.start.toISOString(),
-      'start.lt': this.params.period.end.toISOString(),
-      'order': `start.${this.groupedBy}.asc`
-    };
-    if (this.params.hosts?.length) {
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
-    }
-    this.$userRepartition.loading = true;
-    this._smtpRequestService.getSmtp(args)
-      .pipe(finalize(() => this.$userRepartition.loading = false))
-      .subscribe({ next: (res: any[]) => { this.$userRepartition.data = formatChartDates(res, this.groupedBy, this.datePipe); } });
-  }
-
   getDependencies(): void {
     const args: any = {
       'column': `instance.app_name:origin,host:target,count:count`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'join': 'instance',
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString(),
       'order': 'count.asc'
-    };
-    if (this.params.hosts?.length) {
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    }
+    if(this.params.hosts?.length){
+      args['host.in'] = this.params.hosts.join(',');
     }
     this.$dependencyRepartition.loading = true;
     this._smtpRequestService.getSmtp(args)
-      .pipe(finalize(() => this.$dependencyRepartition.loading = false))
-      .subscribe({ next: (res: any[]) => { this.$dependencyRepartition.data = res; } });
+    .pipe(finalize(() => this.$dependencyRepartition.loading = false))
+    .subscribe({ next: (res: any[]) => { this.$dependencyRepartition.data = res; } });
+  }
+
+  getUser() {
+    const args: any = {
+      'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
+      'join': 'instance',
+      'instance.namespace': this.params.namespace,
+      'start.ge': this.params.period.start.toISOString(),
+      'start.lt': this.params.period.end.toISOString(),
+      'order': `start.${this.groupedBy}.asc`
+    }
+    if(this.params.hosts?.length){
+      args['host.in'] = this.params.hosts.join(',');
+    }
+    this.$userRepartition.loading = true;
+    this._smtpRequestService.getSmtp(args)
+    .pipe(finalize(() => this.$userRepartition.loading = false))
+    .subscribe({ next: (res: any[]) => { this.$userRepartition.data = formatChartDates(res, this.groupedBy, this.datePipe); } });
   }
 
   getGlobalStatistics() {
     const args: any = {
-      'column': `elapsed_percentile:elapsedPercentile,count:count_request,count_request_error:count_error`,
-      'instance_env': 'instance.id',
-      'instance.environement': `"${this.params.env}"`,
+      'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error`,
+      'join': 'instance',
+      'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
       'start.lt': this.params.period.end.toISOString()
-    };
-    if (this.params.hosts?.length) {
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+    }
+    if(this.params.hosts?.length){
+      args['host.in'] = this.params.hosts.join(',');
     }
     this._smtpRequestService.getSmtp(args).subscribe({
       next: (res: any[]) => {

@@ -8,14 +8,15 @@ import {AppComponent} from './app.component';
 import {ViewsModule} from './views/views.module';
 import {SharedModule} from './shared/shared.module';
 
+
 // main layout
 import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
 
 import {DatePipe, DecimalPipe, I18nPluralPipe, registerLocaleData} from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
-import {SearchRestView} from "./views/search/rest/search-rest.view";
+import {SearchRestView} from "./views/search/session/rest/search-rest.view";
 import {DetailSessionRestView} from "./views/detail/session/rest/detail-session-rest.view";
-import {SearchMainView} from "./views/search/main/search-main.view";
+import {SearchMainView} from "./views/search/session/main/search-main.view";
 import {DetailSessionMainView} from "./views/detail/session/main/detail-session-main.view";
 import {DashboardComponent} from "./views/dashboard/dashboard.component";
 import {EnvRouter} from "./service/router.service";
@@ -25,23 +26,25 @@ import {NumberFormatterPipe} from './shared/pipe/number.pipe';
 import {TreeView} from './views/tree/tree.view';
 import {SizePipe} from "./shared/pipe/size.pipe";
 import {Interceptor} from "./shared/interceptor/interceptor";
-import {AnalyticView} from "./views/analytic/analytic.view";
 import {SearchRequestView} from "./views/search/request/search-request.view";
 import {Constants} from "./views/constants";
 import {DetailRequestView} from "./views/detail/request/detail-request.view";
 import {InstanceComponent} from './views/detail/instance/instance.component';
 import {NavbarComponent} from './components/navbar/navbar.component';
 import {AboutDialogComponent} from './components/about/about-dialog.component';
+import {AddEnvironmentDialogComponent} from './components/environment/add-environment-dialog.component';
 import {ServerSupervisionView} from "./views/supervision/_component/server/server-supervision.view";
+import {ServerActivityView} from "./views/supervision/_component/server/server-activity.view";
 import {ClientSupervisionView} from "./views/supervision/_component/client/client-supervision.view";
 import {RequestKpiView} from "./views/kpi/request/request-kpi.view";
 import {SessionKpiView} from "./views/kpi/session/session-kpi.view";
+import {CompareView} from "./views/compare/compare.view";
 import {AuthService} from "./auth/auth.service";
 import {authGuard} from "./auth/auth.guard";
 import {OAuthModule} from "angular-oauth2-oidc";
 import {AuthInterceptor} from "./auth/auth.interceptor";
-import {environment} from "../environments/environment";
-import {NgCollectorModule} from "@oneteme/inspect-ng-collector";
+import {AnalyticsView} from "./views/analytics/analytics.view";
+import {SearchMainEventView} from "./views/search/event/main/search-main-event.view";
 
 registerLocaleData(localeFr, 'fr-FR');
 
@@ -62,10 +65,22 @@ const routes: Route[] = [
           },
           {
             path: ':id_request',
-            component: DetailRequestView,
-            title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-              return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' • Détail'
-            }
+            children: [
+              {
+                path: '',
+                component: DetailRequestView,
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                  return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' • Détail'
+                }
+              },
+              {
+                path: 'compare',
+                component: CompareView,
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                  return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' • Décryptage du Flux';
+                }
+              }
+            ]
           }
         ]
       },
@@ -76,6 +91,7 @@ const routes: Route[] = [
     path: 'session', children: [
       {
         path: 'rest',
+
         children: [
           {
             path: '',
@@ -96,6 +112,11 @@ const routes: Route[] = [
                 data: {type: 'rest'},
                 component: TreeView,
                 title: Constants.MAPPING_TYPE['rest'].title + ' • Arbre d\'Appels'
+              },
+              {
+                path: 'compare',
+                component: CompareView,
+                title: Constants.MAPPING_TYPE['rest'].title +  ' • Décryptage du Flux'
               },
               {path: '**', pathMatch: 'full', redirectTo: `/session/rest/:id_session`}
             ]
@@ -154,8 +175,25 @@ const routes: Route[] = [
     canActivate: [authGuard]
   },
   {
-    path: 'analytic/:user',
-    component: AnalyticView,
+    path: 'event',
+    children: [
+      {
+        title: 'Logs Applicatifs',
+        path: 'log',
+        component: SearchMainEventView,
+        data: { isLogRoute: true }
+      },
+      {
+        title: 'Actions Utilisateur',
+        path: 'user',
+        component: SearchMainEventView,
+        data: { isLogRoute: false }
+      }
+    ]
+  },
+  {
+    path: 'analytics/:user',
+    component: AnalyticsView,
     title: 'Parcours Utilisateur',
     canActivate: [authGuard]
   },
@@ -168,7 +206,13 @@ const routes: Route[] = [
   {
     path: 'architecture',
     component: ArchitectureView,
-    title: 'Architecture',
+    title: Constants.MAPPING_TYPE['architecture'].title,
+    canActivate: [authGuard]
+  },
+  {
+    path: 'activity',
+    component: ServerActivityView,
+    title: 'Supervision • Activité',
     canActivate: [authGuard]
   },
   {
@@ -208,7 +252,6 @@ const routes: Route[] = [
     BrowserModule,
     BrowserAnimationsModule,
     RouterModule.forRoot(routes, {useHash: true}),
-    NgCollectorModule.forRoot(environment.application),
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,
@@ -219,7 +262,8 @@ const routes: Route[] = [
   declarations: [
     AppComponent,
     NavbarComponent,
-    AboutDialogComponent
+    AboutDialogComponent,
+    AddEnvironmentDialogComponent
   ],
   providers: [
     SizePipe,

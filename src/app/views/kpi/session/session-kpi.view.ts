@@ -52,10 +52,10 @@ export class SessionKpiView implements OnInit, OnDestroy {
     })
   });
   hostSubscription: Subscription;
-  params: Partial<{type: 'rest' | 'batch' | 'startup', queryParams: QueryParams}> = {};
+  params: Partial<{type: 'rest' | 'schedule' | 'startup', queryParams: QueryParams}> = {};
   serviceType: { [key: string]: {service : RestSessionService | MainSessionService }  } = {
     "rest": { service: this._restSessionService },
-    "batch": { service: this._mainSessionService },
+    "schedule": { service: this._mainSessionService },
     "startup": { service: this._mainSessionService }
   };
 
@@ -64,7 +64,7 @@ export class SessionKpiView implements OnInit, OnDestroy {
       params: this._activatedRoute.params,
       queryParams: this._activatedRoute.queryParams}).subscribe({
       next: (v: { params: Params, queryParams: Params }) => {
-        const type = v.params.session_type as 'rest' | 'batch' | 'startup';
+        const type = v.params.session_type as 'rest' | 'schedule' | 'startup';
         this.params.type = type;
         this._pageTitleService.set({
           icon: 'finance_mode',
@@ -84,7 +84,7 @@ export class SessionKpiView implements OnInit, OnDestroy {
         if (v.queryParams.host) {
           hosts = Array.isArray(v.queryParams.host) ? v.queryParams.host : [v.queryParams.host];
         }
-        this.params.queryParams = new QueryParams(period, v.queryParams.env || app.defaultEnv, undefined, hosts)
+        this.params.queryParams = new QueryParams(period, v.queryParams.namespace || app.defaultNamespace, undefined, hosts)
         this.patchDateValue(this.params.queryParams.period.start, toDisplayedPeriodEnd(this.params.queryParams.period.end));
         this.getHosts();
         if(type) {
@@ -123,7 +123,7 @@ export class SessionKpiView implements OnInit, OnDestroy {
     }
     this.nameDataList = [];
     this.serverNameIsLoading = true;
-    this.hostSubscription = this.serviceType[this.params.type].service.getHosts({ env: this.params.queryParams.env, start: this.params.queryParams.period.start, end: this.params.queryParams.period.end, type: this.params.type.toUpperCase()})
+    this.hostSubscription = this.serviceType[this.params.type].service.getHosts({ namespace: this.params.queryParams.namespace, start: this.params.queryParams.period.start, end: this.params.queryParams.period.end, type: this.params.type.toUpperCase()})
         .pipe(finalize(()=> this.serverNameIsLoading = false))
         .subscribe({
           next: res => {

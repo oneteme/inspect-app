@@ -18,11 +18,12 @@ export class LogTableComponent {
 
   @Input() set requests(requests: LogEntry[]) {
     this._requests = requests;
+    console.log(requests)
   }
 
   open(row: any) {
     this._dialog.open(StacktraceDialogComponent, {
-      data: { message: row.message, stackTraceRows: row.stackRows }
+      data: {message: row.message, stackRows: row.stackRows}
     });
   }
 }

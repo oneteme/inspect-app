@@ -1,5 +1,5 @@
 import { SliceConfig, TableProvider } from '@oneteme/jquery-table';
-import { DatabaseRequestDto, DirectoryRequestDto, FtpRequestDto, MailRequestDto, MainSessionDto, RestRequestDto, RestSessionDto } from '../../../model/request.model';
+import { DatabaseRequestDto, DirectoryRequestDto, FtpRequestDto, MailRequestDto, MainSessionDto, RestRequestDto, RestSessionDto, SessionEventDto } from '../../../model/request.model';
 import { AbstractStage, LocalRequest, LogEntry } from "../../../model/trace.model";
 import { LastServerStart } from "../../../model/jquery.model";
 import { formatDuration } from '../../pipe/duration.pipe';
@@ -72,12 +72,6 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
         if (!row.end) return 'En cours...';
         return row.status;
       }
-    },
-    {
-      key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', width: '13%',
-      value: (row: RestSessionDto) => {
-        return row.exception?.type;
-      }
     }
   ],
   slices: [
@@ -104,6 +98,7 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
     if (code >= 500) return 'row-ko';
     if (code >= 400) return 'row-warning';
     if (code >= 200) return 'row-ok';
+    if (code == 0 && row.end) return 'row-unavailable';
     return '';
   }
 }
@@ -123,16 +118,9 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
     { key: 'address', header: 'Adresse', icon: 'fingerprint', width: '13%', optional: true },
     {
       key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
-      value: (row: MainSessionDto) => {
+      value: (row: RestSessionDto) => {
         if (!row.end) return 'En cours...';
-        if (row.exception) return 'KO';
-        if (!row.exception) return 'OK';
-      }
-    },
-    {
-      key: 'exception', header: 'Exception', sortable: true, optional: true, icon: 'error_outline', width: '13%',
-      value: (row: MainSessionDto) => {
-        return row.exception?.type;
+        return row.status;
       }
     }
   ],
@@ -152,8 +140,11 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
     }],
   defaultSort: { active: 'start', direction: 'desc' },
   rowClass: (row: MainSessionDto) => {
-    if (row.end && !row.exception) return 'row-ok';
-    if (row.end && row.exception) return 'row-ko';
+    const code = row.status;
+    if (code >= 500) return 'row-ko';
+    if (code >= 400) return 'row-warning';
+    if (code >= 200) return 'row-ok';
+    if (code == 0 && row.end) return 'row-unavailable';
     return '';
   }
 }
@@ -182,10 +173,6 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
         if (!row.end) return 'En cours...';
         return row.status;
       }
-    },
-    {
-      key: 'exception', header: 'Exception', sortable: true, optional: true, icon: 'error_outline',
-      value: (row: RestSessionDto) => row.exception?.type
     },
     { key: 'action', header: 'Action', icon: 'touch_app', sliceable: false, groupable: false, sortable: false },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
@@ -226,12 +213,11 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     { key: 'productName', header: 'Base de données', optional: true, icon: 'storage' },
     {
-      key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
-      value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
-    },
-    {
-      key: 'exception', header: 'Exception', optional: true, icon: 'error_outline',
-      value: (row) => row.exception?.type
+      key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
+      value: (row: DatabaseRequestDto) => {
+        if (!row.end) return 'En cours...';
+        return row.status;
+      }
     },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
@@ -247,10 +233,12 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: DatabaseRequestDto) => {
-    const failed = row.failed;
-    if (row.end == null) return '';
-    if (failed) return 'row-ko';
-    if (!failed) return 'row-ok';
+    const code = row.status;
+    if (code >= 500) return 'row-ko';
+    if (code >= 400) return 'row-warning';
+    if (code >= 200) return 'row-ok';
+    if (code == 0 && row.end) return 'row-unavailable';
+    return '';
   }
 };
 
@@ -273,12 +261,11 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     {
-      key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
-      value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
-    },
-    {
-      key: 'exception', header: 'Exception', optional: true, icon: 'error_outline',
-      value: (row) => row.exception?.type
+      key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
+      value: (row: FtpRequestDto) => {
+        if (!row.end) return 'En cours...';
+        return row.status;
+      }
     },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
@@ -293,10 +280,12 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: FtpRequestDto) => {
-    const failed = row.failed;
-    if (row.end == null) return '';
-    if (failed) return 'row-ko';
-    if (!failed) return 'row-ok';
+    const code = row.status;
+    if (code >= 500) return 'row-ko';
+    if (code >= 400) return 'row-warning';
+    if (code >= 200) return 'row-ok';
+    if (code == 0 && row.end) return 'row-unavailable';
+    return '';
   }
 }
 
@@ -319,10 +308,12 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     {
-      key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
-      value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
+      key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
+      value: (row: DirectoryRequestDto) => {
+        if (!row.end) return 'En cours...';
+        return row.status;
+      }
     },
-    { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
   slices: [
@@ -336,10 +327,12 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: DirectoryRequestDto) => {
-    const failed = row.failed;
-    if (row.end == null) return '';
-    if (failed) return 'row-ko';
-    if (!failed) return 'row-ok';
+    const code = row.status;
+    if (code >= 500) return 'row-ko';
+    if (code >= 400) return 'row-warning';
+    if (code >= 200) return 'row-ok';
+    if (code == 0 && row.end) return 'row-unavailable';
+    return '';
   }
 };
 
@@ -362,8 +355,11 @@ export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     {
-      key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
-      value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
+      key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
+      value: (row: LocalRequest) => {
+        if (!row.end) return 'En cours...';
+        return row.status;
+      }
     },
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
   ],
@@ -378,10 +374,12 @@ export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: LocalRequest) => {
-    const failed = row.exception;
-    if (row.end == null) return '';
-    if (failed) return 'row-ko';
-    if (!failed) return 'row-ok';
+    const code = row.status;
+    if (code >= 500) return 'row-ko';
+    if (code >= 400) return 'row-warning';
+    if (code >= 200) return 'row-ok';
+    if (code == 0 && row.end) return 'row-unavailable';
+    return '';
   }
 };
 
@@ -404,10 +402,12 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
     {
-      key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
-      value: (row) => !row.end ? 'En cours...' : row.failed ? 'KO' : 'OK'
+      key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
+      value: (row: MailRequestDto) => {
+        if (!row.end) return 'En cours...';
+        return row.status;
+      }
     },
-    { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type },
     { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
   ],
   slices: [
@@ -421,10 +421,12 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: MailRequestDto) => {
-    const failed = row.failed;
-    if (row.end == null) return '';
-    if (failed) return 'row-ko';
-    if (!failed) return 'row-ok';
+    const code = row.status;
+    if (code >= 500) return 'row-ko';
+    if (code >= 400) return 'row-warning';
+    if (code >= 200) return 'row-ok';
+    if (code == 0 && row.end) return 'row-unavailable';
+    return '';
   }
 };
 
@@ -442,7 +444,7 @@ export const STAGE_TABLE_CONFIG: TableProvider<AbstractStage> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
     },
     {
-      key: 'failed', header: 'Statut', optional: true, icon: 'task_alt',
+      key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row) => !row.end ? 'En cours...' : row.exception ? 'KO' : 'OK'
     },
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
@@ -469,13 +471,16 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'instant', header: 'Horodate', icon: 'schedule', sliceable: false, groupable: false },
-    { key: 'message', header: 'Message', icon: 'chat', sliceable: false, groupable: false, width: '70%' },
-    { key: 'action', header: 'Action', icon: 'touch_app', sliceable: false, groupable: false, sortable: false }
+    { key: 'appName', header: 'Application', icon: 'apps', sliceable: false, groupable: false, width: '18%' },
+    { key: 'message', header: 'Message', icon: 'chat', sliceable: false, groupable: false, width: '52%' },
+    { key: 'thread', header: 'Thread',  sliceable: false, groupable: false  },
+    { key: 'action', header: 'Action',  sliceable: false, groupable: false },
+    { key: 'stack', header: 'Stack', icon: 'touch_app', sliceable: false, groupable: false, sortable: false }
   ],
   slices: [
     {
-      title: 'Type de log',
-      columnKey: 'level',
+      title: 'Action',
+      columnKey: 'action',
       icon: 'label',
       hidden: true
     }
@@ -513,4 +518,25 @@ export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTra
       ]
     }
   ]
+}
+
+export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
+  ...DEFAULT_TABLE_CONFIG,
+  columns: [
+    { key: 'appName', header: 'Application', width: '15%', icon:'web_asset' },
+    {
+      key: 'instant', header: 'Date', icon: 'schedule', width: '10%', groupable: false, sliceable: false,
+      searchValue: (row: SessionEventDto) => fmtStart(row.instant)
+    },
+    { key: 'resource', header: 'Message', groupable: false, sliceable: false, icon: 'info' , width: '50%',
+      searchValue: (row: SessionEventDto) => fmtMethod(row.type) + ' ' + (row.value || '')
+    }
+  ],
+  defaultSort: { active: 'instant', direction: 'desc' },
+  rowClass: (row: SessionEventDto) => {
+    if (row.type === 'INFO') return 'row-ok';
+    if (row.type === 'ERROR') return 'row-ko';
+    if (row.type === 'WARN') return 'row-warning';
+    return 'row-progress';
+  }
 }

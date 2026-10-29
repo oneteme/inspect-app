@@ -10,7 +10,7 @@ import {app} from '../../../../../environments/environment';
 import {EnvRouter} from "../../../../service/router.service";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {getErrorClassName, showifnotnull, getDataForRange} from '../../../../shared/util';
-import {Constants, INFINITY} from "../../../constants";
+import {Constants, INFINITY, STATUS} from "../../../constants";
 import {DatabaseRequest, DatabaseRequestStage, ExceptionInfo, InstanceEnvironment} from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
 import {TabData} from "../../session/_component/detail-session.component";
@@ -36,7 +36,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
 
   REQUEST_TYPE = Constants.REQUEST_MAPPING_TYPE;
 
-  params: Partial<{ idJdbc: string, env: string }> = {};
+  params: Partial<{ idJdbc: string, namespace: string }> = {};
 
   options: TimelineOptions;
   dataItems: DataItem[];
@@ -44,7 +44,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
   dataArray: any[] = [];
   request: DatabaseRequest;
   stages: DatabaseRequestStage[];
-  exception: ExceptionInfo;
+  exceptions: ExceptionInfo[];
   instance: InstanceEnvironment;
 
   sessionParent: { id: string, type: string };
@@ -77,7 +77,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
       this._activatedRoute.queryParams
     ]).subscribe({
       next: ([params, queryParams]) => {
-        this.params = {idJdbc: params.id_request, env: queryParams.env || app.defaultEnv};
+        this.params = {idJdbc: params.id_request, namespace: queryParams.namespace || app.defaultNamespace};
         this._pageTitleService.set({ icon: 'database', iconOutlined: true, title: 'Flux JDBC • ' + params.id_request, subtitle: 'Communications externes' });
         this.getRequest();
       }
@@ -92,8 +92,17 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
         count: this.stages.length || 0,
         visible: true,
         type: 'stage',
-        hasError: this.stages.some(s => s.exception),
-        errorCount: this.stages.filter(s => s.exception).length || 0
+        hasError: this.exceptions?.length > 0,
+        errorCount: this.exceptions?.length || 0
+      },
+      {
+        label: 'Événements',
+        icon: Constants.MAPPING_TYPE['event'].icon,
+        count: this.exceptions?.length,
+        visible: this.exceptions?.length > 0,
+        type: 'action',
+        hasError: this.exceptions?.length > 0,
+        errorCount: this.exceptions?.length || 0
       },
       {
         label: 'Chronologie',
@@ -132,7 +141,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
         this.instance = result.instance;
         this.request = result.request;
         this.stages = result.stages;
-        this.exception = result.stages.find(s => s.exception?.type || s.exception?.message)?.exception;
+        this.exceptions = result.stages.filter(s => s.exception).map(s => s.exception);
         this.initTabs();
         this.createTimeline();
       }
@@ -145,6 +154,8 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     this.dataArray = this.stages.map((c: DatabaseRequestStage, i: number) => {
       let start = Math.trunc(c.start * 1000);
       let end = c.end ? Math.trunc(c.end * 1000) : INFINITY;
+      const args = c.payload?.args;
+      const count = c.payload?.count;
       return {
         group: `${i}`,
         start: start,
@@ -152,12 +163,12 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
         type: end <= start ? 'point' : 'range',
         content: `<div class="content" style="display: flex; align-items: center; gap: 0.5rem; flex-direction: row;">
                                 <span class="command" style="color: #1565c0; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">${showifnotnull(c.command, () => c.command)}</span>
-                                <span class="arg" style="color: #7f8c8d; font-style: italic; font-size: 0.7rem;">${showifnotnull(c.args, () => `(${c.args.join(', ')})`)}</span>
-                                <span class="count" style="color: #2c3e50; font-weight: 500; font-size: 0.7rem;">${showifnotnull(c.count, () => `×${c.count}`)}</span>
+                                <span class="arg" style="color: #7f8c8d; font-style: italic; font-size: 0.7rem;">${showifnotnull(args, () => `(${args.join(', ')})`)}</span>
+                                <span class="count" style="color: #2c3e50; font-weight: 500; font-size: 0.7rem;">${showifnotnull(count, () => `×${count}`)}</span>
                           </div>`,
         className: `jdbc overflow ${getErrorClassName(c)}`,
         title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end, 'HH:mm:ss.SSS')}</span>  (⏱ ${this.durationPipe.transform(c.end - c.start)})<br>
-                        <span>${showifnotnull(c.command, () => c.command)}${showifnotnull(c.args, () => `(${c.args.join(', ')})`)} ${showifnotnull(c.count, () => `×${c.count}`)}</span>`
+                       <span>${showifnotnull(c.command, () => c.command)}${showifnotnull(args, () => `(${args.join(', ')})`)} ${showifnotnull(count, () => `×${count.join(', ')}`)}</span>`
       }
     })
     this.dataArray.splice(0, 0, {
@@ -220,7 +231,7 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
         this._router.open(`#/${params.join('/')}`, '_blank')
       } else {
         this._router.navigate(params, {
-          queryParams: {env: this.params.env}
+          queryParams: {namespace: this.params.namespace}
         });
       }
     }
@@ -278,7 +289,9 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
   navigateOnKpi(event: MouseEvent) {
     var start = new Date(this.request.start * 1000);
     var end = this.request.end ? new Date(this.request.end * 1000) : new Date();
-    this._router.navigateOnClick(event, ['/kpi/request', 'jdbc'], { queryParams: {host: this.request.host, env: this.instance.env, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
+    this._router.navigateOnClick(event, ['/kpi/request', 'jdbc'], { queryParams: {host: this.request.host, namespace: this.instance.namespace, start: new Date(start.getFullYear(), start.getMonth(), start.getDate(), 0, 0, 0, 0).toISOString(), end: new Date(end.getFullYear(), end.getMonth(), end.getDate() + 1, 0, 0, 0, 0).toISOString()} });
   }
+
+  protected readonly STATUS = STATUS;
 }
 
