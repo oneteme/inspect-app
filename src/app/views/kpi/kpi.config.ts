@@ -2215,6 +2215,43 @@ export interface ChartSection<TExtra = {}> {
   items: ChartItem<TExtra>[];
 }
 
+/** Valeurs retenues pour un filtre : plusieurs filtres peuvent être actifs en même temps (ET entre filtres, OU entre valeurs). */
+export interface ChartFilterSelection {
+  filter: ChartItem;
+  values: string[];
+}
+
+/** Clé de la catégorie « Vide » du slice-panel (@oneteme/jquery-organizer). */
+const EMPTY_SLICE_KEY = '__empty__';
+
+/** Valeurs cochées par filtre (clé du filtre → valeurs), depuis les clés actives de chaque slice ; « Vide » devient une chaîne vide. */
+export function toFilterValues(sliceConfigs: { columnKey?: string }[], activeKeys: string[][]): Record<string, string[]> {
+  const values: Record<string, string[]> = {};
+  sliceConfigs.forEach((s, i) => {
+    if (s.columnKey && activeKeys[i]?.length) {
+      values[s.columnKey] = activeKeys[i].map(k => k === EMPTY_SLICE_KEY ? '' : k);
+    }
+  });
+  return values;
+}
+
+/** Sélections à envoyer au serveur : uniquement les filtres sélectionnés dans le menu et ayant au moins une valeur cochée. */
+export function buildFilterSelections(config: ChartConfig, values: Record<string, string[]>): ChartFilterSelection[] | undefined {
+  const selections = (config.filters?.items ?? [])
+    .filter(f => f.selected && values[f.key]?.length)
+    .map(f => ({ filter: f, values: values[f.key] }));
+  return selections.length ? selections : undefined;
+}
+
+/** Ajoute un critère `<colonne>.in` par filtre sélectionné (ET entre filtres, OU entre valeurs). */
+export function applyFilterSelections(args: Record<string, any>, selections?: ChartFilterSelection[]): void {
+  selections?.forEach(s => {
+    if (s.values?.length) {
+      args[`${s.filter.jquery.value()}.in`] = s.values.join(',');
+    }
+  });
+}
+
 export interface IndicatorExtra {
   stacks?: ChartSection;  // stacks disponibles pour cet indicateur
 }

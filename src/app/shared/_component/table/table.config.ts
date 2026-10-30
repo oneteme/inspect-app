@@ -72,7 +72,20 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
         if (!row.end) return 'En cours...';
         return row.status;
       }
-    }
+    },
+    { key: 'userAgent', header: 'User-Agent', lazy: true, icon: 'devices', width: '15%' },
+    { key: 'host', header: 'Host HTTP', lazy: true, icon: 'language' },
+    { key: 'port', header: 'Port', lazy: true, icon: 'settings_ethernet', groupable: false, sliceable: false },
+    { key: 'contentType', header: 'Content-Type', lazy: true, icon: 'description' },
+    { key: 'authScheme', header: 'Authentification', lazy: true, icon: 'lock' },
+    { key: 'inDataSize', header: 'Taille entrée (o)', lazy: true, icon: 'download', groupable: false, sliceable: false },
+    { key: 'outDataSize', header: 'Taille sortie (o)', lazy: true, icon: 'upload', groupable: false, sliceable: false },
+    { key: 'inContentEncoding', header: 'Encodage entrée', lazy: true, icon: 'compress' },
+    { key: 'outContentEncoding', header: 'Encodage sortie', lazy: true, icon: 'compress' },
+    { key: 'threadName', header: 'Thread', lazy: true, icon: 'memory' },
+    { key: 'cacheControl', header: 'Cache-Control', lazy: true, icon: 'cached', groupable: false, sliceable: false },
+    { key: 'linked', header: 'Liée', lazy: true, icon: 'link', value: (row: RestSessionDto) => row.linked ? 'Oui' : 'Non' },
+    { key: 'intermediateNodes', header: 'Nœuds intermédiaires', lazy: true, icon: 'alt_route', groupable: false, sliceable: false }
   ],
   slices: [
     { title: 'Status', columnKey: 'status', hidden: true },

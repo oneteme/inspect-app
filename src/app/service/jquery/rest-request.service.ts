@@ -3,7 +3,7 @@ import {HttpClient} from "@angular/common/http";
 import {forkJoin, map, Observable} from "rxjs";
 import {RestSessionExceptionsByPeriodAndappname} from "src/app/model/jquery.model";
 import {RestRequestDto} from "../../model/request.model";
-import {ChartItem} from "../../views/kpi/kpi.config";
+import {applyFilterSelections, ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
 
 @Injectable({ providedIn: 'root' })
 export class RestRequestService {
@@ -28,8 +28,8 @@ export class RestRequestService {
     }
 
     getSizeCustom(
-      data: { series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
-      filters: { namespace: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], filters?: string[], instanceType?: string }
+      data: { series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem },
+      filters: { namespace: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], selections?: ChartFilterSelection[], instanceType?: string }
     ): Observable<any[]> {
         const groupAlias = data.group.jquery.buildAlias();
         const stackAlias = data.stack?.jquery.buildAlias();
@@ -50,9 +50,7 @@ export class RestRequestService {
             if (data.group.jquery.order) {
                 args['order'] = data.group.jquery.order;
             }
-            if (data.filter && filters.filters?.length) {
-                args[`${data.filter.jquery.value()}.in`] = filters.filters.join(',');
-            }
+            applyFilterSelections(args, filters.selections);
             if (filters.hosts?.length && !args['host.in']) {
                 args['host.in'] = filters.hosts.join(',');
             }
@@ -85,8 +83,8 @@ export class RestRequestService {
         );
     }
 
-    getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
-              filters: {namespace: string, start: Date, end: Date, hosts?: string[], filters?: string[], instanceType?: string }): Observable<any[]> {
+    getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem },
+              filters: {namespace: string, start: Date, end: Date, hosts?: string[], selections?: ChartFilterSelection[], instanceType?: string }): Observable<any[]> {
         let args: any = {
             'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
             'instance.namespace': filters.namespace,
@@ -101,9 +99,7 @@ export class RestRequestService {
         if(data.group.jquery.order){
             args['order'] = `${data.group.jquery.order}`;
         }
-        if(data.filter && filters.filters?.length) {
-            args[`${data.filter.jquery.value()}.in`] = filters.filters.join(',');
-        }
+        applyFilterSelections(args, filters.selections);
         if(filters.hosts?.length && !args['host.in']){
             args['host.in'] = filters.hosts.join(',');
         }
@@ -113,8 +109,8 @@ export class RestRequestService {
         return this.getRestRequest(args);
     }
 
-    getLatency(data: {serie: ChartItem, indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
-               filters: {namespace: string, start: Date, end: Date, hosts?: string[], method?: string[], filters?: string[], instanceType?: string }): Observable<any[]> {
+    getLatency(data: {serie: ChartItem, indicator: ChartItem, group: ChartItem, stack?: ChartItem },
+               filters: {namespace: string, start: Date, end: Date, hosts?: string[], method?: string[], selections?: ChartFilterSelection[], instanceType?: string }): Observable<any[]> {
         let args: any = {
             'column': `${data.indicator.jquery.value()}(${data.serie.jquery.value()}.minus(rest_session.${data.serie.jquery.value()})):${data.indicator.jquery.buildAlias(data.serie.jquery.buildAlias())},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
             'status.gt': 0,
@@ -133,9 +129,7 @@ export class RestRequestService {
         if(data.group.jquery.order){
             args['order'] = `${data.group.jquery.order}`;
         }
-        if(data.filter && filters.filters?.length) {
-            args[`${data.filter.jquery.value()}.in`] = filters.filters.join(',');
-        }
+        applyFilterSelections(args, filters.selections);
         if(filters.hosts?.length && !args['host.in']){
             args['host.in'] = filters.hosts.join(',');
         }

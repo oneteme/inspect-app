@@ -1,7 +1,7 @@
 import {ChangeDetectorRef, Component, inject, Input, ViewChild} from "@angular/core";
 import {QueryParams} from "../../../../model/conf.model";
 import {finalize, Observable, of} from "rxjs";
-import {
+import {buildFilterSelections, toFilterValues,
   ChartConfig,
   STARTUP_SESSION_PERFORMANCE_CHART_CONFIG,
   STARTUP_SESSION_STATUS_CHART_CONFIG,
@@ -32,13 +32,13 @@ export class StartupComponent {
   $statusOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $statusView: 'chart' | 'table' = 'chart';
   $statusSlice: OrganizerSliceState | null = null;
-  $statusFilteredValues: any[] = [];
+  $statusFilterValues: Record<string, string[]> = {};
   $statusDisplayUnit = '';
 
   $performanceRepartition: Partial<{data: any[], rawData: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = {data: [], loading: true};
   $performanceOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $performanceSlice: OrganizerSliceState | null = null;
-  $performanceFilteredValues: any[] = [];
+  $performanceFilterValues: Record<string, string[]> = {};
   $performanceDisplayUnit = '';
   $userRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
   $dependentChart: {data: any[], loading: boolean} = {data: [], loading: true};
@@ -82,7 +82,7 @@ export class StartupComponent {
   onStatusSliceChange(sliceState: OrganizerSliceState | null): void {
     this.$statusSlice = sliceState;
     if (!sliceState) {
-      this.$statusFilteredValues = [];
+      this.$statusFilterValues = {};
     }
     if (sliceState?.filterApplied === true) {
       this._fetchStatus();
@@ -101,24 +101,22 @@ export class StartupComponent {
   onPerformanceSliceChange(sliceState: OrganizerSliceState | null): void {
     this.$performanceSlice = sliceState;
     if (!sliceState) {
-      this.$performanceFilteredValues = [];
+      this.$performanceFilterValues = {};
     }
     if (sliceState?.filterApplied === true) {
       this._fetchPerformance();
     }
   }
 
-  onStatusFilterChange(filterFn: (row: any) => boolean): void {
+  onStatusFilterChange(activeKeys: string[][]): void {
     if (!this.$statusSlice) return;
-    const columnKey = this.$statusSlice.sliceConfigs[0]?.columnKey;
-    this.$statusFilteredValues = this.$statusSlice.tasks.filter(filterFn).map(t => t[columnKey]);
+    this.$statusFilterValues = toFilterValues(this.$statusSlice.sliceConfigs, activeKeys);
     this._fetchStatus();
   }
 
-  onPerformanceFilterChange(filterFn: (row: any) => boolean): void {
+  onPerformanceFilterChange(activeKeys: string[][]): void {
     if (!this.$performanceSlice) return;
-    const columnKey = this.$performanceSlice.sliceConfigs[0]?.columnKey;
-    this.$performanceFilteredValues = this.$performanceSlice.tasks.filter(filterFn).map(t => t[columnKey]);
+    this.$performanceFilterValues = toFilterValues(this.$performanceSlice.sliceConfigs, activeKeys);
     this._fetchPerformance();
   }
 
@@ -144,13 +142,12 @@ export class StartupComponent {
     const ind = cfg.indicators.items.find(i => i.selected);
     const grp = cfg.groups.items.find(g => g.selected);
     const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
-    const flt = cfg.filters?.items?.find(f => f.selected);
 
     this.$statusRepartition.loading = true;
     this.$statusRepartition.data = [];
     this._mainSessionService.getCustom(
-      { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined, type: 'STARTUP' }
+      { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, selections: buildFilterSelections(cfg, this.$statusFilterValues), type: 'STARTUP' }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -173,12 +170,11 @@ export class StartupComponent {
     const ind = cfg.indicators.items.find(i => i.selected);
     const grp = cfg.groups.items.find(g => g.selected);
     const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
-    const flt = cfg.filters?.items?.find(f => f.selected);
     this.$performanceRepartition.loading = true;
     this.$performanceRepartition.data = [];
     this._mainSessionService.getCustom(
-      { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined, type: 'STARTUP' }
+      { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, selections: buildFilterSelections(cfg, this.$performanceFilterValues), type: 'STARTUP' }
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
