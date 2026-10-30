@@ -272,7 +272,7 @@
                         </div>
                         <span class="sbd-rate" [class.c-ok]="s.errorCount === 0 && s.warnCount === 0"
                               [class.c-warn]="s.errorCount === 0 && s.warnCount > 0"
-                              [class.c-err]="s.errorCount > 0">{{ s.rate === 0 ? '100%' : (s.rate | number:'1.2-2') + '%' }}
+                              [class.c-err]="s.errorCount > 0">{{ s.rate === 0 || s.warnCount === 0 ? s.warnCount === 0 ? '100%' : (s.warnCount | number:'1.2-2') + '%' : (s.rate | number:'1.2-2') + '%' }}
                         </span>
                     </div>
                 </ng-container>
