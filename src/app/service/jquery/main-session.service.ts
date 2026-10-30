@@ -3,6 +3,18 @@ import {HttpClient} from "@angular/common/http";
 import {map, Observable} from "rxjs";
 import {ExceptionsByPeriodAndAppname} from "src/app/model/jquery.model";
 import {applyFilterSelections, ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
+import {MainSessionDto} from "../../model/request.model";
+
+/** Colonnes de base de la liste des sessions principales ; l'alias (`colonne:alias`) donne la clé de la réponse. */
+const MAIN_SESSION_LIST_COLUMNS = 'id,name,location,start,end,user,status,instance.app_name:appName';
+
+/** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
+const LAZY_MAIN_SESSION_COLUMNS: Record<string, string> = {
+    address: 'instance.address:address',
+    type: 'type',
+    threadName: 'thread:threadName',
+    requestsMask: 'mask:requestsMask'
+};
 
 @Injectable({ providedIn: 'root' })
 export class MainSessionService {
@@ -13,6 +25,18 @@ export class MainSessionService {
     getMainSession<T>(params: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/session/main`;
         return this.http.get<T>(url, { params: params });
+    }
+
+    /** Liste des sessions principales : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
+    getMainSessionList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<MainSessionDto[]> {
+        const column = [MAIN_SESSION_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_MAIN_SESSION_COLUMNS[c])].join(',');
+        return this.getMainSession<any[]>({ ...criteria, column }).pipe(
+            map(rows => rows.map(row => ({
+                ...row,
+                start: row.start / 1000,
+                end: row.end == null ? null : row.end / 1000
+            })))
+        );
     }
 
     getHosts(filters: {start: Date, end: Date, namespace: string, type: string}): Observable<{ host: string }[]> {

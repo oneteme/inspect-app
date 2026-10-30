@@ -20,9 +20,7 @@ const LAZY_REST_SESSION_COLUMNS: Record<string, string> = {
     inContentEncoding: 'content_encoding_in:inContentEncoding',
     outContentEncoding: 'content_encoding_out:outContentEncoding',
     threadName: 'thread:threadName',
-    cacheControl: 'cache_control:cacheControl',
-    linked: 'linked',
-    intermediateNodes: 'intermediate_nodes:intermediateNodes'
+    cacheControl: 'cache_control:cacheControl'
 };
 
 @Injectable({ providedIn: 'root' })

@@ -4,7 +4,7 @@ import {ActivatedRoute} from '@angular/router';
 import {combineLatest, finalize, Subject, takeUntil} from 'rxjs';
 import {Location} from '@angular/common';
 import {extractPeriod,} from '../../../../shared/util';
-import {TraceService} from '../../../../service/trace.service';
+import {MainSessionService} from '../../../../service/jquery/main-session.service';
 import {app} from '../../../../../environments/environment';
 import {Constants, STATUS} from '../../../constants';
 import {EnvRouter} from "../../../../service/router.service";
@@ -42,7 +42,7 @@ import {HttpErrorResponse} from "@angular/common/http";
 })
 export class SearchMainView implements OnInit, OnDestroy {
   private readonly _router = inject(EnvRouter);
-  private readonly _traceService = inject(TraceService);
+  private readonly _mainSessionService = inject(MainSessionService);
   private readonly _instanceService = inject(InstanceService);
   private readonly _pageTitleService = inject(PageTitleService);
   private readonly _activatedRoute = inject(ActivatedRoute);
@@ -53,6 +53,8 @@ export class SearchMainView implements OnInit, OnDestroy {
   readonly periodQuickRanges = PERIOD_QUICK_RANGES;
   tableConfig: TableProvider<MainSessionDto> = this.buildTableConfig();
   sessions: MainSessionDto[];
+  /** Critères de la requête de base, rejoués avec les colonnes lazy. */
+  private _criteria: Record<string, any> = {};
 
   serverNameIsLoading = true;
   serverFilterForm = new FormGroup({
@@ -158,8 +160,9 @@ export class SearchMainView implements OnInit, OnDestroy {
 
   getMainRequests() {
     this.$destroy.next();
-    let params = {
-      'namespace': this.queryParams.namespace,
+    this._criteria = {
+      'join': 'instance',
+      'instance.namespace': this.queryParams.namespace,
       'instance.app_name': this.queryParams.appname,
       'status.origin': this.queryParams.rangestatus,
       'type': this.type.toUpperCase(),
@@ -169,7 +172,7 @@ export class SearchMainView implements OnInit, OnDestroy {
 
     this.isLoading = true;
     this.sessions = [];
-    this._traceService.getMainSessions(params)
+    this._mainSessionService.getMainSessionList(this._criteria)
     .pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false))
     .subscribe({
       next: d => {
@@ -190,7 +193,8 @@ export class SearchMainView implements OnInit, OnDestroy {
       search: initialQuery
         ? { ...MAIN_SESSION_TABLE_CONFIG.search, initialQuery, searchColumns: ['exception'] }
         : MAIN_SESSION_TABLE_CONFIG.search,
-      onRowSelected: (row, event) => this.selectedRequest(event, row)
+      onRowSelected: (row, event) => this.selectedRequest(event, row),
+      lazyLoader: columns => this._mainSessionService.getMainSessionList(this._criteria, columns)
     };
   }
 

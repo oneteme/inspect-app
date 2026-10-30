@@ -83,9 +83,7 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
     { key: 'inContentEncoding', header: 'Encodage entrée', lazy: true, icon: 'compress' },
     { key: 'outContentEncoding', header: 'Encodage sortie', lazy: true, icon: 'compress' },
     { key: 'threadName', header: 'Thread', lazy: true, icon: 'memory' },
-    { key: 'cacheControl', header: 'Cache-Control', lazy: true, icon: 'cached', groupable: false, sliceable: false },
-    { key: 'linked', header: 'Liée', lazy: true, icon: 'link', value: (row: RestSessionDto) => row.linked ? 'Oui' : 'Non' },
-    { key: 'intermediateNodes', header: 'Nœuds intermédiaires', lazy: true, icon: 'alt_route', groupable: false, sliceable: false }
+    { key: 'cacheControl', header: 'Cache-Control', lazy: true, icon: 'cached', groupable: false, sliceable: false }
   ],
   slices: [
     { title: 'Status', columnKey: 'status', hidden: true },
@@ -128,7 +126,10 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
     },
     { key: 'user', header: 'Utilisateur', icon: 'person', width: '13%' },
-    { key: 'address', header: 'Adresse', icon: 'fingerprint', width: '13%', optional: true },
+    { key: 'address', header: 'Adresse', icon: 'fingerprint', width: '13%', lazy: true },
+    { key: 'type', header: 'Type', icon: 'sell', lazy: true },
+    { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
+    { key: 'requestsMask', header: 'Masque requêtes', icon: 'filter_alt', lazy: true, groupable: false, sliceable: false },
     {
       key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
       value: (row: RestSessionDto) => {
