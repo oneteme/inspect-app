@@ -154,6 +154,8 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
     this.dataArray = this.stages.map((c: DatabaseRequestStage, i: number) => {
       let start = Math.trunc(c.start * 1000);
       let end = c.end ? Math.trunc(c.end * 1000) : INFINITY;
+      const args = c.payload?.args;
+      const count = c.payload?.count;
       return {
         group: `${i}`,
         start: start,
@@ -161,12 +163,12 @@ export class DetailDatabaseView implements OnInit, OnDestroy {
         type: end <= start ? 'point' : 'range',
         content: `<div class="content" style="display: flex; align-items: center; gap: 0.5rem; flex-direction: row;">
                                 <span class="command" style="color: #1565c0; font-weight: 600; text-transform: uppercase; font-size: 0.75rem;">${showifnotnull(c.command, () => c.command)}</span>
-                                <span class="arg" style="color: #7f8c8d; font-style: italic; font-size: 0.7rem;">${showifnotnull(c.args, () => `(${c.args.join(', ')})`)}</span>
-                                <span class="count" style="color: #2c3e50; font-weight: 500; font-size: 0.7rem;">${showifnotnull(c.count, () => `×${c.count}`)}</span>
+                                <span class="arg" style="color: #7f8c8d; font-style: italic; font-size: 0.7rem;">${showifnotnull(args, () => `(${args.join(', ')})`)}</span>
+                                <span class="count" style="color: #2c3e50; font-weight: 500; font-size: 0.7rem;">${showifnotnull(count, () => `×${count}`)}</span>
                           </div>`,
         className: `jdbc overflow ${getErrorClassName(c)}`,
         title: `<span>${this.pipe.transform(start, 'HH:mm:ss.SSS')} - ${this.pipe.transform(end, 'HH:mm:ss.SSS')}</span>  (⏱ ${this.durationPipe.transform(c.end - c.start)})<br>
-                        <span>${showifnotnull(c.command, () => c.command)}${showifnotnull(c.args, () => `(${c.args.join(', ')})`)} ${showifnotnull(c.count, () => `×${c.count}`)}</span>`
+                       <span>${showifnotnull(c.command, () => c.command)}${showifnotnull(args, () => `(${args.join(', ')})`)} ${showifnotnull(count, () => `×${count.join(', ')}`)}</span>`
       }
     })
     this.dataArray.splice(0, 0, {
