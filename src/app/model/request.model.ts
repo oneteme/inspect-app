@@ -80,3 +80,8 @@ export interface SessionEventDto extends SessionEvent {
   sessionId: string;
   appName?: string;
 }
+
+export interface MainSessionType {
+  id: string;
+  type: string;
+}
