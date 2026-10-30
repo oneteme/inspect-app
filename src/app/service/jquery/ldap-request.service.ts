@@ -1,9 +1,20 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
+import {Observable, map} from "rxjs";
 import {LdapSessionExceptionsByPeriodAndappname} from "src/app/model/jquery.model";
 import {DirectoryRequestDto} from "../../model/request.model";
 import {applyFilterSelections, ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
+
+/** Colonnes de base de la liste LDAP ; l'alias (`colonne:alias`) donne la clé de la réponse. */
+const LDAP_REQUEST_LIST_COLUMNS = 'id,host,command,status,start,end,user';
+
+/** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
+const LAZY_LDAP_REQUEST_COLUMNS: Record<string, string> = {
+    protocol: 'protocol',
+    port: 'port',
+    sessionId: 'parent:sessionId',
+    threadName: 'thread:threadName'
+};
 
 
 @Injectable({ providedIn: 'root' })
@@ -20,8 +31,16 @@ export class LdapRequestService {
         return this.http.get<T>(url, { params: params });
     }
 
-    getRequests(params: any): Observable<Array<DirectoryRequestDto>> {
-        return this.http.get<Array<DirectoryRequestDto>>(`${this.server}/request/ldap`, { params: params });
+    /** Liste LDAP : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
+    getRequestList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<DirectoryRequestDto[]> {
+        const column = [LDAP_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_LDAP_REQUEST_COLUMNS[c])].join(',');
+        return this.getLdap<any[]>({ ...criteria, column }).pipe(
+            map(rows => rows.map(row => ({
+                ...row,
+                start: row.start / 1000,
+                end: row.end == null ? null : row.end / 1000
+            })))
+        );
     }
 
     getHost(type: string, filters: any): Observable<{ host: string }[]> {

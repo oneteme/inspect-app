@@ -1,9 +1,23 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
+import {Observable, map} from "rxjs";
 import {JdbcExceptionsByPeriodAndAppname} from "../../model/jquery.model";
 import {DatabaseRequestDto} from "../../model/request.model";
 import {applyFilterSelections, ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
+
+/** Colonnes de base de la liste JDBC ; l'alias (`colonne:alias`) donne la clé de la réponse. */
+const DATABASE_REQUEST_LIST_COLUMNS = 'id,host,db:name,command,schema,status,start,end,user';
+
+/** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
+const LAZY_DATABASE_REQUEST_COLUMNS: Record<string, string> = {
+    scheme: 'scheme',
+    port: 'port',
+    driverVersion: 'driver:driverVersion',
+    productName: 'db_name:productName',
+    productVersion: 'db_version:productVersion',
+    sessionId: 'parent:sessionId',
+    threadName: 'thread:threadName'
+};
 
 @Injectable({ providedIn: 'root' })
 export class DatabaseRequestService {
@@ -18,8 +32,16 @@ export class DatabaseRequestService {
         return this.http.get<T>(url, { params: params });
     }
 
-    getRequests(params: any): Observable<Array<DatabaseRequestDto>> {
-        return this.http.get<Array<DatabaseRequestDto>>(`${this.server}/request/database`, { params: params });
+    /** Liste JDBC : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
+    getRequestList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<DatabaseRequestDto[]> {
+        const column = [DATABASE_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_DATABASE_REQUEST_COLUMNS[c])].join(',');
+        return this.getDatabaseRequest<any[]>({ ...criteria, column }).pipe(
+            map(rows => rows.map(row => ({
+                ...row,
+                start: row.start / 1000,
+                end: row.end == null ? null : row.end / 1000
+            })))
+        );
     }
 
     getHost(type: string, filters: any): Observable<{ host: string }[]> {

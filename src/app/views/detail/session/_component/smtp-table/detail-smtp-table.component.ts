@@ -34,6 +34,10 @@ export class DetailSmtpTableComponent {
     }
   }
   @Input() isLoading: boolean;
+
+  @Input() set lazyLoader(loader: TableProvider<MailRequestDto>['lazyLoader']) {
+    this.tableConfig = {...this.tableConfig, lazyLoader: loader};
+  }
   @Output() onClickRow: EventEmitter<{ event: MouseEvent, row: string }> = new EventEmitter();
 
   selectedRequest(event: MouseEvent, row: string) {

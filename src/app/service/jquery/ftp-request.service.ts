@@ -1,9 +1,22 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
+import {Observable, map} from "rxjs";
 import {FtpSessionExceptionsByPeriodAndappname} from "src/app/model/jquery.model";
 import {FtpRequestDto} from "../../model/request.model";
 import {applyFilterSelections, ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
+
+/** Colonnes de base de la liste FTP ; l'alias (`colonne:alias`) donne la clé de la réponse. */
+const FTP_REQUEST_LIST_COLUMNS = 'id,host,command,status,start,end,user';
+
+/** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
+const LAZY_FTP_REQUEST_COLUMNS: Record<string, string> = {
+    protocol: 'protocol',
+    port: 'port',
+    serverVersion: 'server_version:serverVersion',
+    clientVersion: 'client_version:clientVersion',
+    sessionId: 'parent:sessionId',
+    threadName: 'thread:threadName'
+};
 
 
 @Injectable({ providedIn: 'root' })
@@ -20,8 +33,16 @@ export class FtpRequestService {
         return this.http.get<T>(url, { params: params });
     }
 
-    getRequests(params: any): Observable<Array<FtpRequestDto>> {
-        return this.http.get<Array<FtpRequestDto>>(`${this.server}/request/ftp`, { params: params });
+    /** Liste FTP : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
+    getRequestList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<FtpRequestDto[]> {
+        const column = [FTP_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_FTP_REQUEST_COLUMNS[c])].join(',');
+        return this.getFtp<any[]>({ ...criteria, column }).pipe(
+            map(rows => rows.map(row => ({
+                ...row,
+                start: row.start / 1000,
+                end: row.end == null ? null : row.end / 1000
+            })))
+        );
     }
 
     getHost(type: string, filters: any): Observable<{ host: string }[]> {

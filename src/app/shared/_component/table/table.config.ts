@@ -189,7 +189,18 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
       }
     },
     { key: 'action', header: 'Action', icon: 'touch_app', sliceable: false, groupable: false, sortable: false },
-    { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
+    { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
+    { key: 'protocol', header: 'Protocole', icon: 'lan', lazy: true },
+    { key: 'port', header: 'Port', icon: 'settings_ethernet', lazy: true },
+    { key: 'query', header: 'Query', icon: 'search', lazy: true },
+    { key: 'sessionId', header: 'Session', icon: 'link', lazy: true },
+    { key: 'contentType', header: 'Content-Type', icon: 'description', lazy: true },
+    { key: 'authScheme', header: 'Authentification', icon: 'lock', lazy: true },
+    { key: 'inDataSize', header: 'Taille entrée', icon: 'download', lazy: true },
+    { key: 'outDataSize', header: 'Taille sortie', icon: 'upload', lazy: true },
+    { key: 'inContentEncoding', header: 'Encodage entrée', icon: 'compress', lazy: true },
+    { key: 'outContentEncoding', header: 'Encodage sortie', icon: 'compress', lazy: true },
+    { key: 'bodyContent', header: 'Corps', icon: 'notes', lazy: true }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
@@ -225,7 +236,7 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
       searchValue: (row: DatabaseRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'person' },
-    { key: 'productName', header: 'Base de données', optional: true, icon: 'storage' },
+    { key: 'productName', header: 'Base de données', icon: 'storage', lazy: true },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row: DatabaseRequestDto) => {
@@ -233,7 +244,12 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
         return row.status;
       }
     },
-    { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
+    { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
+    { key: 'scheme', header: 'Schéma', icon: 'hub', lazy: true },
+    { key: 'port', header: 'Port', icon: 'settings_ethernet', lazy: true },
+    { key: 'driverVersion', header: 'Version driver', icon: 'extension', lazy: true },
+    { key: 'productVersion', header: 'Version base', icon: 'info', lazy: true },
+    { key: 'sessionId', header: 'Session', icon: 'link', lazy: true }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
@@ -281,7 +297,12 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
         return row.status;
       }
     },
-    { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
+    { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
+    { key: 'protocol', header: 'Protocole', icon: 'lan', lazy: true },
+    { key: 'port', header: 'Port', icon: 'settings_ethernet', lazy: true },
+    { key: 'serverVersion', header: 'Version serveur', icon: 'info', lazy: true },
+    { key: 'clientVersion', header: 'Version client', icon: 'extension', lazy: true },
+    { key: 'sessionId', header: 'Session', icon: 'link', lazy: true }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
@@ -328,7 +349,10 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
         return row.status;
       }
     },
-    { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
+    { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
+    { key: 'protocol', header: 'Protocole', icon: 'lan', lazy: true },
+    { key: 'port', header: 'Port', icon: 'settings_ethernet', lazy: true },
+    { key: 'sessionId', header: 'Session', icon: 'link', lazy: true }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
@@ -422,7 +446,9 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
         return row.status;
       }
     },
-    { key: 'threadName', header: 'Thread', optional: true, icon: 'memory' }
+    { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
+    { key: 'port', header: 'Port', icon: 'settings_ethernet', lazy: true },
+    { key: 'sessionId', header: 'Session', icon: 'link', lazy: true }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,

@@ -28,6 +28,10 @@ export class DetailRestTableComponent {
 
   @Input() isLoading: boolean;
 
+  @Input() set lazyLoader(loader: TableProvider<RestRequestDto>['lazyLoader']) {
+    this.tableConfig = {...this.tableConfig, lazyLoader: loader};
+  }
+
   @Input() set initialSearch(value: string) {
     this.tableConfig = {
       ...this.tableConfig,

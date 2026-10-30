@@ -34,6 +34,10 @@ export class DetailLdapTableComponent {
     }
   }
   @Input() isLoading: boolean;
+
+  @Input() set lazyLoader(loader: TableProvider<DirectoryRequestDto>['lazyLoader']) {
+    this.tableConfig = {...this.tableConfig, lazyLoader: loader};
+  }
   @Output() onClickRow: EventEmitter<{ event: MouseEvent, row: string }> = new EventEmitter();
 
   selectedRequest(event: MouseEvent, row: string) {

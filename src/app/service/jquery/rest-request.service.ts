@@ -5,6 +5,25 @@ import {RestSessionExceptionsByPeriodAndappname} from "src/app/model/jquery.mode
 import {RestRequestDto} from "../../model/request.model";
 import {applyFilterSelections, ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
 
+/** Colonnes de base de la liste REST ; l'alias (`colonne:alias`) donne la clé de la réponse. */
+const REST_REQUEST_LIST_COLUMNS = 'id,host,method,path,status,start,end,user';
+
+/** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
+const LAZY_REST_REQUEST_COLUMNS: Record<string, string> = {
+    protocol: 'protocol',
+    query: 'query',
+    port: 'port',
+    sessionId: 'parent:sessionId',
+    threadName: 'thread:threadName',
+    contentType: 'media:contentType',
+    authScheme: 'auth:authScheme',
+    inDataSize: 'size_in:inDataSize',
+    outDataSize: 'size_out:outDataSize',
+    inContentEncoding: 'content_encoding_in:inContentEncoding',
+    outContentEncoding: 'content_encoding_out:outContentEncoding',
+    bodyContent: 'body_content:bodyContent'
+};
+
 @Injectable({ providedIn: 'root' })
 export class RestRequestService {
 
@@ -19,8 +38,16 @@ export class RestRequestService {
         return this.http.get<T>(url, { params: params });
     }
 
-    getRequests(params: any): Observable<Array<RestRequestDto>> {
-        return this.http.get<Array<RestRequestDto>>(`${this.server}/request/rest`, { params: params });
+    /** Liste REST : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
+    getRequestList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<RestRequestDto[]> {
+        const column = [REST_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_REST_REQUEST_COLUMNS[c])].join(',');
+        return this.getRestRequest<any[]>({ ...criteria, column }).pipe(
+            map(rows => rows.map(row => ({
+                ...row,
+                start: row.start / 1000,
+                end: row.end == null ? null : row.end / 1000
+            })))
+        );
     }
 
     getHost(type: string, filters: any): Observable<{ host: string }[]> {
