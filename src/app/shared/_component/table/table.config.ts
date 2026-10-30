@@ -529,6 +529,7 @@ export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
       searchValue: (row: SessionEventDto) => fmtStart(row.instant)
     },
     { key: 'resource', header: 'Message', groupable: false, sliceable: false, icon: 'info' , width: '50%',
+      sortValue: (row: SessionEventDto) => row.value || row.type || '',
       searchValue: (row: SessionEventDto) => fmtMethod(row.type) + ' ' + (row.value || '')
     }
   ],

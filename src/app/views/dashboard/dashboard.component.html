@@ -216,64 +216,68 @@
       </ng-container>
     </div>
         <!-- Distribution Événements -->
-        <div class="sb-block sb-distribution-block">
-            <div class="sbd-title">Événements</div>
-            <div class="sbd-empty" *ngIf="!eventCountsLoading && eventWarnCount === 0 && eventErrorCount === 0 && eventInfoCount === 0">
-                <mat-icon>info_outline</mat-icon>
-                <span>Aucun événement sur la période</span>
+        <ng-container *ngIf="eventCountsLoading; else eventBlock">
+            <div class="sb-block sb-distribution-block sb-skel-block">
+                <div class="sbd-title">Événements</div>
+                <ng-container *ngFor="let _ of eventSkeletonRows">
+                    <div class="sbd-skel-main">
+                        <div class="sbd-skel-top">
+                            <div class="sbd-skel-label"></div>
+                            <div class="sbd-skel-count"></div>
+                        </div>
+                        <div class="sbd-skel-track"></div>
+                    </div>
+                    <div class="sbd-skel-rate"></div>
+                </ng-container>
             </div>
-            <ng-container *ngIf="eventCountsLoading">
-                <div class="sbd-skel-main">
-                    <div class="sbd-skel-top">
-                        <div class="sbd-skel-label"></div>
-                        <div class="sbd-skel-count"></div>
-                    </div>
-                    <div class="sbd-skel-track"></div>
-                </div>
-                <div class="sbd-skel-rate"></div>
-            </ng-container>
-            <div class="sbd-row"
-                 [class.sbd-row-clickable]="true"
-                 (click)="navigateToEventLogs()"
-                 *ngIf="!eventCountsLoading && (eventWarnCount > 0 || eventErrorCount > 0)">
-                <div class="sbd-main">
-                    <div class="sbd-top">
-                        <span class="sbd-label">Logs applicatifs</span>
-                        <span class="sbd-count">
-                    <span class="c-ok">{{ eventInfoCount | compact }} INFO</span>
-                    -
-                    <span class="c-warn">{{ eventWarnCount | compact }} WARN</span>
-                     -
-                    <span class="c-err">{{ eventErrorCount | compact }} ERROR</span>
-                </span>
-                    </div>
-                    <div class="sbd-track sbd-track-split">
-                    <!-- adding the calcul in style because otherwise the user logs are visible in the range -->
-                        <div class="sbd-fill-info" [style.width.%]="(eventInfoCount) > 0 ? (eventInfoCount / (eventWarnCount + eventErrorCount + eventInfoCount)) * 100 : 0"></div>
-                        <div class="sbd-fill-warn" [style.width.%]="(eventWarnCount + eventErrorCount + eventInfoCount) > 0 ? (eventWarnCount / (eventWarnCount + eventErrorCount + eventInfoCount)) * 100 : 0"></div>
-                        <div class="sbd-fill-error" [style.width.%]="(eventErrorCount) > 0 ? (eventErrorCount / (eventWarnCount + eventErrorCount + eventInfoCount)) * 100 : 0"></div>
-                    </div>
-                </div>
-                <span class="sbd-rate">{{ (eventWarnCount + eventErrorCount + eventInfoCount) | compact }}</span>
-            </div>
-            <div class="sbd-row"
-                 [class.sbd-row-clickable]="true"
-                 (click)="navigateToEventUser()"
-                 *ngIf="!eventCountsLoading && (eventUserCount > 0)">
-                <div class="sbd-main">
-                    <div class="sbd-top">
-                        <span class="sbd-label">Actions utilisateurs</span>
-                        <span class="sbd-count">
-                </span>
-                    </div>
-                    <div class="sbd-track sbd-track-split">
-                        <div class="sbd-fill" [style.width.%]="(eventUserCount) > 0 ? (eventUserCount / (eventUserCount)) * 100 : 0"></div>
-                    </div>
-                </div>
-                <span class="sbd-rate" [class.c-ok]="eventUserCount > 0">{{ (eventUserCount) | compact }}</span>
-            </div>
+        </ng-container>
 
-        </div>
+        <ng-template #eventBlock>
+            <div class="sb-block sb-distribution-block">
+                <div class="sbd-title">Événements</div>
+                <div class="sbd-empty" *ngIf="eventSummaries.length === 0 && !eventCountsLoading">
+                    <mat-icon>info_outline</mat-icon>
+                    <span>Aucun événement sur la période</span>
+                </div>
+                <ng-container *ngFor="let s of eventSummaries">
+                    <ng-container *ngIf="s.loading">
+                        <div class="sbd-skel-main">
+                            <div class="sbd-skel-top">
+                                <div class="sbd-skel-label"></div>
+                                <div class="sbd-skel-count"></div>
+                            </div>
+                            <div class="sbd-skel-track"></div>
+                        </div>
+                        <div class="sbd-skel-rate"></div>
+                    </ng-container>
+                    <div class="sbd-row" *ngIf="!s.loading"
+                         [class.sbd-row-clickable]="true"
+                         [title]="s.title"
+                         tabindex="0"
+                         (click)="navigateToEvent(s.key)"
+                         (keydown.enter)="navigateToEvent(s.key)">
+                        <div class="sbd-main">
+                            <div class="sbd-top">
+                                <span class="sbd-label">{{ s.label }}</span>
+                                <span class="sbd-count"> {{ s.total }}</span>
+                            </div>
+                            <div class="sbd-track sbd-track-split" *ngIf="s.key === 'LOG'">
+                                <div class="sbd-fill-info" [style.width.%]="s.infoPct"></div>
+                                <div class="sbd-fill-warn" [style.width.%]="s.warnPct"></div>
+                                <div class="sbd-fill-error" [style.width.%]="s.errorPct"></div>
+                            </div>
+                            <div class="sbd-track sbd-track-split" *ngIf="s.key !== 'LOG'">
+                                <div class="sbd-fill" [style.width.%]="s.total > 0 ? 100 : 0"></div>
+                            </div>
+                        </div>
+                        <span class="sbd-rate" [class.c-ok]="s.errorCount === 0 && s.warnCount === 0"
+                              [class.c-warn]="s.errorCount === 0 && s.warnCount > 0"
+                              [class.c-err]="s.errorCount > 0">{{ s.rate === 0 ? '100%' : (s.rate | number:'1.2-2') + '%' }}
+                        </span>
+                    </div>
+                </ng-container>
+            </div>
+        </ng-template>
     </aside>
 
 </div>
