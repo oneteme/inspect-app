@@ -65,6 +65,30 @@ export class Utils {
         return { 'box-shadow': '4px 0px 0px 0px ' + this.getStateColor(completed) + ' inset' };
     }
 
+    static getContentTypeIcon(contentType?: string): string {
+        const type = contentType?.split(';', 1)[0].trim().toLowerCase() ?? '';
+
+        if (type.includes('json')) return 'file_json';
+        if (type.includes('xml')) return 'code_xml';
+        if (type.includes('html')) return 'html';
+        if (type.includes('css')) return 'css';
+        if (type.includes('js'))return 'javascript';
+        if (type.includes('csv')) return 'csv';
+        if (/tsv|tab-separated/.test(type)) return 'tsv';
+        if (/excel|xls/.test(type)) return 'table_view';
+        if (/docx|doc/.test(type)) return 'docs';
+        if (type.includes('png')) return 'file_png';
+        if (/jpeg|jpg/.test(type)) return 'image';
+        if (type.includes('gif')) return 'gif_box';
+        if (type.includes('zip')) return 'folder_zip';
+        if (type.includes('markdown')) return 'markdown';
+        if (type.includes('pdf')) return 'picture_as_pdf';
+        if (type.includes('txt')) return 'description';
+        if (type.includes('form')) return 'list_alt';
+        if (type.includes('stream')) return 'deployed_code';
+        return 'line_style';
+    }
+
     convertSeconds = (seconds: number): string => {
         const hours = Math.round(Math.floor(seconds / 3600))
         const minutes = Math.round(Math.floor((seconds % 3600) / 60))

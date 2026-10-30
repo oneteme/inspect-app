@@ -112,6 +112,10 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
         return Utils.getSessionUrl(this.session);
     }
 
+    getContentTypeIcon(contentType?: string): string {
+        return Utils.getContentTypeIcon(contentType);
+    }
+
     ngOnDestroy() {
         this.$destroy.next();
         this.$destroy.complete();
