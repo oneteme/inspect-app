@@ -57,7 +57,7 @@ export const environment = {
 
 export const app: Application = {
   host: "http://localhost:9001",
-  defaultNamespace: "dev",
+  defaultNamespace: "jarvis",
   gridViewPeriod: "LAST_60",
   kpiViewPeriod: "LAST_1440"
 }

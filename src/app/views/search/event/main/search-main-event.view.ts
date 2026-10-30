@@ -264,13 +264,27 @@ export class SearchMainEventView {
 
 
     selectedRequest(event: MouseEvent, row: SessionEventDto) {
-        if (row && row.sessionId) {
-            const sessionType = (row as any).sessionType?.toLowerCase() || 'rest';
+        if (!row?.sessionId)
+            return;
 
-            this._router.navigateOnClick(event, ['/session', sessionType, row.sessionId], {
-                queryParams: { namespace: this.queryParams.namespace }
-            });
-        }
+        this._mainSessionService.getMainSession<{ id: string; type: string }[]>({
+            'id': row.sessionId,
+            'column': 'id,type'
+        }).subscribe({
+            next: (res) => {
+                const type = res?.[0]?.type?.toLowerCase() || 'rest';
+                this.navigateToSession(event, type, row.sessionId);
+            },
+            error: () => {
+                this.navigateToSession(event, 'rest', row.sessionId);
+            }
+        });
+    }
+
+    private navigateToSession(event: MouseEvent, type: string, sessionId: string) {
+        this._router.navigateOnClick(event, ['/session', type, sessionId], {
+            queryParams: { namespace: this.queryParams.namespace }
+        });
     }
 
 }
