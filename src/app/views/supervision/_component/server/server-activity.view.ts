@@ -98,8 +98,8 @@ export class ServerActivityView implements OnDestroy {
     stacked: false,
     ytitle: '',
     series: [
-      {data: {x: field('date'), y: field('traceCount')}, name: 'Traitements finalisés'},
-      {data: {x: field('date'), y: field('pending')}, name: 'Traitements en cours'}
+      {data: {x: field('date'), y: field('traceCount')}, name: 'Opérations finalisées'},
+      {data: {x: field('date'), y: field('pending')}, name: 'Opérations en cours'}
     ],
     options: {
       animation: false,
@@ -146,7 +146,7 @@ export class ServerActivityView implements OnDestroy {
   };
 
   constructor() {
-    this._pageTitleService.set({icon: 'admin_panel_settings', iconOutlined: true, title: 'Supervision du serveur'});
+    this._pageTitleService.set({icon: ' troubleshoot', iconOutlined: true, title: 'Diagnostique'});
     this._route.queryParams.pipe(
         switchMap(queryParams => {
           const period = this.resolvePeriod(queryParams);
@@ -338,8 +338,8 @@ export class ServerActivityView implements OnDestroy {
     const categories = this.getChartCategories(rows);
     const xAxis = {type: 'category', data: categories};
     this.USAGE_INSTANCE_TRACE_BY_PERIOD_LINE.series = [
-      {data: {x: field('date'), y: field('traceCount')}, name: 'Traitements finalisés'},
-      {data: {x: field('date'), y: field('pending')}, name: 'Traitements en cours'}
+      {data: {x: field('date'), y: field('traceCount')}, name: 'Opérations finalisées'},
+      {data: {x: field('date'), y: field('pending')}, name: 'Opérations en cours'}
     ];
     this.USAGE_INSTANCE_TRACE_BY_PERIOD_LINE.options = {
       ...this.USAGE_INSTANCE_TRACE_BY_PERIOD_LINE.options,

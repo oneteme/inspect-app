@@ -19,7 +19,7 @@ export class LogEntryService {
     const args: any = {
       'column': 'start:instant,instance.app_name:appName,log_message,thread,action,stacktrace:stackRows',
       'join': 'left_instance',
-      //'instance.namespace': filters.namespace,
+      'instance.namespace': filters.namespace, // todo remove this once @usf fixes the namespace issue in server
       'start.ge': filters.start.toISOString(),
       'start.lt': filters.end.toISOString(),
       'order': 'instant.asc'

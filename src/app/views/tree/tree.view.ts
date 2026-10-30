@@ -379,7 +379,7 @@ export class TreeView implements OnDestroy {
         let jdbcRequestNode = v[1][0];
         b = treeGraph.insertServer({ serverlbl, node: jdbcRequestNode, requestType: 'jdbc' }, "JDBC"); // demon server
         if (v[1].length > 1) {
-          linkStyle = LinkConfig[this.getGroupFailedStyle(v[1])] + "strokeWidth=1.5;"
+          linkStyle = LinkConfig[this.getGroupLinkStyle(v[1])] + "strokeWidth=1.5;"
         } else {
           linkStyle = LinkConfig[jdbcRequestNode.getLinkStyle()];
         }

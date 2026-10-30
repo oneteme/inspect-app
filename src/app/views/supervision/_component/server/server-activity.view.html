@@ -36,13 +36,10 @@
       <div class="kpi-chart-header">
         <div class="kpi-chart-title-group">
           <span class="kpi-accent-bar blue-bar"></span>
-          <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">equalizer</mat-icon>
-          <h2 id="activity-traces-title" class="kpi-chart-title">Traces</h2>
+          <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">browse_activity</mat-icon>
+          <h2 id="activity-traces-title" class="kpi-chart-title">Volume des opérations</h2>
         </div>
         <span class="kpi-chart-badge">{{ isLoadingTrace ? '…' : (traceStat | number) }}</span>
-      </div>
-      <div class="kpi-chart-subheader">
-        <span class="kpi-chart-unit">Traitements finalisés et en cours</span>
       </div>
       <div class="kpi-chart-body">
         <chart type="line" [config]="USAGE_INSTANCE_TRACE_BY_PERIOD_LINE"
@@ -54,13 +51,10 @@
       <div class="kpi-chart-header">
         <div class="kpi-chart-title-group">
           <span class="kpi-accent-bar orange-bar"></span>
-          <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">troubleshoot</mat-icon>
-          <h2 id="activity-sequence-loss-title" class="kpi-chart-title">Pertes de séquences et tentatives échouées</h2>
+          <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">sync_problem</mat-icon>
+          <h2 id="activity-sequence-loss-title" class="kpi-chart-title">Indisponibilité</h2>
         </div>
         <span class="kpi-chart-badge">{{ sequenceLossPeriodsWithEvents | number }}</span>
-      </div>
-      <div class="kpi-chart-subheader">
-        <span class="kpi-chart-unit">Séquences perdues et tentatives échouées par date et instance</span>
       </div>
       <div class="kpi-chart-body">
         <chart type="bar" [config]="SEQUENCE_LOSS_BAR"
@@ -73,13 +67,9 @@
       <div class="kpi-chart-header">
         <div class="kpi-chart-title-group">
           <span class="kpi-accent-bar orange-bar"></span>
-          <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">assignment</mat-icon>
-          <h2 id="activity-reports-title" class="kpi-chart-title">Rapports</h2>
+          <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">bug_report</mat-icon>
+          <h2 id="activity-reports-title" class="kpi-chart-title">Anomalies</h2>
         </div>
-        <span class="kpi-chart-badge">{{ isLoadingLogs ? '…' : (logEntryByPeriod.length | number) }}</span>
-      </div>
-      <div class="kpi-chart-subheader">
-        <span class="kpi-chart-unit">Journaux d’activité du namespace</span>
       </div>
       <div class="kpi-chart-body">
         <jquery-table class="flex-table" [config]="tableConfig" [data]="logEntryByPeriod" [isLoading]="isLoadingLogs">
