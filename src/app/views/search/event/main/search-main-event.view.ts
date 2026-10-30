@@ -26,7 +26,6 @@ import {CustomDateAdapter} from "../../../../shared/material/custom-date-adapter
 import {MY_DATE_FORMATS} from "../../../../shared/shared.module";
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
 import {CustomDateRangeSelectionStrategy} from "../../../../shared/material/custom-date-range-selection-strategy";
-import {MainSessionService} from "../../../../service/jquery/main-session.service";
 
 @Component({
     templateUrl: './search-main-event.view.html',
@@ -44,7 +43,6 @@ export class SearchMainEventView {
     private readonly _instanceService = inject(InstanceService);
     private readonly _activatedRoute = inject(ActivatedRoute);
     private readonly _location = inject(Location);
-    private readonly _mainSessionService = inject(MainSessionService);
     readonly periodQuickRanges = PERIOD_QUICK_RANGES;
     serverNameIsLoading = true;
     nameDataList: any[];
@@ -266,13 +264,9 @@ export class SearchMainEventView {
     selectedRequest(event: MouseEvent, row: SessionEventDto) {
         if (!row?.sessionId)
             return;
-
-        this._mainSessionService.getMainSession<{ id: string; type: string }[]>({
-            'id': row.sessionId,
-            'column': 'id,type'
-        }).subscribe({
+        this._sessionEventService.getMainSessionType(row.sessionId).subscribe({
             next: (res) => {
-                const type = res?.[0]?.type?.toLowerCase() || 'rest';
+                const type = res?.type?.toLowerCase();
                 this.navigateToSession(event, type, row.sessionId);
             },
             error: () => {
