@@ -187,13 +187,13 @@ export class DetailSessionComponent implements OnChanges {
 
   selectedRemote(event: { event: MouseEvent, row: any }) {
     if (event.row) {
-      this._router.navigateOnClick(event.event, ['/session', 'rest', event.row], { queryParams: { namespace: this.instance.namespace } }); // TODO remove env FIX BUG
+      this._router.navigateOnClick(event.event, ['/session', 'rest', event.row], { queryParams: { namespace: this.instance.namespace } });
     }
   }
 
   selectedRest(event: { event: MouseEvent, row: any }) {
     if (event.row) {
-      this._router.navigateOnClick(event.event, ['/request', 'rest', event.row], {queryParams: {namespace: this.instance.namespace}}); // TODO remove env FIX BUG
+      this._router.navigateOnClick(event.event, ['/request', 'rest', event.row], {queryParams: {namespace: this.instance.namespace}});
     }
   }
 
