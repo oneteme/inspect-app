@@ -29,7 +29,7 @@ export class SessionEventService {
     }
 
     getSessionEventTypeCount(params: any): Observable<{count: number, type: string}[]> {
-        return this.http.get<{count: number, type: string}[]>(`${localStorage.getItem('server')}/jquery/session/event/count`, {params: params});
+        return this.http.get<{count: number, type: string}[]>(`${localStorage.getItem('server')}/jquery/session/event`, {params: params});
     }
 
     getMainSessionType(idSession: string): Observable<MainSessionType> {

@@ -273,8 +273,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 const eventParams: any = {
                     'instance.namespace': currentNamespace,
                     'start.ge': currentStart.toISOString(),
-                    'start.lt': effectiveEnd.toISOString()
+                    'start.lt': effectiveEnd.toISOString(),
+                    'column': 'count:count,type',
+                    'type.in': 'INFO,WARN,ERROR'
                 };
+                this.eventWarnCount = 0;
                 if (this.params.serveurs?.length) {
                     eventParams['instance.app_name'] = this.params.serveurs;
                 }
@@ -288,24 +291,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     .subscribe({
                         next: (events) => {
                             if (this._loadGen !== gen || !events) return;
-                            const getCount = (e: any): number => Number(e['COUNT(*)'] ?? e.count ?? 0) || 0;
-
                             this.eventWarnCount = events
-                                .filter(e => e.type === 'WARN')
-                                .reduce((acc, e) => acc + getCount(e), 0);
+                                .find(e => e.type === 'WARN')?.count
 
                             this.eventErrorCount = events
-                                .filter(e => e.type === 'ERROR')
-                                .reduce((acc, e) => acc + getCount(e), 0);
+                                .find(e => e.type === 'ERROR')?.count
 
                             this.eventInfoCount = events
-                                .filter(e => e.type === 'INFO')
-                                .reduce((acc, e) => acc + getCount(e), 0);
-
-                            this.eventUserCount = events
-                                .filter(e => e.type !== 'ERROR' && e.type !== 'WARN' && e.type !== 'INFO')
-                                .reduce((acc, e) => acc + getCount(e), 0);
-
+                                .find(e => e.type === 'INFO')?.count
                             this._rebuildEventSummaries();
                         },
                         error: () => {
@@ -313,14 +306,45 @@ export class DashboardComponent implements OnInit, OnDestroy {
                                 this.eventWarnCount = 0;
                                 this.eventErrorCount = 0;
                                 this.eventInfoCount = 0;
-                                this.eventUserCount = 0;
                                 this._rebuildEventSummaries();
                             }
                         }
                     }));
+                this.getUserEventCount(currentNamespace, currentStart, effectiveEnd, gen);
             }
         }));
     }
+
+    getUserEventCount(currentNamespace: string, currentStart: Date, effectiveEnd: Date, gen: number) {
+        const userParams: any = {
+            'instance.namespace': currentNamespace,
+            'start.ge': currentStart.toISOString(),
+            'start.lt': effectiveEnd.toISOString(),
+            'column': 'count:count,type',
+            'type.notIn': 'INFO,WARN,ERROR'
+        };
+        this._sessionEventService.getSessionEventTypeCount(userParams)
+            .pipe(finalize(() => {
+                if (this._loadGen === gen) {
+                    this.eventCountsLoading = false;
+                    this._rebuildEventSummaries();
+                }
+            }))
+            .subscribe({
+                next: (events) => {
+                    if (this._loadGen !== gen || !events) return;
+                    this.eventUserCount = events.length;
+                    this._rebuildEventSummaries();
+                },
+                error: () => {
+                    if (this._loadGen === gen) {
+                        this.eventUserCount = 0;
+                        this._rebuildEventSummaries();
+                    }
+                }
+            })
+    }
+
     initCharts(gen: number) {
         this.kpiLoading = true;
         this.sparklinePercs = { rest: 0, jdbc: 0, ftp: 0, smtp: 0, ldap: 0 };
