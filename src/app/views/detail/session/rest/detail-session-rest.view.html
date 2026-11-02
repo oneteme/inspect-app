@@ -71,7 +71,9 @@
             <div class="meta-icon-btn"
                  [class.disabled]="!session.contentType"
                  [matTooltip]="session.contentType || 'Content-Type indisponible'">
-              <mat-icon class="material-symbols-outlined">line_style</mat-icon>
+              <mat-icon class="material-symbols-outlined">
+                  {{ getContentTypeIcon(session.contentType) }}
+              </mat-icon>
             </div>
             <div class="meta-icon-btn"
                  [class.disabled]="!session.cacheControl"

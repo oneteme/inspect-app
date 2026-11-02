@@ -178,6 +178,10 @@ export class DetailRestView implements OnInit, OnDestroy {
     return Utils.getSessionUrl(this.request);
   }
 
+  getContentTypeIcon(contentType?: string): string {
+    return Utils.getContentTypeIcon(contentType);
+  }
+
   navigate(event: MouseEvent, targetType: string, extraParam?: string) {
       let params: any[] = [];
       switch (targetType) {
