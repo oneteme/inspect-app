@@ -190,7 +190,7 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
     },
     { key: 'action', header: 'Action', icon: 'touch_app', sliceable: false, groupable: false, sortable: false },
     { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
-    { key: 'protocol', header: 'Protocole', icon: 'lan', lazy: true },
+    { key: 'protocol', header: 'Protocole', icon: 'lan', optional: true },
     { key: 'port', header: 'Port', icon: 'settings_ethernet', lazy: true },
     { key: 'query', header: 'Query', icon: 'search', lazy: true },
     { key: 'sessionId', header: 'Session', icon: 'link', lazy: true },

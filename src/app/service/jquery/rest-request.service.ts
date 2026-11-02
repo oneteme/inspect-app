@@ -6,11 +6,10 @@ import {RestRequestDto} from "../../model/request.model";
 import {applyFilterSelections, ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
 
 /** Colonnes de base de la liste REST ; l'alias (`colonne:alias`) donne la clé de la réponse. */
-const REST_REQUEST_LIST_COLUMNS = 'id,host,method,path,status,start,end,user';
+const REST_REQUEST_LIST_COLUMNS = 'id,host,method,protocol,path,status,start,end,user,linked';
 
 /** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
 const LAZY_REST_REQUEST_COLUMNS: Record<string, string> = {
-    protocol: 'protocol',
     query: 'query',
     port: 'port',
     sessionId: 'parent:sessionId',
