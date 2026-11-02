@@ -11,16 +11,15 @@
         <!-- En-tête -->
         <div class="session-header">
           <div class="session-title-row">
-            <div class="session-icon-wrap">
-              <mat-icon class="material-symbols-outlined session-icon">call_received</mat-icon>
+            <div class="hero-status">
+              <span class="hero-code" *ngIf="session.end; else heroRunning">{{ session.status }}</span>
+              <ng-template #heroRunning>
+                <mat-icon class="material-symbols-outlined hero-code hero-running">{{ STATUS['-1'].icon }}</mat-icon>
+              </ng-template>
+              <span class="hero-label">{{ session.end ? STATUS[session.status.toString().charAt(0) + 'xx']?.label : STATUS['-1']?.label }}</span>
             </div>
-
             <div class="session-title-content">
               <div class="session-name-row">
-                <span class="status-pill"
-                      [ngClass]="STATUS[session.end ? session.status.toString().charAt(0) + 'xx' : '-1']?.class">
-                  {{ session.end ? session.status + ' - ' + STATUS[session.status.toString().charAt(0) + 'xx']?.label : STATUS['-1']?.label }}
-                </span>
                 <span class="session-name ellipsis" [matTooltip]="session.name">
                   {{ session.name || 'N/A' }}
                 </span>

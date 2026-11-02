@@ -19,39 +19,66 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
   }
 
- // Icône colorée selon le statut
-  &.success .session-icon-wrap {
-    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-    border-color: #86efac;
-    .session-icon { color: #16a34a; }
-  }
-  &.warning .session-icon-wrap {
-    background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
-    border-color: #fdba74;
-    .session-icon { color: #d97706; }
-  }
-  &.fail .session-icon-wrap {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    border-color: #fca5a5;
-    .session-icon { color: #dc2626; }
-  }
-  &.unavailable .session-icon-wrap {
-    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-    border-color: #cbd5e1;
-    .session-icon { color: #64748b; }
+  // Statut : code coloré + libellé en petites capitales, sur un léger dégradé (comme kpi-stat-card)
+  --hero-color: #16a34a;
+  --hero-text: #15803d;
+  --hero-tint: #f0fdf4;
+
+  &.warning     { --hero-color: #d97706; --hero-text: #b45309; --hero-tint: #fff7ed; }
+  &.fail        { --hero-color: #dc2626; --hero-text: #b91c1c; --hero-tint: #fff5f5; }
+  &.unavailable { --hero-color: #64748b; --hero-text: #475569; --hero-tint: #f8fafc; }
+  &.in-progress { --hero-color: #4f46e5; --hero-text: #4338ca; --hero-tint: #f0f7ff; }
+
+  .session-header {
+    background: linear-gradient(to bottom, var(--hero-tint) 0%, #ffffff 60%);
   }
 
-  &.in-progress .session-icon-wrap {
-    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-    border-color: #a5b4fc;
-    animation: pulse-border 2s ease-in-out infinite;
-    .session-icon { color: #4f46e5; }
+  .session-title-row {
+    gap: 10px;
+  }
+
+  .hero-status {
+    flex-shrink: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    width: 72px;
+    padding-right: 10px;
+    border-right: 1px solid rgba(15, 23, 42, 0.08);
+    text-align: center;
+  }
+
+  .hero-code {
+    font-size: 22px;
+    line-height: 1;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--hero-color);
+
+    &.hero-running {
+      width: 22px;
+      height: 22px;
+      animation: pulse-icon 1.6s ease-in-out infinite;
+    }
+  }
+
+  .hero-label {
+    font-size: 9px;
+    line-height: 1.25;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--hero-text);
   }
 }
 
-@keyframes pulse-border {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.25); }
-  50%       { box-shadow: 0 0 0 5px rgba(99, 102, 241, 0); }
+@keyframes pulse-icon {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
 }
 
 .session-card-inner {
@@ -77,25 +104,6 @@
   gap: 12px;
   min-width: 0;
   flex: 1;
-}
-
-.session-icon-wrap {
-  flex-shrink: 0;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border: 1px solid #bfdbfe;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  .session-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-    color: #2563eb;
-  }
 }
 
 .session-title-content {
@@ -145,24 +153,6 @@
 .menu-btn {
   flex-shrink: 0;
   color: #64748b;
-}
-
-// Pill de statut HTTP
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  flex-shrink: 0;
-
-  &.success    { background: #dcfce7; color: #166534; }
-  &.warning    { background: #fff7ed; color: #9a3412; }
-  &.fail       { background: #fee2e2; color: #991b1b; }
-  &.unavailable{ background: #f1f5f9; color: #475569; }
-  &.in-progress{ background: #EAF4FF; color: #4f46e5; }
 }
 
 // Badge méthode HTTP

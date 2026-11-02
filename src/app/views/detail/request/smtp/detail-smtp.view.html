@@ -8,16 +8,14 @@
 
         <div class="session-header">
           <div class="session-title-row">
-            <div class="session-icon-wrap">
-              <mat-icon class="material-symbols-outlined session-icon">{{ REQUEST_TYPE['smtp'].icon }}</mat-icon>
+            <div class="hero-status">
+              <span class="hero-code" *ngIf="request.end; else heroRunning">{{ request.status }}</span>
+              <ng-template #heroRunning>
+                <mat-icon class="material-symbols-outlined hero-code hero-running">{{ STATUS['-1'].icon }}</mat-icon>
+              </ng-template>
+              <span class="hero-label">{{ request.end ? STATUS[request.status.toString().charAt(0) + 'xx']?.label : STATUS['-1']?.label }}</span>
             </div>
             <div class="session-title-content">
-              <div class="session-name-row">
-                <span class="status-pill"
-                      [ngClass]="STATUS[request.end ? request.status.toString().charAt(0) + 'xx' : '-1']?.class">
-                  {{ request.end ? STATUS[request.status.toString().charAt(0) + 'xx']?.label : STATUS['-1']?.label }}
-                </span>
-              </div>
               <div class="session-url-row">
                 <span class="method-badge">{{ request.command || 'N/A' }}</span>
                 <span class="session-name ellipsis"
