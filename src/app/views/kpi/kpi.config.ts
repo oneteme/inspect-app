@@ -2,6 +2,16 @@ import {field, UnitConfig} from "@oneteme/jquery-core";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 import {STATUS} from "../constants";
 
+// Les durées (elapsed_time) sont fournies en secondes par le serveur.
+const DURATION_UNIT: UnitConfig = {
+  baseUnit: 's',
+  scales: [
+    { unit: 'µs', scale: 1000000, threshold: 0.001 },
+    { unit: 'ms', scale: 1000, threshold: 1 },
+    { unit: 's', scale: 1, threshold: Infinity }
+  ]
+};
+
 export const REST_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
   series: {
     optional: false,
@@ -951,14 +961,7 @@ export const REST_LATENCY_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
       key: 'avg',
       selected: true,
       group: 'Durées',
-      unit: {
-        baseUnit: 's',
-        scales: [
-          { unit: 'µs', scale: 1000000, threshold: 0.001 },  // < 1ms
-          { unit: 'ms', scale: 1000, threshold: 1 },  // < 1s (DEFAULT)
-          { unit: 's',  scale: 1, threshold: Infinity }  // >= 1s
-        ]
-      },
+      unit: DURATION_UNIT,
       menu: {
         label: 'Moyenne'
       },
@@ -972,14 +975,7 @@ export const REST_LATENCY_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
       key: 'min',
       selected: false,
       group: 'Durées',
-      unit: {
-        baseUnit: 's',
-        scales: [
-          { unit: 'µs', scale: 1000000, threshold: 0.001 },
-          { unit: 'ms', scale: 1000, threshold: 1 },
-          { unit: 's',  scale: 1, threshold: Infinity }
-        ]
-      },
+      unit: DURATION_UNIT,
       menu: {
         label: 'Minimum'
       },
@@ -993,14 +989,7 @@ export const REST_LATENCY_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
       key: 'max',
       selected: false,
       group: 'Durées',
-      unit: {
-        baseUnit: 's',
-        scales: [
-          { unit: 'µs', scale: 1000000, threshold: 0.001 },
-          { unit: 'ms', scale: 1000, threshold: 1 },
-          { unit: 's', scale: 1, threshold: Infinity }
-        ]
-      },
+      unit: DURATION_UNIT,
       menu: {
         label: 'Maximum'
       },
@@ -2102,7 +2091,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
     key: 'percentile',
     selected: true,
     group: 'Durées',
-    unit: 'ms',
+    unit: DURATION_UNIT,
     menu: {
       label: 'Percentile (95%)'
     },
@@ -2116,7 +2105,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
     key: 'median',
     selected: false,
     group: 'Durées',
-    unit: 'ms',
+    unit: DURATION_UNIT,
     menu: {
       label: 'Médiane'
     },
@@ -2130,7 +2119,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
     key: 'avg',
     selected: false,
     group: 'Durées',
-    unit: 'ms',
+    unit: DURATION_UNIT,
     menu: {
       label: 'Moyenne'
     },
@@ -2144,7 +2133,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
     key: 'min',
     selected: false,
     group: 'Durées',
-    unit: 'ms',
+    unit: DURATION_UNIT,
     menu: {
       label: 'Minimum'
     },
@@ -2158,7 +2147,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
     key: 'max',
     selected: false,
     group: 'Durées',
-    unit: 'ms',
+    unit: DURATION_UNIT,
     menu: {
       label: 'Maximum'
     },
