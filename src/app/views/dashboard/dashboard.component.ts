@@ -259,6 +259,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                         if (this._loadGen === gen) {
                             this.restSessionCountLoading = false;
                             this._rebuildSessionSummaries();
+                            this._rebuildEventSummaries();
                         }
                     }))
                     .subscribe({
@@ -277,42 +278,47 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     'column': 'count:count,type',
                     'type.in': 'INFO,WARN,ERROR'
                 };
-                this.eventWarnCount = 0;
                 if (this.params.serveurs?.length) {
                     eventParams['instance.app_name'] = this.params.serveurs;
                 }
-                this.sessionSubscriptions.push(this._sessionEventService.getSessionEventTypeCount(eventParams)
-                    .pipe(finalize(() => {
-                        if (this._loadGen === gen) {
-                            this.eventCountsLoading = false;
-                            this._rebuildEventSummaries();
-                        }
-                    }))
-                    .subscribe({
-                        next: (events) => {
-                            if (this._loadGen !== gen || !events) return;
-                            this.eventWarnCount = events
-                                .find(e => e.type === 'WARN')?.count
-
-                            this.eventErrorCount = events
-                                .find(e => e.type === 'ERROR')?.count
-
-                            this.eventInfoCount = events
-                                .find(e => e.type === 'INFO')?.count
-                            this._rebuildEventSummaries();
-                        },
-                        error: () => {
-                            if (this._loadGen === gen) {
-                                this.eventWarnCount = 0;
-                                this.eventErrorCount = 0;
-                                this.eventInfoCount = 0;
-                                this._rebuildEventSummaries();
-                            }
-                        }
-                    }));
+                this.getLogEventCount(currentNamespace, currentStart, effectiveEnd, gen);
                 this.getUserEventCount(currentNamespace, currentStart, effectiveEnd, gen);
             }
         }));
+    }
+
+    getLogEventCount(currentNamespace: string, currentStart: Date, effectiveEnd: Date, gen: number) {
+        const logParams: any = {
+            'instance.namespace': currentNamespace,
+            'start.ge': currentStart.toISOString(),
+            'start.lt': effectiveEnd.toISOString(),
+            'column': 'count:count,type',
+            'type.in': 'INFO,WARN,ERROR'
+        };
+        this._sessionEventService.getSessionEventTypeCount(logParams)
+            .pipe(finalize(() => {
+                if (this._loadGen === gen) {
+                    this.eventCountsLoading = false;
+                    this._rebuildEventSummaries();
+                }
+            }))
+            .subscribe({
+                next: (events) => {
+                    if (this._loadGen !== gen || !events) return;
+                    this.eventWarnCount = events.find(e => e.type === 'WARN')?.count ?? 0;
+                    this.eventErrorCount = events.find(e => e.type === 'ERROR')?.count ?? 0;
+                    this.eventInfoCount = events.find(e => e.type === 'INFO')?.count ?? 0;
+                    this._rebuildEventSummaries();
+                },
+                error: () => {
+                    if (this._loadGen === gen) {
+                        this.eventWarnCount = 0;
+                        this.eventErrorCount = 0;
+                        this.eventInfoCount = 0;
+                        this._rebuildEventSummaries();
+                    }
+                }
+            });
     }
 
     getUserEventCount(currentNamespace: string, currentStart: Date, effectiveEnd: Date, gen: number) {
@@ -1026,7 +1032,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
         this._cdr.markForCheck();
     }
-
     navigateToEvent(key: string): void {
         if (key === 'LOG') {
             this.navigateToEventLogs();

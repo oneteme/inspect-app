@@ -259,7 +259,7 @@
                         <div class="sbd-main">
                             <div class="sbd-top">
                                 <span class="sbd-label">{{ s.label }}</span>
-                                <span class="sbd-count"> {{ s.total }}</span>
+                                <span class="sbd-count">{{ s.total | compact }}</span>
                             </div>
                             <div class="sbd-track sbd-track-split" *ngIf="s.key === 'LOG'">
                                 <div class="sbd-fill-info" [style.width.%]="s.infoPct"></div>
@@ -272,7 +272,7 @@
                         </div>
                         <span class="sbd-rate" [class.c-ok]="s.errorCount === 0 && s.warnCount === 0"
                               [class.c-warn]="s.errorCount === 0 && s.warnCount > 0"
-                              [class.c-err]="s.errorCount > 0">{{ s.rate === 0 || s.warnCount === 0 ? s.warnCount === 0 ? '100%' : (s.warnCount | number:'1.2-2') + '%' : (s.rate | number:'1.2-2') + '%' }}
+                              [class.c-err]="s.errorCount > 0">{{ s.rate === 0 ? s.warnCount === 0 ? '100%' : (s.warnCount | number:'1.2-2') + '%' : (s.rate | number:'1.2-2') + '%' }}
                         </span>
                     </div>
                 </ng-container>
