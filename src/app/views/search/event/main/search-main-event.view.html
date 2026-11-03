@@ -91,5 +91,12 @@
         <span>{{ row.value }}</span>
     </ng-template>
 
+    <ng-template jqtCellDef="action" let-row>
+        <button matTooltip="Détail de la session" [style.visibility]="row.sessionId ? 'visible' : 'hidden'" mat-icon-button color="primary"
+                (click)="selectedRequest($event, row); $event.stopPropagation()">
+            <mat-icon class="material-symbols-outlined">link</mat-icon>
+        </button>
+    </ng-template>
+
 
 </jquery-table>

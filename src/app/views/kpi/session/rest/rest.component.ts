@@ -468,10 +468,15 @@ export class RestComponent implements OnInit {
     this.$userAgentRepartition.loading = true;
     this._restSessionService.getRestSession(args).pipe(finalize(() => this.$userAgentRepartition.loading = false)).subscribe({
       next: (res: any[]) => {
-        this.$userAgentRepartition.data = res.map(r => ({
-          ...r,
-          user_agt: r.user_agt ? r.user_agt.split('/')[0].trim() : 'N/A'
-        }));
+        const aggregated = (res || []).reduce((sum, r) => {
+          const userAgent = (r.user_agt ? r.user_agt.split('/')[0].trim() : '') || 'N/A';
+          sum[userAgent] = (sum[userAgent] || 0) + (r.count || 0);
+          return sum;
+        }, {} as Record<string, number>);
+
+        this.$userAgentRepartition.data = Object.entries(aggregated)
+            .map(([user_agt, count]: [string, number]) => ({ user_agt, count }))
+            .sort((a, b) => b.count - a.count);
       }
     });
   }

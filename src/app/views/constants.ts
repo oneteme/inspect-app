@@ -100,9 +100,9 @@ export class Constants {
         view: {title: 'Parcours Client', subtitle: 'Navigation utilisateurs et accès aux pages', icon: 'ads_click'},
         dashboard: {title:'Tableau de bord', icon: 'home'},
         deploiment: {title:'Instances Actives', subtitle: 'Suivi des applications en cours d\'exécution', icon:'deployed_code'},
-        event: {title: 'Événements', icon: 'event'},
-        log: {title: 'Événements', subtitle: 'Logs Applicatifs', icon: 'browse_activity'},
-        user: {title: 'Événements', subtitle: 'Actions Utilisateurs', icon: 'person'},
+        event: {title: 'Événements', icon: 'flash_on'},
+        log: {title: 'Événements', subtitle: 'Logs Applicatifs', icon: 'bolt_boost'},
+        user: {title: 'Événements', subtitle: 'Actions Utilisateurs', icon: 'recent_patient'},
         architecture: {title: 'Architecture', icon: 'lan'},
         tree: {title: 'Arborescence des ressources', subtitle: 'Diagramme de bout en bout des flux d\'exécution', icon: 'account_tree'},
     }
