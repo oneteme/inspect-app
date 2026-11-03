@@ -238,7 +238,7 @@ export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => (
       label: 'Api'
     },
     jquery: {
-      value: () => `api_name.coalesce("Non renseigné")`,
+      value: () => `api_name.coalesce("Sans contenu")`,
       buildAlias: () => 'name',
       order: 'name.asc'
     }
@@ -249,7 +249,7 @@ export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => (
       label: 'Utilisateur'
     },
     jquery: {
-      value: () => `user.coalesce("Non renseigné")`,
+      value: () => `user.coalesce("Sans contenu")`,
       buildAlias: () => 'user',
       order: 'user.asc'
     }
@@ -260,7 +260,7 @@ export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => (
       label: 'Method'
     },
     jquery: {
-      value: () => `method.coalesce("Non renseigné")`,
+      value: () => `method.coalesce("Sans contenu")`,
       buildAlias: () => 'method',
       order: 'method.asc'
     }
@@ -271,7 +271,7 @@ export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => (
       label: 'Media'
     },
     jquery: {
-      value: () => `media.coalesce("Non renseigné")`,
+      value: () => `media.coalesce("Sans contenu")`,
       buildAlias: () => 'media',
       order: 'media.asc'
     }
@@ -282,7 +282,7 @@ export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => (
       label: 'Auth'
     },
     jquery: {
-      value: () => `auth.coalesce("Non renseigné")`,
+      value: () => `auth.coalesce("Sans contenu")`,
       buildAlias: () => 'auth',
       order: 'auth.asc'
     }
@@ -320,7 +320,7 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
       label: 'Api'
     },
     jquery: {
-      value: () => `api_name.coalesce("Non renseigné")`,
+      value: () => `api_name.coalesce("Sans contenu")`,
       buildAlias: () => 'name',
       order: 'name.asc'
     }
@@ -331,7 +331,7 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
       label: 'Utilisateur'
     },
     jquery: {
-      value: () => `user.coalesce("Non renseigné")`,
+      value: () => `user.coalesce("Sans contenu")`,
       buildAlias: () => 'user',
       order: 'user.asc'
     }
@@ -342,7 +342,7 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
       label: 'Method'
     },
     jquery: {
-      value: () => `method.coalesce("Non renseigné")`,
+      value: () => `method.coalesce("Sans contenu")`,
       buildAlias: () => 'method',
       order: 'method.asc'
     }
@@ -353,7 +353,7 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
       label: 'Media'
     },
     jquery: {
-      value: () => `method.coalesce("Non renseigné")`,
+      value: () => `method.coalesce("Sans contenu")`,
       buildAlias: () => 'media',
       order: 'media.asc'
     }
@@ -364,7 +364,7 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
       label: 'Auth'
     },
     jquery: {
-      value: () => `auth.coalesce("Non renseigné")`,
+      value: () => `auth.coalesce("Sans contenu")`,
       buildAlias: () => 'auth',
       order: 'asc'
     }
@@ -1079,7 +1079,7 @@ export const REST_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Utilisateur'
     },
     jquery: {
-      value: () => `user.coalesce("Non renseigné")`,
+      value: () => `user.coalesce("Sans contenu")`,
       buildAlias: () => 'user',
       order: 'user.asc'
     }
@@ -1090,7 +1090,7 @@ export const REST_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Method'
     },
     jquery: {
-      value: () => `method.coalesce("Non renseigné")`,
+      value: () => `method.coalesce("Sans contenu")`,
       buildAlias: () => 'method',
       order: 'method.asc'
     }
@@ -1101,7 +1101,7 @@ export const REST_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Media'
     },
     jquery: {
-      value: () => `media.coalesce("Non renseigné")`,
+      value: () => `media.coalesce("Sans contenu")`,
       buildAlias: () => 'media',
       order: 'media.asc'
     }
@@ -1112,7 +1112,7 @@ export const REST_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Auth'
     },
     jquery: {
-      value: () => `auth.coalesce("Non renseigné")`,
+      value: () => `auth.coalesce("Sans contenu")`,
       buildAlias: () => 'auth',
       order: 'auth.asc'
     }
@@ -1150,7 +1150,7 @@ export const REST_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Utilisateur'
     },
     jquery: {
-      value: () => `user.coalesce("Non renseigné")`,
+      value: () => `user.coalesce("Sans contenu")`,
       buildAlias: () => 'user',
       order: 'user.asc'
     }
@@ -1161,7 +1161,7 @@ export const REST_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Method'
     },
     jquery: {
-      value: () => `method.coalesce("Non renseigné")`,
+      value: () => `method.coalesce("Sans contenu")`,
       buildAlias: () => 'method',
       order: 'method.asc'
     }
@@ -1172,7 +1172,7 @@ export const REST_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Media'
     },
     jquery: {
-      value: () => `media.coalesce("Non renseigné")`,
+      value: () => `media.coalesce("Sans contenu")`,
       buildAlias: () => 'media',
       order: 'media.asc'
     }
@@ -1183,7 +1183,7 @@ export const REST_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Auth'
     },
     jquery: {
-      value: () => `auth.coalesce("Non renseigné")`,
+      value: () => `auth.coalesce("Sans contenu")`,
       buildAlias: () => 'auth',
       order: 'auth.asc'
     }
@@ -1306,7 +1306,7 @@ export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Commande'
     },
     jquery: {
-      value: () => `command.coalesce("Non renseigné")`,
+      value: () => `command.coalesce("Sans contenu")`,
       buildAlias: () => 'command',
       order: 'command.asc',
     }
@@ -1317,7 +1317,7 @@ export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Schéma'
     },
     jquery: {
-      value: () => `schema.coalesce("Non renseigné")`,
+      value: () => `schema.coalesce("Sans contenu")`,
       buildAlias: () => 'schema',
       order: 'schema.asc',
     }
@@ -1328,7 +1328,7 @@ export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Utilisateur'
     },
     jquery: {
-      value: () => `user.coalesce("Non renseigné")`,
+      value: () => `user.coalesce("Sans contenu")`,
       buildAlias: () => 'user',
       order: 'user.asc',
     }
@@ -1339,7 +1339,7 @@ export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Nom de la base de données'
     },
     jquery: {
-      value: () => `db_name.coalesce("Non renseigné")`,
+      value: () => `db_name.coalesce("Sans contenu")`,
       buildAlias: () => 'db_name',
       order: 'db_name.asc',
     }
@@ -1350,7 +1350,7 @@ export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Version de la base de données'
     },
     jquery: {
-      value: () => `db_version.coalesce("Non renseigné")`,
+      value: () => `db_version.coalesce("Sans contenu")`,
       buildAlias: () => 'db_version',
       order: 'db_version.asc',
     }
@@ -1361,7 +1361,7 @@ export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Version du driver'
     },
     jquery: {
-      value: () => `driver.coalesce("Non renseigné")`,
+      value: () => `driver.coalesce("Sans contenu")`,
       buildAlias: () => 'driver',
       order: 'driver.asc',
     }
@@ -1399,7 +1399,7 @@ export const JDBC_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Commande'
     },
     jquery: {
-      value: () => `command.coalesce("Non renseigné")`,
+      value: () => `command.coalesce("Sans contenu")`,
       buildAlias: () => 'command',
       order: 'command.asc',
     }
@@ -1410,7 +1410,7 @@ export const JDBC_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Schéma'
     },
     jquery: {
-      value: () => `schema.coalesce("Non renseigné")`,
+      value: () => `schema.coalesce("Sans contenu")`,
       buildAlias: () => 'schema',
       order: 'schema.asc',
     }
@@ -1421,7 +1421,7 @@ export const JDBC_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Utilisateur'
     },
     jquery: {
-      value: () => `user.coalesce("Non renseigné")`,
+      value: () => `user.coalesce("Sans contenu")`,
       buildAlias: () => 'user',
       order: 'user.asc',
     }
@@ -1432,7 +1432,7 @@ export const JDBC_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Nom de la base de données'
     },
     jquery: {
-      value: () => `db_name.coalesce("Non renseigné")`,
+      value: () => `db_name.coalesce("Sans contenu")`,
       buildAlias: () => 'db_name',
       order: 'db_name.asc',
     }
@@ -1443,7 +1443,7 @@ export const JDBC_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Version de la base de données'
     },
     jquery: {
-      value: () => `db_version.coalesce("Non renseigné")`,
+      value: () => `db_version.coalesce("Sans contenu")`,
       buildAlias: () => 'db_version',
       order: 'db_version.asc',
     }
@@ -1454,7 +1454,7 @@ export const JDBC_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Version du driver'
     },
     jquery: {
-      value: () => `driver.coalesce("Non renseigné")`,
+      value: () => `driver.coalesce("Sans contenu")`,
       buildAlias: () => 'driver',
       order: 'driver.asc',
     }
@@ -1577,7 +1577,7 @@ export const FTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Commande'
     },
     jquery: {
-      value: () => `command.coalesce("Non renseigné")`,
+      value: () => `command.coalesce("Sans contenu")`,
       buildAlias: () => 'command',
       order: 'command.asc',
     }
@@ -1588,7 +1588,7 @@ export const FTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Utilisateur'
     },
     jquery: {
-      value: () => `user.coalesce("Non renseigné")`,
+      value: () => `user.coalesce("Sans contenu")`,
       buildAlias: () => 'user',
       order: 'user.asc',
     }
@@ -1599,7 +1599,7 @@ export const FTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Version du serveur'
     },
     jquery: {
-      value: () => `server_version.coalesce("Non renseigné")`,
+      value: () => `server_version.coalesce("Sans contenu")`,
       buildAlias: () => 'server_version',
       order: 'server_version.asc',
     }
@@ -1610,7 +1610,7 @@ export const FTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Version du client'
     },
     jquery: {
-      value: () => `client_version.coalesce("Non renseigné")`,
+      value: () => `client_version.coalesce("Sans contenu")`,
       buildAlias: () => 'client_version',
       order: 'client_version.asc',
     }
@@ -1648,7 +1648,7 @@ export const FTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Commande'
     },
     jquery: {
-      value: () => `command.coalesce("Non renseigné")`,
+      value: () => `command.coalesce("Sans contenu")`,
       buildAlias: () => 'command',
       order: 'command.asc',
     }
@@ -1659,7 +1659,7 @@ export const FTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Utilisateur'
     },
     jquery: {
-      value: () => `user.coalesce("Non renseigné")`,
+      value: () => `user.coalesce("Sans contenu")`,
       buildAlias: () => 'user',
       order: 'user.asc',
     }
@@ -1670,7 +1670,7 @@ export const FTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Version du serveur'
     },
     jquery: {
-      value: () => `server_version.coalesce("Non renseigné")`,
+      value: () => `server_version.coalesce("Sans contenu")`,
       buildAlias: () => 'server_version',
       order: 'server_version.asc',
     }
@@ -1681,7 +1681,7 @@ export const FTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Version du client'
     },
     jquery: {
-      value: () => `client_version.coalesce("Non renseigné")`,
+      value: () => `client_version.coalesce("Sans contenu")`,
       buildAlias: () => 'client_version',
       order: 'client_version.asc',
     }
@@ -1804,7 +1804,7 @@ export const LDAP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Commande'
     },
     jquery: {
-      value: () => `command.coalesce("Non renseigné")`,
+      value: () => `command.coalesce("Sans contenu")`,
       buildAlias: () => 'command',
       order: 'command.asc',
     }
@@ -1815,7 +1815,7 @@ export const LDAP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Utilisateur'
     },
     jquery: {
-      value: () => `user.coalesce("Non renseigné")`,
+      value: () => `user.coalesce("Sans contenu")`,
       buildAlias: () => 'user',
       order: 'user.asc',
     }
@@ -1853,7 +1853,7 @@ export const LDAP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Commande'
     },
     jquery: {
-      value: () => `command.coalesce("Non renseigné")`,
+      value: () => `command.coalesce("Sans contenu")`,
       buildAlias: () => 'command',
       order: 'command.asc',
     }
@@ -1864,7 +1864,7 @@ export const LDAP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Utilisateur'
     },
     jquery: {
-      value: () => `user.coalesce("Non renseigné")`,
+      value: () => `user.coalesce("Sans contenu")`,
       buildAlias: () => 'user',
       order: 'user.asc',
     }
@@ -1987,7 +1987,7 @@ export const SMTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Commande'
     },
     jquery: {
-      value: () => `command.coalesce("Non renseigné")`,
+      value: () => `command.coalesce("Sans contenu")`,
       buildAlias: () => 'command',
       order: 'command.asc',
     }
@@ -1998,7 +1998,7 @@ export const SMTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Utilisateur'
     },
     jquery: {
-      value: () => `user.coalesce("Non renseigné")`,
+      value: () => `user.coalesce("Sans contenu")`,
       buildAlias: () => 'user',
       order: 'user.asc',
     }
@@ -2036,7 +2036,7 @@ export const SMTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Commande'
     },
     jquery: {
-      value: () => `command.coalesce("Non renseigné")`,
+      value: () => `command.coalesce("Sans contenu")`,
       buildAlias: () => 'command',
       order: 'command.asc',
     }
@@ -2047,7 +2047,7 @@ export const SMTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       label: 'Utilisateur'
     },
     jquery: {
-      value: () => `user.coalesce("Non renseigné")`,
+      value: () => `user.coalesce("Sans contenu")`,
       buildAlias: () => 'user',
       order: 'user.asc',
     }

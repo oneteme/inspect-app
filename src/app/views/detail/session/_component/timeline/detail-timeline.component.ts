@@ -192,7 +192,7 @@ export class DetailTimelineComponent implements OnChanges {
         let o = {
             id: c.id ?`${c.id}_${c.typeTimeline}_${id}`: id,
             group: this.isWebApp ? 0 : c.threadName || '?',
-            content: c.typeTimeline === 'action' ? actionLabel : (c.schema || c.name || c.host || c.level || 'N/A'),
+            content: c.typeTimeline === 'action' ? this.buildActionContent(c, actionLabel) : (c.schema || c.name || c.host || c.level || 'N/A'),
             start: c.start * 1000,
             end: end,
             title: c.typeTimeline == 'action' ?
@@ -200,7 +200,7 @@ export class DetailTimelineComponent implements OnChanges {
                      <h4>${actionText}</h4>` :
                 `${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${c.end ? this.pipe.transform(new Date(end), 'HH:mm:ss.SSS'):"En cours..."}</span> ${c.end ? `(${this.durationPipe.transform({start: c.start, end: end / 1000})})`:""}<br>
                  <h4>${c['path'] || ''}</h4>`,
-            className: c.typeTimeline,
+            className: c.typeTimeline + (c.typeTimeline === 'action' && this.LEVEL_ICONS[(c.type ?? '').toLowerCase()] ? ' level-icon' : ''),
             type: ''
         }
         o.type = o.end == o.start ? 'point' : 'range';
@@ -215,6 +215,32 @@ export class DetailTimelineComponent implements OnChanges {
         }
         id++;
         return o;
+    }
+
+
+    private readonly LEVEL_ICONS: {[k: string]: {icon: string, color: string}} = {
+        warn:  {icon: 'error',  color: '#9a5b00'},
+        error: {icon: 'cancel', color: '#b42318'},
+        info:  {icon: 'info',   color: '#1769aa'}
+    };
+
+    buildActionContent(c: any, label: string): any {
+        const conf = this.LEVEL_ICONS[(c.type ?? '').toLowerCase()];
+        if (!conf) return label;
+        const wrapper = document.createElement('span');
+        wrapper.style.display = 'inline-flex';
+        wrapper.style.alignItems = 'center';
+        wrapper.style.gap = '4px';
+        const icon = document.createElement('span');
+        icon.textContent = conf.icon;
+        icon.style.fontFamily = "'Material Symbols Outlined'";
+        icon.style.fontVariationSettings = "'FILL' 1, 'wght' 600";
+        icon.style.fontSize = '20px';
+        icon.style.lineHeight = '1';
+        icon.style.color = conf.color;
+        wrapper.appendChild(icon);
+        wrapper.appendChild(document.createTextNode(label));
+        return wrapper;
     }
 
     mapLog(le: any, id: number): DataItem {

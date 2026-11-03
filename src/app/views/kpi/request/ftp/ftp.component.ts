@@ -221,7 +221,7 @@ export class FtpComponent implements OnInit {
 
   getCommands() {
     const args: any = {
-      'column': `count:count,command.coalesce("Non renseigné"):command`,
+      'column': `count:count,command.coalesce("Sans contenu"):command`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),

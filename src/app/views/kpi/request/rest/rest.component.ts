@@ -385,7 +385,7 @@ export class RestComponent implements OnInit {
   getMediaType() {
     const instanceType = this.params.optional?.instanceType;
     const args: any = {
-      'column': `count:count,media.coalesce("Non renseigné"):media`,
+      'column': `count:count,media.coalesce("Sans contenu"):media`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
