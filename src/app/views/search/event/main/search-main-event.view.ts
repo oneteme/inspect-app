@@ -65,8 +65,7 @@ export class SearchMainEventView {
             ...SESSION_EVENT_TABLE_CONFIG,
             search: initialQuery
                 ? {...SESSION_EVENT_TABLE_CONFIG.search, initialQuery, searchColumns: ['exception']}
-                : SESSION_EVENT_TABLE_CONFIG.search,
-            onRowSelected: (row, event) => this.selectedRequest(event, row)
+                : SESSION_EVENT_TABLE_CONFIG.search
         };
     }
 

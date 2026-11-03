@@ -531,7 +531,9 @@ export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
     { key: 'resource', header: 'Message', groupable: false, sliceable: false, icon: 'info' , width: '50%',
       sortValue: (row: SessionEventDto) => row.value || row.type || '',
       searchValue: (row: SessionEventDto) => fmtMethod(row.type) + ' ' + (row.value || '')
-    }
+    },
+    { key: 'action', header: 'Action', icon: 'touch_app', width: '10%', sliceable: false, groupable: false, sortable: false },
+
   ],
   defaultSort: { active: 'instant', direction: 'desc' },
   rowClass: (row: SessionEventDto) => {
