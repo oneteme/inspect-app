@@ -13,14 +13,32 @@
         </div>
         <div class="server-title-content">
           <div class="server-name-row">
-            <div class="server-env-row">
-              <span class="env-badge">{{ _instance.env || 'N/A' }}</span>
-            </div>
+            <span class="stat-item session-duration instance-status"
+                  [ngClass]="_status?.class"
+                  [matTooltip]="_status ? (_instance.end ? '' : 'En cours · ') + _status.tooltip : ''"
+                  (click)="navigate($event)">
+              <mat-icon class="material-symbols-outlined stat-icon">timer</mat-icon>
+              <span class="stat-value stat-duration" *ngIf="_instance.end">
+                {{ { start: _instance.instant, end: _instance.end } | duration }}
+              </span>
+            </span>
             <span class="server-name" (click)="navigateOnServerClick($event)">
               {{ _instance.name }}
             </span>
+            <div class="meta-chip header-date date-compact">
+              <mat-icon class="material-symbols-outlined meta-icon">schedule</mat-icon>
+              <span class="date-day">{{ (_instance.instant * 1000) | date: 'dd/MM/yyyy' }}&nbsp;</span>
+              <span class="date-time">{{ (_instance.instant * 1000) | date: 'HH:mm:ss' }}</span>
+            </div>
           </div>
           <div class="server-version-row">
+            <div class="server-env-row">
+              <span class="env-badge" *ngIf="_instance.env; else noEnv">{{ _instance.env }}</span>
+              <ng-template #noEnv>
+                <span class="env-badge empty" matTooltip="Environnement non renseigné">Env. N/A</span>
+              </ng-template>
+            </div>
+            <span class="version-empty" *ngIf="!_instance?.version" matTooltip="Version non renseignée">Version N/A</span>
             <app-version-badge
               class="server-version"
               [version]="_instance?.version"
@@ -30,12 +48,6 @@
             </app-version-badge>
           </div>
         </div>
-        <app-status-indicator
-          class="server-status"
-          [loading]="_isLoadingLastTrace"
-          (onClick)="navigate($event)"
-          [params]="{id: _instance.id, end: _instance.end, configuration: _instance.configuration, lastTrace: _lastTrace, date: date.getTime()}">
-        </app-status-indicator>
       </div>
 
       <button mat-icon-button *ngIf="menu" [matMenuTriggerFor]="menu" class="menu-btn">
@@ -50,10 +62,6 @@
           <mat-icon class="material-symbols-outlined meta-icon">person</mat-icon>
           <span>{{ _instance.user || 'N/A' }}</span>
         </div>
-        <div class="meta-chip">
-          <mat-icon class="material-symbols-outlined meta-icon">schedule</mat-icon>
-          <span>{{ (_instance.instant * 1000) | date: 'dd/MM/yyyy HH:mm:ss' }}</span>
-        </div>
       </div>
       <div class="footer-section">
         <div class="meta-icon-btn"
@@ -65,15 +73,6 @@
              [class.disabled]="!_instance?.os"
              [matTooltip]="_instance?.os + ' - ' + _instance?.re">
           <mat-icon class="material-symbols-outlined">{{ _instance.type === 'CLIENT' ? 'devices' : 'data_table' }}</mat-icon>
-        </div>
-      </div>
-      <div class="footer-section">
-        <div class="stat-item">
-          <mat-icon class="material-symbols-outlined stat-icon">timer</mat-icon>
-          <span class="stat-value stat-duration"
-                [matTooltip]="((_instance.end * 1000) | date: 'dd/MM/yyyy HH:mm:ss')">
-                {{ { start: _instance.instant, end: _instance.end } | duration }}
-          </span>
         </div>
       </div>
     </div>
