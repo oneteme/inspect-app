@@ -11,12 +11,10 @@ const DATABASE_REQUEST_LIST_COLUMNS = 'id,host,db:name,command,schema,status,sta
 /** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
 const LAZY_DATABASE_REQUEST_COLUMNS: Record<string, string> = {
     scheme: 'scheme',
-    port: 'port',
-    driverVersion: 'driver:driverVersion',
     productName: 'db_name:productName',
-    productVersion: 'db_version:productVersion',
-    sessionId: 'parent:sessionId',
-    threadName: 'thread:threadName'
+    threadName: 'thread:threadName',
+    appName: 'instance.app_name:appName',
+    appVersion: 'instance.version:appVersion'
 };
 
 @Injectable({ providedIn: 'root' })

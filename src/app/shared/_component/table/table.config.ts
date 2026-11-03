@@ -56,6 +56,7 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
       key: 'resource', header: 'Ressource', groupable: false, sliceable: false, icon: 'category',
       searchValue: (row: RestSessionDto) => fmtMethod(row.method) + ' ' + (row.path || '')
     },
+    { key: 'query', header: 'Query', icon: 'search', lazy: true },
     {
       key: 'start', header: 'Début', icon: 'schedule', width: '17%', groupable: false, sliceable: false,
       searchValue: (row: RestSessionDto) => fmtStart(row.start)
@@ -75,13 +76,9 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
     },
     { key: 'userAgent', header: 'User-Agent', lazy: true, icon: 'devices', width: '15%' },
     { key: 'host', header: 'Host HTTP', lazy: true, icon: 'language' },
-    { key: 'port', header: 'Port', lazy: true, icon: 'settings_ethernet', groupable: false, sliceable: false },
     { key: 'contentType', header: 'Content-Type', lazy: true, icon: 'description' },
-    { key: 'authScheme', header: 'Authentification', lazy: true, icon: 'lock' },
     { key: 'inDataSize', header: 'Taille entrée (o)', lazy: true, icon: 'download', groupable: false, sliceable: false },
     { key: 'outDataSize', header: 'Taille sortie (o)', lazy: true, icon: 'upload', groupable: false, sliceable: false },
-    { key: 'inContentEncoding', header: 'Encodage entrée', lazy: true, icon: 'compress' },
-    { key: 'outContentEncoding', header: 'Encodage sortie', lazy: true, icon: 'compress' },
     { key: 'threadName', header: 'Thread', lazy: true, icon: 'memory' },
     { key: 'cacheControl', header: 'Cache-Control', lazy: true, icon: 'cached', groupable: false, sliceable: false }
   ],
@@ -126,10 +123,7 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
     },
     { key: 'user', header: 'Utilisateur', icon: 'person', width: '13%' },
-    { key: 'address', header: 'Adresse', icon: 'fingerprint', width: '13%', lazy: true },
-    { key: 'type', header: 'Type', icon: 'sell', lazy: true },
     { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
-    { key: 'requestsMask', header: 'Masque requêtes', icon: 'filter_alt', lazy: true, groupable: false, sliceable: false },
     {
       key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
       value: (row: RestSessionDto) => {
@@ -191,16 +185,13 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
     { key: 'action', header: 'Action', icon: 'touch_app', sliceable: false, groupable: false, sortable: false },
     { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
     { key: 'protocol', header: 'Protocole', icon: 'lan', optional: true },
-    { key: 'port', header: 'Port', icon: 'settings_ethernet', lazy: true },
     { key: 'query', header: 'Query', icon: 'search', lazy: true },
-    { key: 'sessionId', header: 'Session', icon: 'link', lazy: true },
     { key: 'contentType', header: 'Content-Type', icon: 'description', lazy: true },
-    { key: 'authScheme', header: 'Authentification', icon: 'lock', lazy: true },
     { key: 'inDataSize', header: 'Taille entrée', icon: 'download', lazy: true },
     { key: 'outDataSize', header: 'Taille sortie', icon: 'upload', lazy: true },
-    { key: 'inContentEncoding', header: 'Encodage entrée', icon: 'compress', lazy: true },
-    { key: 'outContentEncoding', header: 'Encodage sortie', icon: 'compress', lazy: true },
-    { key: 'bodyContent', header: 'Corps', icon: 'notes', lazy: true }
+    { key: 'bodyContent', header: 'Corps', icon: 'notes', lazy: true },
+    { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
+    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
@@ -245,11 +236,9 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
       }
     },
     { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
-    { key: 'scheme', header: 'Schéma', icon: 'hub', lazy: true },
-    { key: 'port', header: 'Port', icon: 'settings_ethernet', lazy: true },
-    { key: 'driverVersion', header: 'Version driver', icon: 'extension', lazy: true },
-    { key: 'productVersion', header: 'Version base', icon: 'info', lazy: true },
-    { key: 'sessionId', header: 'Session', icon: 'link', lazy: true }
+    { key: 'scheme', header: 'Éditeur', icon: 'hub', lazy: true },
+    { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
+    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
@@ -299,10 +288,8 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
     },
     { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
     { key: 'protocol', header: 'Protocole', icon: 'lan', lazy: true },
-    { key: 'port', header: 'Port', icon: 'settings_ethernet', lazy: true },
-    { key: 'serverVersion', header: 'Version serveur', icon: 'info', lazy: true },
-    { key: 'clientVersion', header: 'Version client', icon: 'extension', lazy: true },
-    { key: 'sessionId', header: 'Session', icon: 'link', lazy: true }
+    { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
+    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
@@ -351,8 +338,8 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
     },
     { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
     { key: 'protocol', header: 'Protocole', icon: 'lan', lazy: true },
-    { key: 'port', header: 'Port', icon: 'settings_ethernet', lazy: true },
-    { key: 'sessionId', header: 'Session', icon: 'link', lazy: true }
+    { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
+    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
@@ -447,8 +434,8 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
       }
     },
     { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
-    { key: 'port', header: 'Port', icon: 'settings_ethernet', lazy: true },
-    { key: 'sessionId', header: 'Session', icon: 'link', lazy: true }
+    { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
+    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,

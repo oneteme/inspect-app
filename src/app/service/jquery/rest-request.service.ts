@@ -11,16 +11,13 @@ const REST_REQUEST_LIST_COLUMNS = 'id,host,method,protocol,path,status,start,end
 /** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
 const LAZY_REST_REQUEST_COLUMNS: Record<string, string> = {
     query: 'query',
-    port: 'port',
-    sessionId: 'parent:sessionId',
     threadName: 'thread:threadName',
     contentType: 'media:contentType',
-    authScheme: 'auth:authScheme',
     inDataSize: 'size_in:inDataSize',
     outDataSize: 'size_out:outDataSize',
-    inContentEncoding: 'content_encoding_in:inContentEncoding',
-    outContentEncoding: 'content_encoding_out:outContentEncoding',
-    bodyContent: 'body_content:bodyContent'
+    bodyContent: 'body_content:bodyContent',
+    appName: 'instance.app_name:appName',
+    appVersion: 'instance.version:appVersion'
 };
 
 @Injectable({ providedIn: 'root' })

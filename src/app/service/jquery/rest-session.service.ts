@@ -6,21 +6,18 @@ import {applyFilterSelections, ChartFilterSelection, ChartItem} from "../../view
 import {RestSessionDto} from "../../model/request.model";
 
 /** Colonnes de base de la liste REST ; l'alias (`colonne:alias`) donne la clé de la réponse. */
-const REST_SESSION_LIST_COLUMNS = 'id,api_name:name,method,protocol,path,query,status,start,end,user,instance.app_name:appName';
+const REST_SESSION_LIST_COLUMNS = 'id,api_name:name,method,protocol,path,status,start,end,user,instance.app_name:appName';
 
 /** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
 const LAZY_REST_SESSION_COLUMNS: Record<string, string> = {
     userAgent: 'user_agt:userAgent',
     host: 'host',
-    port: 'port',
     contentType: 'media:contentType',
-    authScheme: 'auth:authScheme',
     inDataSize: 'size_in:inDataSize',
     outDataSize: 'size_out:outDataSize',
-    inContentEncoding: 'content_encoding_in:inContentEncoding',
-    outContentEncoding: 'content_encoding_out:outContentEncoding',
     threadName: 'thread:threadName',
-    cacheControl: 'cache_control:cacheControl'
+    cacheControl: 'cache_control:cacheControl',
+    query: 'query'
 };
 
 @Injectable({ providedIn: 'root' })

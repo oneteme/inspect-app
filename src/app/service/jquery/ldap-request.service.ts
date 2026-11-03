@@ -11,9 +11,9 @@ const LDAP_REQUEST_LIST_COLUMNS = 'id,host,command,status,start,end,user';
 /** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
 const LAZY_LDAP_REQUEST_COLUMNS: Record<string, string> = {
     protocol: 'protocol',
-    port: 'port',
-    sessionId: 'parent:sessionId',
-    threadName: 'thread:threadName'
+    threadName: 'thread:threadName',
+    appName: 'instance.app_name:appName',
+    appVersion: 'instance.version:appVersion'
 };
 
 

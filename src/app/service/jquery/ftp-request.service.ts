@@ -11,11 +11,9 @@ const FTP_REQUEST_LIST_COLUMNS = 'id,host,command,status,start,end,user';
 /** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
 const LAZY_FTP_REQUEST_COLUMNS: Record<string, string> = {
     protocol: 'protocol',
-    port: 'port',
-    serverVersion: 'server_version:serverVersion',
-    clientVersion: 'client_version:clientVersion',
-    sessionId: 'parent:sessionId',
-    threadName: 'thread:threadName'
+    threadName: 'thread:threadName',
+    appName: 'instance.app_name:appName',
+    appVersion: 'instance.version:appVersion'
 };
 
 

@@ -33,11 +33,11 @@ export class DetailSessionComponent implements OnChanges {
   private readonly _smtpRequestService = inject(SmtpRequestService);
   private readonly _ldapRequestService = inject(LdapRequestService);
 
-  readonly restLazyLoader = (columns: string[]) => this._restRequestService.getRequestList({'parent.eq': this.session.id}, columns);
-  readonly databaseLazyLoader = (columns: string[]) => this._databaseRequestService.getRequestList({'parent.eq': this.session.id}, columns);
-  readonly ftpLazyLoader = (columns: string[]) => this._ftpRequestService.getRequestList({'parent.eq': this.session.id}, columns);
-  readonly smtpLazyLoader = (columns: string[]) => this._smtpRequestService.getRequestList({'parent.eq': this.session.id}, columns);
-  readonly ldapLazyLoader = (columns: string[]) => this._ldapRequestService.getRequestList({'parent.eq': this.session.id}, columns);
+  readonly restLazyLoader = (columns: string[]) => this._restRequestService.getRequestList({'join': 'instance', 'parent.eq': this.session.id}, columns);
+  readonly databaseLazyLoader = (columns: string[]) => this._databaseRequestService.getRequestList({'join': 'instance', 'parent.eq': this.session.id}, columns);
+  readonly ftpLazyLoader = (columns: string[]) => this._ftpRequestService.getRequestList({'join': 'instance', 'parent.eq': this.session.id}, columns);
+  readonly smtpLazyLoader = (columns: string[]) => this._smtpRequestService.getRequestList({'join': 'instance', 'parent.eq': this.session.id}, columns);
+  readonly ldapLazyLoader = (columns: string[]) => this._ldapRequestService.getRequestList({'join': 'instance', 'parent.eq': this.session.id}, columns);
 
   @Input() session: MainSessionView | RestSessionView;
   @Input() completedSession: MainSessionView | RestSessionView;
