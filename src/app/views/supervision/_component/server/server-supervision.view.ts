@@ -65,7 +65,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     stacked: false,
     ytitle: '',
     series: [
-      {data: {x: field('date'), y: field('maxHeap')}, name: 'Maximum', type: 'area', color: '#feb019'},
+      {data: {x: field('date'), y: field('maxHeap')}, name: 'Maximum', type: 'area', color: '#feb019', visible: false},
       {data: {x: field('date'), y: field('commitedHeap')}, name: 'Allouée', color: '#00e396'},
       {data: {x: field('date'), y: field('usedHeap')}, name: 'Utilisée', color: '#008ffb'}
     ],
@@ -97,7 +97,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     stacked: false,
     ytitle: '',
     series: [
-      {data: {x: field('date'), y: field('diskTotalSpace')}, name: 'Maximum', type: 'area', color: '#FEB019'},
+      {data: {x: field('date'), y: field('diskTotalSpace')}, name: 'Maximum', type: 'area', color: '#FEB019', visible: false},
       {data: {x: field('date'), y: field('usedDiskSpace')}, name: 'Utilisée', color: '#008ffb'}
     ],
     options: {
@@ -149,7 +149,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     ytitle: 'Threads',
     series: [
       {data: {x: field('date'), y: field('nbActiveThread')}, name: 'Threads actifs', color: '#2563eb'},
-      {data: {x: field('date'), y: field('nbStartThread')}, name: 'Threads démarrés', color: '#ea580c'}
+      {data: {x: field('date'), y: field('nbStartThread')}, name: 'Threads démons', color: '#ea580c'}
     ],
     options: {
       animation: false,
