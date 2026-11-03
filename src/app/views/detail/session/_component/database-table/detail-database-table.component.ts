@@ -34,6 +34,10 @@ export class DetailDatabaseTableComponent {
     }
   }
   @Input() isLoading: boolean;
+
+  @Input() set lazyLoader(loader: TableProvider<DatabaseRequestDto>['lazyLoader']) {
+    this.tableConfig = {...this.tableConfig, lazyLoader: loader};
+  }
   @Output() onClickRow: EventEmitter<{ event: MouseEvent, row: string }> = new EventEmitter();
 
   selectedQuery(event: MouseEvent, row: string) {

@@ -2,6 +2,16 @@ import {field, UnitConfig} from "@oneteme/jquery-core";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 import {STATUS} from "../constants";
 
+// Les durées (elapsed_time) sont fournies en secondes par le serveur.
+const DURATION_UNIT: UnitConfig = {
+  baseUnit: 's',
+  scales: [
+    { unit: 'µs', scale: 1000000, threshold: 0.001 },
+    { unit: 'ms', scale: 1000, threshold: 1 },
+    { unit: 's', scale: 1, threshold: Infinity }
+  ]
+};
+
 export const REST_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
   series: {
     optional: false,
@@ -951,14 +961,7 @@ export const REST_LATENCY_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
       key: 'avg',
       selected: true,
       group: 'Durées',
-      unit: {
-        baseUnit: 's',
-        scales: [
-          { unit: 'µs', scale: 1000000, threshold: 0.001 },  // < 1ms
-          { unit: 'ms', scale: 1000, threshold: 1 },  // < 1s (DEFAULT)
-          { unit: 's',  scale: 1, threshold: Infinity }  // >= 1s
-        ]
-      },
+      unit: DURATION_UNIT,
       menu: {
         label: 'Moyenne'
       },
@@ -972,14 +975,7 @@ export const REST_LATENCY_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
       key: 'min',
       selected: false,
       group: 'Durées',
-      unit: {
-        baseUnit: 's',
-        scales: [
-          { unit: 'µs', scale: 1000000, threshold: 0.001 },
-          { unit: 'ms', scale: 1000, threshold: 1 },
-          { unit: 's',  scale: 1, threshold: Infinity }
-        ]
-      },
+      unit: DURATION_UNIT,
       menu: {
         label: 'Minimum'
       },
@@ -993,14 +989,7 @@ export const REST_LATENCY_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
       key: 'max',
       selected: false,
       group: 'Durées',
-      unit: {
-        baseUnit: 's',
-        scales: [
-          { unit: 'µs', scale: 1000000, threshold: 0.001 },
-          { unit: 'ms', scale: 1000, threshold: 1 },
-          { unit: 's', scale: 1, threshold: Infinity }
-        ]
-      },
+      unit: DURATION_UNIT,
       menu: {
         label: 'Maximum'
       },
@@ -2102,7 +2091,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
     key: 'percentile',
     selected: true,
     group: 'Durées',
-    unit: 'ms',
+    unit: DURATION_UNIT,
     menu: {
       label: 'Percentile (95%)'
     },
@@ -2116,7 +2105,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
     key: 'median',
     selected: false,
     group: 'Durées',
-    unit: 'ms',
+    unit: DURATION_UNIT,
     menu: {
       label: 'Médiane'
     },
@@ -2130,7 +2119,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
     key: 'avg',
     selected: false,
     group: 'Durées',
-    unit: 'ms',
+    unit: DURATION_UNIT,
     menu: {
       label: 'Moyenne'
     },
@@ -2144,7 +2133,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
     key: 'min',
     selected: false,
     group: 'Durées',
-    unit: 'ms',
+    unit: DURATION_UNIT,
     menu: {
       label: 'Minimum'
     },
@@ -2158,7 +2147,7 @@ export const PERFORMANCE_INDICATORS = (): ChartSection => ({
     key: 'max',
     selected: false,
     group: 'Durées',
-    unit: 'ms',
+    unit: DURATION_UNIT,
     menu: {
       label: 'Maximum'
     },
@@ -2213,6 +2202,43 @@ export interface ChartItem<TExtra = {}> {
 export interface ChartSection<TExtra = {}> {
   optional: boolean;
   items: ChartItem<TExtra>[];
+}
+
+/** Valeurs retenues pour un filtre : plusieurs filtres peuvent être actifs en même temps (ET entre filtres, OU entre valeurs). */
+export interface ChartFilterSelection {
+  filter: ChartItem;
+  values: string[];
+}
+
+/** Clé de la catégorie « Vide » du slice-panel (@oneteme/jquery-organizer). */
+const EMPTY_SLICE_KEY = '__empty__';
+
+/** Valeurs cochées par filtre (clé du filtre → valeurs), depuis les clés actives de chaque slice ; « Vide » devient une chaîne vide. */
+export function toFilterValues(sliceConfigs: { columnKey?: string }[], activeKeys: string[][]): Record<string, string[]> {
+  const values: Record<string, string[]> = {};
+  sliceConfigs.forEach((s, i) => {
+    if (s.columnKey && activeKeys[i]?.length) {
+      values[s.columnKey] = activeKeys[i].map(k => k === EMPTY_SLICE_KEY ? '' : k);
+    }
+  });
+  return values;
+}
+
+/** Sélections à envoyer au serveur : uniquement les filtres sélectionnés dans le menu et ayant au moins une valeur cochée. */
+export function buildFilterSelections(config: ChartConfig, values: Record<string, string[]>): ChartFilterSelection[] | undefined {
+  const selections = (config.filters?.items ?? [])
+    .filter(f => f.selected && values[f.key]?.length)
+    .map(f => ({ filter: f, values: values[f.key] }));
+  return selections.length ? selections : undefined;
+}
+
+/** Ajoute un critère `<colonne>.in` par filtre sélectionné (ET entre filtres, OU entre valeurs). */
+export function applyFilterSelections(args: Record<string, any>, selections?: ChartFilterSelection[]): void {
+  selections?.forEach(s => {
+    if (s.values?.length) {
+      args[`${s.filter.jquery.value()}.in`] = s.values.join(',');
+    }
+  });
 }
 
 export interface IndicatorExtra {

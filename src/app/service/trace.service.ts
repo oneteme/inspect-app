@@ -6,7 +6,6 @@ import {
   DirectoryRequestDto,
   FtpRequestDto,
   MailRequestDto,
-  MainSessionDto,
   RestRequestDto,
   RestSessionDto
 } from "../model/request.model";
@@ -63,10 +62,6 @@ export class TraceService {
 
   getRestSession(id: string): Observable<RestSession> {
     return this.http.get<RestSession>(`${this.server}/session/rest/${id}`);
-  }
-
-  getMainSessions(params: any): Observable<Array<MainSessionDto>> {
-    return this.http.get<Array<MainSessionDto>>(`${this.server}/session/main`, {params: params});
   }
 
   getMainSession(id: string): Observable<MainSession> {

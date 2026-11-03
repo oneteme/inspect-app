@@ -1,6 +1,83 @@
-﻿.server-card-host {
-  flex: 0 0 38%;
-  min-width: 280px;
+.server-card-host {
+  flex: 0 0 36%;
+  min-width: 340px;
+}
+
+// Menus d'actions des cartes (session-card et app-server-card) : même style que le menu de la navbar
+.mat-mdc-menu-panel.card-menu {
+  min-width: 220px;
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid rgba(15, 23, 42, 0.12);
+  border-radius: 4px;
+  box-shadow: 0 18px 36px rgba(15, 23, 42, 0.12), 0 6px 14px rgba(15, 23, 42, 0.06);
+  overflow: hidden;
+
+  .mat-mdc-menu-content {
+    padding: 10px;
+    background: transparent;
+  }
+
+  .mat-mdc-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    min-height: 46px;
+    margin-bottom: 4px;
+    padding: 0 12px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: transparent;
+    transition: all 0.15s ease;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+
+    .mat-mdc-menu-item-text {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: normal;
+      color: rgba(15, 23, 42, 0.7);
+
+      > div {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+    }
+
+    .mat-icon {
+      margin: 0;
+      width: 20px;
+      height: 20px;
+      font-size: 20px;
+      color: rgba(15, 23, 42, 0.5);
+      transition: color 0.15s ease;
+    }
+
+    mat-progress-spinner {
+      margin: 0 !important;
+    }
+
+    &:hover:not([disabled]),
+    &.cdk-keyboard-focused:not([disabled]) {
+      background: linear-gradient(90deg, rgba(37, 99, 235, 0.08), rgba(20, 184, 166, 0.08));
+      border-color: rgba(37, 99, 235, 0.18);
+      box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08);
+
+      .mat-mdc-menu-item-text,
+      .mat-icon {
+        color: rgba(15, 23, 42, 0.9);
+      }
+    }
+
+    &[disabled] {
+      opacity: 0.45;
+    }
+  }
 }
 
 // CARTE SESSION REST
@@ -19,39 +96,202 @@
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
   }
 
- // Icône colorée selon le statut
-  &.success .session-icon-wrap {
-    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%);
-    border-color: #86efac;
-    .session-icon { color: #16a34a; }
-  }
-  &.warning .session-icon-wrap {
-    background: linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%);
-    border-color: #fdba74;
-    .session-icon { color: #d97706; }
-  }
-  &.fail .session-icon-wrap {
-    background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
-    border-color: #fca5a5;
-    .session-icon { color: #dc2626; }
-  }
-  &.unavailable .session-icon-wrap {
-    background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
-    border-color: #cbd5e1;
-    .session-icon { color: #64748b; }
+  // Statut : code coloré + libellé en petites capitales, sur un léger dégradé (comme kpi-stat-card)
+  --hero-color: #16a34a;
+  --hero-text: #15803d;
+  --hero-tint: #f0fdf4;
+
+  &.warning     { --hero-color: #d97706; --hero-text: #b45309; --hero-tint: #fff7ed; }
+  &.fail        { --hero-color: #dc2626; --hero-text: #b91c1c; --hero-tint: #fff5f5; }
+  &.unavailable { --hero-color: #64748b; --hero-text: #475569; --hero-tint: #f8fafc; }
+  &.in-progress { --hero-color: #4f46e5; --hero-text: #4338ca; --hero-tint: #f0f7ff; }
+
+  .session-header {
+    background: linear-gradient(to bottom, var(--hero-tint) 0%, #ffffff 60%);
   }
 
-  &.in-progress .session-icon-wrap {
-    background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
-    border-color: #a5b4fc;
-    animation: pulse-border 2s ease-in-out infinite;
-    .session-icon { color: #4f46e5; }
+  .session-title-row {
+    gap: 10px;
+  }
+
+  .status-badge {
+    flex-shrink: 0;
+    display: inline-grid;
+    place-items: center;
+    box-sizing: border-box;
+    width: 92px;
+    min-height: 40px;
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    text-wrap: balance;
+    overflow: hidden;
+
+    &.pulse {
+      animation: pulse-icon 1.6s ease-in-out infinite;
+    }
+
+    .status-label,
+    .status-code {
+      grid-area: 1 / 1;
+      transition: opacity 0.25s ease, transform 0.3s cubic-bezier(0.34, 1.4, 0.64, 1), filter 0.25s ease;
+    }
+
+    // Code HTTP réel (flux http et services exposés) : remplace le libellé au survol
+    &.with-code {
+      cursor: default;
+
+      .status-code {
+        opacity: 0;
+        transform: translateY(14px) scale(0.8);
+        filter: blur(3px);
+        font-size: 22px;
+        font-weight: 800;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+        letter-spacing: 0.02em;
+      }
+
+      &:hover {
+        .status-label {
+          opacity: 0;
+          transform: translateY(-14px) scale(0.9);
+          filter: blur(3px);
+        }
+
+        .status-code {
+          opacity: 1;
+          transform: none;
+          filter: none;
+        }
+      }
+    }
   }
 }
 
-@keyframes pulse-border {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.25); }
-  50%       { box-shadow: 0 0 0 5px rgba(99, 102, 241, 0); }
+// Infos d'en-tête partagées par session-card et app-server-card (durée + date) :
+// texte simple, sans fond ni contour
+.session-duration,
+.meta-chip.header-date {
+  box-sizing: border-box;
+  flex-shrink: 0;
+  height: 24px;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  line-height: 1;
+  color: #475569;
+  font-size: 12px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.session-duration {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 11px;
+
+  // Petit séparateur vers l'élément suivant
+  &::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 50%;
+    width: 1px;
+    height: 14px;
+    transform: translateY(-50%);
+    background: #cbd5e1;
+  }
+
+  // Pas de séparateur quand la date suit directement (rien à séparer)
+  &:has(+ .header-date)::after {
+    display: none;
+  }
+
+  .stat-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+    color: #64748b;
+  }
+
+  .stat-duration {
+    font-size: 12px;
+    font-weight: 600;
+    color: #334155;
+  }
+
+  // Statut de l'instance (carte serveur) : l'icône et le texte suivent l'état, l'icône pulse si l'instance est en ligne
+  &.instance-status {
+    cursor: pointer;
+  }
+
+  &.online {
+    --pill-color: #10b981;
+    --pill-text: #047857;
+    .stat-icon { animation: pulse-icon 1.6s ease-in-out infinite; }
+  }
+  &.pending {
+    --pill-color: #f59e0b;
+    --pill-text: #b45309;
+  }
+  &.offline {
+    --pill-color: #94a3b8;
+    --pill-text: #64748b;
+  }
+
+  &.online, &.pending, &.offline {
+    .stat-icon { color: var(--pill-color); }
+    .stat-duration { color: var(--pill-text); }
+  }
+}
+
+.meta-chip.header-date {
+  margin-left: auto;
+  padding: 0;
+  background: transparent;
+  color: #64748b;
+  font-weight: 500;
+
+  .meta-icon {
+    width: 14px;
+    height: 14px;
+    font-size: 14px;
+    color: #64748b;
+  }
+
+  // Version réduite (heure seule) : la date se déploie au survol
+  &.date-compact {
+    .date-day {
+      display: inline-block;
+      max-width: 0;
+      overflow: hidden;
+      opacity: 0;
+      white-space: nowrap;
+      transition: max-width 0.25s ease, opacity 0.2s ease;
+    }
+
+    .date-time {
+      font-variant-numeric: tabular-nums;
+    }
+
+    &:hover .date-day {
+      max-width: 90px;
+      opacity: 1;
+    }
+  }
+}
+
+@keyframes pulse-icon {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.35; }
 }
 
 .session-card-inner {
@@ -79,25 +319,6 @@
   flex: 1;
 }
 
-.session-icon-wrap {
-  flex-shrink: 0;
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
-  border: 1px solid #bfdbfe;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  .session-icon {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-    color: #2563eb;
-  }
-}
-
 .session-title-content {
   display: flex;
   flex-direction: column;
@@ -108,14 +329,17 @@
 
 .session-name-row {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
   min-width: 0;
+  min-height: 26px;
 }
 
 .session-name {
+  flex: 1 1 auto;
   font-size: 15px;
   font-weight: 600;
+  line-height: 1.3;
   color: #1e293b;
   min-width: 0;
 }
@@ -126,9 +350,10 @@
 
 .session-url-row {
   display: flex;
-  align-items: baseline;
-  gap: 8px;
+  align-items: center;
+  gap: 10px;
   min-width: 0;
+  min-height: 26px;
 }
 
 .session-url {
@@ -142,27 +367,17 @@
   }
 }
 
+.session-target {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
 .menu-btn {
   flex-shrink: 0;
   color: #64748b;
-}
-
-// Pill de statut HTTP
-.status-pill {
-  display: inline-flex;
-  align-items: center;
-  padding: 2px 10px;
-  border-radius: 20px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  flex-shrink: 0;
-
-  &.success    { background: #dcfce7; color: #166534; }
-  &.warning    { background: #fff7ed; color: #9a3412; }
-  &.fail       { background: #fee2e2; color: #991b1b; }
-  &.unavailable{ background: #f1f5f9; color: #475569; }
-  &.in-progress{ background: #EAF4FF; color: #4f46e5; }
 }
 
 // Badge méthode HTTP
@@ -232,22 +447,29 @@
   width: 32px;
   height: 32px;
   border-radius: 8px;
-  cursor: pointer;
-  transition: background 0.15s ease;
-  color: #334155;
-  background: #ffffff;
-  border: 1px solid #e2e8f0;
+  cursor: help;
+  transition: background 0.15s ease, color 0.15s ease;
+  color: #475569;
+  background: #f1f5f9;
+  border: none;
 
   mat-icon {
     font-size: 17px;
     width: 17px;
     height: 17px;
+
+    // Glyphes de type de contenu : agrandis sans modifier la taille du conteneur
+    &.content-type-icon {
+      font-size: 21px;
+      width: 21px;
+      height: 21px;
+      overflow: visible;
+    }
   }
 
   &:hover:not(.disabled) {
-    background: #eff6ff;
-    border-color: #bfdbfe;
-    color: #2563eb;
+    background: #e2e8f0;
+    color: #1e293b;
   }
 
   &.disabled {
@@ -259,11 +481,6 @@
 
 // Section stats données
 .data-stats {
-  gap: 0.75em;
-}
-.data-stats-vertical {
-  display: flex;
-  flex-direction: column;
   gap: 0.75em;
 }
 

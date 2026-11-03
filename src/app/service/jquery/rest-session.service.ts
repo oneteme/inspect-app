@@ -2,7 +2,23 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {forkJoin, map, Observable} from "rxjs";
 import {ExceptionsByPeriodAndAppname} from "../../model/jquery.model";
-import {ChartItem} from "../../views/kpi/kpi.config";
+import {applyFilterSelections, ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
+import {RestSessionDto} from "../../model/request.model";
+
+/** Colonnes de base de la liste REST ; l'alias (`colonne:alias`) donne la clé de la réponse. */
+const REST_SESSION_LIST_COLUMNS = 'id,api_name:name,method,protocol,path,status,start,end,user,instance.app_name:appName';
+
+/** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
+const LAZY_REST_SESSION_COLUMNS: Record<string, string> = {
+    userAgent: 'user_agt:userAgent',
+    host: 'host',
+    contentType: 'media:contentType',
+    inDataSize: 'size_in:inDataSize',
+    outDataSize: 'size_out:outDataSize',
+    threadName: 'thread:threadName',
+    cacheControl: 'cache_control:cacheControl',
+    query: 'query'
+};
 
 @Injectable({ providedIn: 'root' })
 export class RestSessionService {
@@ -13,6 +29,18 @@ export class RestSessionService {
     getRestSession<T>(params: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/session/rest`;
         return this.http.get<T>(url, { params: params });
+    }
+
+    /** Liste REST : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
+    getRestSessionList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<RestSessionDto[]> {
+        const column = [REST_SESSION_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_REST_SESSION_COLUMNS[c])].join(',');
+        return this.getRestSession<any[]>({ ...criteria, column }).pipe(
+            map(rows => rows.map(row => ({
+                ...row,
+                start: row.start / 1000,
+                end: row.end == null ? null : row.end / 1000
+            })))
+        );
     }
 
     getHosts(filters: {start: Date, end: Date , namespace: string}): Observable<{ host: string }[]> {
@@ -94,8 +122,8 @@ export class RestSessionService {
     }
 
     getSizeCustom(
-      data: { series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
-      filters: { namespace: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], filters?: string[] }
+      data: { series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem },
+      filters: { namespace: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], selections?: ChartFilterSelection[] }
     ): Observable<any[]> {
         const groupAlias = data.group.jquery.buildAlias();
         const stackAlias = data.stack?.jquery.buildAlias();
@@ -117,9 +145,7 @@ export class RestSessionService {
             if (data.group.jquery.order) {
                 args['order'] = data.group.jquery.order;
             }
-            if (data.filter && filters.filters?.length) {
-                args[`${data.filter.jquery.value()}.in`] = filters.filters.join(',');
-            }
+            applyFilterSelections(args, filters.selections);
             if (filters.hosts?.length && !args['host.in']) {
                 args['host.in'] = filters.hosts.join(',');
             }
@@ -149,8 +175,8 @@ export class RestSessionService {
         );
     }
 
-    getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
-              filters: {namespace: string, start: Date, end: Date, hosts?: string[], filters?: string[] }): Observable<any[]> {
+    getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem },
+              filters: {namespace: string, start: Date, end: Date, hosts?: string[], selections?: ChartFilterSelection[] }): Observable<any[]> {
 
         let args: any = {
             'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
@@ -166,9 +192,7 @@ export class RestSessionService {
         if(data.group.jquery.order){
             args['order'] = `${data.group.jquery.order}`;
         }
-        if(data.filter && filters.filters?.length) {
-            args[`${data.filter.jquery.value()}.in`] = filters.filters.join(',');
-        }
+        applyFilterSelections(args, filters.selections);
         if(filters.hosts?.length && !args['instance.app_name.in']){
             args['instance.app_name.in'] = filters.hosts.join(',');
         }

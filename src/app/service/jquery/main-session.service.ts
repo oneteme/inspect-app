@@ -2,7 +2,16 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {map, Observable} from "rxjs";
 import {ExceptionsByPeriodAndAppname} from "src/app/model/jquery.model";
-import {ChartItem} from "../../views/kpi/kpi.config";
+import {applyFilterSelections, ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
+import {MainSessionDto} from "../../model/request.model";
+
+/** Colonnes de base de la liste des sessions principales ; l'alias (`colonne:alias`) donne la clé de la réponse. */
+const MAIN_SESSION_LIST_COLUMNS = 'id,name,location,start,end,user,status,instance.app_name:appName,instance.address:address';
+
+/** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
+const LAZY_MAIN_SESSION_COLUMNS: Record<string, string> = {
+    threadName: 'thread:threadName'
+};
 
 @Injectable({ providedIn: 'root' })
 export class MainSessionService {
@@ -13,6 +22,18 @@ export class MainSessionService {
     getMainSession<T>(params: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/session/main`;
         return this.http.get<T>(url, { params: params });
+    }
+
+    /** Liste des sessions principales : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
+    getMainSessionList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<MainSessionDto[]> {
+        const column = [MAIN_SESSION_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_MAIN_SESSION_COLUMNS[c])].join(',');
+        return this.getMainSession<any[]>({ ...criteria, column }).pipe(
+            map(rows => rows.map(row => ({
+                ...row,
+                start: row.start / 1000,
+                end: row.end == null ? null : row.end / 1000
+            })))
+        );
     }
 
     getHosts(filters: {start: Date, end: Date, namespace: string, type: string}): Observable<{ host: string }[]> {
@@ -77,8 +98,8 @@ export class MainSessionService {
         }).pipe(map((data: {user: string}[]) => (data.map(d => d.user))));
     }
 
-    getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
-              filters: {namespace: string, start: Date, end: Date, hosts?: string[], filters?: string[], type: string }): Observable<any[]> {
+    getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem },
+              filters: {namespace: string, start: Date, end: Date, hosts?: string[], selections?: ChartFilterSelection[], type: string }): Observable<any[]> {
         let args: any = {
             'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
             'join': 'instance',
@@ -95,9 +116,7 @@ export class MainSessionService {
         if(data.group.jquery.order){
             args['order'] = `${data.group.jquery.order}`;
         }
-        if(data.filter && filters.filters?.length) {
-            args[`${data.filter.jquery.value()}.in`] = filters.filters.join(',');
-        }
+        applyFilterSelections(args, filters.selections);
         if(filters.hosts?.length && !args['instance.app_name.in']){
             args['instance.app_name.in'] = filters.hosts.join(',');
         }

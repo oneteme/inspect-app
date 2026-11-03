@@ -1,9 +1,19 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
+import {Observable, map} from "rxjs";
 import {SmtpSessionExceptionsByPeriodAndappname} from "src/app/model/jquery.model";
 import {MailRequestDto} from "../../model/request.model";
-import {ChartItem} from "../../views/kpi/kpi.config";
+import {applyFilterSelections, ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
+
+/** Colonnes de base de la liste SMTP ; l'alias (`colonne:alias`) donne la clé de la réponse. */
+const SMTP_REQUEST_LIST_COLUMNS = 'id,host,command,status,start,end,user';
+
+/** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
+const LAZY_SMTP_REQUEST_COLUMNS: Record<string, string> = {
+    threadName: 'thread:threadName',
+    appName: 'instance.app_name:appName',
+    appVersion: 'instance.version:appVersion'
+};
 
 
 @Injectable({ providedIn: 'root' })
@@ -18,8 +28,16 @@ export class SmtpRequestService {
         return this.http.get<T>(url, { params: params });
     }
 
-    getRequests(params: any): Observable<Array<MailRequestDto>> {
-        return this.http.get<Array<MailRequestDto>>(`${this.server}/request/smtp`, { params: params });
+    /** Liste SMTP : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
+    getRequestList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<MailRequestDto[]> {
+        const column = [SMTP_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_SMTP_REQUEST_COLUMNS[c])].join(',');
+        return this.getSmtp<any[]>({ ...criteria, column }).pipe(
+            map(rows => rows.map(row => ({
+                ...row,
+                start: row.start / 1000,
+                end: row.end == null ? null : row.end / 1000
+            })))
+        );
     }
 
     getHost(type: string, filters: any): Observable<{ host: string }[]> {
@@ -47,8 +65,8 @@ export class SmtpRequestService {
         return this.getSmtp(args);
     }
 
-    getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
-              filters: {namespace: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], filters?: string[] }): Observable<any[]> {
+    getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem },
+              filters: {namespace: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], selections?: ChartFilterSelection[] }): Observable<any[]> {
         let args: any = {
             'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
             'instance.namespace': filters.namespace,
@@ -63,9 +81,7 @@ export class SmtpRequestService {
         if(data.group.jquery.order){
             args['order'] = `${data.group.jquery.order}`;
         }
-        if(data.filter && filters.filters?.length) {
-            args[`${data.filter.jquery.value()}.in`] = filters.filters.join(',');
-        }
+        applyFilterSelections(args, filters.selections);
         if(filters.hosts?.length && !args['host.in']){
             args['host.in'] = filters.hosts.join(',');
         }

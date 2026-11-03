@@ -5,7 +5,7 @@ import {TableColumnProvider} from "@oneteme/jquery-table";
 import {QueryParams} from "../../../../model/conf.model";
 import {RestRequestService} from "../../../../service/jquery/rest-request.service";
 import {finalize, Observable, of} from "rxjs";
-import {buildSeries,ChartConfig,pivotByStack,REST_LATENCY_CHART_CONFIG,REST_PERFORMANCE_CHART_CONFIG,REST_STATUS_CHART_CONFIG,REST_VOLUMETRY_CHART_CONFIG} from "./../../kpi.config";
+import {buildSeries,ChartConfig,buildFilterSelections,toFilterValues,pivotByStack,REST_LATENCY_CHART_CONFIG,REST_PERFORMANCE_CHART_CONFIG,REST_STATUS_CHART_CONFIG,REST_VOLUMETRY_CHART_CONFIG} from "./../../kpi.config";
 import {periodManagement, formatChartDates} from "../../../../shared/util";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
@@ -43,25 +43,25 @@ export class RestComponent implements OnInit {
   $statusOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $statusView: 'chart' | 'table' = 'chart';
   $statusSlice: OrganizerSliceState | null = null;
-  $statusFilteredValues: any[] = [];
+  $statusFilterValues: Record<string, string[]> = {};
   $statusDisplayUnit = '';
 
   $performanceRepartition: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = { data: [], loading: true };
   $performanceOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $performanceSlice: OrganizerSliceState | null = null;
-  $performanceFilteredValues: any[] = [];
+  $performanceFilterValues: Record<string, string[]> = {};
   $performanceDisplayUnit = '';
 
   $volumetryRepartition: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = { data: [], loading: true };
   $volumetryOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $volumetrySlice: OrganizerSliceState | null = null;
-  $volumetryFilteredValues: any[] = [];
+  $volumetryFilterValues: Record<string, string[]> = {};
   $volumetryDisplayUnit = '';
 
   $latencyRepartition: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = { data: [], loading: true };
   $latencyOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $latencySlice: OrganizerSliceState | null = null;
-  $latencyFilteredValues: any[] = [];
+  $latencyFilterValues: Record<string, string[]> = {};
   $latencyDisplayUnit = '';
 
   $methodRepartition: { data: any[], loading: boolean } = { data: [], loading: true };
@@ -125,7 +125,7 @@ export class RestComponent implements OnInit {
   onStatusSliceChange(sliceState: OrganizerSliceState | null): void {
     this.$statusSlice = sliceState;
     if (!sliceState) {
-      this.$statusFilteredValues = [];
+      this.$statusFilterValues = {};
     }
     // Refetch seulement si un filtre a été effectivement sélectionné
     if (sliceState?.filterApplied === true) {
@@ -145,7 +145,7 @@ export class RestComponent implements OnInit {
   onPerformanceSliceChange(sliceState: OrganizerSliceState | null): void {
     this.$performanceSlice = sliceState;
     if (!sliceState) {
-      this.$performanceFilteredValues = [];
+      this.$performanceFilterValues = {};
     }
     // Refetch seulement si un filtre a été effectivement sélectionné
     if (sliceState?.filterApplied === true) {
@@ -165,7 +165,7 @@ export class RestComponent implements OnInit {
   onVolumetrySliceChange(sliceState: OrganizerSliceState | null): void {
     this.$volumetrySlice = sliceState;
     if (!sliceState) {
-      this.$volumetryFilteredValues = [];
+      this.$volumetryFilterValues = {};
     }
     // Refetch seulement si un filtre a été effectivement sélectionné
     if (sliceState?.filterApplied === true) {
@@ -185,7 +185,7 @@ export class RestComponent implements OnInit {
   onLatencySliceChange(sliceState: OrganizerSliceState | null): void {
     this.$latencySlice = sliceState;
     if (!sliceState) {
-      this.$latencyFilteredValues = [];
+      this.$latencyFilterValues = {};
     }
     // Refetch seulement si un filtre a été effectivement sélectionné
     if (sliceState?.filterApplied === true) {
@@ -193,31 +193,27 @@ export class RestComponent implements OnInit {
     }
   }
 
-  onStatusFilterChange(filterFn: (row: any) => boolean): void {
+  onStatusFilterChange(activeKeys: string[][]): void {
     if (!this.$statusSlice) return;
-    const columnKey = this.$statusSlice.sliceConfigs[0]?.columnKey;
-    this.$statusFilteredValues = this.$statusSlice.tasks.filter(filterFn).map(t => t[columnKey]);
+    this.$statusFilterValues = toFilterValues(this.$statusSlice.sliceConfigs, activeKeys);
     this._fetchStatus();
   }
 
-  onPerformanceFilterChange(filterFn: (row: any) => boolean): void {
+  onPerformanceFilterChange(activeKeys: string[][]): void {
     if (!this.$performanceSlice) return;
-    const columnKey = this.$performanceSlice.sliceConfigs[0]?.columnKey;
-    this.$performanceFilteredValues = this.$performanceSlice.tasks.filter(filterFn).map(t => t[columnKey]);
+    this.$performanceFilterValues = toFilterValues(this.$performanceSlice.sliceConfigs, activeKeys);
     this._fetchPerformance();
   }
 
-  onVolumetryFilterChange(filterFn: (row: any) => boolean): void {
+  onVolumetryFilterChange(activeKeys: string[][]): void {
     if (!this.$volumetrySlice) return;
-    const columnKey = this.$volumetrySlice.sliceConfigs[0]?.columnKey;
-    this.$volumetryFilteredValues = this.$volumetrySlice.tasks.filter(filterFn).map(t => t[columnKey]);
+    this.$volumetryFilterValues = toFilterValues(this.$volumetrySlice.sliceConfigs, activeKeys);
     this._fetchVolumetry();
   }
 
-  onLatencyFilterChange(filterFn: (row: any) => boolean): void {
+  onLatencyFilterChange(activeKeys: string[][]): void {
     if (!this.$latencySlice) return;
-    const columnKey = this.$latencySlice.sliceConfigs[0]?.columnKey;
-    this.$latencyFilteredValues = this.$latencySlice.tasks.filter(filterFn).map(t => t[columnKey]);
+    this.$latencyFilterValues = toFilterValues(this.$latencySlice.sliceConfigs, activeKeys);
     this._fetchLatency();
   }
 
@@ -247,13 +243,12 @@ export class RestComponent implements OnInit {
     const ind = cfg.indicators.items.find(i => i.selected);
     const grp = cfg.groups.items.find(g => g.selected);
     const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
-    const flt = cfg.filters?.items?.find(f => f.selected);
 
     this.$statusRepartition.loading = true;
     this.$statusRepartition.data = [];
     this._httpRequestService.getCustom(
-      { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined }
+      { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, selections: buildFilterSelections(cfg, this.$statusFilterValues) }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -276,12 +271,11 @@ export class RestComponent implements OnInit {
     const ind = cfg.indicators.items.find(i => i.selected);
     const grp = cfg.groups.items.find(g => g.selected);
     const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
-    const flt = cfg.filters?.items?.find(f => f.selected);
     this.$performanceRepartition.loading = true;
     this.$performanceRepartition.data = [];
     this._httpRequestService.getCustom(
-      { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined }
+      { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, selections: buildFilterSelections(cfg, this.$performanceFilterValues) }
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -304,13 +298,12 @@ export class RestComponent implements OnInit {
     const ind = cfg.indicators.items.find(i => i.selected);
     const grp = cfg.groups.items.find(g => g.selected);
     const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
-    const flt = cfg.filters?.items?.find(f => f.selected);
 
     this.$volumetryRepartition.loading = true;
     this.$volumetryRepartition.data = [];
     this._httpRequestService.getSizeCustom(
-      { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$volumetryFilteredValues.length ? this.$volumetryFilteredValues : undefined }
+      { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, selections: buildFilterSelections(cfg, this.$volumetryFilterValues) }
     ).pipe(finalize(() => this.$volumetryRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -335,12 +328,11 @@ export class RestComponent implements OnInit {
     const ind = cfg.indicators.items.find(i => i.selected);
     const grp = cfg.groups.items.find(g => g.selected);
     const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
-    const flt = cfg.filters?.items?.find(f => f.selected);
     this.$latencyRepartition.loading = true;
     this.$latencyRepartition.data = [];
     this._httpRequestService.getLatency(
-      { serie: cfg.series.items[0], indicator: ind, group: grp, stack: stk, filter: flt },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$latencyFilteredValues.length ? this.$latencyFilteredValues : undefined }
+      { serie: cfg.series.items[0], indicator: ind, group: grp, stack: stk },
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, selections: buildFilterSelections(cfg, this.$latencyFilterValues) }
     ).pipe(finalize(() => this.$latencyRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;

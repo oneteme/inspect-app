@@ -1,9 +1,20 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
+import {Observable, map} from "rxjs";
 import {LdapSessionExceptionsByPeriodAndappname} from "src/app/model/jquery.model";
 import {DirectoryRequestDto} from "../../model/request.model";
-import {ChartItem} from "../../views/kpi/kpi.config";
+import {applyFilterSelections, ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
+
+/** Colonnes de base de la liste LDAP ; l'alias (`colonne:alias`) donne la clé de la réponse. */
+const LDAP_REQUEST_LIST_COLUMNS = 'id,host,command,status,start,end,user';
+
+/** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
+const LAZY_LDAP_REQUEST_COLUMNS: Record<string, string> = {
+    protocol: 'protocol',
+    threadName: 'thread:threadName',
+    appName: 'instance.app_name:appName',
+    appVersion: 'instance.version:appVersion'
+};
 
 
 @Injectable({ providedIn: 'root' })
@@ -20,8 +31,16 @@ export class LdapRequestService {
         return this.http.get<T>(url, { params: params });
     }
 
-    getRequests(params: any): Observable<Array<DirectoryRequestDto>> {
-        return this.http.get<Array<DirectoryRequestDto>>(`${this.server}/request/ldap`, { params: params });
+    /** Liste LDAP : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
+    getRequestList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<DirectoryRequestDto[]> {
+        const column = [LDAP_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_LDAP_REQUEST_COLUMNS[c])].join(',');
+        return this.getLdap<any[]>({ ...criteria, column }).pipe(
+            map(rows => rows.map(row => ({
+                ...row,
+                start: row.start / 1000,
+                end: row.end == null ? null : row.end / 1000
+            })))
+        );
     }
 
     getHost(type: string, filters: any): Observable<{ host: string }[]> {
@@ -42,8 +61,8 @@ export class LdapRequestService {
         return this.getLdap(args);
     }
 
-    getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem, filter?: ChartItem },
-              filters: {namespace: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], filters?: string[] }): Observable<any[]> {
+    getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem },
+              filters: {namespace: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], selections?: ChartFilterSelection[] }): Observable<any[]> {
         let args: any = {
             'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
             'join': 'instance',
@@ -58,9 +77,7 @@ export class LdapRequestService {
         if(data.group.jquery.order){
             args['order'] = `${data.group.jquery.order}`;
         }
-        if(data.filter && filters.filters?.length) {
-            args[`${data.filter.jquery.value()}.in`] = filters.filters.join(',');
-        }
+        applyFilterSelections(args, filters.selections);
         if(filters.hosts?.length && !args['host.in']){
             args['host.in'] = filters.hosts.join(',');
         }

@@ -79,6 +79,7 @@
             [requests]="requests"
             [isLoading]="isLoading"
             [initialSearch]="queryParams.optional?.q"
+            [lazyLoader]="lazyLoader"
             (onClickRemote)="selectedRemote($event)"
             (onClickRow)="selectedRest($event)">
 </rest-table>
@@ -86,22 +87,26 @@
 <ftp-table *ngIf="params.type=='ftp'" [emptyLabel]="emptyLabel" [requests]="requests"
            [isLoading]="isLoading"
            [initialSearch]="queryParams.optional?.q"
+           [lazyLoader]="lazyLoader"
            (onClickRow)="selectedFtp($event)"></ftp-table>
 
 <smtp-table *ngIf="params.type=='smtp'" [emptyLabel]="emptyLabel" [requests]="requests"
             [isLoading]="isLoading"
             [initialSearch]="queryParams.optional?.q"
+            [lazyLoader]="lazyLoader"
             (onClickRow)="selectedSmtp($event)" >
 </smtp-table>
 
 <ldap-table *ngIf="params.type=='ldap'" [emptyLabel]="emptyLabel" [requests]="requests"
             [isLoading]="isLoading"
             [initialSearch]="queryParams.optional?.q"
+            [lazyLoader]="lazyLoader"
             (onClickRow)="selectedLdap($event)">
 </ldap-table>
 
 <database-table *ngIf="params.type=='jdbc'" [emptyLabel]="emptyLabel" [requests]="requests"
                 [isLoading]="isLoading"
                 [initialSearch]="queryParams.optional?.q"
+                [lazyLoader]="lazyLoader"
                 (onClickRow)="selectedQuery($event)">
 </database-table>
