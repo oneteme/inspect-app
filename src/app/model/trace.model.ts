@@ -66,16 +66,15 @@ export interface LocalRequest extends AbstractRequest {
 }
 
 export interface DatabaseRequestStage extends AbstractStage {
-  count: number[];
-  args: string[];
+  payload?: StagePayload;
 }
 
 export interface DirectoryRequestStage extends AbstractStage {
-  args: string[];
+  payload?: StagePayload;
 }
 
 export interface FtpRequestStage extends AbstractStage {
-  args: string[];
+  payload?: StagePayload;
 }
 
 export interface HttpRequestStage extends AbstractStage {
@@ -112,6 +111,7 @@ export interface SessionEvent {
   type: string;
   sessionId: string;
   value?: string;
+  scope?: string;
   location?: string;
 }
 
@@ -209,4 +209,9 @@ export interface LogEntry {
   thread: string;
   action: string;
   stackRows: StackTraceRow[] | string;
+}
+
+export interface StagePayload {
+  args: string[];
+  count: number[];
 }

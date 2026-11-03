@@ -57,7 +57,9 @@
             <div class="meta-icon-btn"
                  [class.disabled]="!request.contentType"
                  [matTooltip]="request.contentType || 'Content-Type indisponible'">
-              <mat-icon class="material-symbols-outlined">line_style</mat-icon>
+                <mat-icon class="material-symbols-outlined">
+                    {{ getContentTypeIcon(request.contentType) }}
+                </mat-icon>
             </div>
             <div class="meta-icon-btn"
                  [class.disabled]="!request.outContentEncoding"
