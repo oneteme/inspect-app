@@ -292,6 +292,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             'instance.namespace': currentNamespace,
             'start.ge': currentStart.toISOString(),
             'start.lt': effectiveEnd.toISOString(),
+            'join': 'instance',
             'column': 'count:count,type',
             'type.in': 'INFO,WARN,ERROR'
         };
@@ -326,6 +327,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             'instance.namespace': currentNamespace,
             'start.ge': currentStart.toISOString(),
             'start.lt': effectiveEnd.toISOString(),
+            'join': 'instance',
             'column': 'count:count,type',
             'type.notIn': 'INFO,WARN,ERROR'
         };
@@ -1006,7 +1008,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
             .map(t => {
                 const total = t.total;
                 const errors = t.errorCount;
-                const rate = total > 0 ? (errors * 100) / total : 0;
+                let rate = total;
+                if (total > 0) {
+                    const count = errors > 0 ? errors : t.warnCount;
+                    rate = (count * 100) / total;
+                }
                 const title = t.key === 'LOG'
                     ? `${this._decimalPipe.transform(total, '1.0-0')} logs · ${this._decimalPipe.transform(t.infoCount, '1.0-0')} INFO · ${this._decimalPipe.transform(t.warnCount, '1.0-0')} WARN · ${this._decimalPipe.transform(t.errorCount, '1.0-0')} ERROR`
                     : `${this._decimalPipe.transform(total, '1.0-0')} actions utilisateurs`;
@@ -1265,4 +1271,8 @@ function equalArraysOrString(a: string | string[], b: string | string[]) {
         return aSorted.every((val, index) => bSorted[index] === val);
     }
     return a === b;
+}
+
+function showCorrectRate(eventSummary: any) {
+
 }
