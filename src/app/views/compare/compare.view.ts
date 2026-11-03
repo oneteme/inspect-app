@@ -25,7 +25,7 @@ export interface RemoteTrace {
   branch?: string;
   hash?: string;
   environment?: string;
-  exception?: { type?: string; message?: string } | string;
+  exceptions?: { type?: string; message?: string }[] | string[];
 }
 
 export interface RequestInfo {
@@ -128,8 +128,13 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
     return '#22c55e';                                 // success
   }
 
-  private extractException(ex: { type?: string; message?: string } | string | undefined): string | null {
+  private extractException(ex: { type?: string; message?: string } | string | { type?: string; message?: string }[] | string[] | undefined): string | null {
     if (!ex) return null;
+    if (Array.isArray(ex)) {
+      if (ex.length === 0) return null;
+      if (ex.length > 1) return `${ex.length} exceptions`;
+      ex = ex[0];
+    }
     if (typeof ex === 'string') return ex;
     return [ex.type, ex.message].filter(Boolean).join(': ') || null;
   }
@@ -190,9 +195,8 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
     const calleeElapsed = remote.end != null && remote.start != null ? remote.end - remote.start : null;
     const colorItem     = this.getStatusColor('status' in req ? req.status : remote?.status);
     const colorRemote   = this.getStatusColor('status' in remote ? remote.status : req?.status);
-    const exception     = this.extractException(remote.exception);
+    const exception     = this.extractException(remote.exceptions);
     const itemException = this.extractException(req.exception);
-
     const graph = new mx.mxGraph(container);
     graph.setCellsLocked(true);
     graph.setCellsMovable(false);

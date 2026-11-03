@@ -51,7 +51,7 @@ export const DEFAULT_DURATION_SLICE_CONFIG: SliceConfig = {
 export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'APPLICATION', icon: 'apps', width: '18%' },
+    { key: 'appName', header: 'APPLICATION', icon: 'widgets', width: '18%' },
     {
       key: 'resource', header: 'Ressource', groupable: false, sliceable: false, icon: 'category',
       searchValue: (row: RestSessionDto) => fmtMethod(row.method) + ' ' + (row.path || '')
@@ -117,7 +117,7 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
 export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'APPLICATION', icon: 'apps', width: '13%' },
+    { key: 'appName', header: 'APPLICATION', icon: 'widgets', width: '13%' },
     { key: 'name', header: 'Nom', icon: 'label', width: '13%' },
     { key: 'location', header: 'Ressource', icon: 'category' },
     { key: 'start', header: 'Début', groupable: false, sliceable: false, icon: 'schedule', width: '13%' },
@@ -473,7 +473,7 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
 export const STAGE_TABLE_CONFIG: TableProvider<AbstractStage> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'name', header: 'Evènement', icon: 'event_list' },
+    { key: 'name', header: 'Etape', icon: 'event_list' },
     {
       key: 'resource', header: 'Ressource', icon: 'category',
       searchValue: (row: AbstractStage) => fmtMethod(row.command) + ' ' + ((row as any).args ?? row.arg ?? '')
@@ -511,7 +511,7 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'instant', header: 'Horodate', icon: 'schedule', sliceable: false, groupable: false },
-    { key: 'appName', header: 'Application', icon: 'apps', sliceable: false, groupable: false, width: '18%' },
+    { key: 'appName', header: 'Application', icon: 'widgets', sliceable: false, groupable: false, width: '18%' },
     { key: 'message', header: 'Message', icon: 'chat', sliceable: false, groupable: false, width: '52%' },
     { key: 'thread', header: 'Thread',  sliceable: false, groupable: false  },
     { key: 'action', header: 'Action',  sliceable: false, groupable: false },
@@ -531,7 +531,7 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
 export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTrace?: number }> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'Application', icon: 'apps', sliceable: false, groupable: false, width: '25%' },
+    { key: 'appName', header: 'Application', icon: 'widgets', sliceable: false, groupable: false, width: '25%' },
     { key: 'duration', header: 'Depuis', icon: 'schedule', groupable: false, width: '12%', sortValue: (row) => row.start },
     { key: 'version', header: 'Version', icon: 'label', width: '20%' },
     { key: 'branch', header: 'Branche', icon: 'fork_right', width: '25%' },
@@ -563,7 +563,7 @@ export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTra
 export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'Application', width: '15%', icon:'apps' },
+    { key: 'appName', header: 'Application', width: '15%', icon:'widgets' },
     {
       key: 'instant', header: 'Date', icon: 'schedule', width: '10%', groupable: false, sliceable: false,
       searchValue: (row: SessionEventDto) => fmtStart(row.instant)

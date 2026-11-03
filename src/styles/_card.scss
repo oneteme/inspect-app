@@ -251,6 +251,11 @@
 .data-stats {
   gap: 0.75em;
 }
+.data-stats-vertical {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75em;
+}
 
 .stat-item {
   display: inline-flex;
