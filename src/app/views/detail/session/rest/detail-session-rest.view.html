@@ -97,6 +97,7 @@
               <mat-icon class="material-symbols-outlined stat-icon">arrow_downward</mat-icon>
               <span class="stat-value">{{ session.outDataSize || 0 }}o</span>
             </div>
+              <div class="footer-section data-stats-vertical">
             <div class="stat-item">
               <mat-icon class="material-symbols-outlined stat-icon">timer</mat-icon>
               <span class="stat-value stat-duration"
@@ -104,6 +105,13 @@
                 {{ { start: session.start, end: session.end } | duration }}
               </span>
             </div>
+              <div class="stat-item" *ngIf="session.asyncDuration != null && session.asyncDuration >= 0">
+                  <mat-icon class="material-symbols-outlined stat-icon">more_time</mat-icon>
+                  <span class="stat-value" matTooltip="Durée des traitements asynchrones">
+                      {{ session.asyncDuration / 1000 | duration }}
+                  </span>
+              </div>
+              </div>
           </div>
 
         </div>
