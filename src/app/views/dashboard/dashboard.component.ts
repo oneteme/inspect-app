@@ -109,6 +109,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     groupedBy: string;
     period: IPeriod | IStep | IStepFrom;
     readonly periodQuickRanges = PERIOD_QUICK_RANGES;
+    readonly eventSkeletonRows = [1, 2];
 
     serverHealthData: LastServerStart[] = [];
     serverHealthLoading = true;
@@ -160,7 +161,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     // résumés calculés après chargement
     protocolSummaries: { key: string; label: string; rate: number; count: number; total: number; loading: boolean; title: string }[] = [];
     sessionSummaries: { key: string; label: string; errors: number; total: number; rate: number; barPct: number; loading: boolean; title: string }[] = [];
-    eventSummaries: { key: string; label: string; errors: number; total: number; rate: number; loading: boolean; title: string }[] = [];
+    eventSummaries: { key: string; label: string; errors: number; total: number; rate: number; barPct: number; loading: boolean; title: string; infoCount?: number; warnCount?: number; errorCount?: number; infoPct?: number; warnPct?: number; errorPct?: number; }[] = [];
+    eventTotal = 0;
     sessionTotal = 0;
     eventWarnCount = 0;
     eventErrorCount = 0;
@@ -217,7 +219,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 const serverParam = this.createServerFilter();
                 const effectiveEnd = currentEnd > new Date() ? new Date() : currentEnd;
                 this.chartRequests = this.REQUESTS(currentNamespace, currentStart, effectiveEnd, serverParam.app_name);
-                this.tabRequests   = this.TAB_REQUESTS(currentNamespace, currentStart, effectiveEnd, serverParam.app_name);
+                this.tabRequests = this.TAB_REQUESTS(currentNamespace, currentStart, effectiveEnd, serverParam.app_name);
                 this.sessionSubscriptions.forEach(s => s.unsubscribe());
                 this.sessionSubscriptions = [];
                 this.sessionSummaries = [];
@@ -225,7 +227,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 this.sessionCountData = [];
                 this.sessionCountLoading = true;
                 this.restSessionCountLoading = true;
-                this.restSessionCount = { total: 0, errors: 0 };
+                this.eventCountsLoading = true;
+                this.restSessionCount = {total: 0, errors: 0};
+                this.eventSummaries = [];
+                this.eventWarnCount = 0;
+                this.eventErrorCount = 0;
+                this.eventInfoCount = 0;
+                this.eventUserCount = 0;
+                this.eventTotal = 0;
                 const namespaceChanged = this.params.namespace !== this._lastHealthNamespace;
                 if (namespaceChanged) {
                     this.deployTableRows = [];
@@ -241,57 +250,107 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     this._lastHealthNamespace = currentNamespace;
                     this.loadServerHealth(currentNamespace, gen);
                 }
-                this.sessionSubscriptions.push(this._sessionService.getCountByNamespace({ namespace: currentNamespace, start: currentStart, end: currentEnd })
-                    .pipe(finalize(() => { if (this._loadGen === gen) { this.restSessionCountLoading = false; this._rebuildSessionSummaries(); } }))
-                    .subscribe({ next: (data) => { if (this._loadGen === gen) { this.restSessionCount = data; } } }));
+                this.sessionSubscriptions.push(this._sessionService.getCountByNamespace({
+                    namespace: currentNamespace,
+                    start: currentStart,
+                    end: currentEnd
+                })
+                    .pipe(finalize(() => {
+                        if (this._loadGen === gen) {
+                            this.restSessionCountLoading = false;
+                            this._rebuildSessionSummaries();
+                            this._rebuildEventSummaries();
+                        }
+                    }))
+                    .subscribe({
+                        next: (data) => {
+                            if (this._loadGen === gen) {
+                                this.restSessionCount = data;
+                            }
+                        }
+                    }));
 
                 this._location.replaceState(`${this._router.url.split('?')[0]}?${this.buildQueryPath(this.buildQueryParams())}`)
                 const eventParams: any = {
                     'instance.namespace': currentNamespace,
                     'start.ge': currentStart.toISOString(),
-                    'start.lt': effectiveEnd.toISOString()
+                    'start.lt': effectiveEnd.toISOString(),
+                    'column': 'count:count,type',
+                    'type.in': 'INFO,WARN,ERROR'
                 };
                 if (this.params.serveurs?.length) {
                     eventParams['instance.app_name'] = this.params.serveurs;
                 }
-                this.sessionSubscriptions.push(this._sessionEventService.getSessionEventTypeCount(eventParams)
-                    .pipe(finalize(() => { if (this._loadGen === gen) { this.eventCountsLoading = false; this._cdr.markForCheck(); } }))
-                    .subscribe({
-                        next: (events) => {
-                            if (this._loadGen !== gen || !events) return;
-                            const getCount = (e: any): number => Number(e['COUNT(*)'] ?? e.count ?? 0) || 0;
-
-                            this.eventWarnCount = events
-                                .filter(e => e.type === 'WARN')
-                                .reduce((acc, e) => acc + getCount(e), 0);
-
-                            this.eventErrorCount = events
-                                .filter(e => e.type === 'ERROR')
-                                .reduce((acc, e) => acc + getCount(e), 0);
-
-                            this.eventInfoCount = events
-                                .filter(e => e.type === 'INFO')
-                                .reduce((acc, e) => acc + getCount(e), 0);
-
-                            this.eventUserCount = events
-                                .filter(e => e.type !== 'ERROR' && e.type !== 'WARN' && e.type !== 'INFO')
-                                .reduce((acc, e) => acc + getCount(e), 0);
-
-                            this._cdr.markForCheck();
-                        },
-                        error: () => {
-                            if (this._loadGen === gen) {
-                                this.eventWarnCount = 0;
-                                this.eventErrorCount = 0;
-                                this.eventInfoCount = 0;
-                                this.eventUserCount = 0;
-                                this._cdr.markForCheck();
-                            }
-                        }
-                    }));
+                this.getLogEventCount(currentNamespace, currentStart, effectiveEnd, gen);
+                this.getUserEventCount(currentNamespace, currentStart, effectiveEnd, gen);
             }
         }));
     }
+
+    getLogEventCount(currentNamespace: string, currentStart: Date, effectiveEnd: Date, gen: number) {
+        const logParams: any = {
+            'instance.namespace': currentNamespace,
+            'start.ge': currentStart.toISOString(),
+            'start.lt': effectiveEnd.toISOString(),
+            'column': 'count:count,type',
+            'type.in': 'INFO,WARN,ERROR'
+        };
+        this._sessionEventService.getSessionEventTypeCount(logParams)
+            .pipe(finalize(() => {
+                if (this._loadGen === gen) {
+                    this.eventCountsLoading = false;
+                    this._rebuildEventSummaries();
+                }
+            }))
+            .subscribe({
+                next: (events) => {
+                    if (this._loadGen !== gen || !events) return;
+                    this.eventWarnCount = events.find(e => e.type === 'WARN')?.count ?? 0;
+                    this.eventErrorCount = events.find(e => e.type === 'ERROR')?.count ?? 0;
+                    this.eventInfoCount = events.find(e => e.type === 'INFO')?.count ?? 0;
+                    this._rebuildEventSummaries();
+                },
+                error: () => {
+                    if (this._loadGen === gen) {
+                        this.eventWarnCount = 0;
+                        this.eventErrorCount = 0;
+                        this.eventInfoCount = 0;
+                        this._rebuildEventSummaries();
+                    }
+                }
+            });
+    }
+
+    getUserEventCount(currentNamespace: string, currentStart: Date, effectiveEnd: Date, gen: number) {
+        const userParams: any = {
+            'instance.namespace': currentNamespace,
+            'start.ge': currentStart.toISOString(),
+            'start.lt': effectiveEnd.toISOString(),
+            'column': 'count:count,type',
+            'type.notIn': 'INFO,WARN,ERROR'
+        };
+        this._sessionEventService.getSessionEventTypeCount(userParams)
+            .pipe(finalize(() => {
+                if (this._loadGen === gen) {
+                    this.eventCountsLoading = false;
+                    this._rebuildEventSummaries();
+                }
+            }))
+            .subscribe({
+                next: (events) => {
+                    if (this._loadGen !== gen || !events) return;
+                    this.eventUserCount = events.length;
+                    this._rebuildEventSummaries();
+                },
+                error: () => {
+                    if (this._loadGen === gen) {
+                        this.eventUserCount = 0;
+                        this._rebuildEventSummaries();
+                    }
+                }
+            })
+    }
+
     initCharts(gen: number) {
         this.kpiLoading = true;
         this.sparklinePercs = { rest: 0, jdbc: 0, ftp: 0, smtp: 0, ldap: 0 };
@@ -916,6 +975,69 @@ export class DashboardComponent implements OnInit, OnDestroy {
             })
             .filter(s => s.loading || s.total > 0);
         this._rebuildInsightsAllClear();
+    }
+
+    private _rebuildEventSummaries(): void {
+        const logTotal = this.eventInfoCount + this.eventWarnCount + this.eventErrorCount;
+        const userTotal = this.eventUserCount;
+        this.eventTotal = logTotal + userTotal;
+        const overallTotal = this.eventTotal;
+
+        const types = [
+            {
+                key: 'LOG',
+                label: 'Logs Applicatifs',
+                total: logTotal,
+                infoCount: this.eventInfoCount,
+                warnCount: this.eventWarnCount,
+                errorCount: this.eventErrorCount
+            },
+            {
+                key: 'USER',
+                label: 'Actions Utilisateurs',
+                total: userTotal,
+                infoCount: 0,
+                warnCount: 0,
+                errorCount: 0
+            }
+        ];
+
+        this.eventSummaries = types
+            .map(t => {
+                const total = t.total;
+                const errors = t.errorCount;
+                const rate = total > 0 ? (errors * 100) / total : 0;
+                const title = t.key === 'LOG'
+                    ? `${this._decimalPipe.transform(total, '1.0-0')} logs · ${this._decimalPipe.transform(t.infoCount, '1.0-0')} INFO · ${this._decimalPipe.transform(t.warnCount, '1.0-0')} WARN · ${this._decimalPipe.transform(t.errorCount, '1.0-0')} ERROR`
+                    : `${this._decimalPipe.transform(total, '1.0-0')} actions utilisateurs`;
+
+                return {
+                    key: t.key,
+                    label: t.label,
+                    errors,
+                    total,
+                    rate,
+                    barPct: overallTotal > 0 ? (total * 100) / overallTotal : 0,
+                    loading: this.eventCountsLoading,
+                    title,
+                    infoCount: t.infoCount,
+                    warnCount: t.warnCount,
+                    errorCount: t.errorCount,
+                    infoPct: total > 0 ? (t.infoCount * 100) / total : 0,
+                    warnPct: total > 0 ? (t.warnCount * 100) / total : 0,
+                    errorPct: total > 0 ? (t.errorCount * 100) / total : 0
+                };
+            })
+            .filter(s => s.loading || s.total > 0);
+
+        this._cdr.markForCheck();
+    }
+    navigateToEvent(key: string): void {
+        if (key === 'LOG') {
+            this.navigateToEventLogs();
+        } else if (key === 'USER') {
+            this.navigateToEventUser();
+        }
     }
 
     private buildSupervisionQueryParams(namespace?: string): Params {
