@@ -6,7 +6,7 @@ import {applyFilterSelections, ChartFilterSelection, ChartItem} from "../../view
 import {MainSessionDto} from "../../model/request.model";
 
 /** Colonnes de base de la liste des sessions principales ; l'alias (`colonne:alias`) donne la clé de la réponse. */
-const MAIN_SESSION_LIST_COLUMNS = 'id,name,location,start,end,user,status,instance.app_name:appName';
+const MAIN_SESSION_LIST_COLUMNS = 'id,name,location,start,end,user,status,instance.app_name:appName,instance.address:address';
 
 /** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
 const LAZY_MAIN_SESSION_COLUMNS: Record<string, string> = {

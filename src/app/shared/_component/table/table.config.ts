@@ -123,6 +123,7 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
     },
     { key: 'user', header: 'Utilisateur', icon: 'person', width: '13%' },
+    { key: 'address', header: 'Adresse', icon: 'fingerprint', width: '13%', optional: true },
     { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
     {
       key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
