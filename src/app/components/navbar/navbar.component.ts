@@ -210,7 +210,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   getEnvClass(env: string): string {
     const known = ['dev', 'ppd', 'prv', 'rec', 'pg', 'rcc'];
-    return known.includes(env) ? env : 'other';
+    const suffix = (env ?? '').split('-').pop()!.toLowerCase();
+    return known.includes(suffix) ? suffix : 'other';
   }
 
   onFilterClick(): void { this._panelSvc.toggle(); }
