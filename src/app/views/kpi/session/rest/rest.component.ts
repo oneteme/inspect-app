@@ -10,6 +10,7 @@ import {buildFilterSelections, toFilterValues,
   pivotByStack
 } from "../../kpi.config";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
+import {withKpiChartTypes} from "../../kpi-chart-type";
 import {periodManagement, formatChartDates} from "../../../../shared/util";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 import {RestSessionService} from "../../../../service/jquery/rest-session.service";
@@ -85,6 +86,10 @@ export class RestComponent implements OnInit {
 
   readonly STATUS_CHART_PROVIDER_BASE = STATUS_CHART_PROVIDER_BASE;
 
+  $statusChartType = 'column';
+  $performanceChartType = 'column';
+  $volumetryChartType = 'column';
+
   $statusRepartition: Partial<{data: any[], rawData: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = { data: [], loading: true};
   $statusOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $statusView: 'chart' | 'table' = 'chart';
@@ -141,11 +146,17 @@ export class RestComponent implements OnInit {
   ngOnInit() {}
 
   onStatusViewChange(event: OrganizerButtonEvent): void {
+    if (event.type === 'chartTypeSelected') {
+      this.$statusChartType = event.state.selectedChartType ?? this.$statusChartType;
+      this.$statusOrganizer = withKpiChartTypes(this.$statusOrganizer, this.$statusChartType);
+      this._cdr.markForCheck();
+      return;
+    }
     if (event.type === 'viewSwitched') {
       this.$statusView = event.state.viewMode ?? 'chart';
     }
     const result = this._handleOrganizerEvent(event, this.$statusRepartition.chartConfig, this.$statusOrganizer, this._statusOrganizerOptions());
-    this.$statusOrganizer = result.binding;
+    this.$statusOrganizer = withKpiChartTypes(result.binding, this.$statusChartType);
     if (result.shouldRefetch) {
       this._fetchStatus();
     }
@@ -163,8 +174,14 @@ export class RestComponent implements OnInit {
   }
 
   onPerformanceViewChange(event: OrganizerButtonEvent): void {
+    if (event.type === 'chartTypeSelected') {
+      this.$performanceChartType = event.state.selectedChartType ?? this.$performanceChartType;
+      this.$performanceOrganizer = withKpiChartTypes(this.$performanceOrganizer, this.$performanceChartType);
+      this._cdr.markForCheck();
+      return;
+    }
     const result = this._handleOrganizerEvent(event, this.$performanceRepartition.chartConfig, this.$performanceOrganizer, this._performanceOrganizerOptions());
-    this.$performanceOrganizer = result.binding;
+    this.$performanceOrganizer = withKpiChartTypes(result.binding, this.$performanceChartType);
     if (result.shouldRefetch) {
       this._fetchPerformance();
     }
@@ -182,8 +199,14 @@ export class RestComponent implements OnInit {
   }
 
   onVolumetryViewChange(event: OrganizerButtonEvent): void {
+    if (event.type === 'chartTypeSelected') {
+      this.$volumetryChartType = event.state.selectedChartType ?? this.$volumetryChartType;
+      this.$volumetryOrganizer = withKpiChartTypes(this.$volumetryOrganizer, this.$volumetryChartType);
+      this._cdr.markForCheck();
+      return;
+    }
     const result = this._handleOrganizerEvent(event, this.$volumetryRepartition.chartConfig, this.$volumetryOrganizer, this._volumetryOrganizerOptions());
-    this.$volumetryOrganizer = result.binding;
+    this.$volumetryOrganizer = withKpiChartTypes(result.binding, this.$volumetryChartType);
     if (result.shouldRefetch) {
       this._fetchVolumetry();
     }
@@ -334,9 +357,9 @@ export class RestComponent implements OnInit {
   }
 
   private _rebuildOrganizerConfigs(): void {
-    this.$statusOrganizer = buildOrganizerChartBinding(this.$statusRepartition.chartConfig, this._statusOrganizerOptions());
-    this.$performanceOrganizer = buildOrganizerChartBinding(this.$performanceRepartition.chartConfig, this._performanceOrganizerOptions());
-    this.$volumetryOrganizer = buildOrganizerChartBinding(this.$volumetryRepartition.chartConfig, this._volumetryOrganizerOptions());
+    this.$statusOrganizer = withKpiChartTypes(buildOrganizerChartBinding(this.$statusRepartition.chartConfig, this._statusOrganizerOptions()), this.$statusChartType);
+    this.$performanceOrganizer = withKpiChartTypes(buildOrganizerChartBinding(this.$performanceRepartition.chartConfig, this._performanceOrganizerOptions()), this.$performanceChartType);
+    this.$volumetryOrganizer = withKpiChartTypes(buildOrganizerChartBinding(this.$volumetryRepartition.chartConfig, this._volumetryOrganizerOptions()), this.$volumetryChartType);
   }
 
   private _statusOrganizerOptions(): OrganizerChartBridgeOptions {

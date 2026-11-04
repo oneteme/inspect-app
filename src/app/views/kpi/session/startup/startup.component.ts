@@ -15,6 +15,7 @@ import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, Org
 import {DatePipe} from "@angular/common";
 import {ChartProvider} from "@oneteme/jquery-core";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
+import {withKpiChartTypes} from "../../kpi-chart-type";
 
 @Component({
   templateUrl: './startup.component.html',
@@ -46,6 +47,9 @@ export class StartupComponent {
 
   readonly STATUS_CHART_PROVIDER_BASE = STATUS_CHART_PROVIDER_BASE;
 
+  $statusChartType = 'column';
+  $performanceChartType = 'column';
+
   groupedBy: string = '';
   params: QueryParams;
 
@@ -68,11 +72,17 @@ export class StartupComponent {
   };
 
   onStatusViewChange(event: OrganizerButtonEvent): void {
+    if (event.type === 'chartTypeSelected') {
+      this.$statusChartType = event.state.selectedChartType ?? this.$statusChartType;
+      this.$statusOrganizer = withKpiChartTypes(this.$statusOrganizer, this.$statusChartType);
+      this._cdr.markForCheck();
+      return;
+    }
     if (event.type === 'viewSwitched') {
       this.$statusView = event.state.viewMode ?? 'chart';
     }
     const result = this._handleOrganizerEvent(event, this.$statusRepartition.chartConfig, this.$statusOrganizer, this._statusOrganizerOptions());
-    this.$statusOrganizer = result.binding;
+    this.$statusOrganizer = withKpiChartTypes(result.binding, this.$statusChartType);
     if (result.shouldRefetch) {
       this._fetchStatus();
     }
@@ -90,8 +100,14 @@ export class StartupComponent {
   }
 
   onPerformanceViewChange(event: OrganizerButtonEvent): void {
+    if (event.type === 'chartTypeSelected') {
+      this.$performanceChartType = event.state.selectedChartType ?? this.$performanceChartType;
+      this.$performanceOrganizer = withKpiChartTypes(this.$performanceOrganizer, this.$performanceChartType);
+      this._cdr.markForCheck();
+      return;
+    }
     const result = this._handleOrganizerEvent(event, this.$performanceRepartition.chartConfig, this.$performanceOrganizer, this._performanceOrganizerOptions());
-    this.$performanceOrganizer = result.binding;
+    this.$performanceOrganizer = withKpiChartTypes(result.binding, this.$performanceChartType);
     if (result.shouldRefetch) {
       this._fetchPerformance();
     }
@@ -207,8 +223,8 @@ export class StartupComponent {
   }
 
   private _rebuildOrganizerConfigs(): void {
-    this.$statusOrganizer = buildOrganizerChartBinding(this.$statusRepartition.chartConfig, this._statusOrganizerOptions());
-    this.$performanceOrganizer = buildOrganizerChartBinding(this.$performanceRepartition.chartConfig, this._performanceOrganizerOptions());
+    this.$statusOrganizer = withKpiChartTypes(buildOrganizerChartBinding(this.$statusRepartition.chartConfig, this._statusOrganizerOptions()), this.$statusChartType);
+    this.$performanceOrganizer = withKpiChartTypes(buildOrganizerChartBinding(this.$performanceRepartition.chartConfig, this._performanceOrganizerOptions()), this.$performanceChartType);
   }
 
   private _statusOrganizerOptions(): OrganizerChartBridgeOptions {

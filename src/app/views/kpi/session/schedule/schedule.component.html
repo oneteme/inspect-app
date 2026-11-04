@@ -97,7 +97,7 @@
           (activeKeysChange)="onStatusFilterChange($event)">
         </slice-panel>
         <chart #statusChart
-          type="column"
+          [type]="$statusChartType"
           [config]="$statusRepartition.chartProvider || {series: []}"
           [data]="$statusRepartition.data"
           [isLoading]="$statusRepartition.loading">
@@ -148,7 +148,7 @@
           (activeKeysChange)="onPerformanceFilterChange($event)">
         </slice-panel>
         <chart #performanceChart
-          type="column"
+          [type]="$performanceChartType"
           [config]="$performanceRepartition.chartProvider || {series: []}"
           [data]="$performanceRepartition.data"
           [isLoading]="$performanceRepartition.loading">

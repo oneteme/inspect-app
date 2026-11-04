@@ -10,6 +10,7 @@ import {periodManagement, formatChartDates} from "../../../../shared/util";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
+import {withKpiChartTypes} from "../../kpi-chart-type";
 
 @Component({
   templateUrl: './rest.component.html',
@@ -39,6 +40,11 @@ export class RestComponent implements OnInit {
   }
 
   // Chart state
+  $statusChartType = 'column';
+  $performanceChartType = 'column';
+  $volumetryChartType = 'column';
+  $latencyChartType = 'column';
+
   $statusRepartition: Partial<{data: any[], rawData: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = { data: [], loading: true };
   $statusOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $statusView: 'chart' | 'table' = 'chart';
@@ -111,11 +117,17 @@ export class RestComponent implements OnInit {
   }
 
   onStatusViewChange(event: OrganizerButtonEvent): void {
+    if (event.type === 'chartTypeSelected') {
+      this.$statusChartType = event.state.selectedChartType ?? this.$statusChartType;
+      this.$statusOrganizer = withKpiChartTypes(this.$statusOrganizer, this.$statusChartType);
+      this._cdr.markForCheck();
+      return;
+    }
     if (event.type === 'viewSwitched') {
       this.$statusView = event.state.viewMode ?? 'chart';
     }
     const result = this._handleOrganizerEvent(event, this.$statusRepartition.chartConfig, this.$statusOrganizer, this._statusOrganizerOptions());
-    this.$statusOrganizer = result.binding;
+    this.$statusOrganizer = withKpiChartTypes(result.binding, this.$statusChartType);
     if (result.shouldRefetch) {
       this._fetchStatus();
     }
@@ -134,8 +146,14 @@ export class RestComponent implements OnInit {
   }
 
   onPerformanceViewChange(event: OrganizerButtonEvent): void {
+    if (event.type === 'chartTypeSelected') {
+      this.$performanceChartType = event.state.selectedChartType ?? this.$performanceChartType;
+      this.$performanceOrganizer = withKpiChartTypes(this.$performanceOrganizer, this.$performanceChartType);
+      this._cdr.markForCheck();
+      return;
+    }
     const result = this._handleOrganizerEvent(event, this.$performanceRepartition.chartConfig, this.$performanceOrganizer, this._performanceOrganizerOptions());
-    this.$performanceOrganizer = result.binding;
+    this.$performanceOrganizer = withKpiChartTypes(result.binding, this.$performanceChartType);
     if (result.shouldRefetch) {
       this._fetchPerformance();
     }
@@ -154,8 +172,14 @@ export class RestComponent implements OnInit {
   }
 
   onVolumetryViewChange(event: OrganizerButtonEvent): void {
+    if (event.type === 'chartTypeSelected') {
+      this.$volumetryChartType = event.state.selectedChartType ?? this.$volumetryChartType;
+      this.$volumetryOrganizer = withKpiChartTypes(this.$volumetryOrganizer, this.$volumetryChartType);
+      this._cdr.markForCheck();
+      return;
+    }
     const result = this._handleOrganizerEvent(event, this.$volumetryRepartition.chartConfig, this.$volumetryOrganizer, this._volumetryOrganizerOptions());
-    this.$volumetryOrganizer = result.binding;
+    this.$volumetryOrganizer = withKpiChartTypes(result.binding, this.$volumetryChartType);
     if (result.shouldRefetch) {
       this._fetchVolumetry();
     }
@@ -174,8 +198,14 @@ export class RestComponent implements OnInit {
   }
 
   onLatencyViewChange(event: OrganizerButtonEvent): void {
+    if (event.type === 'chartTypeSelected') {
+      this.$latencyChartType = event.state.selectedChartType ?? this.$latencyChartType;
+      this.$latencyOrganizer = withKpiChartTypes(this.$latencyOrganizer, this.$latencyChartType);
+      this._cdr.markForCheck();
+      return;
+    }
     const result = this._handleOrganizerEvent(event, this.$latencyRepartition.chartConfig, this.$latencyOrganizer, this._latencyOrganizerOptions());
-    this.$latencyOrganizer = result.binding;
+    this.$latencyOrganizer = withKpiChartTypes(result.binding, this.$latencyChartType);
     if (result.shouldRefetch) {
       this._fetchLatency();
     }
@@ -444,10 +474,10 @@ export class RestComponent implements OnInit {
   }
 
   private _rebuildOrganizerConfigs(): void {
-    this.$statusOrganizer = buildOrganizerChartBinding(this.$statusRepartition.chartConfig, this._statusOrganizerOptions());
-    this.$performanceOrganizer = buildOrganizerChartBinding(this.$performanceRepartition.chartConfig, this._performanceOrganizerOptions());
-    this.$volumetryOrganizer = buildOrganizerChartBinding(this.$volumetryRepartition.chartConfig, this._volumetryOrganizerOptions());
-    this.$latencyOrganizer = buildOrganizerChartBinding(this.$latencyRepartition.chartConfig, this._latencyOrganizerOptions());
+    this.$statusOrganizer = withKpiChartTypes(buildOrganizerChartBinding(this.$statusRepartition.chartConfig, this._statusOrganizerOptions()), this.$statusChartType);
+    this.$performanceOrganizer = withKpiChartTypes(buildOrganizerChartBinding(this.$performanceRepartition.chartConfig, this._performanceOrganizerOptions()), this.$performanceChartType);
+    this.$volumetryOrganizer = withKpiChartTypes(buildOrganizerChartBinding(this.$volumetryRepartition.chartConfig, this._volumetryOrganizerOptions()), this.$volumetryChartType);
+    this.$latencyOrganizer = withKpiChartTypes(buildOrganizerChartBinding(this.$latencyRepartition.chartConfig, this._latencyOrganizerOptions()), this.$latencyChartType);
   }
 
   private _statusOrganizerOptions(): OrganizerChartBridgeOptions {

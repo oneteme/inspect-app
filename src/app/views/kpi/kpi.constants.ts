@@ -19,7 +19,6 @@ export const STATUS_CHART_PROVIDER_BASE: Partial<ChartProvider<string, number>> 
       axisLabel: { fontSize: 11, color: '#94a3b8' }
     },
     tooltip: {
-      trigger: 'axis',
       borderRadius: 10,
       borderWidth: 0,
       backgroundColor: 'rgba(15,23,42,0.88)',

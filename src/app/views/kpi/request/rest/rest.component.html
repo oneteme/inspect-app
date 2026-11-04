@@ -79,7 +79,7 @@
           (activeKeysChange)="onStatusFilterChange($event)">
         </slice-panel>
         <chart #statusChart
-          type="column"
+          [type]="$statusChartType"
           [config]="$statusRepartition.chartProvider || {series: []}"
           [data]="$statusRepartition.data"
           [isLoading]="$statusRepartition.loading">
@@ -139,7 +139,7 @@
           [alwaysShow]="true"
           (activeKeysChange)="onPerformanceFilterChange($event)">
         </slice-panel>
-        <chart #performanceChart type="column"
+        <chart #performanceChart [type]="$performanceChartType"
           [config]="$performanceRepartition.chartProvider || {series: []}"
           [data]="$performanceRepartition.data"
           [isLoading]="$performanceRepartition.loading">
@@ -199,7 +199,7 @@
           [alwaysShow]="true"
           (activeKeysChange)="onVolumetryFilterChange($event)">
         </slice-panel>
-        <chart #volumetryChart type="column"
+        <chart #volumetryChart [type]="$volumetryChartType"
           [config]="$volumetryRepartition.chartProvider || {series: []}"
           [data]="$volumetryRepartition.data"
           [isLoading]="$volumetryRepartition.loading">
@@ -242,7 +242,7 @@
           [alwaysShow]="true"
           (activeKeysChange)="onLatencyFilterChange($event)">
         </slice-panel>
-        <chart #latencyChart type="column"
+        <chart #latencyChart [type]="$latencyChartType"
           [config]="$latencyRepartition.chartProvider || {series: []}"
           [data]="$latencyRepartition.data"
           [isLoading]="$latencyRepartition.loading">
