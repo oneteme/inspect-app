@@ -36,6 +36,7 @@
                 </div>
               </div>
               <div class="session-url-row" *ngIf="session.location">
+                <span class="session-type-label">[{{ SESSION_TYPE_LABEL[session.type] || session.type }}]</span>
                 <a class="session-url ellipsis" [href]="session.location" target="_blank"
                    [matTooltip]="session.location">
                   {{ session.location }}
