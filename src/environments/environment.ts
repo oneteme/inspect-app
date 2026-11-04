@@ -12,15 +12,19 @@ export const environment = {
     enabled: false, // default: false
     debugMode: false, // default: false
     // debug: {app: true, user: false},
-    scheduling: {
-      interval: 60000 // default: '60s'
+    application: {
+      name: 'inspect-app',
+      namespace: 'jarvis',
+      version: () => '',
+      env: 'local',
+      user: () => {
+        let claims: any = sessionStorage.getItem("id_token_claims_obj")
+        return (claims && JSON.parse(claims).sub);
+      }
     },
-    name: "inspect-app",
-    version: "1.5.3",
-    env: 'local',
-    user: () => {
-      let claims: any = sessionStorage.getItem("id_token_claims_obj")
-      return (claims && JSON.parse(claims).sub);
+    scheduling: {
+      interval: 60000,
+      queueCapacity: 1000
     },
     monitoring: {
       httpRoute: {
@@ -33,23 +37,18 @@ export const environment = {
           host: [],
         },
       },
-      resources: {
-        enabled: true // default: false
-      },
-      analytics: {
-        enabled: false // default: false
-      },
-      storage: {
-        enabled: false // default: false
-      }
+      resources: { enabled: true },
+      analytics: { enabled: true },
+      logger: { enabled: true },          // Capture console.warn and console.error
+      reporter: { enabled: true },  // Send internal collector reports
+      storage: { enabled: false }
     },
     tracing: {
-      queueCapacity: 1000, // default: 10000
-      delayIfPending: 1, // default: 30
       remote: {
-        mode: 'REST', // default: null
         host: `http://localhost:9001/`, // default: 'localhost'
-        retentionMaxAge: 10 // default: '30'
+        mode: 'cors',
+        token: () => "",
+        retentionMaxAge: { audit: 7, diagnostics: 10 }
       }
     }
   }
