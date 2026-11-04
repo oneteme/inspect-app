@@ -8,7 +8,7 @@ import { MatMenuTrigger } from '@angular/material/menu';
 import { MatDialog } from '@angular/material/dialog';
 import { AboutDialogComponent } from '../about/about-dialog.component';
 import { AddEnvironmentDialogComponent } from '../environment/add-environment-dialog.component';
-import { app, auth } from 'src/environments/environment';
+import {app, auth, environment} from 'src/environments/environment';
 import { Constants } from '../../views/constants';
 import { EnvRouter } from '../../service/router.service';
 import { InstanceService } from '../../service/jquery/instance.service';
@@ -288,4 +288,5 @@ export class NavbarComponent implements OnInit, OnDestroy {
     this.authService.logout();
   }
 
+  protected readonly auth = auth;
 }
