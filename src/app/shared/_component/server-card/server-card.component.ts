@@ -48,7 +48,7 @@ export class ServerCardComponent {
 
 
   navigate(event: MouseEvent) {
-    this._router.navigateOnClick(event, ['/supervision', this._instance.type.toLowerCase(), this._instance.id], {
+    this._router.navigateOnClick(event, ['/supervision/server', this._instance.id], {
       queryParams: this.buildSupervisionQueryParams()
     });
   }
