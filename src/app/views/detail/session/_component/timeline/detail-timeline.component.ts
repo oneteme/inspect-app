@@ -226,20 +226,26 @@ export class DetailTimelineComponent implements OnChanges {
 
     buildActionContent(c: any, label: string): any {
         const conf = this.LEVEL_ICONS[(c.type ?? '').toLowerCase()];
-        if (!conf) return label;
+        const short = label.length > 5 ? label.slice(0, 5) + '…' : label;
+
         const wrapper = document.createElement('span');
         wrapper.style.display = 'inline-flex';
         wrapper.style.alignItems = 'center';
         wrapper.style.gap = '4px';
-        const icon = document.createElement('span');
-        icon.textContent = conf.icon;
-        icon.style.fontFamily = "'Material Symbols Outlined'";
-        icon.style.fontVariationSettings = "'FILL' 1, 'wght' 600";
-        icon.style.fontSize = '20px';
-        icon.style.lineHeight = '1';
-        icon.style.color = conf.color;
-        wrapper.appendChild(icon);
-        wrapper.appendChild(document.createTextNode(label));
+        wrapper.title = label;
+
+        if (conf) {
+            const icon = document.createElement('span');
+            icon.textContent = conf.icon;
+            icon.style.fontFamily = "'Material Symbols Outlined'";
+            icon.style.fontVariationSettings = "'FILL' 1, 'wght' 600";
+            icon.style.fontSize = '20px';
+            icon.style.lineHeight = '1';
+            icon.style.color = conf.color;
+            wrapper.appendChild(icon);
+        }
+
+        wrapper.appendChild(document.createTextNode(short));
         return wrapper;
     }
 
