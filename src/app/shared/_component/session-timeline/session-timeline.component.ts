@@ -25,15 +25,12 @@ export class SessionTimelineComponent implements OnDestroy {
 
     private _events: SessionEvent[] = [];
     private _exceptions: ExceptionInfo[] = [];
-    pageSize = 50;
-    pageIndex = 0;
     displayedItems: TimelineItem[] = [];
     private _items: TimelineItem[] = [];
 
     @Input()
     set events(events: SessionEvent[] | null | undefined) {
         this._events = events ?? [];
-        this.pageIndex = 0;
         this.updateDisplayedItems();
     }
 
@@ -50,18 +47,11 @@ export class SessionTimelineComponent implements OnDestroy {
         } else {
             this._exceptions = [exceptions];
         }
-        this.pageIndex = 0;
         this.updateDisplayedItems();
     }
 
     get exceptions(): ExceptionInfo[] {
         return this._exceptions;
-    }
-
-    onPageChange(event: PageEvent): void {
-        this.pageIndex = event.pageSize === this.pageSize ? event.pageIndex : 0;
-        this.pageSize = event.pageSize;
-        this.updateDisplayedItems();
     }
 
     private updateDisplayedItems(): void {
@@ -80,14 +70,7 @@ export class SessionTimelineComponent implements OnDestroy {
             }
             return firstInstant - secondInstant;
         });
-        const lastPage = Math.max(0, Math.ceil(this._items.length / this.pageSize) - 1);
-        this.pageIndex = Math.max(0, Math.min(this.pageIndex, lastPage));
-        const start = this.pageIndex * this.pageSize;
-        this.displayedItems = this._items.slice(start, start + this.pageSize);
-    }
-
-    get itemCount(): number {
-        return this._items.length;
+        this.displayedItems = this._items;
     }
 
     getItemInstant(item: TimelineItem): number | null {
