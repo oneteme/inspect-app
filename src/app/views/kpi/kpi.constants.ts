@@ -16,7 +16,7 @@ export const STATUS_CHART_PROVIDER_BASE: Partial<ChartProvider<string, number>> 
       axisLine: { show: false },
       axisTick: { show: false },
       splitLine: { lineStyle: { color: '#f1f5f9', type: 'dashed' } },
-      axisLabel: { fontSize: 11, color: '#94a3b8', formatter: (v: number) => v?.toLocaleString('fr-FR') }
+      axisLabel: { fontSize: 11, color: '#94a3b8' }
     },
     tooltip: {
       trigger: 'axis',

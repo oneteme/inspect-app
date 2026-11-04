@@ -4,7 +4,7 @@ import {ChartComponent, selectBestScale} from "@oneteme/jquery-echarts";
 import {QueryParams} from "../../../../model/conf.model";
 import {LdapRequestService} from "../../../../service/jquery/ldap-request.service";
 import {finalize, Observable, of} from "rxjs";
-import {buildSeries,ChartConfig,pivotByStack,LDAP_STATUS_CHART_CONFIG,LDAP_PERFORMANCE_CHART_CONFIG} from "../../kpi.config";
+import {buildFilterSelections, toFilterValues,buildSeries,ChartConfig,pivotByStack,LDAP_STATUS_CHART_CONFIG,LDAP_PERFORMANCE_CHART_CONFIG} from "../../kpi.config";
 import {periodManagement, formatChartDates} from "../../../../shared/util";
 import {ChartProvider, field} from "@oneteme/jquery-core";
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
@@ -28,13 +28,13 @@ export class LdapComponent implements OnInit {
   $statusOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $statusView: 'chart' | 'table' = 'chart';
   $statusSlice: OrganizerSliceState | null = null;
-  $statusFilteredValues: any[] = [];
+  $statusFilterValues: Record<string, string[]> = {};
   $statusDisplayUnit = '';
 
   $performanceRepartition: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = { data: [], loading: true };
   $performanceOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $performanceSlice: OrganizerSliceState | null = null;
-  $performanceFilteredValues: any[] = [];
+  $performanceFilterValues: Record<string, string[]> = {};
   $performanceDisplayUnit = '';
 
   $commandRepartition: { data: any[], loading: boolean } = { data: [], loading: true };
@@ -91,7 +91,7 @@ export class LdapComponent implements OnInit {
   onStatusSliceChange(sliceState: OrganizerSliceState | null): void {
     this.$statusSlice = sliceState;
     if (!sliceState) {
-      this.$statusFilteredValues = [];
+      this.$statusFilterValues = {};
     }
     // Refetch seulement si un filtre a été effectivement sélectionné
     if (sliceState?.filterApplied === true) {
@@ -111,7 +111,7 @@ export class LdapComponent implements OnInit {
   onPerformanceSliceChange(sliceState: OrganizerSliceState | null): void {
     this.$performanceSlice = sliceState;
     if (!sliceState) {
-      this.$performanceFilteredValues = [];
+      this.$performanceFilterValues = {};
     }
     // Refetch seulement si un filtre a été effectivement sélectionné
     if (sliceState?.filterApplied === true) {
@@ -119,17 +119,15 @@ export class LdapComponent implements OnInit {
     }
   }
 
-  onStatusFilterChange(filterFn: (row: any) => boolean): void {
+  onStatusFilterChange(activeKeys: string[][]): void {
     if (!this.$statusSlice) return;
-    const columnKey = this.$statusSlice.sliceConfigs[0]?.columnKey;
-    this.$statusFilteredValues = this.$statusSlice.tasks.filter(filterFn).map(t => t[columnKey]);
+    this.$statusFilterValues = toFilterValues(this.$statusSlice.sliceConfigs, activeKeys);
     this._fetchStatus();
   }
 
-  onPerformanceFilterChange(filterFn: (row: any) => boolean): void {
+  onPerformanceFilterChange(activeKeys: string[][]): void {
     if (!this.$performanceSlice) return;
-    const columnKey = this.$performanceSlice.sliceConfigs[0]?.columnKey;
-    this.$performanceFilteredValues = this.$performanceSlice.tasks.filter(filterFn).map(t => t[columnKey]);
+    this.$performanceFilterValues = toFilterValues(this.$performanceSlice.sliceConfigs, activeKeys);
     this._fetchPerformance();
   }
 
@@ -157,13 +155,12 @@ export class LdapComponent implements OnInit {
     const ind = cfg.indicators.items.find(i => i.selected);
     const grp = cfg.groups.items.find(g => g.selected);
     const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
-    const flt = cfg.filters?.items?.find(f => f.selected);
 
     this.$statusRepartition.loading = true;
     this.$statusRepartition.data = [];
     this._ldapRequestService.getCustom(
-      { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$statusFilteredValues.length ? this.$statusFilteredValues : undefined }
+      { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, selections: buildFilterSelections(cfg, this.$statusFilterValues) }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
@@ -186,12 +183,11 @@ export class LdapComponent implements OnInit {
     const ind = cfg.indicators.items.find(i => i.selected);
     const grp = cfg.groups.items.find(g => g.selected);
     const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
-    const flt = cfg.filters?.items?.find(f => f.selected);
     this.$performanceRepartition.loading = true;
     this.$performanceRepartition.data = [];
     this._ldapRequestService.getCustom(
-      { series: cfg.series.items, indicator: ind, group: grp, stack: stk, filter: flt },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, filters: this.$performanceFilteredValues.length ? this.$performanceFilteredValues : undefined }
+      { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, selections: buildFilterSelections(cfg, this.$performanceFilterValues) }
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;

@@ -1,7 +1,7 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {AnalyticDto, SessionEventDto} from "../model/request.model";
+import {AnalyticDto, MainSessionType, SessionEventDto} from "../model/request.model";
 import {SessionEvent} from "../model/trace.model";
 
 @Injectable({ providedIn: 'root' })
@@ -29,8 +29,11 @@ export class SessionEventService {
     }
 
     getSessionEventTypeCount(params: any): Observable<{count: number, type: string}[]> {
-        return this.http.get<{count: number, type: string}[]>(`${localStorage.getItem('server')}/jquery/session/event/count`, {params: params});
+        return this.http.get<{count: number, type: string}[]>(`${localStorage.getItem('server')}/jquery/session/event`, {params: params});
     }
 
+    getMainSessionType(idSession: string): Observable<MainSessionType> {
+        return this.http.get<MainSessionType>(`${this.server}/session/main/${idSession}`);
+    }
 
 }

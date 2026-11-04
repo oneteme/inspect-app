@@ -3,6 +3,11 @@ import {EnvRouter} from "../../../../service/router.service";
 import {MainSessionView, RestSessionView} from "../../../../model/request.model";
 import {ExceptionInfo, InstanceEnvironment, SessionEvent} from "../../../../model/trace.model";
 import {Constants} from "../../../constants";
+import {RestRequestService} from "../../../../service/jquery/rest-request.service";
+import {DatabaseRequestService} from "../../../../service/jquery/database-request.service";
+import {FtpRequestService} from "../../../../service/jquery/ftp-request.service";
+import {SmtpRequestService} from "../../../../service/jquery/smtp-request.service";
+import {LdapRequestService} from "../../../../service/jquery/ldap-request.service";
 
 export interface TabData {
   label: string;
@@ -22,6 +27,17 @@ export interface TabData {
 })
 export class DetailSessionComponent implements OnChanges {
   private readonly _router: EnvRouter = inject(EnvRouter);
+  private readonly _restRequestService = inject(RestRequestService);
+  private readonly _databaseRequestService = inject(DatabaseRequestService);
+  private readonly _ftpRequestService = inject(FtpRequestService);
+  private readonly _smtpRequestService = inject(SmtpRequestService);
+  private readonly _ldapRequestService = inject(LdapRequestService);
+
+  readonly restLazyLoader = (columns: string[]) => this._restRequestService.getRequestList({'join': 'instance', 'parent.eq': this.session.id}, columns);
+  readonly databaseLazyLoader = (columns: string[]) => this._databaseRequestService.getRequestList({'join': 'instance', 'parent.eq': this.session.id}, columns);
+  readonly ftpLazyLoader = (columns: string[]) => this._ftpRequestService.getRequestList({'join': 'instance', 'parent.eq': this.session.id}, columns);
+  readonly smtpLazyLoader = (columns: string[]) => this._smtpRequestService.getRequestList({'join': 'instance', 'parent.eq': this.session.id}, columns);
+  readonly ldapLazyLoader = (columns: string[]) => this._ldapRequestService.getRequestList({'join': 'instance', 'parent.eq': this.session.id}, columns);
 
   @Input() session: MainSessionView | RestSessionView;
   @Input() completedSession: MainSessionView | RestSessionView;
@@ -187,13 +203,13 @@ export class DetailSessionComponent implements OnChanges {
 
   selectedRemote(event: { event: MouseEvent, row: any }) {
     if (event.row) {
-      this._router.navigateOnClick(event.event, ['/session', 'rest', event.row], { queryParams: { namespace: this.instance.namespace } }); // TODO remove env FIX BUG
+      this._router.navigateOnClick(event.event, ['/session', 'rest', event.row], { queryParams: { namespace: this.instance.namespace } });
     }
   }
 
   selectedRest(event: { event: MouseEvent, row: any }) {
     if (event.row) {
-      this._router.navigateOnClick(event.event, ['/request', 'rest', event.row], {queryParams: {namespace: this.instance.namespace}}); // TODO remove env FIX BUG
+      this._router.navigateOnClick(event.event, ['/request', 'rest', event.row], {queryParams: {namespace: this.instance.namespace}});
     }
   }
 

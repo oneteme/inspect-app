@@ -118,6 +118,7 @@ export interface SessionEvent {
 export interface AbstractSession {
   requestsMask: number;
   instanceId: string;
+  asyncDuration?: number;
 }
 
 export interface AbstractRequest {

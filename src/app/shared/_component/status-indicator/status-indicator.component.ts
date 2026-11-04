@@ -2,6 +2,15 @@ import {Component, EventEmitter, inject, Input, Output} from "@angular/core";
 import {InspectCollectorConfiguration} from "../../../model/trace.model";
 import {DatePipe} from "@angular/common";
 
+export function resolveInstanceStatus(value: {end: number, configuration: InspectCollectorConfiguration, lastTrace: number, date: number}, datePipe: DatePipe): {class: 'online' | 'pending' | 'offline', tooltip: string} {
+  let interval = value.date - (value.configuration?.scheduling.interval + 60 || 60 * 60) * 1000;
+  if(value.end || !value.lastTrace) {
+    return {class: 'offline', tooltip: value.end ? `Instance arrêtée le ${datePipe.transform(new Date(value.end * 1000), 'dd/MM/yyyy à HH:mm:ss.SSS', 'fr')}` : 'Aucune trace remontée'};
+  }
+  const tooltip = `Dernière trace remontée le ${datePipe.transform(new Date(value.lastTrace), 'dd/MM/yyyy à HH:mm:ss.SSS', 'fr')}`;
+  return {class: value.lastTrace < interval ? 'pending' : 'online', tooltip};
+}
+
 @Component({
   selector: 'app-status-indicator',
   template: `
@@ -99,16 +108,8 @@ export class StatusIndicatorComponent {
   }
 
   getStatus(value: {id: string, end: number, configuration: InspectCollectorConfiguration, lastTrace: number, date: number}) {
-    let interval = value.date - (value.configuration?.scheduling.interval + 60 || 60 * 60) * 1000;
-    if(value.end || !value.lastTrace) {
-      this.class = 'offline';
-      this.tooltip = value.end ? `Instance arrêtée le ${this._datePipe.transform(new Date(value.end * 1000), 'dd/MM/yyyy à HH:mm:ss.SSS', 'fr')}` : 'Aucune trace remontée';
-    } else if(value.lastTrace < interval){
-      this.class = 'pending';
-      this.tooltip = `Dernière trace remontée le ${this._datePipe.transform(new Date(value.lastTrace), 'dd/MM/yyyy à HH:mm:ss.SSS', 'fr')}`;
-    } else {
-      this.class = 'online';
-      this.tooltip = `Dernière trace remontée le ${this._datePipe.transform(new Date(value.lastTrace), 'dd/MM/yyyy à HH:mm:ss.SSS', 'fr')}`
-    }
+    const status = resolveInstanceStatus(value, this._datePipe);
+    this.class = status.class;
+    this.tooltip = status.tooltip;
   }
 }

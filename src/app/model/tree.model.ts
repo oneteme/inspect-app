@@ -144,6 +144,8 @@ export class MainServerNode implements Node<Label> {
 
 }
 
+
+
 export class LinkRequestNode implements Link<Label> {
   nodeObject: RestSessionTree
 
@@ -155,19 +157,8 @@ export class LinkRequestNode implements Link<Label> {
     const elapsed  =formatDuration(this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null);
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
-    const isOngoing = this.nodeObject?.end == null;
-    
-    // Extract color from LinkConfig based on status
-    let linkStyle = 'SUCCES'; // default
-    if (isOngoing) linkStyle = 'ONGOING';
-    else if (this.nodeObject.status >= 500 || this.nodeObject.status === 0) linkStyle = 'ERROR';
-    else if (this.nodeObject.status >= 400 && this.nodeObject.status < 500) linkStyle = 'CLIENT_ERROR';
-    
-    // Extract hex color from LinkConfig (format: "strokeColor=#XXXXXX;...")
-    const colorMatch = LinkConfig[linkStyle].match(/#[0-9a-f]{6}/i);
-    const statusColor = colorMatch ? colorMatch[0] : '#22c55e';
-    
-    const statusIcon = isOngoing ? 'schedule' : (this.nodeObject.status < 400 ? 'check_circle' : (this.nodeObject.status < 500 ? 'warning' : 'error'));
+    const statusColor = getStatusDisplay(this.nodeObject, 'color');
+    const statusIcon = getStatusDisplay(this.nodeObject, 'icon');
     return {
       status:   { icon: statusIcon, value: status, color: statusColor },
       elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
@@ -176,13 +167,7 @@ export class LinkRequestNode implements Link<Label> {
     }
   }
   getLinkStyle(): string {
-    if (this.nodeObject.end == null) return 'ONGOING';
-    switch(true){
-      case (this.nodeObject.status >= 200 && this.nodeObject.status < 300): return "SUCCES";
-      case (this.nodeObject.status >= 400 && this.nodeObject.status < 500):  return "CLIENT_ERROR"
-      case (this.nodeObject.status >=500):  return "ERROR";
-      case (this.nodeObject.status == 0):   return "UNREACHABLE"
-    }
+    return getStatusDisplay(this.nodeObject, 'linkStyle');
   }
 
   formatLink(field: Label): string {
@@ -229,11 +214,9 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
   linkInfo(): any {
     const elapsed  = formatDuration(this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null);
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
-    const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
-    const isError   = this.nodeObject.status >= 400;
-    const isOngoing = this.nodeObject?.end == null;
-    const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
-    const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
+    const status = getStatusDisplay(this.nodeObject, 'text');
+    const statusIcon = getStatusDisplay(this.nodeObject, 'icon');
+    const statusColor = getStatusDisplay(this.nodeObject, 'color');
     return {
       status:   { icon: statusIcon, value: status, color: statusColor },
       elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
@@ -243,8 +226,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
    }
 
    getLinkStyle(): string {
-     if (this.nodeObject.end == null) return 'ONGOING';
-     return this.nodeObject.status >= 400 ? 'ERROR' : 'SUCCES'
+     return getStatusDisplay(this.nodeObject, 'linkStyle');
    }
 
   formatLink(field: Label): string {
@@ -256,7 +238,7 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
       case Label.METHOD_RESOURCE: return `${this.nodeObject?.command || '?'} /${this.nodeObject?.schema || '?'}`;
       case Label.SIZE_COMPRESSION: return this.nodeObject?.count < 0 ? '0': this.nodeObject?.count!= undefined? this.nodeObject?.count.toString() : '?';
       case Label.PROTOCOL_SCHEME: return "JDBC/Basic"
-      case Label.STATUS_EXCEPTION: return this.nodeObject.status >= 400 ? 'KO' : 'OK'
+      case Label.STATUS_EXCEPTION: return getStatusDisplay(this.nodeObject, 'text');
       case Label.USER: return `${this.nodeObject.user || '?'}`;
       default: return '?';
     }
@@ -275,10 +257,8 @@ export class JdbcRequestNode implements Node<Label>, Link<Label> {
     const elapsed  = formatDuration(this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null);
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
-    const isError   = this.nodeObject.status >= 400;
-    const isOngoing = this.nodeObject?.end == null;
-    const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
-    const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
+    const statusColor = getStatusDisplay(this.nodeObject, 'color');
+    const statusIcon = getStatusDisplay(this.nodeObject, 'icon');
 
     return {
       status:   { icon: statusIcon, value: status, color: statusColor },
@@ -338,10 +318,8 @@ export class MailRequestNode implements Node<Label>, Link<Label> {
     const elapsed  = formatDuration(this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null);
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
-    const isError   = this.nodeObject.status >= 400;
-    const isOngoing = this.nodeObject?.end == null;
-    const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
-    const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
+    const statusColor = getStatusDisplay(this.nodeObject, 'color');
+    const statusIcon = getStatusDisplay(this.nodeObject, 'icon');
      return {
        status:   { icon: statusIcon, value: status, color: statusColor },
        elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
@@ -397,10 +375,8 @@ export class LdapRequestNode implements Node<Label>, Link<Label> {
     const elapsed  = formatDuration(this.nodeObject.end != null ? (this.nodeObject.end - this.nodeObject.start) || null : null);
     const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
     const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
-    const isError   = this.nodeObject.status >= 400;
-    const isOngoing = this.nodeObject?.end == null;
-    const statusColor = isError ? '#ef4444' :  isOngoing ? '#f59e0b' : '#22c55e';
-    const statusIcon  = isError ? 'error' : isOngoing ? 'schedule' : 'check_circle';
+    const statusColor = getStatusDisplay(this.nodeObject, 'color');
+    const statusIcon = getStatusDisplay(this.nodeObject, 'icon');
      return {
        status:   { icon: statusIcon, value: status, color: statusColor },
        elapsed:  { icon: 'timer', value: elapsed, color: '#8b5cf6' },
@@ -465,19 +441,8 @@ export class RestRequestNode implements Node<Label>, Link<Label> {
       const elapsed  =  elapsedLatence(this.nodeObject);
       const resource = this.formatLink?.(Label.METHOD_RESOURCE)  ?? '?';
       const status   = this.formatLink?.(Label.STATUS_EXCEPTION) ?? '?';
-      const isOngoing = this.nodeObject?.end == null;
-      
-      // Extract color from LinkConfig based on status
-      let linkStyle = 'SUCCES'; // default
-      if (isOngoing) linkStyle = 'ONGOING';
-      else if (this.nodeObject.status >= 500 || this.nodeObject.status === 0) linkStyle = 'ERROR';
-      else if (this.nodeObject.status >= 400 && this.nodeObject.status < 500) linkStyle = 'CLIENT_ERROR';
-      
-      // Extract hex color from LinkConfig (format: "strokeColor=#XXXXXX;...")
-      const colorMatch = LinkConfig[linkStyle].match(/#[0-9a-f]{6}/i);
-      const statusColor = colorMatch ? colorMatch[0] : '#22c55e';
-      
-      const statusIcon = isOngoing ? 'schedule' : (this.nodeObject.status < 400 ? 'check_circle' : (this.nodeObject.status < 500 ? 'warning' : 'error'));
+      const statusColor = getStatusDisplay(this.nodeObject, 'color');
+      const statusIcon = getStatusDisplay(this.nodeObject, 'icon');
       
       return {
         status:   { icon: statusIcon, value: status, color: statusColor },
@@ -513,28 +478,11 @@ export class RestRequestNode implements Node<Label>, Link<Label> {
   }
 
   getLinkStyle(): string {
-    if (this.nodeObject.end == null) return 'ONGOING';
-    switch(true){
-      case (this.nodeObject.status >= 200 && this.nodeObject.status < 300): return "SUCCES";
-      case (this.nodeObject.status >= 400 && this.nodeObject.status < 500):  return "CLIENT_ERROR"
-      case (this.nodeObject.status >=500):  return "ERROR";
-      case (this.nodeObject.status == 0):   return "UNREACHABLE"
-    }
+    return getStatusDisplay(this.nodeObject, 'linkStyle');
   }
 }
 
-export enum Label {
-  SERVER_IDENTITY = "SERVER_IDENTITY",
-  OS_RE = "OS_RE",
-  IP_PORT = "IP_PORT",
-  BRANCH_COMMIT = "BRANCH_COMMIT",
-  ELAPSED_LATENSE = "ELAPSED_LATENSE",
-  METHOD_RESOURCE = "METHOD_RESOURCE",
-  SIZE_COMPRESSION = "SIZE_COMPRESSION",
-  PROTOCOL_SCHEME = "PROTOCOL_SCHEME",
-  STATUS_EXCEPTION = "STATUS_EXCEPTION",
-  USER = "USER"
-}
+
 
 function elapsedLatence<T extends { end: number, start: number, remoteTrace?: { end: number, start: number } }>(nodeObject: T): string {
   const e1 = nodeObject.end - nodeObject.start;
@@ -1033,12 +981,21 @@ export const ServerConfig = {
   BATCH: { icon: "shape=image;image=assets/mxgraph/batch.drawio.svg;", width: 30, height: 30 },
 }
 
+
+const STATUS_COLORS = {
+  SUCCES: '#22c55e',
+  CLIENT_ERROR: '#f9ad4e',
+  ERROR: '#ef4444',
+  UNREACHABLE: '#64748b',
+  ONGOING: '#3b82f6'
+} as const;
+
 export const LinkConfig = {
-  SUCCES:       "strokeColor=#22c55e;",
-  CLIENT_ERROR: "strokeColor=#f9ad4e;",
-  ERROR:        "strokeColor=#ef4444;",
-  UNREACHABLE:  "strokeColor=#ef4444;",
-  ONGOING:      "strokeColor=#3b82f6;dashed=1;ongoing=1;"
+  SUCCES: `strokeColor=${STATUS_COLORS.SUCCES};`,
+  CLIENT_ERROR: `strokeColor=${STATUS_COLORS.CLIENT_ERROR};`,
+  ERROR: `strokeColor=${STATUS_COLORS.ERROR};`,
+  UNREACHABLE: `strokeColor=${STATUS_COLORS.UNREACHABLE};`,
+  ONGOING: `strokeColor=${STATUS_COLORS.ONGOING};dashed=1;ongoing=1;`
 }
 
 export const resourceConfig = {
@@ -1049,5 +1006,36 @@ export const resourceConfig = {
   'SETUP': { icon: 'settings', color: '#64748b' },
   'SCRIPT': { icon: 'code', color: '#06b6d4' },
   'EMIT': { icon: 'arrow_upward', color: '#06b6d4' }
+}
+
+type StatusProperty = 'text' | 'icon' | 'color' | 'linkStyle';
+
+const STATUS_DISPLAY: Record<string, Record<StatusProperty, string>> = {
+  ongoing: {text: 'En cours', icon: 'schedule', color: STATUS_COLORS.ONGOING, linkStyle: 'ONGOING'},
+  '500': {text: "Erreur d'interface", icon: 'error', color: STATUS_COLORS.ERROR, linkStyle: 'ERROR'},
+  '400': {text: 'Erreur applicative', icon: 'warning', color: STATUS_COLORS.CLIENT_ERROR, linkStyle: 'CLIENT_ERROR'},
+  '200': {text: 'Succès', icon: 'check_circle', color: STATUS_COLORS.SUCCES, linkStyle: 'SUCCES'},
+  '0': {text: 'Erreur de connexion', icon: 'error', color: STATUS_COLORS.UNREACHABLE, linkStyle: 'UNREACHABLE'}
+};
+
+function getStatusDisplay(node: {end: number | null; status: number}, property: StatusProperty): string {
+  if (node.end == null) return STATUS_DISPLAY.ongoing[property];
+  if (node.status >= 500) return STATUS_DISPLAY['500'][property];
+  if (node.status >= 400) return STATUS_DISPLAY['400'][property];
+  if (node.status >= 200 && node.status < 400) return STATUS_DISPLAY['200'][property];
+  return STATUS_DISPLAY['0'][property];
+}
+
+export enum Label {
+  SERVER_IDENTITY = "SERVER_IDENTITY",
+  OS_RE = "OS_RE",
+  IP_PORT = "IP_PORT",
+  BRANCH_COMMIT = "BRANCH_COMMIT",
+  ELAPSED_LATENSE = "ELAPSED_LATENSE",
+  METHOD_RESOURCE = "METHOD_RESOURCE",
+  SIZE_COMPRESSION = "SIZE_COMPRESSION",
+  PROTOCOL_SCHEME = "PROTOCOL_SCHEME",
+  STATUS_EXCEPTION = "STATUS_EXCEPTION",
+  USER = "USER"
 }
 

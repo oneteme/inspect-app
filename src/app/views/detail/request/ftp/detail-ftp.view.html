@@ -8,19 +8,29 @@
 
         <div class="session-header">
           <div class="session-title-row">
-            <div class="session-icon-wrap">
-              <mat-icon class="material-symbols-outlined session-icon">{{ REQUEST_TYPE['ftp'].icon }}</mat-icon>
-            </div>
+            <span class="status-badge"
+                  *ngIf="STATUS[request.end ? request.status.toString().charAt(0) + 'xx' : '-1'] as st"
+                  [class.pulse]="!request.end"
+                  [style.color]="st.color"
+                  [style.background-color]="st.color + '1a'">{{ st.label }}</span>
             <div class="session-title-content">
               <div class="session-name-row">
-                <span class="status-pill"
-                      [ngClass]="STATUS[request.end ? request.status.toString().charAt(0) + 'xx' : '-1']?.class">
-                  {{ request.end ? STATUS[request.status.toString().charAt(0) + 'xx']?.label : STATUS['-1']?.label }}
+                <span class="stat-item session-duration">
+                  <mat-icon class="material-symbols-outlined stat-icon">timer</mat-icon>
+                  <span class="stat-value stat-duration"
+                        [matTooltip]="((request.end * 1000) | date: 'dd/MM/yyyy HH:mm:ss.SSS')">
+                    {{ { start: request.start, end: request.end } | duration }}
+                  </span>
                 </span>
+                <div class="meta-chip header-date date-compact">
+                  <mat-icon class="material-symbols-outlined meta-icon">schedule</mat-icon>
+                  <span class="date-day">{{ (request.start * 1000) | date: 'dd/MM/yyyy' }}&nbsp;</span>
+                  <span class="date-time">{{ (request.start * 1000) | date: 'HH:mm:ss.SSS' }}</span>
+                </div>
               </div>
               <div class="session-url-row">
                 <span class="method-badge">{{ request.command || 'N/A' }}</span>
-                <span class="session-name ellipsis"
+                <span class="session-target ellipsis"
                       [matTooltip]="request.protocol + '://' + (request.host || 'N/A') + (request.port == -1 ? '' : ':' + request.port)">
                   {{ request.protocol + '://' + (request.host || 'N/A') + (request.port == -1 ? '' : ':' + request.port) }}
                 </span>
@@ -37,19 +47,6 @@
             <div class="meta-chip">
               <mat-icon class="material-symbols-outlined meta-icon">person</mat-icon>
               <span>{{ request.user || 'N/A' }}</span>
-            </div>
-            <div class="meta-chip">
-              <mat-icon class="material-symbols-outlined meta-icon">schedule</mat-icon>
-              <span>{{ (request.start * 1000) | date: 'dd/MM/yyyy HH:mm:ss.SSS' }}</span>
-            </div>
-          </div>
-          <div class="footer-section data-stats">
-            <div class="stat-item">
-              <mat-icon class="material-symbols-outlined stat-icon">timer</mat-icon>
-              <span class="stat-value stat-duration"
-                    [matTooltip]="((request.end * 1000) | date: 'dd/MM/yyyy HH:mm:ss.SSS')">
-                {{ { start: request.start, end: request.end } | duration }}
-              </span>
             </div>
           </div>
         </div>
@@ -110,12 +107,12 @@
   </app-empty-state>
 </ng-template>
 
-<mat-menu #menuHost="matMenu">
+<mat-menu #menuHost="matMenu" class="card-menu">
     <div mat-menu-item (click)="navigate($event,'parent')" [disabled]="sessionParent == null"><mat-icon class="material-symbols-outlined">move_up</mat-icon>Contexte de l'Appel</div>
     <a mat-menu-item (click)="navigateOnKpi($event)"><mat-icon class="material-symbols-outlined">finance_mode</mat-icon>KPI</a>
 </mat-menu>
 
-<mat-menu #menuServer="matMenu">
+<mat-menu #menuServer="matMenu" class="card-menu">
   <a mat-menu-item (click)="onClickPulse()"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
 </mat-menu>
 

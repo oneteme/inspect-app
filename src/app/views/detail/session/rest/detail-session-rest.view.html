@@ -11,19 +11,36 @@
         <!-- En-tête -->
         <div class="session-header">
           <div class="session-title-row">
-            <div class="session-icon-wrap">
-              <mat-icon class="material-symbols-outlined session-icon">call_received</mat-icon>
-            </div>
-
+            <span class="status-badge"
+                  *ngIf="STATUS[session.end ? session.status.toString().charAt(0) + 'xx' : '-1'] as st"
+                  [class.pulse]="!session.end"
+                  [class.with-code]="session.end"
+                  [style.color]="st.color"
+                  [style.background-color]="st.color + '1a'">
+              <span class="status-code" *ngIf="session.end">{{ session.status }}</span>
+              <span class="status-label">{{ st.label }}</span>
+            </span>
             <div class="session-title-content">
               <div class="session-name-row">
-                <span class="status-pill"
-                      [ngClass]="STATUS[session.end ? session.status.toString().charAt(0) + 'xx' : '-1']?.class">
-                  {{ session.end ? session.status + ' - ' + STATUS[session.status.toString().charAt(0) + 'xx']?.label : STATUS['-1']?.label }}
+                <span class="stat-item session-duration"
+                      [class.online]="!session.end"
+                      [matTooltip]="session.end && session.asyncDuration != null && session.asyncDuration >= 0
+                        ? 'Temps de réponse : ' + ({ start: session.start, end: session.end } | duration) + ' · Traitement différé : ' + (session.asyncDuration / 1000 | duration)
+                        : (session.end ? '' : 'En cours')">
+                  <mat-icon class="material-symbols-outlined stat-icon">{{ session.end && session.asyncDuration != null && session.asyncDuration >= 0 ? 'time_auto' : 'timer' }}</mat-icon>
+                  <span class="stat-value stat-duration" *ngIf="session.end"
+                        [matTooltip]="session.end && session.asyncDuration != null && session.asyncDuration >= 0 ? '' : ((session.end * 1000) | date: 'dd/MM/yyyy HH:mm:ss.SSS')">
+                    {{ { start: session.start, end: session.end } | duration }}
+                  </span>
                 </span>
                 <span class="session-name ellipsis" [matTooltip]="session.name">
                   {{ session.name || 'N/A' }}
                 </span>
+                <div class="meta-chip header-date date-compact">
+                  <mat-icon class="material-symbols-outlined meta-icon">schedule</mat-icon>
+                  <span class="date-day">{{ (session.start * 1000) | date: 'dd/MM/yyyy' }}&nbsp;</span>
+                  <span class="date-time">{{ (session.start * 1000) | date: 'HH:mm:ss.SSS' }}</span>
+                </div>
               </div>
 
               <div class="session-url-row">
@@ -49,15 +66,11 @@
         <!-- Pied de carte -->
         <div class="session-footer">
 
-          <!-- Utilisateur & date -->
+          <!-- Utilisateur -->
           <div class="footer-section">
             <div class="meta-chip">
               <mat-icon class="material-symbols-outlined meta-icon">person</mat-icon>
               <span>{{ session.user || 'N/A' }}</span>
-            </div>
-            <div class="meta-chip">
-              <mat-icon class="material-symbols-outlined meta-icon">schedule</mat-icon>
-              <span>{{ (session.start * 1000) | date: 'dd/MM/yyyy HH:mm:ss.SSS' }}</span>
             </div>
           </div>
 
@@ -71,7 +84,7 @@
             <div class="meta-icon-btn"
                  [class.disabled]="!session.contentType"
                  [matTooltip]="session.contentType || 'Content-Type indisponible'">
-              <mat-icon class="material-symbols-outlined">
+              <mat-icon class="material-symbols-outlined content-type-icon">
                   {{ getContentTypeIcon(session.contentType) }}
               </mat-icon>
             </div>
@@ -87,7 +100,7 @@
             </div>
           </div>
 
-          <!-- Volume & durée -->
+          <!-- Volume -->
           <div class="footer-section data-stats">
             <div class="stat-item" [matTooltip]="session.inDataSize + 'o Envoyés'">
               <mat-icon class="material-symbols-outlined stat-icon">arrow_upward</mat-icon>
@@ -96,13 +109,6 @@
             <div class="stat-item" [matTooltip]="session.outDataSize + 'o Reçus'">
               <mat-icon class="material-symbols-outlined stat-icon">arrow_downward</mat-icon>
               <span class="stat-value">{{ session.outDataSize || 0 }}o</span>
-            </div>
-            <div class="stat-item">
-              <mat-icon class="material-symbols-outlined stat-icon">timer</mat-icon>
-              <span class="stat-value stat-duration"
-                    [matTooltip]="((session.end * 1000) | date: 'dd/MM/yyyy HH:mm:ss.SSS')">
-                {{ { start: session.start, end: session.end } | duration }}
-              </span>
             </div>
           </div>
 
@@ -128,7 +134,7 @@
   </app-empty-state>
 </ng-template>
 
-<mat-menu #menuEndPoint="matMenu" xPosition="after">
+<mat-menu #menuEndPoint="matMenu" xPosition="after" class="card-menu">
   <a mat-menu-item [disabled]="sessionParent == null" [ngStyle]="{'pointer-events': sessionParent == null ? 'none' : ''}" [routerLink]="sessionParent?.type == 'rest' ? ['/session', 'rest', sessionParent?.id] : ['/session', sessionParent?.type.toLowerCase(), sessionParent?.id]" [queryParams]="{namespace: instance?.namespace}">
     <div style="display: flex;">
       <mat-progress-spinner *ngIf="parentLoading"  style="margin-right: 16px" diameter="24" mode="indeterminate"
@@ -148,7 +154,7 @@
   </a>
 </mat-menu>
 
-<mat-menu #menuServer="matMenu">
+<mat-menu #menuServer="matMenu" class="card-menu">
   <a mat-menu-item (click)="onClickPulse()"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
 </mat-menu>
 

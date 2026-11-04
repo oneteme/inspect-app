@@ -231,8 +231,8 @@
 
       <button class="env-trigger" [matMenuTriggerFor]="envMenu" [ngClass]="'env-' + getEnvClass(namespace.value)" matTooltip="Changer l'environnement"
               [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
-              data-inspect-scope="Afficher les environnements disponibles"
-              data-inspect-track="Ouvrir le menu des environnements">
+              data-inspect-scope="Afficher les namespaces disponibles"
+              data-inspect-track="Ouvrir le menu des namespaces">
         <span class="env-letter">{{ namespace.value?.charAt(0) | uppercase }}</span>
         <span class="env-label">{{ namespace.value | uppercase }}</span>
         <mat-icon>expand_more</mat-icon>
@@ -242,15 +242,15 @@
       <mat-menu #envMenu="matMenu" class="env-menu-panel">
         <button mat-menu-item *ngFor="let e of namespaces" (click)="selectNamespace(e)"
                 [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
-                [attr.data-inspect-scope]="'Afficher les données de la page pour l’environnement ' + e"
-                [attr.data-inspect-track]="'Sélectionner l’environnement ' + e">
+                [attr.data-inspect-scope]="'Afficher les données de la page pour le namespace ' + e"
+                [attr.data-inspect-track]="'Sélectionner le namespace ' + e">
           <mat-icon [style.visibility]="namespace.value === e ? 'visible' : 'hidden'">check</mat-icon>
           <span>{{ e | uppercase }}</span>
         </button>
-        <button mat-menu-item (click)="openAddNamespaceDialog()"
+        <button mat-menu-item (click)="openAddNamespaceDialog()" *ngIf="auth.enabled"
                 [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
-                data-inspect-scope="Ouvrir le formulaire d’ajout d’un environnement"
-                data-inspect-track="Ajouter un environnement">
+                data-inspect-scope="Ouvrir le formulaire d’ajout d’un namespace"
+                data-inspect-track="Ajouter un namespace">
           <mat-icon class="material-symbols-outlined">add</mat-icon>
           <span>Ajouter</span>
         </button>
@@ -277,10 +277,10 @@
         <button mat-menu-item
                 [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
                 data-inspect-scope="Consulter les traitements, les pertes de séquences et les rapports du serveur"
-                data-inspect-track="Ouvrir la supervision du serveur"
+                data-inspect-track="Ouvrir le diagnostic du serveur"
                 (click)="openServerActivity($event)">
           <mat-icon class="material-symbols-outlined">admin_panel_settings</mat-icon>
-          <span>Supervision du serveur</span>
+          <span>Diagnostic du serveur</span>
         </button>
         <button mat-menu-item class="logout-item" (click)="logout()"
                 [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"

@@ -76,7 +76,7 @@
           [data]="$statusSlice!.tasks"
           [showCounts]="false"
           [alwaysShow]="true"
-          (filterChange)="onStatusFilterChange($event)">
+          (activeKeysChange)="onStatusFilterChange($event)">
         </slice-panel>
         <chart #statusChart
           type="column"
@@ -137,7 +137,7 @@
           [data]="$performanceSlice!.tasks"
           [showCounts]="false"
           [alwaysShow]="true"
-          (filterChange)="onPerformanceFilterChange($event)">
+          (activeKeysChange)="onPerformanceFilterChange($event)">
         </slice-panel>
         <chart #performanceChart type="column"
           [config]="$performanceRepartition.chartProvider || {series: []}"
@@ -197,7 +197,7 @@
           [data]="$volumetrySlice!.tasks"
           [showCounts]="false"
           [alwaysShow]="true"
-          (filterChange)="onVolumetryFilterChange($event)">
+          (activeKeysChange)="onVolumetryFilterChange($event)">
         </slice-panel>
         <chart #volumetryChart type="column"
           [config]="$volumetryRepartition.chartProvider || {series: []}"
@@ -240,7 +240,7 @@
           [data]="$latencySlice!.tasks"
           [showCounts]="false"
           [alwaysShow]="true"
-          (filterChange)="onLatencyFilterChange($event)">
+          (activeKeysChange)="onLatencyFilterChange($event)">
         </slice-panel>
         <chart #latencyChart type="column"
           [config]="$latencyRepartition.chartProvider || {series: []}"

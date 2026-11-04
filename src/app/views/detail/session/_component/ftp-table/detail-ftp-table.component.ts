@@ -29,6 +29,10 @@ export class DetailFtpTableComponent {
   }
 
   @Input() isLoading: boolean;
+
+  @Input() set lazyLoader(loader: TableProvider<FtpRequestDto>['lazyLoader']) {
+    this.tableConfig = {...this.tableConfig, lazyLoader: loader};
+  }
   @Input() set initialSearch(value: string) {
     this.tableConfig = {
       ...this.tableConfig,

@@ -4,7 +4,7 @@ import {Location} from '@angular/common';
 import {ActivatedRoute, Params} from '@angular/router';
 import {finalize, Subject, takeUntil} from 'rxjs';
 import {extractPeriod} from '../../../../shared/util';
-import {TraceService} from '../../../../service/trace.service';
+import {RestSessionService} from '../../../../service/jquery/rest-session.service';
 import {app} from '../../../../../environments/environment';
 import {Constants, STATUS} from '../../../constants';
 import {EnvRouter} from '../../../../service/router.service';
@@ -43,7 +43,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   private readonly _router = inject(EnvRouter);
   private readonly _instanceService = inject(InstanceService);
   private readonly _pageTitleService = inject(PageTitleService);
-  private readonly _traceService = inject(TraceService);
+  private readonly _restSessionService = inject(RestSessionService);
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _location = inject(Location);
   private readonly $destroy = new Subject<void>();
@@ -74,9 +74,12 @@ export class SearchRestView implements OnInit, OnDestroy {
 
   tableConfig: TableProvider<RestSessionDto> = {
     ...REST_SESSION_TABLE_CONFIG,
-    onRowSelected: (row, event) => this.selectedRequest(event, row)
+    onRowSelected: (row, event) => this.selectedRequest(event, row),
+    lazyLoader: columns => this._restSessionService.getRestSessionList(this._criteria, columns)
   };
   sessions: RestSessionDto[];
+  /** Critères de la requête de base, rejoués avec les colonnes lazy. */
+  private _criteria: Record<string, any> = {};
 
   constructor() {
     this._activatedRoute.queryParams.subscribe({
@@ -172,8 +175,9 @@ export class SearchRestView implements OnInit, OnDestroy {
 
   getIncomingRequest(): void {
     this.$destroy.next();
-    const params: any = {
-      'namespace': this.queryParams.namespace,
+    this._criteria = {
+      'instance.namespace': this.queryParams.namespace,
+      'join': 'instance',
       'instance.app_name': this.queryParams.appname,
       'status.origin': this.queryParams.rangestatus,
       'start.ge': this.queryParams.period.start.toISOString(),
@@ -182,7 +186,7 @@ export class SearchRestView implements OnInit, OnDestroy {
 
     this.isLoading = true;
     this.sessions = [];
-    this._traceService.getRestSessions(params)
+    this._restSessionService.getRestSessionList(this._criteria)
       .pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false))
       .subscribe({
         next: d => {

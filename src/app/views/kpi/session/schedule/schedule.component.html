@@ -94,7 +94,7 @@
           [data]="$statusSlice!.tasks"
           [showCounts]="false"
           [alwaysShow]="true"
-          (filterChange)="onStatusFilterChange($event)">
+          (activeKeysChange)="onStatusFilterChange($event)">
         </slice-panel>
         <chart #statusChart
           type="column"
@@ -145,7 +145,7 @@
           [data]="$performanceSlice!.tasks"
           [showCounts]="false"
           [alwaysShow]="true"
-          (filterChange)="onPerformanceFilterChange($event)">
+          (activeKeysChange)="onPerformanceFilterChange($event)">
         </slice-panel>
         <chart #performanceChart
           type="column"

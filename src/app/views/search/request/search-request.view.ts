@@ -4,7 +4,7 @@ import {MatPaginator} from '@angular/material/paginator';
 import {MatSort} from '@angular/material/sort'
 import {Location} from '@angular/common';
 import {ActivatedRoute, Params} from '@angular/router';
-import {combineLatest, finalize, Subscription} from 'rxjs';
+import {combineLatest, finalize, Observable, Subscription} from 'rxjs';
 import {extractPeriod} from 'src/app/shared/util';
 import {app} from 'src/environments/environment';
 import {Constants, STATUS} from '../../constants';
@@ -71,6 +71,8 @@ export class SearchRequestView implements OnInit, OnDestroy {
   subscriptions: Subscription[] = [];
   hostSubscription: Subscription;
   RequestSubscription: Subscription;
+  /** Critères de la requête de base, rejoués avec les colonnes lazy. */
+  private _criteria: Record<string, any> = {};
   seviceType: { [key: string]: {service : RestRequestService | DatabaseRequestService | FtpRequestService | SmtpRequestService | LdapRequestService,
                                 filters: {icon: string, label: string,color: string, value: any}[] } } =
       {
@@ -199,13 +201,15 @@ export class SearchRequestView implements OnInit, OnDestroy {
     this.requests = null;
     this.emptyLabel = null;
     this.isLoading = true;
-    this.RequestSubscription = (<any>this.seviceType[this.params.type]).service.getRequests({
-      'namespace': this.queryParams.namespace,
-      'host': this.queryParams.hosts,
+    this._criteria = {
+      'join': 'instance',
+      'instance.namespace': this.queryParams.namespace,
+      ...(this.queryParams.hosts?.length ? { 'host.in': this.queryParams.hosts.join(',') } : {}),
       'status.origin': this.queryParams.rangestatus,
       'start.ge': this.queryParams.period.start.toISOString(),
       'start.lt': this.queryParams.period.end.toISOString()
-    })
+    };
+    this.RequestSubscription = (this.seviceType[this.params.type].service.getRequestList(this._criteria) as Observable<any[]>)
       .pipe(finalize(()=> this.isLoading = false))
       .subscribe({
         next: (d: any) => {
@@ -220,6 +224,8 @@ export class SearchRequestView implements OnInit, OnDestroy {
         }
       });
   }
+
+  lazyLoader = (columns: string[]) => this.seviceType[this.params.type].service.getRequestList(this._criteria, columns);
 
   patchDateValue(start: Date, end: Date) {
     this.requestFilterForm.patchValue({

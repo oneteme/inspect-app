@@ -10,18 +10,32 @@
         <!-- En-tête -->
         <div class="session-header">
           <div class="session-title-row">
-            <div class="session-icon-wrap">
-              <mat-icon class="material-symbols-outlined session-icon">{{ MAPPING_TYPE[type]?.icon }}</mat-icon>
-            </div>
+            <span class="status-badge"
+                  *ngIf="STATUS[session.end ? session.status.toString().charAt(0) + 'xx' : '-1'] as st"
+                  [class.pulse]="!session.end"
+                  [style.color]="st.color"
+                  [style.background-color]="st.color + '1a'">{{ st.label }}</span>
             <div class="session-title-content">
               <div class="session-name-row">
-                <span class="status-pill"
-                      [ngClass]="STATUS[session.end ? session.status.toString().charAt(0) + 'xx' : '-1']?.class">
-                  {{ STATUS[session.end ? session.status.toString().charAt(0) + 'xx' : '-1']?.label }}
+                <span class="stat-item session-duration"
+                      [class.online]="!session.end"
+                      [matTooltip]="session.end && session.asyncDuration != null && session.asyncDuration >= 0
+                        ? 'Temps de réponse : ' + ({ start: session.start, end: session.end } | duration) + ' · Traitement différé : ' + (session.asyncDuration / 1000 | duration)
+                        : (session.end ? '' : 'En cours')">
+                  <mat-icon class="material-symbols-outlined stat-icon">{{ session.end && session.asyncDuration != null && session.asyncDuration >= 0 ? 'time_auto' : 'timer' }}</mat-icon>
+                  <span class="stat-value stat-duration" *ngIf="session.end"
+                        [matTooltip]="session.end && session.asyncDuration != null && session.asyncDuration >= 0 ? '' : ((session.end * 1000) | date: 'dd/MM/yyyy HH:mm:ss.SSS')">
+                    {{ { start: session.start, end: session.end } | duration }}
+                  </span>
                 </span>
                 <span class="session-name ellipsis" [matTooltip]="session.name">
                   {{ session.name || 'N/A' }}
                 </span>
+                <div class="meta-chip header-date date-compact">
+                  <mat-icon class="material-symbols-outlined meta-icon">schedule</mat-icon>
+                  <span class="date-day">{{ (session.start * 1000) | date: 'dd/MM/yyyy' }}&nbsp;</span>
+                  <span class="date-time">{{ (session.start * 1000) | date: 'HH:mm:ss.SSS' }}</span>
+                </div>
               </div>
               <div class="session-url-row" *ngIf="session.location">
                 <a class="session-url ellipsis" [href]="session.location" target="_blank"
@@ -46,19 +60,6 @@
             <div class="meta-chip">
               <mat-icon class="material-symbols-outlined meta-icon">person</mat-icon>
               <span>{{ session.user || 'N/A' }}</span>
-            </div>
-            <div class="meta-chip">
-              <mat-icon class="material-symbols-outlined meta-icon">schedule</mat-icon>
-              <span>{{ (session.start * 1000) | date: 'dd/MM/yyyy HH:mm:ss.SSS' }}</span>
-            </div>
-          </div>
-          <div class="footer-section data-stats">
-            <div class="stat-item">
-              <mat-icon class="material-symbols-outlined stat-icon">timer</mat-icon>
-              <span class="stat-value stat-duration"
-                    [matTooltip]="((session.end * 1000) | date: 'dd/MM/yyyy HH:mm:ss.SSS')">
-                {{ { start: session.start, end: session.end } | duration }}
-              </span>
             </div>
           </div>
         </div>
@@ -87,7 +88,7 @@
 </ng-template>
 
 
-<mat-menu #menuEndPoint="matMenu" xPosition="after">
+<mat-menu #menuEndPoint="matMenu" xPosition="after" class="card-menu">
   <a mat-menu-item [routerLink]="['/session', session?.type?.toLowerCase(), session?.id, 'tree']" [queryParams]="{namespace: instance?.namespace}">
     <mat-icon class="material-symbols-outlined">lan</mat-icon>Arbre d'appels
   </a>
@@ -103,6 +104,6 @@
   </a>
 </mat-menu>
 
-<mat-menu #menuServer="matMenu">
+<mat-menu #menuServer="matMenu" class="card-menu">
   <a mat-menu-item (click)="onClickPulse()"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
 </mat-menu>
