@@ -15,12 +15,13 @@
           <div class="server-name-row">
             <span class="stat-item session-duration instance-status"
                   [ngClass]="_status?.class"
-                  [matTooltip]="_status ? (_instance.end ? '' : 'En cours · ') + _status.tooltip : ''"
+                  [matTooltip]="_status ? _status.tooltip : ''"
                   (click)="navigate($event)">
               <mat-icon class="material-symbols-outlined stat-icon">timer</mat-icon>
               <span class="stat-value stat-duration" *ngIf="_instance.end">
                 {{ { start: _instance.instant, end: _instance.end } | duration }}
               </span>
+              <span class="stat-state" *ngIf="!_instance.end">En cours</span>
             </span>
             <span class="server-name" (click)="navigateOnServerClick($event)">
               {{ _instance.name }}
