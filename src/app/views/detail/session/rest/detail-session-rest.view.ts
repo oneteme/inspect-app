@@ -70,7 +70,6 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
                             return merge(
                                 this._traceService.getInstance(this.session.instanceId).pipe(map(d=>(this.instance=d))),
                                 this.loadSessionExceptions(this.session),
-                                this.loadSessionEvents(this.session),
                                 this._traceService.getRestSessionStages(this.session.id).pipe(map(d=>(this.session.httpSessionStages=d))),
                                 this.session.linked ? defer(() => { this.parentLoading = true; return this._traceService.getSessionParent(RequestType.REST, this.session.id).pipe(catchError(() => of(null)), finalize(()=>(this.parentLoading = false)), map(d => this.sessionParent = d))}) : of(),
                                 (this.session.requestsMask & 4) > 0 ? defer(()=> {this.session.restRequests = []; return this._traceService.getRestRequests(this.session.id).pipe(map(d=>(this.session.restRequests=d)))}) : of(),
@@ -78,7 +77,8 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
                                 (this.session.requestsMask & 1) > 0 ? defer(()=> {this.session.localRequests = []; return this._traceService.getLocalRequests(this.session.id).pipe(map(d=>(this.session.localRequests=d)))}) : of(),
                                 (this.session.requestsMask & 8) > 0 ? defer(()=> {this.session.ftpRequests = []; return this._traceService.getFtpRequests(this.session.id).pipe(map(d=>(this.session.ftpRequests=d)))}) : of(),
                                 (this.session.requestsMask & 16) > 0 ? defer(()=> {this.session.mailRequests = []; return this._traceService.getSmtpRequests(this.session.id).pipe(map(d=>(this.session.mailRequests=d)))}) : of(),
-                                (this.session.requestsMask & 32) > 0 ? defer(()=> {this.session.ldapRequests = []; return this._traceService.getLdapRequests(this.session.id).pipe(map(d=>(this.session.ldapRequests=d)))}) : of()
+                                (this.session.requestsMask & 32) > 0 ? defer(()=> {this.session.ldapRequests = []; return this._traceService.getLdapRequests(this.session.id).pipe(map(d=>(this.session.ldapRequests=d)))}) : of(),
+                                (this.session.requestsMask & 1024) > 0 ? this.loadSessionEvents(this.session) : of()
                             )
                         }))
                 }),
