@@ -1,6 +1,6 @@
 ﻿import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
 import { DashboardDetailContext } from './detail-view.model';
-import {STATUS} from "../../../constants";
+import {ANALYTIC_MAPPING, EVENT_LOG, STATUS} from "../../../constants";
 
 @Component({
     selector: 'dashboard-detail-view',
@@ -17,6 +17,7 @@ export class DashboardDetailViewComponent {
     @Output() exceptionNav = new EventEmitter<{ type: string; tab: 'rest' | 'schedule' | 'view' }>();
     @Output() instanceFilter = new EventEmitter<string>();
     @Output() viewAllClick = new EventEmitter<string>();
+    @Output() eventNav = new EventEmitter<{ key: string; type?: string }>();
 
     getErrBarWidth(list: { count: number }[], count: number): number {
         return list?.[0]?.count ? Math.round((count / list[0].count) * 100) : 0;
@@ -35,6 +36,11 @@ export class DashboardDetailViewComponent {
         return !!this.selectedKey && sessionKeys.has(this.selectedKey);
     }
 
+    get isEventInsight(): boolean {
+        const eventKeys = new Set(['LOG', 'USER']);
+        return !!this.selectedKey && eventKeys.has(this.selectedKey);
+    }
+
     get sessionChartData(): { stringDate: string; count: number }[] {
         if (this.selectedKey === 'SCHEDULE') return this.context.batchExceptionChart;
         if (this.selectedKey === 'VIEW') return this.context.viewExceptionChart;
@@ -51,6 +57,46 @@ export class DashboardDetailViewComponent {
         }
     }
 
+    get eventChartSubtitle(): string {
+        switch (this.selectedKey) {
+            case 'LOG': return ' — Logs Applicatifs';
+            case 'USER': return ' — Actions Utilisateurs';
+            default: return ' — Événements';
+        }
+    }
+
+    get topLogErrors(): { type: string; rawType: string; count: number }[] {
+        const list: { type: string; rawType: string; count: number }[] = [];
+        if ((this.context?.eventErrorCount ?? 0) > 0) list.push({ type: 'ERROR', rawType: 'ERROR', count: this.context.eventErrorCount! });
+        if ((this.context?.eventWarnCount ?? 0) > 0) list.push({ type: 'WARN', rawType: 'WARN', count: this.context.eventWarnCount! });
+        if ((this.context?.eventInfoCount ?? 0) > 0) list.push({ type: 'INFO', rawType: 'INFO', count: this.context.eventInfoCount! });
+        return list.sort((a, b) => b.count - a.count);
+    }
+
+    get eventChartLoading(): boolean {
+        return this.context?.eventCountLoading ?? false;
+    }
+
+    get eventChartData(): any[] {
+        return this.selectedKey === 'LOG'
+            ? (this.context?.eventLogChart || [])
+            : (this.context?.eventUserChart || []);
+    }
+
+    get eventChartConfig(): any {
+        return this.selectedKey === 'USER'
+            ? this.context.evtUserLineConfig
+            : this.context.evtExcLineConfig;
+    }
+
+    get topUserEvents(): { type: string; count: number }[] {
+        return this.context?.topUserEvents ?? [];
+    }
+
+    getUserActionLabel(type: string): string {
+        return ANALYTIC_MAPPING[type]?.label || type;
+    }
+
     get selectedLabel(): string {
         if (!this.selectedKey) return 'Clients';
         if (this.isSessionInsight) {
@@ -58,6 +104,13 @@ export class DashboardDetailViewComponent {
                 SERVICE: 'Services exposés', BATCH: 'Tâches planifiées', STARTUP: 'Initialisation', VIEW: 'Parcours client', TEST: 'Test'
             };
             return sessionLabels[this.selectedKey] ?? this.selectedKey;
+        }
+        if (this.isEventInsight) {
+            const eventLabels: Record<string, string> = {
+                LOG: 'Logs Applicatifs',
+                USER: 'Actions Utilisateurs'
+            };
+            return eventLabels[this.selectedKey] ?? this.selectedKey;
         }
         return this.context.protocolDefs.find(p => p.key === this.selectedKey)?.label ?? this.selectedKey;
     }
@@ -75,6 +128,7 @@ export class DashboardDetailViewComponent {
         if (key === 'SCHEDULE')   return this.context.tabRequests['batchExceptionTable']?.isLoading !== false;
         if (key === 'VIEW')    return this.context.tabRequests['viewExceptionTable']?.isLoading !== false;
         if (key === 'STARTUP' || key === 'TEST') return this.context.tabRequests['startupExceptionTable']?.isLoading !== false;
+        if (key === 'LOG' || key === 'USER') return this.context.eventCountLoading;
         const protoDef = this.context.protocolDefs.find(p => p.key === key);
         if (protoDef) {
             if (this.context.chartRequests[protoDef.reqKey]?.isLoading !== false) return true;
@@ -107,6 +161,10 @@ export class DashboardDetailViewComponent {
                 return !this.context.sessionCountLoading && !this.context.sessionInitErrors;
             case 'TEST':
                 return !this.context.sessionCountLoading && !this.context.sessionTestErrors;
+            case 'LOG':
+                return !this.context.eventCountLoading && !(this.context.eventLogCount || 0);
+            case 'USER':
+                return !this.context.eventCountLoading && !(this.context.eventUserCount || 0);
             default: {
                 const protoDef = this.context.protocolDefs.find(p => p.key === key);
                 const loaded = protoDef
@@ -121,4 +179,5 @@ export class DashboardDetailViewComponent {
     trackByKey(_: number, item: { key: string }): string { return item.key; }
 
     protected readonly Status = STATUS;
+    protected readonly EventLog = EVENT_LOG;
 }

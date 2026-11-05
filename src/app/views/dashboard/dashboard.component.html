@@ -72,7 +72,8 @@
                 (sessionTypeNav)="navigateToSessionByType($event.type, undefined, $event.server)"
                 (exceptionNav)="navigateToException($event)"
                 (instanceFilter)="navigateToInstancesWithFilter($event)"
-                (viewAllClick)="onViewAllClick($event)">
+                (viewAllClick)="onViewAllClick($event)"
+                (eventNav)="navigateToEvents($event)">
         </dashboard-detail-view>
 
     </section>
@@ -177,44 +178,44 @@
             </div>
         </ng-template>
 
-    <!-- Distribution Flux (ex-Request) -->
-    <div class="sb-block sb-distribution-block">
-      <div class="sbd-title">Flux</div>
-      <div class="sbd-empty" *ngIf="protocolSummaries.length === 0 && !kpiLoading">
-        <mat-icon>info_outline</mat-icon>
-        <span>Aucun flux sur la période</span>
-      </div>
-      <ng-container *ngFor="let p of protocolSummaries">
-        <ng-container *ngIf="p.loading">
-          <div class="sbd-skel-main">
-            <div class="sbd-skel-top">
-              <div class="sbd-skel-label"></div>
-              <div class="sbd-skel-count"></div>
+        <!-- Distribution Flux (ex-Request) -->
+        <div class="sb-block sb-distribution-block">
+            <div class="sbd-title">Flux</div>
+            <div class="sbd-empty" *ngIf="protocolSummaries.length === 0 && !kpiLoading">
+                <mat-icon>info_outline</mat-icon>
+                <span>Aucun flux sur la période</span>
             </div>
-            <div class="sbd-skel-track"></div>
-          </div>
-          <div class="sbd-skel-rate"></div>
-        </ng-container>
-        <div class="sbd-row" *ngIf="!p.loading"
-          [class.sbd-row-selected]="selectedInsights.has(p.key)"
-          [class.sbd-row-clickable]="true"
-          [title]="p.title"
-          tabindex="0"
-          (click)="toggleInsight(p.key)"
-          (keydown.enter)="toggleInsight(p.key)">
-          <div class="sbd-main">
-            <div class="sbd-top">
-              <span class="sbd-label">{{ p.label }}</span>
-              <span class="sbd-count">{{ p.total | compact }}</span>
-            </div>
-            <div class="sbd-track" [class.track-active]="p.total > 0">
-              <div class="sbd-fill" [style.width.%]="p.total > 0 ? (100 - p.rate) : 0"></div>
-            </div>
-          </div>
-          <span class="sbd-rate" [class.c-ok]="p.rate === 0" [class.c-err]="p.rate > 0">{{ p.rate === 0 ? '100%' : (p.rate | number:'1.2-2') + '%' }}</span>
+            <ng-container *ngFor="let p of protocolSummaries">
+                <ng-container *ngIf="p.loading">
+                    <div class="sbd-skel-main">
+                        <div class="sbd-skel-top">
+                            <div class="sbd-skel-label"></div>
+                            <div class="sbd-skel-count"></div>
+                        </div>
+                        <div class="sbd-skel-track"></div>
+                    </div>
+                    <div class="sbd-skel-rate"></div>
+                </ng-container>
+                <div class="sbd-row" *ngIf="!p.loading"
+                     [class.sbd-row-selected]="selectedInsights.has(p.key)"
+                     [class.sbd-row-clickable]="true"
+                     [title]="p.title"
+                     tabindex="0"
+                     (click)="toggleInsight(p.key)"
+                     (keydown.enter)="toggleInsight(p.key)">
+                    <div class="sbd-main">
+                        <div class="sbd-top">
+                            <span class="sbd-label">{{ p.label }}</span>
+                            <span class="sbd-count">{{ p.total | compact }}</span>
+                        </div>
+                        <div class="sbd-track" [class.track-active]="p.total > 0">
+                            <div class="sbd-fill" [style.width.%]="p.total > 0 ? (100 - p.rate) : 0"></div>
+                        </div>
+                    </div>
+                    <span class="sbd-rate" [class.c-ok]="p.rate === 0" [class.c-err]="p.rate > 0">{{ p.rate === 0 ? '100%' : (p.rate | number:'1.2-2') + '%' }}</span>
+                </div>
+            </ng-container>
         </div>
-      </ng-container>
-    </div>
         <!-- Distribution Événements -->
         <ng-container *ngIf="eventCountLoading; else eventBlock">
             <div class="sb-block sb-distribution-block sb-skel-block">
@@ -251,11 +252,12 @@
                         <div class="sbd-skel-rate"></div>
                     </ng-container>
                     <div class="sbd-row" *ngIf="!s.loading"
+                         [class.sbd-row-selected]="selectedInsights.has(s.key)"
                          [class.sbd-row-clickable]="true"
                          [title]="s.title"
                          tabindex="0"
-                         (click)="navigateToEvent(s.key)"
-                         (keydown.enter)="navigateToEvent(s.key)">
+                         (click)="toggleInsight(s.key)"
+                         (keydown.enter)="toggleInsight(s.key)">
                         <div class="sbd-main">
                             <div class="sbd-top">
                                 <span class="sbd-label">{{ s.label }}</span>
