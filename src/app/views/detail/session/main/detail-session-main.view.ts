@@ -96,7 +96,7 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
         return defer(() => {
             session.exceptions = [];
             return this._exceptionService.getExceptions(session.id, 1).pipe(
-                map(exceptions => session.exceptions = [...(exceptions ?? [])]),
+                map(exceptions => session.exceptions = [...(exceptions.map(e => ({...e, traceId: session.id, traceType: 2})) ?? [])]),
                 catchError(() => of([]))
             );
         });
