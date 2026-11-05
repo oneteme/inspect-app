@@ -2,51 +2,52 @@ import {Application, IStep, IStepFrom, Period} from "src/app/model/conf.model";
 
 export const environment = {
   production: false,
-  application:
-      {
-        enabled: false, // default: false
-        debugMode: false, // default: false
-        // debug: {app: true, user: false},
-        application: {
-          name: 'inspect-app',
-          namespace: 'jarvis',
-          version: () => '',
-          env: 'prod',
-          user: () => {
-            let claims: any = sessionStorage.getItem("id_token_claims_obj")
-            return (claims && JSON.parse(claims).sub);
-          }
-        },
-        scheduling: {
-          interval: 60000,
-          queueCapacity: 1000
-        },
-        monitoring: {
-          httpRoute: {
-            excludes: {
-              path: [/scope/],
-            },
+  application: {
+    collector:  {
+      enabled: false, // default: false
+      debugMode: false, // default: false
+      // debug: {app: true, user: false},
+      application: {
+        name: 'inspect-app',
+        namespace: 'jarvis',
+        version: () => '',
+        env: 'prod',
+        user: () => {
+          let claims: any = sessionStorage.getItem("id_token_claims_obj")
+          return (claims && JSON.parse(claims).sub);
+        }
+      },
+      scheduling: {
+        interval: 60000,
+        queueCapacity: 1000
+      },
+      monitoring: {
+        httpRoute: {
+          excludes: {
+            path: [/scope/],
           },
-          httpRequest: {
-            excludes: {
-              host: [],
-            },
-          },
-          resources: { enabled: true },
-          analytics: { enabled: true },
-          logger: { enabled: true },          // Capture console.warn and console.error
-          reporter: { enabled: true },  // Send internal collector reports
-          storage: { enabled: false }
         },
-        tracing: {
-          remote: {
-            host: `http://localhost:9001/`, // default: 'localhost'
-            mode: 'cors',
-            token: () => "",
-            retentionMaxAge: { audit: 7, diagnostics: 10 }
-          }
+        httpRequest: {
+          excludes: {
+            host: [],
+          },
+        },
+        resources: { enabled: true },
+        analytics: { enabled: true },
+        logger: { enabled: true },          // Capture console.warn and console.error
+        reporter: { enabled: true },  // Send internal collector reports
+        storage: { enabled: false }
+      },
+      tracing: {
+        remote: {
+          host: `http://localhost:9001/`, // default: 'localhost'
+          mode: 'cors',
+          token: () => "",
+          retentionMaxAge: { audit: 7, diagnostics: 10 }
         }
       }
+    }
+  }
 };
 
 export const app: Application = {
