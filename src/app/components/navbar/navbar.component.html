@@ -277,10 +277,10 @@
         <button mat-menu-item
                 [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
                 data-inspect-scope="Consulter les traitements, les pertes de séquences et les rapports du serveur"
-                data-inspect-track="Ouvrir le diagnostic du serveur"
+                data-inspect-track="Ouvrir le diagnostic"
                 (click)="openServerActivity($event)">
           <mat-icon class="material-symbols-outlined">admin_panel_settings</mat-icon>
-          <span>Diagnostic du serveur</span>
+          <span>Diagnostic</span>
         </button>
         <button mat-menu-item class="logout-item" (click)="logout()"
                 [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"

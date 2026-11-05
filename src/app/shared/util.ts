@@ -1,3 +1,4 @@
+import { ChartPeriodGranularity, comparePeriodLabels, formatPeriodLabel, PERIOD_AUTO_OPTION_ID } from "@oneteme/jquery-core";
 import { DatePipe } from "@angular/common";
 import {ChartGroup} from "../model/chart.model";
 import { Filter, FilterMap, Operation } from "../views/constants";
@@ -279,15 +280,54 @@ export const formatters: any = {
     }
 }
 
-export function formatChartDates(data: any[], groupedBy: string, datePipe: DatePipe): any[] {
-    if (!data || data.length === 0) return data;
-    if (!formatters[groupedBy]) {
+/** `dateHour` est un bucket composite (jour + heure) construit par `rest-session.service.ts` : il évite de fusionner les heures de plusieurs jours. */
+const PERIOD_GRANULARITY_BY_GROUP: Record<string, ChartPeriodGranularity> = {
+    hour: 'hour',
+    dateHour: 'monthDayHour',
+    date: 'date',
+    monthDay: 'monthDay',
+    yearWeek: 'yearWeek',
+    yearMonth: 'yearMonth',
+    year: 'year',
+};
+
+/** Granularité core (`monthDayHour`) → groupedBy serveur, quand les deux noms diffèrent. */
+const SERVER_GROUP_BY_PERIOD_OPTION: Record<string, string> = {
+    monthDayHour: 'dateHour',
+};
+
+/** Granularité serveur (groupedBy) correspondant à une variante choisie ; « Automatique » suit la période. */
+export function resolvePeriodGranularity(optionId: string | undefined, start: Date, end: Date): string {
+    if (!optionId || optionId === PERIOD_AUTO_OPTION_ID) return periodManagement(start, end);
+    return SERVER_GROUP_BY_PERIOD_OPTION[optionId] ?? optionId;
+}
+
+/**
+ * Formate les libellés de période (buckets UTC renvoyés par le serveur) en français et les trie chronologiquement.
+ * `datePipe` n'est plus utilisé, il reste accepté pour les appelants existants.
+ * `from` ancre le tri des périodes `monthDay` (plages à cheval sur le 1er janvier).
+ */
+export function formatChartDates(data: any[], groupedBy: string, _datePipe?: DatePipe, from?: Date): any[] {
+    const granularity = PERIOD_GRANULARITY_BY_GROUP[groupedBy];
+    if (!data || data.length === 0 || !granularity) {
         return data;
     }
-    
-    const cloned = JSON.parse(JSON.stringify(data));
-    formatters[groupedBy](cloned, datePipe);
-    return cloned;
+
+    return [...data]
+        .sort((a, b) => comparePeriodLabels(a.date, b.date, granularity, from))
+        .map(row => ({ ...row, date: row.date == null ? row.date : formatPeriodLabel(row.date, granularity) }));
+}
+
+/** Libellés et tri des valeurs de tranche « date » (valeurs brutes du serveur). */
+export function buildPeriodSliceDisplay(groupedBy: string, from?: Date): { formatLabel: (raw: string) => string; compareKeys: (a: string, b: string) => number } | undefined {
+    const granularity = PERIOD_GRANULARITY_BY_GROUP[groupedBy];
+    if (!granularity) {
+        return undefined;
+    }
+    return {
+        formatLabel: raw => formatPeriodLabel(raw, granularity),
+        compareKeys: (a, b) => comparePeriodLabels(a, b, granularity, from),
+    };
 }
 
 

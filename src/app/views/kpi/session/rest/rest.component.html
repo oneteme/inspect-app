@@ -76,6 +76,7 @@
             [state]="$statusOrganizer.state"
             [hideMenuValues]="true"
             (viewChange)="onStatusViewChange($event)"
+            [sliceFilterValues]="$statusFilterValues"
             (sliceStateChange)="onStatusSliceChange($event)">
           </organizer-button>
         </div>
@@ -90,6 +91,7 @@
           *ngIf="$statusSlice"
           [sliceConfigs]="$statusSlice!.sliceConfigs"
           [data]="$statusSlice!.tasks"
+          [presetKeys]="$statusSlice!.selectedKeys ?? null"
           [showCounts]="false"
           [alwaysShow]="true"
           (activeKeysChange)="onStatusFilterChange($event)">
@@ -144,6 +146,7 @@
             [state]="$performanceOrganizer.state"
             [hideMenuValues]="true"
             (viewChange)="onPerformanceViewChange($event)"
+            [sliceFilterValues]="$performanceFilterValues"
             (sliceStateChange)="onPerformanceSliceChange($event)">
           </organizer-button>
         </div>
@@ -158,6 +161,7 @@
           *ngIf="$performanceSlice"
           [sliceConfigs]="$performanceSlice!.sliceConfigs"
           [data]="$performanceSlice!.tasks"
+          [presetKeys]="$performanceSlice!.selectedKeys ?? null"
           [showCounts]="false"
           [alwaysShow]="true"
           (activeKeysChange)="onPerformanceFilterChange($event)">
@@ -203,6 +207,7 @@
             [state]="$volumetryOrganizer.state"
             [hideMenuValues]="true"
             (viewChange)="onVolumetryViewChange($event)"
+            [sliceFilterValues]="$volumetryFilterValues"
             (sliceStateChange)="onVolumetrySliceChange($event)">
           </organizer-button>
         </div>
@@ -217,6 +222,7 @@
           *ngIf="$volumetrySlice"
           [sliceConfigs]="$volumetrySlice!.sliceConfigs"
           [data]="$volumetrySlice!.tasks"
+          [presetKeys]="$volumetrySlice!.selectedKeys ?? null"
           [showCounts]="false"
           [alwaysShow]="true"
           (activeKeysChange)="onVolumetryFilterChange($event)">
