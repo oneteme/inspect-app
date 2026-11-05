@@ -15,7 +15,7 @@ export class ExceptionService {
 
     getExceptions(id: string, type: number): Observable<{ type: string, message: string, offset: number, hasStack: boolean }[]> {
         let params = {
-            'select': 'err_type:type,err_msg:message,order:offset,has_stack:hasStack',
+            'select': 'err_type:type,err_msg:message,err_order:offset,has_stack:hasStack',
             'parent': id,
             'trace_type': type
         };
@@ -25,6 +25,7 @@ export class ExceptionService {
     getStacktrace(id: string, offset: number, type: number): Observable<{ stacktrace: string, cause: string }> {
         let params = {
             'select': 'stacktrace:stacktrace,cause:cause',
+            'err_order': offset,
             'parent': id,
             'trace_type': type
         };
