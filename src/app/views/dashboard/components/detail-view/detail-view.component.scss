@@ -499,6 +499,12 @@
   box-sizing: border-box;
 }
 
+.db-evt-chart-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
 @media (min-width: 1300px) {
   .db-detail-view { gap: 1.25em; }
   .db-insights { max-height: none; overflow-y: visible; }

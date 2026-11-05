@@ -136,6 +136,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     topErrors: Record<string, { type: string; count: number }[]> = {};
     selectedInsights = new Set<string>();
     sessExcLineConfig = Constants.SESSION_EXCEPTION_LINE;
+    evtExcLineConfig = Constants.EVENT_LOG_BY_PERIOD_LINE;
 
     // server health
 
@@ -149,6 +150,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
     batchExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
     viewExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
     startupExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
+
+    // charts par type d'événement
+    eventLogChart: { stringDate: string; info: number; warn: number; error: number; count: number, perc: number }[] = [];
+    eventUserChart: { stringDate: string; type: string; count: number, perc: number }[] = [];
+
 
     // état des insights (tout clair / erreurs par catégorie)
 
@@ -283,6 +289,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     eventParams['instance.app_name'] = this.params.serveurs;
                 }
                 this.getLogEventCount(currentNamespace, currentStart, effectiveEnd, gen);
+                this.getLogEventChart(currentNamespace, currentStart, effectiveEnd, gen);
                 this.getUserEventCount(currentNamespace, currentStart, effectiveEnd, gen);
             }
         }));
@@ -318,10 +325,58 @@ export class DashboardComponent implements OnInit, OnDestroy {
                         this.eventWarnCount = 0;
                         this.eventErrorCount = 0;
                         this.eventInfoCount = 0;
+                        this.eventLogChart = [];
                         this._rebuildEventSummaries();
                     }
                 }
             });
+    }
+
+
+    getLogEventChart(currentNamespace: string, currentStart: Date, effectiveEnd: Date, gen: number) {
+        const groupedBy = this.groupedBy;
+        const logParams: any = {
+            'instance.namespace': currentNamespace,
+            'start.ge': currentStart.toISOString(),
+            'start.lt': effectiveEnd.toISOString(),
+            'join': 'instance',
+            'column': `start.${groupedBy}:date,type,count:count`,
+            'type.in': 'INFO,WARN,ERROR',
+            'order': 'date.asc'
+        };
+        const serverParam = this.createServerFilter();
+        if (serverParam.app_name) {
+            logParams['instance.app_name.in'] = serverParam.app_name;
+        }
+
+        this._sessionEventService.getSessionEventTypeCount(logParams).subscribe({
+            next: (rows: any[]) => {
+                if (this._loadGen !== gen || !rows) return;
+                formatters[groupedBy](rows, this._datePipe, 'stringDate');
+
+                const map = new Map<string, { stringDate: string; info: number; warn: number; error: number; count: number }>();
+                rows.forEach(r => {
+                    if (!map.has(r.stringDate)) {
+                        map.set(r.stringDate, { stringDate: r.stringDate, info: 0, warn: 0, error: 0, count: 0 });
+                    }
+                    const entry = map.get(r.stringDate)!;
+                    const t = (r.type || '').toUpperCase();
+                    if (t === 'INFO') entry.info += r.count;
+                    else if (t === 'WARN') entry.warn += r.count;
+                    else if (t === 'ERROR') entry.error += r.count;
+                    entry.count += r.count;
+                });
+
+                this.eventLogChart = this._fillHourGapsLogs(map, currentStart, effectiveEnd);
+                this._cdr.markForCheck();
+            },
+            error: () => {
+                if (this._loadGen === gen) {
+                    this.eventLogChart = [];
+                    this._cdr.markForCheck();
+                }
+            }
+        });
     }
 
     getUserEventCount(currentNamespace: string, currentStart: Date, effectiveEnd: Date, gen: number) {
@@ -350,11 +405,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 error: () => {
                     if (this._loadGen === gen) {
                         this.eventUserCount = 0;
+                        this.eventUserChart = [];
                         this._rebuildEventSummaries();
                     }
                 }
             });
     }
+
     initCharts(gen: number) {
         this.kpiLoading = true;
         this.sparklinePercs = { rest: 0, jdbc: 0, ftp: 0, smtp: 0, ldap: 0 };
@@ -418,6 +475,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this._tabsResolved = 0;
         this._sessionCountByType = {};
         this.sessionCountLoading = true;
+        this.eventLogChart = [];
+        this.eventUserChart = [];
         this.eventCountLoading = true;
         const keys = Object.keys(this.tabRequests);
         const totalTabs = keys.length;
@@ -599,24 +658,24 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.deployTableRows = [];
         this._serverHealthSub?.unsubscribe();
         this._serverHealthSub = this._instanceService.getLastServerStart({ namespace })
-                .pipe(
-                    tap((servers: LastServerStart[]) => {
-                        this.serverHealthLoading = false;
-                    }),
-                    switchMap((servers: LastServerStart[]) => {
-                        this.deployTableRows = servers;
-                        this.deployTableToday = new Date();
-                        this.versionColor = groupByColor(servers, (v: any) => v.version);
-                        this._rebuildDeployStats();
-                        this._rebuildServerHealth();
-                        return servers.length
-                          ? this._instanceTraceService.getLastInstanceTrace({instance: servers.map(s => s.id)}).pipe(
+            .pipe(
+                tap((servers: LastServerStart[]) => {
+                    this.serverHealthLoading = false;
+                }),
+                switchMap((servers: LastServerStart[]) => {
+                    this.deployTableRows = servers;
+                    this.deployTableToday = new Date();
+                    this.versionColor = groupByColor(servers, (v: any) => v.version);
+                    this._rebuildDeployStats();
+                    this._rebuildServerHealth();
+                    return servers.length
+                        ? this._instanceTraceService.getLastInstanceTrace({instance: servers.map(s => s.id)}).pipe(
                             finalize(() => this.instanceTraceLoading = false))
-                          : of([]).pipe(finalize(() => this.instanceTraceLoading = false));
+                        : of([]).pipe(finalize(() => this.instanceTraceLoading = false));
 
-                    })
-                )
-                .subscribe({ next: res => {
+                })
+            )
+            .subscribe({ next: res => {
                     if (this._loadGen !== gen) return;
                     this.deployTableRows = this.deployTableRows.map(s => ({ ...s, lastTrace: res.find((t: any) => t.id === s.id)?.date }));
                     this._rebuildDeployStats();
@@ -689,6 +748,43 @@ export class DashboardComponent implements OnInit, OnDestroy {
         }
         return Object.entries(map).map(([stringDate, count]) => ({ stringDate, count })).sort((a, b) => a.stringDate.localeCompare(b.stringDate));
     }
+
+    /**
+     * Re use the method fillHours but with for eventLogs and their types (info, warn, error)
+     * @param map
+     * @param start
+     * @param end
+     * @private
+     */
+    private _fillHourGapsLogs(map: Map<string, any>, start: Date, end: Date): any[] {
+        const now = new Date();
+        const effectiveEnd = end > now ? now : end;
+        const defaultEntry = (label: string) => ({ stringDate: label, info: 0, warn: 0, error: 0, count: 0 });
+
+        if (this.groupedBy === 'hour') {
+            const result: any[] = [];
+            const startH = start.getHours();
+            const isToday = start.toDateString() === now.toDateString();
+            const endH = isToday ? now.getHours() : 23;
+            for (let h = startH; h <= endH; h++) {
+                const label = this._datePipe.transform(new Date(2000, 1, 1, h), 'shortTime') || '';
+                result.push(map.get(label) ?? defaultEntry(label));
+            }
+            return result;
+        }
+        if (this.groupedBy === 'date') {
+            const result: any[] = [];
+            const d = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+            while (d < effectiveEnd) {
+                const label = this._datePipe.transform(d, 'd MMM yy') || '';
+                result.push(map.get(label) ?? defaultEntry(label));
+                d.setDate(d.getDate() + 1);
+            }
+            return result;
+        }
+        return Array.from(map.values());
+    }
+
 
     private _addPerc(filled: { stringDate: string; count: number }[], countokMap: Record<string, number>): { stringDate: string; count: number; perc: number }[] {
         return filled.map(p => ({ ...p, perc: countokMap[p.stringDate] ? (p.count * 100) / countokMap[p.stringDate] : 0 }));
@@ -920,6 +1016,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
             chartRequests: this.chartRequests,
             sparklinePercs: this.sparklinePercs,
             sparklineTitles: this.sparklineTitles,
+            eventLogChart: this.eventLogChart,
+            eventUserChart: this.eventUserChart,
+            eventCountLoading: this.eventCountLoading,
+            eventLogCount: this.eventInfoCount + this.eventWarnCount + this.eventErrorCount,
+            eventInfoCount: this.eventInfoCount,
+            eventWarnCount: this.eventWarnCount,
+            eventErrorCount: this.eventErrorCount,
+            evtExcLineConfig: this.evtExcLineConfig,
         };
     }
 
@@ -1040,13 +1144,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
             .filter(s => s.loading || s.total > 0);
 
         this._cdr.markForCheck();
-    }
-    navigateToEvent(key: string): void {
-        if (key === 'LOG') {
-            this.navigateToEventLogs();
-        } else if (key === 'USER') {
-            this.navigateToEventUser();
-        }
     }
 
     private buildSupervisionQueryParams(namespace?: string): Params {
@@ -1171,7 +1268,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     }))
             },
             viewExceptionTable: {
-                            observable: this._mainService.getMainExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, mainType: 'VIEW' })
+                observable: this._mainService.getMainExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, mainType: 'VIEW' })
                     .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
                         const dateMap = new Map<string, number>();
@@ -1230,16 +1327,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this._pageTitleService.clear();
     }
 
-    navigateToEventLogs(): void {
-        this._router.navigate(['/event/log'], {
-            queryParams: this.buildNavigationQueryParams()
-        });
-    }
-
     navigateToEventUser(): void {
         this._router.navigate(['/event/user'], {
             queryParams: this.buildNavigationQueryParams()
         });
+    }
+
+    navigateToEventLogs(event?: { key: string; type?: string }): void {
+        const extraParams: Params = event?.type ? { type: event.type } : {};
+        this._router.navigate(['/event/log'], { queryParams: this.buildNavigationQueryParams(extraParams) });
     }
 }
 

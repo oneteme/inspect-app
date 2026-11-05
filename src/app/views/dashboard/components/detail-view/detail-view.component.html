@@ -14,7 +14,7 @@
 <div class="db-detail-view" *ngIf="isBlockLoading || !isNoIncidents">
 
   <!-- ── Activité protocole : pleine largeur (protocoles uniquement) ── -->
-  <div class="db-proto-wrap" *ngIf="context.selectedInsights.size > 0 && !isSessionInsight">
+  <div class="db-proto-wrap" *ngIf="context.selectedInsights.size > 0 && !isSessionInsight &&!isEventInsight">
     <div class="db-insights-hdr">
       <span class="dih-title">Pourcentage d'incidents sur la période</span>
       <span class="dih-sub">{{ fluxChartSubtitle }}</span>
@@ -54,7 +54,24 @@
     </div>
   </div>
 
-  <!-- ── Bloc principal : erreurs & infrastructure ── -->
+    <!--    Event -->
+    <div class="db-evt-chart-wrap" *ngIf="isEventInsight">
+        <div class="db-insights-hdr">
+            <span class="dih-title">Pourcentage d'incidents sur la période</span>
+            <span class="dih-sub">{{ eventChartSubtitle }}</span>
+        </div>
+        <div class="proto-list">
+            <div class="proto-row">
+                <div class="pr-chart">
+                    <chart type="area" [config]="context.evtExcLineConfig" [data]="eventChartData" [isLoading]="eventChartLoading"></chart>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <!-- ── Bloc principal : erreurs & infrastructure ── -->
   <div class="db-clt-block">
     <span class="sb-block-head">Nombre d'incidents par exception</span>
 
@@ -70,7 +87,9 @@
            || (context.selectedInsights.has('BATCH') && (context.tabRequests.batchExceptionTable?.isLoading !== false || context.topBatchErrors.length))
            || (context.selectedInsights.has('STARTUP') && (context.sessionCountLoading || context.sessionInitErrors > 0))
            || (context.selectedInsights.has('VIEW') && (context.tabRequests.viewExceptionTable?.isLoading !== false || context.topViewErrors.length || context.sessionWebErrors > 0))
-           || (context.selectedInsights.has('TEST') && (context.sessionCountLoading || context.sessionTestErrors > 0))">
+           || (context.selectedInsights.has('TEST') && (context.sessionCountLoading || context.sessionTestErrors > 0))
+           || (context.selectedInsights.has('LOG') && (context.eventCountLoading || context.eventLogCount > 0))">
+
 
       <!-- État chargement -->
       <div class="clt-loading" *ngIf="isBlockLoading">Chargement des données...</div>
@@ -106,12 +125,12 @@
             </button>
           </div>
 
-          <!-- BATCH -->
+          <!-- SCHEDULE -->
           <div class="dbi-card"
-               *ngIf="context.selectedInsights.has('BATCH') && context.tabRequests.batchExceptionTable?.isLoading === false && context.topBatchErrors.length">
+               *ngIf="context.selectedInsights.has('SCHEDULE') && context.tabRequests.batchExceptionTable?.isLoading === false && context.topBatchErrors.length">
             <button type="button" class="dbi-row dbi-row-link"
                  *ngFor="let e of context.topBatchErrors; trackBy: trackByType"
-                 (click)="exceptionNav.emit({ type: e.type, tab: 'batch' })">
+                 (click)="exceptionNav.emit({ type: e.type, tab: 'schedule' })">
               <span class="dbi-dot" [style.background]="Status[e.type].color"></span>
               <span class="dbi-name">{{ Status[e.type].label }}</span>
               <div class="dbi-bar-wrap"><div class="dbi-bar" [style.background]="Status[e.type].color" [style.width.%]="getErrBarWidth(context.topBatchErrors, e.count)"></div></div>
@@ -175,7 +194,51 @@
 
       </div><!-- fin .db-insights -->
 
-    </div><!-- fin .clt-body -->
+        <!-- EVENT LOG -->
+        <div class="dbi-card"
+             *ngIf="context.selectedInsights.has('LOG') && !context.eventCountLoading && (context.eventLogCount || 0) > 0">
+            <button type="button" class="dbi-row dbi-row-link"
+                    *ngFor="let e of topLogErrors; trackBy: trackByType"
+                    (click)="eventNav.emit({ key: 'LOG', type: e.rawType || e.type })">
+                <span class="dbi-dot" [style.background]="EventLog[e.type].color"></span>
+                <span class="dbi-name" [title]="e.rawType">{{ EventLog[e.type].label }}</span>
+                <div class="dbi-bar-wrap">
+                    <div class="dbi-bar" [style.background]="EventLog[e.type].color" [style.width.%]="getErrBarWidth(topLogErrors, e.count)"></div>
+                </div>
+                <span class="dbi-badge dbi-badge-warn" [style.color]="EventLog[e.type].color">{{ e.count | compact }}</span>
+                <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
+            </button>
+            <button type="button" class="dbi-row dbi-row-link" *ngIf="!topLogErrors.length"
+                    (click)="eventNav.emit({ key: 'LOG' })">
+                <span class="dbi-dot"></span>
+                <span class="dbi-name">{{ (context.eventLogCount || 0) | number:'1.0-0' }} logs applicatifs</span>
+                <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
+            </button>
+        </div>
+
+        <!-- EVENT USER -->
+        <div class="dbi-card"
+             *ngIf="context.selectedInsights.has('USER') && !context.eventCountLoading && (context.eventUserCount || 0) > 0">
+            <button type="button" class="dbi-row dbi-row-link"
+                    *ngFor="let e of topLogErrors; trackBy: trackByType"
+                    (click)="eventNav.emit({ key: 'USER', type: e.rawType || e.type })">">
+                <span class="dbi-dot" [style.background]="EventLog[e.type].color"></span>
+                <span class="dbi-name" [title]="e.rawType">{{ EventLog[e.type].label }}</span>
+                <div class="dbi-bar-wrap">
+                    <div class="dbi-bar" [style.background]="EventLog[e.type].color" [style.width.%]="getErrBarWidth(topLogErrors, e.count)"></div>
+                </div>
+                <span class="dbi-badge dbi-badge-warn" [style.color]="EventLog[e.type].color">{{ e.count | compact }}</span>
+                <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
+            </button>
+            <button type="button" class="dbi-row dbi-row-link" *ngIf="!topLogErrors.length"
+                    (click)="eventNav.emit({ key: 'USER' })">
+                <span class="dbi-dot"></span>
+                <span class="dbi-name">{{ (context.eventUserCount || 0) | number:'1.0-0' }} actions utilisateurs</span>
+                <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
+            </button>
+        </div>
+
+    </div><!-- fin .db-insights -->
 
   </div><!-- fin .db-clt-block -->
 
