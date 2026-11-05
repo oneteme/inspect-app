@@ -45,6 +45,8 @@ import {OAuthModule} from "angular-oauth2-oidc";
 import {AuthInterceptor} from "./auth/auth.interceptor";
 import {AnalyticsView} from "./views/analytics/analytics.view";
 import {SearchMainEventView} from "./views/search/event/main/search-main-event.view";
+import {NgCollectorModule} from "@oneteme/inspect-ng-collector";
+import {environment} from "../environments/environment";
 
 registerLocaleData(localeFr, 'fr-FR');
 
@@ -252,6 +254,7 @@ const routes: Route[] = [
     BrowserModule,
     BrowserAnimationsModule,
     RouterModule.forRoot(routes, {useHash: true}),
+    NgCollectorModule.forRoot(environment.application),
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,
