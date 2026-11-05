@@ -270,7 +270,7 @@ export class LdapComponent implements OnInit {
     this.$userRepartition.loading = true;
     this._ldapRequestService.getLdap(args).pipe(finalize(() => this.$userRepartition.loading = false)).subscribe({
       next: (res: any[]) => {
-        this.$userRepartition.data = res;
+        this.$userRepartition.data = formatChartDates(res, this.groupedBy, this.datePipe);
       }
     });
   }

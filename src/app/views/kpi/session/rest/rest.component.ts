@@ -478,7 +478,7 @@ export class RestComponent implements OnInit {
     this.$userRepartition.loading = true;
     this._restSessionService.getRestSession(args).pipe(finalize(() => this.$userRepartition.loading = false)).subscribe({
       next: (res: any[]) => {
-        this.$userRepartition.data = res;
+        this.$userRepartition.data = formatChartDates(res, this.groupedBy, this.datePipe, this.params.period.start);
       }
     });
   }

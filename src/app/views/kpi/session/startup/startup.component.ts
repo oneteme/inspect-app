@@ -290,7 +290,7 @@ export class StartupComponent {
     this.$userRepartition.loading = true;
     this._mainSessionService.getMainSession(args).pipe(finalize(() => this.$userRepartition.loading = false)).subscribe({
       next: (res: any[]) => {
-        this.$userRepartition.data = res;
+        this.$userRepartition.data = formatChartDates(res, this.groupedBy, this.datePipe);
       }
     });
   }
