@@ -216,7 +216,7 @@
       </ng-container>
     </div>
         <!-- Distribution Événements -->
-        <ng-container *ngIf="eventCountsLoading; else eventBlock">
+        <ng-container *ngIf="eventCountLoading; else eventBlock">
             <div class="sb-block sb-distribution-block sb-skel-block">
                 <div class="sbd-title">Événements</div>
                 <ng-container *ngFor="let _ of eventSkeletonRows">
@@ -235,7 +235,7 @@
         <ng-template #eventBlock>
             <div class="sb-block sb-distribution-block">
                 <div class="sbd-title">Événements</div>
-                <div class="sbd-empty" *ngIf="eventSummaries.length === 0 && !eventCountsLoading">
+                <div class="sbd-empty" *ngIf="eventSummaries.length === 0 && !eventCountLoading">
                     <mat-icon>info_outline</mat-icon>
                     <span>Aucun événement sur la période</span>
                 </div>
@@ -272,7 +272,7 @@
                         </div>
                         <span class="sbd-rate" [class.c-ok]="s.errorCount === 0 && s.warnCount === 0"
                               [class.c-warn]="s.errorCount === 0 && s.warnCount > 0"
-                              [class.c-err]="s.errorCount > 0">{{ s.rate === 0 ? s.warnCount === 0 ? '100%' : (s.warnCount | number:'1.2-2') + '%' : (s.rate | number:'1.2-2') + '%' }}
+                              [class.c-err]="s.errorCount > 0">{{ s.errorCount === 0 && (s.warnCount === 0 || s.infoCount === 0) ? '100%' : (s.rate | number:'1.2-2') + '%' }}
                         </span>
                     </div>
                 </ng-container>

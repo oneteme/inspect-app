@@ -73,7 +73,7 @@ export class SearchMainEventView {
         this._activatedRoute.queryParams.subscribe({
             next: (params: Params) => {
                 this._pageTitleService.set({
-                    icon: Constants.MAPPING_TYPE['event'].icon,
+                    icon: this._activatedRoute.snapshot.data['isLogRoute'] ? Constants.MAPPING_TYPE['log'].icon : Constants.MAPPING_TYPE['user'].icon,
                     iconOutlined: true,
                     title: (Constants.MAPPING_TYPE['event'].title) + ' ',
                     subtitle: this._activatedRoute.snapshot.data['isLogRoute'] ? Constants.MAPPING_TYPE['log'].subtitle : Constants.MAPPING_TYPE['user'].subtitle,
@@ -151,7 +151,7 @@ export class SearchMainEventView {
                     } else {
                         this.events = d.filter(e => !logTypes.has(e.type));
                         this.filters = [...new Set(this.events.map(e => e.type))].map(type => ({
-                            icon: STATUS['-1'].icon, label: type, color: STATUS['-1'].color, value: type
+                            icon: STATUS['2xx'].icon, label: type, color: STATUS['2xx'].color, value: type
                         }));
                     }
                 },

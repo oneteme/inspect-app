@@ -276,3 +276,9 @@ export const STATUS = {
     "4xx": {icon: 'error', label: "Erreur applicative", color: '#F9AD4E', class: 'warning'},
     "5xx": {icon: 'warning', label: "Erreur d'interface", color: '#F44336', class: 'fail'}
 };
+
+export const EVENT_LOG = {
+    INFO: {icon: 'info', label: "Info", color: '#4CAF50', class: 'info'},
+    WARN: {icon: 'warning', label: "Avertissement", color: '#F9AD4E', class: 'warning'},
+    ERROR: {icon: 'error', label: "Erreur", color: '#F44336', class: 'fail'}
+}
