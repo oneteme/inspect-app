@@ -87,7 +87,7 @@ export class Utils {
         if (type.includes('txt')) return 'description';
         if (type.includes('form')) return 'list_alt';
         if (type.includes('stream')) return 'deployed_code';
-        return 'line_style';
+        return 'text_snippet';
     }
 
     convertSeconds = (seconds: number): string => {

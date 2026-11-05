@@ -66,7 +66,7 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: RestSessionDto) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'person', width: '15%' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge', width: '15%' },
     {
       key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
       value: (row: RestSessionDto) => {
@@ -122,7 +122,7 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
       key: 'duration', header: 'Durée', groupable: false, icon: 'timer', width: '13%',
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
     },
-    { key: 'user', header: 'Utilisateur', icon: 'person', width: '13%' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge', width: '13%' },
     { key: 'address', header: 'Adresse', icon: 'fingerprint', width: '13%', optional: true },
     { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
     {
@@ -175,7 +175,7 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: RestRequestDto) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'person' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge' },
     {
       key: 'status', header: 'Status', sortable: true, optional: true, icon: 'task_alt',
       value: (row: RestSessionDto) => {
@@ -227,7 +227,7 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: DatabaseRequestDto) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'person' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge' },
     { key: 'productName', header: 'Base de données', icon: 'storage', lazy: true },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
@@ -279,7 +279,7 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: FtpRequestDto) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'person' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge' },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row: FtpRequestDto) => {
@@ -329,7 +329,7 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: DirectoryRequestDto) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'person' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge' },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row: DirectoryRequestDto) => {
@@ -379,7 +379,7 @@ export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: LocalRequest) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'person' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge' },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row: LocalRequest) => {
@@ -426,7 +426,7 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: MailRequestDto) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'person' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge' },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row: MailRequestDto) => {
@@ -527,7 +527,7 @@ export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTra
     { key: 'os', header: 'OS', icon: 'computer', optional: true, width: '8%' },
     { key: 're', header: 'RE', icon: 'sdk', optional: true, width: '8%' },
     { key: 'address', header: 'Adresse', icon: 'fingerprint', sliceable: false, groupable: false, optional: true },
-    { key: 'user', header: 'Utilisateur', icon: 'person', optional: true, width: '10%' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge', optional: true, width: '10%' },
     { key: 'collector', header: 'Collector', icon: 'sensors', optional: true, width: '10%' }
   ],
   defaultSort: { active: 'duration', direction: 'desc' },
