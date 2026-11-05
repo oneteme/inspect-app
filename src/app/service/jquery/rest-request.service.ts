@@ -3,7 +3,8 @@ import {HttpClient} from "@angular/common/http";
 import {forkJoin, map, Observable} from "rxjs";
 import {RestSessionExceptionsByPeriodAndappname} from "src/app/model/jquery.model";
 import {RestRequestDto} from "../../model/request.model";
-import {applyFilterSelections, ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
+import {ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
+import {DATE_HOUR_COLUMNS, fetchGroupedRows, groupColumn, groupOrder, isDateHour, packDateHour} from "./kpi-date-granularity";
 
 /** Colonnes de base de la liste REST ; l'alias (`colonne:alias`) donne la clé de la réponse. */
 const REST_REQUEST_LIST_COLUMNS = 'id,host,method,protocol,path,status,start,end,user,linked';
@@ -56,11 +57,12 @@ export class RestRequestService {
     ): Observable<any[]> {
         const groupAlias = data.group.jquery.buildAlias();
         const stackAlias = data.stack?.jquery.buildAlias();
+        const dateHour = isDateHour(filters.groupedBy, data.group.key);
         // Une requête par série (size_in, size_out, ...)
         const requests = data.series.map(serie => {
             const serieAlias = data.indicator.jquery.buildAlias(serie.jquery.buildAlias());
             const args: any = {
-                'column': `${data.indicator.jquery.value(serie.jquery.value())}:${serieAlias},${data.group.jquery.value()}:${groupAlias}`,
+                'column': `${data.indicator.jquery.value(serie.jquery.value())}:${serieAlias},${groupColumn(data.group, dateHour)}`,
                 'instance.namespace': filters.namespace,
                 'start.ge': filters.start.toISOString(),
                 'start.lt': filters.end.toISOString(),
@@ -71,16 +73,15 @@ export class RestRequestService {
                 args[`${stackAlias}.notNull`] = '';
             }
             if (data.group.jquery.order) {
-                args['order'] = data.group.jquery.order;
+                args['order'] = groupOrder(data.group, dateHour);
             }
-            applyFilterSelections(args, filters.selections);
             if (filters.hosts?.length && !args['host.in']) {
                 args['host.in'] = filters.hosts.join(',');
             }
             if (filters.instanceType) {
                 args['instance.type'] = filters.instanceType;
             }
-            return this.getRestRequest<any[]>(args);
+            return fetchGroupedRows(request => this.getRestRequest<any[]>(request), args, filters.selections, dateHour, groupAlias);
         });
 
         // Fusion des résultats par clé group (+ stack si présent)
@@ -107,9 +108,11 @@ export class RestRequestService {
     }
 
     getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem },
-              filters: {namespace: string, start: Date, end: Date, hosts?: string[], selections?: ChartFilterSelection[], instanceType?: string }): Observable<any[]> {
+              filters: {namespace: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], selections?: ChartFilterSelection[], instanceType?: string }): Observable<any[]> {
+        const groupAlias = data.group.jquery.buildAlias();
+        const dateHour = isDateHour(filters.groupedBy, data.group.key);
         let args: any = {
-            'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
+            'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${groupColumn(data.group, dateHour)}`,
             'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
@@ -120,22 +123,23 @@ export class RestRequestService {
             args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
         }
         if(data.group.jquery.order){
-            args['order'] = `${data.group.jquery.order}`;
+            args['order'] = groupOrder(data.group, dateHour);
         }
-        applyFilterSelections(args, filters.selections);
         if(filters.hosts?.length && !args['host.in']){
             args['host.in'] = filters.hosts.join(',');
         }
         if(filters.instanceType) {
             args['instance.type'] = filters.instanceType;
         }
-        return this.getRestRequest(args);
+        return fetchGroupedRows(request => this.getRestRequest<any[]>(request), args, filters.selections, dateHour, groupAlias);
     }
 
     getLatency(data: {serie: ChartItem, indicator: ChartItem, group: ChartItem, stack?: ChartItem },
-               filters: {namespace: string, start: Date, end: Date, hosts?: string[], method?: string[], selections?: ChartFilterSelection[], instanceType?: string }): Observable<any[]> {
+               filters: {namespace: string, start: Date, end: Date, hosts?: string[], method?: string[], selections?: ChartFilterSelection[], instanceType?: string, groupedBy?: string }): Observable<any[]> {
+        const groupAlias = data.group.jquery.buildAlias();
+        const dateHour = isDateHour(filters.groupedBy, data.group.key);
         let args: any = {
-            'column': `${data.indicator.jquery.value()}(${data.serie.jquery.value()}.minus(rest_session.${data.serie.jquery.value()})):${data.indicator.jquery.buildAlias(data.serie.jquery.buildAlias())},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
+            'column': `${data.indicator.jquery.value()}(${data.serie.jquery.value()}.minus(rest_session.${data.serie.jquery.value()})):${data.indicator.jquery.buildAlias(data.serie.jquery.buildAlias())},${groupColumn(data.group, dateHour)}`,
             'status.gt': 0,
             'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
@@ -150,21 +154,21 @@ export class RestRequestService {
             args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
         }
         if(data.group.jquery.order){
-            args['order'] = `${data.group.jquery.order}`;
+            args['order'] = groupOrder(data.group, dateHour);
         }
-        applyFilterSelections(args, filters.selections);
         if(filters.hosts?.length && !args['host.in']){
             args['host.in'] = filters.hosts.join(',');
         }
         if(filters.instanceType) {
             args['instance.type'] = filters.instanceType;
         }
-        return this.getRestRequest(args);
+        return fetchGroupedRows(request => this.getRestRequest<any[]>(request), args, filters.selections, dateHour, groupAlias);
     }
 
-    getFilters(filter: ChartItem, filters: {namespace: string, start: Date, end: Date, hosts?: string[], instanceType?: string }) {
+    getFilters(filter: ChartItem, filters: {namespace: string, start: Date, end: Date, hosts?: string[], instanceType?: string, groupedBy?: string }) {
+        const dateHour = isDateHour(filters.groupedBy, filter.key);
         let args: any = {
-            'column': `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
+            'column': dateHour ? DATE_HOUR_COLUMNS : `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
             'distinct': 'true',
             'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
@@ -177,7 +181,9 @@ export class RestRequestService {
         if(filters.instanceType) {
             args['instance.type'] = filters.instanceType;
         }
-        return this.getRestRequest(args);
+        return this.getRestRequest<any[]>(args).pipe(
+            map(rows => dateHour ? packDateHour(rows, filter.jquery.buildAlias()) : rows)
+        );
     }
 
     getRestExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<RestSessionExceptionsByPeriodAndappname[]> {

@@ -2,7 +2,8 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {map, Observable} from "rxjs";
 import {ExceptionsByPeriodAndAppname} from "src/app/model/jquery.model";
-import {applyFilterSelections, ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
+import {ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
+import {DATE_HOUR_COLUMNS, fetchGroupedRows, groupColumn, groupOrder, isDateHour, packDateHour} from "./kpi-date-granularity";
 import {MainSessionDto} from "../../model/request.model";
 
 /** Colonnes de base de la liste des sessions principales ; l'alias (`colonne:alias`) donne la clé de la réponse. */
@@ -99,9 +100,11 @@ export class MainSessionService {
     }
 
     getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem },
-              filters: {namespace: string, start: Date, end: Date, hosts?: string[], selections?: ChartFilterSelection[], type: string }): Observable<any[]> {
+              filters: {namespace: string, start: Date, end: Date, hosts?: string[], selections?: ChartFilterSelection[], type: string, groupedBy?: string }): Observable<any[]> {
+        const groupAlias = data.group.jquery.buildAlias();
+        const dateHour = isDateHour(filters.groupedBy, data.group.key);
         let args: any = {
-            'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
+            'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${groupColumn(data.group, dateHour)}`,
             'join': 'instance',
             'instance.namespace': filters.namespace,
             'instance.type': 'SERVER',
@@ -114,18 +117,18 @@ export class MainSessionService {
             args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
         }
         if(data.group.jquery.order){
-            args['order'] = `${data.group.jquery.order}`;
+            args['order'] = groupOrder(data.group, dateHour);
         }
-        applyFilterSelections(args, filters.selections);
         if(filters.hosts?.length && !args['instance.app_name.in']){
             args['instance.app_name.in'] = filters.hosts.join(',');
         }
-        return this.getMainSession(args);
+        return fetchGroupedRows(request => this.getMainSession<any[]>(request), args, filters.selections, dateHour, groupAlias);
     }
 
-    getFilters(filter: ChartItem, filters: {namespace: string, start: Date, end: Date, hosts: string[], type: string }) {
+    getFilters(filter: ChartItem, filters: {namespace: string, start: Date, end: Date, hosts: string[], type: string, groupedBy?: string }) {
+        const dateHour = isDateHour(filters.groupedBy, filter.key);
         let args: any = {
-            'column': `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
+            'column': dateHour ? DATE_HOUR_COLUMNS : `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
             'distinct': 'true',
             'join': 'instance',
             'instance.namespace': filters.namespace,
@@ -137,6 +140,8 @@ export class MainSessionService {
         if(filters.hosts?.length){
             args['instance.app_name.in'] = filters.hosts.join(',');
         }
-        return this.getMainSession(args);
+        return this.getMainSession<any[]>(args).pipe(
+            map(rows => dateHour ? packDateHour(rows, filter.jquery.buildAlias()) : rows)
+        );
     }
 }

@@ -5,9 +5,9 @@ import {QueryParams} from "../../../../model/conf.model";
 import {DatabaseRequestService} from "../../../../service/jquery/database-request.service";
 import {finalize, Observable, of} from "rxjs";
 import {buildSeries,ChartConfig,buildFilterSelections,toFilterValues,pivotByStack,JDBC_STATUS_CHART_CONFIG,JDBC_PERFORMANCE_CHART_CONFIG} from "../../kpi.config";
-import {periodManagement, formatChartDates} from "../../../../shared/util";
-import {ChartProvider, field} from "@oneteme/jquery-core";
-import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
+import {periodManagement, formatChartDates, buildPeriodSliceDisplay, resolvePeriodGranularity} from "../../../../shared/util";
+import {ChartProvider, field, buildPeriodOptions, remapSliceKeys} from "@oneteme/jquery-core";
+import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, OrganizerXOption, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
 import {withKpiChartTypes} from "../../kpi-chart-type";
 
@@ -66,6 +66,8 @@ export class JdbcComponent implements OnInit {
 
   params: QueryParams;
   groupedBy: string = '';
+  $statusGranularity: string = '';
+  $performanceGranularity: string = '';
 
   @Input() set queryParams(value: QueryParams) {
     if (value) {
@@ -73,6 +75,8 @@ export class JdbcComponent implements OnInit {
       this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
 
       // Initialize ChartConfigs and OrganizerConfigs
+      this.$statusGranularity = this.groupedBy;
+      this.$performanceGranularity = this.groupedBy;
       this.$statusRepartition.chartConfig = JDBC_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = JDBC_PERFORMANCE_CHART_CONFIG(this.groupedBy);
 
@@ -99,6 +103,11 @@ export class JdbcComponent implements OnInit {
     if (event.type === 'viewSwitched') {
       this.$statusView = event.state.viewMode ?? 'chart';
     }
+    const granularity = this._resolveGranularityAfterX(event, this.$statusGranularity);
+    if (granularity !== this.$statusGranularity) {
+      this.$statusGranularity = granularity;
+      this.$statusRepartition.chartConfig = JDBC_STATUS_CHART_CONFIG(granularity);
+    }
     const result = this._handleOrganizerEvent(event, this.$statusRepartition.chartConfig, this.$statusOrganizer, this._statusOrganizerOptions());
     this.$statusOrganizer = withKpiChartTypes(result.binding, this.$statusChartType);
     if (result.shouldRefetch) {
@@ -124,6 +133,11 @@ export class JdbcComponent implements OnInit {
       this.$performanceOrganizer = withKpiChartTypes(this.$performanceOrganizer, this.$performanceChartType);
       this._cdr.markForCheck();
       return;
+    }
+    const granularity = this._resolveGranularityAfterX(event, this.$performanceGranularity);
+    if (granularity !== this.$performanceGranularity) {
+      this.$performanceGranularity = granularity;
+      this.$performanceRepartition.chartConfig = JDBC_PERFORMANCE_CHART_CONFIG(granularity);
     }
     const result = this._handleOrganizerEvent(event, this.$performanceRepartition.chartConfig, this.$performanceOrganizer, this._performanceOrganizerOptions());
     this.$performanceOrganizer = withKpiChartTypes(result.binding, this.$performanceChartType);
@@ -156,7 +170,7 @@ export class JdbcComponent implements OnInit {
     this._fetchPerformance();
   }
 
-  private _fetchSliceData(chartConfig: ChartConfig, filterKey: string): Observable<any[]> {
+  private _fetchSliceData(chartConfig: ChartConfig, filterKey: string, granularity: string): Observable<any[]> {
     const filter = chartConfig.filters?.items?.find(item => item.key === filterKey);
     if (!filter) {
       return of([]);
@@ -164,7 +178,7 @@ export class JdbcComponent implements OnInit {
 
     return this._jdbcRequestService.getFilters(
       filter,
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: granularity }
     ) as Observable<any[]>;
   }
 
@@ -185,10 +199,10 @@ export class JdbcComponent implements OnInit {
     this.$statusRepartition.data = [];
     this._jdbcRequestService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, selections: buildFilterSelections(cfg, this.$statusFilterValues) }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$statusGranularity, selections: buildFilterSelections(cfg, this.$statusFilterValues) }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
-      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
+      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$statusGranularity, this.datePipe, this.params.period.start) : data;
       const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
       const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
       this.$statusRepartition.rawData = formattedData;
@@ -212,10 +226,10 @@ export class JdbcComponent implements OnInit {
     this.$performanceRepartition.data = [];
     this._jdbcRequestService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, selections: buildFilterSelections(cfg, this.$performanceFilterValues) }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$performanceGranularity, selections: buildFilterSelections(cfg, this.$performanceFilterValues) }
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
-      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
+      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$performanceGranularity, this.datePipe, this.params.period.start) : data;
       const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
       const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
       this.$performanceRepartition.data = pivoted;
@@ -297,7 +311,7 @@ export class JdbcComponent implements OnInit {
     this.$userRepartition.loading = true;
     this._jdbcRequestService.getDatabaseRequest(args)
       .pipe(finalize(() => this.$userRepartition.loading = false))
-      .subscribe({ next: (res: any[]) => { this.$userRepartition.data = formatChartDates(res, this.groupedBy, this.datePipe); } });
+      .subscribe({ next: (res: any[]) => { this.$userRepartition.data = formatChartDates(res, this.groupedBy, this.datePipe, this.params.period.start); } });
   }
 
   getDependencies(): void {
@@ -346,7 +360,10 @@ export class JdbcComponent implements OnInit {
 
   private _statusOrganizerOptions(): OrganizerChartBridgeOptions {
     return {
-      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$statusRepartition.chartConfig, filterKey),
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$statusRepartition.chartConfig, filterKey, this.$statusGranularity),
+      resolveSliceDisplay: (filterKey: string) => this._resolvePeriodSliceDisplay(filterKey, this.$statusGranularity),
+      resolveXOptions: (groupKey: string) => this._resolveXOptions(groupKey),
+      remapSliceSelection: remapSliceKeys,
       onExportVisual: () => this._statusChart?.exportImage('disponibilite'),
       onExportData: () => this._statusChart?.exportData('disponibilite')
     };
@@ -354,10 +371,28 @@ export class JdbcComponent implements OnInit {
 
   private _performanceOrganizerOptions(): OrganizerChartBridgeOptions {
     return {
-      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$performanceRepartition.chartConfig, filterKey),
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$performanceRepartition.chartConfig, filterKey, this.$performanceGranularity),
+      resolveSliceDisplay: (filterKey: string) => this._resolvePeriodSliceDisplay(filterKey, this.$performanceGranularity),
+      resolveXOptions: (groupKey: string) => this._resolveXOptions(groupKey),
+      remapSliceSelection: remapSliceKeys,
       onExportVisual: () => this._performanceChart?.exportImage('performance'),
       onExportData: () => this._performanceChart?.exportData('performance'),
     };
+  }
+
+  private _resolvePeriodSliceDisplay(filterKey: string, granularity: string) {
+    return filterKey === 'date' ? buildPeriodSliceDisplay(granularity, this.params.period.start) : undefined;
+  }
+
+  private _resolveXOptions(groupKey: string): OrganizerXOption[] | undefined {
+    return groupKey === 'date' ? buildPeriodOptions() : undefined;
+  }
+
+  private _resolveGranularityAfterX(event: OrganizerButtonEvent, current: string): string {
+    if (event.type !== 'xSelected' || event.state.selectedX !== 'date') {
+      return current;
+    }
+    return resolvePeriodGranularity(event.state.selectedXOption, this.params.period.start, this.params.period.end);
   }
 
   private _handleOrganizerEvent(

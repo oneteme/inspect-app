@@ -2,8 +2,9 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {forkJoin, map, Observable} from "rxjs";
 import {ExceptionsByPeriodAndAppname} from "../../model/jquery.model";
-import {applyFilterSelections, ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
+import {ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
 import {RestSessionDto} from "../../model/request.model";
+import {DATE_HOUR_COLUMNS, fetchGroupedRows, groupColumn, groupOrder, isDateHour, packDateHour} from "./kpi-date-granularity";
 
 /** Colonnes de base de la liste REST ; l'alias (`colonne:alias`) donne la clé de la réponse. */
 const REST_SESSION_LIST_COLUMNS = 'id,api_name:name,method,protocol,path,status,start,end,user,instance.app_name:appName';
@@ -19,58 +20,6 @@ const LAZY_REST_SESSION_COLUMNS: Record<string, string> = {
     cacheControl: 'cache_control:cacheControl',
     query: 'query'
 };
-
-/** Granularité composite « jour + heure » (une requête par jour pour un filtre exact, cf. buildSelectionRequests). */
-export const DATE_HOUR_GROUPED_BY = 'dateHour';
-const DATE_HOUR_COLUMNS = 'start.monthDay.varchar:day,start.hour.varchar:hour';
-const DATE_HOUR_ORDER = 'start.monthDay.asc,start.hour.asc';
-
-/** Le serveur ne groupe pas sur jour + heure en une seule colonne : on groupe sur deux colonnes, puis on les assemble en `MM-dd HH`. */
-function packDateHour(rows: any[], alias: string): any[] {
-    return rows.map(({ day, hour, ...rest }) => ({ ...rest, [alias]: `${day} ${hour}` }));
-}
-
-function groupColumn(group: ChartItem, dateHour: boolean): string {
-    return dateHour ? DATE_HOUR_COLUMNS : `${group.jquery.value()}:${group.jquery.buildAlias()}`;
-}
-
-function groupOrder(group: ChartItem, dateHour: boolean): string | undefined {
-    return dateHour ? DATE_HOUR_ORDER : group.jquery.order;
-}
-
-/**
- * Requêtes à envoyer pour les sélections. Pour un groupement « jour + heure » par date, une requête par jour :
- * chaque couple (jour, heure) coché reste exact et les lignes de jours différents ne se mélangent pas.
- * Sinon une seule requête : les jours et heures cochés sont combinés (un couple non coché peut donc apparaître).
- */
-function buildSelectionRequests(args: any, selections: ChartFilterSelection[] | undefined, groupedBy: string | undefined, splitByDay: boolean): any[] {
-    const dateSelection = groupedBy === DATE_HOUR_GROUPED_BY ? selections?.find(s => s.filter.key === 'date' && s.values?.length) : undefined;
-    const parts = dateSelection?.values.map(v => v.split(' ')).filter(([day, hour]) => day && hour) ?? [];
-    if (!dateSelection || !parts.length) {
-        const request = { ...args };
-        applyFilterSelections(request, selections);
-        return [request];
-    }
-
-    const others = selections?.filter(s => s !== dateSelection);
-    const slices = splitByDay
-        ? [...new Set(parts.map(([day]) => day))].map(day => ({
-            days: [day],
-            hours: parts.filter(([d]) => d === day).map(([, hour]) => hour)
-        }))
-        : [{
-            days: [...new Set(parts.map(([day]) => day))],
-            hours: [...new Set(parts.map(([, hour]) => hour))]
-        }];
-
-    return slices.map(({ days, hours }) => {
-        const request = { ...args };
-        applyFilterSelections(request, others);
-        request['start.monthDay.varchar.in'] = days.join(',');
-        request['start.hour.varchar.in'] = hours.join(',');
-        return request;
-    });
-}
 
 @Injectable({ providedIn: 'root' })
 export class RestSessionService {
@@ -179,7 +128,7 @@ export class RestSessionService {
     ): Observable<any[]> {
         const groupAlias = data.group.jquery.buildAlias();
         const stackAlias = data.stack?.jquery.buildAlias();
-        const dateHour = filters.groupedBy === DATE_HOUR_GROUPED_BY && data.group.key === 'date';
+        const dateHour = isDateHour(filters.groupedBy, data.group.key);
 
         // Une requête par série (size_in, size_out, ...)
         const requests = data.series.map(serie => {
@@ -201,13 +150,7 @@ export class RestSessionService {
             if (filters.hosts?.length && !args['host.in']) {
                 args['host.in'] = filters.hosts.join(',');
             }
-            const selectionRequests = buildSelectionRequests(args, filters.selections, filters.groupedBy, dateHour);
-            return forkJoin(selectionRequests.map(request => this.getRestSession<any[]>(request))).pipe(
-                map(results => {
-                    const rows = results.flat();
-                    return dateHour ? packDateHour(rows, groupAlias) : rows;
-                })
-            );
+            return fetchGroupedRows(request => this.getRestSession<any[]>(request), args, filters.selections, dateHour, groupAlias);
         });
 
         // Fusion des résultats par clé group (+ stack si présent)
@@ -236,7 +179,7 @@ export class RestSessionService {
     getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem },
               filters: {namespace: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], selections?: ChartFilterSelection[] }): Observable<any[]> {
         const groupAlias = data.group.jquery.buildAlias();
-        const dateHour = filters.groupedBy === DATE_HOUR_GROUPED_BY && data.group.key === 'date';
+        const dateHour = isDateHour(filters.groupedBy, data.group.key);
 
         let args: any = {
             'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${groupColumn(data.group, dateHour)}`,
@@ -255,17 +198,11 @@ export class RestSessionService {
         if(filters.hosts?.length && !args['instance.app_name.in']){
             args['instance.app_name.in'] = filters.hosts.join(',');
         }
-        const selectionRequests = buildSelectionRequests(args, filters.selections, filters.groupedBy, dateHour);
-        return forkJoin(selectionRequests.map(request => this.getRestSession<any[]>(request))).pipe(
-            map(results => {
-                const rows = results.flat();
-                return dateHour ? packDateHour(rows, groupAlias) : rows;
-            })
-        );
+        return fetchGroupedRows(request => this.getRestSession<any[]>(request), args, filters.selections, dateHour, groupAlias);
     }
 
     getFilters(filter: ChartItem, filters: {namespace: string, start: Date, end: Date, hosts: string[], groupedBy?: string }): Observable<any[]> {
-        const dateHour = filters.groupedBy === DATE_HOUR_GROUPED_BY && filter.key === 'date';
+        const dateHour = isDateHour(filters.groupedBy, filter.key);
         let args: any = {
             'column': dateHour ? DATE_HOUR_COLUMNS : `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
             'distinct': 'true',
