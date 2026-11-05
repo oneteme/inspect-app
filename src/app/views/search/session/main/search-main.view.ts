@@ -250,7 +250,7 @@ export class SearchMainView implements OnInit, OnDestroy {
   selectedRequest(event: MouseEvent, row: MainSessionDto) {
     if (row) {
       this._router.navigateOnClick(event, ['/session', this.type, row.id], {
-        queryParams: {'namespace': this.queryParams.namespace}
+        queryParams: {...this.queryParams.period.buildParams(), namespace: this.queryParams.namespace}
       });
     }
   }

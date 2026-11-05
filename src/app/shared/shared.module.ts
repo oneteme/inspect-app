@@ -10,13 +10,11 @@ import {ExceptionTypePipe} from "./pipe/exception-type.pipe";
 import {TruncStringPipe} from "./pipe/trunc-string.pipe";
 import {TimelineComponent} from "./_component/timeline/timeline.component";
 import {TypeColumnFormatPipe} from "./pipe/type-column-format";
-import {ExceptionDisplayComponent} from "./_component/exception-display/exception-display.component";
 import {StacktraceDialogComponent} from './_component/exception-display/stacktrace-dialog/stacktrace-dialog.component';
 import {VersionBadgeComponent} from "./_component/version-badge/version-badge.component";
 import {StatusIndicatorComponent} from "./_component/status-indicator/status-indicator.component";
 import {ServerCardComponent} from "./_component/server-card/server-card.component";
 import {BranchChipComponent} from "./_component/branch-hash-badge/branch-chip.component";
-import {LogTableComponent} from "./_component/table/log-table/log-table.component";
 import {JqtCellDefDirective, TableComponent} from "@oneteme/jquery-table";
 import {StageTableComponent} from "./_component/table/stage-table/stage-table.component";
 import {PulseComponent} from "./_component/pulse/pulse.component";
@@ -60,13 +58,11 @@ export const MY_DATE_FORMATS = {
     TruncStringPipe,
     TypeColumnFormatPipe,
     TimelineComponent,
-    ExceptionDisplayComponent,
     StacktraceDialogComponent,
     VersionBadgeComponent,
     BranchChipComponent,
     StatusIndicatorComponent,
     ServerCardComponent,
-    LogTableComponent,
     StageTableComponent,
     PulseComponent,
     PulseDialogComponent,
@@ -85,12 +81,10 @@ export const MY_DATE_FORMATS = {
     TruncStringPipe,
     TypeColumnFormatPipe,
     TimelineComponent,
-    ExceptionDisplayComponent,
     VersionBadgeComponent,
     BranchChipComponent,
     StatusIndicatorComponent,
     ServerCardComponent,
-    LogTableComponent,
     TableComponent,
     JqtCellDefDirective,
     StageTableComponent,

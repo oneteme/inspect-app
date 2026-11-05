@@ -563,6 +563,7 @@ export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
       sortValue: (row: SessionEventDto) => row.value || row.type || '',
       searchValue: (row: SessionEventDto) => fmtMethod(row.type) + ' ' + (row.value || '')
     },
+    { key: 'threadName', header: 'Thread', lazy: true, icon: 'memory' },
     { key: 'action', header: 'Action', icon: 'touch_app', width: '10%', sliceable: false, groupable: false, sortable: false },
 
   ],

@@ -8,20 +8,20 @@ import {MatDialog} from '@angular/material/dialog';
 import {ChartProvider, field} from '@oneteme/jquery-core';
 import {TableProvider} from '@oneteme/jquery-table';
 import {catchError, EMPTY, finalize, merge, Subject, switchMap, takeUntil, tap} from 'rxjs';
-import {LogEntry} from '../../../../model/trace.model';
-import {LogEntryService} from '../../../../service/jquery/log-entry.service';
-import {InstanceTraceService, SequenceLossEvent} from '../../../../service/jquery/instance-trace.service';
-import {PageTitleService} from '../../../../service/page-title.service';
-import {InstanceService} from '../../../../service/jquery/instance.service';
-import {StacktraceDialogComponent} from '../../../../shared/_component/exception-display/stacktrace-dialog/stacktrace-dialog.component';
-import {LOG_TABLE_CONFIG} from '../../../../shared/_component/table/table.config';
-import {app} from '../../../../../environments/environment';
-import {getDefaultRelativePeriod} from '../../../../shared/period-filter';
-import {IPeriod} from '../../../../model/conf.model';
-import {CustomDateAdapter} from '../../../../shared/material/custom-date-adapter';
-import {CustomDateRangeSelectionStrategy} from '../../../../shared/material/custom-date-range-selection-strategy';
-import {MY_DATE_FORMATS} from '../../../../shared/shared.module';
-import {ActivityPeriodGroup, activityPeriodManagement} from '../../../../shared/util';
+import {LogEntry} from '../../../model/trace.model';
+import {LogEntryService} from '../../../service/jquery/log-entry.service';
+import {InstanceTraceService, SequenceLossEvent} from '../../../service/jquery/instance-trace.service';
+import {PageTitleService} from '../../../service/page-title.service';
+import {InstanceService} from '../../../service/jquery/instance.service';
+import {StacktraceDialogComponent} from '../../../shared/_component/exception-display/stacktrace-dialog/stacktrace-dialog.component';
+import {LOG_TABLE_CONFIG} from '../../../shared/_component/table/table.config';
+import {app} from '../../../../environments/environment';
+import {getDefaultRelativePeriod} from '../../../shared/period-filter';
+import {IPeriod} from '../../../model/conf.model';
+import {CustomDateAdapter} from '../../../shared/material/custom-date-adapter';
+import {CustomDateRangeSelectionStrategy} from '../../../shared/material/custom-date-range-selection-strategy';
+import {MY_DATE_FORMATS} from '../../../shared/shared.module';
+import {ActivityPeriodGroup, activityPeriodManagement} from '../../../shared/util';
 
 interface ActivityFilters {
   namespace: string;
@@ -249,7 +249,7 @@ export class ServerActivityView implements OnDestroy {
   openLogStacktrace(row: LogEntry): void {
     console.log(row)
     this._dialog.open(StacktraceDialogComponent, {
-      data: {message: row.message, stackRows: row.stackRows}
+      data: {message: row.message, stack: row.stacktrace}
     });
   }
 
@@ -277,7 +277,7 @@ export class ServerActivityView implements OnDestroy {
         return new IPeriod(start, end);
       }
     }
-    const fallback = getDefaultRelativePeriod(24);
+    const fallback = getDefaultRelativePeriod(60);
     return new IPeriod(fallback.start, fallback.end);
   }
 

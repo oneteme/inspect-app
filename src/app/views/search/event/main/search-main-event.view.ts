@@ -86,7 +86,7 @@ export class SearchMainEventView {
                 });
                 const typeParam = params.type || params.rangestatus;
                 const types = !typeParam ? [] : Array.isArray(typeParam) ? typeParam : [typeParam];
-                if (params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.namespace || app.defaultNamespace, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server], null, null, null, null, types);
+                if (params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.namespace || app.defaultNamespace, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server], null, null, types);
                 if (!params.start && !params.end) {
                     let period;
                     if (params.step && params.from) {
@@ -94,7 +94,7 @@ export class SearchMainEventView {
                     } else if (params.step) {
                         period = new IStep(Number(params.step));
                     }
-                    this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), params.namespace || app.defaultNamespace, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server], null, null, null, null, types);
+                    this.queryParams = new QueryParams(period || extractPeriod(app.gridViewPeriod, "gridViewPeriod"), params.namespace || app.defaultNamespace, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server], null, null, types);
                 }
                 if (params.q) {
                     this.queryParams.optional = {q: params.q};
@@ -291,7 +291,7 @@ export class SearchMainEventView {
 
     private navigateToSession(event: MouseEvent, type: string, sessionId: string) {
         this._router.navigateOnClick(event, ['/session', type, sessionId], {
-            queryParams: { namespace: this.queryParams.namespace }
+            queryParams: {...this.queryParams.period.buildParams(), namespace: this.queryParams.namespace }
         });
     }
 

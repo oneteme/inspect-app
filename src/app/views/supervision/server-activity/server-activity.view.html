@@ -84,7 +84,7 @@
           </ng-template>
 
           <ng-template jqtCellDef="message" let-row>
-            {{ row.message }}
+            <span [title]="row.message">{{ row.message }}</span>
           </ng-template>
 
           <ng-template jqtCellDef="stack" let-row>

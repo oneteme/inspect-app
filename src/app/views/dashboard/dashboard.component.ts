@@ -878,7 +878,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     get hasSelectedInsights(): boolean { return this.selectedInsights.size > 0; }
 
     navigateOnStatusIndicator(event: MouseEvent, row: any): void {
-        this._router.navigateOnClick(event, ['/supervision', row.type.toLowerCase(), row.id], {
+        this._router.navigateOnClick(event, ['/supervision/server', row.id], {
             queryParams: this.buildSupervisionQueryParams(row.namespace)
         });
     }

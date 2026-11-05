@@ -149,14 +149,18 @@ export interface ExceptionInfo {
   type: string;
   message: string;
   offset?: number;
-  stackTraceRows: StackTraceRow[];
-  cause: ExceptionInfo;
+  stackTraceRows?: StackTraceRow[];
+  cause?: ExceptionInfo;
+  hasStack?: boolean;
+  traceId?: string;
+  traceType?: number;
 }
 
 export interface StackTraceRow {
   className: string;
   methodName: string;
   lineNumber: number;
+  fileName?: string | null;
 }
 
 export interface InstanceEnvironment {
@@ -209,7 +213,7 @@ export interface LogEntry {
   message: string;
   thread: string;
   action: string;
-  stackRows: StackTraceRow[] | string;
+  stacktrace: string;
 }
 
 export interface StagePayload {

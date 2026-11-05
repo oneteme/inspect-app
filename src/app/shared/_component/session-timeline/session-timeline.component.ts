@@ -1,8 +1,9 @@
-import {Component, Input, OnDestroy} from '@angular/core';
+import {Component, inject, Input, OnDestroy} from '@angular/core';
 import {PageEvent} from '@angular/material/paginator';
 import {ExceptionInfo, SessionEvent} from '../../../model/trace.model';
 import {MatDialog} from '@angular/material/dialog';
 import {StacktraceDialogComponent} from '../exception-display/stacktrace-dialog/stacktrace-dialog.component';
+import {ExceptionService} from "../../../service/jquery/exception.service";
 
 interface TimelineItem {
     kind: 'event' | 'exception';
@@ -16,9 +17,13 @@ interface TimelineItem {
     styleUrls: ['./session-timeline.component.scss']
 })
 export class SessionTimelineComponent implements OnDestroy {
+    private readonly _exceptionService: ExceptionService = inject(ExceptionService);
+
     copiedItem: TimelineItem | null = null;
     copyFeedback = '';
     copySucceeded = false;
+    private readonly expandedExceptionMessages = new Set<TimelineItem>();
+    private readonly exceptionMessageLengthThreshold = 120;
     private copyTimer?: ReturnType<typeof setTimeout>;
 
     constructor(private dialog: MatDialog) {}
@@ -127,6 +132,26 @@ export class SessionTimelineComponent implements OnDestroy {
             .join(' : ');
     }
 
+    hasLongExceptionMessage(item: TimelineItem): boolean {
+        return (item.exception?.message?.length ?? 0) > this.exceptionMessageLengthThreshold;
+    }
+
+    isExceptionMessageExpanded(item: TimelineItem): boolean {
+        return this.expandedExceptionMessages.has(item);
+    }
+
+    isExceptionMessageCollapsed(item: TimelineItem): boolean {
+        return this.hasLongExceptionMessage(item) && !this.isExceptionMessageExpanded(item);
+    }
+
+    toggleExceptionMessage(item: TimelineItem): void {
+        if (this.isExceptionMessageExpanded(item)) {
+            this.expandedExceptionMessages.delete(item);
+        } else {
+            this.expandedExceptionMessages.add(item);
+        }
+    }
+
     onItemCopied(item: TimelineItem, success: boolean): void {
         this.copiedItem = item;
         this.copySucceeded = success;
@@ -136,15 +161,21 @@ export class SessionTimelineComponent implements OnDestroy {
     }
 
     showExceptionStacktrace(exception: ExceptionInfo): void {
-        this.dialog.open(StacktraceDialogComponent, {
-            width: '80vw',
-            height: '60vh',
-            data: {
-                type: exception.type,
-                message: exception.message,
-                stackTraceRows: exception.stackTraceRows
-            }
-        });
+        this._exceptionService.getStacktrace(exception.traceId, exception.offset, exception.traceType)
+            .subscribe({
+                next: res => {
+                    this.dialog.open(StacktraceDialogComponent, {
+                        width: '80vw',
+                        height: '60vh',
+                        data: {
+                            type: exception.type,
+                            message: exception.message,
+                            stack: res.stacktrace,
+                            cause: res.cause
+                        }
+                    });
+                }
+            })
     }
 
     ngOnDestroy(): void {

@@ -83,7 +83,7 @@
   <ng-template jqtCellDef="resource" let-row>
     <span style="font-weight: bold;">{{ row.method | typeColumnFormat }}</span>
     <br>
-    {{ row.path }}
+    <span [title]="row.path">{{ row.path }}</span>
   </ng-template>
 
   <ng-template jqtCellDef="start" let-row>
@@ -97,7 +97,7 @@
       <mat-spinner [diameter]="14"></mat-spinner>
       En cours...
     </div>
-    <div *ngIf="row.end" [matTooltip]="row.end * 1000 | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr'">
+    <div *ngIf="row.end" [title]="row.end * 1000 | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr'">
       {{ {start: row.start, end: row.end} | duration }}
     </div>
   </ng-template>

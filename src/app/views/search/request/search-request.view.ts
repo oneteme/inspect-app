@@ -257,71 +257,47 @@ export class SearchRequestView implements OnInit, OnDestroy {
 
   selectedRemote(event: { event: MouseEvent, row: any }) {
     event.event.stopPropagation();
-    if (event.event.ctrlKey) {
-      this._router.open(`#/session/rest/${event.row}`, '_blank')
-    } else {
-      this._router.navigate(['/session/rest', event.row], {
-        queryParams: { namespace: this.queryParams.namespace }
-      });
-    }
+    this._router.navigateOnClick(event.event, ['/session/rest', event.row], {
+      queryParams: { ...this.queryParams.period.buildParams(), namespace: this.queryParams.namespace }
+    });
   }
 
   selectedRest(event: { event: MouseEvent, row: any }) {
     if (event.event) event.event.stopPropagation();
-    if (event.event?.ctrlKey) {
-      this._router.open(`#/request/rest/${event.row}`, '_blank')
-    } else {
-      this._router.navigate(['/request/rest', event.row], {
-        queryParams: { namespace: this.queryParams.namespace }
-      });
-    }
+    this._router.navigateOnClick(event.event, ['/request/rest', event.row], {
+      queryParams: { ...this.queryParams.period.buildParams(), namespace: this.queryParams.namespace }
+    });
   }
 
   selectedSmtp(event: { event: MouseEvent, row: any }) {
     if (event.row) {
-      if (event.event.ctrlKey) {
-        this._router.open(`#/request/smtp/${event.row}`, '_blank',)
-      } else {
-        this._router.navigate([`/request/smtp`, event.row], {
-          queryParams: { namespace: this.queryParams.namespace }
-        });
-      }
+      this._router.navigateOnClick(event.event, [`/request/smtp`, event.row], {
+        queryParams: { ...this.queryParams.period.buildParams(), namespace: this.queryParams.namespace }
+      });
     }
   }
 
   selectedLdap(event: { event: MouseEvent, row: any }) {
     if (event.row) {
-      if (event.event.ctrlKey) {
-        this._router.open(`#/request/ldap/${event.row}`, '_blank',)
-      } else {
-        this._router.navigate([`/request/ldap`, event.row], {
-          queryParams: { namespace: this.queryParams.namespace }
-        });
-      }
+      this._router.navigateOnClick(event.event, [`/request/ldap`, event.row], {
+        queryParams: { ...this.queryParams.period.buildParams(), namespace: this.queryParams.namespace }
+      });
     }
   }
 
   selectedFtp(event: { event: MouseEvent, row: any }) {
     if (event.row) {
-      if (event.event.ctrlKey) {
-        this._router.open(`#/request/ftp/${event.row}`, '_blank',)
-      } else {
-        this._router.navigate([`/request/ftp`, event.row], {
-          queryParams: { namespace: this.queryParams.namespace }
-        });
-      }
+      this._router.navigateOnClick(event.event, [`/request/ftp`, event.row], {
+        queryParams: { ...this.queryParams.period.buildParams(), namespace: this.queryParams.namespace }
+      });
     }
   }
 
   selectedQuery(event: { event: MouseEvent, row: any }) {
     if (event.row) {
-      if (event.event.ctrlKey) {
-        this._router.open(`#/request/jdbc/${event.row}`, '_blank',)
-      } else {
-        this._router.navigate([`/request/jdbc`, event.row], {
-          queryParams: { namespace: this.queryParams.namespace }
-        });
-      }
+      this._router.navigateOnClick(event.event, [`/request/jdbc`, event.row], {
+        queryParams: { ...this.queryParams.period.buildParams(), namespace: this.queryParams.namespace }
+      });
     }
   }
 

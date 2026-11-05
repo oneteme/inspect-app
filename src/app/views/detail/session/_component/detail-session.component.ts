@@ -128,11 +128,11 @@ export class DetailSessionComponent implements OnChanges {
       {
         label: 'Événements',
         icon: Constants.MAPPING_TYPE['event'].icon,
-        count: this.sessionEvents.length + this.sessionExceptions.length,
-        visible: this.sessionEvents.length > 0 || this.sessionExceptions.length > 0,
+        count: this.sessionEvents?.length + this.sessionExceptions?.length,
+        visible: this.sessionEvents?.length > 0 || this.sessionExceptions?.length > 0,
         type: 'action',
-        hasError: this.sessionExceptions.length > 0,
-        errorCount: this.sessionExceptions.length || 0
+        hasError: this.sessionExceptions?.length > 0,
+        errorCount: this.sessionExceptions?.length || 0
       },
       {
         label: 'Chronologie',
