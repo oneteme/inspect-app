@@ -552,6 +552,9 @@ export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'appName', header: 'Application', width: '15%', icon:'widgets' },
+    { key: 'namespace', header: 'Namespace', icon: 'layers', width: '10%', lazy: true },
+    { key: 'scope', header: 'Thread', icon: 'call_split', width: '10%', lazy: true },
+    { key: 'sessionId', header: 'Session', icon: 'fingerprint', optional: true, groupable: false, sliceable: false },
     {
       key: 'instant', header: 'Date', icon: 'schedule', width: '10%', groupable: false, sliceable: false,
       searchValue: (row: SessionEventDto) => fmtStart(row.instant)

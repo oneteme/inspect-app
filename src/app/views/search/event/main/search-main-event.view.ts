@@ -1,5 +1,5 @@
 import {Component, inject} from '@angular/core';
-import {finalize} from 'rxjs';
+import {finalize, map, Observable} from 'rxjs';
 import {TableProvider} from "@oneteme/jquery-table";
 import {HttpErrorResponse} from "@angular/common/http";
 import {SessionEventDto} from "../../../../model/request.model";
@@ -59,10 +59,16 @@ export class SearchMainEventView {
     filters: { icon: string; label: string; color: string; value: any }[] = [...this._baseFilters];
 
     tableConfig: TableProvider<SessionEventDto> = this.buildTableConfig();
+    /** Critères de la requête de base, rejoués avec les colonnes lazy. */
+    private _criteria: Record<string, any> = {};
+    /** Colonnes lazy déjà demandées : la requête de base les inclut, pour que `data` les contienne. */
+    private _lazyColumns: string[] = [];
+    private readonly _logTypes = new Set(['INFO', 'WARN', 'ERROR']);
 
     private buildTableConfig(initialQuery?: string): TableProvider<SessionEventDto> {
         return {
             ...SESSION_EVENT_TABLE_CONFIG,
+            lazyLoader: columns => this.loadLazyColumns(columns),
             search: initialQuery
                 ? {...SESSION_EVENT_TABLE_CONFIG.search, initialQuery, searchColumns: ['exception']}
                 : SESSION_EVENT_TABLE_CONFIG.search
@@ -134,22 +140,19 @@ export class SearchMainEventView {
         if (this.queryParams.period?.end) {
             params['start.lt'] = this.queryParams.period.end.toISOString();
         }
+        this._criteria = params;
         const isLogRoute = this._activatedRoute.snapshot.data['isLogRoute'];
 
-        this._sessionEventService.getSessionEvents(params)
+        this._sessionEventService.getSessionEvents(params, this._lazyColumns)
             .pipe(finalize(() => this.isLoading = false))
             .subscribe({
                 next: d => {
-
-                    const logTypes = new Set(['INFO', 'WARN', 'ERROR']);
                     if (!d) {
                         this.events = [];
                         return;
                     }
-                    if (isLogRoute) {
-                        this.events = d.filter(event => logTypes.has(event.type));
-                    } else {
-                        this.events = d.filter(e => !logTypes.has(e.type));
+                    this.events = this.filterByRoute(d, isLogRoute);
+                    if (!isLogRoute) {
                         this.filters = [...new Set(this.events.map(e => e.type))].map(type => ({
                             icon: STATUS['2xx'].icon, label: type, color: STATUS['2xx'].color, value: type
                         }));
@@ -161,6 +164,18 @@ export class SearchMainEventView {
                     }
                 }
             });
+    }
+
+    /** `/event/log` garde INFO/WARN/ERROR, `/event/user` garde les autres types. */
+    private filterByRoute(rows: SessionEventDto[], isLogRoute: boolean): SessionEventDto[] {
+        return rows.filter(e => this._logTypes.has(e.type) === isLogRoute);
+    }
+
+    private loadLazyColumns(columns: string[]): Observable<SessionEventDto[]> {
+        this._lazyColumns = [...columns];
+        const isLogRoute = this._activatedRoute.snapshot.data['isLogRoute'];
+        return this._sessionEventService.getSessionEvents(this._criteria, this._lazyColumns)
+            .pipe(map(rows => this.filterByRoute(rows ?? [], isLogRoute)));
     }
 
     search() {
