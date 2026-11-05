@@ -34,15 +34,21 @@
                                   class="exception-bar fail">
                                 <span class="exception-text">
                                     <span *ngIf="item.exception?.type" class="exception-type">{{item.exception?.type}}</span>
-                                    <span *ngIf="item.exception?.type && item.exception?.message" class="exception-separator">·</span>
                                     <span *ngIf="item.exception?.message"
                                           class="exception-message"
-                                          [matTooltip]="item.exception?.message">
+                                          [class.collapsed]="isExceptionMessageCollapsed(item)">
                                         {{item.exception?.message}}
                                     </span>
+                                    <button *ngIf="hasLongExceptionMessage(item)"
+                                            class="exception-toggle"
+                                            (click)="$event.stopPropagation(); toggleExceptionMessage(item)"
+                                            (keydown)="$event.stopPropagation()"
+                                            [attr.aria-expanded]="isExceptionMessageExpanded(item)">
+                                        {{isExceptionMessageExpanded(item) ? 'Voir moins' : 'Voir plus'}}
+                                    </button>
                                 </span>
                                 <span class="exception-actions">
-                                    <button *ngIf="item.exception?.stackTraceRows"
+                                    <button *ngIf="item.exception?.hasStack"
                                             class="exception-action"
                                             (click)="$event.stopPropagation(); showExceptionStacktrace(item.exception!)"
                                             (keydown)="$event.stopPropagation()"

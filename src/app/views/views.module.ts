@@ -31,7 +31,6 @@ import {DetailLocalTableComponent} from "./detail/session/_component/local-table
 import {NumberFormatterPipe, CompactNumberPipe} from '../shared/pipe/number.pipe';
 import {SearchRequestView} from "./search/request/search-request.view";
 import {DetailTimelineComponent} from "./detail/session/_component/timeline/detail-timeline.component";
-import {ActionTableComponent} from "./detail/session/_component/action-table/action-table.component";
 import {DetailRequestView} from "./detail/request/detail-request.view";
 import {DetailRestView} from "./detail/request/rest/detail-rest.view";
 import {MailTableComponent} from "./detail/request/smtp/_component/mail-table/mail-table.component";
@@ -111,7 +110,6 @@ import {SearchMainEventView} from "./search/event/main/search-main-event.view";
     TreeView,
     NumberFormatterPipe,
     CompactNumberPipe,
-    ActionTableComponent,
     SearchRequestView,
     MailTableComponent,
     ServerInstanceSelectorDialogComponent,

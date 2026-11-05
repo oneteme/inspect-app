@@ -249,7 +249,7 @@ export class ServerActivityView implements OnDestroy {
   openLogStacktrace(row: LogEntry): void {
     console.log(row)
     this._dialog.open(StacktraceDialogComponent, {
-      data: {message: row.message, stackRows: row.stackRows}
+      data: {message: row.message, stack: row.stacktrace}
     });
   }
 

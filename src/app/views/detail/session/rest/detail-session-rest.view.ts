@@ -13,6 +13,7 @@ import {MatDialog} from "@angular/material/dialog";
 import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
 import {Constants, STATUS} from "../../../constants";
 import {SessionEventService} from "../../../../service/session-event.service";
+import {ExceptionService} from "../../../../service/jquery/exception.service";
 
 @Component({
     templateUrl: './detail-session-rest.view.html',
@@ -21,8 +22,8 @@ import {SessionEventService} from "../../../../service/session-event.service";
 export class DetailSessionRestView implements OnInit, OnDestroy {
     private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
     private readonly _traceService: TraceService = inject(TraceService);
+    private readonly _exceptionService: ExceptionService = inject(ExceptionService);
     private readonly _sessionEventService = inject(SessionEventService);
-    private readonly _location: Location = inject(Location);
     private readonly $destroy = new Subject<void>();
     protected readonly _router: EnvRouter = inject(EnvRouter);
     private readonly _dialog = inject(MatDialog);
@@ -89,8 +90,8 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     private loadSessionExceptions(session: RestSessionView) {
         return defer(() => {
             session.exceptions = [];
-            return this._traceService.getSessionExceptions(session.id).pipe(
-                map(exceptions => session.exceptions = [...(exceptions ?? [])]),
+            return this._exceptionService.getExceptions(session.id, 2).pipe(
+                        map(exceptions => session.exceptions = [...(exceptions.map(e => ({...e, traceId: session.id, traceType: 2})) ?? [])]),
                 catchError(() => of([]))
             );
         });

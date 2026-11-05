@@ -267,11 +267,11 @@
 
   .exception-text {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    justify-content: center;
     gap: 6px;
     flex: 1;
     min-width: 0;
-    overflow: hidden;
     font-size: 12px;
   }
 
@@ -289,10 +289,14 @@
 
   .exception-message {
     min-width: 0;
-    overflow: hidden;
     color: #475569;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+
+    &.collapsed {
+      display: -webkit-box;
+      overflow: hidden;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
   }
 
   .exception-actions {
@@ -334,6 +338,30 @@
       mat-icon {
         color: #475569;
       }
+    }
+  }
+
+  .exception-toggle {
+    align-self: center;
+    margin-top: 0;
+    padding: 2px 4px;
+    border: 0;
+    background: transparent;
+    color: #64748b;
+    font-size: 11px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: color 0.15s ease;
+
+    &:hover {
+      color: #334155;
+      text-decoration: underline;
+    }
+
+    &:focus-visible {
+      outline: 2px solid #1464dc;
+      outline-offset: 2px;
     }
   }
 }

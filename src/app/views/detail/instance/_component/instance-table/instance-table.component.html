@@ -5,7 +5,7 @@
       <mat-spinner [diameter]="14"></mat-spinner>
       En cours...
     </div>
-    <div *ngIf="row.end" [matTooltip]="row.end | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr'">
+    <div *ngIf="row.end" [title]="row.end | date:'dd/MM/yyyy, HH:mm:ss.SSS':'fr'">
       {{ {start: row.start / 1000, end: row.end / 1000 } | duration }}
     </div>
   </ng-template>

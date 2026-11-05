@@ -20,7 +20,7 @@
   </div>
 
   <div class="modal-body">
-    <pre><code>{{ _stacktrace }}</code></pre>
+    <pre><code><ng-container *ngFor="let line of stacktraceLines"><span class="stacktrace-line" *ngIf="!line.hiddenFrames">{{ line.text }}</span><ng-container *ngIf="line.hiddenFrames"><button type="button" class="stacktrace-more" [attr.aria-expanded]="line.expanded" (click)="toggleFrames(line)">{{ line.text }}</button><ng-container *ngIf="line.expanded"><span class="stacktrace-line" *ngFor="let frame of line.hiddenFrames">{{ frame }}</span></ng-container></ng-container></ng-container></code></pre>
   </div>
 
 </div>

@@ -88,7 +88,7 @@
     <ng-template jqtCellDef="resource" let-row>
         <span class="event-log-title'">[{{ row.type }}]</span>
         <br>
-        <span>{{ row.value }}</span>
+        <span [title]="row.value">{{ row.value }}</span>
     </ng-template>
 
     <ng-template jqtCellDef="action" let-row>
