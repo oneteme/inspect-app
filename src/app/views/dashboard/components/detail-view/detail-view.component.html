@@ -200,7 +200,6 @@
         <!-- EVENT LOG -->
         <div class="dbi-card"
              *ngIf="context.selectedInsights.has('LOG') && !context.eventCountLoading && (context.eventLogCount || 0) > 0">
-                         *ngIf="context.selectedInsights.has('LOG') && !context.eventCountLoading && (context.eventLogCount || 0) > 0">
             <button type="button" class="dbi-row dbi-row-link"
                     *ngFor="let e of topLogErrors; trackBy: trackByType"
                     (click)="eventNav.emit({ key: 'LOG', type: e.rawType || e.type })">
