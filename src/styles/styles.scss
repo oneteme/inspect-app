@@ -558,6 +558,12 @@ loading.hidden {
   padding: 0 12px 0 0 !important;
 }
 
+.vis-item.vis-dot.level-icon {
+  visibility: hidden;
+}
+.vis-item.vis-point.level-icon .vis-item-content {
+  margin-left: -11px !important;
+}
 
 .vis-item.vis-range.in-progress {
   background-image: repeating-linear-gradient(

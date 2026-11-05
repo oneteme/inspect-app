@@ -63,6 +63,9 @@ $colors: (
       flex-shrink: 0;
     }
 
+    .vis-item.vis-dot.level-icon { visibility: hidden; }
+    .vis-item.vis-point.level-icon { background-color: transparent !important; border-color: transparent !important; }
+
     @each $name, $color in $colors {
       &.#{$name} {
         background-color: rgba($color, 0.12);
