@@ -257,7 +257,7 @@ export class Constants {
     static readonly EVENT_USER_BY_PERIOD_LINE: ChartProvider<string, number> = {
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('count') }, name: 'Actions Utilisateurs', color: '#4CAF50', noDataStyle: { symbolSize: 0 } } as any
+            { data: { x: field('stringDate'), y: field('count') }, name: 'Actions Utilisateurs', color: '#8b5cf6', noDataStyle: { symbolSize: 0 } } as any
         ],
         options: {
             legend: { show: false },
