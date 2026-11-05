@@ -1,6 +1,6 @@
 ﻿import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
 import { DashboardDetailContext } from './detail-view.model';
-import {EVENT_LOG, STATUS} from "../../../constants";
+import {ANALYTIC_MAPPING, EVENT_LOG, STATUS} from "../../../constants";
 
 @Component({
     selector: 'dashboard-detail-view',
@@ -83,6 +83,20 @@ export class DashboardDetailViewComponent {
             : (this.context?.eventUserChart || []);
     }
 
+    get eventChartConfig(): any {
+        return this.selectedKey === 'USER'
+            ? this.context.evtUserLineConfig
+            : this.context.evtExcLineConfig;
+    }
+
+    get topUserEvents(): { type: string; count: number }[] {
+        return this.context?.topUserEvents ?? [];
+    }
+
+    getUserActionLabel(type: string): string {
+        return ANALYTIC_MAPPING[type]?.label || type;
+    }
+
     get selectedLabel(): string {
         if (!this.selectedKey) return 'Clients';
         if (this.isSessionInsight) {
@@ -149,6 +163,8 @@ export class DashboardDetailViewComponent {
                 return !this.context.sessionCountLoading && !this.context.sessionTestErrors;
             case 'LOG':
                 return !this.context.eventCountLoading && !(this.context.eventLogCount || 0);
+            case 'USER':
+                return !this.context.eventCountLoading && !(this.context.eventUserCount || 0);
             default: {
                 const protoDef = this.context.protocolDefs.find(p => p.key === key);
                 const loaded = protoDef

@@ -31,7 +31,6 @@ import {MY_DATE_FORMATS} from '../../shared/shared.module';
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from '@angular/material/datepicker';
 import {CustomDateRangeSelectionStrategy} from '../../shared/material/custom-date-range-selection-strategy';
 import {SessionEventService} from "../../service/session-event.service";
-import {ChartProvider, field} from "@oneteme/jquery-core";
 
 @Component({
     templateUrl: './dashboard.component.html',
@@ -137,6 +136,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     selectedInsights = new Set<string>();
     sessExcLineConfig = Constants.SESSION_EXCEPTION_LINE;
     evtExcLineConfig = Constants.EVENT_LOG_BY_PERIOD_LINE;
+    evtUserLineConfig = Constants.EVENT_USER_BY_PERIOD_LINE;
 
     // server health
 
@@ -153,7 +153,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     // charts par type d'événement
     eventLogChart: { stringDate: string; info: number; warn: number; error: number; count: number, perc: number }[] = [];
-    eventUserChart: { stringDate: string; type: string; count: number, perc: number }[] = [];
+    eventUserChart: { stringDate: string; count: number }[] = [];
+    topUserEvents: { type: string; count: number }[] = [];
 
 
     // état des insights (tout clair / erreurs par catégorie)
@@ -291,6 +292,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 this.getLogEventCount(currentNamespace, currentStart, effectiveEnd, gen);
                 this.getLogEventChart(currentNamespace, currentStart, effectiveEnd, gen);
                 this.getUserEventCount(currentNamespace, currentStart, effectiveEnd, gen);
+                this.getUserEventChart(currentNamespace, currentStart, effectiveEnd, gen);
             }
         }));
     }
@@ -379,14 +381,53 @@ export class DashboardComponent implements OnInit, OnDestroy {
         });
     }
 
+    getUserEventChart(currentNamespace: string, currentStart: Date, effectiveEnd: Date, gen: number) {
+        const groupedBy = this.groupedBy;
+        const userParams: any = {
+            'instance.namespace': currentNamespace,
+            'start.ge': currentStart.toISOString(),
+            'start.lt': effectiveEnd.toISOString(),
+            'join': 'instance',
+            'column': `start.${groupedBy}:date,type,count:count`,
+            'order': 'date.asc'
+        };
+        const serverParam = this.createServerFilter();
+        if (serverParam.app_name) {
+            userParams['instance.app_name.in'] = serverParam.app_name;
+        }
+
+        this._sessionEventService.getSessionEventTypeCount(userParams).subscribe({
+            next: (rows: any[]) => {
+                if (this._loadGen !== gen || !rows) return;
+                formatters[groupedBy](rows, this._datePipe, 'stringDate');
+
+                const logTypes = new Set(['INFO', 'WARN', 'ERROR']);
+                const dateMap: Record<string, number> = {};
+                rows.forEach(r => {
+                    if (r.type && !logTypes.has(r.type.toUpperCase())) {
+                        dateMap[r.stringDate] = (dateMap[r.stringDate] ?? 0) + (r.count ?? 0);
+                    }
+                });
+
+                this.eventUserChart = this._fillHourGaps(dateMap, currentStart, effectiveEnd);
+                this._cdr.markForCheck();
+            },
+            error: () => {
+                if (this._loadGen === gen) {
+                    this.eventUserChart = [];
+                    this._cdr.markForCheck();
+                }
+            }
+        });
+    }
+
     getUserEventCount(currentNamespace: string, currentStart: Date, effectiveEnd: Date, gen: number) {
         const userParams: any = {
             'instance.namespace': currentNamespace,
             'start.ge': currentStart.toISOString(),
             'start.lt': effectiveEnd.toISOString(),
             'join': 'instance',
-            'column': 'count:count,type',
-            'type.notIn': 'INFO,WARN,ERROR'
+            'column': 'count:count,type'
         };
         this.eventCountLoading = true;
         this._sessionEventService.getSessionEventTypeCount(userParams)
@@ -399,14 +440,20 @@ export class DashboardComponent implements OnInit, OnDestroy {
             .subscribe({
                 next: (events) => {
                     if (this._loadGen !== gen || !events) return;
-                    this.eventUserCount = events.reduce((sum, e) => sum + (e.count ?? 0), 0);
+                    const logTypes = new Set(['INFO', 'WARN', 'ERROR']);
+                    this.topUserEvents = (events || [])
+                        .filter(e => e.type && !logTypes.has(e.type.toUpperCase()))
+                        .map(e => ({ type: e.type, count: e.count ?? 0 }))
+                        .sort((a, b) => b.count - a.count);
+                    this.eventUserCount = this.topUserEvents.reduce((sum, e) => sum + e.count, 0);
                     this._rebuildEventSummaries();
                 },
                 error: () => {
                     if (this._loadGen === gen) {
+                        this.topUserEvents = [];
                         this.eventUserCount = 0;
                         this.eventUserChart = [];
-                        this._rebuildEventSummaries();
+                        this._cdr.markForCheck();
                     }
                 }
             });
@@ -1024,6 +1071,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
             eventWarnCount: this.eventWarnCount,
             eventErrorCount: this.eventErrorCount,
             evtExcLineConfig: this.evtExcLineConfig,
+            topUserEvents: this.topUserEvents,
+            eventUserCount: this.eventUserCount,
+            evtUserLineConfig: this.evtUserLineConfig,
         };
     }
 
@@ -1327,15 +1377,10 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this._pageTitleService.clear();
     }
 
-    navigateToEventUser(): void {
-        this._router.navigate(['/event/user'], {
-            queryParams: this.buildNavigationQueryParams()
-        });
-    }
-
-    navigateToEventLogs(event?: { key: string; type?: string }): void {
+    navigateToEvents(event?: { key: string; type?: string }): void {
         const extraParams: Params = event?.type ? { type: event.type } : {};
-        this._router.navigate(['/event/log'], { queryParams: this.buildNavigationQueryParams(extraParams) });
+        const route = event?.key === 'USER' ? '/event/user' : '/event/log';
+        this._router.navigate([route], { queryParams: this.buildNavigationQueryParams(extraParams) });
     }
 }
 

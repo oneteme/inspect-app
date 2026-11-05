@@ -253,6 +253,25 @@ export class Constants {
             }
         }
     };
+
+    static readonly EVENT_USER_BY_PERIOD_LINE: ChartProvider<string, number> = {
+        continue: true,
+        series: [
+            { data: { x: field('stringDate'), y: field('count') }, name: 'Actions Utilisateurs', color: '#4CAF50', noDataStyle: { symbolSize: 0 } } as any
+        ],
+        options: {
+            legend: { show: false },
+            yAxis: { show: true, min: 0, minInterval: 1, axisLabel: { fontSize: 9, color: 'rgba(0,0,0,.38)' } },
+            series: [{ smooth: true }],
+            tooltip: {
+                formatter: (params: any[]) => {
+                    const p = params[0];
+                    const val = Array.isArray(p.value) ? p.value[1] : p.value;
+                    return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName} : <b>${val ?? 0}</b>`;
+                }
+            }
+        }
+    };
 }
 
 export class Filter {

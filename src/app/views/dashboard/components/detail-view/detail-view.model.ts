@@ -20,13 +20,15 @@ export interface DashboardDetailContext {
     chartRequests: Record<string, any>;
     sparklinePercs: Record<string, number>;
     sparklineTitles: Record<string, { title: string; subtitle: string }>;
-    eventLogChart?: { stringDate: string; info: number; warn: number; error: number; count: number, perc: number }[];
-    eventLogCount?: number;
-    eventInfoCount?: number;
-    eventWarnCount?: number;
-    eventErrorCount?: number;
-    eventUserChart?: { stringDate: string; type: string; count: number, perc: number }[];
-    eventUserCount?: number;
-    evtExcLineConfig?: any;
-    eventCountLoading?: boolean;
+    eventLogChart: { stringDate: string; info: number; warn: number; error: number; count: number, perc: number }[];
+    eventLogCount: number;
+    eventInfoCount: number;
+    eventWarnCount: number;
+    eventErrorCount: number;
+    eventUserChart: { stringDate: string; count: number }[];
+    eventUserCount: number;
+    evtExcLineConfig: any;
+    eventCountLoading: boolean;
+    topUserEvents: { type: string; count: number }[];
+    evtUserLineConfig: any;
 }
