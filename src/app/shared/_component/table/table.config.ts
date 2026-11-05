@@ -66,7 +66,7 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: RestSessionDto) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'person', width: '15%' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge', width: '15%' },
     {
       key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
       value: (row: RestSessionDto) => {
@@ -79,7 +79,7 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
     { key: 'contentType', header: 'Content-Type', lazy: true, icon: 'description' },
     { key: 'inDataSize', header: 'Taille entrée (o)', lazy: true, icon: 'download', groupable: false, sliceable: false },
     { key: 'outDataSize', header: 'Taille sortie (o)', lazy: true, icon: 'upload', groupable: false, sliceable: false },
-    { key: 'threadName', header: 'Thread', lazy: true, icon: 'memory' },
+    { key: 'threadName', header: 'Thread', lazy: true, icon: 'call_split' },
     { key: 'cacheControl', header: 'Cache-Control', lazy: true, icon: 'cached', groupable: false, sliceable: false }
   ],
   slices: [
@@ -122,9 +122,9 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
       key: 'duration', header: 'Durée', groupable: false, icon: 'timer', width: '13%',
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
     },
-    { key: 'user', header: 'Utilisateur', icon: 'person', width: '13%' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge', width: '13%' },
     { key: 'address', header: 'Adresse', icon: 'fingerprint', width: '13%', optional: true },
-    { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
+    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
     {
       key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
       value: (row: RestSessionDto) => {
@@ -175,7 +175,7 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: RestRequestDto) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'person' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge' },
     {
       key: 'status', header: 'Status', sortable: true, optional: true, icon: 'task_alt',
       value: (row: RestSessionDto) => {
@@ -184,7 +184,7 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
       }
     },
     { key: 'action', header: 'Action', icon: 'touch_app', sliceable: false, groupable: false, sortable: false },
-    { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
+    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
     { key: 'protocol', header: 'Protocole', icon: 'lan', optional: true },
     { key: 'query', header: 'Query', icon: 'search', lazy: true },
     { key: 'contentType', header: 'Content-Type', icon: 'description', lazy: true },
@@ -227,7 +227,7 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: DatabaseRequestDto) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'person' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge' },
     { key: 'productName', header: 'Base de données', icon: 'storage', lazy: true },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
@@ -236,7 +236,7 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
         return row.status;
       }
     },
-    { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
+    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
     { key: 'scheme', header: 'Éditeur', icon: 'hub', lazy: true },
     { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
@@ -279,7 +279,7 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: FtpRequestDto) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'person' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge' },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row: FtpRequestDto) => {
@@ -287,7 +287,7 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
         return row.status;
       }
     },
-    { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
+    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
     { key: 'protocol', header: 'Protocole', icon: 'lan', lazy: true },
     { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
@@ -329,7 +329,7 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: DirectoryRequestDto) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'person' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge' },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row: DirectoryRequestDto) => {
@@ -337,7 +337,7 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
         return row.status;
       }
     },
-    { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
+    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
     { key: 'protocol', header: 'Protocole', icon: 'lan', lazy: true },
     { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
@@ -379,7 +379,7 @@ export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: LocalRequest) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'person' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge' },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row: LocalRequest) => {
@@ -426,7 +426,7 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: MailRequestDto) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'person' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge' },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row: MailRequestDto) => {
@@ -434,7 +434,7 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
         return row.status;
       }
     },
-    { key: 'threadName', header: 'Thread', icon: 'memory', lazy: true },
+    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
     { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
   ],
@@ -527,7 +527,7 @@ export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTra
     { key: 'os', header: 'OS', icon: 'computer', optional: true, width: '8%' },
     { key: 're', header: 'RE', icon: 'sdk', optional: true, width: '8%' },
     { key: 'address', header: 'Adresse', icon: 'fingerprint', sliceable: false, groupable: false, optional: true },
-    { key: 'user', header: 'Utilisateur', icon: 'person', optional: true, width: '10%' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge', optional: true, width: '10%' },
     { key: 'collector', header: 'Collector', icon: 'sensors', optional: true, width: '10%' }
   ],
   defaultSort: { active: 'duration', direction: 'desc' },
@@ -552,6 +552,9 @@ export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'appName', header: 'Application', width: '15%', icon:'widgets' },
+    { key: 'namespace', header: 'Namespace', icon: 'layers', width: '10%', lazy: true },
+    { key: 'scope', header: 'Thread', icon: 'call_split', width: '10%', lazy: true },
+    { key: 'sessionId', header: 'Session', icon: 'fingerprint', optional: true, groupable: false, sliceable: false },
     {
       key: 'instant', header: 'Date', icon: 'schedule', width: '10%', groupable: false, sliceable: false,
       searchValue: (row: SessionEventDto) => fmtStart(row.instant)
@@ -566,9 +569,8 @@ export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
   ],
   defaultSort: { active: 'instant', direction: 'desc' },
   rowClass: (row: SessionEventDto) => {
-    if (row.type === 'INFO') return 'row-ok';
     if (row.type === 'ERROR') return 'row-ko';
     if (row.type === 'WARN') return 'row-warning';
-    return 'row-progress';
+    return 'row-ok';
   }
 }

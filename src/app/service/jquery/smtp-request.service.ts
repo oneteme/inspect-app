@@ -3,7 +3,8 @@ import {HttpClient} from "@angular/common/http";
 import {Observable, map} from "rxjs";
 import {SmtpSessionExceptionsByPeriodAndappname} from "src/app/model/jquery.model";
 import {MailRequestDto} from "../../model/request.model";
-import {applyFilterSelections, ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
+import {ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
+import {DATE_HOUR_COLUMNS, fetchGroupedRows, groupColumn, groupOrder, isDateHour, packDateHour} from "./kpi-date-granularity";
 
 /** Colonnes de base de la liste SMTP ; l'alias (`colonne:alias`) donne la clé de la réponse. */
 const SMTP_REQUEST_LIST_COLUMNS = 'id,host,command,status,start,end,user';
@@ -67,8 +68,10 @@ export class SmtpRequestService {
 
     getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem },
               filters: {namespace: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], selections?: ChartFilterSelection[] }): Observable<any[]> {
+        const groupAlias = data.group.jquery.buildAlias();
+        const dateHour = isDateHour(filters.groupedBy, data.group.key);
         let args: any = {
-            'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${data.group.jquery.value()}:${data.group.jquery.buildAlias()}`,
+            'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${groupColumn(data.group, dateHour)}`,
             'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
@@ -79,18 +82,18 @@ export class SmtpRequestService {
             args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
         }
         if(data.group.jquery.order){
-            args['order'] = `${data.group.jquery.order}`;
+            args['order'] = groupOrder(data.group, dateHour);
         }
-        applyFilterSelections(args, filters.selections);
         if(filters.hosts?.length && !args['host.in']){
             args['host.in'] = filters.hosts.join(',');
         }
-        return this.getSmtp(args);
+        return fetchGroupedRows(request => this.getSmtp<any[]>(request), args, filters.selections, dateHour, groupAlias);
     }
 
-    getFilters(filter: ChartItem, filters: {namespace: string, start: Date, end: Date, hosts?: string[] }) {
+    getFilters(filter: ChartItem, filters: {namespace: string, start: Date, end: Date, hosts?: string[], groupedBy?: string }) {
+        const dateHour = isDateHour(filters.groupedBy, filter.key);
         let args: any = {
-            'column': `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
+            'column': dateHour ? DATE_HOUR_COLUMNS : `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
             'distinct': 'true',
             'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
@@ -100,6 +103,8 @@ export class SmtpRequestService {
         if(filters.hosts?.length){
             args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
         }
-        return this.getSmtp(args);
+        return this.getSmtp<any[]>(args).pipe(
+            map(rows => dateHour ? packDateHour(rows, filter.jquery.buildAlias()) : rows)
+        );
     }
 }

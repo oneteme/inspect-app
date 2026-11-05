@@ -78,6 +78,7 @@ export enum RequestType {
 
 export interface SessionEventDto extends SessionEvent {
   sessionId: string;
+  namespace?: string;
   appName?: string;
 }
 

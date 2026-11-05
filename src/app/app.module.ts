@@ -47,6 +47,7 @@ import {SearchMainEventView} from "./views/search/event/main/search-main-event.v
 import {NgCollectorModule} from "@oneteme/inspect-ng-collector";
 import {environment} from "../environments/environment";
 
+const InspectNgCollectorModule= NgCollectorModule.forRoot(environment.application);
 registerLocaleData(localeFr, 'fr-FR');
 
 export function initializeAuth(authService: AuthService) {
@@ -247,7 +248,7 @@ const routes: Route[] = [
     BrowserModule,
     BrowserAnimationsModule,
     RouterModule.forRoot(routes, {useHash: true}),
-    NgCollectorModule.forRoot(environment.application),
+    InspectNgCollectorModule,
     FormsModule,
     HttpClientModule,
     ReactiveFormsModule,

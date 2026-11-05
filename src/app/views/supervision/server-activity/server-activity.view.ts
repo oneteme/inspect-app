@@ -146,7 +146,7 @@ export class ServerActivityView implements OnDestroy {
   };
 
   constructor() {
-    this._pageTitleService.set({icon: ' troubleshoot', iconOutlined: true, title: 'Diagnostic'});
+    this._pageTitleService.set({icon: 'admin_panel_settings', iconOutlined: true, title: 'Diagnostic'});
     this._route.queryParams.pipe(
         switchMap(queryParams => {
           const period = this.resolvePeriod(queryParams);

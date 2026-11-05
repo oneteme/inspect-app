@@ -2,7 +2,7 @@ import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {Location} from '@angular/common';
 import {ActivatedRoute, Params} from '@angular/router';
-import {finalize, Subject, takeUntil} from 'rxjs';
+import {finalize, Observable, Subject, takeUntil} from 'rxjs';
 import {extractPeriod} from '../../../../shared/util';
 import {RestSessionService} from '../../../../service/jquery/rest-session.service';
 import {app} from '../../../../../environments/environment';
@@ -75,11 +75,13 @@ export class SearchRestView implements OnInit, OnDestroy {
   tableConfig: TableProvider<RestSessionDto> = {
     ...REST_SESSION_TABLE_CONFIG,
     onRowSelected: (row, event) => this.selectedRequest(event, row),
-    lazyLoader: columns => this._restSessionService.getRestSessionList(this._criteria, columns)
+    lazyLoader: columns => this.loadLazyColumns(columns)
   };
   sessions: RestSessionDto[];
   /** Critères de la requête de base, rejoués avec les colonnes lazy. */
   private _criteria: Record<string, any> = {};
+  /** Colonnes lazy déjà demandées : la requête de base les inclut, pour que `data` les contienne. */
+  private _lazyColumns: string[] = [];
 
   constructor() {
     this._activatedRoute.queryParams.subscribe({
@@ -186,7 +188,7 @@ export class SearchRestView implements OnInit, OnDestroy {
 
     this.isLoading = true;
     this.sessions = [];
-    this._restSessionService.getRestSessionList(this._criteria)
+    this._restSessionService.getRestSessionList(this._criteria, this._lazyColumns)
       .pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false))
       .subscribe({
         next: d => {
@@ -198,6 +200,11 @@ export class SearchRestView implements OnInit, OnDestroy {
           }
         }
       });
+  }
+
+  private loadLazyColumns(columns: string[]): Observable<RestSessionDto[]> {
+    this._lazyColumns = [...columns];
+    return this._restSessionService.getRestSessionList(this._criteria, columns);
   }
 
   patchDateValue(start: Date, end: Date): void {

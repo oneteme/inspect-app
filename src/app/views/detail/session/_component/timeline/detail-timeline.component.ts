@@ -183,7 +183,7 @@ export class DetailTimelineComponent implements OnChanges {
             ? this.ANALYTIC_MAPPING[c.type]
             : undefined;
 
-        const actionLabel = analytic?.label ?? c.type ?? 'Événement';
+
 
         const actionText = analytic
             ? analytic.text(c)
@@ -192,7 +192,7 @@ export class DetailTimelineComponent implements OnChanges {
         let o = {
             id: c.id ?`${c.id}_${c.typeTimeline}_${id}`: id,
             group: this.isWebApp ? 0 : c.threadName || '?',
-            content: c.typeTimeline === 'action' ? actionLabel : (c.schema || c.name || c.host || c.level || 'N/A'),
+            content: c.typeTimeline === 'action' ? this.buildActionContent(c) : (c.schema || c.name || c.host || c.level || 'N/A'),
             start: c.start * 1000,
             end: end,
             title: c.typeTimeline == 'action' ?
@@ -200,7 +200,8 @@ export class DetailTimelineComponent implements OnChanges {
                      <h4>${actionText}</h4>` :
                 `${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${c.end ? this.pipe.transform(new Date(end), 'HH:mm:ss.SSS'):"En cours..."}</span> ${c.end ? `(${this.durationPipe.transform({start: c.start, end: end / 1000})})`:""}<br>
                  <h4>${c['path'] || ''}</h4>`,
-            className: c.typeTimeline,
+            className: c.typeTimeline
+                + (c.typeTimeline === 'action' ? ' level-icon' : ''),
             type: ''
         }
         o.type = o.end == o.start ? 'point' : 'range';
@@ -215,6 +216,63 @@ export class DetailTimelineComponent implements OnChanges {
         }
         id++;
         return o;
+    }
+
+
+    private readonly LEVEL_ICONS: {[k: string]: {icon: string, color: string}} = {
+        warn:  {icon: 'error',  color: '#9a5b00'},
+        error: {icon: 'cancel', color: '#b42318'},
+        info:  {icon: 'info',   color: '#1769aa'}
+    };
+    getEventIcon(type: string): string {
+        switch (type) {
+            case 'DOMContentLoaded':
+                return 'language';
+            case 'click':
+                return 'ads_click';
+            case 'dblclick':
+                return 'mouse';
+            case 'scroll':
+                return 'swap_vert';
+            case 'resize':
+                return 'open_in_full';
+            case 'zoom':
+                return 'zoom_in';
+            case 'DOC_HIDDEN':
+                return 'visibility_off';
+            case 'DOC_VISIBLE':
+                return 'visibility';
+            case 'change':
+                return 'edit';
+            case 'info':
+            case 'INFO':
+                return 'info';
+            case 'warn':
+            case 'WARN':
+                return 'error';
+            case 'error':
+            case 'ERROR':
+                return 'cancel';
+            default:
+                return 'radio_button_checked';
+        }
+    }
+
+
+    buildActionContent(c: any): HTMLElement {
+        const conf = this.LEVEL_ICONS[(c.type ?? '').toLowerCase()];
+        const icon = document.createElement('span');
+
+        icon.textContent = this.getEventIcon(c.type ?? '');
+        icon.style.display = 'inline-flex';
+        icon.style.alignItems = 'center';
+        icon.style.fontFamily = "'Material Symbols Outlined'";
+        icon.style.fontVariationSettings = "'FILL' 1, 'wght' 600";
+        icon.style.fontSize = '20px';
+        icon.style.lineHeight = '1';
+        icon.style.color = conf?.color ?? '#1769aa';
+
+        return icon;
     }
 
     mapLog(le: any, id: number): DataItem {

@@ -1,7 +1,7 @@
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
-import {combineLatest, finalize, Subject, takeUntil} from 'rxjs';
+import {combineLatest, finalize, Observable, Subject, takeUntil} from 'rxjs';
 import {Location} from '@angular/common';
 import {extractPeriod,} from '../../../../shared/util';
 import {MainSessionService} from '../../../../service/jquery/main-session.service';
@@ -172,7 +172,7 @@ export class SearchMainView implements OnInit, OnDestroy {
 
     this.isLoading = true;
     this.sessions = [];
-    this._mainSessionService.getMainSessionList(this._criteria)
+    this._mainSessionService.getMainSessionList(this._criteria, this._lazyColumns)
     .pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false))
     .subscribe({
       next: d => {
@@ -194,8 +194,16 @@ export class SearchMainView implements OnInit, OnDestroy {
         ? { ...MAIN_SESSION_TABLE_CONFIG.search, initialQuery, searchColumns: ['exception'] }
         : MAIN_SESSION_TABLE_CONFIG.search,
       onRowSelected: (row, event) => this.selectedRequest(event, row),
-      lazyLoader: columns => this._mainSessionService.getMainSessionList(this._criteria, columns)
+      lazyLoader: columns => this.loadLazyColumns(columns)
     };
+  }
+
+  /** Colonnes lazy déjà demandées : la requête de base les inclut, pour que `data` les contienne. */
+  private _lazyColumns: string[] = [];
+
+  private loadLazyColumns(columns: string[]): Observable<MainSessionDto[]> {
+    this._lazyColumns = [...columns];
+    return this._mainSessionService.getMainSessionList(this._criteria, columns);
   }
 
 

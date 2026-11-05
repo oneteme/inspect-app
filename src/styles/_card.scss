@@ -228,7 +228,7 @@
     color: #334155;
   }
 
-  // Statut de l'instance (carte serveur) : l'icône et le texte suivent l'état, l'icône pulse si l'instance est en ligne
+  // Statut de l'instance (carte serveur) : l'icône et le texte suivent l'état
   &.instance-status {
     cursor: pointer;
   }
@@ -236,7 +236,6 @@
   &.online {
     --pill-color: #10b981;
     --pill-text: #047857;
-    .stat-icon { animation: pulse-icon 1.6s ease-in-out infinite; }
   }
   &.pending {
     --pill-color: #f59e0b;
@@ -248,7 +247,7 @@
   }
 
   &.online, &.pending, &.offline {
-    .stat-icon { color: var(--pill-color); }
+    .stat-icon, .stat-state { color: var(--pill-color); }
     .stat-duration { color: var(--pill-text); }
   }
 }
