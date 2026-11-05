@@ -116,7 +116,9 @@ export class SearchRequestView implements OnInit, OnDestroy {
       this._activatedRoute.queryParams
       ]).subscribe({
       next: ([params, queryParams]) => {
-          this.params.type = params.type || 'rest';
+          const type = params.type || 'rest';
+          if (type !== this.params.type) this._lazyColumns = [];
+          this.params.type = type;
           this._pageTitleService.set({
             icon: Constants.REQUEST_MAPPING_TYPE[this.params.type]?.icon || 'api',
             iconOutlined: true,
@@ -209,7 +211,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
       'start.ge': this.queryParams.period.start.toISOString(),
       'start.lt': this.queryParams.period.end.toISOString()
     };
-    this.RequestSubscription = (this.seviceType[this.params.type].service.getRequestList(this._criteria) as Observable<any[]>)
+    this.RequestSubscription = (this.seviceType[this.params.type].service.getRequestList(this._criteria, this._lazyColumns) as Observable<any[]>)
       .pipe(finalize(()=> this.isLoading = false))
       .subscribe({
         next: (d: any) => {
@@ -225,7 +227,12 @@ export class SearchRequestView implements OnInit, OnDestroy {
       });
   }
 
-  lazyLoader = (columns: string[]) => this.seviceType[this.params.type].service.getRequestList(this._criteria, columns);
+  /** Colonnes lazy déjà demandées : la requête de base les inclut, pour que `data` les contienne. */
+  private _lazyColumns: string[] = [];
+  lazyLoader = (columns: string[]) => {
+    this._lazyColumns = [...columns];
+    return this.seviceType[this.params.type].service.getRequestList(this._criteria, columns);
+  };
 
   patchDateValue(start: Date, end: Date) {
     this.requestFilterForm.patchValue({
