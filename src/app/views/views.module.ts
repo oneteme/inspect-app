@@ -37,13 +37,9 @@ import {DetailRestView} from "./detail/request/rest/detail-rest.view";
 import {MailTableComponent} from "./detail/request/smtp/_component/mail-table/mail-table.component";
 import {
   ServerInstanceSelectorDialogComponent
-} from "./supervision/_component/server/server-instance-selector-dialog/server-instance-selector-dialog.component";
-import {ServerSupervisionView} from "./supervision/_component/server/server-supervision.view";
-import {ServerActivityView} from "./supervision/_component/server/server-activity.view";
-import {ClientSupervisionView} from "./supervision/_component/client/client-supervision.view";
-import {
-  ClientInstanceSelectorDialogComponent
-} from "./supervision/_component/client/client-instance-selector-dialog/client-instance-selector-dialog.component";
+} from "./supervision/_component/server-instance-selector-dialog/server-instance-selector-dialog.component";
+import {ServerSupervisionView} from "./supervision/server-supervision/server-supervision.view";
+import {ServerActivityView} from "./supervision/server-activity/server-activity.view";
 import {InstanceComponent} from './detail/instance/instance.component';
 import {InstanceTableComponent} from './detail/instance/_component/instance-table/instance-table.component';
 import {ParameterTableComponent} from "./detail/instance/_component/parameter-table/parameter-table.component";
@@ -119,10 +115,8 @@ import {SearchMainEventView} from "./search/event/main/search-main-event.view";
     SearchRequestView,
     MailTableComponent,
     ServerInstanceSelectorDialogComponent,
-    ClientInstanceSelectorDialogComponent,
     ServerSupervisionView,
     ServerActivityView,
-    ClientSupervisionView,
     InstanceComponent,
     InstanceTableComponent,
     ParameterTableComponent,

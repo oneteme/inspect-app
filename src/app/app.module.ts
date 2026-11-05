@@ -33,9 +33,8 @@ import {InstanceComponent} from './views/detail/instance/instance.component';
 import {NavbarComponent} from './components/navbar/navbar.component';
 import {AboutDialogComponent} from './components/about/about-dialog.component';
 import {AddEnvironmentDialogComponent} from './components/environment/add-environment-dialog.component';
-import {ServerSupervisionView} from "./views/supervision/_component/server/server-supervision.view";
-import {ServerActivityView} from "./views/supervision/_component/server/server-activity.view";
-import {ClientSupervisionView} from "./views/supervision/_component/client/client-supervision.view";
+import {ServerSupervisionView} from "./views/supervision/server-supervision/server-supervision.view";
+import {ServerActivityView} from "./views/supervision/server-activity/server-activity.view";
 import {RequestKpiView} from "./views/kpi/request/request-kpi.view";
 import {SessionKpiView} from "./views/kpi/session/session-kpi.view";
 import {CompareView} from "./views/compare/compare.view";
@@ -238,12 +237,6 @@ const routes: Route[] = [
     title:  (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
       return Constants.MAPPING_TYPE[route.paramMap.get('session_type')].title + ' • KPI';
     },
-    canActivate: [authGuard]
-  },
-  {
-    path: 'supervision/client/:instance',
-    component: ClientSupervisionView,
-    title: 'Supervision • Client',
     canActivate: [authGuard]
   },
   {path: '**', pathMatch: 'full', redirectTo: `/home`}

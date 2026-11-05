@@ -3,28 +3,28 @@ import {ActivatedRoute} from "@angular/router";
 import {DecimalPipe} from "@angular/common";
 import {combineLatest, EMPTY, finalize, forkJoin, of, Subject, switchMap, takeUntil} from "rxjs";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {TraceService} from "../../../../service/trace.service";
-import {InstanceEnvironment} from "../../../../model/trace.model";
-import {MachineUsageService} from "../../../../service/jquery/resource-usage.service";
+import {TraceService} from "../../../service/trace.service";
+import {InstanceEnvironment} from "../../../model/trace.model";
+import {MachineUsageService} from "../../../service/jquery/resource-usage.service";
 import {ChartProvider, field} from "@oneteme/jquery-core";
-import {InstanceTraceService} from "../../../../service/jquery/instance-trace.service";
+import {InstanceTraceService} from "../../../service/jquery/instance-trace.service";
 import {MatDialog} from "@angular/material/dialog";
 import {DateAdapter, MAT_DATE_FORMATS} from "@angular/material/core";
-import {CustomDateAdapter} from "../../../../shared/material/custom-date-adapter";
-import {MY_DATE_FORMATS} from "../../../../shared/shared.module";
+import {CustomDateAdapter} from "../../../shared/material/custom-date-adapter";
+import {MY_DATE_FORMATS} from "../../../shared/shared.module";
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
-import {CustomDateRangeSelectionStrategy} from "../../../../shared/material/custom-date-range-selection-strategy";
-import {EnvRouter} from "../../../../service/router.service";
-import {InstanceService} from "../../../../service/jquery/instance.service";
+import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-date-range-selection-strategy";
+import {EnvRouter} from "../../../service/router.service";
+import {InstanceService} from "../../../service/jquery/instance.service";
 import {
   ServerInstanceSelectorDialogComponent
-} from "./server-instance-selector-dialog/server-instance-selector-dialog.component";
+} from "../_component/server-instance-selector-dialog/server-instance-selector-dialog.component";
 import {MatSnackBar} from "@angular/material/snack-bar";
-import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
-import {PageTitleService} from '../../../../service/page-title.service';
-import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../../shared/period-filter';
-import {IPeriod, IStep, IStepFrom} from '../../../../model/conf.model';
-import {shallowEqual} from '../../../search/session/rest/search-rest.view';
+import {PulseDialogComponent} from "../../../shared/_component/pulse/dialog/pulse-dialog.component";
+import {PageTitleService} from '../../../service/page-title.service';
+import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
+import {IPeriod, IStep, IStepFrom} from '../../../model/conf.model';
+import {shallowEqual} from '../../search/session/rest/search-rest.view';
 
 @Component({
   templateUrl: './server-supervision.view.html',
