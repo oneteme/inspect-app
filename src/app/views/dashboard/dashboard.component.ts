@@ -31,6 +31,7 @@ import {MY_DATE_FORMATS} from '../../shared/shared.module';
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from '@angular/material/datepicker';
 import {CustomDateRangeSelectionStrategy} from '../../shared/material/custom-date-range-selection-strategy';
 import {SessionEventService} from "../../service/session-event.service";
+import {ChartProvider, field} from "@oneteme/jquery-core";
 
 @Component({
     templateUrl: './dashboard.component.html',
@@ -127,6 +128,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private _offlineRows: (LastServerStart & { lastTrace?: number })[] = [];
     sessionCountData: { type: string; total: number; errors: number }[] = [];
     sessionCountLoading = true;
+    eventCountLoading = true;
     restSessionCountLoading = true;
     restSessionCount: { total: number; errors: number } = { total: 0, errors: 0 };
     kpiLoading = true;
@@ -168,7 +170,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     eventErrorCount = 0;
     eventInfoCount = 0;
     eventUserCount = 0;
-    eventCountsLoading = true;
 
     private _chartsResolved = 0;
     private _tabsResolved = 0;
@@ -227,7 +228,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 this.sessionCountData = [];
                 this.sessionCountLoading = true;
                 this.restSessionCountLoading = true;
-                this.eventCountsLoading = true;
+                this.eventCountLoading = true;
                 this.restSessionCount = {total: 0, errors: 0};
                 this.eventSummaries = [];
                 this.eventWarnCount = 0;
@@ -296,10 +297,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
             'column': 'count:count,type',
             'type.in': 'INFO,WARN,ERROR'
         };
+        this.eventCountLoading = true;
         this._sessionEventService.getSessionEventTypeCount(logParams)
             .pipe(finalize(() => {
                 if (this._loadGen === gen) {
-                    this.eventCountsLoading = false;
+                    this.eventCountLoading = false;
                     this._rebuildEventSummaries();
                 }
             }))
@@ -331,17 +333,18 @@ export class DashboardComponent implements OnInit, OnDestroy {
             'column': 'count:count,type',
             'type.notIn': 'INFO,WARN,ERROR'
         };
+        this.eventCountLoading = true;
         this._sessionEventService.getSessionEventTypeCount(userParams)
             .pipe(finalize(() => {
                 if (this._loadGen === gen) {
-                    this.eventCountsLoading = false;
+                    this.eventCountLoading = false;
                     this._rebuildEventSummaries();
                 }
             }))
             .subscribe({
                 next: (events) => {
                     if (this._loadGen !== gen || !events) return;
-                    this.eventUserCount = events.length;
+                    this.eventUserCount = events.reduce((sum, e) => sum + (e.count ?? 0), 0);
                     this._rebuildEventSummaries();
                 },
                 error: () => {
@@ -350,9 +353,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
                         this._rebuildEventSummaries();
                     }
                 }
-            })
+            });
     }
-
     initCharts(gen: number) {
         this.kpiLoading = true;
         this.sparklinePercs = { rest: 0, jdbc: 0, ftp: 0, smtp: 0, ldap: 0 };
@@ -416,6 +418,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this._tabsResolved = 0;
         this._sessionCountByType = {};
         this.sessionCountLoading = true;
+        this.eventCountLoading = true;
         const keys = Object.keys(this.tabRequests);
         const totalTabs = keys.length;
         keys.forEach(i => {
@@ -1024,7 +1027,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     total,
                     rate,
                     barPct: overallTotal > 0 ? (total * 100) / overallTotal : 0,
-                    loading: this.eventCountsLoading,
+                    loading: this.eventCountLoading,
                     title,
                     infoCount: t.infoCount,
                     warnCount: t.warnCount,
@@ -1271,8 +1274,4 @@ function equalArraysOrString(a: string | string[], b: string | string[]) {
         return aSorted.every((val, index) => bSorted[index] === val);
     }
     return a === b;
-}
-
-function showCorrectRate(eventSummary: any) {
-
 }
