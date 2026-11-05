@@ -1,8 +1,17 @@
 import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
+import {map, Observable} from "rxjs";
 import {AnalyticDto, MainSessionType, SessionEventDto} from "../model/request.model";
 import {SessionEvent} from "../model/trace.model";
+
+/** Colonnes de base de la liste ; l'alias (`colonne:alias`) donne la clé de la réponse. sessionId reste en base : il sert au lien de détail. */
+const SESSION_EVENT_LIST_COLUMNS = 'start:instant,type,value,sessionId,instance.app_name:appName';
+
+/** Colonnes lazy : clé de table vers expression jquery. */
+const LAZY_SESSION_EVENT_COLUMNS: Record<string, string> = {
+    namespace: 'instance.namespace:namespace',
+    scope: 'scope'
+};
 
 @Injectable({ providedIn: 'root' })
 export class SessionEventService {
@@ -24,8 +33,13 @@ export class SessionEventService {
         return this.http.get<SessionEvent[]>(`${this.server}/session/${idSession}/event`);
     }
 
-    getSessionEvents(params: any): Observable<SessionEventDto[]> {
-        return this.http.get<SessionEventDto[]>(`${this.server}/session/event`, {params: params});
+    /** Liste jquery : colonnes de base + colonnes lazy demandées. jquery renvoie start en ms, la page attend instant en secondes. */
+    getSessionEvents(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<SessionEventDto[]> {
+        const column = [SESSION_EVENT_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_SESSION_EVENT_COLUMNS[c])].join(',');
+        const params = { ...criteria, join: 'instance', column };
+        return this.http.get<any[]>(`${localStorage.getItem('server')}/jquery/session/event`, {params}).pipe(
+            map(rows => rows.map(row => ({ ...row, instant: row.instant / 1000 })))
+        );
     }
 
     getSessionEventTypeCount(params: any): Observable<{count: number, type: string}[]> {

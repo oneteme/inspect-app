@@ -13,7 +13,6 @@
           <div class="session-title-row">
             <span class="status-badge"
                   *ngIf="STATUS[session.end ? session.status.toString().charAt(0) + 'xx' : '-1'] as st"
-                  [class.pulse]="!session.end"
                   [class.with-code]="session.end"
                   [style.color]="st.color"
                   [style.background-color]="st.color + '1a'">
@@ -23,11 +22,10 @@
             <div class="session-title-content">
               <div class="session-name-row">
                 <span class="stat-item session-duration"
-                      [class.online]="!session.end"
                       [matTooltip]="session.end && session.asyncDuration != null && session.asyncDuration >= 0
                         ? 'Temps de réponse : ' + ({ start: session.start, end: session.end } | duration) + ' · Traitement différé : ' + (session.asyncDuration / 1000 | duration)
                         : (session.end ? '' : 'En cours')">
-                  <mat-icon class="material-symbols-outlined stat-icon">{{ session.end && session.asyncDuration != null && session.asyncDuration >= 0 ? 'time_auto' : 'timer' }}</mat-icon>
+                  <mat-icon class="material-symbols-outlined stat-icon" [style.color]="session.end ? null : STATUS['-1'].color">{{ session.end && session.asyncDuration != null && session.asyncDuration >= 0 ? 'time_auto' : 'timer' }}</mat-icon>
                   <span class="stat-value stat-duration" *ngIf="session.end"
                         [matTooltip]="session.end && session.asyncDuration != null && session.asyncDuration >= 0 ? '' : ((session.end * 1000) | date: 'dd/MM/yyyy HH:mm:ss.SSS')">
                     {{ { start: session.start, end: session.end } | duration }}

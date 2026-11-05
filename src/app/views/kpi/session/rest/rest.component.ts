@@ -10,12 +10,13 @@ import {buildFilterSelections, toFilterValues,
   pivotByStack
 } from "../../kpi.config";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
-import {periodManagement, formatChartDates} from "../../../../shared/util";
-import {ChartProvider, field} from "@oneteme/jquery-core";
+import {withKpiChartTypes} from "../../kpi-chart-type";
+import {periodManagement, formatChartDates, buildPeriodSliceDisplay, resolvePeriodGranularity} from "../../../../shared/util";
+import {ChartProvider, field, buildPeriodOptions, remapSliceKeys} from "@oneteme/jquery-core";
 import {RestSessionService} from "../../../../service/jquery/rest-session.service";
 import {EnvRouter} from "../../../../service/router.service";
 import {ChartComponent, selectBestScale} from "@oneteme/jquery-echarts";
-import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
+import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, OrganizerXOption, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
 import {DatePipe} from "@angular/common";
 
 @Component({
@@ -85,6 +86,10 @@ export class RestComponent implements OnInit {
 
   readonly STATUS_CHART_PROVIDER_BASE = STATUS_CHART_PROVIDER_BASE;
 
+  $statusChartType = 'column';
+  $performanceChartType = 'column';
+  $volumetryChartType = 'column';
+
   $statusRepartition: Partial<{data: any[], rawData: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = { data: [], loading: true};
   $statusOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $statusView: 'chart' | 'table' = 'chart';
@@ -112,7 +117,11 @@ export class RestComponent implements OnInit {
   $userRepartition: {data: any[], loading: boolean} = { data: [], loading: true};
   $globalStatistic: {totalRequest: number, percentError: number, totalRequestError: number, elapsedPercentile: number, totalUser: number} = {totalRequest: 0, totalRequestError: 0, percentError: 0, elapsedPercentile: 0, totalUser: 0};
 
+  // Granularité serveur par graphique (groupedBy), modifiable via le sous-menu de l'axe Date
   groupedBy: string = '';
+  $statusGranularity: string = '';
+  $performanceGranularity: string = '';
+  $volumetryGranularity: string = '';
   params: QueryParams;
 
   @Input() set queryParams(value: QueryParams) {
@@ -121,6 +130,9 @@ export class RestComponent implements OnInit {
       this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
 
       // Initialize ChartConfigs and OrganizerConfigs
+      this.$statusGranularity = this.groupedBy;
+      this.$performanceGranularity = this.groupedBy;
+      this.$volumetryGranularity = this.groupedBy;
       this.$statusRepartition.chartConfig = REST_SESSION_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = REST_SESSION_PERFORMANCE_CHART_CONFIG(this.groupedBy);
       this.$volumetryRepartition.chartConfig = REST_SESSION_VOLUMETRY_CHART_CONFIG(this.groupedBy);
@@ -141,11 +153,22 @@ export class RestComponent implements OnInit {
   ngOnInit() {}
 
   onStatusViewChange(event: OrganizerButtonEvent): void {
+    if (event.type === 'chartTypeSelected') {
+      this.$statusChartType = event.state.selectedChartType ?? this.$statusChartType;
+      this.$statusOrganizer = withKpiChartTypes(this.$statusOrganizer, this.$statusChartType);
+      this._cdr.markForCheck();
+      return;
+    }
     if (event.type === 'viewSwitched') {
       this.$statusView = event.state.viewMode ?? 'chart';
     }
+    const granularity = this._resolveGranularityAfterX(event, this.$statusGranularity);
+    if (granularity !== this.$statusGranularity) {
+      this.$statusGranularity = granularity;
+      this.$statusRepartition.chartConfig = REST_SESSION_STATUS_CHART_CONFIG(granularity);
+    }
     const result = this._handleOrganizerEvent(event, this.$statusRepartition.chartConfig, this.$statusOrganizer, this._statusOrganizerOptions());
-    this.$statusOrganizer = result.binding;
+    this.$statusOrganizer = withKpiChartTypes(result.binding, this.$statusChartType);
     if (result.shouldRefetch) {
       this._fetchStatus();
     }
@@ -163,8 +186,19 @@ export class RestComponent implements OnInit {
   }
 
   onPerformanceViewChange(event: OrganizerButtonEvent): void {
+    if (event.type === 'chartTypeSelected') {
+      this.$performanceChartType = event.state.selectedChartType ?? this.$performanceChartType;
+      this.$performanceOrganizer = withKpiChartTypes(this.$performanceOrganizer, this.$performanceChartType);
+      this._cdr.markForCheck();
+      return;
+    }
+    const granularity = this._resolveGranularityAfterX(event, this.$performanceGranularity);
+    if (granularity !== this.$performanceGranularity) {
+      this.$performanceGranularity = granularity;
+      this.$performanceRepartition.chartConfig = REST_SESSION_PERFORMANCE_CHART_CONFIG(granularity);
+    }
     const result = this._handleOrganizerEvent(event, this.$performanceRepartition.chartConfig, this.$performanceOrganizer, this._performanceOrganizerOptions());
-    this.$performanceOrganizer = result.binding;
+    this.$performanceOrganizer = withKpiChartTypes(result.binding, this.$performanceChartType);
     if (result.shouldRefetch) {
       this._fetchPerformance();
     }
@@ -182,8 +216,19 @@ export class RestComponent implements OnInit {
   }
 
   onVolumetryViewChange(event: OrganizerButtonEvent): void {
+    if (event.type === 'chartTypeSelected') {
+      this.$volumetryChartType = event.state.selectedChartType ?? this.$volumetryChartType;
+      this.$volumetryOrganizer = withKpiChartTypes(this.$volumetryOrganizer, this.$volumetryChartType);
+      this._cdr.markForCheck();
+      return;
+    }
+    const granularity = this._resolveGranularityAfterX(event, this.$volumetryGranularity);
+    if (granularity !== this.$volumetryGranularity) {
+      this.$volumetryGranularity = granularity;
+      this.$volumetryRepartition.chartConfig = REST_SESSION_VOLUMETRY_CHART_CONFIG(granularity);
+    }
     const result = this._handleOrganizerEvent(event, this.$volumetryRepartition.chartConfig, this.$volumetryOrganizer, this._volumetryOrganizerOptions());
-    this.$volumetryOrganizer = result.binding;
+    this.$volumetryOrganizer = withKpiChartTypes(result.binding, this.$volumetryChartType);
     if (result.shouldRefetch) {
       this._fetchVolumetry();
     }
@@ -218,7 +263,7 @@ export class RestComponent implements OnInit {
     this._fetchVolumetry();
   }
 
-  private _fetchSliceData(chartConfig: ChartConfig, filterKey: string): Observable<any[]> {
+  private _fetchSliceData(chartConfig: ChartConfig, filterKey: string, granularity: string): Observable<any[]> {
     const filter = chartConfig.filters?.items?.find(item => item.key === filterKey);
     if (!filter) {
       return of([]);
@@ -226,7 +271,7 @@ export class RestComponent implements OnInit {
 
     return this._restSessionService.getFilters(
       filter,
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: granularity }
     ) as Observable<any[]>;
   }
 
@@ -246,10 +291,10 @@ export class RestComponent implements OnInit {
     this.$statusRepartition.data = [];
     this._restSessionService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, selections: buildFilterSelections(cfg, this.$statusFilterValues) }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$statusGranularity, selections: buildFilterSelections(cfg, this.$statusFilterValues) }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
-      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
+      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$statusGranularity, this.datePipe, this.params.period.start) : data;
       const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
       const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
       this.$statusRepartition.rawData = formattedData;
@@ -273,10 +318,10 @@ export class RestComponent implements OnInit {
     this.$performanceRepartition.data = [];
     this._restSessionService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, selections: buildFilterSelections(cfg, this.$performanceFilterValues) }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$performanceGranularity, selections: buildFilterSelections(cfg, this.$performanceFilterValues) }
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
-      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
+      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$performanceGranularity, this.datePipe, this.params.period.start) : data;
       const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
       const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
       this.$performanceRepartition.data = pivoted;
@@ -301,10 +346,10 @@ export class RestComponent implements OnInit {
     this.$volumetryRepartition.data = [];
     this._restSessionService.getSizeCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, selections: buildFilterSelections(cfg, this.$volumetryFilterValues) }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$volumetryGranularity, selections: buildFilterSelections(cfg, this.$volumetryFilterValues) }
     ).pipe(finalize(() => this.$volumetryRepartition.loading = false))
     .subscribe(data => {
-      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.groupedBy, this.datePipe) : data;
+      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$volumetryGranularity, this.datePipe, this.params.period.start) : data;
       const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
       const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
       this.$volumetryRepartition.rawData = formattedData;
@@ -334,14 +379,17 @@ export class RestComponent implements OnInit {
   }
 
   private _rebuildOrganizerConfigs(): void {
-    this.$statusOrganizer = buildOrganizerChartBinding(this.$statusRepartition.chartConfig, this._statusOrganizerOptions());
-    this.$performanceOrganizer = buildOrganizerChartBinding(this.$performanceRepartition.chartConfig, this._performanceOrganizerOptions());
-    this.$volumetryOrganizer = buildOrganizerChartBinding(this.$volumetryRepartition.chartConfig, this._volumetryOrganizerOptions());
+    this.$statusOrganizer = withKpiChartTypes(buildOrganizerChartBinding(this.$statusRepartition.chartConfig, this._statusOrganizerOptions()), this.$statusChartType);
+    this.$performanceOrganizer = withKpiChartTypes(buildOrganizerChartBinding(this.$performanceRepartition.chartConfig, this._performanceOrganizerOptions()), this.$performanceChartType);
+    this.$volumetryOrganizer = withKpiChartTypes(buildOrganizerChartBinding(this.$volumetryRepartition.chartConfig, this._volumetryOrganizerOptions()), this.$volumetryChartType);
   }
 
   private _statusOrganizerOptions(): OrganizerChartBridgeOptions {
     return {
-      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$statusRepartition.chartConfig, filterKey),
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$statusRepartition.chartConfig, filterKey, this.$statusGranularity),
+      resolveSliceDisplay: (filterKey: string) => this._resolvePeriodSliceDisplay(filterKey, this.$statusGranularity),
+      resolveXOptions: (groupKey: string) => this._resolveXOptions(groupKey),
+      remapSliceSelection: remapSliceKeys,
       onExportVisual: () => this._statusChart?.exportImage('status'),
       onExportData: () => this._statusChart?.exportData('status')
     };
@@ -349,7 +397,10 @@ export class RestComponent implements OnInit {
 
   private _performanceOrganizerOptions(): OrganizerChartBridgeOptions {
     return {
-      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$performanceRepartition.chartConfig, filterKey),
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$performanceRepartition.chartConfig, filterKey, this.$performanceGranularity),
+      resolveSliceDisplay: (filterKey: string) => this._resolvePeriodSliceDisplay(filterKey, this.$performanceGranularity),
+      resolveXOptions: (groupKey: string) => this._resolveXOptions(groupKey),
+      remapSliceSelection: remapSliceKeys,
       onExportVisual: () => this._performanceChart?.exportImage('performance'),
       onExportData: () => this._performanceChart?.exportData('performance'),
     };
@@ -357,10 +408,29 @@ export class RestComponent implements OnInit {
 
   private _volumetryOrganizerOptions(): OrganizerChartBridgeOptions {
     return {
-      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$volumetryRepartition.chartConfig, filterKey),
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$volumetryRepartition.chartConfig, filterKey, this.$volumetryGranularity),
+      resolveSliceDisplay: (filterKey: string) => this._resolvePeriodSliceDisplay(filterKey, this.$volumetryGranularity),
+      resolveXOptions: (groupKey: string) => this._resolveXOptions(groupKey),
+      remapSliceSelection: remapSliceKeys,
       onExportVisual: () => this._volumetryChart?.exportImage('volumetry'),
       onExportData: () => this._volumetryChart?.exportData('volumetry')
     };
+  }
+
+  private _resolvePeriodSliceDisplay(filterKey: string, granularity: string) {
+    return filterKey === 'date' ? buildPeriodSliceDisplay(granularity, this.params.period.start) : undefined;
+  }
+
+  private _resolveXOptions(groupKey: string): OrganizerXOption[] | undefined {
+    return groupKey === 'date' ? buildPeriodOptions() : undefined;
+  }
+
+  /** Granularité à appliquer après un événement X : seul le choix de variante sur l'axe Date la modifie. */
+  private _resolveGranularityAfterX(event: OrganizerButtonEvent, current: string): string {
+    if (event.type !== 'xSelected' || event.state.selectedX !== 'date') {
+      return current;
+    }
+    return resolvePeriodGranularity(event.state.selectedXOption, this.params.period.start, this.params.period.end);
   }
 
   private _handleOrganizerEvent(
@@ -408,7 +478,7 @@ export class RestComponent implements OnInit {
     this.$userRepartition.loading = true;
     this._restSessionService.getRestSession(args).pipe(finalize(() => this.$userRepartition.loading = false)).subscribe({
       next: (res: any[]) => {
-        this.$userRepartition.data = res;
+        this.$userRepartition.data = formatChartDates(res, this.groupedBy, this.datePipe, this.params.period.start);
       }
     });
   }

@@ -23,7 +23,7 @@
     </div>
     <div class="kpi-stat-card purple">
       <div class="kpi-stat-icon purple">
-        <mat-icon class="material-symbols-outlined">schedule</mat-icon>
+        <mat-icon class="material-symbols-outlined">timer</mat-icon>
       </div>
       <div class="kpi-stat-content">
         <span class="kpi-stat-label">Temps de réponse max</span>
@@ -56,7 +56,7 @@
       <div class="kpi-chart-header">
         <div class="kpi-chart-title-group">
           <span class="kpi-accent-bar orange-bar"></span>
-          <mat-icon class="kpi-chart-icon material-symbols-outlined">signal_cellular_alt</mat-icon>
+          <mat-icon class="kpi-chart-icon material-symbols-outlined">cardiology</mat-icon>
           <span class="kpi-chart-title">Disponibilité</span>
           <nav class="kpi-breadcrumb" *ngIf="activeStackLabel($statusRepartition.chartConfig) || activeGroupLabel($statusRepartition.chartConfig)">
             <ng-container *ngIf="activeGroupLabel($statusRepartition.chartConfig)">
@@ -95,7 +95,7 @@
           (activeKeysChange)="onStatusFilterChange($event)">
         </slice-panel>
         <chart #statusChart
-               type="column"
+               [type]="$statusChartType"
                [config]="$statusRepartition.chartProvider || {series: []}"
                [data]="$statusRepartition.data"
                [isLoading]="$statusRepartition.loading"></chart>
@@ -122,7 +122,7 @@
       <div class="kpi-chart-header">
         <div class="kpi-chart-title-group">
           <span class="kpi-accent-bar teal-bar"></span>
-          <mat-icon class="kpi-chart-icon material-symbols-outlined">trending_up</mat-icon>
+          <mat-icon class="kpi-chart-icon material-symbols-outlined">timer</mat-icon>
           <span class="kpi-chart-title">Performance</span>
           <nav class="kpi-breadcrumb" *ngIf="activeStackLabel($performanceRepartition.chartConfig) || activeGroupLabel($performanceRepartition.chartConfig)">
             <ng-container *ngIf="activeGroupLabel($performanceRepartition.chartConfig)">
@@ -161,7 +161,7 @@
           (activeKeysChange)="onPerformanceFilterChange($event)">
         </slice-panel>
         <chart #performanceChart
-               type="column"
+               [type]="$performanceChartType"
                [config]="$performanceRepartition.chartProvider || {series: []}"
                [data]="$performanceRepartition.data"
                [isLoading]="$performanceRepartition.loading"></chart>

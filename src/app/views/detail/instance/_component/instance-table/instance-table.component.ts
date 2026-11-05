@@ -36,7 +36,7 @@ export class InstanceTableComponent {
       },
       { key: 'os', header: 'OS', icon: 'computer', optional: true },
       { key: 're', header: 'RE', icon: 'sdk', optional: true },
-      { key: 'user', header: 'Utilisateur', icon: 'person', optional: true }
+      { key: 'user', header: 'Utilisateur', icon: 'badge', optional: true }
     ],
     defaultSort: DEFAULT_SORT_CONFIG,
     rowClass: (row) => {
