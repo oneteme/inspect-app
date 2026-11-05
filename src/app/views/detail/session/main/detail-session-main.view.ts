@@ -44,7 +44,7 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
                 this.type = params.type_main;
                 this._pageTitleService.set({ icon: Constants.MAPPING_TYPE[params.type_main]?.icon || 'manufacturing', iconOutlined: true, title: (Constants.MAPPING_TYPE[params.type_main]?.title || params.type_main) + ' • ' + params.id_session, subtitle: Constants.MAPPING_TYPE[params.type_main]?.subtitle });
                 this.getSession(params.id_session);
-                this._location.replaceState(`${this._router.url.split('?')[0]}?namespace=${this.namespace}`)
+                //this._location.replaceState(`${this._router.url.split('?')[0]}?namespace=${this.namespace}`)
             }
         });
     }

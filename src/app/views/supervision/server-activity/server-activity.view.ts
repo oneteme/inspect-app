@@ -277,7 +277,7 @@ export class ServerActivityView implements OnDestroy {
         return new IPeriod(start, end);
       }
     }
-    const fallback = getDefaultRelativePeriod(24);
+    const fallback = getDefaultRelativePeriod(60);
     return new IPeriod(fallback.start, fallback.end);
   }
 

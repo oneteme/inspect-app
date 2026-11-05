@@ -219,7 +219,7 @@ export class SearchRestView implements OnInit, OnDestroy {
   selectedRequest(event: MouseEvent, row: RestSessionDto): void {
     if (row) {
       this._router.navigateOnClick(event, ['/session/rest', row.id], {
-        queryParams: { namespace: this.queryParams.namespace }
+        queryParams: { ...this.queryParams.period.buildParams(), namespace: this.queryParams.namespace }
       });
     }
   }

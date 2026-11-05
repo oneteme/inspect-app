@@ -8,7 +8,7 @@ export interface Application {
 export class QueryParams {
     private _optional: { [key: string]: any } = {};
 
-    constructor(public _period: Period, public _namespace: string, public _appname?: string[], public _hosts?: string[], public _rangestatus?: string[], public _commands?: string[], public _schemas?: string[], public _types?: string[]) {
+    constructor(public _period: Period, public _namespace: string, public _appname?: string[], public _hosts?: string[], public _rangestatus?: string[], public _types?: string[]) {
     }
 
     set period(period: Period) {
@@ -55,22 +55,6 @@ export class QueryParams {
         return this._types;
     }
 
-
-    set commands(command: string[]) {
-        this._commands = command
-    }
-    get commands(): string[] {
-        return this._commands;
-    }
-
-    set schemas(schema: string[]) {
-        this._schemas = schema
-    }
-    get schemas(): string[] {
-        return this._schemas;
-    }
-
-
     get optional(): { [key: string]: any } {
         return this._optional;
     }
@@ -99,12 +83,6 @@ export class QueryParams {
         if (this.namespace) {
             params = { ...params, namespace: this.namespace };
         }
-        if (this.commands && this.commands.length > 0) {
-            params = { ...params, command: this.commands.toString() }
-        }
-        if (this.schemas && this.schemas.length > 0) {
-            params = { ...params, schema: this.schemas.toString() }
-        }
         return params;
     }
 
@@ -124,7 +102,7 @@ export class IPeriod implements Period {
     }
 
     set start(start: Date) {
-        this._start = start;
+        this._start = new Date(start);
     }
 
     get start(): Date {
@@ -132,7 +110,7 @@ export class IPeriod implements Period {
     }
 
     set end(end: Date) {
-        this._end = end;
+        this._end = new Date(end);
     }
 
     get end(): Date {
@@ -165,7 +143,7 @@ export class IStep implements Period {
     get end(): Date {
         let now = new Date();
         now.setSeconds(0, 0);
-        return now;
+        return new Date(now.getFullYear(), now.getMonth(), now.getDate(), now.getHours(), now.getMinutes() + 1);
     }
 
     buildParams(): { step: number } {
