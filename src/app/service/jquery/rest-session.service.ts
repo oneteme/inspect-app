@@ -46,7 +46,7 @@ export class RestSessionService {
 
     getHosts(filters: {start: Date, end: Date , namespace: string}): Observable<{ host: string }[]> {
         var args: any = {
-            'column': `instance.app_name.distinct:host`,
+            'select': `instance.app_name.distinct:host`,
             'instance.namespace': filters.namespace,
             'instance.type': 'SERVER',
             'start.ge': filters.start.toISOString(),
@@ -60,7 +60,7 @@ export class RestSessionService {
 
     getDependencies(filters: {namespace: string, start: Date, end: Date, servers: string[]}): Observable<{count: number, target: string, origin: string}[]> {
         let args: any = {
-            'column': `count:count,instance.app_name:origin,instance_join.app_name:target`,
+            'select': `count:count,instance.app_name:origin,instance_join.app_name:target`,
             'rest_request.start.ge': filters.start.toISOString(),
             'rest_request.start.lt': filters.end.toISOString(),
             'rest_session_join.start.ge': filters.start.toISOString(),
@@ -79,7 +79,7 @@ export class RestSessionService {
 
     getDependents(filters: {namespace: string, start: Date, end: Date, servers: string[]}): Observable<{count: number, target: string, origin: string}[]> {
         let args: any = {
-            'column': `rest_session_join.count:count,instance_join.app_name:target,instance.app_name:origin`,
+            'select': `rest_session_join.count:count,instance_join.app_name:target,instance.app_name:origin`,
             'rest_request.start.ge': filters.start.toISOString(),
             'rest_request.start.lt': filters.end.toISOString(),
             'rest_session_join.start.ge': filters.start.toISOString(),
@@ -111,7 +111,7 @@ export class RestSessionService {
 
     getCountByNamespace(filters: {namespace: string, start: Date, end: Date}): Observable<{total: number, errors: number}> {
         return this.getRestSession<{count: number, countErrorServer: number, countErrorClient: number}[]>({
-            'column': 'count:count,count_error_server:countErrorServer,count_error_client:countErrorClient',
+            'select': 'count:count,count_error_server:countErrorServer,count_error_client:countErrorClient',
             'join': 'instance',
             'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
@@ -134,14 +134,14 @@ export class RestSessionService {
         const requests = data.series.map(serie => {
             const serieAlias = data.indicator.jquery.buildAlias(serie.jquery.buildAlias());
             const args: any = {
-                'column': `${data.indicator.jquery.value(serie.jquery.value())}:${serieAlias},${groupColumn(data.group, dateHour)}`,
+                'select': `${data.indicator.jquery.value(serie.jquery.value())}:${serieAlias},${groupColumn(data.group, dateHour)}`,
                 'join': 'instance',
                 'instance.namespace': filters.namespace,
                 'start.ge': filters.start.toISOString(),
                 'start.lt': filters.end.toISOString()
             };
             if (data.stack) {
-                args['column'] += `,${data.stack.jquery.value(serie.jquery.buildAlias())}:${stackAlias}`;
+                args['select'] += `,${data.stack.jquery.value(serie.jquery.buildAlias())}:${stackAlias}`;
                 args[`${stackAlias}.notNull`] = '';
             }
             if (data.group.jquery.order) {
@@ -182,14 +182,14 @@ export class RestSessionService {
         const dateHour = isDateHour(filters.groupedBy, data.group.key);
 
         let args: any = {
-            'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${groupColumn(data.group, dateHour)}`,
+            'select': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${groupColumn(data.group, dateHour)}`,
             'join': 'instance',
             'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
         if(data.stack) {
-            args['column'] += `,${data.stack.jquery.value()}:${data.stack.jquery.buildAlias()}`;
+            args['select'] += `,${data.stack.jquery.value()}:${data.stack.jquery.buildAlias()}`;
             args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
         }
         if(data.group.jquery.order){
@@ -204,7 +204,7 @@ export class RestSessionService {
     getFilters(filter: ChartItem, filters: {namespace: string, start: Date, end: Date, hosts: string[], groupedBy?: string }): Observable<any[]> {
         const dateHour = isDateHour(filters.groupedBy, filter.key);
         let args: any = {
-            'column': dateHour ? DATE_HOUR_COLUMNS : `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
+            'select': dateHour ? DATE_HOUR_COLUMNS : `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
             'distinct': 'true',
             'join': 'instance',
             'instance.namespace': filters.namespace,
