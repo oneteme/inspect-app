@@ -1,6 +1,5 @@
 import {Component, Input} from "@angular/core";
 import {ChartProvider, field} from "@oneteme/jquery-core";
-import {QueryParams} from "../../../../model/conf.model";
 
 @Component({
   selector: 'media-type-chart',
@@ -34,7 +33,7 @@ export class MediaTypeChartComponent {
   }
   _data: any = [];
 
-  @Input() queryParams: QueryParams;
+  @Input() subtitle: string = '';
 
   @Input() set data(value: any[]) {
     if(value) {

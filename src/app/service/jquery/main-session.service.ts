@@ -11,7 +11,8 @@ const MAIN_SESSION_LIST_COLUMNS = 'id,name,location,start,end,user,status,instan
 
 /** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
 const LAZY_MAIN_SESSION_COLUMNS: Record<string, string> = {
-    threadName: 'thread:threadName'
+    threadName: 'thread:threadName',
+    appVersion: 'instance.version:appVersion'
 };
 
 @Injectable({ providedIn: 'root' })
@@ -39,7 +40,7 @@ export class MainSessionService {
 
     getHosts(filters: {start: Date, end: Date, namespace: string, type: string}): Observable<{ host: string }[]> {
         var args: any = {
-            'column': `instance.app_name.distinct:host`,
+            'select': `instance.app_name.distinct:host`,
             'join': 'instance',
             'instance.namespace': filters.namespace,
             'instance.type': 'SERVER',
@@ -67,7 +68,7 @@ export class MainSessionService {
 
     getDependents(filters: {namespace: string, start: Date, end: Date, servers: string[], type: string}): Observable<{count: number, target: string, origin: string}[]> {
         let args: any = {
-            'column': `rest_session_join.count:count,instance_join.app_name:target,instance.app_name:origin`,
+            'select': `rest_session_join.count:count,instance_join.app_name:target,instance.app_name:origin`,
             'type': filters.type,
             'rest_request.start.ge': filters.start.toISOString(),
             'rest_request.start.lt': filters.end.toISOString(),
@@ -88,7 +89,7 @@ export class MainSessionService {
 
     getUsersView(filters: {namespace: string, date: Date}): Observable<string[]> {
         return this.getMainSession({
-            'column': 'user',
+            'select': 'user',
             'distinct': true,
             'join': 'instance',
             'user.notNull': '',
@@ -104,7 +105,7 @@ export class MainSessionService {
         const groupAlias = data.group.jquery.buildAlias();
         const dateHour = isDateHour(filters.groupedBy, data.group.key);
         let args: any = {
-            'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${groupColumn(data.group, dateHour)}`,
+            'select': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${groupColumn(data.group, dateHour)}`,
             'join': 'instance',
             'instance.namespace': filters.namespace,
             'instance.type': 'SERVER',
@@ -113,7 +114,7 @@ export class MainSessionService {
             'start.lt': filters.end.toISOString()
         }
         if(data.stack) {
-            args['column'] += `,${data.stack.jquery.value()}:${data.stack.jquery.buildAlias()}`;
+            args['select'] += `,${data.stack.jquery.value()}:${data.stack.jquery.buildAlias()}`;
             args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
         }
         if(data.group.jquery.order){
@@ -128,7 +129,7 @@ export class MainSessionService {
     getFilters(filter: ChartItem, filters: {namespace: string, start: Date, end: Date, hosts: string[], type: string, groupedBy?: string }) {
         const dateHour = isDateHour(filters.groupedBy, filter.key);
         let args: any = {
-            'column': dateHour ? DATE_HOUR_COLUMNS : `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
+            'select': dateHour ? DATE_HOUR_COLUMNS : `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
             'distinct': 'true',
             'join': 'instance',
             'instance.namespace': filters.namespace,

@@ -51,7 +51,7 @@ export const DEFAULT_DURATION_SLICE_CONFIG: SliceConfig = {
 export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'APPLICATION', icon: 'widgets', width: '18%' },
+    { key: 'appName', header: 'Application', icon: 'widgets', width: '18%' },
     {
       key: 'resource', header: 'Ressource', groupable: false, sliceable: false, icon: 'category',
       searchValue: (row: RestSessionDto) => fmtMethod(row.method) + ' ' + (row.path || '')
@@ -114,7 +114,7 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
 export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'APPLICATION', icon: 'widgets', width: '13%' },
+    { key: 'appName', header: 'Application', icon: 'widgets', width: '13%' },
     { key: 'name', header: 'Nom', icon: 'label', width: '13%' },
     { key: 'location', header: 'Ressource', icon: 'category' },
     { key: 'start', header: 'Début', groupable: false, sliceable: false, icon: 'schedule', width: '13%' },
@@ -125,6 +125,7 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
     { key: 'user', header: 'Utilisateur', icon: 'badge', width: '13%' },
     { key: 'address', header: 'Adresse', icon: 'fingerprint', width: '13%', optional: true },
     { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
+    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true },
     {
       key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
       value: (row: RestSessionDto) => {
@@ -161,7 +162,7 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
 export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'host', header: 'SERVEUR', icon: 'dns' },
+    { key: 'host', header: 'Serveur', icon: 'dns' },
     {
       key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false,
       searchValue: (row: RestRequestDto) => fmtMethod(row.method) + ' ' + (row.path || '')
@@ -183,15 +184,15 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
         return row.status;
       }
     },
-    { key: 'action', header: 'Action', icon: 'touch_app', sliceable: false, groupable: false, sortable: false },
+    { key: 'action', header: 'Détails', icon: 'touch_app', width: '10%', sliceable: false, groupable: false, sortable: false, removable: false },
     { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
     { key: 'protocol', header: 'Protocole', icon: 'lan', optional: true },
     { key: 'query', header: 'Query', icon: 'search', lazy: true },
     { key: 'contentType', header: 'Content-Type', icon: 'description', lazy: true },
     { key: 'inDataSize', header: 'Taille entrée', icon: 'download', lazy: true },
     { key: 'outDataSize', header: 'Taille sortie', icon: 'upload', lazy: true },
-    { key: 'bodyContent', header: 'Corps', icon: 'notes', lazy: true },
-    { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
+    { key: 'bodyContent', header: 'Réponse', icon: 'file-input', iconFontSet: 'material-symbols-outlined', lazy: true },
+    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
   ],
   slices: [
@@ -228,7 +229,7 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
       searchValue: (row: DatabaseRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'badge' },
-    { key: 'productName', header: 'Base de données', icon: 'storage', lazy: true },
+    { key: 'productName', header: 'Base de données', icon: 'table_rows', lazy: true },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row: DatabaseRequestDto) => {
@@ -238,7 +239,7 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
     },
     { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
     { key: 'scheme', header: 'Éditeur', icon: 'hub', lazy: true },
-    { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
+    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
   ],
   slices: [
@@ -289,7 +290,7 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
     },
     { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
     { key: 'protocol', header: 'Protocole', icon: 'lan', lazy: true },
-    { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
+    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
   ],
   slices: [
@@ -339,7 +340,7 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
     },
     { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
     { key: 'protocol', header: 'Protocole', icon: 'lan', lazy: true },
-    { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
+    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
   ],
   slices: [
@@ -435,7 +436,7 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
       }
     },
     { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
-    { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
+    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
   ],
   slices: [
@@ -461,7 +462,7 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
 export const STAGE_TABLE_CONFIG: TableProvider<AbstractStage> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'name', header: 'Etape', icon: 'event_list' },
+    { key: 'name', header: 'Etape', icon: 'steppers', iconFontSet: 'material-symbols-outlined' },
     {
       key: 'resource', header: 'Ressource', icon: 'category',
       searchValue: (row: AbstractStage) => fmtMethod(row.command) + ' ' + ((row as any).args ?? row.arg ?? '')
@@ -498,16 +499,16 @@ export const STAGE_TABLE_CONFIG: TableProvider<AbstractStage> = {
 export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'instant', header: 'Horodate', icon: 'schedule', sliceable: false, groupable: false },
-    { key: 'appName', header: 'Application', icon: 'widgets', sliceable: false, groupable: false, width: '18%' },
-    { key: 'message', header: 'Message', icon: 'chat', sliceable: false, groupable: false, width: '52%' },
-    { key: 'thread', header: 'Thread',  sliceable: false, groupable: false  },
-    { key: 'action', header: 'Action',  sliceable: false, groupable: false },
-    { key: 'stack', header: 'Stack', icon: 'touch_app', sliceable: false, groupable: false, sortable: false }
+    { key: 'instant', header: 'Horodate', icon: 'schedule', sliceable: false, groupable: false, width: '11%' },
+    { key: 'appName', header: 'Application', icon: 'widgets', sliceable: false, groupable: false, width: '12%' },
+    { key: 'message', header: 'Message', icon: 'chat', sliceable: false, groupable: false, width: '35%' },
+    { key: 'thread', header: 'Thread', sliceable: false, groupable: false, width: '16%' },
+    { key: 'action', header: 'Détails', sliceable: false, groupable: false, width: '17%' },
+    { key: 'stack', header: 'Stack', icon: 'touch_app', sliceable: false, groupable: false, sortable: false, width: '9%' }
   ],
   slices: [
     {
-      title: 'Action',
+      title: 'Détails',
       columnKey: 'action',
       icon: 'label',
       hidden: true
@@ -552,20 +553,21 @@ export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'appName', header: 'Application', width: '15%', icon:'widgets' },
-    { key: 'namespace', header: 'Namespace', icon: 'layers', width: '10%', lazy: true },
+    { key: 'namespace', header: 'Namespace', icon: 'layers', width: '10%', lazy: true, groupable: false, sliceable: false },
+    { key: 'scope', header: 'Thread', icon: 'call_split', width: '10%', lazy: true },
     { key: 'sessionId', header: 'Session', icon: 'fingerprint', optional: true, groupable: false, sliceable: false },
+    { key: 'type', header: 'Type', icon: 'label', optional: true, groupable: true, sliceable: true },
     {
       key: 'instant', header: 'Date', icon: 'schedule', width: '10%', groupable: false, sliceable: false,
       searchValue: (row: SessionEventDto) => fmtStart(row.instant)
     },
-    { key: 'resource', header: 'Message', groupable: false, sliceable: false, icon: 'info' , width: '50%',
-      sortValue: (row: SessionEventDto) => row.value || row.type || '',
+    { key: 'resource', header: 'Actions', groupable: false, sliceable: false, icon: 'info' , width: '50%',
+      sortValue: (row: SessionEventDto) => row.value,
       searchValue: (row: SessionEventDto) => fmtMethod(row.type) + ' ' + (row.value || '')
     },
     { key: 'scope', header: 'Section', icon: 'call_split', width: '15%' },
     { key: 'threadName', header: 'Thread', lazy: true, icon: 'memory' },
-    { key: 'action', header: 'Action', icon: 'touch_app', width: '10%', sliceable: false, groupable: false, sortable: false },
-
+    { key: 'action', header: 'Détails', icon: 'touch_app', width: '10%', sliceable: false, groupable: false, sortable: false },
   ],
   defaultSort: { active: 'instant', direction: 'desc' },
   rowClass: (row: SessionEventDto) => {

@@ -56,7 +56,7 @@
       <div class="kpi-chart-header">
         <div class="kpi-chart-title-group">
           <span class="kpi-accent-bar blue-bar"></span>
-          <mat-icon class="kpi-chart-icon material-symbols-outlined">cardiology</mat-icon>
+          <mat-icon class="kpi-chart-icon material-symbols-outlined">task_alt</mat-icon>
           <span class="kpi-chart-title">Disponibilité</span>
           <nav class="kpi-breadcrumb" *ngIf="activeStackLabel($statusRepartition.chartConfig) || activeGroupLabel($statusRepartition.chartConfig)">
             <ng-container *ngIf="activeGroupLabel($statusRepartition.chartConfig)">
@@ -112,6 +112,9 @@
           <mat-icon class="kpi-chart-icon material-symbols-outlined">code</mat-icon>
           <span class="kpi-chart-title">Méthodes HTTP</span>
         </div>
+      </div>
+      <div class="kpi-chart-subheader">
+        <span class="kpi-chart-unit">{{ volumeSubtitle($methodRepartition.data, 'méthode', 'méthodes') }}</span>
       </div>
       <div class="kpi-chart-body">
         <chart type="donut"
@@ -179,7 +182,7 @@
       <media-type-chart
         [data]="$mediaRepartition.data"
         [loading]="$mediaRepartition.loading"
-        [queryParams]="params">
+        [subtitle]="volumeSubtitle($mediaRepartition.data, 'type de média', 'types de média')">
       </media-type-chart>
     </div>
 
@@ -244,9 +247,12 @@
           <span class="kpi-chart-title">Clients HTTP</span>
         </div>
       </div>
+      <div class="kpi-chart-subheader">
+        <span class="kpi-chart-unit">{{ volumeSubtitle($userAgentRepartition.data, 'user-agent', 'user-agents') }}</span>
+      </div>
       <div class="kpi-chart-body">
-        <chart type="donut"
-          [config]="USER_AGENT_PIE_CONFIG"
+        <chart type="sunburst"
+          [config]="USER_AGENT_SUNBURST_CONFIG"
           [data]="$userAgentRepartition.data"
           [isLoading]="$userAgentRepartition.loading">
         </chart>

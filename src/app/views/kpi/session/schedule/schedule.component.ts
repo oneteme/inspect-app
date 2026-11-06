@@ -1,7 +1,7 @@
 import {ChangeDetectorRef, Component, inject, Input, ViewChild} from "@angular/core";
 import {QueryParams} from "../../../../model/conf.model";
 import {finalize, Observable, of} from "rxjs";
-import {buildFilterSelections, toFilterValues,BATCH_SESSION_PERFORMANCE_CHART_CONFIG, BATCH_SESSION_STATUS_CHART_CONFIG, ChartConfig, buildSeries, pivotByStack} from "../../kpi.config";
+import {buildFilterSelections, toFilterValues,BATCH_SESSION_PERFORMANCE_CHART_CONFIG, BATCH_SESSION_STATUS_CHART_CONFIG, ChartConfig, buildSeries, lineTypeOptions, pivotByStack} from "../../kpi.config";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
 import {withKpiChartTypes} from "../../kpi-chart-type";
 import {formatChartDates, periodManagement, buildPeriodSliceDisplay, resolvePeriodGranularity} from "../../../../shared/util";
@@ -183,7 +183,8 @@ export class ScheduleComponent {
       this.$statusDisplayUnit = this._resolveDisplayUnit(ind?.unit, formattedData, yAlias);
       this.$statusRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
-        series: series
+        series: series,
+        optionsByType: lineTypeOptions(series)
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });
@@ -210,7 +211,8 @@ export class ScheduleComponent {
       this.$performanceRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
         series,
-        yUnit: ind?.unit
+        yUnit: ind?.unit,
+        optionsByType: lineTypeOptions(series)
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });
@@ -304,7 +306,7 @@ export class ScheduleComponent {
 
   getUser() {
     let args: any = {
-      'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
+      'select': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'instance.type': 'SERVER',
@@ -336,7 +338,7 @@ export class ScheduleComponent {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error,count(name.distinct):count_batch`,
+      'select': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error,count(name.distinct):count_batch`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'instance.type': 'SERVER',

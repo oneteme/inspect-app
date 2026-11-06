@@ -111,7 +111,7 @@
   }
 
   .session-title-row {
-    gap: 10px;
+    gap: 8px;
   }
 
   .status-badge {
@@ -192,28 +192,9 @@
 }
 
 .session-duration {
-  position: relative;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding-right: 11px;
-
-  // Petit séparateur vers l'élément suivant
-  &::after {
-    content: "";
-    position: absolute;
-    right: 0;
-    top: 50%;
-    width: 1px;
-    height: 14px;
-    transform: translateY(-50%);
-    background: #cbd5e1;
-  }
-
-  // Pas de séparateur quand la date suit directement (rien à séparer)
-  &:has(+ .header-date)::after {
-    display: none;
-  }
 
   .stat-icon {
     width: 14px;
@@ -227,37 +208,27 @@
     font-weight: 600;
     color: #334155;
   }
-
-  // Statut de l'instance (carte serveur) : l'icône et le texte suivent l'état
-  &.instance-status {
-    cursor: pointer;
-  }
-
-  &.online {
-    --pill-color: #10b981;
-    --pill-text: #047857;
-  }
-  &.pending {
-    --pill-color: #f59e0b;
-    --pill-text: #b45309;
-  }
-  &.offline {
-    --pill-color: #94a3b8;
-    --pill-text: #64748b;
-  }
-
-  &.online, &.pending, &.offline {
-    .stat-icon, .stat-state { color: var(--pill-color); }
-    .stat-duration { color: var(--pill-text); }
-  }
 }
 
 .meta-chip.header-date {
-  margin-left: auto;
-  padding: 0;
+  position: relative;
+  padding: 0 11px 0 0;
   background: transparent;
   color: #64748b;
+  font-size: 11px;
   font-weight: 500;
+
+  // Séparateur vers l'élément suivant (le nom)
+  &::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 50%;
+    width: 1px;
+    height: 14px;
+    transform: translateY(-50%);
+    background: #cbd5e1;
+  }
 
   .meta-icon {
     width: 14px;
@@ -266,24 +237,51 @@
     color: #64748b;
   }
 
-  // Version réduite (heure seule) : la date se déploie au survol
+  // Version réduite (heure seule) : au survol, la date s'ouvre en largeur (ce qui décale le séparateur et le nom)
+  // et passe sur une ligne au-dessus de l'heure, l'ensemble étant centré sur l'icône
   &.date-compact {
+    display: inline-grid;
+    grid-template-columns: auto auto;
+    align-items: center;
+    column-gap: 3px;
+    line-height: 13px;
+
+    .meta-icon {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .date-day,
+    .date-time {
+      grid-column: 2;
+      grid-row: 1;
+      justify-self: start;
+      white-space: nowrap;
+    }
+
     .date-day {
-      display: inline-block;
       max-width: 0;
       overflow: hidden;
+      transform: translateY(-6.5px);
       opacity: 0;
-      white-space: nowrap;
+      pointer-events: none;
       transition: max-width 0.25s ease, opacity 0.2s ease;
     }
 
     .date-time {
       font-variant-numeric: tabular-nums;
+      transition: transform 0.2s ease;
     }
 
-    &:hover .date-day {
-      max-width: 90px;
-      opacity: 1;
+    &:hover {
+      .date-day {
+        max-width: 80px;
+        opacity: 1;
+      }
+
+      .date-time {
+        transform: translateY(7px);
+      }
     }
   }
 }
@@ -313,7 +311,7 @@
 .session-title-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   min-width: 0;
   flex: 1;
 }

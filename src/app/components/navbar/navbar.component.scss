@@ -585,24 +585,57 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   margin: 4px 0;
 }
 
+::ng-deep .user-menu-panel .user-menu-item,
 ::ng-deep .user-menu-panel .logout-item {
-  border-radius: 8px !important;
-  height: 40px !important;
-  min-height: 40px !important;
-  transition: all 0.15s ease !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  height: 46px !important;
+  min-height: 46px !important;
+  border-radius: 10px !important;
+  background: transparent !important;
   border: 1px solid transparent !important;
+  transition: all 0.15s ease !important;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin-right: 0 !important;
+  }
+
+  span {
+    font-size: 14px;
+    font-weight: 500;
+  }
+}
+
+::ng-deep .user-menu-panel .user-menu-item {
+  mat-icon {
+    color: rgba(15, 23, 42, 0.5) !important;
+  }
+
+  span {
+    color: rgba(15, 23, 42, 0.7) !important;
+  }
+
+  &:hover {
+    background: linear-gradient(90deg, rgba(37, 99, 235, 0.08), rgba(20, 184, 166, 0.08)) !important;
+    border-color: rgba(37, 99, 235, 0.18) !important;
+    box-shadow: 0 10px 18px rgba(15, 23, 42, 0.08) !important;
+
+    mat-icon, span { color: rgba(15, 23, 42, 0.9) !important; }
+  }
+}
+
+::ng-deep .user-menu-panel .logout-item {
   margin-top: 4px !important;
 
   mat-icon {
     color: #ef4444 !important;
-    font-size: 18px;
-    width: 18px;
-    height: 18px;
   }
 
   span {
-    font-size: 13px !important;
-    font-weight: 500 !important;
     color: #ef4444 !important;
   }
 

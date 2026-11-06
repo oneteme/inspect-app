@@ -277,7 +277,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   openServerActivity(event: MouseEvent): void {
-    this._envRouter.navigateOnClick(event, ['activity'], {
+    this._envRouter.navigateOnClick(event, ['diagnostic'], {
       queryParams: {
         ...this.buildNavigationQueryParams(),
         namespace: this._activatedRoute.snapshot.queryParams.namespace || this.namespace.value || app.defaultNamespace
