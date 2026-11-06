@@ -461,7 +461,7 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
 export const STAGE_TABLE_CONFIG: TableProvider<AbstractStage> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'name', header: 'Etape', icon: 'event_list' },
+    { key: 'name', header: 'Etape', icon: 'steppers', iconFontSet: 'material-symbols-outlined' },
     {
       key: 'resource', header: 'Ressource', icon: 'category',
       searchValue: (row: AbstractStage) => fmtMethod(row.command) + ' ' + ((row as any).args ?? row.arg ?? '')
