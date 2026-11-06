@@ -183,7 +183,7 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
         return row.status;
       }
     },
-    { key: 'action', header: 'Action', icon: 'touch_app', sliceable: false, groupable: false, sortable: false },
+    { key: 'action', header: '', icon: '', sliceable: false, groupable: false, sortable: false },
     { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
     { key: 'protocol', header: 'Protocole', icon: 'lan', optional: true },
     { key: 'query', header: 'Query', icon: 'search', lazy: true },
@@ -502,8 +502,8 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
     { key: 'appName', header: 'Application', icon: 'widgets', sliceable: false, groupable: false, width: '18%' },
     { key: 'message', header: 'Message', icon: 'chat', sliceable: false, groupable: false, width: '52%' },
     { key: 'thread', header: 'Thread',  sliceable: false, groupable: false  },
-    { key: 'action', header: 'Action',  sliceable: false, groupable: false },
-    { key: 'stack', header: 'Stack', icon: 'touch_app', sliceable: false, groupable: false, sortable: false }
+    { key: 'action', header: '',  sliceable: false, groupable: false },
+    { key: 'stack', header: 'Stack', icon: '', sliceable: false, groupable: false, sortable: false }
   ],
   slices: [
     {
@@ -559,12 +559,12 @@ export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
       key: 'instant', header: 'Date', icon: 'schedule', width: '10%', groupable: false, sliceable: false,
       searchValue: (row: SessionEventDto) => fmtStart(row.instant)
     },
-    { key: 'resource', header: 'Message', groupable: false, sliceable: false, icon: 'info' , width: '50%',
+    { key: 'resource', header: 'Action', groupable: false, sliceable: false, icon: 'info' , width: '50%',
       sortValue: (row: SessionEventDto) => row.value || row.type || '',
       searchValue: (row: SessionEventDto) => fmtMethod(row.type) + ' ' + (row.value || '')
     },
     { key: 'threadName', header: 'Thread', lazy: true, icon: 'memory' },
-    { key: 'action', header: 'Action', icon: 'touch_app', width: '10%', sliceable: false, groupable: false, sortable: false },
+    { key: 'action', header: '', icon: '', width: '10%', sliceable: false, groupable: false, sortable: false },
 
   ],
   defaultSort: { active: 'instant', direction: 'desc' },

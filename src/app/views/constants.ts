@@ -320,5 +320,6 @@ export const STATUS = {
 export const EVENT_LOG = {
     INFO: {icon: 'done', label: "INFO", color: '#4CAF50', class: 'success'},
     WARN: {icon: 'error', label: "WARN", color: '#F9AD4E', class: 'warning'},
-    ERROR: {icon: 'warning', label: "ERROR", color: '#F44336', class: 'fail'}
+    ERROR: {icon: 'warning', label: "ERROR", color: '#F44336', class: 'fail'},
+    USER: {icon: 'recent_patient', label: "USER", color: '#8b5cf6', class: 'user-action'}
 }

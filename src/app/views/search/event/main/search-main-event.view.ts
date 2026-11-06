@@ -16,7 +16,7 @@ import {
 } from "../../../../shared/period-filter";
 import {app} from "../../../../../environments/environment";
 import {extractPeriod} from "../../../../shared/util";
-import {Constants, STATUS} from "../../../constants";
+import {Constants, EVENT_LOG} from "../../../constants";
 import {InstanceService} from "../../../../service/jquery/instance.service";
 import {Location} from "@angular/common";
 import {PageTitleService} from "../../../../service/page-title.service";
@@ -51,9 +51,9 @@ export class SearchMainEventView {
     queryParams: Partial<QueryParams> = {};
 
     private readonly _baseFilters: { icon: string; label: string; color: string; value: any }[] = [
-        {icon: STATUS['2xx'].icon, label: 'INFO', color: STATUS['2xx'].color, value: 'INFO'},
-        {icon: STATUS['5xx'].icon, label: 'ERROR', color: STATUS['5xx'].color, value: 'ERROR'},
-        {icon: STATUS['4xx'].icon, label: 'WARN', color: STATUS['4xx'].color, value: 'WARN'},
+        {icon: EVENT_LOG['INFO'].icon, label: 'INFO', color: EVENT_LOG['INFO'].color, value: 'INFO'},
+        {icon: EVENT_LOG['ERROR'].icon, label: 'ERROR', color: EVENT_LOG['ERROR'].color, value: 'ERROR'},
+        {icon: EVENT_LOG['WARN'].icon, label: 'WARN', color: EVENT_LOG['WARN'].color, value: 'WARN'},
     ];
 
     filters: { icon: string; label: string; color: string; value: any }[] = [...this._baseFilters];
@@ -124,12 +124,18 @@ export class SearchMainEventView {
     getEvents() {
         this.isLoading = true;
         this.events = [];
+        const isLogRoute = this._activatedRoute.snapshot.data['isLogRoute'];
         const params: any = {};
         if (this.queryParams.namespace) {
             params['instance.namespace'] = this.queryParams.namespace;
         }
         if (this.queryParams.appname && this.queryParams.appname.length > 0 && this.queryParams.appname[0] !== '') {
             params['instance.app_name'] = this.queryParams.appname;
+        }
+        if(isLogRoute) {
+            params['type.in'] = Array.from(this._logTypes.values());
+        } else {
+            params['type.notIn'] = Array.from(this._logTypes.values());
         }
         if (this.queryParams.types && this.queryParams.types.length > 0) {
             params['type'] = this.queryParams.types;
@@ -141,8 +147,6 @@ export class SearchMainEventView {
             params['start.lt'] = this.queryParams.period.end.toISOString();
         }
         this._criteria = params;
-        const isLogRoute = this._activatedRoute.snapshot.data['isLogRoute'];
-
         this._sessionEventService.getSessionEvents(params, this._lazyColumns)
             .pipe(finalize(() => this.isLoading = false))
             .subscribe({
@@ -154,7 +158,7 @@ export class SearchMainEventView {
                     this.events = this.filterByRoute(d, isLogRoute);
                     if (!isLogRoute) {
                         this.filters = [...new Set(this.events.map(e => e.type))].map(type => ({
-                            icon: STATUS['2xx'].icon, label: type, color: STATUS['2xx'].color, value: type
+                            icon: EVENT_LOG['USER'].icon, label: type, color: EVENT_LOG['USER'].color, value: type
                         }));
                     }
                 },
