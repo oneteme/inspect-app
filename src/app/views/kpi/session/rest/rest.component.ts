@@ -549,12 +549,12 @@ export class RestComponent implements OnInit {
               count
             }))
             .sort((a, b) => b.count - a.count);
+
+        this.$userAgentRepartition.data = rows;
       }
     });
   }
 
-
-        this.$userAgentRepartition.data = rows;
   getDependencies() {
     this.$dependencyRepartition.loading = true;
     this.$dependencyRepartition.data = [];
