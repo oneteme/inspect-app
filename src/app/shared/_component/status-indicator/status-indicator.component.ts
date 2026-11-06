@@ -5,7 +5,7 @@ import {DatePipe} from "@angular/common";
 export function resolveInstanceStatus(value: {end: number, configuration: InspectCollectorConfiguration, lastTrace: number, date: number}, datePipe: DatePipe): {class: 'online' | 'pending' | 'offline', tooltip: string} {
   let interval = value.date - (value.configuration?.scheduling.interval + 60 || 60 * 60) * 1000;
   if(value.end || !value.lastTrace) {
-    return {class: 'offline', tooltip: value.end ? `Instance arrêtée le ${datePipe.transform(new Date(value.end * 1000), 'dd/MM/yyyy à HH:mm:ss.SSS', 'fr')}` : 'Aucune trace remontée'};
+    return {class: 'offline', tooltip: value.end ? `Instance arrêtée le ${datePipe.transform(new Date(value.end), 'dd/MM/yyyy à HH:mm:ss.SSS', 'fr')}` : 'Aucune trace remontée'};
   }
   const tooltip = `Dernière trace remontée le ${datePipe.transform(new Date(value.lastTrace), 'dd/MM/yyyy à HH:mm:ss.SSS', 'fr')}`;
   return {class: value.lastTrace < interval ? 'pending' : 'online', tooltip};

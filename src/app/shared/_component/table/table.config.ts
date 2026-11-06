@@ -184,7 +184,7 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
         return row.status;
       }
     },
-    { key: 'action', header: 'Action', icon: 'touch_app', sliceable: false, groupable: false, sortable: false },
+    { key: 'action', header: 'Détails', icon: 'touch_app', width: '10%', sliceable: false, groupable: false, sortable: false, removable: false },
     { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
     { key: 'protocol', header: 'Protocole', icon: 'lan', optional: true },
     { key: 'query', header: 'Query', icon: 'search', lazy: true },
@@ -499,16 +499,16 @@ export const STAGE_TABLE_CONFIG: TableProvider<AbstractStage> = {
 export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'instant', header: 'Horodate', icon: 'schedule', sliceable: false, groupable: false, width: '11%' },
-    { key: 'appName', header: 'Application', icon: 'widgets', sliceable: false, groupable: false, width: '12%' },
-    { key: 'message', header: 'Message', icon: 'chat', sliceable: false, groupable: false, width: '35%' },
-    { key: 'thread', header: 'Thread', sliceable: false, groupable: false, width: '16%' },
-    { key: 'action', header: 'Action', sliceable: false, groupable: false, width: '17%' },
-    { key: 'stack', header: 'Stack', icon: 'touch_app', sliceable: false, groupable: false, sortable: false, width: '9%' }
+    { key: 'instant', header: 'Horodate', icon: 'schedule', sliceable: false, groupable: false },
+    { key: 'appName', header: 'Application', icon: 'widgets', sliceable: false, groupable: false, width: '18%' },
+    { key: 'message', header: 'Message', icon: 'chat', sliceable: false, groupable: false, width: '52%' },
+    { key: 'thread', header: 'Thread',  sliceable: false, groupable: false  },
+    { key: 'action', header: 'Détails',  sliceable: false, groupable: false },
+    { key: 'stack', header: 'Stack', icon: 'touch_app', sliceable: false, groupable: false, sortable: false }
   ],
   slices: [
     {
-      title: 'Action',
+      title: 'Détails',
       columnKey: 'action',
       icon: 'label',
       hidden: true
@@ -556,17 +556,18 @@ export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
     { key: 'namespace', header: 'Namespace', icon: 'layers', width: '10%', lazy: true },
     { key: 'scope', header: 'Thread', icon: 'call_split', width: '10%', lazy: true },
     { key: 'sessionId', header: 'Session', icon: 'fingerprint', optional: true, groupable: false, sliceable: false },
+    { key: 'type', header: 'Type', icon: 'label', optional: true, groupable: true, sliceable: false },
     {
       key: 'instant', header: 'Date', icon: 'schedule', width: '10%', groupable: false, sliceable: false,
       searchValue: (row: SessionEventDto) => fmtStart(row.instant)
     },
-    { key: 'resource', header: 'Message', groupable: false, sliceable: false, icon: 'info' , width: '50%',
-      sortValue: (row: SessionEventDto) => row.value || row.type || '',
+    { key: 'resource', header: 'Actions', groupable: false, sliceable: false, icon: 'info' , width: '50%',
+      sortValue: (row: SessionEventDto) => row.value,
       searchValue: (row: SessionEventDto) => fmtMethod(row.type) + ' ' + (row.value || '')
     },
-    { key: 'threadName', header: 'Thread', lazy: true, icon: 'memory' },
-    { key: 'action', header: 'Action', icon: 'touch_app', width: '10%', sliceable: false, groupable: false, sortable: false },
 
+    { key: 'threadName', header: 'Thread', lazy: true, icon: 'memory' },
+    { key: 'action', header: 'Détails', icon: 'touch_app', width: '10%', sliceable: false, groupable: false, sortable: false },
   ],
   defaultSort: { active: 'instant', direction: 'desc' },
   rowClass: (row: SessionEventDto) => {

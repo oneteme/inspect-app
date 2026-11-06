@@ -313,7 +313,7 @@ export class StartupComponent {
 
   getUser() {
     let args: any = {
-      'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
+      'select': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'instance.type': 'SERVER',
@@ -345,7 +345,7 @@ export class StartupComponent {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error`,
+      'select': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'instance.type': 'SERVER',

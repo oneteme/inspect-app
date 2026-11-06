@@ -47,7 +47,7 @@ export class SmtpRequestService {
 
     getSmtpExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string,host?: string[],command?: string[] }): Observable<SmtpSessionExceptionsByPeriodAndappname[]> {
         let args = {
-            'column': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,error_type:errorType,start.${filters.groupedBy}:date,start.year:year`,
+            'select': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,error_type:errorType,start.${filters.groupedBy}:date,start.year:year`,
             'join': 'instance',
             'instance.namespace': `"${filters.namespace}"`,
             'start.ge': filters.start.toISOString(),
@@ -71,14 +71,14 @@ export class SmtpRequestService {
         const groupAlias = data.group.jquery.buildAlias();
         const dateHour = isDateHour(filters.groupedBy, data.group.key);
         let args: any = {
-            'column': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${groupColumn(data.group, dateHour)}`,
+            'select': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${groupColumn(data.group, dateHour)}`,
             'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'join': 'instance'
         }
         if(data.stack) {
-            args['column'] += `,${data.stack.jquery.value()}:${data.stack.jquery.buildAlias()}`;
+            args['select'] += `,${data.stack.jquery.value()}:${data.stack.jquery.buildAlias()}`;
             args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
         }
         if(data.group.jquery.order){
@@ -93,7 +93,7 @@ export class SmtpRequestService {
     getFilters(filter: ChartItem, filters: {namespace: string, start: Date, end: Date, hosts?: string[], groupedBy?: string }) {
         const dateHour = isDateHour(filters.groupedBy, filter.key);
         let args: any = {
-            'column': dateHour ? DATE_HOUR_COLUMNS : `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
+            'select': dateHour ? DATE_HOUR_COLUMNS : `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
             'distinct': 'true',
             'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
