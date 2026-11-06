@@ -212,7 +212,7 @@ const routes: Route[] = [
     canActivate: [authGuard]
   },
   {
-    path: 'activity',
+    path: 'diagnostic',
     component: ServerActivityView,
     title: 'Diagnostic',
     canActivate: [authGuard]
