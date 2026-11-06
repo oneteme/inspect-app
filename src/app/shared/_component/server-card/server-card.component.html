@@ -6,31 +6,24 @@
     <!-- En-tête -->
     <div class="server-header">
       <div class="server-title-row">
-        <div class="server-icon-wrap">
+        <div class="server-icon-wrap"
+             [ngClass]="_status?.class"
+             [matTooltip]="_status ? _status.tooltip : ''"
+             (click)="navigate($event)">
           <mat-icon class="material-symbols-outlined server-icon">
             {{ _instance.type === 'CLIENT' ? 'devices' : 'widgets' }}
           </mat-icon>
         </div>
         <div class="server-title-content">
           <div class="server-name-row">
-            <span class="stat-item session-duration instance-status"
-                  [ngClass]="_status?.class"
-                  [matTooltip]="_status ? _status.tooltip : ''"
-                  (click)="navigate($event)">
-              <mat-icon class="material-symbols-outlined stat-icon">timer</mat-icon>
-              <span class="stat-value stat-duration" *ngIf="_instance.end">
-                {{ { start: _instance.instant, end: _instance.end } | duration }}
-              </span>
-              <span class="stat-state" *ngIf="!_instance.end">En cours</span>
-            </span>
-            <span class="server-name" (click)="navigateOnServerClick($event)">
-              {{ _instance.name }}
-            </span>
             <div class="meta-chip header-date date-compact">
               <mat-icon class="material-symbols-outlined meta-icon">schedule</mat-icon>
               <span class="date-day">{{ (_instance.instant * 1000) | date: 'dd/MM/yyyy' }}&nbsp;</span>
               <span class="date-time">{{ (_instance.instant * 1000) | date: 'HH:mm:ss' }}</span>
             </div>
+            <span class="server-name" (click)="navigateOnServerClick($event)">
+              {{ _instance.name }}
+            </span>
           </div>
           <div class="server-version-row">
             <div class="server-env-row">

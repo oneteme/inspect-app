@@ -5,8 +5,8 @@ import {TableColumnProvider} from "@oneteme/jquery-table";
 import {QueryParams} from "../../../../model/conf.model";
 import {RestRequestService} from "../../../../service/jquery/rest-request.service";
 import {finalize, Observable, of} from "rxjs";
-import {buildSeries,ChartConfig,buildFilterSelections,toFilterValues,pivotByStack,REST_LATENCY_CHART_CONFIG,REST_PERFORMANCE_CHART_CONFIG,REST_STATUS_CHART_CONFIG,REST_VOLUMETRY_CHART_CONFIG} from "./../../kpi.config";
-import {periodManagement, formatChartDates, buildPeriodSliceDisplay, resolvePeriodGranularity} from "../../../../shared/util";
+import {buildSeries,ChartConfig,buildFilterSelections,toFilterValues,pivotByStack,lineTypeOptions,REST_LATENCY_CHART_CONFIG,REST_PERFORMANCE_CHART_CONFIG,REST_STATUS_CHART_CONFIG,REST_VOLUMETRY_CHART_CONFIG} from "./../../kpi.config";
+import {periodManagement, formatChartDates, buildPeriodSliceDisplay, resolvePeriodGranularity, volumeSubtitle} from "../../../../shared/util";
 import {ChartProvider, field, buildPeriodOptions, remapSliceKeys} from "@oneteme/jquery-core";
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, OrganizerXOption, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
@@ -17,6 +17,7 @@ import {withKpiChartTypes} from "../../kpi-chart-type";
   styleUrls: ['./rest.component.scss']
 })
 export class RestComponent implements OnInit {
+  readonly volumeSubtitle = volumeSubtitle;
   private readonly _httpRequestService = inject(RestRequestService);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly datePipe = inject(DatePipe);
@@ -318,7 +319,8 @@ export class RestComponent implements OnInit {
       this.$statusDisplayUnit = this._resolveDisplayUnit(ind?.unit, formattedData, yAlias);
       this.$statusRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
-        series: series
+        series: series,
+        optionsByType: lineTypeOptions(series)
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });
@@ -345,7 +347,8 @@ export class RestComponent implements OnInit {
       this.$performanceRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
         series,
-        yUnit: ind?.unit
+        yUnit: ind?.unit,
+        optionsByType: lineTypeOptions(series)
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });
@@ -375,7 +378,8 @@ export class RestComponent implements OnInit {
       this.$volumetryRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
         series,
-        yUnit: ind?.unit
+        yUnit: ind?.unit,
+        optionsByType: lineTypeOptions(series)
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });
@@ -410,7 +414,8 @@ export class RestComponent implements OnInit {
       this.$latencyRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
         series,
-        yUnit: ind?.unit
+        yUnit: ind?.unit,
+        optionsByType: lineTypeOptions(series)
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });

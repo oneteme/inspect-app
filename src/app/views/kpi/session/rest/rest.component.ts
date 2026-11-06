@@ -7,11 +7,12 @@ import {buildFilterSelections, toFilterValues,
   REST_SESSION_STATUS_CHART_CONFIG,
   REST_SESSION_VOLUMETRY_CHART_CONFIG,
   buildSeries,
+  lineTypeOptions,
   pivotByStack
 } from "../../kpi.config";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
 import {withKpiChartTypes} from "../../kpi-chart-type";
-import {periodManagement, formatChartDates, buildPeriodSliceDisplay, resolvePeriodGranularity} from "../../../../shared/util";
+import {periodManagement, formatChartDates, buildPeriodSliceDisplay, resolvePeriodGranularity, volumeSubtitle} from "../../../../shared/util";
 import {ChartProvider, field, buildPeriodOptions, remapSliceKeys} from "@oneteme/jquery-core";
 import {RestSessionService} from "../../../../service/jquery/rest-session.service";
 import {EnvRouter} from "../../../../service/router.service";
@@ -24,6 +25,7 @@ import {DatePipe} from "@angular/common";
   styleUrls: ['./rest.component.scss']
 })
 export class RestComponent implements OnInit {
+  readonly volumeSubtitle = volumeSubtitle;
   private readonly _restSessionService = inject(RestSessionService);
   private readonly _router = inject(EnvRouter);
   private readonly _cdr = inject(ChangeDetectorRef);
@@ -59,32 +61,28 @@ export class RestComponent implements OnInit {
     }
   }
 
-  readonly USER_AGENT_PIE_CONFIG: ChartProvider<string, number> = {
+  readonly USER_AGENT_SUNBURST_CONFIG: ChartProvider<string, number> = {
     series: [
-      { data: { x: field('user_agt'), y: field('count') } }
+      { name: field('product'), data: { x: field('user_agt'), y: field('count') } }
     ],
     options: {
-      legend: {
-        orient: 'horizontal',
-        bottom: 0,
-        left: 'center'
-      },
       series: [{
-        label: {
-          show: false             // pas de datalabels sur les slices
-        },
-        labelLine: {
-          show: false             // pas de lignes de labels non plus
-        }
+        label: { show: false },
+        levels: [
+          {},
+          { label: { show: true, rotate: 0, formatter: '{b}', fontSize: 11, minAngle: 15 } },
+          { label: { show: false } }
+        ]
       }],
       tooltip: {
         formatter: (params: any) =>
-          `${params.name} : <b>${params.value.toLocaleString('fr-FR')}</b> (${params.percent}%)`
+          `${params.name} : <b>${params.value.toLocaleString('fr-FR')}</b>`
       }
     }
   }
 
   readonly STATUS_CHART_PROVIDER_BASE = STATUS_CHART_PROVIDER_BASE;
+
 
   $statusChartType = 'column';
   $performanceChartType = 'column';
@@ -303,7 +301,8 @@ export class RestComponent implements OnInit {
       this.$statusDisplayUnit = this._resolveDisplayUnit(ind?.unit, formattedData, yAlias);
       this.$statusRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
-        series: series
+        series: series,
+        optionsByType: lineTypeOptions(series)
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });
@@ -330,7 +329,8 @@ export class RestComponent implements OnInit {
       this.$performanceRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
         series,
-        yUnit: ind?.unit
+        yUnit: ind?.unit,
+        optionsByType: lineTypeOptions(series)
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });
@@ -358,7 +358,8 @@ export class RestComponent implements OnInit {
       this.$volumetryDisplayUnit = this._resolveDisplayUnit(ind?.unit, formattedData, yAlias);
       this.$volumetryRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
-        series: series
+        series: series,
+        optionsByType: lineTypeOptions(series)
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });
@@ -539,14 +540,20 @@ export class RestComponent implements OnInit {
     this._restSessionService.getRestSession(args).pipe(finalize(() => this.$userAgentRepartition.loading = false)).subscribe({
       next: (res: any[]) => {
         const aggregated = (res || []).reduce((sum, r) => {
-          const userAgent = (r.user_agt ? r.user_agt.split('/')[0].trim() : '') || 'N/A';
+          const userAgent = r.user_agt?.trim() || 'N/A';
           sum[userAgent] = (sum[userAgent] || 0) + (r.count || 0);
           return sum;
         }, {} as Record<string, number>);
 
-        this.$userAgentRepartition.data = Object.entries(aggregated)
-            .map(([user_agt, count]: [string, number]) => ({ user_agt, count }))
+        const rows = Object.entries(aggregated)
+            .map(([user_agt, count]: [string, number]) => ({
+              product: user_agt.split('/')[0].trim() || 'N/A',
+              user_agt,
+              count
+            }))
             .sort((a, b) => b.count - a.count);
+
+        this.$userAgentRepartition.data = rows;
       }
     });
   }

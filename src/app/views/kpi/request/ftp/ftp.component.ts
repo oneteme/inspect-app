@@ -4,8 +4,8 @@ import {ChartComponent, selectBestScale} from "@oneteme/jquery-echarts";
 import {QueryParams} from "../../../../model/conf.model";
 import {FtpRequestService} from "../../../../service/jquery/ftp-request.service";
 import {finalize, Observable, of} from "rxjs";
-import {buildFilterSelections, toFilterValues,buildSeries,ChartConfig,pivotByStack,FTP_STATUS_CHART_CONFIG,FTP_PERFORMANCE_CHART_CONFIG} from "../../kpi.config";
-import {formatChartDates, periodManagement, buildPeriodSliceDisplay, resolvePeriodGranularity} from "../../../../shared/util";
+import {buildFilterSelections, toFilterValues,buildSeries,ChartConfig,lineTypeOptions,pivotByStack,FTP_STATUS_CHART_CONFIG,FTP_PERFORMANCE_CHART_CONFIG} from "../../kpi.config";
+import {formatChartDates, periodManagement, buildPeriodSliceDisplay, resolvePeriodGranularity, volumeSubtitle} from "../../../../shared/util";
 import {ChartProvider, field, buildPeriodOptions, remapSliceKeys} from "@oneteme/jquery-core";
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, OrganizerXOption, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
@@ -17,6 +17,7 @@ import {withKpiChartTypes} from "../../kpi-chart-type";
   host: { 'data-view': 'kpi-ftp' }
 })
 export class FtpComponent implements OnInit {
+  readonly volumeSubtitle = volumeSubtitle;
   private readonly _ftpRequestService = inject(FtpRequestService);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly datePipe = inject(DatePipe);
@@ -198,7 +199,8 @@ export class FtpComponent implements OnInit {
       this.$statusDisplayUnit = this._resolveDisplayUnit(ind?.unit, formattedData, yAlias);
       this.$statusRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
-        series: series
+        series: series,
+        optionsByType: lineTypeOptions(series)
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });
@@ -225,7 +227,8 @@ export class FtpComponent implements OnInit {
       this.$performanceRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
         series,
-        yUnit: ind?.unit
+        yUnit: ind?.unit,
+        optionsByType: lineTypeOptions(series)
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });

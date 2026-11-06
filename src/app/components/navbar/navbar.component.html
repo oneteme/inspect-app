@@ -274,12 +274,12 @@
           </div>
         </div>
         <div class="user-menu-divider"></div>
-        <button mat-menu-item
+        <button mat-menu-item class="user-menu-item"
                 [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
                 data-inspect-scope="Consulter les traitements, les pertes de séquences et les rapports du serveur"
                 data-inspect-track="Le diagnostic"
                 (click)="openServerActivity($event)">
-          <mat-icon class="material-symbols-outlined">admin_panel_settings</mat-icon>
+          <mat-icon class="material-symbols-outlined">troubleshoot</mat-icon>
           <span>Diagnostic</span>
         </button>
         <button mat-menu-item class="logout-item" (click)="logout()"

@@ -4,8 +4,8 @@ import {ChartComponent, selectBestScale} from "@oneteme/jquery-echarts";
 import {QueryParams} from "../../../../model/conf.model";
 import {DatabaseRequestService} from "../../../../service/jquery/database-request.service";
 import {finalize, Observable, of} from "rxjs";
-import {buildSeries,ChartConfig,buildFilterSelections,toFilterValues,pivotByStack,JDBC_STATUS_CHART_CONFIG,JDBC_PERFORMANCE_CHART_CONFIG} from "../../kpi.config";
-import {periodManagement, formatChartDates, buildPeriodSliceDisplay, resolvePeriodGranularity} from "../../../../shared/util";
+import {buildSeries,ChartConfig,buildFilterSelections,toFilterValues,lineTypeOptions,pivotByStack,JDBC_STATUS_CHART_CONFIG,JDBC_PERFORMANCE_CHART_CONFIG} from "../../kpi.config";
+import {periodManagement, formatChartDates, buildPeriodSliceDisplay, resolvePeriodGranularity, volumeSubtitle} from "../../../../shared/util";
 import {ChartProvider, field, buildPeriodOptions, remapSliceKeys} from "@oneteme/jquery-core";
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, OrganizerXOption, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
@@ -16,6 +16,7 @@ import {withKpiChartTypes} from "../../kpi-chart-type";
   styleUrls: ['./jdbc.component.scss']
 })
 export class JdbcComponent implements OnInit {
+  readonly volumeSubtitle = volumeSubtitle;
   private readonly _jdbcRequestService = inject(DatabaseRequestService);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly datePipe = inject(DatePipe);
@@ -211,7 +212,8 @@ export class JdbcComponent implements OnInit {
       this.$statusDisplayUnit = this._resolveDisplayUnit(ind?.unit, formattedData, yAlias);
       this.$statusRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
-        series: series
+        series: series,
+        optionsByType: lineTypeOptions(series)
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });
@@ -238,7 +240,8 @@ export class JdbcComponent implements OnInit {
       this.$performanceRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
         series,
-        yUnit: ind?.unit
+        yUnit: ind?.unit,
+        optionsByType: lineTypeOptions(series)
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });

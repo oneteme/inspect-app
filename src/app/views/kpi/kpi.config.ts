@@ -1,4 +1,4 @@
-import {field, UnitConfig} from "@oneteme/jquery-core";
+import {ChartType, field, UnitConfig} from "@oneteme/jquery-core";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 import {STATUS} from "../constants";
 
@@ -2291,9 +2291,14 @@ export function pivotByStack(series: ChartItem[], indicator: ChartItem, group: C
   return Object.values(grouped);
 }
 
+/** Les durées ne se cumulent pas : avec un groupement, chaque groupe est tracé côte à côte. */
+export function isStackable(indicator: ChartItem): boolean {
+  return indicator.unit !== DURATION_UNIT;
+}
+
 export function buildSeries(series: ChartItem[], indicator: ChartItem, group: ChartItem, stack: ChartItem, data: any[]): SerieProvider<string, number>[] {
   return series.flatMap(s => {
-    return stack ? buildStackSeries(s, stack, data) : [{ data: { x: field(group.jquery.buildAlias()), y: field(indicator.jquery.buildAlias(s.jquery.buildAlias())) }, stack: s.jquery.buildAlias(), name: indicator.jquery.buildName ? indicator.jquery.buildName(s) : indicator.jquery.buildAlias(s.jquery.buildAlias()), color: s.jquery.buildColor ? s.jquery.buildColor() : '' }];
+    return stack ? buildStackSeries(s, stack, data, isStackable(indicator)) : [{ data: { x: field(group.jquery.buildAlias()), y: field(indicator.jquery.buildAlias(s.jquery.buildAlias())) }, stack: s.jquery.buildAlias(), name: indicator.jquery.buildName ? indicator.jquery.buildName(s) : indicator.jquery.buildAlias(s.jquery.buildAlias()), color: s.jquery.buildColor ? s.jquery.buildColor() : '' }];
   });
 }
 
@@ -2303,14 +2308,25 @@ export function buildSeries(series: ChartItem[], indicator: ChartItem, group: Ch
  * Exemple de sortie :
  *   [{ data: { x: field('date'), y: field('202') }, name: '202', color: '#22c55e' }]
  */
-export function buildStackSeries(serie: ChartItem, stack: ChartItem, data: any[]): SerieProvider<string, number>[] {
+export function buildStackSeries(serie: ChartItem, stack: ChartItem, data: any[], stackable: boolean): SerieProvider<string, number>[] {
   const distinctStacks = [...new Set(data.map(d => String(d[stack.jquery.buildAlias()])))].sort((a, b) => a.localeCompare(b));
   return distinctStacks.map(s => ({
     data: { x: field('group'), y: field(s + '_' + serie.jquery.buildAlias()) },
     name: stack.jquery.buildName ? stack.jquery.buildName(serie, s) : s + '_' + serie.jquery.buildAlias(),
-    stack: serie.jquery.buildAlias(),
+    stack: stackable ? serie.jquery.buildAlias() : undefined,
     color: stack.jquery.buildColor ? stack.jquery.buildColor(s) : ''
   }));
+}
+
+const LINE_CHART_TYPES: ChartType[] = ['line', 'spline'];
+
+/**
+ * Le cumul (stack) n'a de sens que pour les barres et les aires : sur les courbes, chaque série
+ * est tracée à sa propre valeur. `optionsByType` annule donc `stack` série par série.
+ */
+export function lineTypeOptions(series: unknown[]): Partial<Record<ChartType, any>> {
+  const unstacked = { series: series.map(() => ({ stack: null })) };
+  return Object.fromEntries(LINE_CHART_TYPES.map(type => [type, unstacked]));
 }
 
 /** Retourne une couleur hex selon la famille du code HTTP. */

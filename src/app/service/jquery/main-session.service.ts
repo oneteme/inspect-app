@@ -11,7 +11,8 @@ const MAIN_SESSION_LIST_COLUMNS = 'id,name,location,start,end,user,status,instan
 
 /** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
 const LAZY_MAIN_SESSION_COLUMNS: Record<string, string> = {
-    threadName: 'thread:threadName'
+    threadName: 'thread:threadName',
+    appVersion: 'instance.version:appVersion'
 };
 
 @Injectable({ providedIn: 'root' })

@@ -4,7 +4,7 @@ import {ChartProvider} from "@oneteme/jquery-core";
 import {QueryParams} from "../../../../model/conf.model";
 import {periodManagement} from "../../../../shared/util";
 import {SliceConfig} from "@oneteme/jquery-table";
-import {buildSeries, ChartConfig, REST_PERFORMANCE_CHART_CONFIG, pivotByStack} from "../../kpi.config";
+import {buildSeries, ChartConfig, REST_PERFORMANCE_CHART_CONFIG, pivotByStack, lineTypeOptions} from "../../kpi.config";
 
 @Component({
   selector: 'performance-chart',
@@ -108,9 +108,11 @@ export class PerformanceChartComponent {
 
   @Input() set data(value: any[]) {
     if(value && this.jqueryConfig) {
+      const series = buildSeries(this.jqueryConfig.series.items, this.actualIndicator, this.actualGroup, this.actualStack, value);
       this.chartProvider = {
         ...this.chartProvider,
-        series: buildSeries(this.jqueryConfig.series.items, this.actualIndicator, this.actualGroup, this.actualStack, value)
+        series,
+        optionsByType: lineTypeOptions(series)
       };
       this._data = this.actualStack ? pivotByStack(this.jqueryConfig.series.items, this.actualIndicator, this.actualGroup, this.actualStack, value) : value;
     }
