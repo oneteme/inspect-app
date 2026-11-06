@@ -236,18 +236,18 @@ export class Constants {
     static readonly EVENT_LOG_BY_PERIOD_LINE: ChartProvider<string, number> = {
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('info') }, name: 'INFO', color: '#4CAF50', noDataStyle: { symbolSize: 0 } } as any,
-            { data: { x: field('stringDate'), y: field('warn') }, name: 'WARN', color: '#F9AD4E', noDataStyle: { symbolSize: 0 } } as any,
-            { data: { x: field('stringDate'), y: field('error') }, name: 'ERROR', color: '#F44336', noDataStyle: { symbolSize: 0 } } as any,
+            { data: { x: field('stringDate'), y: field('infoPerc') }, name: 'INFO', color: '#4CAF50', noDataStyle: { symbolSize: 0 } } as any,
+            { data: { x: field('stringDate'), y: field('warnPerc') }, name: 'WARN', color: '#F9AD4E', noDataStyle: { symbolSize: 0 } } as any,
+            { data: { x: field('stringDate'), y: field('errorPerc') }, name: 'ERROR', color: '#F44336', noDataStyle: { symbolSize: 0 } } as any,
         ],
         options: {
             legend: { show: false },
-            yAxis: { show: true, axisLabel: { fontSize: 9, color: 'rgba(0,0,0,.38)' } },
+            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v === 0 ? '' : v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
             series: [{ smooth: true }, { smooth: true }, { smooth: true }],
             tooltip: {
                 formatter: (params: any[]) => {
                     const header = params[0]?.axisValueLabel ?? params[0]?.axisValue ?? '';
-                    const lines = params.map(p => `${p.marker}${p.seriesName} : <b>${p.value?.[1] ?? p.value ?? 0}</b>`).join('<br/>');
+                    const lines = params.map(p => `${p.marker}${p.seriesName} : <b>${(p.value?.[1] ?? p.value ?? 0).toFixed(2)}%</b>`).join('<br/>');
                     return `${header}<br/>${lines}`;
                 }
             }
@@ -257,17 +257,17 @@ export class Constants {
     static readonly EVENT_USER_BY_PERIOD_LINE: ChartProvider<string, number> = {
         continue: true,
         series: [
-            { data: { x: field('stringDate'), y: field('count') }, name: 'Actions Utilisateurs', color: '#8b5cf6', noDataStyle: { symbolSize: 0 } } as any
+            { data: { x: field('stringDate'), y: field('perc') }, name: 'Actions Utilisateurs', color: '#8b5cf6', noDataStyle: { symbolSize: 0 } } as any
         ],
         options: {
             legend: { show: false },
-            yAxis: { show: true, min: 0, minInterval: 1, axisLabel: { fontSize: 9, color: 'rgba(0,0,0,.38)' } },
+            yAxis: { show: true, min: 0, max: 100, interval: 20, axisLabel: { formatter: (v: number) => v === 0 ? '' : v + '%', fontSize: 9, color: 'rgba(0,0,0,.38)' } },
             series: [{ smooth: true }],
             tooltip: {
                 formatter: (params: any[]) => {
                     const p = params[0];
                     const val = Array.isArray(p.value) ? p.value[1] : p.value;
-                    return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName} : <b>${val ?? 0}</b>`;
+                    return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName} : <b>${(val ?? 0).toFixed(2)}%</b>`;
                 }
             }
         }
@@ -320,5 +320,6 @@ export const STATUS = {
 export const EVENT_LOG = {
     INFO: {icon: 'done', label: "INFO", color: '#4CAF50', class: 'success'},
     WARN: {icon: 'error', label: "WARN", color: '#F9AD4E', class: 'warning'},
-    ERROR: {icon: 'warning', label: "ERROR", color: '#F44336', class: 'fail'}
+    ERROR: {icon: 'warning', label: "ERROR", color: '#F44336', class: 'fail'},
+    USER: {icon: 'recent_patient', label: "USER", color: '#8b5cf6', class: 'user-action'}
 }

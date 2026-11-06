@@ -6,7 +6,8 @@ import {app} from 'src/environments/environment';
 import {EnvRouter} from "../../service/router.service";
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {DateAdapter, MAT_DATE_FORMATS} from '@angular/material/core';
-import {Constants} from '../constants';
+import {Constants, ANALYTIC_MAPPING} from '../constants';
+import {ChartProvider, field} from '@oneteme/jquery-core';
 import {formatters, groupByColor, periodManagement} from 'src/app/shared/util';
 import {IPeriod, IStep, IStepFrom} from '../../model/conf.model';
 import {getDefaultTodayPeriod, getQuickRangeStep, getQuickRangeDates, isDefaultTodayPeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../shared/period-filter';
@@ -136,7 +137,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     selectedInsights = new Set<string>();
     sessExcLineConfig = Constants.SESSION_EXCEPTION_LINE;
     evtExcLineConfig = Constants.EVENT_LOG_BY_PERIOD_LINE;
-    evtUserLineConfig = Constants.EVENT_USER_BY_PERIOD_LINE;
+    evtUserLineConfig: any = Constants.EVENT_USER_BY_PERIOD_LINE;
 
     // server health
 
@@ -152,8 +153,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     startupExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
 
     // charts par type d'événement
-    eventLogChart: { stringDate: string; info: number; warn: number; error: number; count: number, perc: number }[] = [];
-    eventUserChart: { stringDate: string; count: number }[] = [];
+    eventLogChart: { stringDate: string; info: number; warn: number; error: number; count: number; infoPerc: number; warnPerc: number; errorPerc: number }[] = [];
+    eventUserChart: ({ stringDate: string; count: number; [key: string]: any })[] = [];
     topUserEvents: { type: string; count: number }[] = [];
 
 
@@ -369,7 +370,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     entry.count += r.count;
                 });
 
-                this.eventLogChart = this._fillHourGapsLogs(map, currentStart, effectiveEnd);
+                this.eventLogChart = this._addEventPerc(this._fillHourGapsLogs(map, currentStart, effectiveEnd));
                 this._cdr.markForCheck();
             },
             error: () => {
@@ -402,14 +403,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 formatters[groupedBy](rows, this._datePipe, 'stringDate');
 
                 const logTypes = new Set(['INFO', 'WARN', 'ERROR']);
-                const dateMap: Record<string, number> = {};
+                const typeSet = new Set<string>();
+                const dateMap = new Map<string, { stringDate: string; count: number; [key: string]: any }>();
+
                 rows.forEach(r => {
-                    if (r.type && !logTypes.has(r.type.toUpperCase())) {
-                        dateMap[r.stringDate] = (dateMap[r.stringDate] ?? 0) + (r.count ?? 0);
+                    const rawType = r.type;
+                    if (!rawType || logTypes.has(rawType.toUpperCase())) return;
+                    typeSet.add(rawType);
+                    if (!dateMap.has(r.stringDate)) {
+                        dateMap.set(r.stringDate, { stringDate: r.stringDate, count: 0 });
                     }
+                    const entry = dateMap.get(r.stringDate)!;
+                    const count = r.count ?? 0;
+                    entry[rawType] = (entry[rawType] ?? 0) + count;
+                    entry.count += count;
                 });
 
-                this.eventUserChart = this._fillHourGaps(dateMap, currentStart, effectiveEnd);
+                const userTypes = Array.from(typeSet);
+                const filled = this._fillHourGapsUserTypes(dateMap, userTypes, currentStart, effectiveEnd);
+                this.eventUserChart = this._addUserTypePerc(filled, userTypes);
+                this.evtUserLineConfig = this._buildUserEventChartConfig(userTypes);
                 this._cdr.markForCheck();
             },
             error: () => {
@@ -835,6 +848,116 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     private _addPerc(filled: { stringDate: string; count: number }[], countokMap: Record<string, number>): { stringDate: string; count: number; perc: number }[] {
         return filled.map(p => ({ ...p, perc: countokMap[p.stringDate] ? (p.count * 100) / countokMap[p.stringDate] : 0 }));
+    }
+
+    /**
+     * Add percentage fields to the event log chart data based on the total count of events INFO WARN ERROR
+     * @param filled
+     * @private
+     */
+    private _addEventPerc(filled: { stringDate: string; info: number; warn: number; error: number; count: number }[]): { stringDate: string; info: number; warn: number; error: number; count: number; infoPerc: number; warnPerc: number; errorPerc: number }[] {
+        const total = filled.reduce((sum, p) => sum + p.count, 0);
+        return filled.map(p => ({
+            ...p,
+            infoPerc: total ? (p.info * 100) / total : 0,
+            warnPerc: total ? (p.warn * 100) / total : 0,
+            errorPerc: total ? (p.error * 100) / total : 0
+        }));
+    }
+
+    /**
+     * Re use the method fillHours for user events and their dynamic action types
+     * @param map
+     * @param types
+     * @param start
+     * @param end
+     * @private
+     */
+    private _fillHourGapsUserTypes(map: Map<string, any>, types: string[], start: Date, end: Date): any[] {
+        const now = new Date();
+        const effectiveEnd = end > now ? now : end;
+        const defaultEntry = (label: string) => {
+            const entry: Record<string, any> = { stringDate: label, count: 0 };
+            types.forEach(t => { entry[t] = 0; });
+            return entry;
+        };
+
+        const ensureAllTypes = (entry: any) => {
+            types.forEach(t => {
+                if (entry[t] === undefined) entry[t] = 0;
+            });
+            return entry;
+        };
+
+        if (this.groupedBy === 'hour') {
+            const result: any[] = [];
+            const startH = start.getHours();
+            const isToday = start.toDateString() === now.toDateString();
+            const endH = isToday ? now.getHours() : 23;
+            for (let h = startH; h <= endH; h++) {
+                const label = this._datePipe.transform(new Date(2000, 1, 1, h), 'shortTime') || '';
+                result.push(map.has(label) ? ensureAllTypes(map.get(label)) : defaultEntry(label));
+            }
+            return result;
+        }
+        if (this.groupedBy === 'date') {
+            const result: any[] = [];
+            const d = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+            while (d < effectiveEnd) {
+                const label = this._datePipe.transform(d, 'd MMM yy') || '';
+                result.push(map.has(label) ? ensureAllTypes(map.get(label)) : defaultEntry(label));
+                d.setDate(d.getDate() + 1);
+            }
+            return result;
+        }
+        return Array.from(map.values()).map(ensureAllTypes);
+    }
+
+    private _addUserTypePerc(filled: any[], types: string[]): any[] {
+        const total = filled.reduce((sum, p) => sum + (p.count ?? 0), 0);
+        return filled.map(p => {
+            const item: any = { ...p };
+            types.forEach(t => {
+                item[t + '_perc'] = total ? ((p[t] ?? 0) * 100) / total : 0;
+            });
+            return item;
+        });
+    }
+
+    private _buildUserEventChartConfig(types: string[]): ChartProvider<string, number> {
+        const series = types.map((type, i) => ({
+            data: { x: field('stringDate'), y: field(type + '_perc') },
+            name: ANALYTIC_MAPPING[type]?.label || type,
+            color: '#8b5cf6',
+            noDataStyle: { symbolSize: 0 }
+        } as any));
+
+        return {
+            continue: true,
+            series,
+            options: {
+                legend: { show: false },
+                yAxis: {
+                    show: true,
+                    min: 0,
+                    max: 100,
+                    interval: 20,
+                    axisLabel: {
+                        formatter: (v: number) => v === 0 ? '' : v + '%',
+                        fontSize: 9,
+                        color: 'rgba(0,0,0,.38)'
+                    }
+                },
+                series: types.map(() => ({ smooth: true })),
+                tooltip: {
+                    formatter: (params: any[]) => {
+                        const header = params[0]?.axisValueLabel ?? params[0]?.axisValue ?? '';
+                        const lines = params.map(p => `${p.marker}${p.seriesName} : <b>${(p.value?.[1] ?? p.value ?? 0).toFixed(2)}%</b>`).join('<br/>');
+                        return `${header}<br/>${lines}`;
+                    }
+                }
+            }
+        };
     }
 
     private _aggregateTabData(data: any[]): { errors: Record<string, number>; dates: Record<string, number>; countoks: Record<string, number> } {
