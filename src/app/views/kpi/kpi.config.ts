@@ -1,4 +1,4 @@
-import {field, UnitConfig} from "@oneteme/jquery-core";
+import {ChartType, field, UnitConfig} from "@oneteme/jquery-core";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 import {STATUS} from "../constants";
 
@@ -2311,6 +2311,17 @@ export function buildStackSeries(serie: ChartItem, stack: ChartItem, data: any[]
     stack: serie.jquery.buildAlias(),
     color: stack.jquery.buildColor ? stack.jquery.buildColor(s) : ''
   }));
+}
+
+const LINE_FAMILY_CHART_TYPES: ChartType[] = ['line', 'spline', 'area', 'areaspline'];
+
+/**
+ * Le cumul (stack) n'a de sens que pour les barres : sur les courbes, chaque série
+ * est tracée à sa propre valeur. `optionsByType` annule donc `stack` série par série.
+ */
+export function lineTypeOptions(series: unknown[]): Partial<Record<ChartType, any>> {
+  const unstacked = { series: series.map(() => ({ stack: null })) };
+  return Object.fromEntries(LINE_FAMILY_CHART_TYPES.map(type => [type, unstacked]));
 }
 
 /** Retourne une couleur hex selon la famille du code HTTP. */

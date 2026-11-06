@@ -7,6 +7,7 @@ import {buildFilterSelections, toFilterValues,
   REST_SESSION_STATUS_CHART_CONFIG,
   REST_SESSION_VOLUMETRY_CHART_CONFIG,
   buildSeries,
+  lineTypeOptions,
   pivotByStack
 } from "../../kpi.config";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
@@ -301,7 +302,8 @@ export class RestComponent implements OnInit {
       this.$statusDisplayUnit = this._resolveDisplayUnit(ind?.unit, formattedData, yAlias);
       this.$statusRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
-        series: series
+        series: series,
+        optionsByType: lineTypeOptions(series)
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });
@@ -328,7 +330,8 @@ export class RestComponent implements OnInit {
       this.$performanceRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
         series,
-        yUnit: ind?.unit
+        yUnit: ind?.unit,
+        optionsByType: lineTypeOptions(series)
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });
@@ -356,7 +359,8 @@ export class RestComponent implements OnInit {
       this.$volumetryDisplayUnit = this._resolveDisplayUnit(ind?.unit, formattedData, yAlias);
       this.$volumetryRepartition.chartProvider = {
         ...this.STATUS_CHART_PROVIDER_BASE,
-        series: series
+        series: series,
+        optionsByType: lineTypeOptions(series)
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
     });

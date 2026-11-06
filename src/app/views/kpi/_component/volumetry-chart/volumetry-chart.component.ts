@@ -2,7 +2,7 @@ import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {ChartProvider} from "@oneteme/jquery-core";
 import {QueryParams} from "../../../../model/conf.model";
 import {SliceConfig} from "@oneteme/jquery-table";
-import {buildSeries, ChartConfig, pivotByStack} from "../../kpi.config";
+import {buildSeries, ChartConfig, pivotByStack, lineTypeOptions} from "../../kpi.config";
 
 @Component({
   selector: 'volumetry-chart',
@@ -106,9 +106,11 @@ export class VolumetryChartComponent {
 
   @Input() set data(value: any[]) {
     if(value && this.jqueryConfig) {
+      const series = buildSeries(this.jqueryConfig.series.items, this.actualIndicator, this.actualGroup, this.actualStack, value);
       this.chartProvider = {
         ...this.chartProvider,
-        series: buildSeries(this.jqueryConfig.series.items, this.actualIndicator, this.actualGroup, this.actualStack, value)
+        series,
+        optionsByType: lineTypeOptions(series)
       };
       this._data = this.actualStack ? pivotByStack(this.jqueryConfig.series.items, this.actualIndicator, this.actualGroup, this.actualStack, value) : value;
     }
