@@ -51,7 +51,7 @@ export const DEFAULT_DURATION_SLICE_CONFIG: SliceConfig = {
 export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'APPLICATION', icon: 'widgets', width: '18%' },
+    { key: 'appName', header: 'Application', icon: 'widgets', width: '18%' },
     {
       key: 'resource', header: 'Ressource', groupable: false, sliceable: false, icon: 'category',
       searchValue: (row: RestSessionDto) => fmtMethod(row.method) + ' ' + (row.path || '')
@@ -114,7 +114,7 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
 export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'APPLICATION', icon: 'widgets', width: '13%' },
+    { key: 'appName', header: 'Application', icon: 'widgets', width: '13%' },
     { key: 'name', header: 'Nom', icon: 'label', width: '13%' },
     { key: 'location', header: 'Ressource', icon: 'category' },
     { key: 'start', header: 'Début', groupable: false, sliceable: false, icon: 'schedule', width: '13%' },
