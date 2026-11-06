@@ -161,7 +161,7 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
 export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'host', header: 'SERVEUR', icon: 'dns' },
+    { key: 'host', header: 'Serveur', icon: 'dns' },
     {
       key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false,
       searchValue: (row: RestRequestDto) => fmtMethod(row.method) + ' ' + (row.path || '')
@@ -191,7 +191,7 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
     { key: 'inDataSize', header: 'Taille entrée', icon: 'download', lazy: true },
     { key: 'outDataSize', header: 'Taille sortie', icon: 'upload', lazy: true },
     { key: 'bodyContent', header: 'Corps', icon: 'notes', lazy: true },
-    { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
+    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
   ],
   slices: [
@@ -228,7 +228,7 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
       searchValue: (row: DatabaseRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'badge' },
-    { key: 'productName', header: 'Base de données', icon: 'storage', lazy: true },
+    { key: 'productName', header: 'Base de données', icon: 'database', iconFontSet: 'material-symbols-outlined', lazy: true },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row: DatabaseRequestDto) => {
@@ -238,7 +238,7 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
     },
     { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
     { key: 'scheme', header: 'Éditeur', icon: 'hub', lazy: true },
-    { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
+    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
   ],
   slices: [
@@ -289,7 +289,7 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
     },
     { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
     { key: 'protocol', header: 'Protocole', icon: 'lan', lazy: true },
-    { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
+    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
   ],
   slices: [
@@ -339,7 +339,7 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
     },
     { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
     { key: 'protocol', header: 'Protocole', icon: 'lan', lazy: true },
-    { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
+    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
   ],
   slices: [
@@ -435,7 +435,7 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
       }
     },
     { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
-    { key: 'appName', header: 'Application', icon: 'apps', lazy: true },
+    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
   ],
   slices: [
