@@ -5,12 +5,11 @@ import {QueryParams} from "../../../../model/conf.model";
 import {SmtpRequestService} from "../../../../service/jquery/smtp-request.service";
 import {finalize, Observable, of} from "rxjs";
 import {buildFilterSelections, toFilterValues,buildSeries,ChartConfig,lineTypeOptions,pivotByStack,SMTP_STATUS_CHART_CONFIG,SMTP_PERFORMANCE_CHART_CONFIG} from "../../kpi.config";
-import {periodManagement, formatChartDates, buildPeriodSliceDisplay, resolvePeriodGranularity} from "../../../../shared/util";
+import {periodManagement, formatChartDates, buildPeriodSliceDisplay, resolvePeriodGranularity, volumeSubtitle} from "../../../../shared/util";
 import {ChartProvider, field, buildPeriodOptions, remapSliceKeys} from "@oneteme/jquery-core";
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, OrganizerXOption, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
 import {withKpiChartTypes} from "../../kpi-chart-type";
-import {volumeSubtitle} from "../../kpi-subtitle";
 
 @Component({
   templateUrl: './smtp.component.html',
