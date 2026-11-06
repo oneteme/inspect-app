@@ -12,6 +12,7 @@ import {buildFilterSelections, toFilterValues,
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
 import {withKpiChartTypes} from "../../kpi-chart-type";
 import {periodManagement, formatChartDates, buildPeriodSliceDisplay, resolvePeriodGranularity} from "../../../../shared/util";
+import {volumeSubtitle} from "../../kpi-subtitle";
 import {ChartProvider, field, buildPeriodOptions, remapSliceKeys} from "@oneteme/jquery-core";
 import {RestSessionService} from "../../../../service/jquery/rest-session.service";
 import {EnvRouter} from "../../../../service/router.service";
@@ -24,6 +25,7 @@ import {DatePipe} from "@angular/common";
   styleUrls: ['./rest.component.scss']
 })
 export class RestComponent implements OnInit {
+  readonly volumeSubtitle = volumeSubtitle;
   private readonly _restSessionService = inject(RestSessionService);
   private readonly _router = inject(EnvRouter);
   private readonly _cdr = inject(ChangeDetectorRef);

@@ -95,7 +95,10 @@
           <span class="kpi-chart-title">Méthodes HTTP</span>
         </div>
       </div>
-      <div class="kpi-chart-body">
+                <div class="kpi-chart-subheader">
+                  <span class="kpi-chart-unit">{{ volumeSubtitle($methodRepartition.data, 'méthode', 'méthodes') }}</span>
+                </div>
+                <div class="kpi-chart-body">
         <chart type="donut"
           [config]="METHOD_PIE_CONFIG"
           [data]="$methodRepartition.data"
@@ -155,7 +158,10 @@
           <span class="kpi-chart-title">Media</span>
         </div>
       </div>
-      <div class="kpi-chart-body">
+                <div class="kpi-chart-subheader">
+                  <span class="kpi-chart-unit">{{ volumeSubtitle($mediaRepartition.data, 'type de média', 'types de média') }}</span>
+                </div>
+                <div class="kpi-chart-body">
         <chart type="donut"
           [config]="MEDIA_PIE_CONFIG"
           [data]="$mediaRepartition.data"

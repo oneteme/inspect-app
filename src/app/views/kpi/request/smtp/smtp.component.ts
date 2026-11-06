@@ -10,6 +10,7 @@ import {ChartProvider, field, buildPeriodOptions, remapSliceKeys} from "@oneteme
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, OrganizerXOption, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
 import {withKpiChartTypes} from "../../kpi-chart-type";
+import {volumeSubtitle} from "../../kpi-subtitle";
 
 @Component({
   templateUrl: './smtp.component.html',
@@ -17,6 +18,7 @@ import {withKpiChartTypes} from "../../kpi-chart-type";
   host: { 'data-view': 'kpi-smtp' }
 })
 export class SmtpComponent implements OnInit {
+  readonly volumeSubtitle = volumeSubtitle;
   private readonly _smtpRequestService = inject(SmtpRequestService);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly datePipe = inject(DatePipe);

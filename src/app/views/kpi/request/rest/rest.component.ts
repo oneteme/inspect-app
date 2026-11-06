@@ -11,12 +11,14 @@ import {ChartProvider, field, buildPeriodOptions, remapSliceKeys} from "@oneteme
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, OrganizerXOption, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
 import {withKpiChartTypes} from "../../kpi-chart-type";
+import {volumeSubtitle} from "../../kpi-subtitle";
 
 @Component({
   templateUrl: './rest.component.html',
   styleUrls: ['./rest.component.scss']
 })
 export class RestComponent implements OnInit {
+  readonly volumeSubtitle = volumeSubtitle;
   private readonly _httpRequestService = inject(RestRequestService);
   private readonly _cdr = inject(ChangeDetectorRef);
   private readonly datePipe = inject(DatePipe);

@@ -95,7 +95,10 @@
           <span class="kpi-chart-title">Commandes</span>
         </div>
       </div>
-      <div class="kpi-chart-body">
+                <div class="kpi-chart-subheader">
+                  <span class="kpi-chart-unit">{{ volumeSubtitle($commandRepartition.data, 'commande', 'commandes', 'requête') }}</span>
+                </div>
+                <div class="kpi-chart-body">
         <chart type="donut"
           [config]="COMMAND_PIE_CONFIG"
           [data]="$commandRepartition.data"
