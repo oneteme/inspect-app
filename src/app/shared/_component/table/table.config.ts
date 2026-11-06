@@ -190,7 +190,7 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
     { key: 'contentType', header: 'Content-Type', icon: 'description', lazy: true },
     { key: 'inDataSize', header: 'Taille entrée', icon: 'download', lazy: true },
     { key: 'outDataSize', header: 'Taille sortie', icon: 'upload', lazy: true },
-    { key: 'bodyContent', header: 'Corps', icon: 'notes', lazy: true },
+    { key: 'bodyContent', header: 'Réponse', icon: 'notes', lazy: true },
     { key: 'appName', header: 'Application', icon: 'widgets', lazy: true },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
   ],
