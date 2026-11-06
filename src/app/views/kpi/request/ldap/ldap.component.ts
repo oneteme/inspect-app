@@ -253,7 +253,7 @@ export class LdapComponent implements OnInit {
 
   getCommands() {
     const args: any = {
-      'column': `count:count,command.coalesce("Non renseigné"):command`,
+      'select': `count:count,command.coalesce("Non renseigné"):command`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
@@ -271,7 +271,7 @@ export class LdapComponent implements OnInit {
 
   getUser(): void {
     const args: any = {
-      'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
+      'select': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
@@ -291,7 +291,7 @@ export class LdapComponent implements OnInit {
 
   getDependencies(): void {
     const args: any = {
-      'column': `instance.app_name:origin,host:target,count:count`,
+      'select': `instance.app_name:origin,host:target,count:count`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
@@ -309,7 +309,7 @@ export class LdapComponent implements OnInit {
 
   getGlobalStatistics() {
     const args: any = {
-      'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error`,
+      'select': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),

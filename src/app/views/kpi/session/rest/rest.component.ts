@@ -465,7 +465,7 @@ export class RestComponent implements OnInit {
 
   getUser() {
     let args: any = {
-      'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
+      'select': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
@@ -485,7 +485,7 @@ export class RestComponent implements OnInit {
 
   getMediaType() {
     let args: any = {
-      'column': `count:count,media.coalesce("Sans contenu"):media`,
+      'select': `count:count,media.coalesce("Sans contenu"):media`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
@@ -505,7 +505,7 @@ export class RestComponent implements OnInit {
 
   getMethods() {
     let args: any = {
-      'column': `count:count,method:method`,
+      'select': `count:count,method:method`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
@@ -525,7 +525,7 @@ export class RestComponent implements OnInit {
 
   getUserAgents() {
     let args: any = {
-      'column': `count:count,user_agt:user_agt`,
+      'select': `count:count,user_agt:user_agt`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
@@ -573,7 +573,7 @@ export class RestComponent implements OnInit {
 
   getGlobalStatistics() {
     let args: any = {
-      'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error,count(user.distinct):count_user`,
+      'select': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error,count(user.distinct):count_user`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),

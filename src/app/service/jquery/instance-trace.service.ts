@@ -25,7 +25,7 @@ export class InstanceTraceService {
 
   getInstanceTraceByPeriod(filters: {instance: string, start: Date, end: Date}): Observable<{date: number, pending: number, attempts: number, traceCount: number}[]> {
     let args: any = {
-      'column': 'start:date,pending:pending,attempts:attempts,trace_count:traceCount',
+      'select': 'start:date,pending:pending,attempts:attempts,trace_count:traceCount',
       'instance_env.varchar': filters.instance,
       'start.ge': filters.start.toISOString(),
       'start.lt': filters.end.toISOString(),
@@ -36,7 +36,7 @@ export class InstanceTraceService {
 
   getPendingSum(filters: {instance: string, date: Date}): Observable<number> {
     return this.getInstanceTrace({
-      'column': 'pending.sum:pending',
+      'select': 'pending.sum:pending',
       'instance_env.varchar': filters.instance,
       'start.lt': filters.date.toISOString()
     }).pipe(map((res: {pending: number}[]) => res[0].pending || 0));
@@ -50,7 +50,7 @@ export class InstanceTraceService {
     traceCount: number;
   }[]> {
     const args: any = {
-      'column': `start.${filters.groupedBy}:date,instance.app_name:appName,pending.sum:pending,attempts.sum:attempts,trace_count.sum:traceCount`,
+      'select': `start.${filters.groupedBy}:date,instance.app_name:appName,pending.sum:pending,attempts.sum:attempts,trace_count.sum:traceCount`,
       'join': 'instance',
       'instance.namespace': filters.namespace,
       'start.ge': filters.start.toISOString(),
@@ -66,7 +66,7 @@ export class InstanceTraceService {
 
   getSequenceLossesByPeriod(filters: {namespace: string, start: Date, end: Date, groupedBy: ActivityPeriodGroup, app_name?: string[]}): Observable<SequenceLossEvent[]> {
     const args: any = {
-      'column': `v1.instanceId,v1.start:start,v1.start.${filters.groupedBy}:date,v1.sequence.minus(v1.prev_seq).minus(1):seq,v1.attempts.minus(1):atm`,
+      'select': `v1.instanceId,v1.start:start,v1.start.${filters.groupedBy}:date,v1.sequence.minus(v1.prev_seq).minus(1):seq,v1.attempts.minus(1):atm`,
       'cte': 'select(instance_env:instanceId,instance.namespace:namespace,instance.app_name:appName,start,sequence,attempts,sequence.lag.over(partition(instance_env).order(start.asc)):prev_seq,attempts.lag.over(partition(instance_env).order(start.asc)):prev_atm).join(left_instance):v1',
       'seq.gt(0).or(atm.gt(0))': '',
       'v1.namespace': filters.namespace,
@@ -85,7 +85,7 @@ export class InstanceTraceService {
 
   getLastInstanceTrace(filters: {instance: string[]}): Observable<{id: string, date: number}[]> {
     let args: any = {
-      'column': 'instance_env:id,start:date',
+      'select': 'instance_env:id,start:date',
       'instance_env.varchar.in': filters.instance.join(','),
       'rank.over(partition(instance_env).order(start.desc))': '1'
     }

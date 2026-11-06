@@ -283,7 +283,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     'instance.namespace': currentNamespace,
                     'start.ge': currentStart.toISOString(),
                     'start.lt': effectiveEnd.toISOString(),
-                    'column': 'count:count,type',
+                    'select': 'count:count,type',
                     'type.in': 'INFO,WARN,ERROR'
                 };
                 if (this.params.serveurs?.length) {
@@ -303,7 +303,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             'start.ge': currentStart.toISOString(),
             'start.lt': effectiveEnd.toISOString(),
             'join': 'instance',
-            'column': 'count:count,type',
+            'select': 'count:count,type',
             'type.in': 'INFO,WARN,ERROR'
         };
         this.eventCountLoading = true;
@@ -342,7 +342,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             'start.ge': currentStart.toISOString(),
             'start.lt': effectiveEnd.toISOString(),
             'join': 'instance',
-            'column': `start.${groupedBy}:date,type,count:count`,
+            'select': `start.${groupedBy}:date,type,count:count`,
             'type.in': 'INFO,WARN,ERROR',
             'order': 'date.asc'
         };
@@ -388,7 +388,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             'start.ge': currentStart.toISOString(),
             'start.lt': effectiveEnd.toISOString(),
             'join': 'instance',
-            'column': `start.${groupedBy}:date,type,count:count`,
+            'select': `start.${groupedBy}:date,type,count:count`,
             'order': 'date.asc'
         };
         const serverParam = this.createServerFilter();
@@ -427,7 +427,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             'start.ge': currentStart.toISOString(),
             'start.lt': effectiveEnd.toISOString(),
             'join': 'instance',
-            'column': 'count:count,type'
+            'select': 'count:count,type'
         };
         this.eventCountLoading = true;
         this._sessionEventService.getSessionEventTypeCount(userParams)

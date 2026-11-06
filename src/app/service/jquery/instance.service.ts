@@ -17,7 +17,7 @@ export class InstanceService {
 
   getNamespaces(): Observable<{ namespace: string }[]> {
     let args = {
-      'column': 'namespace',
+      'select': 'namespace',
       'distinct': true,
       'namespace.notNull': '',
       'order': 'namespace.asc'
@@ -27,7 +27,7 @@ export class InstanceService {
 
   getApplications(type: string, namespace: string): Observable<{ appName: string }[]> {
     let args = {
-      'column': 'app_name:appName',
+      'select': 'app_name:appName',
       'distinct': true,
       'app_name.notNull': '',
       'namespace': namespace,
@@ -39,7 +39,7 @@ export class InstanceService {
 
   getLastServerStart(filters: { namespace: string }): Observable<LastServerStart[]> {
     return this.getInstance<any>({
-      'column': `view1.id,view1.appName,view1.version,view1.namespace:namespace,view1.type,view1.branch,view1.hash,view1.start,view1.end,view1.collector,view1.configuration,view1.restart,view1.minStart,view1.lastStart,view1.os,view1.re,view1.address,view1.user`,
+      'select': `view1.id,view1.appName,view1.version,view1.namespace:namespace,view1.type,view1.branch,view1.hash,view1.start,view1.end,view1.collector,view1.configuration,view1.restart,view1.minStart,view1.lastStart,view1.os,view1.re,view1.address,view1.user`,
       'cte': `select(id,namespace,type,branch,hash,start,end,collector,configuration,os,re,user,address,app_name,version,start.min.over(partition(namespace,app_name,version)):minStart,rank.over(partition(namespace,app_name).order(end.coalesce(9999-12-31T00:00:00.000Z).desc,start.desc)):rk,count.over(partition(namespace,app_name,version)):restart,start.max.over(partition(namespace,app_name)):lastStart).criteria(type.eq(SERVER).and(namespace.eq(${filters.namespace}))):view1`,
       'view1.rk': '1', 'order': 'view1.start.desc'
     }).pipe(map(res => { return res.map(r => ({...r, configuration: r.configuration?.value ? JSON.parse(r.configuration?.value) : null})) }));
@@ -47,7 +47,7 @@ export class InstanceService {
 
   getMainSessionApplication(start: Date, end: Date, namespace: string): Observable<{ appName: string, type: string }[]> {
     let args = {
-      'column': 'app_name:appName,main_session.type',
+      'select': 'app_name:appName,main_session.type',
       'distinct': true,
       'id': 'main_session.instance_env',
       'main_session.start.ge': start.toISOString(),
@@ -74,7 +74,7 @@ export class InstanceService {
     re:string,
   }[]> {
     let args: any = {
-      'column': 'id,start,end,version,address,branch,hash,os,re,collector,configuration',
+      'select': 'id,start,end,version,address,branch,hash,os,re,collector,configuration',
       'namespace': filters.namespace,
       'app_name': filters.appName,
       'order': 'start.asc'
@@ -93,7 +93,7 @@ export class InstanceService {
   }[]> {
     let criteria = `start.le(${filters.end.toISOString()}).and(end.ge(${filters.start.toISOString()}).or(end.isNull))`;
     let args: any = {
-      'column': 'id,app_name:appName,start,end',
+      'select': 'id,app_name:appName,start,end',
       'namespace': filters.namespace,
       [criteria]: '',
       'order': 'app_name.asc,start.desc'
@@ -110,7 +110,7 @@ export class InstanceService {
   }[]> {
     let criteria = `start.le(${filters.end.toISOString()}).and(end.ge(${filters.start.toISOString()}).or(end.isNull))`;
     let args: any = {
-      'column': 'id,app_name:appName,address,start,end',
+      'select': 'id,app_name:appName,address,start,end',
       'namespace': filters.namespace,
       'type': 'CLIENT',
       [criteria]: '',

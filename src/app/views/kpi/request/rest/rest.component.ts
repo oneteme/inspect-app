@@ -435,7 +435,7 @@ export class RestComponent implements OnInit {
   getMediaType() {
     const instanceType = this.params.optional?.instanceType;
     const args: any = {
-      'column': `count:count,media.coalesce("Sans contenu"):media`,
+      'select': `count:count,media.coalesce("Sans contenu"):media`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
@@ -457,7 +457,7 @@ export class RestComponent implements OnInit {
   getMethods() {
     const instanceType = this.params.optional?.instanceType;
     const args: any = {
-      'column': `count:count,method:method`,
+      'select': `count:count,method:method`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
@@ -479,7 +479,7 @@ export class RestComponent implements OnInit {
   getGlobalStatistics() {
     const instanceType = this.params.optional?.instanceType;
     const args: any = {
-      'column': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error`,
+      'select': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
@@ -627,7 +627,7 @@ export class RestComponent implements OnInit {
   getUser(): void {
     const instanceType = this.params.optional?.instanceType;
     const args: any = {
-      'column': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
+      'select': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
       'instance_env': 'instance.id',
       'instance.namespace': `"${this.params.namespace}"`,
       'start.ge': this.params.period.start.toISOString(),
@@ -649,7 +649,7 @@ export class RestComponent implements OnInit {
   getDependencies(): void {
     const instanceType = this.params.optional?.instanceType;
     const args: any = {
-      'column': `instance.app_name:origin,host:target,count:count`,
+      'select': `instance.app_name:origin,host:target,count:count`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
