@@ -5,12 +5,11 @@ import {AnalyticDto, MainSessionType, SessionEventDto} from "../model/request.mo
 import {SessionEvent} from "../model/trace.model";
 
 /** Colonnes de base de la liste ; l'alias (`colonne:alias`) donne la clé de la réponse. sessionId reste en base : il sert au lien de détail. */
-const SESSION_EVENT_LIST_COLUMNS = 'start:instant,type,value,sessionId,instance.app_name:appName';
+const SESSION_EVENT_LIST_COLUMNS = 'start:instant,type,value,sessionId,scope,instance.app_name:appName';
 
 /** Colonnes lazy : clé de table vers expression jquery. */
 const LAZY_SESSION_EVENT_COLUMNS: Record<string, string> = {
-    namespace: 'instance.namespace:namespace',
-    scope: 'scope'
+    namespace: 'instance.namespace:namespace'
 };
 
 @Injectable({ providedIn: 'root' })
