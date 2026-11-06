@@ -25,7 +25,7 @@ export interface DashboardDetailContext {
     eventInfoCount: number;
     eventWarnCount: number;
     eventErrorCount: number;
-    eventUserChart: { stringDate: string; count: number; perc: number }[];
+    eventUserChart: ({ stringDate: string; count: number; [key: string]: any })[];
     eventUserCount: number;
     evtExcLineConfig: any;
     eventCountLoading: boolean;
