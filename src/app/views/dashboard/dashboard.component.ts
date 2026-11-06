@@ -152,8 +152,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
     startupExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
 
     // charts par type d'événement
-    eventLogChart: { stringDate: string; info: number; warn: number; error: number; count: number, perc: number }[] = [];
-    eventUserChart: { stringDate: string; count: number }[] = [];
+    eventLogChart: { stringDate: string; info: number; warn: number; error: number; count: number; infoPerc: number; warnPerc: number; errorPerc: number }[] = [];
+    eventUserChart: { stringDate: string; count: number; perc: number }[] = [];
     topUserEvents: { type: string; count: number }[] = [];
 
 
@@ -369,7 +369,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     entry.count += r.count;
                 });
 
-                this.eventLogChart = this._fillHourGapsLogs(map, currentStart, effectiveEnd);
+                this.eventLogChart = this._addEventPerc(this._fillHourGapsLogs(map, currentStart, effectiveEnd));
                 this._cdr.markForCheck();
             },
             error: () => {
@@ -409,7 +409,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     }
                 });
 
-                this.eventUserChart = this._fillHourGaps(dateMap, currentStart, effectiveEnd);
+                this.eventUserChart = this._addUserEventPerc(this._fillHourGaps(dateMap, currentStart, effectiveEnd));
                 this._cdr.markForCheck();
             },
             error: () => {
@@ -835,6 +835,26 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     private _addPerc(filled: { stringDate: string; count: number }[], countokMap: Record<string, number>): { stringDate: string; count: number; perc: number }[] {
         return filled.map(p => ({ ...p, perc: countokMap[p.stringDate] ? (p.count * 100) / countokMap[p.stringDate] : 0 }));
+    }
+
+    /**
+     * Add percentage fields to the event log chart data based on the total count of events INFO WARN ERROR
+     * @param filled
+     * @private
+     */
+    private _addEventPerc(filled: { stringDate: string; info: number; warn: number; error: number; count: number }[]): { stringDate: string; info: number; warn: number; error: number; count: number; infoPerc: number; warnPerc: number; errorPerc: number }[] {
+        const total = filled.reduce((sum, p) => sum + p.count, 0);
+        return filled.map(p => ({
+            ...p,
+            infoPerc: total ? (p.info * 100) / total : 0,
+            warnPerc: total ? (p.warn * 100) / total : 0,
+            errorPerc: total ? (p.error * 100) / total : 0
+        }));
+    }
+
+    private _addUserEventPerc(filled: { stringDate: string; count: number }[]): { stringDate: string; count: number; perc: number }[] {
+        const total = filled.reduce((sum, p) => sum + p.count, 0);
+        return filled.map(p => ({...p, perc: total ? (p.count * 100) / total : 0 }));
     }
 
     private _aggregateTabData(data: any[]): { errors: Record<string, number>; dates: Record<string, number>; countoks: Record<string, number> } {
