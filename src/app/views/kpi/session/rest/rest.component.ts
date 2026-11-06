@@ -61,32 +61,28 @@ export class RestComponent implements OnInit {
     }
   }
 
-  readonly USER_AGENT_PIE_CONFIG: ChartProvider<string, number> = {
+  readonly USER_AGENT_SUNBURST_CONFIG: ChartProvider<string, number> = {
     series: [
-      { data: { x: field('user_agt'), y: field('count') } }
+      { name: field('product'), data: { x: field('user_agt'), y: field('count') } }
     ],
     options: {
-      legend: {
-        orient: 'horizontal',
-        bottom: 0,
-        left: 'center'
-      },
       series: [{
-        label: {
-          show: false             // pas de datalabels sur les slices
-        },
-        labelLine: {
-          show: false             // pas de lignes de labels non plus
-        }
+        label: { show: false },
+        levels: [
+          {},
+          { label: { show: true, rotate: 0, formatter: '{b}', fontSize: 11, minAngle: 15 } },
+          { label: { show: false } }
+        ]
       }],
       tooltip: {
         formatter: (params: any) =>
-          `${params.name} : <b>${params.value.toLocaleString('fr-FR')}</b> (${params.percent}%)`
+          `${params.name} : <b>${params.value.toLocaleString('fr-FR')}</b>`
       }
     }
   }
 
   readonly STATUS_CHART_PROVIDER_BASE = STATUS_CHART_PROVIDER_BASE;
+
 
   $statusChartType = 'column';
   $performanceChartType = 'column';
@@ -541,18 +537,24 @@ export class RestComponent implements OnInit {
     this._restSessionService.getRestSession(args).pipe(finalize(() => this.$userAgentRepartition.loading = false)).subscribe({
       next: (res: any[]) => {
         const aggregated = (res || []).reduce((sum, r) => {
-          const userAgent = (r.user_agt ? r.user_agt.split('/')[0].trim() : '') || 'N/A';
+          const userAgent = r.user_agt?.trim() || 'N/A';
           sum[userAgent] = (sum[userAgent] || 0) + (r.count || 0);
           return sum;
         }, {} as Record<string, number>);
 
-        this.$userAgentRepartition.data = Object.entries(aggregated)
-            .map(([user_agt, count]: [string, number]) => ({ user_agt, count }))
+        const rows = Object.entries(aggregated)
+            .map(([user_agt, count]: [string, number]) => ({
+              product: user_agt.split('/')[0].trim() || 'N/A',
+              user_agt,
+              count
+            }))
             .sort((a, b) => b.count - a.count);
       }
     });
   }
 
+
+        this.$userAgentRepartition.data = rows;
   getDependencies() {
     this.$dependencyRepartition.loading = true;
     this.$dependencyRepartition.data = [];

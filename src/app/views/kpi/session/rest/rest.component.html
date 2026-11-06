@@ -251,8 +251,8 @@
         <span class="kpi-chart-unit">{{ volumeSubtitle($userAgentRepartition.data, 'user-agent', 'user-agents') }}</span>
       </div>
       <div class="kpi-chart-body">
-        <chart type="donut"
-          [config]="USER_AGENT_PIE_CONFIG"
+        <chart type="sunburst"
+          [config]="USER_AGENT_SUNBURST_CONFIG"
           [data]="$userAgentRepartition.data"
           [isLoading]="$userAgentRepartition.loading">
         </chart>
