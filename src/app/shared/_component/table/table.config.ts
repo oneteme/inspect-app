@@ -228,7 +228,7 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
       searchValue: (row: DatabaseRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'badge' },
-    { key: 'productName', header: 'Base de données', icon: 'database', iconFontSet: 'material-symbols-outlined', lazy: true },
+    { key: 'productName', header: 'Base de données', icon: 'table_rows', lazy: true },
     {
       key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
       value: (row: DatabaseRequestDto) => {
