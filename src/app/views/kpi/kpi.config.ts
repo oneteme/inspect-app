@@ -2313,15 +2313,15 @@ export function buildStackSeries(serie: ChartItem, stack: ChartItem, data: any[]
   }));
 }
 
-const LINE_FAMILY_CHART_TYPES: ChartType[] = ['line', 'spline', 'area', 'areaspline'];
+const LINE_CHART_TYPES: ChartType[] = ['line', 'spline'];
 
 /**
- * Le cumul (stack) n'a de sens que pour les barres : sur les courbes, chaque série
+ * Le cumul (stack) n'a de sens que pour les barres et les aires : sur les courbes, chaque série
  * est tracée à sa propre valeur. `optionsByType` annule donc `stack` série par série.
  */
 export function lineTypeOptions(series: unknown[]): Partial<Record<ChartType, any>> {
   const unstacked = { series: series.map(() => ({ stack: null })) };
-  return Object.fromEntries(LINE_FAMILY_CHART_TYPES.map(type => [type, unstacked]));
+  return Object.fromEntries(LINE_CHART_TYPES.map(type => [type, unstacked]));
 }
 
 /** Retourne une couleur hex selon la famille du code HTTP. */
