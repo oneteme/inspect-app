@@ -38,7 +38,7 @@
 .server-title-row {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   min-width: 0;
   flex: 1;
 }
@@ -52,12 +52,27 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 
   .server-icon {
     font-size: 20px;
     width: 20px;
     height: 20px;
     color: #64748b;
+  }
+
+  // Statut de l'instance : couleur de l'icône et fond teinté
+  &.online {
+    background: #10b9811a;
+    .server-icon { color: #10b981; }
+  }
+  &.pending {
+    background: #f59e0b1a;
+    .server-icon { color: #f59e0b; }
+  }
+  &.offline {
+    background: #94a3b81a;
+    .server-icon { color: #94a3b8; }
   }
 }
 

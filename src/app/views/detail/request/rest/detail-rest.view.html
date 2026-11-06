@@ -21,6 +21,14 @@
             </span>
             <div class="session-title-content">
               <div class="session-name-row">
+                <div class="meta-chip header-date date-compact">
+                  <mat-icon class="material-symbols-outlined meta-icon">schedule</mat-icon>
+                  <span class="date-day">{{ (request.start * 1000) | date: 'dd/MM/yyyy' }}&nbsp;</span>
+                  <span class="date-time">{{ (request.start * 1000) | date: 'HH:mm:ss.SSS' }}</span>
+                </div>
+                <span class="session-name ellipsis" [matTooltip]="request.path">
+                  {{ request.path || 'N/A' }}
+                </span>
                 <span class="stat-item session-duration">
                   <mat-icon class="material-symbols-outlined stat-icon">timer</mat-icon>
                   <span class="stat-value stat-duration"
@@ -28,14 +36,6 @@
                     {{ { start: request.start, end: request.end } | duration }}
                   </span>
                 </span>
-                <span class="session-name ellipsis" [matTooltip]="request.path">
-                  {{ request.path || 'N/A' }}
-                </span>
-                <div class="meta-chip header-date date-compact">
-                  <mat-icon class="material-symbols-outlined meta-icon">schedule</mat-icon>
-                  <span class="date-day">{{ (request.start * 1000) | date: 'dd/MM/yyyy' }}&nbsp;</span>
-                  <span class="date-time">{{ (request.start * 1000) | date: 'HH:mm:ss.SSS' }}</span>
-                </div>
               </div>
               <div class="session-url-row">
                 <span class="method-badge">{{ request.method }}</span>

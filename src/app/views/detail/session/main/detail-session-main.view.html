@@ -16,6 +16,14 @@
                   [style.background-color]="st.color + '1a'">{{ st.label }}</span>
             <div class="session-title-content">
               <div class="session-name-row">
+                <div class="meta-chip header-date date-compact">
+                  <mat-icon class="material-symbols-outlined meta-icon">schedule</mat-icon>
+                  <span class="date-day">{{ (session.start * 1000) | date: 'dd/MM/yyyy' }}&nbsp;</span>
+                  <span class="date-time">{{ (session.start * 1000) | date: 'HH:mm:ss.SSS' }}</span>
+                </div>
+                <span class="session-name ellipsis" [matTooltip]="session.name">
+                  {{ session.name || 'N/A' }}
+                </span>
                 <span class="stat-item session-duration"
                       [matTooltip]="session.end && session.asyncDuration != null && session.asyncDuration >= 0
                         ? 'Temps de réponse : ' + ({ start: session.start, end: session.end } | duration) + ' · Traitement différé : ' + (session.asyncDuration / 1000 | duration)
@@ -26,14 +34,6 @@
                     {{ { start: session.start, end: session.end } | duration }}
                   </span>
                 </span>
-                <span class="session-name ellipsis" [matTooltip]="session.name">
-                  {{ session.name || 'N/A' }}
-                </span>
-                <div class="meta-chip header-date date-compact">
-                  <mat-icon class="material-symbols-outlined meta-icon">schedule</mat-icon>
-                  <span class="date-day">{{ (session.start * 1000) | date: 'dd/MM/yyyy' }}&nbsp;</span>
-                  <span class="date-time">{{ (session.start * 1000) | date: 'HH:mm:ss.SSS' }}</span>
-                </div>
               </div>
               <div class="session-url-row" *ngIf="session.location">
                 <span class="method-badge">{{ SESSION_TYPE_LABEL[session.type] || session.type }}</span>
