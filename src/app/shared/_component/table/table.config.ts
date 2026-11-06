@@ -125,6 +125,7 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
     { key: 'user', header: 'Utilisateur', icon: 'badge', width: '13%' },
     { key: 'address', header: 'Adresse', icon: 'fingerprint', width: '13%', optional: true },
     { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
+    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true },
     {
       key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
       value: (row: RestSessionDto) => {
