@@ -553,7 +553,6 @@ export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
   columns: [
     { key: 'appName', header: 'Application', width: '15%', icon:'widgets' },
     { key: 'namespace', header: 'Namespace', icon: 'layers', width: '10%', lazy: true },
-    { key: 'scope', header: 'Thread', icon: 'call_split', width: '10%', lazy: true },
     { key: 'sessionId', header: 'Session', icon: 'fingerprint', optional: true, groupable: false, sliceable: false },
     {
       key: 'instant', header: 'Date', icon: 'schedule', width: '10%', groupable: false, sliceable: false,
@@ -563,6 +562,7 @@ export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
       sortValue: (row: SessionEventDto) => row.value || row.type || '',
       searchValue: (row: SessionEventDto) => fmtMethod(row.type) + ' ' + (row.value || '')
     },
+    { key: 'scope', header: 'Section', icon: 'call_split', width: '15%' },
     { key: 'threadName', header: 'Thread', lazy: true, icon: 'memory' },
     { key: 'action', header: 'Action', icon: 'touch_app', width: '10%', sliceable: false, groupable: false, sortable: false },
 

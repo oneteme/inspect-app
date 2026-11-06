@@ -86,12 +86,9 @@
     </ng-template>
 
     <ng-template jqtCellDef="resource" let-row>
-        <span class="event-log-title">[{{ row.type }}]</span>
+        <span class="event-log-title">[{{ row.type | uppercase }}]</span>
         <br>
-        <span [title]="row.value">
-           <ng-container *ngIf="row.value">-{{ row.value }}</ng-container>
-           <ng-container *ngIf="row.scope"> -{{ row.scope }}</ng-container>
-        </span>
+        <span [title]="row.value">{{ row.value }}</span>
     </ng-template>
 
     <ng-template jqtCellDef="action" let-row>
