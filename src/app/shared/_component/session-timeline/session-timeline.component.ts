@@ -4,6 +4,7 @@ import {ExceptionInfo, SessionEvent} from '../../../model/trace.model';
 import {MatDialog} from '@angular/material/dialog';
 import {StacktraceDialogComponent} from '../exception-display/stacktrace-dialog/stacktrace-dialog.component';
 import {ExceptionService} from "../../../service/jquery/exception.service";
+import {formatDuration} from "../../pipe/duration.pipe";
 
 interface TimelineItem {
     kind: 'event' | 'exception';
@@ -194,13 +195,12 @@ export class SessionTimelineComponent implements OnDestroy {
             return null;
         }
 
-        const elapsedMilliseconds = Math.round((nextInstant - currentInstant) * 1000);
-
-        if (elapsedMilliseconds < 1000) {
-            return `+ ${elapsedMilliseconds} ms`;
+        const diffSeconds = nextInstant - currentInstant;
+        if (diffSeconds < 0) {
+            return null;
         }
 
-        return `+ ${(elapsedMilliseconds / 1000).toFixed(3)} s`;
+        return `+ ${formatDuration(diffSeconds)}`;
     }
 
     getEventLabel(type: string): string {
