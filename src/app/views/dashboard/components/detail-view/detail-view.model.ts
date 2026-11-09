@@ -29,6 +29,7 @@ export interface DashboardDetailContext {
     eventUserCount: number;
     evtExcLineConfig: any;
     eventCountLoading: boolean;
+    eventChartLoading?: boolean;
     topUserEvents: { type: string; count: number }[];
     evtUserLineConfig: any;
 }
