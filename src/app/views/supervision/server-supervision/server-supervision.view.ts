@@ -275,7 +275,6 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     // this.syncChartPeriodBounds();
     this._traceService.getInstance(this.params.instance)
     .pipe(switchMap(res => {
-        console.log(res.namespace, this.params.namespace)
       if(res?.namespace !== this.params.namespace) {
         this._snackBar.open(`L'identifiant de cette instance ne correspond pas à l'environnement ${this.params.namespace}`, "Fermer",
             {
@@ -305,7 +304,6 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
     }), finalize(() => (this.isLoading = false)), takeUntil(this.$requestCancel), takeUntil(this.$destroy)).subscribe({
       next: ([last, usage]) => {
         this.usageResourceByPeriod = usage?.length ? usage.map(r => ({...r, date: new Date(r.date), maxHeap: this.instance.resource.maxHeap, diskTotalSpace: this.instance.resource.diskTotalSpace})) : [];
-        console.log(usage)
         this.lastTrace = last[0]?.date;
         this.updatePageTitle();
         this.selectedPeriod = this.defaultSelectedPeriod();

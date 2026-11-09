@@ -273,7 +273,7 @@ export class JdbcComponent implements OnInit {
       'order': 'count.desc'
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.join(',');
+      args['host.in'] = this.params.hosts.map(value => `"${value}"`).join(',');
     }
     this.$commandRepartition.loading = true;
     this._jdbcRequestService.getDatabaseRequest(args)
@@ -291,7 +291,7 @@ export class JdbcComponent implements OnInit {
       'order': 'count.desc'
     };
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.join(',');
+      args['host.in'] = this.params.hosts.map(value => `"${value}"`).join(',');
     }
     this.$methodRepartition.loading = true;
     this._jdbcRequestService.getDatabaseRequest(args)
@@ -309,7 +309,7 @@ export class JdbcComponent implements OnInit {
       'order': `start.${this.groupedBy}.asc`
     };
     if (this.params.hosts?.length) {
-      args['host.in'] = this.params.hosts.join(',');
+      args['host.in'] = this.params.hosts.map(value => `"${value}"`).join(',');
     }
     this.$userRepartition.loading = true;
     this._jdbcRequestService.getDatabaseRequest(args)
@@ -327,7 +327,7 @@ export class JdbcComponent implements OnInit {
       'order': 'count.asc'
     };
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.join(',');
+      args['host.in'] = this.params.hosts.map(value => `"${value}"`).join(',');
     }
     this.$dependencyRepartition.loading = true;
     this._jdbcRequestService.getDatabaseRequest(args)
@@ -344,7 +344,7 @@ export class JdbcComponent implements OnInit {
       'start.lt': this.params.period.end.toISOString()
     };
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.join(',');
+      args['host.in'] = this.params.hosts.map(value => `"${value}"`).join(',');
     }
     this._jdbcRequestService.getDatabaseRequest(args).subscribe({
       next: (res: any[]) => {

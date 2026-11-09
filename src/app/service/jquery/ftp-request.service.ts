@@ -82,7 +82,7 @@ export class FtpRequestService {
             args['order'] = groupOrder(data.group, dateHour);
         }
         if(filters.hosts?.length && !args['host.in']){
-            args['host.in'] = filters.hosts.join(',');
+            args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
         }
         return fetchGroupedRows(request => this.getFtp<any[]>(request), args, filters.selections, dateHour, groupAlias);
     }
@@ -98,7 +98,7 @@ export class FtpRequestService {
             'start.lt': filters.end.toISOString()
         }
         if(filters.hosts?.length){
-            args['host.in'] = filters.hosts.join(',');
+            args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
         }
         return this.getFtp<any[]>(args).pipe(
             map(rows => dateHour ? packDateHour(rows, filter.jquery.buildAlias()) : rows)

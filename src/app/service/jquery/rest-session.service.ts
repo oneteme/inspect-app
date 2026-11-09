@@ -148,7 +148,7 @@ export class RestSessionService {
                 args['order'] = groupOrder(data.group, dateHour);
             }
             if (filters.hosts?.length && !args['host.in']) {
-                args['host.in'] = filters.hosts.join(',');
+                args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
             }
             return fetchGroupedRows(request => this.getRestSession<any[]>(request), args, filters.selections, dateHour, groupAlias);
         });

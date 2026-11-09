@@ -76,7 +76,7 @@ export class RestRequestService {
                 args['order'] = groupOrder(data.group, dateHour);
             }
             if (filters.hosts?.length && !args['host.in']) {
-                args['host.in'] = filters.hosts.join(',');
+                args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
             }
             if (filters.instanceType) {
                 args['instance.type'] = filters.instanceType;
@@ -126,7 +126,7 @@ export class RestRequestService {
             args['order'] = groupOrder(data.group, dateHour);
         }
         if(filters.hosts?.length && !args['host.in']){
-            args['host.in'] = filters.hosts.join(',');
+            args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
         }
         if(filters.instanceType) {
             args['instance.type'] = filters.instanceType;
@@ -157,7 +157,7 @@ export class RestRequestService {
             args['order'] = groupOrder(data.group, dateHour);
         }
         if(filters.hosts?.length && !args['host.in']){
-            args['host.in'] = filters.hosts.join(',');
+            args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
         }
         if(filters.instanceType) {
             args['instance.type'] = filters.instanceType;
@@ -176,7 +176,7 @@ export class RestRequestService {
             'join': 'instance'
         }
         if(filters.hosts?.length){
-            args['host.in'] = filters.hosts.join(',');
+            args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
         }
         if(filters.instanceType) {
             args['instance.type'] = filters.instanceType;
