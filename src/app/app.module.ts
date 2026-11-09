@@ -47,7 +47,7 @@ import {SearchMainEventView} from "./views/search/event/main/search-main-event.v
 import {NgCollectorModule} from "@oneteme/inspect-ng-collector";
 import {environment} from "../environments/environment";
 
-const InspectNgCollectorModule= NgCollectorModule.forRoot(environment.application);
+const InspectNgCollectorModule= NgCollectorModule.forRoot(environment.inspect);
 registerLocaleData(localeFr, 'fr-FR');
 
 export function initializeAuth(authService: AuthService) {
@@ -220,7 +220,7 @@ const routes: Route[] = [
   {
     path: 'supervision/server/:instance',
     component: ServerSupervisionView,
-    title: 'Supervision • Serveur',
+    title: 'Supervision • Application',
     canActivate: [authGuard]
   },
   {
