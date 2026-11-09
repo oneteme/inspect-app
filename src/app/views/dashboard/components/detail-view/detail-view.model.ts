@@ -22,13 +22,14 @@ export interface DashboardDetailContext {
     sparklineTitles: Record<string, { title: string; subtitle: string }>;
     eventLogChart: { stringDate: string; info: number; warn: number; error: number; count: number; infoPerc: number; warnPerc: number; errorPerc: number }[];
     eventLogCount: number;
-    eventInfoCount: number;
-    eventWarnCount: number;
-    eventErrorCount: number;
+    eventInfoCount?: number;
+    eventWarnCount?: number;
+    eventErrorCount?: number;
     eventUserChart: ({ stringDate: string; count: number; [key: string]: any })[];
     eventUserCount: number;
     evtExcLineConfig: any;
     eventCountLoading: boolean;
+    eventChartLoading?: boolean;
     topUserEvents: { type: string; count: number }[];
     evtUserLineConfig: any;
 }

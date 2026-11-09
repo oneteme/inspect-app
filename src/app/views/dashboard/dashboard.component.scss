@@ -390,6 +390,9 @@
     .sbd-count { opacity: .75; }
   }
 }
+.sbd-track-target * {
+  pointer-events: none;
+}
 
 .sbd-main {
   display: flex;

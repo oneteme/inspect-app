@@ -106,7 +106,7 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
     if (code >= 500) return 'row-ko';
     if (code >= 400) return 'row-warning';
     if (code >= 200) return 'row-ok';
-    if (code == 0 && row.end) return 'row-unavailable';
+    if (code < 100 && row.end) return 'row-unavailable';
     return '';
   }
 }
@@ -154,7 +154,7 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
     if (code >= 500) return 'row-ko';
     if (code >= 400) return 'row-warning';
     if (code >= 200) return 'row-ok';
-    if (code == 0 && row.end) return 'row-unavailable';
+    if (code < 100 && row.end) return 'row-unavailable';
     return '';
   }
 }
@@ -206,7 +206,7 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
     if (code >= 500) return 'row-ko';
     if (code >= 400) return 'row-warning';
     if (code >= 200) return 'row-ok';
-    if (code == 0 && row.end) return 'row-unavailable';
+    if (code < 100 && row.end) return 'row-unavailable';
     return '';
   }
 };
@@ -258,7 +258,7 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
     if (code >= 500) return 'row-ko';
     if (code >= 400) return 'row-warning';
     if (code >= 200) return 'row-ok';
-    if (code == 0 && row.end) return 'row-unavailable';
+    if (code < 100 && row.end) return 'row-unavailable';
     return '';
   }
 };
@@ -308,7 +308,7 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
     if (code >= 500) return 'row-ko';
     if (code >= 400) return 'row-warning';
     if (code >= 200) return 'row-ok';
-    if (code == 0 && row.end) return 'row-unavailable';
+    if (code < 100 && row.end) return 'row-unavailable';
     return '';
   }
 }
@@ -358,7 +358,7 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
     if (code >= 500) return 'row-ko';
     if (code >= 400) return 'row-warning';
     if (code >= 200) return 'row-ok';
-    if (code == 0 && row.end) return 'row-unavailable';
+    if (code < 100 && row.end) return 'row-unavailable';
     return '';
   }
 };
@@ -405,7 +405,7 @@ export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
     if (code >= 500) return 'row-ko';
     if (code >= 400) return 'row-warning';
     if (code >= 200) return 'row-ok';
-    if (code == 0 && row.end) return 'row-unavailable';
+    if (code < 100 && row.end) return 'row-unavailable';
     return '';
   }
 };
@@ -454,7 +454,7 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
     if (code >= 500) return 'row-ko';
     if (code >= 400) return 'row-warning';
     if (code >= 200) return 'row-ok';
-    if (code == 0 && row.end) return 'row-unavailable';
+    if (code < 100 && row.end) return 'row-unavailable';
     return '';
   }
 };

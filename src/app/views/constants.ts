@@ -247,8 +247,22 @@ export class Constants {
             tooltip: {
                 formatter: (params: any[]) => {
                     const header = params[0]?.axisValueLabel ?? params[0]?.axisValue ?? '';
-                    const lines = params.map(p => `${p.marker}${p.seriesName} : <b>${(p.value?.[1] ?? p.value ?? 0).toFixed(2)}%</b>`).join('<br/>');
-                    return `${header}<br/>${lines}`;
+                    const lines = params
+                        .filter(p => {
+                            const raw = Array.isArray(p.value) ? p.value[1] : (typeof p.value === 'object' && p.value !== null ? p.value.y : p.value);
+                            const num = typeof raw === 'number' && !Number.isNaN(raw) ? raw : Number(raw);
+                            if ((p.seriesName === 'INFO' || p.seriesName === 'WARN' || p.seriesName === 'ERROR') && (!num || Number.isNaN(num))) {
+                                return false;
+                            }
+                            return true;
+                        })
+                        .map(p => {
+                            const raw = Array.isArray(p.value) ? p.value[1] : (typeof p.value === 'object' && p.value !== null ? p.value.y : p.value);
+                            const num = typeof raw === 'number' && !Number.isNaN(raw) ? raw : 0;
+                            return `${p.marker}${p.seriesName} : <b>${num.toFixed(2)}%</b>`;
+                        })
+                        .join('<br/>');
+                    return lines ? `${header}<br/>${lines}` : header;
                 }
             }
         }

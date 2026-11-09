@@ -74,7 +74,7 @@ export class DashboardDetailViewComponent {
     }
 
     get eventChartLoading(): boolean {
-        return this.context?.eventCountLoading ?? false;
+        return (this.context?.eventChartLoading ?? false) || (this.context?.eventCountLoading ?? false);
     }
 
     get eventChartData(): any[] {
@@ -124,11 +124,11 @@ export class DashboardDetailViewComponent {
     get isBlockLoading(): boolean {
         const key = this.selectedKey;
         if (!key) return false;
-        if (key === 'SERVICE') return this.context.tabRequests['sessionExceptionsTable']?.isLoading !== false;
+        if (key === 'SERVICE') return this.context.tabRequests['sessionExceptionsTable']?.isLoading !== false || !this.context.tabRequests['sessionExceptionsTable']?.loaded;
         if (key === 'SCHEDULE')   return this.context.tabRequests['scheduleExceptionTable']?.isLoading !== false;
         if (key === 'VIEW')    return this.context.tabRequests['viewExceptionTable']?.isLoading !== false;
         if (key === 'STARTUP' || key === 'TEST') return this.context.tabRequests['startupExceptionTable']?.isLoading !== false;
-        if (key === 'LOG' || key === 'USER') return this.context.eventCountLoading;
+        if (key === 'LOG' || key === 'USER') return this.context.eventCountLoading || (this.context.eventChartLoading ?? false);
         const protoDef = this.context.protocolDefs.find(p => p.key === key);
         if (protoDef) {
             if (this.context.chartRequests[protoDef.reqKey]?.isLoading !== false) return true;
@@ -143,7 +143,7 @@ export class DashboardDetailViewComponent {
         if (this.selectedKey === 'SCHEDULE')   return this.context.tabRequests['scheduleExceptionTable']?.isLoading || this.context.tabRequests['scheduleTopJobsTable']?.isLoading;
         if (this.selectedKey === 'VIEW')    return this.context.tabRequests['viewExceptionTable']?.isLoading;
         if (this.selectedKey === 'STARTUP') return this.context.tabRequests['startupExceptionTable']?.isLoading;
-        return this.context.tabRequests['sessionExceptionsTable']?.isLoading;
+        return this.context.tabRequests['sessionExceptionsTable']?.isLoading !== false;
     }
 
     /** Aucun incident détecté sur la période pour l'insight actif */
@@ -152,7 +152,7 @@ export class DashboardDetailViewComponent {
         if (!key) return false;
         switch (key) {
             case 'SERVICE':
-                return this.context.tabRequests['sessionExceptionsTable']?.isLoading === false && !this.context.topSessionErrors.length;
+                return this.context.tabRequests['sessionExceptionsTable']?.isLoading === false && this.context.tabRequests['sessionExceptionsTable']?.loaded === true && !this.context.topSessionErrors.length;
             case 'SCHEDULE':
                 return this.context.tabRequests['scheduleExceptionTable']?.isLoading === false && !this.context.topScheduleErrors.length;
             case 'VIEW':
@@ -162,9 +162,9 @@ export class DashboardDetailViewComponent {
             case 'TEST':
                 return !this.context.sessionCountLoading && !this.context.sessionTestErrors;
             case 'LOG':
-                return !this.context.eventCountLoading && !(this.context.eventLogCount || 0);
+                return !this.context.eventCountLoading && !this.context.eventChartLoading && !(this.context.eventLogCount || 0);
             case 'USER':
-                return !this.context.eventCountLoading && !(this.context.eventUserCount || 0);
+                return !this.context.eventCountLoading && !this.context.eventChartLoading && !(this.context.eventUserCount || 0);
             default: {
                 const protoDef = this.context.protocolDefs.find(p => p.key === key);
                 const loaded = protoDef
