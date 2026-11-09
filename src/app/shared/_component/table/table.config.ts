@@ -551,10 +551,10 @@ export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTra
 
 export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
   ...DEFAULT_TABLE_CONFIG,
+  columnMinWidth: 120,
   columns: [
     { key: 'appName', header: 'Application', width: '15%', icon:'widgets' },
     { key: 'namespace', header: 'Namespace', icon: 'layers', width: '10%', lazy: true, groupable: false, sliceable: false },
-    { key: 'scope', header: 'Thread', icon: 'call_split', width: '10%', lazy: true },
     { key: 'sessionId', header: 'Session', icon: 'fingerprint', optional: true, groupable: false, sliceable: false },
     { key: 'type', header: 'Type', icon: 'label', optional: true, groupable: true, sliceable: true },
     {
@@ -565,9 +565,8 @@ export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
       sortValue: (row: SessionEventDto) => row.value,
       searchValue: (row: SessionEventDto) => fmtMethod(row.type) + ' ' + (row.value || '')
     },
-    { key: 'scope', header: 'Section', icon: 'call_split', width: '15%' },
-    { key: 'threadName', header: 'Thread', lazy: true, icon: 'memory' },
-    { key: 'action', header: 'Détails', icon: 'touch_app', width: '10%', sliceable: false, groupable: false, sortable: false },
+    { key: 'scope', header: 'Section', icon: 'web', width: '15%' },
+    { key: 'action', width: '10%', sliceable: false, groupable: false, sortable: false, inFieldsMenu: false },
   ],
   defaultSort: { active: 'instant', direction: 'desc' },
   rowClass: (row: SessionEventDto) => {
