@@ -379,16 +379,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     if (this._loadGen !== gen || !rows) return;
                     formatters[groupedBy](rows, this._datePipe, 'stringDate');
 
-                    const map = new Map<string, { stringDate: string; info: number; warn: number; error: number; count: number }>();
+                    const map = new Map<string, { stringDate: string; info?: number; warn?: number; error?: number; count: number }>();
                     rows.forEach(r => {
                         if (!map.has(r.stringDate)) {
-                            map.set(r.stringDate, { stringDate: r.stringDate, info: 0, warn: 0, error: 0, count: 0 });
+                            map.set(r.stringDate, { stringDate: r.stringDate, count: 0 });
                         }
                         const entry = map.get(r.stringDate)!;
                         const t = (r.type || '').toUpperCase();
-                        if (t === 'INFO') entry.info += r.count;
-                        else if (t === 'WARN') entry.warn += r.count;
-                        else if (t === 'ERROR') entry.error += r.count;
+                        if (t === 'INFO') entry.info = (entry.info || 0) + r.count;
+                        else if (t === 'WARN') entry.warn = (entry.warn || 0) + r.count;
+                        else if (t === 'ERROR') entry.error = (entry.error || 0) + r.count;
                         entry.count += r.count;
                     });
 
