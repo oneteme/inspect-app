@@ -28,7 +28,7 @@ export class DetailSessionMainView implements OnInit, OnDestroy {
     protected readonly _router = inject(EnvRouter);
     private readonly _pageTitleService = inject(PageTitleService);
     MAPPING_TYPE = Constants.MAPPING_TYPE;
-    readonly SESSION_TYPE_LABEL: Record<string, string> = { VIEW: 'NAVIGATE', BATCH: 'BATCH', SCHEDULE: 'SCHEDULE', STARTUP: 'STARTUP', TEST: 'TEST' };
+    readonly SESSION_TYPE_LABEL: Record<string, string> = { VIEW: 'NAVIGATE', SCHEDULE: 'SCHEDULE', STARTUP: 'STARTUP', TEST: 'TEST' };
     session: MainSessionView;
     completedSession: MainSessionView;
     instance: InstanceEnvironment;

@@ -144,11 +144,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     // exception charts par type de session
     topSessionErrors: { type: string; count: number }[] = [];
-    topBatchErrors: { type: string; count: number }[] = [];
+    topScheduleErrors: { type: string; count: number }[] = [];
     topViewErrors: { type: string; count: number }[] = [];
     topStartupErrors: { type: string; count: number }[] = [];
     sessionExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
-    batchExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
+    scheduleExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
     viewExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
     startupExceptionChart: { stringDate: string; count: number; perc: number }[] = [];
 
@@ -523,11 +523,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
     initTab(gen: number) {
         this.sessionExceptionChart = [];
-        this.batchExceptionChart = [];
+        this.scheduleExceptionChart = [];
         this.viewExceptionChart = [];
         this.startupExceptionChart = [];
         this.topSessionErrors = [];
-        this.topBatchErrors = [];
+        this.topScheduleErrors = [];
         this.topViewErrors = [];
         this.topStartupErrors = [];
         this.tabSubscriptions.forEach(t => t.unsubscribe());
@@ -995,11 +995,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
             const { errors: sm, dates: sd, countoks: sc } = this._aggregateTabData(this.tabRequests['sessionExceptionsTable']?.data ?? []);
             this.topSessionErrors = Object.entries(sm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count);
             this.sessionExceptionChart = this._addPerc(this._fillHourGaps(sd, this.params.start!, effectiveEnd), sc);
-        } else if (tabKey === 'batchExceptionTable') {
-            const { errors: bm, dates: bd, countoks: bc } = this._aggregateTabData(this.tabRequests['batchExceptionTable']?.data ?? []);
-            this.topBatchErrors = Object.entries(bm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count);
-            this.batchExceptionChart = this._addPerc(this._fillHourGaps(bd, this.params.start!, effectiveEnd), bc);
-            this._patchSessionCountData('BATCH');
+        } else if (tabKey === 'scheduleExceptionTable') {
+            const { errors: bm, dates: bd, countoks: bc } = this._aggregateTabData(this.tabRequests['scheduleExceptionTable']?.data ?? []);
+            this.topScheduleErrors = Object.entries(bm).map(([type, count]) => ({ type, count })).sort((a, b) => b.count - a.count);
+            this.scheduleExceptionChart = this._addPerc(this._fillHourGaps(bd, this.params.start!, effectiveEnd), bc);
+            this._patchSessionCountData('SCHEDULE');
             this._rebuildSessionSummaries();
         } else if (tabKey === 'viewExceptionTable') {
             const { errors: vm, dates: vd, countoks: vc } = this._aggregateTabData(this.tabRequests['viewExceptionTable']?.data ?? []);
@@ -1104,7 +1104,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         if (!key) return;
         const sessionKeyMap: Record<string, string> = {
             SERVICE: 'rest',
-            BATCH: 'schedule',
+            SCHEDULE: 'schedule',
             STARTUP: 'startup',
             VIEW: 'view',
             TEST: 'test'
@@ -1171,11 +1171,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
             kpiLoading: this.kpiLoading,
             tabRequests: this.tabRequests,
             topSessionErrors: this.topSessionErrors,
-            topBatchErrors: this.topBatchErrors,
+            topScheduleErrors: this.topScheduleErrors,
             topViewErrors: this.topViewErrors,
             topStartupErrors: this.topStartupErrors,
             sessionExceptionChart: this.sessionExceptionChart,
-            batchExceptionChart: this.batchExceptionChart,
+            scheduleExceptionChart: this.scheduleExceptionChart,
             viewExceptionChart: this.viewExceptionChart,
             startupExceptionChart: this.startupExceptionChart,
             sessExcLineConfig: this.sessExcLineConfig,
@@ -1427,13 +1427,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
                         return result;
                     }))
             },
-            batchExceptionTable: {
-                observable: this._mainService.getMainExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, mainType: 'BATCH' })
+            scheduleExceptionTable: {
+                observable: this._mainService.getMainExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, mainType: 'SCHEDULE' })
                     .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
                         const dateMap = new Map<string, number>();
                         (result as any[]).forEach(r => { if (r.stringDate != null && r.countok != null) dateMap.set(r.stringDate, r.countok); });
-                        this._sessionCountByType['BATCH'] = {
+                        this._sessionCountByType['SCHEDULE'] = {
                             total: Array.from(dateMap.values()).reduce((s, v) => s + v, 0),
                             errors: result.filter(r => r.errorType != null).reduce((s, r) => s + r.count, 0)
                         };

@@ -206,7 +206,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
     this._criteria = {
       'join': 'instance',
       'instance.namespace': this.queryParams.namespace,
-      ...(this.queryParams.hosts?.length ? { 'host.in': this.queryParams.hosts.join(',') } : {}),
+      ...(this.queryParams.hosts?.length ? { 'host.in': this.queryParams.hosts.map(value => `"${value}"`).join(',') } : {}),
       'status.origin': this.queryParams.rangestatus,
       'start.ge': this.queryParams.period.start.toISOString(),
       'start.lt': this.queryParams.period.end.toISOString()

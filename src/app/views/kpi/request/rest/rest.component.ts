@@ -448,7 +448,7 @@ export class RestComponent implements OnInit {
       'order': 'count.desc'
     };
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.join(',');
+      args['host.in'] = this.params.hosts.map(value => `"${value}"`).join(',');
     }
     if(instanceType) {
       args['instance.type'] = instanceType;
@@ -470,7 +470,7 @@ export class RestComponent implements OnInit {
       'order': 'count.desc'
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.join(',');
+      args['host.in'] = this.params.hosts.map(value => `"${value}"`).join(',');
     }
     if(instanceType) {
       args['instance.type'] = instanceType;
@@ -491,7 +491,7 @@ export class RestComponent implements OnInit {
       'start.lt': this.params.period.end.toISOString()
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.join(',');
+      args['host.in'] = this.params.hosts.map(value => `"${value}"`).join(',');
     }
     if(instanceType) {
       args['instance.type'] = instanceType;
@@ -640,7 +640,7 @@ export class RestComponent implements OnInit {
       'order': `start.${this.groupedBy}.asc`
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.map(o => `"${o}"`).join(',');
+      args['host.in'] = this.params.hosts.map(value => `"${value}"`).join(',');
     }
     if(instanceType) {
       args['instance.type'] = instanceType;

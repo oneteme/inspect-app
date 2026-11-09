@@ -34,8 +34,8 @@ export class LdapRequestService {
 
     /** Liste LDAP : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
     getRequestList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<DirectoryRequestDto[]> {
-        const column = [LDAP_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_LDAP_REQUEST_COLUMNS[c])].join(',');
-        return this.getLdap<any[]>({ ...criteria, column }).pipe(
+        const select = [LDAP_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_LDAP_REQUEST_COLUMNS[c])].join(',');
+        return this.getLdap<any[]>({ ...criteria, select }).pipe(
             map(rows => rows.map(row => ({
                 ...row,
                 start: row.start / 1000,
@@ -81,7 +81,7 @@ export class LdapRequestService {
             args['order'] = groupOrder(data.group, dateHour);
         }
         if(filters.hosts?.length && !args['host.in']){
-            args['host.in'] = filters.hosts.join(',');
+            args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
         }
         return fetchGroupedRows(request => this.getLdap<any[]>(request), args, filters.selections, dateHour, groupAlias);
     }
@@ -97,7 +97,7 @@ export class LdapRequestService {
             'start.lt': filters.end.toISOString()
         }
         if(filters.hosts?.length){
-            args['host.in'] = filters.hosts.join(',');
+            args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
         }
         return this.getLdap<any[]>(args).pipe(
             map(rows => dateHour ? packDateHour(rows, filter.jquery.buildAlias()) : rows)

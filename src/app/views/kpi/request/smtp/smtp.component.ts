@@ -258,7 +258,7 @@ export class SmtpComponent implements OnInit {
       'order': 'count.desc'
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.join(',');
+      args['host.in'] = this.params.hosts.map(value => `"${value}"`).join(',');
     }
     this.$commandRepartition.loading = true;
     this._smtpRequestService.getSmtp(args)
@@ -276,7 +276,7 @@ export class SmtpComponent implements OnInit {
       'order': 'count.asc'
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.join(',');
+      args['host.in'] = this.params.hosts.map(value => `"${value}"`).join(',');
     }
     this.$dependencyRepartition.loading = true;
     this._smtpRequestService.getSmtp(args)
@@ -294,7 +294,7 @@ export class SmtpComponent implements OnInit {
       'order': `start.${this.groupedBy}.asc`
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.join(',');
+      args['host.in'] = this.params.hosts.map(value => `"${value}"`).join(',');
     }
     this.$userRepartition.loading = true;
     this._smtpRequestService.getSmtp(args)
@@ -311,7 +311,7 @@ export class SmtpComponent implements OnInit {
       'start.lt': this.params.period.end.toISOString()
     }
     if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.join(',');
+      args['host.in'] = this.params.hosts.map(value => `"${value}"`).join(',');
     }
     this._smtpRequestService.getSmtp(args).subscribe({
       next: (res: any[]) => {

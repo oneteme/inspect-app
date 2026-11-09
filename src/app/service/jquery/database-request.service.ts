@@ -33,8 +33,8 @@ export class DatabaseRequestService {
 
     /** Liste JDBC : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
     getRequestList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<DatabaseRequestDto[]> {
-        const column = [DATABASE_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_DATABASE_REQUEST_COLUMNS[c])].join(',');
-        return this.getDatabaseRequest<any[]>({ ...criteria, column }).pipe(
+        const select = [DATABASE_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_DATABASE_REQUEST_COLUMNS[c])].join(',');
+        return this.getDatabaseRequest<any[]>({ ...criteria, select }).pipe(
             map(rows => rows.map(row => ({
                 ...row,
                 start: row.start / 1000,
@@ -81,7 +81,7 @@ export class DatabaseRequestService {
             args['order'] = groupOrder(data.group, dateHour);
         }
         if(filters.hosts?.length && !args['host.in']){
-            args['host.in'] = filters.hosts.join(',');
+            args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
         }
         return fetchGroupedRows(request => this.getDatabaseRequest<any[]>(request), args, filters.selections, dateHour, groupAlias);
     }
@@ -97,7 +97,7 @@ export class DatabaseRequestService {
             'start.lt': filters.end.toISOString()
         }
         if(filters.hosts?.length){
-            args['host.in'] = filters.hosts.join(',');
+            args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
         }
         return this.getDatabaseRequest<any[]>(args).pipe(
             map(rows => dateHour ? packDateHour(rows, filter.jquery.buildAlias()) : rows)

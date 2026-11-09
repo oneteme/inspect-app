@@ -37,8 +37,8 @@ export class RestRequestService {
 
     /** Liste REST : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
     getRequestList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<RestRequestDto[]> {
-        const column = [REST_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_REST_REQUEST_COLUMNS[c])].join(',');
-        return this.getRestRequest<any[]>({ ...criteria, column }).pipe(
+        const select = [REST_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_REST_REQUEST_COLUMNS[c])].join(',');
+        return this.getRestRequest<any[]>({ ...criteria, select }).pipe(
             map(rows => rows.map(row => ({
                 ...row,
                 start: row.start / 1000,
@@ -76,7 +76,7 @@ export class RestRequestService {
                 args['order'] = groupOrder(data.group, dateHour);
             }
             if (filters.hosts?.length && !args['host.in']) {
-                args['host.in'] = filters.hosts.join(',');
+                args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
             }
             if (filters.instanceType) {
                 args['instance.type'] = filters.instanceType;
@@ -126,7 +126,7 @@ export class RestRequestService {
             args['order'] = groupOrder(data.group, dateHour);
         }
         if(filters.hosts?.length && !args['host.in']){
-            args['host.in'] = filters.hosts.join(',');
+            args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
         }
         if(filters.instanceType) {
             args['instance.type'] = filters.instanceType;
@@ -157,7 +157,7 @@ export class RestRequestService {
             args['order'] = groupOrder(data.group, dateHour);
         }
         if(filters.hosts?.length && !args['host.in']){
-            args['host.in'] = filters.hosts.join(',');
+            args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
         }
         if(filters.instanceType) {
             args['instance.type'] = filters.instanceType;
@@ -176,7 +176,7 @@ export class RestRequestService {
             'join': 'instance'
         }
         if(filters.hosts?.length){
-            args['host.in'] = filters.hosts.join(',');
+            args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
         }
         if(filters.instanceType) {
             args['instance.type'] = filters.instanceType;

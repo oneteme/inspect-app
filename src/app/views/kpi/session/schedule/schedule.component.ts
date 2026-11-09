@@ -1,7 +1,7 @@
 import {ChangeDetectorRef, Component, inject, Input, ViewChild} from "@angular/core";
 import {QueryParams} from "../../../../model/conf.model";
 import {finalize, Observable, of} from "rxjs";
-import {buildFilterSelections, toFilterValues,BATCH_SESSION_PERFORMANCE_CHART_CONFIG, BATCH_SESSION_STATUS_CHART_CONFIG, ChartConfig, buildSeries, lineTypeOptions, pivotByStack} from "../../kpi.config";
+import {buildFilterSelections, toFilterValues,SCHEDULE_SESSION_PERFORMANCE_CHART_CONFIG, SCHEDULE_SESSION_STATUS_CHART_CONFIG, ChartConfig, buildSeries, lineTypeOptions, pivotByStack} from "../../kpi.config";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
 import {withKpiChartTypes} from "../../kpi-chart-type";
 import {formatChartDates, periodManagement, buildPeriodSliceDisplay, resolvePeriodGranularity} from "../../../../shared/util";
@@ -57,8 +57,8 @@ export class ScheduleComponent {
       // Initialize ChartConfigs and OrganizerConfigs
       this.$statusGranularity = this.groupedBy;
       this.$performanceGranularity = this.groupedBy;
-      this.$statusRepartition.chartConfig = BATCH_SESSION_STATUS_CHART_CONFIG(this.groupedBy);
-      this.$performanceRepartition.chartConfig = BATCH_SESSION_PERFORMANCE_CHART_CONFIG(this.groupedBy);
+      this.$statusRepartition.chartConfig = SCHEDULE_SESSION_STATUS_CHART_CONFIG(this.groupedBy);
+      this.$performanceRepartition.chartConfig = SCHEDULE_SESSION_PERFORMANCE_CHART_CONFIG(this.groupedBy);
 
       this._rebuildOrganizerConfigs();
 
@@ -82,7 +82,7 @@ export class ScheduleComponent {
     const granularity = this._resolveGranularityAfterX(event, this.$statusGranularity);
     if (granularity !== this.$statusGranularity) {
       this.$statusGranularity = granularity;
-      this.$statusRepartition.chartConfig = BATCH_SESSION_STATUS_CHART_CONFIG(granularity);
+      this.$statusRepartition.chartConfig = SCHEDULE_SESSION_STATUS_CHART_CONFIG(granularity);
     }
     const result = this._handleOrganizerEvent(event, this.$statusRepartition.chartConfig, this.$statusOrganizer, this._statusOrganizerOptions());
     this.$statusOrganizer = withKpiChartTypes(result.binding, this.$statusChartType);
@@ -112,7 +112,7 @@ export class ScheduleComponent {
     const granularity = this._resolveGranularityAfterX(event, this.$performanceGranularity);
     if (granularity !== this.$performanceGranularity) {
       this.$performanceGranularity = granularity;
-      this.$performanceRepartition.chartConfig = BATCH_SESSION_PERFORMANCE_CHART_CONFIG(granularity);
+      this.$performanceRepartition.chartConfig = SCHEDULE_SESSION_PERFORMANCE_CHART_CONFIG(granularity);
     }
     const result = this._handleOrganizerEvent(event, this.$performanceRepartition.chartConfig, this.$performanceOrganizer, this._performanceOrganizerOptions());
     this.$performanceOrganizer = withKpiChartTypes(result.binding, this.$performanceChartType);
@@ -338,7 +338,7 @@ export class ScheduleComponent {
 
   getGlobalStatistics() {
     let args: any = {
-      'select': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error,count(name.distinct):count_batch`,
+      'select': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error,count(name.distinct):count_schedule`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'instance.type': 'SERVER',
@@ -355,7 +355,7 @@ export class ScheduleComponent {
         this.$globalStatistic.totalRequestError = res[0]?.count_error ?? 0;
         this.$globalStatistic.percentError = res[0]?.count_request ? (res[0].count_error / res[0].count_request) * 100 : 0;
         this.$globalStatistic.elapsedPercentile = res[0]?.elapsedPercentile ?? 0;
-        this.$globalStatistic.totalName = res[0]?.count_batch ?? 0;
+        this.$globalStatistic.totalName = res[0]?.count_schedule ?? 0;
       }
     });
   }

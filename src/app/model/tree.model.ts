@@ -967,7 +967,7 @@ export class TreeGraph {
 }
 
 
-export type ServerType = 'REST' | 'JDBC' | 'FTP' | 'SMTP' | 'LDAP' | 'LINK' | 'GHOST' | 'VIEW' | 'BATCH';
+export type ServerType = 'REST' | 'JDBC' | 'FTP' | 'SMTP' | 'LDAP' | 'LINK' | 'GHOST' | 'VIEW' | 'SCHEDULE';
 export type linkType = 'SINGLE' | 'MULTIPLE';
 export const ServerConfig = {
   JDBC: { icon: "shape=image;image=assets/mxgraph/database.drawio.svg;", width: 80, height: 30 },
@@ -978,7 +978,7 @@ export const ServerConfig = {
   LINK: { icon: "shape=image;image=assets/mxgraph/parent.drawio.svg;", width: 30, height: 30 },
   GHOST: { icon: "shape=image;image=assets/mxgraph/ghost.drawio.svg;", width: 30, height: 30 },
   VIEW: { icon: "shape=image;image=assets/mxgraph/view.drawio.svg;", width: 30, height: 30 },
-  BATCH: { icon: "shape=image;image=assets/mxgraph/batch.drawio.svg;", width: 30, height: 30 },
+  SCHEDULE: { icon: "shape=image;image=assets/mxgraph/batch.drawio.svg;", width: 30, height: 30 },
 }
 
 

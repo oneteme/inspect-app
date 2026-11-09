@@ -31,8 +31,8 @@ export class SmtpRequestService {
 
     /** Liste SMTP : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
     getRequestList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<MailRequestDto[]> {
-        const column = [SMTP_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_SMTP_REQUEST_COLUMNS[c])].join(',');
-        return this.getSmtp<any[]>({ ...criteria, column }).pipe(
+        const select = [SMTP_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_SMTP_REQUEST_COLUMNS[c])].join(',');
+        return this.getSmtp<any[]>({ ...criteria, select }).pipe(
             map(rows => rows.map(row => ({
                 ...row,
                 start: row.start / 1000,
@@ -85,7 +85,7 @@ export class SmtpRequestService {
             args['order'] = groupOrder(data.group, dateHour);
         }
         if(filters.hosts?.length && !args['host.in']){
-            args['host.in'] = filters.hosts.join(',');
+            args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
         }
         return fetchGroupedRows(request => this.getSmtp<any[]>(request), args, filters.selections, dateHour, groupAlias);
     }
@@ -101,7 +101,7 @@ export class SmtpRequestService {
             'join': 'instance'
         }
         if(filters.hosts?.length){
-            args['host.in'] = filters.hosts.map(o => `"${o}"`).join(',');
+            args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
         }
         return this.getSmtp<any[]>(args).pipe(
             map(rows => dateHour ? packDateHour(rows, filter.jquery.buildAlias()) : rows)

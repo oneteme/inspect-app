@@ -467,7 +467,7 @@ export class TreeView implements OnDestroy {
 
   getIcon(obj: RestSessionTree | MainSessionTree): ServerType {
     if ("type" in obj) {
-      return obj.type == 'VIEW' ? 'VIEW' : 'BATCH';
+      return obj.type == 'VIEW' ? 'VIEW' : 'SCHEDULE';
     }
     return ('id' in obj ? 'REST' : 'GHOST');
   }
