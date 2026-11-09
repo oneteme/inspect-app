@@ -536,7 +536,7 @@ export const SCHEDULE_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection
     },
     jquery: {
       value: () => `name`,
-      buildAlias: () => 'name',
+      buildAlias: () => 'schedule',
       order: 'name.asc'
     }
   }]
@@ -2235,8 +2235,16 @@ export function buildFilterSelections(config: ChartConfig, values: Record<string
 /** Ajoute un critère `<colonne>.in` par filtre sélectionné (ET entre filtres, OU entre valeurs). */
 export function applyFilterSelections(args: Record<string, any>, selections?: ChartFilterSelection[]): void {
   selections?.forEach(s => {
-    if (s.values?.length) {
-      args[`${s.filter.jquery.value()}.in`] = s.values.join(',');
+    const column = s.filter.jquery.value();
+    const values = s.values ?? [];
+    const nonEmpty = values.filter(v => v !== '');
+    const hasEmpty = nonEmpty.length !== values.length;
+    if (hasEmpty && nonEmpty.length) {
+      args[`${column}.isNull.or(${column}.in(${nonEmpty.join(',')}))`] = '';
+    } else if (hasEmpty) {
+      args[`${column}.isNull`] = '';
+    } else if (nonEmpty.length) {
+      args[`${column}.in`] = nonEmpty.join(',');
     }
   });
 }
