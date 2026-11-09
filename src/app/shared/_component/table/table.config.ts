@@ -162,38 +162,38 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
 export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'host', header: 'Serveur', icon: 'dns' },
+    { key: 'host', header: 'Serveur', icon: 'dns', width: '15%', minWidth: 140 },
     {
-      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false,
+      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false, width: '30%', minWidth: 220,
       searchValue: (row: RestRequestDto) => fmtMethod(row.method) + ' ' + (row.path || '')
     },
     {
-      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
+      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false, width: '12%', minWidth: 150,
       searchValue: (row: RestRequestDto) => fmtStart(row.start)
     },
     {
-      key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
+      key: 'duration', header: 'Durée', icon: 'timer', groupable: false, width: '8%', minWidth: 100,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: RestRequestDto) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'badge' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge', width: '10%', minWidth: 120 },
     {
-      key: 'status', header: 'Status', sortable: true, optional: true, icon: 'task_alt',
+      key: 'status', header: 'Status', sortable: true, optional: true, icon: 'task_alt', minWidth: 110,
       value: (row: RestSessionDto) => {
         if (!row.end) return 'En cours...';
         return row.status;
       }
     },
-    { key: 'action', header: 'Détails', icon: 'touch_app', width: '10%', sliceable: false, groupable: false, sortable: false, removable: false },
-    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
-    { key: 'protocol', header: 'Protocole', icon: 'lan', optional: true },
-    { key: 'query', header: 'Query', icon: 'search', lazy: true },
-    { key: 'contentType', header: 'Content-Type', icon: 'description', lazy: true },
-    { key: 'inDataSize', header: 'Taille entrée', icon: 'download', lazy: true },
-    { key: 'outDataSize', header: 'Taille sortie', icon: 'upload', lazy: true },
-    { key: 'bodyContent', header: 'Réponse', icon: 'file-input', iconFontSet: 'material-symbols-outlined', lazy: true },
-    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true },
-    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
+    { key: 'action', header: 'Détails', icon: 'touch_app', width: '10%', minWidth: 60, sliceable: false, groupable: false, sortable: false, removable: false },
+    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true, minWidth: 150 },
+    { key: 'protocol', header: 'Protocole', icon: 'lan', optional: true, minWidth: 110 },
+    { key: 'query', header: 'Query', icon: 'search', lazy: true, minWidth: 120 },
+    { key: 'contentType', header: 'Content-Type', icon: 'description', lazy: true, minWidth: 130 },
+    { key: 'inDataSize', header: 'Taille entrée', icon: 'download', lazy: true, minWidth: 120 },
+    { key: 'outDataSize', header: 'Taille sortie', icon: 'upload', lazy: true, minWidth: 120 },
+    { key: 'bodyContent', header: 'Réponse', icon: 'file-input', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 150 },
+    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true, minWidth: 150 },
+    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
@@ -214,33 +214,33 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
 export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'host', header: 'Serveur', icon: 'dns' },
+    { key: 'host', header: 'Serveur', icon: 'dns', width: '15%', minWidth: 140 },
     {
-      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false,
+      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false, width: '30%', minWidth: 220,
       searchValue: (row: DatabaseRequestDto) => fmtMethod(row.command) + ' ' + (row.schema || row.name || 'N/A')
     },
     {
-      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
+      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false, width: '12%', minWidth: 150,
       searchValue: (row: DatabaseRequestDto) => fmtStart(row.start)
     },
     {
-      key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
+      key: 'duration', header: 'Durée', icon: 'timer', groupable: false, width: '8%', minWidth: 100,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: DatabaseRequestDto) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'badge' },
-    { key: 'productName', header: 'Base de données', icon: 'table_rows', lazy: true },
+    { key: 'user', header: 'Utilisateur', icon: 'badge', width: '10%', minWidth: 120 },
+    { key: 'productName', header: 'Base de données', icon: 'table_rows', lazy: true, minWidth: 180 },
     {
-      key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
+      key: 'status', header: 'Statut', optional: true, icon: 'task_alt', minWidth: 110,
       value: (row: DatabaseRequestDto) => {
         if (!row.end) return 'En cours...';
         return row.status;
       }
     },
-    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
-    { key: 'scheme', header: 'Éditeur', icon: 'hub', lazy: true },
-    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true },
-    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
+    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true, minWidth: 150 },
+    { key: 'scheme', header: 'Éditeur', icon: 'hub', lazy: true, minWidth: 130 },
+    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true, minWidth: 150 },
+    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
@@ -266,32 +266,32 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
 export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'host', header: 'SERVEUR', icon: 'dns' },
+    { key: 'host', header: 'SERVEUR', icon: 'dns', width: '15%', minWidth: 140 },
     {
-      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false,
+      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false, width: '30%', minWidth: 220,
       searchValue: (row: FtpRequestDto) => fmtMethod(row.command)
     },
     {
-      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
+      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false, width: '12%', minWidth: 150,
       searchValue: (row: FtpRequestDto) => fmtStart(row.start)
     },
     {
-      key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
+      key: 'duration', header: 'Durée', icon: 'timer', groupable: false, width: '8%', minWidth: 100,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: FtpRequestDto) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'badge' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge', width: '10%', minWidth: 120 },
     {
-      key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
+      key: 'status', header: 'Statut', optional: true, icon: 'task_alt', minWidth: 110,
       value: (row: FtpRequestDto) => {
         if (!row.end) return 'En cours...';
         return row.status;
       }
     },
-    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
-    { key: 'protocol', header: 'Protocole', icon: 'lan', lazy: true },
-    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true },
-    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
+    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true, minWidth: 150 },
+    { key: 'protocol', header: 'Protocole', icon: 'lan', lazy: true, minWidth: 110 },
+    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true, minWidth: 150 },
+    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
@@ -316,32 +316,32 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
 export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'host', header: 'SERVEUR', icon: 'dns' },
+    { key: 'host', header: 'SERVEUR', icon: 'dns', width: '15%', minWidth: 140 },
     {
-      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false,
+      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false, width: '30%', minWidth: 220,
       searchValue: (row: DirectoryRequestDto) => fmtMethod(row.command)
     },
     {
-      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
+      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false, width: '12%', minWidth: 150,
       searchValue: (row: DirectoryRequestDto) => fmtStart(row.start)
     },
     {
-      key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
+      key: 'duration', header: 'Durée', icon: 'timer', groupable: false, width: '8%', minWidth: 100,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: DirectoryRequestDto) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'badge' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge', width: '10%', minWidth: 120 },
     {
-      key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
+      key: 'status', header: 'Statut', optional: true, icon: 'task_alt', minWidth: 110,
       value: (row: DirectoryRequestDto) => {
         if (!row.end) return 'En cours...';
         return row.status;
       }
     },
-    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
-    { key: 'protocol', header: 'Protocole', icon: 'lan', lazy: true },
-    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true },
-    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
+    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true, minWidth: 150 },
+    { key: 'protocol', header: 'Protocole', icon: 'lan', lazy: true, minWidth: 110 },
+    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true, minWidth: 150 },
+    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
@@ -366,29 +366,29 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
 export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'host', header: 'Hôte', icon: 'dns' },
+    { key: 'host', header: 'Hôte', icon: 'dns', width: '15%', minWidth: 140 },
     {
-      key: 'resource', header: 'Ressource', icon: 'category',
+      key: 'resource', header: 'Ressource', icon: 'category', width: '30%', minWidth: 220,
       searchValue: (row: LocalRequest) => fmtMethod((row as any).type) + ' ' + ((row as any).name || 'N/A')
     },
     {
-      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
+      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false, width: '12%', minWidth: 150,
       searchValue: (row: LocalRequest) => fmtStart(row.start)
     },
     {
-      key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
+      key: 'duration', header: 'Durée', icon: 'timer', groupable: false, width: '8%', minWidth: 100,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: LocalRequest) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'badge' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge', width: '10%', minWidth: 120 },
     {
-      key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
+      key: 'status', header: 'Statut', optional: true, icon: 'task_alt', minWidth: 110,
       value: (row: LocalRequest) => {
         if (!row.end) return 'En cours...';
         return row.status;
       }
     },
-    { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
+    { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', minWidth: 150, value: (row) => row.exception?.type }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
@@ -413,31 +413,31 @@ export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
 export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'host', header: 'Serveur', icon: 'dns' },
+    { key: 'host', header: 'Serveur', icon: 'dns', width: '15%', minWidth: 140 },
     {
-      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false,
+      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false, width: '30%', minWidth: 220,
       searchValue: (row: MailRequestDto) => fmtMethod((row as any).command)
     },
     {
-      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false,
+      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false, width: '12%', minWidth: 150,
       searchValue: (row: MailRequestDto) => fmtStart(row.start)
     },
     {
-      key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
+      key: 'duration', header: 'Durée', icon: 'timer', groupable: false, width: '8%', minWidth: 100,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: MailRequestDto) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'badge' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge', width: '10%', minWidth: 120 },
     {
-      key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
+      key: 'status', header: 'Statut', optional: true, icon: 'task_alt', minWidth: 110,
       value: (row: MailRequestDto) => {
         if (!row.end) return 'En cours...';
         return row.status;
       }
     },
-    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
-    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true },
-    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true }
+    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true, minWidth: 150 },
+    { key: 'appName', header: 'Application', icon: 'widgets', lazy: true, minWidth: 150 },
+    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
     DEFAULT_DURATION_SLICE_CONFIG,
@@ -551,22 +551,21 @@ export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTra
 
 export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
   ...DEFAULT_TABLE_CONFIG,
-  columnMinWidth: 120,
   columns: [
-    { key: 'appName', header: 'Application', width: '15%', icon:'widgets' },
-    { key: 'namespace', header: 'Namespace', icon: 'layers', width: '10%', lazy: true, groupable: false, sliceable: false },
-    { key: 'sessionId', header: 'Session', icon: 'fingerprint', optional: true, groupable: false, sliceable: false },
-    { key: 'type', header: 'Type', icon: 'label', optional: true, groupable: true, sliceable: true },
+    { key: 'appName', header: 'Application', width: '13%', minWidth: 120, icon:'widgets' },
+    { key: 'namespace', header: 'Namespace', icon: 'layers', width: '12%', minWidth: 180, lazy: true, groupable: false, sliceable: false },
+    { key: 'sessionId', header: 'Session', icon: 'fingerprint', minWidth: 280, optional: true, groupable: false, sliceable: false },
+    { key: 'type', header: 'Type', icon: 'label', minWidth: 100, optional: true, groupable: true, sliceable: true },
     {
-      key: 'instant', header: 'Date', icon: 'schedule', width: '10%', groupable: false, sliceable: false,
+      key: 'instant', header: 'Date', icon: 'schedule', width: '10%', minWidth: 280, groupable: false, sliceable: false,
       searchValue: (row: SessionEventDto) => fmtStart(row.instant)
     },
-    { key: 'resource', header: 'Actions', groupable: false, sliceable: false, icon: 'info' , width: '50%',
+    { key: 'resource', header: 'Actions', groupable: false, sliceable: false, icon: 'info' , width: '50%', minWidth: 400,
       sortValue: (row: SessionEventDto) => row.value,
       searchValue: (row: SessionEventDto) => fmtMethod(row.type) + ' ' + (row.value || '')
     },
-    { key: 'scope', header: 'Section', icon: 'web', width: '15%' },
-    { key: 'action', width: '10%', sliceable: false, groupable: false, sortable: false, inFieldsMenu: false },
+    { key: 'scope', header: 'Section', icon: 'web', width: '15%', minWidth: 150 },
+    { key: 'action', width: '10%', minWidth: 60, sliceable: false, groupable: false, sortable: false, inFieldsMenu: false },
   ],
   defaultSort: { active: 'instant', direction: 'desc' },
   rowClass: (row: SessionEventDto) => {
