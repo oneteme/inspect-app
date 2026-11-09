@@ -520,16 +520,16 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
 export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTrace?: number }> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'Application', icon: 'widgets', sliceable: false, groupable: false, width: '25%' },
-    { key: 'duration', header: 'Depuis', icon: 'schedule', groupable: false, width: '12%', sortValue: (row) => row.start },
-    { key: 'version', header: 'Version', icon: 'label', width: '20%' },
-    { key: 'branch', header: 'Branche', icon: 'fork_right', width: '25%' },
-    { key: 'restart', header: 'Démarrage', icon: 'restart_alt', groupable: false, sliceable: false },
-    { key: 'os', header: 'OS', icon: 'computer', optional: true, width: '8%' },
-    { key: 're', header: 'RE', icon: 'sdk', optional: true, width: '8%' },
-    { key: 'address', header: 'Adresse', icon: 'fingerprint', sliceable: false, groupable: false, optional: true },
-    { key: 'user', header: 'Utilisateur', icon: 'badge', optional: true, width: '10%' },
-    { key: 'collector', header: 'Collector', icon: 'sensors', optional: true, width: '10%' }
+    { key: 'appName', header: 'Application', icon: 'widgets', sliceable: false, groupable: false, width: '25%', minWidth: 180 },
+    { key: 'duration', header: 'Depuis', icon: 'schedule', groupable: false, width: '12%', minWidth: 120, sortValue: (row) => row.start },
+    { key: 'version', header: 'Version', icon: 'label', width: '20%', minWidth: 130 },
+    { key: 'branch', header: 'Branche', icon: 'fork_right', width: '25%', minWidth: 180 },
+    { key: 'restart', header: 'Démarrage', icon: 'restart_alt', groupable: false, sliceable: false, minWidth: 170 },
+    { key: 'os', header: 'OS', icon: 'computer', optional: true, width: '13%', minWidth: 340 },
+    { key: 're', header: 'RE', icon: 'sdk', optional: true, width: '8%', minWidth: 170 },
+    { key: 'address', header: 'Adresse', icon: 'fingerprint', sliceable: false, groupable: false, optional: true, minWidth: 170 },
+    { key: 'user', header: 'Utilisateur', icon: 'badge', optional: true, width: '10%', minWidth: 220 },
+    { key: 'collector', header: 'Collector', icon: 'sensors', optional: true, width: '17%', minWidth: 370 }
   ],
   defaultSort: { active: 'duration', direction: 'desc' },
   slices: [
