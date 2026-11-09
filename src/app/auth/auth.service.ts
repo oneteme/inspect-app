@@ -1,9 +1,8 @@
 import { Injectable } from '@angular/core';
 import { OAuthService } from 'angular-oauth2-oidc';
-import { authCodeFlowConfig } from "./auth-code-flow.config";
-import { auth } from "../../environments/environment";
+import { authCodeFlowConfig, resolvedAuth } from "./auth-code-flow.config";
 import { Router } from '@angular/router';
-import { isImplicitId } from '../model/auth.model';
+import { initDebug, isImplicitId } from '../model/auth.model';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
@@ -14,7 +13,10 @@ export class AuthService {
 
 
     init(): Promise<void> {
-        if (!auth.enabled || this.initialized) {
+        initDebug(resolvedAuth);
+        console.log("auth config : ", authCodeFlowConfig)
+        console.log("resolved config : ", resolvedAuth)
+        if (!resolvedAuth.enabled || this.initialized) {
             return Promise.resolve();
         }
         this.oauthService.configure(authCodeFlowConfig);
@@ -46,11 +48,11 @@ export class AuthService {
     }
 
     isLogged(): boolean {
-        return !isImplicitId(auth) ? this.oauthService.hasValidAccessToken() : this.oauthService.hasValidIdToken();
+        return !isImplicitId(resolvedAuth) ? this.oauthService.hasValidAccessToken() : this.oauthService.hasValidIdToken();
     }
 
     getToken(): string {
-        return !isImplicitId(auth) ? this.oauthService.getAccessToken() : this.oauthService.getIdToken();
+        return !isImplicitId(resolvedAuth) ? this.oauthService.getAccessToken() : this.oauthService.getIdToken();
     }
 
     getAccessToken(): string {
