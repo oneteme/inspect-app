@@ -69,7 +69,7 @@ export class DetailRestView implements OnInit, OnDestroy {
         count: this.stages.length || 0,
         visible: true,
         type: 'stage',
-        hasError: this.exceptions?.length > 0,
+        hasError: this.stages.some(s => s.exception),
         errorCount: this.exceptions?.length || 0
       },
       {

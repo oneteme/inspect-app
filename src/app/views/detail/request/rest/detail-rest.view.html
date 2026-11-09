@@ -3,7 +3,7 @@
 
     <!-- ═══ CARTE REQUEST REST ═══ -->
     <div class="session-card"
-         [ngClass]="STATUS[request.end ? request.status.toString().charAt(0) + 'xx' : '-1']?.class">
+         [ngClass]="STATUS[request.end ? request.status < 100 ? '0xx' : request.status.toString().charAt(0) + 'xx' : '-1']?.class">
 
       <div class="session-card-inner">
 
@@ -11,7 +11,7 @@
         <div class="session-header">
           <div class="session-title-row">
             <span class="status-badge"
-                  *ngIf="STATUS[request.end ? request.status.toString().charAt(0) + 'xx' : '-1'] as st"
+                  *ngIf="STATUS[request.end ? request.status < 100 ? '0xx' : request.status.toString().charAt(0) + 'xx' : '-1'] as st"
                   [class.pulse]="!request.end"
                   [class.with-code]="request.end"
                   [style.color]="st.color"
