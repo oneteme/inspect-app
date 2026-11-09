@@ -3,7 +3,7 @@
 
     <!-- ═══ CARTE SESSION MAIN ═══ -->
     <div class="session-card"
-         [ngClass]="STATUS[session.end ? session.status.toString().charAt(0) + 'xx' : '-1']?.class">
+         [ngClass]="STATUS[session.end ? session.status < 100 ? '0xx' : session.status.toString().charAt(0) + 'xx' : '-1']?.class">
 
       <div class="session-card-inner">
 
@@ -11,7 +11,7 @@
         <div class="session-header">
           <div class="session-title-row">
             <span class="status-badge"
-                  *ngIf="STATUS[session.end ? session.status.toString().charAt(0) + 'xx' : '-1'] as st"
+                  *ngIf="STATUS[session.end ? session.status < 100 ? '0xx' : session.status.toString().charAt(0) + 'xx' : '-1'] as st"
                   [style.color]="st.color"
                   [style.background-color]="st.color + '1a'">{{ st.label }}</span>
             <div class="session-title-content">
