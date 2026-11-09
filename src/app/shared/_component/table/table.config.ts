@@ -184,7 +184,7 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
         return row.status;
       }
     },
-    { key: 'action', header: 'Détails', icon: 'touch_app', width: '10%', minWidth: 60, sliceable: false, groupable: false, sortable: false, removable: false },
+    { key: 'action', width: '10%', minWidth: 60, sliceable: false, groupable: false, sortable: false, inFieldsMenu: false },
     { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true, minWidth: 150 },
     { key: 'protocol', header: 'Protocole', icon: 'lan', optional: true, minWidth: 110 },
     { key: 'query', header: 'Query', icon: 'search', lazy: true, minWidth: 120 },
