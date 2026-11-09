@@ -51,36 +51,36 @@ export const DEFAULT_DURATION_SLICE_CONFIG: SliceConfig = {
 export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'Application', icon: 'widgets', width: '18%' },
+    { key: 'appName', header: 'Application', icon: 'widgets', width: '18%', minWidth: 150 },
     {
-      key: 'resource', header: 'Ressource', groupable: false, sliceable: false, icon: 'category',
+      key: 'resource', header: 'Ressource', groupable: false, sliceable: false, icon: 'category', minWidth: 300,
       searchValue: (row: RestSessionDto) => fmtMethod(row.method) + ' ' + (row.path || '')
     },
-    { key: 'query', header: 'Query', icon: 'search', lazy: true },
+    { key: 'query', header: 'Query', icon: 'search', lazy: true, minWidth: 160 },
     {
-      key: 'start', header: 'Début', icon: 'schedule', width: '17%', groupable: false, sliceable: false,
+      key: 'start', header: 'Début', icon: 'schedule', width: '17%', groupable: false, sliceable: false, minWidth: 170,
       searchValue: (row: RestSessionDto) => fmtStart(row.start)
     },
     {
-      key: 'duration', header: 'Durée', icon: 'timer', width: '13%', groupable: false,
+      key: 'duration', header: 'Durée', icon: 'timer', width: '13%', groupable: false, minWidth: 100,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: RestSessionDto) => fmtDuration(row.start, row.end)
     },
-    { key: 'user', header: 'Utilisateur', icon: 'badge', width: '15%' },
+    { key: 'user', header: 'Utilisateur', icon: 'badge', width: '15%', minWidth: 120 },
     {
-      key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
+      key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%', minWidth: 110,
       value: (row: RestSessionDto) => {
         if (!row.end) return 'En cours...';
         return row.status;
       }
     },
-    { key: 'userAgent', header: 'User-Agent', lazy: true, icon: 'devices', width: '15%' },
-    { key: 'host', header: 'Host HTTP', lazy: true, icon: 'language' },
-    { key: 'contentType', header: 'Content-Type', lazy: true, icon: 'description' },
-    { key: 'inDataSize', header: 'Taille entrée (o)', lazy: true, icon: 'download', groupable: false, sliceable: false },
-    { key: 'outDataSize', header: 'Taille sortie (o)', lazy: true, icon: 'upload', groupable: false, sliceable: false },
-    { key: 'threadName', header: 'Thread', lazy: true, icon: 'call_split' },
-    { key: 'cacheControl', header: 'Cache-Control', lazy: true, icon: 'cached', groupable: false, sliceable: false }
+    { key: 'userAgent', header: 'User-Agent', lazy: true, icon: 'devices', width: '15%', minWidth: 260 },
+    { key: 'host', header: 'Host HTTP', lazy: true, icon: 'language', minWidth: 160 },
+    { key: 'contentType', header: 'Content-Type', lazy: true, icon: 'description', minWidth: 150 },
+    { key: 'inDataSize', header: 'Taille entrée (o)', lazy: true, icon: 'download', groupable: false, sliceable: false, minWidth: 140 },
+    { key: 'outDataSize', header: 'Taille sortie (o)', lazy: true, icon: 'upload', groupable: false, sliceable: false, minWidth: 140 },
+    { key: 'threadName', header: 'Thread', lazy: true, icon: 'call_split', minWidth: 150 },
+    { key: 'cacheControl', header: 'Cache-Control', lazy: true, icon: 'cached', groupable: false, sliceable: false, minWidth: 150 }
   ],
   slices: [
     { title: 'Status', columnKey: 'status', hidden: true },
@@ -114,20 +114,20 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
 export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'Application', icon: 'widgets', width: '13%' },
-    { key: 'name', header: 'Nom', icon: 'label', width: '13%' },
-    { key: 'location', header: 'Ressource', icon: 'category' },
-    { key: 'start', header: 'Début', groupable: false, sliceable: false, icon: 'schedule', width: '13%' },
+    { key: 'appName', header: 'Application', icon: 'widgets', width: '13%', minWidth: 150 },
+    { key: 'name', header: 'Nom', icon: 'label', width: '13%', minWidth: 150 },
+    { key: 'location', header: 'Ressource', icon: 'category', minWidth: 220 },
+    { key: 'start', header: 'Début', groupable: false, sliceable: false, icon: 'schedule', width: '13%', minWidth: 150 },
     {
-      key: 'duration', header: 'Durée', groupable: false, icon: 'timer', width: '13%',
+      key: 'duration', header: 'Durée', groupable: false, icon: 'timer', width: '13%', minWidth: 100,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
     },
-    { key: 'user', header: 'Utilisateur', icon: 'badge', width: '13%' },
-    { key: 'address', header: 'Adresse', icon: 'fingerprint', width: '13%', optional: true },
-    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true },
-    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true },
+    { key: 'user', header: 'Utilisateur', icon: 'badge', width: '13%', minWidth: 120 },
+    { key: 'address', header: 'Adresse', icon: 'fingerprint', width: '13%', optional: true, minWidth: 150 },
+    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true, minWidth: 150 },
+    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 },
     {
-      key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%',
+      key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%', minWidth: 110,
       value: (row: RestSessionDto) => {
         if (!row.end) return 'En cours...';
         return row.status;
