@@ -34,8 +34,8 @@ export class LdapRequestService {
 
     /** Liste LDAP : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
     getRequestList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<DirectoryRequestDto[]> {
-        const column = [LDAP_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_LDAP_REQUEST_COLUMNS[c])].join(',');
-        return this.getLdap<any[]>({ ...criteria, column }).pipe(
+        const select = [LDAP_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_LDAP_REQUEST_COLUMNS[c])].join(',');
+        return this.getLdap<any[]>({ ...criteria, select }).pipe(
             map(rows => rows.map(row => ({
                 ...row,
                 start: row.start / 1000,

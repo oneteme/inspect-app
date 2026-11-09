@@ -33,8 +33,8 @@ export class DatabaseRequestService {
 
     /** Liste JDBC : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
     getRequestList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<DatabaseRequestDto[]> {
-        const column = [DATABASE_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_DATABASE_REQUEST_COLUMNS[c])].join(',');
-        return this.getDatabaseRequest<any[]>({ ...criteria, column }).pipe(
+        const select = [DATABASE_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_DATABASE_REQUEST_COLUMNS[c])].join(',');
+        return this.getDatabaseRequest<any[]>({ ...criteria, select }).pipe(
             map(rows => rows.map(row => ({
                 ...row,
                 start: row.start / 1000,

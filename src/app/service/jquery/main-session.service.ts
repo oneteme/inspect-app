@@ -28,8 +28,8 @@ export class MainSessionService {
 
     /** Liste des sessions principales : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
     getMainSessionList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<MainSessionDto[]> {
-        const column = [MAIN_SESSION_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_MAIN_SESSION_COLUMNS[c])].join(',');
-        return this.getMainSession<any[]>({ ...criteria, column }).pipe(
+        const select = [MAIN_SESSION_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_MAIN_SESSION_COLUMNS[c])].join(',');
+        return this.getMainSession<any[]>({ ...criteria, select }).pipe(
             map(rows => rows.map(row => ({
                 ...row,
                 start: row.start / 1000,
@@ -55,7 +55,7 @@ export class MainSessionService {
 
     getMainExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, mainType: string}): Observable<ExceptionsByPeriodAndAppname[]> {
         let args = {
-            "column": `start.${filters.groupedBy}:date,error_type,count:count,count.sum.over(partition(date)):countok,start.year:year,type:type`,
+            "select": `start.${filters.groupedBy}:date,error_type,count:count,count.sum.over(partition(date)):countok,start.year:year,type:type`,
             'main_session.type': filters.mainType,
             'join': 'instance',
             'instance.namespace': filters.namespace,

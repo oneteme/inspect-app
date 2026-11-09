@@ -5,11 +5,11 @@ export interface DashboardDetailContext {
     kpiLoading: boolean;
     tabRequests: Record<string, any>;
     topSessionErrors: any[];
-    topBatchErrors: any[];
+    topScheduleErrors: any[];
     topViewErrors: any[];
     topStartupErrors: { type: string; count: number }[];
     sessionExceptionChart: { stringDate: string; count: number; perc: number }[];
-    batchExceptionChart: { stringDate: string; count: number; perc: number }[];
+    scheduleExceptionChart: { stringDate: string; count: number; perc: number }[];
     viewExceptionChart: { stringDate: string; count: number; perc: number }[];
     startupExceptionChart: { stringDate: string; count: number; perc: number }[];
     sessExcLineConfig: any;

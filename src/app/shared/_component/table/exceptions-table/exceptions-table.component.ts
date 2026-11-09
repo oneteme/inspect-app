@@ -44,7 +44,7 @@ export class ExceptionsTableComponent {
         ...this.tableConfig,
         columns: [
           ...this.tableConfig.columns,
-          { key: 'type', header: 'Type', icon: 'category', value: (row) => row.type == 'SERVER' ? this.MAPPING_TYPE['rest'].title : this.MAPPING_TYPE['batch'].title }
+          { key: 'type', header: 'Type', icon: 'category', value: (row) => row.type == 'SERVER' ? this.MAPPING_TYPE['rest'].title : this.MAPPING_TYPE['schedule'].title }
         ]
       }
     }

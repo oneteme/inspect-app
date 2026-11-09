@@ -34,8 +34,8 @@ export class SessionEventService {
 
     /** Liste jquery : colonnes de base + colonnes lazy demandées. jquery renvoie start en ms, la page attend instant en secondes. */
     getSessionEvents(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<SessionEventDto[]> {
-        const column = [SESSION_EVENT_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_SESSION_EVENT_COLUMNS[c])].join(',');
-        const params = { ...criteria, join: 'instance', column };
+        const select = [SESSION_EVENT_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_SESSION_EVENT_COLUMNS[c])].join(',');
+        const params = { ...criteria, join: 'instance', select };
         return this.http.get<any[]>(`${localStorage.getItem('server')}/jquery/session/event`, {params}).pipe(
             map(rows => rows.map(row => ({ ...row, instant: row.instant / 1000 })))
         );

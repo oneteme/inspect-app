@@ -34,8 +34,8 @@ export class RestSessionService {
 
     /** Liste REST : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
     getRestSessionList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<RestSessionDto[]> {
-        const column = [REST_SESSION_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_REST_SESSION_COLUMNS[c])].join(',');
-        return this.getRestSession<any[]>({ ...criteria, column }).pipe(
+        const select = [REST_SESSION_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_REST_SESSION_COLUMNS[c])].join(',');
+        return this.getRestSession<any[]>({ ...criteria, select }).pipe(
             map(rows => rows.map(row => ({
                 ...row,
                 start: row.start / 1000,
@@ -98,7 +98,7 @@ export class RestSessionService {
 
     getSessionExceptions(filters: {namespace: string, start: Date, end: Date, groupedBy: string}): Observable<ExceptionsByPeriodAndAppname[]> {
         let args: any = {
-            "column": `start.${filters.groupedBy}:date,error_type:errorType,count:count,count.sum.over(partition(date)):countok,start.year:year`,
+            "select": `start.${filters.groupedBy}:date,error_type:errorType,count:count,count.sum.over(partition(date)):countok,start.year:year`,
             'join': 'instance',
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),

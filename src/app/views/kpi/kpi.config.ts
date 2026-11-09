@@ -381,7 +381,7 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
   }]
 });
 
-export const BATCH_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+export const SCHEDULE_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -442,11 +442,11 @@ export const BATCH_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfi
       }
     }]
   },
-  groups: BATCH_SESSION_GROUPS_CONFIG(groupedBy),
-  filters: BATCH_SESSION_FILTERS_CONFIG(groupedBy)
+  groups: SCHEDULE_SESSION_GROUPS_CONFIG(groupedBy),
+  filters: SCHEDULE_SESSION_FILTERS_CONFIG(groupedBy)
 });
 
-export const BATCH_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+export const SCHEDULE_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -462,11 +462,11 @@ export const BATCH_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): Chart
     }]
   },
   indicators: PERFORMANCE_INDICATORS(),
-  groups: BATCH_SESSION_GROUPS_CONFIG(groupedBy),
-  filters: BATCH_SESSION_FILTERS_CONFIG(groupedBy)
+  groups: SCHEDULE_SESSION_GROUPS_CONFIG(groupedBy),
+  filters: SCHEDULE_SESSION_FILTERS_CONFIG(groupedBy)
 });
 
-export const BATCH_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
+export const SCHEDULE_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
   optional: false,
   items: [{
     key: 'date',
@@ -491,7 +491,7 @@ export const BATCH_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => 
       order: 'host.asc'
     }
   }, {
-    key: 'batch',
+    key: 'schedule',
     selected: false,
     menu: {
       label: 'Tâches planifiées'
@@ -504,7 +504,7 @@ export const BATCH_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => 
   }]
 });
 
-export const BATCH_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
+export const SCHEDULE_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
   optional: false,
   items: [{
     key: 'date',
@@ -529,7 +529,7 @@ export const BATCH_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection =>
       order: 'host.asc'
     }
   }, {
-    key: 'batch',
+    key: 'schedule',
     selected: false,
     menu: {
       label: 'Tâches planifiées'

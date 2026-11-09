@@ -42,7 +42,7 @@ export class DashboardDetailViewComponent {
     }
 
     get sessionChartData(): { stringDate: string; count: number }[] {
-        if (this.selectedKey === 'SCHEDULE') return this.context.batchExceptionChart;
+        if (this.selectedKey === 'SCHEDULE') return this.context.scheduleExceptionChart;
         if (this.selectedKey === 'VIEW') return this.context.viewExceptionChart;
         if (this.selectedKey === 'STARTUP') return this.context.startupExceptionChart;
         return this.context.sessionExceptionChart;
@@ -101,7 +101,7 @@ export class DashboardDetailViewComponent {
         if (!this.selectedKey) return 'Clients';
         if (this.isSessionInsight) {
             const sessionLabels: Record<string, string> = {
-                SERVICE: 'Services exposés', BATCH: 'Tâches planifiées', STARTUP: 'Initialisation', VIEW: 'Parcours client', TEST: 'Test'
+                SERVICE: 'Services exposés', SCHEDULE: 'Tâches planifiées', STARTUP: 'Initialisation', VIEW: 'Parcours client', TEST: 'Test'
             };
             return sessionLabels[this.selectedKey] ?? this.selectedKey;
         }
@@ -125,7 +125,7 @@ export class DashboardDetailViewComponent {
         const key = this.selectedKey;
         if (!key) return false;
         if (key === 'SERVICE') return this.context.tabRequests['sessionExceptionsTable']?.isLoading !== false;
-        if (key === 'SCHEDULE')   return this.context.tabRequests['batchExceptionTable']?.isLoading !== false;
+        if (key === 'SCHEDULE')   return this.context.tabRequests['scheduleExceptionTable']?.isLoading !== false;
         if (key === 'VIEW')    return this.context.tabRequests['viewExceptionTable']?.isLoading !== false;
         if (key === 'STARTUP' || key === 'TEST') return this.context.tabRequests['startupExceptionTable']?.isLoading !== false;
         if (key === 'LOG' || key === 'USER') return this.context.eventCountLoading;
@@ -140,7 +140,7 @@ export class DashboardDetailViewComponent {
 
     /** Loading du graphique selon le type de session sélectionné */
     get sessionChartLoading(): boolean {
-        if (this.selectedKey === 'SCHEDULE')   return this.context.tabRequests['batchExceptionTable']?.isLoading || this.context.tabRequests['batchTopJobsTable']?.isLoading;
+        if (this.selectedKey === 'SCHEDULE')   return this.context.tabRequests['scheduleExceptionTable']?.isLoading || this.context.tabRequests['scheduleTopJobsTable']?.isLoading;
         if (this.selectedKey === 'VIEW')    return this.context.tabRequests['viewExceptionTable']?.isLoading;
         if (this.selectedKey === 'STARTUP') return this.context.tabRequests['startupExceptionTable']?.isLoading;
         return this.context.tabRequests['sessionExceptionsTable']?.isLoading;
@@ -154,7 +154,7 @@ export class DashboardDetailViewComponent {
             case 'SERVICE':
                 return this.context.tabRequests['sessionExceptionsTable']?.isLoading === false && !this.context.topSessionErrors.length;
             case 'SCHEDULE':
-                return this.context.tabRequests['batchExceptionTable']?.isLoading === false && !this.context.topBatchErrors.length;
+                return this.context.tabRequests['scheduleExceptionTable']?.isLoading === false && !this.context.topScheduleErrors.length;
             case 'VIEW':
                 return this.context.tabRequests['viewExceptionTable']?.isLoading === false && !this.context.topViewErrors.length && !this.context.sessionWebErrors;
             case 'STARTUP':

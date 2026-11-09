@@ -31,8 +31,8 @@ export class SmtpRequestService {
 
     /** Liste SMTP : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
     getRequestList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<MailRequestDto[]> {
-        const column = [SMTP_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_SMTP_REQUEST_COLUMNS[c])].join(',');
-        return this.getSmtp<any[]>({ ...criteria, column }).pipe(
+        const select = [SMTP_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_SMTP_REQUEST_COLUMNS[c])].join(',');
+        return this.getSmtp<any[]>({ ...criteria, select }).pipe(
             map(rows => rows.map(row => ({
                 ...row,
                 start: row.start / 1000,
