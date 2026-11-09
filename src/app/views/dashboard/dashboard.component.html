@@ -101,18 +101,27 @@
                 </div>
                 <div class="dov-stats-sidebar">
                     <button type="button" class="dov-stat-sb sb-total"
+                            [attr.data-inspect-location]="MAPPING_TYPE['deploiment'].title + ' • ' + MAPPING_TYPE['dashboard'].title"
+                            data-inspect-scope="Menu latéral"
+                            data-inspect-track="Total des instances actives"
                             (click)="selectServerStatus('all')"
                             [class.dov-stat-sb-active]="serverStatusFilter === 'all' && showOverview">
                         <span class="dov-stat-sb-val">{{ hasNoData ? '--' : deployTableRows.length }}</span>
                         <span class="dov-stat-sb-lbl">Total</span>
                     </button>
                     <button type="button" class="dov-stat-sb sb-pending"
+                            [attr.data-inspect-location]="MAPPING_TYPE['deploiment'].title + ' • ' + MAPPING_TYPE['dashboard'].title"
+                            data-inspect-scope="Menu latéral"
+                            data-inspect-track="Instances actives en attente"
                             (click)="selectServerStatus('pending')"
                             [class.dov-stat-sb-active]="serverStatusFilter === 'pending' && showOverview">
                         <span class="dov-stat-sb-val">{{ hasNoData ? '--' : pendingServerStat }}</span>
                         <span class="dov-stat-sb-lbl">En attente</span>
                     </button>
                     <button type="button" class="dov-stat-sb sb-offline"
+                            [attr.data-inspect-location]="MAPPING_TYPE['deploiment'].title + ' • ' + MAPPING_TYPE['dashboard'].title"
+                            data-inspect-scope="Menu latéral"
+                            data-inspect-track="Instances actives hors ligne"
                             (click)="selectServerStatus('offline')"
                             [class.dov-stat-sb-active]="serverStatusFilter === 'offline' && showOverview">
                         <span class="dov-stat-sb-val">{{ hasNoData ? '--' : offlineServerStat }}</span>
@@ -163,7 +172,10 @@
                          tabindex="0"
                          (click)="toggleInsight(s.key)"
                          (keydown.enter)="toggleInsight(s.key)">
-                        <div class="sbd-main">
+                        <div class="sbd-main sbd-track-target"
+                             [attr.data-inspect-location]="'Traitements • ' + MAPPING_TYPE['dashboard'].title"
+                             data-inspect-scope="Menu latéral"
+                             [attr.data-inspect-track]="s.label">
                             <div class="sbd-top">
                                 <span class="sbd-label">{{ s.label }}</span>
                                 <span class="sbd-count">{{ s.total | compact }}</span>
@@ -172,7 +184,10 @@
                                 <div class="sbd-fill" [style.width.%]="s.total > 0 ? (100 - s.rate) : 0"></div>
                             </div>
                         </div>
-                        <span class="sbd-rate" [class.c-ok]="s.total > 0 && s.rate === 0" [class.c-err]="s.rate > 0">{{ s.rate === 0 ? '100%' : (s.rate | number:'1.2-2') + '%' }}</span>
+                        <span class="sbd-rate sbd-track-target" [class.c-ok]="s.total > 0 && s.rate === 0" [class.c-err]="s.rate > 0"
+                              [attr.data-inspect-location]="'Traitements • ' + MAPPING_TYPE['dashboard'].title"
+                              data-inspect-scope="Menu latéral"
+                              [attr.data-inspect-track]="s.label">{{ s.rate === 0 ? '100%' : (s.rate | number:'1.2-2') + '%' }}</span>
                     </div>
                 </ng-container>
             </div>
@@ -203,7 +218,10 @@
                      tabindex="0"
                      (click)="toggleInsight(p.key)"
                      (keydown.enter)="toggleInsight(p.key)">
-                    <div class="sbd-main">
+                    <div class="sbd-main sbd-track-target"
+                         [attr.data-inspect-location]="'Flux • ' + MAPPING_TYPE['dashboard'].title"
+                         data-inspect-scope="Menu latéral"
+                         [attr.data-inspect-track]="p.label">
                         <div class="sbd-top">
                             <span class="sbd-label">{{ p.label }}</span>
                             <span class="sbd-count">{{ p.total | compact }}</span>
@@ -212,7 +230,10 @@
                             <div class="sbd-fill" [style.width.%]="p.total > 0 ? (100 - p.rate) : 0"></div>
                         </div>
                     </div>
-                    <span class="sbd-rate" [class.c-ok]="p.rate === 0" [class.c-err]="p.rate > 0">{{ p.rate === 0 ? '100%' : (p.rate | number:'1.2-2') + '%' }}</span>
+                    <span class="sbd-rate sbd-track-target" [class.c-ok]="p.rate === 0" [class.c-err]="p.rate > 0"
+                          [attr.data-inspect-location]="'Flux • ' + MAPPING_TYPE['dashboard'].title"
+                          data-inspect-scope="Menu latéral"
+                          [attr.data-inspect-track]="p.label">{{ p.rate === 0 ? '100%' : (p.rate | number:'1.2-2') + '%' }}</span>
                 </div>
             </ng-container>
         </div>
@@ -258,7 +279,10 @@
                          tabindex="0"
                          (click)="toggleInsight(s.key)"
                          (keydown.enter)="toggleInsight(s.key)">
-                        <div class="sbd-main">
+                        <div class="sbd-main sbd-track-target"
+                             [attr.data-inspect-location]="'Événements • ' + MAPPING_TYPE['dashboard'].title"
+                             data-inspect-scope="Menu latéral"
+                             [attr.data-inspect-track]="s.label">
                             <div class="sbd-top">
                                 <span class="sbd-label">{{ s.label }}</span>
                                 <span class="sbd-count">{{ s.total | compact }}</span>
@@ -272,7 +296,11 @@
                                 <div class="sbd-fill" [style.width.%]="s.total > 0 ? 100 : 0"></div>
                             </div>
                         </div>
-                        <span class="sbd-rate" [class.c-ok]="s.errorCount === 0 && s.warnCount === 0"
+                        <span class="sbd-rate sbd-track-target"
+                              [attr.data-inspect-location]="'Événements • ' + MAPPING_TYPE['dashboard'].title"
+                              data-inspect-scope="Menu latéral"
+                              [attr.data-inspect-track]="s.label"
+                              [class.c-ok]="s.errorCount === 0 && s.warnCount === 0"
                               [class.c-warn]="s.errorCount === 0 && s.warnCount > 0"
                               [class.c-err]="s.errorCount > 0">{{ s.errorCount === 0 && (s.warnCount === 0 || s.infoCount === 0) ? '100%' : (s.rate | number:'1.2-2') + '%' }}
                         </span>
