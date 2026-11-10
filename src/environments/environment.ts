@@ -69,7 +69,7 @@ export const auth: AuthParams = {
   clientSecret: '',
   scope: "openid",
   enabled: false,
-  debug: true
+  debug: false // PROD = false !
 }
 
 export function makeDateTimePeriod(step: number): Period {
