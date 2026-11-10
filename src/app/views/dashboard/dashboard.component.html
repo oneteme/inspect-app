@@ -302,7 +302,7 @@
                               [attr.data-inspect-track]="s.label"
                               [class.c-ok]="s.errorCount === 0 && s.warnCount === 0"
                               [class.c-warn]="s.errorCount === 0 && s.warnCount > 0"
-                              [class.c-err]="s.errorCount > 0">{{ s.errorCount === 0 && (s.warnCount === 0 || s.infoCount === 0) ? '100%' : (s.rate | number:'1.2-2') + '%' }}
+                              [class.c-err]="s.errorCount > 0">{{ s.rate === 100 || (s.errorCount === 0 && (s.warnCount === 0 || s.infoCount === 0)) ? '100%' : (s.rate | number:'1.2-2') + '%' }}
                         </span>
                     </div>
                 </ng-container>
