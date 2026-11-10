@@ -127,7 +127,8 @@
       <mat-menu #mainMenu="matMenu" class="main-nav-menu">
         <ng-container *ngFor="let item of navItems">
           <button
-            mat-menu-item
+             mat-menu-item
+             class="inspect-track-target"
             *ngIf="item.children"
             [matMenuTriggerFor]="subMenu"
             [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
@@ -226,32 +227,29 @@
     <div class="nav-actions">
       <div class="nav-divider"></div>
 
-      <button class="env-trigger" [matMenuTriggerFor]="envMenu" [ngClass]="'env-' + getEnvClass(namespace.value)" matTooltip="Changer l'environnement"
-              [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
-              data-inspect-scope="Afficher les namespaces disponibles"
-              data-inspect-track="Le menu des namespaces">
-        <span class="env-letter">{{ namespace.value?.charAt(0) | uppercase }}</span>
-        <span class="env-label">{{ namespace.value | uppercase }}</span>
-        <mat-icon>expand_more</mat-icon>
-        <mat-spinner *ngIf="isLoadingNamespace" [diameter]="14"></mat-spinner>
-      </button>
+        <button class="env-trigger inspect-track-target" [matMenuTriggerFor]="envMenu" [ngClass]="'env-' + getEnvClass(namespace.value)" matTooltip="Changer l'environnement">
+            <span class="env-letter">{{ namespace.value?.charAt(0) | uppercase }}</span>
+            <span class="env-label">{{ namespace.value | uppercase }}</span>
+            <mat-icon>expand_more</mat-icon>
+            <mat-spinner *ngIf="isLoadingNamespace" [diameter]="14"></mat-spinner>
+        </button>
 
-      <mat-menu #envMenu="matMenu" class="env-menu-panel">
-        <button mat-menu-item *ngFor="let e of namespaces" (click)="selectNamespace(e)"
-                [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
-                [attr.data-inspect-scope]="'Afficher les données de la page pour le namespace ' + e"
-                [attr.data-inspect-track]="'Le namespace ' + e">
-          <mat-icon [style.visibility]="namespace.value === e ? 'visible' : 'hidden'">check</mat-icon>
-          <span>{{ e | uppercase }}</span>
-        </button>
-        <button mat-menu-item (click)="openAddNamespaceDialog()" *ngIf="auth.enabled"
-                [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
-                data-inspect-scope="Le formulaire d’ajout d’un namespace"
-                data-inspect-track="Ajouter un namespace">
-          <mat-icon class="material-symbols-outlined">add</mat-icon>
-          <span>Ajouter</span>
-        </button>
-      </mat-menu>
+        <mat-menu #envMenu="matMenu" class="env-menu-panel">
+            <button mat-menu-item class="inspect-track-target" *ngFor="let e of namespaces" (click)="selectNamespace(e)"
+                    [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
+                    data-inspect-scope="Menu des namespaces"
+                    [attr.data-inspect-track]="'Namespace ' + e">
+                <mat-icon [style.visibility]="namespace.value === e ? 'visible' : 'hidden'">check</mat-icon>
+                <span>{{ e | uppercase }}</span>
+            </button>
+            <button mat-menu-item class="inspect-track-target" (click)="openAddNamespaceDialog()" *ngIf="auth.enabled"
+                    [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
+                    data-inspect-scope="Menu des namespaces"
+                    data-inspect-track="Ajouter un namespace">
+                <mat-icon class="material-symbols-outlined">add</mat-icon>
+                <span>Ajouter</span>
+            </button>
+        </mat-menu>
 
       <button class="user-btn"
              [matMenuTriggerFor]="userMenu"
