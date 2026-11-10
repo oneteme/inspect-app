@@ -142,7 +142,7 @@
           <mat-menu #subMenu="matMenu" class="sub-nav-menu">
             <button
               mat-menu-item
-              class="nav-item-with-kpi"
+              class="nav-item-with-kpi inspect-track-target"
               *ngFor="let subItem of item.children"
               [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
               data-inspect-scope="Menu principal"
