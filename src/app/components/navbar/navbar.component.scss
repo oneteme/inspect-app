@@ -451,6 +451,8 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   margin-left: auto;
   padding-left: 8px;
   flex-shrink: 0;
+  // Le parent mat-menu-item-text désactive les pointer-events : on les réactive pour rester cliquable
+  pointer-events: auto;
 
   mat-icon {
     font-size: 15px;
