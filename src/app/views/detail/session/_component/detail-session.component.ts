@@ -154,51 +154,51 @@ export class DetailSessionComponent implements OnChanges {
 
   // Méthodes pour calculer les erreurs
   private hasRestErrors(): boolean {
-    return this.session.restRequests?.some(req => req.status && (req.status >= 400 || req.status == 0)) || false;
+    return this.session.restRequests?.some(req => req.status && (req.status >= 400 || req.status< 100)) || false;
   }
 
   private getRestErrorCount(): number {
-    return this.session.restRequests?.filter(req => req.status && (req.status >= 400 || req.status == 0)).length || 0;
+    return this.session.restRequests?.filter(req => req.status && (req.status >= 400 || req.status < 100)).length || 0;
   }
 
   private hasLocalErrors(): boolean {
-    return this.session.localRequests?.some(req => req.status && (req.status >= 400 || req.status == 0)) || false;
+    return this.session.localRequests?.some(req => req.status && (req.status >= 400 || req.status < 100)) || false;
   }
 
   private getLocalErrorCount(): number {
-    return this.session.localRequests?.filter(req => req.status && (req.status >= 400 || req.status == 0)).length || 0;
+    return this.session.localRequests?.filter(req => req.status && (req.status >= 400 || req.status < 100)).length || 0;
   }
 
   private hasFtpErrors(): boolean {
-    return this.session.ftpRequests?.some(req => req.status && (req.status >= 400 || req.status == 0)) || false;
+    return this.session.ftpRequests?.some(req => req.status && (req.status >= 400 || req.status < 100)) || false;
   }
 
   private getFtpErrorCount(): number {
-    return this.session.ftpRequests?.filter(req => req.status && (req.status >= 400 || req.status == 0)).length || 0;
+    return this.session.ftpRequests?.filter(req => req.status && (req.status >= 400 || req.status < 100)).length || 0;
   }
 
   private hasSmtpErrors(): boolean {
-    return this.session.mailRequests?.some(req => req.status && (req.status >= 400 || req.status == 0)) || false;
+    return this.session.mailRequests?.some(req => req.status && (req.status >= 400 || req.status < 100)) || false;
   }
 
   private getSmtpErrorCount(): number {
-    return this.session.mailRequests?.filter(req => req.status && (req.status >= 400 || req.status == 0)).length || 0;
+    return this.session.mailRequests?.filter(req => req.status && (req.status >= 400 || req.status < 100)).length || 0;
   }
 
   private hasLdapErrors(): boolean {
-    return this.session.ldapRequests?.some(req => req.status && (req.status >= 400 || req.status == 0)) || false;
+    return this.session.ldapRequests?.some(req => req.status && (req.status >= 400 || req.status < 100)) || false;
   }
 
   private getLdapErrorCount(): number {
-    return this.session.ldapRequests?.filter(req => req.status && (req.status >= 400 || req.status == 0)).length || 0;
+    return this.session.ldapRequests?.filter(req => req.status && (req.status >= 400 || req.status < 100)).length || 0;
   }
 
   private hasDatabaseErrors(): boolean {
-    return this.session.databaseRequests?.some(req => req.status && (req.status >= 400 || req.status == 0)) || false;
+    return this.session.databaseRequests?.some(req => req.status && (req.status >= 400 || req.status < 100)) || false;
   }
 
   private getDatabaseErrorCount(): number {
-    return this.session.databaseRequests?.filter(req => req.status && (req.status >= 400 || req.status == 0)).length || 0;
+    return this.session.databaseRequests?.filter(req => req.status && (req.status >= 400 || req.status < 100)).length || 0;
   }
 
   selectedRemote(event: { event: MouseEvent, row: any }) {

@@ -472,10 +472,6 @@ export const STAGE_TABLE_CONFIG: TableProvider<AbstractStage> = {
       key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
     },
-    {
-      key: 'status', header: 'Statut', optional: true, icon: 'task_alt',
-      value: (row) => !row.end ? 'En cours...' : row.exception ? 'KO' : 'OK'
-    },
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
   ],
   slices: [
