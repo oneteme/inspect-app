@@ -77,8 +77,8 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
     { key: 'userAgent', header: 'User-Agent', lazy: true, icon: 'devices', width: '15%', minWidth: 260 },
     { key: 'host', header: 'Host HTTP', lazy: true, icon: 'language', minWidth: 160 },
     { key: 'contentType', header: 'Content-Type', lazy: true, icon: 'description', minWidth: 150 },
-    { key: 'inDataSize', header: 'Taille entrée (o)', lazy: true, icon: 'download', groupable: false, sliceable: false, minWidth: 140 },
-    { key: 'outDataSize', header: 'Taille sortie (o)', lazy: true, icon: 'upload', groupable: false, sliceable: false, minWidth: 140 },
+    { key: 'inDataSize', header: 'Données Reçues', icon: 'arrow_upward', iconFontSet: 'material-symbols-outlined', lazy: true, groupable: false, sliceable: false, minWidth: 140 },
+    { key: 'outDataSize', header: 'Données Envoyées', icon: 'arrow_downward', iconFontSet: 'material-symbols-outlined', lazy: true, groupable: false, sliceable: false, minWidth: 140 },
     { key: 'threadName', header: 'Thread', lazy: true, icon: 'call_split', minWidth: 150 },
     { key: 'cacheControl', header: 'Cache-Control', lazy: true, icon: 'cached', groupable: false, sliceable: false, minWidth: 150 }
   ],
@@ -189,8 +189,8 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
     { key: 'protocol', header: 'Protocole', icon: 'lan', optional: true, minWidth: 110 },
     { key: 'query', header: 'Query', icon: 'search', lazy: true, minWidth: 120 },
     { key: 'contentType', header: 'Content-Type', icon: 'description', lazy: true, minWidth: 130 },
-    { key: 'inDataSize', header: 'Taille entrée', icon: 'download', lazy: true, minWidth: 120 },
-    { key: 'outDataSize', header: 'Taille sortie', icon: 'upload', lazy: true, minWidth: 120 },
+    { key: 'outDataSize', header: 'Données envoyées', icon: 'arrow_upward', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 120 },
+    { key: 'inDataSize', header: 'Données lues', icon: 'arrow_downward', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 120 },
     { key: 'bodyContent', header: 'Réponse', icon: 'file-input', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 150 },
     { key: 'appName', header: 'Application', icon: 'widgets', lazy: true, minWidth: 150 },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
