@@ -191,7 +191,7 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
     { key: 'contentType', header: 'Content-Type', icon: 'description', lazy: true, minWidth: 130 },
     { key: 'outDataSize', header: 'Données envoyées', icon: 'arrow_upward', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 120 },
     { key: 'inDataSize', header: 'Données lues', icon: 'arrow_downward', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 120 },
-    { key: 'bodyContent', header: 'Réponse', icon: 'file-input', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 150 },
+    { key: 'bodyContent', header: 'Réponse', icon: 'reply', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 150 },
     { key: 'appName', header: 'Application', icon: 'widgets', lazy: true, minWidth: 150 },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
