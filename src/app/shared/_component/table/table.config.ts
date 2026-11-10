@@ -514,7 +514,7 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
       hidden: true
     }
   ],
-  defaultSort: DEFAULT_SORT_CONFIG
+  defaultSort: { active: 'instant', direction: 'desc' }
 };
 
 export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTrace?: number }> = {
