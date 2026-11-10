@@ -83,8 +83,10 @@ const routes: Route[] = [
                 }
               }
             ]
+            , canActivate: [authGuard]
           }
         ]
+        , canActivate: [authGuard]
       },
       {path: '**', pathMatch: 'full', redirectTo: `/request/rest`}
     ], canActivate: [authGuard]
@@ -122,9 +124,11 @@ const routes: Route[] = [
               },
               {path: '**', pathMatch: 'full', redirectTo: `/session/rest/:id_session`}
             ]
+            , canActivate: [authGuard]
           },
           {path: '**', pathMatch: 'full', redirectTo: `/session/rest`}
         ]
+        , canActivate: [authGuard]
       },
       {
         path: ':type_main',
@@ -159,6 +163,7 @@ const routes: Route[] = [
           },
           {path: '**', pathMatch: 'full', redirectTo: `/main/:type_main`}
         ]
+        , canActivate: [authGuard]
       },
       {path: '**', pathMatch: 'full', redirectTo: `/session/rest`}
     ], canActivate: [authGuard]
@@ -192,6 +197,7 @@ const routes: Route[] = [
         data: { isLogRoute: false }
       }
     ]
+    , canActivate: [authGuard]
   },
   {
     path: 'analytics/:user',
