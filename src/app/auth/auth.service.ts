@@ -14,8 +14,6 @@ export class AuthService {
 
     init(): Promise<void> {
         initDebug(resolvedAuth);
-        console.log("auth config : ", authCodeFlowConfig)
-        console.log("resolved config : ", resolvedAuth)
         if (!resolvedAuth.enabled || this.initialized) {
             return Promise.resolve();
         }
