@@ -1,4 +1,4 @@
-﻿import {ChartProvider, field, values} from "@oneteme/jquery-core";
+﻿import {ChartProvider, field} from "@oneteme/jquery-core";
 import {UserAction} from "../model/trace.model";
 
 export const INFINITY = new Date(9999,12,31).getTime();
@@ -280,8 +280,10 @@ export class Constants {
             tooltip: {
                 formatter: (params: any[]) => {
                     const p = params[0];
-                    const val = Array.isArray(p.value) ? p.value[1] : p.value;
-                    return `${p.axisValueLabel ?? p.axisValue}<br/>${p.marker}${p.seriesName} : <b>${(val ?? 0).toFixed(2)}%</b>`;
+                    const header = p?.axisValueLabel ?? p?.axisValue ?? '';
+                    const raw = Array.isArray(p?.value) ? p.value[1] : p?.value;
+                    const val = typeof raw === 'number' && !Number.isNaN(raw) ? raw : 0;
+                    return val ? `${header}<br/>${p.marker}${p.seriesName} : <b>${val.toFixed(2)}%</b>` : header;
                 }
             }
         }
@@ -335,5 +337,17 @@ export const EVENT_LOG = {
     INFO: {icon: 'done', label: "INFO", color: '#4CAF50', class: 'success'},
     WARN: {icon: 'error', label: "WARN", color: '#F9AD4E', class: 'warning'},
     ERROR: {icon: 'warning', label: "ERROR", color: '#F44336', class: 'fail'},
-    USER: {icon: 'recent_patient', label: "USER", color: '#8b5cf6', class: 'user-action'}
+}
+
+export const EVENT_USER = {
+    "Initialisation": {label: "Initialisation", color: `hsl(258, 85%, 80%)`},
+    "Click": {label: "Clic", color: `hsl(250, 75%, 70%)`},
+    "Dblclick": {label: "Double Clic", color: `hsl(240, 65%, 60%)`},
+    "Scroll": {label: "Défilement", color: `hsl(230, 55%, 50%)`},
+    "Scrollend": {label: "Fin du défilement", color: `hsl(220, 50%, 45%)`},
+    "Change": {label: "Valeur modifiée", color: `hsl(210, 45%, 40%)`},
+    "Tab-focus": {label: "Page visible", color: `hsl(200, 35%, 30%)`},
+    "Tab-blur": {label: "Page masquée", color: `hsl(190, 25%, 40%)`},
+    "Zoom": {label: "Zoom", color: `hsl(180, 40%, 50%)`},
+    "Resize": {label: "Redimensionnement", color: `hsl(170, 50%, 60%)`}
 }

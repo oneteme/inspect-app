@@ -1,4 +1,6 @@
-﻿.db-detail-view {
+﻿@use "src/styles/palettes.scss" as *;
+
+.db-detail-view {
   display: flex;
   flex-direction: column;
   gap: .75em;
@@ -208,6 +210,17 @@
   border-bottom: 1px solid rgba(34,36,38,.05);
   &:last-child { border-bottom: none; }
   &[type="button"] { width: 100%; border: none; background: transparent; font: inherit; color: inherit; text-align: left; }
+  &.dbi-row--user, &.dbi-row-user {
+    .dbi-dot { background: var(--inspect-md-light-blue), var(--inspect-dark-blue); }
+    .dbi-bar { background: var(--inspect-md-light-blue), var(--inspect-dark-blue); }
+    .dbi-badge {
+      background: var(--inspect-md-light-blue), var(--inspect-dark-blue);
+      color: var(--inspect-dark-blue, var(--inspect-md-light-blue));
+      padding: 1px 7px;
+      border-radius: 8px;
+      text-align: center;
+    }
+  }
 }
 
 .dbi-row-link {

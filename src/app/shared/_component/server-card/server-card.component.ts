@@ -33,7 +33,7 @@ export class ServerCardComponent {
       this._instanceTraceService.getLastInstanceTrace({instance: [value.id]})
       .pipe(finalize(() => {
         this._isLoadingLastTrace = false;
-        this._status = resolveInstanceStatus({end: value.end, configuration: value.configuration, lastTrace: this._lastTrace, date: this.date.getTime()}, this._datePipe);
+        this._status = resolveInstanceStatus({end: (value.end * 1000), configuration: value.configuration, lastTrace: this._lastTrace, date: this.date.getTime()}, this._datePipe);
       }))
       .subscribe({
         next: trace => {
