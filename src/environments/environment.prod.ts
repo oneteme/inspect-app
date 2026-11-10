@@ -2,21 +2,22 @@ import {Application, IStep, IStepFrom, Period} from "src/app/model/conf.model";
 
 export const environment = {
   production: false,
-  application: {
-    collector:  {
+  inspect: {
+    application: {
+      name: 'inspect-app',
+      namespace: 'jarvis-prd',
+      version: () => '',
+      env: 'prd',
+      user: () => {
+        let claims: any = sessionStorage.getItem("id_token_claims_obj")
+        return (claims && JSON.parse(claims).sub);
+      }
+    },
+    collector: {
       enabled: false, // default: false
       debugMode: false, // default: false
       // debug: {app: true, user: false},
-      application: {
-        name: 'inspect-app',
-        namespace: 'jarvis',
-        version: () => '',
-        env: 'prod',
-        user: () => {
-          let claims: any = sessionStorage.getItem("id_token_claims_obj")
-          return (claims && JSON.parse(claims).sub);
-        }
-      },
+
       scheduling: {
         interval: 60000,
         queueCapacity: 1000
@@ -41,7 +42,6 @@ export const environment = {
       tracing: {
         remote: {
           host: `http://localhost:9001/`, // default: 'localhost'
-          mode: 'cors',
           token: () => "",
           retentionMaxAge: { audit: 7, diagnostics: 10 }
         }

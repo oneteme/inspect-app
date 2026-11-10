@@ -47,7 +47,7 @@ import {SearchMainEventView} from "./views/search/event/main/search-main-event.v
 import {NgCollectorModule} from "@oneteme/inspect-ng-collector";
 import {environment} from "../environments/environment";
 
-const InspectNgCollectorModule= NgCollectorModule.forRoot(environment.application);
+const InspectNgCollectorModule= NgCollectorModule.forRoot(environment.inspect);
 registerLocaleData(localeFr, 'fr-FR');
 
 export function initializeAuth(authService: AuthService) {
@@ -83,8 +83,10 @@ const routes: Route[] = [
                 }
               }
             ]
+            , canActivate: [authGuard]
           }
         ]
+        , canActivate: [authGuard]
       },
       {path: '**', pathMatch: 'full', redirectTo: `/request/rest`}
     ], canActivate: [authGuard]
@@ -122,9 +124,11 @@ const routes: Route[] = [
               },
               {path: '**', pathMatch: 'full', redirectTo: `/session/rest/:id_session`}
             ]
+            , canActivate: [authGuard]
           },
           {path: '**', pathMatch: 'full', redirectTo: `/session/rest`}
         ]
+        , canActivate: [authGuard]
       },
       {
         path: ':type_main',
@@ -159,6 +163,7 @@ const routes: Route[] = [
           },
           {path: '**', pathMatch: 'full', redirectTo: `/main/:type_main`}
         ]
+        , canActivate: [authGuard]
       },
       {path: '**', pathMatch: 'full', redirectTo: `/session/rest`}
     ], canActivate: [authGuard]
@@ -192,6 +197,7 @@ const routes: Route[] = [
         data: { isLogRoute: false }
       }
     ]
+    , canActivate: [authGuard]
   },
   {
     path: 'analytics/:user',
@@ -220,7 +226,7 @@ const routes: Route[] = [
   {
     path: 'supervision/server/:instance',
     component: ServerSupervisionView,
-    title: 'Supervision • Serveur',
+    title: 'Supervision • Application',
     canActivate: [authGuard]
   },
   {

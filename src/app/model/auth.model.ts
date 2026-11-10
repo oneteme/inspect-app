@@ -25,6 +25,12 @@ export interface AuthParams {
  */
     requireHttps?: boolean,
     clearHashPostLogin?: boolean
+
+    /**
+     * Overrides or extends the generated AuthConfig.
+     * Properties defined here always take priority.
+     */
+    overrideAuthConfig?: AuthConfig;
 }
 
 export enum AuthFlow {
@@ -65,3 +71,37 @@ export function isImplicitId(params: AuthParams) {
 export function isImplicitAccess(params: AuthParams) {
     return params.authFlow == AuthFlow.IMPLICIT_ACCESS;
 }
+const authConfigLocal = createLocalStorage("overrideAuthConfig"),
+    isSecurityEnabled = createLocalStorage("enabled");
+
+function createLocalStorage(key: String) {
+    return "inspect.auth." + key
+}
+
+export function resolveAuthParams(params: AuthParams): AuthParams {
+    if (!params.debug) {
+        return params;
+    }
+
+    return {
+        ...params,
+        overrideAuthConfig: {
+            ...params.overrideAuthConfig,
+            ...JSON.parse(localStorage.getItem(authConfigLocal) || "{}")
+        },
+        enabled: localStorage.getItem(isSecurityEnabled) !== null
+            ? localStorage.getItem(isSecurityEnabled) === "true"
+            : params.enabled
+    };
+}
+
+export function initDebug(params: AuthParams) {
+    if (params.debug) {
+        localStorage.setItem(authConfigLocal, JSON.stringify(params.overrideAuthConfig));
+        localStorage.setItem(isSecurityEnabled, String(params.enabled));
+    } else {
+        localStorage.removeItem(authConfigLocal);
+        localStorage.removeItem(isSecurityEnabled);
+    }
+}
+

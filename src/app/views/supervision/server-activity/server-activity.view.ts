@@ -114,8 +114,8 @@ export class ServerActivityView implements OnDestroy {
   readonly SEQUENCE_LOSS_BAR: ChartProvider<string, number> = {
     height: 335,
     series: [
-      {data: {x: field('date'), y: field('seq')}, name: 'Séquences perdues'},
-      {data: {x: field('date'), y: field('atm')}, name: 'Tentatives échouées'}
+      {data: {x: field('date'), y: field('seq')}, name: 'Ruptures d\'envoi '},
+      {data: {x: field('date'), y: field('atm')}, name: 'Échecs de connexion'}
     ],
     options: {
       animation: false,
@@ -138,8 +138,8 @@ export class ServerActivityView implements OnDestroy {
           const period = String(item?.axisValue ?? item?.name ?? '');
           const row = this.sequenceLossData.find(item => item.date === period);
           return `Période : ${period || '—'}<br/>` +
-              `Séquences perdues : ${row?.seq ?? 0}<br/>` +
-              `Tentatives échouées : ${row?.atm ?? 0}`;
+              `Ruptures d'envoi  : ${row?.seq ?? 0}<br/>` +
+              `Échecs de connexion : ${row?.atm ?? 0}`;
         }
       }
     }
@@ -349,8 +349,8 @@ export class ServerActivityView implements OnDestroy {
 
   private syncSequenceLossCategories(): void {
     this.SEQUENCE_LOSS_BAR.series = [
-      {data: {x: field('date'), y: field('seq')}, name: 'Séquences perdues'},
-      {data: {x: field('date'), y: field('atm')}, name: 'Tentatives échouées'}
+      {data: {x: field('date'), y: field('seq')}, name: 'Ruptures d\'envoi '},
+      {data: {x: field('date'), y: field('atm')}, name: 'Échecs de connexion'}
     ];
     this.SEQUENCE_LOSS_BAR.options = {
       ...this.SEQUENCE_LOSS_BAR.options,
