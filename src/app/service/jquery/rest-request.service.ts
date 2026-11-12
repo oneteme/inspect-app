@@ -146,7 +146,7 @@ export class RestRequestService {
             'start.lt': filters.end.toISOString(),
             'rest_session.start.ge': filters.start.toISOString(),
             'rest_session.start.lt': filters.end.toISOString(),
-            'join': 'innerJoin(instance).criteria(instance_env.eq(instance.id)),innerJoin(rest_session).criteria(id.eq(rest_session.id))',
+            'join': 'innerJoin(instance).criteria(instance_env.eq(instance.id)),innerJoin(rest_session).criteria(id.eq(rest_session.id).and(start.le(rest_session.start)).and(end.ge(rest_session.end)))',
 
         }
         if(data.stack) {
