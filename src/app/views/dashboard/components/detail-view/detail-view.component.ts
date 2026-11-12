@@ -1,6 +1,6 @@
 ﻿import { Component, EventEmitter, Input, Output, ViewEncapsulation } from '@angular/core';
 import { DashboardDetailContext } from './detail-view.model';
-import {ANALYTIC_MAPPING, EVENT_LOG, STATUS} from "../../../constants";
+import {EVENT_LOG, EVENT_USER, STATUS} from "../../../constants";
 
 @Component({
     selector: 'dashboard-detail-view',
@@ -94,7 +94,7 @@ export class DashboardDetailViewComponent {
     }
 
     getUserActionLabel(type: string): string {
-        return ANALYTIC_MAPPING[type]?.label || type;
+        return EVENT_USER[type]?.label || type;
     }
 
     get selectedLabel(): string {
@@ -165,7 +165,7 @@ export class DashboardDetailViewComponent {
                 return !this.context.eventCountLoading && !this.context.eventChartLoading && !(this.context.eventLogCount || 0);
             case 'USER':
                 return !this.context.eventCountLoading && !this.context.eventChartLoading && !(this.context.eventUserCount || 0);
-            default: {
+                default: {
                 const protoDef = this.context.protocolDefs.find(p => p.key === key);
                 const loaded = protoDef
                     ? this.context.chartRequests[protoDef.reqKey]?.isLoading === false
@@ -180,4 +180,5 @@ export class DashboardDetailViewComponent {
 
     protected readonly Status = STATUS;
     protected readonly EventLog = EVENT_LOG;
+    protected readonly EventUser = EVENT_USER;
 }

@@ -1,4 +1,4 @@
-# Inpect App
+# INSPECT App
 
 <p align="center">
   <a href="https://spring.io/">

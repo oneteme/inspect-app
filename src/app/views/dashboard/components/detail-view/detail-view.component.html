@@ -72,14 +72,8 @@
 
 
     <!-- ── Bloc principal : erreurs & infrastructure ── -->
-    <div class="db-clt-block">
-        <span class="sb-block-head" *ngIf="!context.selectedInsights.has('LOG') && !context.selectedInsights.has('USER')">Nombre d'incidents par exception</span>
-        <span class="sb-block-head" *ngIf="context.selectedInsights.has('LOG') || context.selectedInsights.has('USER')">Nombre d'événements par type</span>
-
-
-        <!-- Erreurs & Infrastructure (pleine largeur) -->
-        <div class="clt-body"
-             *ngIf="context.kpiLoading
+    <div class="db-clt-block"
+         *ngIf="context.kpiLoading
            || (context.selectedInsights.has('rest') && context.topErrors['rest']?.length)
            || (context.selectedInsights.has('jdbc') && context.topErrors['jdbc']?.length)
            || (context.selectedInsights.has('ftp') && context.topErrors['ftp']?.length)
@@ -92,6 +86,12 @@
            || (context.selectedInsights.has('TEST') && (context.sessionCountLoading || context.sessionTestErrors > 0))
            || (context.selectedInsights.has('LOG') && (context.eventCountLoading || context.eventLogCount > 0))
            || (context.selectedInsights.has('USER') && (context.eventCountLoading || context.eventUserCount > 0))">
+        <span class="sb-block-head" *ngIf="!context.selectedInsights.has('LOG') && !context.selectedInsights.has('USER')">Nombre d'incidents par exception</span>
+        <span class="sb-block-head" *ngIf="context.selectedInsights.has('LOG') || context.selectedInsights.has('USER')">Nombre d'événements par type</span>
+
+
+        <!-- Erreurs & Infrastructure (pleine largeur) -->
+        <div class="clt-body">
 
 
       <!-- État chargement -->
@@ -222,20 +222,20 @@
         <!-- EVENT USER -->
         <div class="dbi-card"
              *ngIf="context.selectedInsights.has('USER') && !context.eventCountLoading && (context.eventUserCount || 0) > 0">
-            <button type="button" class="dbi-row dbi-row-link"
+            <button type="button" class="dbi-row dbi-row-link dbi-row--user"
                     *ngFor="let e of topUserEvents; trackBy: trackByType"
                     (click)="eventNav.emit({ key: 'USER', type: e.type })">
-                <span class="dbi-dot" style="background: #8b5cf6;"></span>
+                <span class="dbi-dot" [style.background]="EventUser[e.type]?.color"></span>
                 <span class="dbi-name" [title]="e.type">{{ getUserActionLabel(e.type) }}</span>
                 <div class="dbi-bar-wrap">
-                    <div class="dbi-bar" style="background: #8b5cf6;" [style.width.%]="getErrBarWidth(topUserEvents, e.count)"></div>
+                    <div class="dbi-bar" [style.background]="EventUser[e.type]?.color" [style.width.%]="getErrBarWidth(topUserEvents, e.count)"></div>
                 </div>
-                <span class="dbi-badge" style="color: #8b5cf6;">{{ e.count | compact }}</span>
+                <span class="dbi-badge" [style.color]="EventUser[e.type]?.color">{{ e.count | compact }}</span>
                 <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
             </button>
-            <button type="button" class="dbi-row dbi-row-link" *ngIf="!topUserEvents.length"
+            <button type="button" class="dbi-row dbi-row-link dbi-row--user" *ngIf="!topUserEvents.length"
                     (click)="eventNav.emit({ key: 'USER' })">
-                <span class="dbi-dot" style="background: #8b5cf6;"></span>
+                <span class="dbi-dot"></span>
                 <span class="dbi-name">{{ (context.eventUserCount || 0) | number:'1.0-0' }} actions utilisateurs</span>
                 <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
             </button>

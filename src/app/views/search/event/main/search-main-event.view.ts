@@ -16,7 +16,7 @@ import {
 } from "../../../../shared/period-filter";
 import {app} from "../../../../../environments/environment";
 import {extractPeriod} from "../../../../shared/util";
-import {Constants, EVENT_LOG} from "../../../constants";
+import {Constants, EVENT_LOG, EVENT_USER} from "../../../constants";
 import {InstanceService} from "../../../../service/jquery/instance.service";
 import {Location} from "@angular/common";
 import {PageTitleService} from "../../../../service/page-title.service";
@@ -56,7 +56,10 @@ export class SearchMainEventView {
         {icon: EVENT_LOG['WARN'].icon, label: 'WARN', color: EVENT_LOG['WARN'].color, value: 'WARN'},
     ];
 
-    filters: { icon: string; label: string; color: string; value: any }[] = [...this._baseFilters];
+    private readonly _userFilters: { icon?: string; label: string; color: string; value: any }[] =
+        Object.keys(EVENT_USER).map(type => ({label: EVENT_USER[type].label, color: EVENT_USER[type].color, value: type}));
+
+    filters: { icon?: string; label: string; color: string; value: any }[] = [...this._baseFilters];
 
     tableConfig: TableProvider<SessionEventDto> = this.buildTableConfig();
     /** Critères de la requête de base, rejoués avec les colonnes lazy. */
@@ -64,6 +67,7 @@ export class SearchMainEventView {
     /** Colonnes lazy déjà demandées : la requête de base les inclut, pour que `data` les contienne. */
     private _lazyColumns: string[] = [];
     private readonly _logTypes = new Set(['INFO', 'WARN', 'ERROR']);
+    private readonly _userTypes = new Set(Object.keys(EVENT_USER));
 
     private buildTableConfig(initialQuery?: string): TableProvider<SessionEventDto> {
         return {
@@ -86,6 +90,8 @@ export class SearchMainEventView {
                 });
                 const typeParam = params.type || params.rangestatus;
                 const types = !typeParam ? [] : Array.isArray(typeParam) ? typeParam : [typeParam];
+                const isLogRoute = this._activatedRoute.snapshot.data['isLogRoute'];
+                this.filters = isLogRoute ? [...this._baseFilters] : [...this._userFilters];
                 if (params.start && params.end) this.queryParams = new QueryParams(new IPeriod(new Date(params.start), new Date(params.end)), params.namespace || app.defaultNamespace, !params.server ? [] : Array.isArray(params.server) ? params.server : [params.server], null, null, types);
                 if (!params.start && !params.end) {
                     let period;
@@ -135,7 +141,7 @@ export class SearchMainEventView {
         if(isLogRoute) {
             params['type.in'] = Array.from(this._logTypes.values());
         } else {
-            params['type.notIn'] = Array.from(this._logTypes.values());
+            params['type.in'] = Array.from(this._userTypes.values());
         }
         if (this.queryParams.types && this.queryParams.types.length > 0) {
             params['type'] = this.queryParams.types;
@@ -156,11 +162,6 @@ export class SearchMainEventView {
                         return;
                     }
                     this.events = this.filterByRoute(d, isLogRoute);
-                    if (!isLogRoute) {
-                        this.filters = [...new Set(this.events.map(e => e.type))].map(type => ({
-                            icon: EVENT_LOG['USER'].icon, label: type, color: EVENT_LOG['USER'].color, value: type
-                        }));
-                    }
                 },
                 error: (error: HttpErrorResponse) => {
                     if (error.status === 413) {
@@ -172,7 +173,10 @@ export class SearchMainEventView {
 
     /** `/event/log` garde INFO/WARN/ERROR, `/event/user` garde les autres types. */
     private filterByRoute(rows: SessionEventDto[], isLogRoute: boolean): SessionEventDto[] {
-        return rows.filter(e => this._logTypes.has(e.type) === isLogRoute);
+        if(isLogRoute) {
+            return rows.filter(e => this._logTypes.has(e.type));
+        }
+        return rows.filter(e => this._userTypes.has(e.type));
     }
 
     private loadLazyColumns(columns: string[]): Observable<SessionEventDto[]> {

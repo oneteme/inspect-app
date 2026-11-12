@@ -1,5 +1,4 @@
 import {Component, inject, Input, OnDestroy} from '@angular/core';
-import {PageEvent} from '@angular/material/paginator';
 import {ExceptionInfo, SessionEvent} from '../../../model/trace.model';
 import {MatDialog} from '@angular/material/dialog';
 import {StacktraceDialogComponent} from '../exception-display/stacktrace-dialog/stacktrace-dialog.component';
@@ -208,22 +207,31 @@ export class SessionTimelineComponent implements OnDestroy {
             case 'DOMContentLoaded':
                 return 'Page prête';
             case 'DOC_VISIBLE':
-                return 'Page au premier plan';
+            case 'Tab-focus':
+                return 'Page visible';
             case 'DOC_HIDDEN':
+            case 'Tab-blur':
                 return 'Page masquée';
             case 'click':
+            case 'Click':
                 return 'Clic';
             case 'dblclick':
+            case 'Dblclick':
                 return 'Double-clic';
+            case 'Change':
             case 'change':
                 return 'Valeur modifiée';
             case 'scroll':
+            case 'Scroll':
                 return 'Défilement';
             case 'scrollend':
+            case 'Scrollend':
                 return 'Fin du défilement';
             case 'resize':
+            case 'Resize':
                 return 'Fenêtre redimensionnée';
             case 'zoom':
+            case 'Zoom':
                 return 'Zoom modifié';
             case 'info':
             case 'INFO':
@@ -244,20 +252,26 @@ export class SessionTimelineComponent implements OnDestroy {
             case 'DOMContentLoaded':
                 return 'language';
             case 'click':
+            case 'Click':
                 return 'ads_click';
             case 'dblclick':
+            case 'Dblclick':
                 return 'mouse';
             case 'scroll':
+            case 'Scroll':
                 return 'swap_vert';
             case 'resize':
+            case 'Resize':
                 return 'open_in_full';
             case 'zoom':
                 return 'zoom_in';
             case 'DOC_HIDDEN':
+            case 'Tab-blur':
                 return 'visibility_off';
             case 'DOC_VISIBLE':
+            case 'Tab-focus':
                 return 'visibility';
-            case 'change':
+            case 'Change':
                 return 'edit';
             case 'info':
             case 'INFO':
@@ -278,6 +292,8 @@ export class SessionTimelineComponent implements OnDestroy {
             case 'DOMContentLoaded':
             case 'DOC_VISIBLE':
             case 'DOC_HIDDEN':
+            case 'Tab-focus':
+            case 'Tab-blur':
                 return 'page';
             case 'resize':
             case 'click':
@@ -285,6 +301,12 @@ export class SessionTimelineComponent implements OnDestroy {
             case 'change':
             case 'scroll':
             case 'zoom':
+            case 'Resize':
+            case 'Click':
+            case 'Dblclick':
+            case 'Change':
+            case 'Scroll':
+            case 'Zoom':
                 return 'user';
             case 'info':
             case 'INFO':
