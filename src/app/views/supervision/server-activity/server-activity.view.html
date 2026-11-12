@@ -39,7 +39,8 @@
           <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">browse_activity</mat-icon>
           <h2 id="activity-traces-title" class="kpi-chart-title">Volume des opérations</h2>
         </div>
-        <span class="kpi-chart-badge">{{ isLoadingTrace ? '…' : (traceStat | number) }}</span>
+        <span class="kpi-chart-badge" *ngIf="isLoadingTrace">...</span>
+        <span class="kpi-chart-badge" *ngIf="!isLoadingTrace" matTooltip="Schéma : {{ schemaSizeMb }}&#10;Base : {{ databaseSizeMb }}">{{ databaseRatio }}</span>
       </div>
       <div class="kpi-chart-body">
         <chart type="line" [config]="USAGE_INSTANCE_TRACE_BY_PERIOD_LINE"
@@ -54,7 +55,6 @@
           <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">sync_problem</mat-icon>
           <h2 id="activity-sequence-loss-title" class="kpi-chart-title">Indisponibilité</h2>
         </div>
-        <span class="kpi-chart-badge">{{ sequenceLossPeriodsWithEvents | number }}</span>
       </div>
       <div class="kpi-chart-body">
         <chart type="bar" [config]="SEQUENCE_LOSS_BAR"
