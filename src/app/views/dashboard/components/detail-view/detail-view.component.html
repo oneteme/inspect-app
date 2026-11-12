@@ -72,8 +72,14 @@
 
 
     <!-- ── Bloc principal : erreurs & infrastructure ── -->
-    <div class="db-clt-block"
-         *ngIf="context.kpiLoading
+    <div class="db-clt-block">
+        <span class="sb-block-head" *ngIf="!context.selectedInsights.has('LOG') && !context.selectedInsights.has('USER')">Nombre d'incidents par exception</span>
+        <span class="sb-block-head" *ngIf="context.selectedInsights.has('LOG') || context.selectedInsights.has('USER')">Nombre d'événements par type</span>
+
+
+        <!-- Erreurs & Infrastructure (pleine largeur) -->
+        <div class="clt-body"
+             *ngIf="context.kpiLoading
            || (context.selectedInsights.has('rest') && context.topErrors['rest']?.length)
            || (context.selectedInsights.has('jdbc') && context.topErrors['jdbc']?.length)
            || (context.selectedInsights.has('ftp') && context.topErrors['ftp']?.length)
@@ -86,12 +92,6 @@
            || (context.selectedInsights.has('TEST') && (context.sessionCountLoading || context.sessionTestErrors > 0))
            || (context.selectedInsights.has('LOG') && (context.eventCountLoading || context.eventLogCount > 0))
            || (context.selectedInsights.has('USER') && (context.eventCountLoading || context.eventUserCount > 0))">
-        <span class="sb-block-head" *ngIf="!context.selectedInsights.has('LOG') && !context.selectedInsights.has('USER')">Nombre d'incidents par exception</span>
-        <span class="sb-block-head" *ngIf="context.selectedInsights.has('LOG') || context.selectedInsights.has('USER')">Nombre d'événements par type</span>
-
-
-        <!-- Erreurs & Infrastructure (pleine largeur) -->
-        <div class="clt-body">
 
 
       <!-- État chargement -->
