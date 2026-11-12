@@ -486,7 +486,7 @@ export class RestComponent implements OnInit {
 
   getMediaType() {
     let args: any = {
-      'select': `count:count,media.coalesce("Sans contenu"):media`,
+      'select': `count:count,media.coalesce("No Content"):media`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
