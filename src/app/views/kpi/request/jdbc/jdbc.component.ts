@@ -283,7 +283,7 @@ export class JdbcComponent implements OnInit {
 
   getDatabases() {
     const args: any = {
-      'select': `count:count,db_name:db_name`,
+      'select': `count:count,db_name.coalesce("Non renseigné"):db_name`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
