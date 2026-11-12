@@ -265,7 +265,7 @@ export class JdbcComponent implements OnInit {
 
   getCommands() {
     const args: any = {
-      'select': `count:count,command.coalesce("Non renseigné"):command`,
+      'select': `count:count,command.coalesce("Unknown"):command`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
@@ -283,7 +283,7 @@ export class JdbcComponent implements OnInit {
 
   getDatabases() {
     const args: any = {
-      'select': `count:count,db_name.coalesce("Non renseigné"):db_name`,
+      'select': `count:count,db_name.coalesce("Unknown"):db_name`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
