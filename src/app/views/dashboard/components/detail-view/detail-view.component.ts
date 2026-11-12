@@ -164,8 +164,8 @@ export class DashboardDetailViewComponent {
             case 'LOG':
                 return !this.context.eventCountLoading && !this.context.eventChartLoading && !(this.context.eventLogCount || 0);
             case 'USER':
-                return false;
-            default: {
+                return !this.context.eventCountLoading && !this.context.eventChartLoading && !(this.context.eventUserCount || 0);
+                default: {
                 const protoDef = this.context.protocolDefs.find(p => p.key === key);
                 const loaded = protoDef
                     ? this.context.chartRequests[protoDef.reqKey]?.isLoading === false

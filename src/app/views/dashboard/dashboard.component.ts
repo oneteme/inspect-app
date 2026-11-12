@@ -1046,7 +1046,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
             const item: any = { ...p, perc: 0 };
             types.forEach(t => {
                 const raw = p[t] ?? 0;
-                item[t + '_perc'] = total && raw ? (raw * 100) / total : null;
+                item[t + '_perc'] = total && raw ? (raw * 100) / total : 0;
             });
             return item;
         });
