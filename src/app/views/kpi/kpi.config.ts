@@ -65,7 +65,7 @@ export const REST_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig
           optional: false,
           items: [{
             key: 'status_stack',
-            selected: true,
+            selected: false,
             menu: {
               label: 'Statut'
             },
@@ -77,7 +77,7 @@ export const REST_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig
             }
           }, {
             key: 'status_tranche',
-            selected: false,
+            selected: true,
             menu: {
               label: 'Tranche'
             },
@@ -415,7 +415,7 @@ export const SCHEDULE_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartCo
           optional: false,
           items: [{
             key: 'status_stack',
-            selected: true,
+            selected: false,
             menu: {
               label: 'Statut'
             },
@@ -427,7 +427,7 @@ export const SCHEDULE_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartCo
             }
           }, {
             key: 'status_tranche',
-            selected: false,
+            selected: true,
             menu: {
               label: 'Tranche'
             },
@@ -576,7 +576,7 @@ export const STARTUP_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartCon
           optional: false,
           items: [{
             key: 'status_stack',
-            selected: true,
+            selected: false,
             menu: {
               label: 'Statut'
             },
@@ -588,7 +588,7 @@ export const STARTUP_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartCon
             }
           }, {
             key: 'status_tranche',
-            selected: false,
+            selected: true,
             menu: {
               label: 'Tranche'
             },
@@ -765,7 +765,7 @@ export const REST_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
           optional: false,
           items: [{
             key: 'status_stack',
-            selected: true,
+            selected: false,
             menu: {
               label: 'Statut'
             },
@@ -777,7 +777,7 @@ export const REST_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
             }
           }, {
             key: 'status_tranche',
-            selected: false,
+            selected: true,
             menu: {
               label: 'Tranche'
             },
@@ -1212,7 +1212,7 @@ export const JDBC_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
           optional: false,
           items: [{
             key: 'status_stack',
-            selected: true,
+            selected: false,
             menu: {
               label: 'Statut'
             },
@@ -1224,7 +1224,7 @@ export const JDBC_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
             }
           }, {
             key: 'status_tranche',
-            selected: false,
+            selected: true,
             menu: {
               label: 'Tranche'
             },
@@ -1483,7 +1483,7 @@ export const FTP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
           optional: false,
           items: [{
             key: 'status_stack',
-            selected: true,
+            selected: false,
             menu: {
               label: 'Statut'
             },
@@ -1495,7 +1495,7 @@ export const FTP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
             }
           }, {
             key: 'status_tranche',
-            selected: false,
+            selected: true,
             menu: {
               label: 'Tranche'
             },
@@ -1710,7 +1710,7 @@ export const LDAP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
           optional: false,
           items: [{
             key: 'status_stack',
-            selected: true,
+            selected: false,
             menu: {
               label: 'Statut'
             },
@@ -1722,7 +1722,7 @@ export const LDAP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
             }
           }, {
             key: 'status_tranche',
-            selected: false,
+            selected: true,
             menu: {
               label: 'Tranche'
             },
@@ -1893,7 +1893,7 @@ export const SMTP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
           optional: false,
           items: [{
             key: 'status_stack',
-            selected: true,
+            selected: false,
             menu: {
               label: 'Statut'
             },
@@ -1905,7 +1905,7 @@ export const SMTP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
             }
           }, {
             key: 'status_tranche',
-            selected: false,
+            selected: true,
             menu: {
               label: 'Tranche'
             },
