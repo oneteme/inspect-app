@@ -654,7 +654,7 @@ export class RestComponent implements OnInit {
   getDependencies(): void {
     const instanceType = this.params.optional?.instanceType;
     const args: any = {
-      'select': `instance.app_name:origin,host:target,count:count`,
+      'select': `instance.app_name:origin,host.coalesce("Unknown"):target,count:count`,
       'join': 'instance',
       'instance.namespace': this.params.namespace,
       'start.ge': this.params.period.start.toISOString(),
