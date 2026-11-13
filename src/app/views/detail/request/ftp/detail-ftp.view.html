@@ -108,11 +108,11 @@
 </ng-template>
 
 <mat-menu #menuHost="matMenu" class="card-menu">
-    <div mat-menu-item (click)="navigate($event,'parent')" [disabled]="sessionParent == null"><mat-icon class="material-symbols-outlined">move_up</mat-icon>Contexte de l'Appel</div>
-    <a mat-menu-item (click)="navigateOnKpi($event)"><mat-icon class="material-symbols-outlined">finance_mode</mat-icon>KPI</a>
+    <div mat-menu-item class="inspect-track-target" (click)="navigate($event,'parent')" [disabled]="sessionParent == null" data-inspect-track="Contexte de l'Appel" data-inspect-scope="Menu contextuel"><mat-icon class="material-symbols-outlined">move_up</mat-icon>Contexte de l'Appel</div>
+    <a mat-menu-item class="inspect-track-target" (click)="navigateOnKpi($event)" data-inspect-track="KPI" data-inspect-scope="Menu contextuel"><mat-icon class="material-symbols-outlined">finance_mode</mat-icon>KPI</a>
 </mat-menu>
 
 <mat-menu #menuServer="matMenu" class="card-menu">
-  <a mat-menu-item (click)="onClickPulse()"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
+    <a mat-menu-item (click)="onClickPulse()"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
 </mat-menu>
 

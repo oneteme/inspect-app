@@ -33,7 +33,17 @@
                             <span *ngIf="item.exception?.type || item.exception?.message"
                                   class="exception-bar fail">
                                 <span class="exception-text">
-                                    <span *ngIf="item.exception?.type" class="exception-type">{{item.exception?.type}}</span>
+                                    <span *ngIf="item.exception?.type" class="exception-type">
+                                      <span class="exception-type-label">{{item.exception?.type}}</span>
+                                      <button *ngIf="item.exception?.hasStack"
+                                              class="exception-action"
+                                              (click)="$event.stopPropagation(); showExceptionStacktrace(item.exception!)"
+                                              (keydown)="$event.stopPropagation()"
+                                              matTooltip="Voir la stacktrace">
+                                        <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
+                                        <span>Voir la stacktrace</span>
+                                      </button>
+                                    </span>
                                     <span *ngIf="item.exception?.message"
                                           class="exception-message"
                                           [class.collapsed]="isExceptionMessageCollapsed(item)">
@@ -45,15 +55,6 @@
                                             (keydown)="$event.stopPropagation()"
                                             [attr.aria-expanded]="isExceptionMessageExpanded(item)">
                                         {{isExceptionMessageExpanded(item) ? 'Voir moins' : 'Voir plus'}}
-                                    </button>
-                                </span>
-                                <span class="exception-actions">
-                                    <button *ngIf="item.exception?.hasStack"
-                                            class="exception-action"
-                                            (click)="$event.stopPropagation(); showExceptionStacktrace(item.exception!)"
-                                            (keydown)="$event.stopPropagation()"
-                                            matTooltip="Voir la stacktrace">
-                                        <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
                                     </button>
                                 </span>
                             </span>

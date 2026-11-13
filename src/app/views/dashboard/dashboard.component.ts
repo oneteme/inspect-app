@@ -391,6 +391,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     });
 
                     this.eventLogChart = this._addEventPerc(this._fillHourGapsLogs(map, currentStart, effectiveEnd));
+                    const presentTypes = Array.from(this.logTypes).filter(t => rows.some(r => (r.type || '').toUpperCase() === t));
+                    this.evtExcLineConfig = this._buildLogEventChartConfig(presentTypes);
                     this._cdr.markForCheck();
                 },
                 error: () => {
@@ -1076,7 +1078,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         } as any));
 
         return {
-            continue: true,
+            continue: false,
             series,
             options: {
                 legend: { show: false },

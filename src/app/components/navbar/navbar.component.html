@@ -159,7 +159,7 @@
               *ngFor="let subItem of item.children"
               [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
               data-inspect-scope="Menu principal"
-              [attr.data-inspect-track]="item.label + ' / ' + subItem.label"
+              [attr.data-inspect-track]="item.id === 'request' ? item.label + ' ' + subItem.label : subItem.label"
               (click)="navigateToSub($event, item, subItem)">
               <mat-icon class="material-symbols-outlined">{{ subItem.icon }}</mat-icon>
               <span>{{ subItem.label }}</span>
@@ -168,7 +168,7 @@
                 class="nav-kpi-btn"
                 [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
                 data-inspect-scope="Menu principal"
-                [attr.data-inspect-track]="'KPI ' + item.label + ' / ' + subItem.label"
+                [attr.data-inspect-track]="'KPI '+ subItem.label"
                 (click)="$event.stopPropagation(); navigateToKpi($event, subItem.kpiRoute)"
                 [matTooltip]="'KPI'"
                 matTooltipPosition="right"
@@ -250,14 +250,14 @@
         <mat-menu #envMenu="matMenu" class="env-menu-panel">
             <button mat-menu-item class="inspect-track-target" *ngFor="let e of namespaces" (click)="selectNamespace(e)"
                     [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
-                    data-inspect-scope="Menu des namespaces"
-                    [attr.data-inspect-track]="'Namespace ' + e">
+                    data-inspect-scope="Namespace"
+                    [attr.data-inspect-track]="e">
                 <mat-icon [style.visibility]="namespace.value === e ? 'visible' : 'hidden'">check</mat-icon>
                 <span>{{ e | uppercase }}</span>
             </button>
             <button mat-menu-item class="inspect-track-target" (click)="openAddNamespaceDialog()" *ngIf="auth.enabled"
                     [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
-                    data-inspect-scope="Menu des namespaces"
+                    data-inspect-scope="Namespace"
                     data-inspect-track="Ajouter un namespace">
                 <mat-icon class="material-symbols-outlined">add</mat-icon>
                 <span>Ajouter</span>
@@ -268,7 +268,7 @@
              [matMenuTriggerFor]="userMenu"
              [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
              data-inspect-scope="Afficher les actions du menu utilisateur"
-             data-inspect-track="Le menu utilisateur"
+             data-inspect-track="Menu utilisateur"
              matTooltip="Profil utilisateur">
         <span class="user-name">{{ getUserDisplayName() }}</span>
       </button>

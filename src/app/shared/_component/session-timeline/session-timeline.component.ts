@@ -327,7 +327,7 @@ export class SessionTimelineComponent implements OnDestroy {
             case 'user':
                 return 'Action utilisateur';
             case 'status':
-                return 'Message système';
+                return 'Log applicatif';
             default:
                 return 'Type d’événement inconnu';
         }

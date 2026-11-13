@@ -128,26 +128,30 @@
 </ng-template>
 
 <mat-menu #menuEndPoint="matMenu" xPosition="after" class="card-menu">
-  <a mat-menu-item [disabled]="sessionParent == null" [ngStyle]="{'pointer-events': sessionParent == null ? 'none' : ''}" [routerLink]="sessionParent?.type == 'rest' ? ['/session', 'rest', sessionParent?.id] : ['/session', sessionParent?.type.toLowerCase(), sessionParent?.id]" [queryParams]="{namespace: instance?.namespace}">
-    <div style="display: flex;">
-      <mat-progress-spinner *ngIf="parentLoading"  style="margin-right: 16px" diameter="24" mode="indeterminate"
-                            matTooltip="Chargement de l'appel parent">
-      </mat-progress-spinner>
-      <mat-icon *ngIf="!parentLoading">move_up</mat-icon>
-      Origine Client
-    </div>
-  </a>
-  <a mat-menu-item [routerLink]="['/session', 'rest', session?.id, 'tree']" [queryParams]="{namespace: instance?.namespace}">
-    <mat-icon class="material-symbols-outlined">lan</mat-icon>
-    Arbre d'appels
-  </a>
-  <a mat-menu-item (click)="navigate($event)"><mat-icon class="material-symbols-outlined">finance_mode</mat-icon>KPI</a>
-  <a mat-menu-item (click)="navigateOnCompare($event)">
-      <mat-icon class="material-symbols-outlined">compare_arrows</mat-icon>Décryptage du Flux
-  </a>
+    <a mat-menu-item class="inspect-track-target" [disabled]="sessionParent == null" [ngStyle]="{'pointer-events': sessionParent == null ? 'none' : ''}" [routerLink]="sessionParent?.type == 'rest' ? ['/session', 'rest', sessionParent?.id] : ['/session', sessionParent?.type.toLowerCase(), sessionParent?.id]" [queryParams]="{namespace: instance?.namespace}"
+       data-inspect-track="Origine Client" data-inspect-scope="Menu contextuel">
+        <div style="display: flex;">
+            <mat-progress-spinner *ngIf="parentLoading"  style="margin-right: 16px" diameter="24" mode="indeterminate"
+                                  matTooltip="Chargement de l'appel parent">
+            </mat-progress-spinner>
+            <mat-icon *ngIf="!parentLoading">move_up</mat-icon>
+            Origine Client
+        </div>
+    </a>
+    <a mat-menu-item class="inspect-track-target" [routerLink]="['/session', 'rest', session?.id, 'tree']" [queryParams]="{namespace: instance?.namespace}"
+       data-inspect-track="Arbre d'appels" data-inspect-scope="Menu contextuel">
+        <mat-icon class="material-symbols-outlined">lan</mat-icon>
+        Arbre d'appels
+    </a>
+    <a mat-menu-item class="inspect-track-target" (click)="navigate($event)" data-inspect-track="KPI" data-inspect-scope="Menu contextuel">
+        <mat-icon class="material-symbols-outlined">finance_mode</mat-icon>KPI
+    </a>
+    <a mat-menu-item class="inspect-track-target" (click)="navigateOnCompare($event)" data-inspect-track="Décryptage du Flux" data-inspect-scope="Menu contextuel">
+        <mat-icon class="material-symbols-outlined">compare_arrows</mat-icon>Décryptage du Flux
+    </a>
 </mat-menu>
 
 <mat-menu #menuServer="matMenu" class="card-menu">
-  <a mat-menu-item (click)="onClickPulse()"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
+    <a mat-menu-item (click)="onClickPulse()"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
 </mat-menu>
 

@@ -27,6 +27,14 @@ export class SessionEventService {
         if(limit) params['limit'] = limit;
         return this.http.get<AnalyticDto[]>(`${this.server}/session/user/${user}/action`, { params: params });
     }
+    getUserActionsByInstance(instanceId: string, date: Date, offset?: number, limit?: number): Observable<AnalyticDto[]> {
+        let params: any = {
+            'date': date.toISOString()
+        }
+        if(offset) params['offset'] = offset;
+        if(limit) params['limit'] = limit;
+        return this.http.get<AnalyticDto[]>(`${this.server}/session/instance/${instanceId}/action`, { params: params });
+    }
 
     getSessionEventsBySession(idSession: string): Observable<SessionEvent[]> {
         return this.http.get<SessionEvent[]>(`${this.server}/session/${idSession}/event`);
