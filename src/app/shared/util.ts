@@ -3,9 +3,6 @@ import { DatePipe } from "@angular/common";
 import {ChartGroup} from "../model/chart.model";
 import { Filter, FilterMap, Operation } from "../views/constants";
 import { makeDateTimePeriod, makeDateTimePeriodFrom } from "src/environments/environment";
-import {Injectable} from "@angular/core";
-import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
 
 export class Utils {
 
