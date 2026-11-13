@@ -1,0 +1,15 @@
+<div class="modal">
+    <div class="modal-header">
+        <div class="modal-header-left">
+            <div class="modal-info">
+                <div class="modal-title">Informations de la base de données</div>
+            </div>
+        </div>
+        <button class="modal-close" mat-dialog-close>
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+    <div class="modal-body">
+        <jquery-table class="flex-table" [config]="tableConfig" [data]="tables"></jquery-table>
+    </div>
+</div>

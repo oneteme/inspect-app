@@ -391,6 +391,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     });
 
                     this.eventLogChart = this._addEventPerc(this._fillHourGapsLogs(map, currentStart, effectiveEnd));
+                    const presentTypes = Array.from(this.logTypes).filter(t => rows.some(r => (r.type || '').toUpperCase() === t));
+                    this.evtExcLineConfig = this._buildLogEventChartConfig(presentTypes);
                     this._cdr.markForCheck();
                 },
                 error: () => {
@@ -1076,7 +1078,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         } as any));
 
         return {
-            continue: true,
+            continue: false,
             series,
             options: {
                 legend: { show: false },
@@ -1100,38 +1102,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     private _buildUserEventChartConfig(types: string[]): ChartProvider<string, number> {
-        if (!types.length) {
-            return {
-                continue: true,
-                series: [
-                    {
-                        data: { x: field('stringDate'), y: field('perc') },
-                        name: 'Actions Utilisateurs',
-                        color: '#8b5cf6',
-                        noDataStyle: { symbolSize: 0 }
-                    } as any
-                ],
-                options: {
-                    legend: { show: false },
-                    yAxis: {
-                        show: true,
-                        min: 0,
-                        max: 100,
-                        interval: 20,
-                        axisLabel: {
-                            formatter: (v: number) => v === 0 ? '' : v + '%',
-                            fontSize: 9,
-                            color: 'rgba(0,0,0,.38)'
-                        }
-                    },
-                    series: [{ smooth: true, showSymbol: true, symbolSize: (v: any) => Array.isArray(v) && v[1] != null ? 6 : 0 }],
-                    tooltip: {
-                        formatter: (params: any[]) => this._formatNonZeroTooltip(params)
-                    }
-                }
-            };
-        }
-
         const series = types.map(type => ({
             data: { x: field('stringDate'), y: (field(type + '_perc') || type) },
             name: EVENT_USER[type]?.label || type,
@@ -1140,7 +1110,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         } as any));
 
         return {
-            continue: true,
+            continue: false,
             series,
             options: {
                 legend: { show: false },
@@ -1498,9 +1468,16 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     const count = errors > 0 ? errors : t.warnCount;
                     rate = (count * 100) / total;
                 }
-                const title = t.key === 'LOG'
-                    ? `${this._decimalPipe.transform(total, '1.0-0')} logs · ${this._decimalPipe.transform(t.infoCount, '1.0-0')} INFO · ${this._decimalPipe.transform(t.warnCount, '1.0-0')} WARN · ${this._decimalPipe.transform(t.errorCount, '1.0-0')} ERROR`
-                    : `${this._decimalPipe.transform(total, '1.0-0')} actions utilisateurs`;
+                let title;
+                if(t.key === 'LOG') {
+                    const logs = this._decimalPipe.transform(total, '1.0-0');
+                    const info = t.infoCount > 0 ? ` · ${this._decimalPipe.transform(t.infoCount, '1.0-0')} INFO` : '';
+                    const warn = t.warnCount > 0 ? ` · ${this._decimalPipe.transform(t.warnCount, '1.0-0')} WARN` : '';
+                    const error = t.errorCount > 0 ? ` · ${this._decimalPipe.transform(t.errorCount, '1.0-0')} ERROR` : '';
+                    title = `${logs} logs${info}${warn}${error}`;
+                } else {
+                    title = `${this._decimalPipe.transform(total, '1.0-0')} actions utilisateurs`;
+                }
 
                 return {
                     key: t.key,

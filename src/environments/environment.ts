@@ -19,7 +19,7 @@ export const environment = {
       }
     },
     collector: {
-      enabled: true, // default: false
+      enabled: false, // default: false
       debugMode: false, // default: false
       // debug: {app: true, user: false},
 

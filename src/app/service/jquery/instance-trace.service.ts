@@ -23,6 +23,7 @@ export class InstanceTraceService {
     return this.http.get<T>(url, { params: params });
   }
 
+
   getInstanceTraceByPeriod(filters: {instance: string, start: Date, end: Date}): Observable<{date: number, pending: number, attempts: number, traceCount: number}[]> {
     let args: any = {
       'select': 'start:date,pending:pending,attempts:attempts,trace_count:traceCount',
@@ -79,7 +80,6 @@ export class InstanceTraceService {
     }
     return this.getInstanceTrace(args);
   }
-
 
 
 
