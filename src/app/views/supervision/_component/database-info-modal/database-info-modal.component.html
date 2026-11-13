@@ -10,24 +10,6 @@
         </button>
     </div>
     <div class="modal-body">
-        <div class="table-wrapper" *ngIf="tables?.length; else empty">
-            <table class="database-table">
-                <thead>
-                <tr>
-                    <th>Nom de la table</th>
-                    <th>Volume</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr *ngFor="let table of tables">
-                    <td>{{ table.table_name }}</td>
-                    <td>{{ table.size }}</td>
-                </tr>
-                </tbody>
-            </table>
-        </div>
-        <ng-template #empty>
-            <div class="empty-state">{{ isLoading ? 'Chargement...' : 'Aucune table trouvée' }}</div>
-        </ng-template>
+        <jquery-table class="flex-table" [config]="tableConfig" [data]="tables"></jquery-table>
     </div>
 </div>

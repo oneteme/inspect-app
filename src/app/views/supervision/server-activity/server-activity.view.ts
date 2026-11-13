@@ -10,7 +10,7 @@ import {TableProvider} from '@oneteme/jquery-table';
 import {catchError, EMPTY, finalize, merge, Subject, switchMap, takeUntil, tap} from 'rxjs';
 import {LogEntry} from '../../../model/trace.model';
 import {LogEntryService} from '../../../service/jquery/log-entry.service';
-import {InstanceTraceService, parseSizeToBytes, SequenceLossEvent} from '../../../service/jquery/instance-trace.service';
+import {InstanceTraceService, SequenceLossEvent} from '../../../service/jquery/instance-trace.service';
 import {PageTitleService} from '../../../service/page-title.service';
 import {InstanceService} from '../../../service/jquery/instance.service';
 import {StacktraceDialogComponent} from '../../../shared/_component/exception-display/stacktrace-dialog/stacktrace-dialog.component';
@@ -22,7 +22,7 @@ import {IPeriod} from '../../../model/conf.model';
 import {CustomDateAdapter} from '../../../shared/material/custom-date-adapter';
 import {CustomDateRangeSelectionStrategy} from '../../../shared/material/custom-date-range-selection-strategy';
 import {MY_DATE_FORMATS} from '../../../shared/shared.module';
-import {ActivityPeriodGroup, activityPeriodManagement} from '../../../shared/util';
+import {ActivityPeriodGroup, activityPeriodManagement, parseSizeToBytes} from '../../../shared/util';
 import {DatabaseInfo} from "../../../model/request.model";
 import {DatabaseRequestService} from "../../../service/jquery/database-request.service";
 
@@ -280,7 +280,10 @@ export class ServerActivityView implements OnDestroy {
   }
 
   openDatabaseInfo(): void {
-    this._dialog.open(DatabaseInfoModalComponent);
+    this._dialog.open(DatabaseInfoModalComponent, {
+      width: '70vw',
+      height: '70vh'
+    });
   }
 
   private resetActivityData(): void {
