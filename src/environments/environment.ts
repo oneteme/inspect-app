@@ -10,7 +10,7 @@ export const environment = {
   inspect: {
     application: {
       name: 'inspect-app',
-      namespace: 'jarvis-local',
+      namespace: 'jarvis',
       version: () => '',
       env: 'local',
       user: () => {
