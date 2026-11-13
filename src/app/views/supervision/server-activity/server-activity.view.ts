@@ -22,8 +22,8 @@ import {CustomDateAdapter} from '../../../shared/material/custom-date-adapter';
 import {CustomDateRangeSelectionStrategy} from '../../../shared/material/custom-date-range-selection-strategy';
 import {MY_DATE_FORMATS} from '../../../shared/shared.module';
 import {ActivityPeriodGroup, activityPeriodManagement} from '../../../shared/util';
-import {AdminService} from "../../../service/admin.service";
-import {DatabaseInfo} from "../../../model/database.model";
+import {DatabaseInfo} from "../../../model/request.model";
+import {DatabaseRequestService} from "../../../service/jquery/database-request.service";
 
 interface ActivityFilters {
   namespace: string;
@@ -56,7 +56,7 @@ interface SequenceLossRow {
 })
 export class ServerActivityView implements OnDestroy {
   private readonly _route = inject(ActivatedRoute);
-  private readonly _adminService = inject(AdminService);
+  private readonly _databaseRequestService = inject(DatabaseRequestService);
   private readonly _router = inject(Router);
   private readonly _logEntryService = inject(LogEntryService);
   private readonly _instanceTraceService = inject(InstanceTraceService);
@@ -154,7 +154,7 @@ export class ServerActivityView implements OnDestroy {
 
   constructor() {
     this._pageTitleService.set({icon: 'troubleshoot', iconOutlined: true, title: 'Diagnostic'});
-    this._adminService.getDatabaseInfo().pipe(
+    this._databaseRequestService.getDatabaseInfo().pipe(
         tap(info => {
           const first = info?.[0];
           if (first) {
