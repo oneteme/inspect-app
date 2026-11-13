@@ -65,6 +65,7 @@ import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.compone
 import {CompareView} from "./compare/compare.view";
 import {AnalyticsView} from "./analytics/analytics.view";
 import {SearchMainEventView} from "./search/event/main/search-main-event.view";
+import DashboardNewComponent from "./dashboard/new/dashboard-new.component";
 
 @NgModule({
   imports: [
@@ -115,6 +116,7 @@ import {SearchMainEventView} from "./search/event/main/search-main-event.view";
     ParameterTableComponent,
     DashboardInstancesTableComponent,
     DashboardDetailViewComponent,
+    DashboardNewComponent,
 
     // New
     RequestKpiView,
@@ -138,7 +140,7 @@ import {SearchMainEventView} from "./search/event/main/search-main-event.view";
     MediaTypeChartComponent,
     UserChartComponent,
     CompareView,
-      AnalyticsView
+    AnalyticsView
   ]
 })
 export class ViewsModule { }

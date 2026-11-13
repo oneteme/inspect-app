@@ -436,3 +436,36 @@ export function volumeSubtitle(rows: any[], distinctSingular: string, distinctPl
   const distinct = rows.length;
   return `${distinct} ${distinct > 1 ? distinctPlural : distinctSingular}`;
 }
+
+export function shallowEqual(
+    a: {[key: string | symbol]: any},
+    b: {[key: string | symbol]: any},
+): boolean {
+    const k1 = a ? getDataKeys(a) : undefined;
+    const k2 = b ? getDataKeys(b) : undefined;
+    if (!k1 || !k2 || k1.length != k2.length) {
+        return false;
+    }
+    let key: string | symbol;
+    for (let i = 0; i < k1.length; i++) {
+        key = k1[i];
+        if (!equalArraysOrString(a[key], b[key])) {
+            return false;
+        }
+    }
+    return true;
+}
+
+export function getDataKeys(obj: Object): Array<string | symbol> {
+    return [...Object.keys(obj), ...Object.getOwnPropertySymbols(obj)];
+}
+
+export function equalArraysOrString(a: string | string[], b: string | string[]) {
+    if (Array.isArray(a) && Array.isArray(b)) {
+        if (a.length !== b.length) return false;
+        const aSorted = [...a].sort();
+        const bSorted = [...b].sort();
+        return aSorted.every((val, index) => bSorted[index] === val);
+    }
+    return a === b;
+}
