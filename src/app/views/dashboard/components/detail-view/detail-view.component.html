@@ -5,7 +5,11 @@
   </div>
   <span class="db-clear-title">Aucun incident sur la période</span>
   <span class="db-clear-label">{{ selectedLabel }}</span>
-  <button type="button" class="db-clear-action" (click)="viewAllClick.emit(selectedKey || '')">
+  <button type="button" class="db-clear-action inspect-track-target"
+          [attr.data-inspect-location]="!isEventInsight ? (isSessionInsight ? 'Traitements' : 'Flux') + ' • Tableau de bord' : null"
+          [attr.data-inspect-scope]="!isEventInsight ? 'Menu latéral' : null"
+          [attr.data-inspect-track]="!isEventInsight ? selectedLabel : null"
+          (click)="viewAllClick.emit(selectedKey || '')">
     Voir tout
     <mat-icon class="material-symbols-outlined">arrow_forward</mat-icon>
   </button>

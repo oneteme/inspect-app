@@ -1,6 +1,5 @@
 import {Component, inject, OnDestroy} from "@angular/core";
 import {SessionEventService} from "../../service/session-event.service";
-import {combineLatest, distinctUntilChanged, filter, finalize, Observable, Subject, takeUntil} from "rxjs";
 import {ActivatedRoute} from "@angular/router";
 import {EnvRouter} from "../../service/router.service";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
@@ -12,6 +11,8 @@ import {MainSessionService} from "../../service/jquery/main-session.service";
 import {app} from "../../../environments/environment";
 import {AnalyticDto} from "../../model/request.model";
 import {PageTitleService} from '../../service/page-title.service';
+import {catchError, combineLatest, distinctUntilChanged, filter, finalize, Observable, of, Subject, switchMap, takeUntil, map} from "rxjs";
+import {TraceService} from "../../service/trace.service";
 
 @Component({
     templateUrl: './analytics.view.html',
@@ -32,6 +33,7 @@ export class AnalyticsView implements OnDestroy {
     private readonly _mainSessionService = inject(MainSessionService);
     private readonly _pageTitleService = inject(PageTitleService);
     private readonly $destroy = new Subject<void>();
+    private readonly _traceService = inject(TraceService);
     readonly filterForm = new FormGroup({
         user: new FormControl('', [Validators.required]),
         date: new FormControl(new Date(), [Validators.required])
@@ -53,7 +55,7 @@ export class AnalyticsView implements OnDestroy {
     private readonly _visibleDurations = new Map<string, number>();
     private _analysisTimestamp: number = Date.now() / 1000;
 
-    params: Partial<{namespace: string, user: string, date: Date, offset: number, limit: number}> = {};
+    params: Partial<{namespace: string, user: string, instanceId: string, date: Date, offset: number, limit: number}> = {};
 
     loading: boolean;
 
@@ -71,7 +73,11 @@ export class AnalyticsView implements OnDestroy {
     getUserActions() {
         this.loading = true;
 
-        this._sessionEventService.getUserActionsByUser(this.params.user, this.params.date)
+        const request$ = this.params.instanceId
+            ? this._sessionEventService.getUserActionsByInstance(this.params.instanceId, this.params.date)
+            : this._sessionEventService.getUserActionsByUser(this.params.user, this.params.date);
+
+        request$
             .pipe(takeUntil(this.$destroy), finalize(() => this.loading = false))
             .subscribe({
                 next: result => {
@@ -216,17 +222,31 @@ export class AnalyticsView implements OnDestroy {
         this.$users = this._mainSessionService.getUsersView({namespace: this.params.namespace, date: this.params.date});
     }
 
+    private readonly _uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
     onRouteChange() {
         combineLatest([
             this._activatedRoute.params,
             this._activatedRoute.queryParams
-        ]).subscribe({
-            next: ([params, queryParams]) => {
-                this.params.user = params.user;
+        ]).pipe(
+            switchMap(([params, queryParams]) => {
+                const routeId: string = params.id;
+                if (this._uuidPattern.test(routeId)) {
+                    return this._traceService.getInstance(routeId).pipe(
+                        map(instance => ({ instanceId: routeId, user: instance.user, queryParams })),
+                        catchError(() => of({ instanceId: routeId, user: null, queryParams }))
+                    );
+                }
+                return of({ instanceId: null, user: routeId, queryParams });
+            })
+        ).subscribe({
+            next: ({ instanceId, user, queryParams }) => {
+                this.params.instanceId = instanceId;
+                this.params.user = user;
                 this._pageTitleService.set({
                     icon: 'web_traffic',
                     iconOutlined: true,
-                    title: 'Parcours de l\'utilisateur ' + params.user
+                    title: 'Parcours de l\'utilisateur' + (user ? ' ' + user : '')
                 });
                 this.params.namespace = queryParams.namespace || app.defaultNamespace;
                 this.params.date = new Date(queryParams.date);

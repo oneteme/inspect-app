@@ -34,10 +34,10 @@
                                   class="exception-bar fail">
                                 <span class="exception-text">
                                     <span *ngIf="item.exception?.type" class="exception-type">{{item.exception?.type}}</span>
-                                    <span *ngIf="item.exception?.message"
+                                    <span *ngIf="item.exception?.type"
                                           class="exception-message"
                                           [class.collapsed]="isExceptionMessageCollapsed(item)">
-                                        {{item.exception?.message}}
+                                    « {{item.exception?.message ?? ''}} »
                                     </span>
                                     <button *ngIf="hasLongExceptionMessage(item)"
                                             class="exception-toggle"

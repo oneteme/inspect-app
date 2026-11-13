@@ -175,7 +175,7 @@
                         <div class="sbd-main sbd-track-target"
                              [attr.data-inspect-location]="'Traitements • ' + MAPPING_TYPE['dashboard'].title"
                              data-inspect-scope="Menu latéral"
-                             [attr.data-inspect-track]="s.label">
+                             [attr.data-inspect-track]="'Taux ' + s.label">
                             <div class="sbd-top">
                                 <span class="sbd-label">{{ s.label }}</span>
                                 <span class="sbd-count">{{ s.total | compact }}</span>
@@ -187,7 +187,7 @@
                         <span class="sbd-rate sbd-track-target" [class.c-ok]="s.total > 0 && s.rate === 0" [class.c-err]="s.rate > 0"
                               [attr.data-inspect-location]="'Traitements • ' + MAPPING_TYPE['dashboard'].title"
                               data-inspect-scope="Menu latéral"
-                              [attr.data-inspect-track]="s.label">{{ s.rate === 0 ? '100%' : (s.rate | number:'1.2-2') + '%' }}</span>
+                              [attr.data-inspect-track]="'Taux ' + s.label">{{ s.rate === 0 ? '100%' : (s.rate | number:'1.2-2') + '%' }}</span>
                     </div>
                 </ng-container>
             </div>
@@ -221,7 +221,7 @@
                     <div class="sbd-main sbd-track-target"
                          [attr.data-inspect-location]="'Flux • ' + MAPPING_TYPE['dashboard'].title"
                          data-inspect-scope="Menu latéral"
-                         [attr.data-inspect-track]="p.label">
+                         [attr.data-inspect-track]="'Taux d’exposition ' + p.label">
                         <div class="sbd-top">
                             <span class="sbd-label">{{ p.label }}</span>
                             <span class="sbd-count">{{ p.total | compact }}</span>
@@ -233,7 +233,7 @@
                     <span class="sbd-rate sbd-track-target" [class.c-ok]="p.rate === 0" [class.c-err]="p.rate > 0"
                           [attr.data-inspect-location]="'Flux • ' + MAPPING_TYPE['dashboard'].title"
                           data-inspect-scope="Menu latéral"
-                          [attr.data-inspect-track]="p.label">{{ p.rate === 0 ? '100%' : (p.rate | number:'1.2-2') + '%' }}</span>
+                          [attr.data-inspect-track]="'Taux ' + p.label">{{ p.rate === 0 ? '100%' : (p.rate | number:'1.2-2') + '%' }}</span>
                 </div>
             </ng-container>
         </div>
