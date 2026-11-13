@@ -28,12 +28,6 @@ export function parseSizeToBytes(value: string): number {
   return Number.isFinite(amount) ? amount * multiplier : 0;
 }
 
-export interface DatabaseInfo {
-  schema: string;
-  size_schema: string;
-  size_database: string;
-}
-
 @Injectable({ providedIn: 'root' })
 export class InstanceTraceService {
   constructor(private readonly http: HttpClient) {
@@ -43,11 +37,6 @@ export class InstanceTraceService {
   getInstanceTrace<T>(params: any): Observable<T> {
     const url = `${localStorage.getItem('server')}/jquery/instance/trace`;
     return this.http.get<T>(url, { params: params });
-  }
-
-  getDatabaseInfo(params?: any): Observable<DatabaseInfo[]> {
-    const url = `${localStorage.getItem('server')}/v5/trace/database`;
-    return this.http.get<DatabaseInfo[]>(url, { params: params });
   }
 
 
