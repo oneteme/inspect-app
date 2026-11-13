@@ -84,21 +84,24 @@
 
 
 <mat-menu #menuEndPoint="matMenu" xPosition="after" class="card-menu">
-  <a mat-menu-item [routerLink]="['/session', session?.type?.toLowerCase(), session?.id, 'tree']" [queryParams]="{namespace: instance?.namespace}">
-    <mat-icon class="material-symbols-outlined">lan</mat-icon>Arbre d'appels
-  </a>
-  <a mat-menu-item *ngIf="session?.type == 'VIEW'"
-     [routerLink]="['/analytics', session?.user]"
-     [queryParams]="{namespace: instance?.namespace, date: getDate(session?.start * 1000, false).toISOString()}"
-     [ngStyle]="{'pointer-events': !session?.user ? 'none' : ''}"
-     [disabled]="!session?.user">
-    <mat-icon class="material-symbols-outlined">web_traffic</mat-icon>Parcours Utilisateur
-  </a>
-  <a mat-menu-item *ngIf="session?.type == 'SCHEDULE' || session?.type == 'STARTUP'" (click)="navigate($event)">
-    <mat-icon class="material-symbols-outlined">finance_mode</mat-icon>KPI
-  </a>
+    <a mat-menu-item class="inspect-track-target" [routerLink]="['/session', session?.type?.toLowerCase(), session?.id, 'tree']" [queryParams]="{namespace: instance?.namespace}"
+       data-inspect-track="Arbre d'appels" data-inspect-scope="Menu contextuel">
+        <mat-icon class="material-symbols-outlined">lan</mat-icon>Arbre d'appels
+    </a>
+    <a mat-menu-item class="inspect-track-target" *ngIf="session?.type == 'VIEW'"
+       [routerLink]="['/analytics', instance?.id]"
+       [queryParams]="{namespace: instance?.namespace, date: getDate(session?.start * 1000, false).toISOString()}"
+       [ngStyle]="{'pointer-events': !instance?.id ? 'none' : ''}"
+       [disabled]="!instance?.id"
+       data-inspect-track="Parcours Utilisateur" data-inspect-scope="Menu contextuel">
+        <mat-icon class="material-symbols-outlined">web_traffic</mat-icon>Parcours Utilisateur
+    </a>
+    <a mat-menu-item class="inspect-track-target" *ngIf="session?.type == 'SCHEDULE' || session?.type == 'STARTUP'" (click)="navigate($event)"
+       data-inspect-track="KPI" data-inspect-scope="Menu contextuel">
+        <mat-icon class="material-symbols-outlined">finance_mode</mat-icon>KPI
+    </a>
 </mat-menu>
 
 <mat-menu #menuServer="matMenu" class="card-menu">
-  <a mat-menu-item (click)="onClickPulse()"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
+    <a mat-menu-item (click)="onClickPulse()"><mat-icon class="material-symbols-outlined">view_timeline</mat-icon>Pulse</a>
 </mat-menu>

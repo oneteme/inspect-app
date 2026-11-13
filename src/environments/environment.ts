@@ -10,7 +10,7 @@ export const environment = {
   inspect: {
     application: {
       name: 'inspect-app',
-      namespace: 'jarvis-local',
+      namespace: 'jarvis',
       version: () => '',
       env: 'local',
       user: () => {
@@ -24,8 +24,8 @@ export const environment = {
       // debug: {app: true, user: false},
 
       scheduling: {
-        interval: 60000,
-        queueCapacity: 1000
+        interval: 1000,
+        queueCapacity: 50
       },
       monitoring: {
         httpRoute: {
