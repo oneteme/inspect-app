@@ -10,8 +10,15 @@ import {Constants, EVENT_LOG, EVENT_USER} from '../constants';
 import {ChartProvider, field} from '@oneteme/jquery-core';
 import {formatters, groupByColor, periodManagement} from 'src/app/shared/util';
 import {IPeriod, IStep, IStepFrom} from '../../model/conf.model';
-import {getDefaultTodayPeriod, getQuickRangeStep, getQuickRangeDates, isDefaultTodayPeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../shared/period-filter';
-import {MatDialog} from '@angular/material/dialog';
+import {
+    getDefaultTodayPeriod,
+    getQuickRangeDates,
+    getQuickRangeStep,
+    isDefaultTodayPeriod,
+    PERIOD_QUICK_RANGES,
+    PeriodQuickRange,
+    toDisplayedPeriodEnd
+} from '../../shared/period-filter';
 import {InstanceService} from 'src/app/service/jquery/instance.service';
 import {RestSessionService} from 'src/app/service/jquery/rest-session.service';
 import {MainSessionService} from 'src/app/service/jquery/main-session.service';
@@ -19,10 +26,7 @@ import {RestRequestService} from 'src/app/service/jquery/rest-request.service';
 import {DatabaseRequestService} from 'src/app/service/jquery/database-request.service';
 import {FtpRequestService} from 'src/app/service/jquery/ftp-request.service';
 import {LdapRequestService} from 'src/app/service/jquery/ldap-request.service';
-import {
-    LastServerStart,
-    ExceptionsByPeriodAndAppname
-} from 'src/app/model/jquery.model';
+import {ExceptionsByPeriodAndAppname, LastServerStart} from 'src/app/model/jquery.model';
 import {SmtpRequestService} from 'src/app/service/jquery/smtp-request.service';
 import {InstanceTraceService} from 'src/app/service/jquery/instance-trace.service';
 import {DashboardDetailContext} from './components/detail-view/detail-view.model';
@@ -44,16 +48,6 @@ import {SessionEventService} from "../../service/session-event.service";
     ]
 })
 export class DashboardComponent implements OnInit, OnDestroy {
-    constants = Constants;
-
-    readonly protocolDefs: { key: string; reqKey: string; label: string; chartConfig: any }[] = [
-        { key: 'rest', reqKey: 'restRequestExceptionsTable', label: 'HTTP', chartConfig: Constants.REST_REQUEST_EXCEPTION_BY_PERIOD_LINE },
-        { key: 'jdbc', reqKey: 'databaseRequestExceptionsTable', label: 'JDBC', chartConfig: Constants.DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE },
-        { key: 'ftp', reqKey: 'ftpRequestExceptionsTable', label: 'FTP', chartConfig: Constants.FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE },
-        { key: 'smtp', reqKey: 'smtpRequestExceptionsTable', label: 'SMTP', chartConfig: Constants.SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE },
-        { key: 'ldap', reqKey: 'ldapRequestExceptionsTable', label: 'LDAP', chartConfig: Constants.LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE },
-    ];
-
     private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
     private readonly _router: EnvRouter = inject(EnvRouter);
     private readonly _instanceService = inject(InstanceService);
@@ -66,13 +60,21 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly _ldapService = inject(LdapRequestService);
     private readonly _location: Location = inject(Location);
     private readonly _datePipe = inject(DatePipe);
-    private readonly _dialog = inject(MatDialog);
     private readonly _decimalPipe = inject(DecimalPipe);
     private readonly _instanceTraceService = inject(InstanceTraceService);
     private readonly _cdr = inject(ChangeDetectorRef);
     private readonly _pageTitleService = inject(PageTitleService);
     private readonly _sessionEventService = inject(SessionEventService);
 
+    constants = Constants;
+
+    readonly protocolDefs: { key: string; reqKey: string; label: string; chartConfig: any }[] = [
+        { key: 'rest', reqKey: 'restRequestExceptionsTable', label: 'HTTP', chartConfig: Constants.REST_REQUEST_EXCEPTION_BY_PERIOD_LINE },
+        { key: 'jdbc', reqKey: 'databaseRequestExceptionsTable', label: 'JDBC', chartConfig: Constants.DATABASE_REQUEST_EXCEPTION_BY_PERIOD_LINE },
+        { key: 'ftp', reqKey: 'ftpRequestExceptionsTable', label: 'FTP', chartConfig: Constants.FTP_REQUEST_EXCEPTION_BY_PERIOD_LINE },
+        { key: 'smtp', reqKey: 'smtpRequestExceptionsTable', label: 'SMTP', chartConfig: Constants.SMTP_REQUEST_EXCEPTION_BY_PERIOD_LINE },
+        { key: 'ldap', reqKey: 'ldapRequestExceptionsTable', label: 'LDAP', chartConfig: Constants.LDAP_REQUEST_EXCEPTION_BY_PERIOD_LINE },
+    ];
 
     sparklineTitles: {
         rest: {title: string, subtitle: string},
@@ -1679,9 +1681,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this._serviceSub?.unsubscribe();
         this._logChartSub?.unsubscribe();
         this._userChartSub?.unsubscribe();
-        if(this._dialog){
-            this._dialog.closeAll();
-        }
         this._pageTitleService.clear();
     }
 

@@ -36,10 +36,6 @@
              (click)="restartClick.emit({ event: $event, minStart: row.minStart, appName: row.appName })">
           {{ row.restart }}
         </div>
-        <mat-icon *ngIf="row.start != row.lastStart" class="material-symbols-outlined dov-warning-icon"
-          (click)="restartClick.emit({ event: $event, minStart: row.lastStart, appName: row.appName })">
-          deployed_code_alert
-        </mat-icon>
       </div>
     </ng-template>
 

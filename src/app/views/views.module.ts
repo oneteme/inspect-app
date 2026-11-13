@@ -6,7 +6,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {SharedModule} from '../shared/shared.module';
 import {ChartComponent} from "@oneteme/jquery-echarts";
-import {OrganizerButtonModule} from "@oneteme/jquery-organizer";
+import {OrganizerButtonModule, SlicePanelComponent} from "@oneteme/jquery-organizer";
 import {SearchRestView} from "./search/session/rest/search-rest.view";
 import {SearchMainView} from "./search/session/main/search-main.view";
 import {DetailSessionRestView} from "./detail/session/rest/detail-session-rest.view";
@@ -23,12 +23,9 @@ import {DetailLdapTableComponent} from "./detail/session/_component/ldap-table/d
 import {DetailSessionComponent} from "./detail/session/_component/detail-session.component";
 import {TreeView} from "./tree/tree.view";
 import {DashboardComponent} from "./dashboard/dashboard.component";
-import {
-  ProtocolExceptionComponent
-} from './dashboard/components/protocol-exception-modal/protocol-exception-modal.component';
 import {ArchitectureView} from "./architecture/architecture.view";
 import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
-import {NumberFormatterPipe, CompactNumberPipe} from '../shared/pipe/number.pipe';
+import {CompactNumberPipe, NumberFormatterPipe} from '../shared/pipe/number.pipe';
 import {SearchRequestView} from "./search/request/search-request.view";
 import {DetailTimelineComponent} from "./detail/session/_component/timeline/detail-timeline.component";
 import {DetailRequestView} from "./detail/request/detail-request.view";
@@ -52,7 +49,6 @@ import {PerformanceChartComponent} from "./kpi/_component/performance-chart/perf
 import {VolumetryChartComponent} from "./kpi/_component/volumetry-chart/volumetry-chart.component";
 import {ChartMenuComponent} from "./kpi/_component/chart-menu/chart-menu.component";
 import {LatencyChartComponent} from "./kpi/_component/latency-chart/latency-chart.component";
-import {SlicePanelComponent} from "@oneteme/jquery-organizer";
 import {TableComponent} from "@oneteme/jquery-table";
 import {JdbcComponent} from "./kpi/request/jdbc/jdbc.component";
 import {FtpComponent} from "./kpi/request/ftp/ftp.component";
@@ -105,7 +101,6 @@ import {SearchMainEventView} from "./search/event/main/search-main-event.view";
     DetailTimelineComponent,
     DetailSessionComponent,
     DashboardComponent,
-    ProtocolExceptionComponent,
     ArchitectureView,
     TreeView,
     NumberFormatterPipe,
