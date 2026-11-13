@@ -31,8 +31,8 @@ export class ExceptionService {
         };
         return this.getException<{ stacktrace: any, cause: any }[]>(params).pipe(
             map(rows => rows.map(row => ({
-                stacktrace: row.stacktrace.value,
-                cause: row.cause.value
+                stacktrace: row.stacktrace?.value,
+                cause: row.cause?.value
             }))[0])
         );
     }
