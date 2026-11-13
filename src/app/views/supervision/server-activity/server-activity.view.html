@@ -39,8 +39,8 @@
           <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">browse_activity</mat-icon>
           <h2 id="activity-traces-title" class="kpi-chart-title">Volume des opérations</h2>
         </div>
-        <span class="kpi-chart-badge" *ngIf="isLoadingTrace">...</span>
-        <span class="kpi-chart-badge" *ngIf="!isLoadingTrace" matTooltip="Nom du schéma : {{ schemaName }}&#10;Schéma : {{ schemaSizeMb }}&#10;Base : {{ databaseSizeMb }}">{{ databaseRatio }}</span>
+        <span class="kpi-chart-badge" *ngIf="isLoadingDatabaseInfo" matTooltip="Chargement...">...</span>
+        <span class="kpi-chart-badge database" *ngIf="!isLoadingDatabaseInfo" (click)="openDatabaseInfo()" matTooltip="Nom du schéma : {{ schemaName }}&#10;Taille : {{ schemaSizeMb }}&#10;Taille de la base : {{ databaseSizeMb }}">{{ databaseRatio }}</span>
       </div>
       <div class="kpi-chart-body">
         <chart type="line" [config]="USAGE_INSTANCE_TRACE_BY_PERIOD_LINE"
