@@ -1,7 +1,7 @@
 import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute} from '@angular/router';
-import {combineLatest, finalize, Observable, Subject, takeUntil} from 'rxjs';
+import {combineLatest, debounceTime, finalize, Observable, Subject, takeUntil} from 'rxjs';
 import {Location} from '@angular/common';
 import {extractPeriod,} from '../../../../shared/util';
 import {MainSessionService} from '../../../../service/jquery/main-session.service';
@@ -47,7 +47,10 @@ export class SearchMainView implements OnInit, OnDestroy {
   private readonly _pageTitleService = inject(PageTitleService);
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _location = inject(Location);
+  /** Annule la requête en cours lors d'un nouveau chargement. */
   private readonly $destroy = new Subject<void>();
+  /** Libère la subscription aux routes à la destruction du composant. */
+  private readonly _viewDestroyed = new Subject<void>();
 
   MAPPING_TYPE = Constants.MAPPING_TYPE;
   readonly periodQuickRanges = PERIOD_QUICK_RANGES;
@@ -81,7 +84,11 @@ export class SearchMainView implements OnInit, OnDestroy {
     combineLatest([
       this._activatedRoute.params,
       this._activatedRoute.queryParams
-    ]).subscribe({
+    ]).pipe(
+      // Angular émet queryParams puis params lors d'une navigation : on fusionne les émissions synchrones
+      debounceTime(0),
+      takeUntil(this._viewDestroyed)
+    ).subscribe({
       next: ([params, queryParams]) => {
         this.type = params.type_main;
         this.tableConfig = this.buildTableConfig(queryParams.q);
@@ -153,6 +160,8 @@ export class SearchMainView implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this._viewDestroyed.next();
+    this._viewDestroyed.complete();
     this.$destroy.next();
     this.$destroy.complete();
     this._pageTitleService.clear();
