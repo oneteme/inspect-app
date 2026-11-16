@@ -3,6 +3,7 @@
 
   <div class="navbar-content">
     <div class="nav-brand" (click)="gotoHome($event)">
+
       <svg xmlns="http://www.w3.org/2000/svg" class="nav-brand-logo" viewBox="55 62 450 108">
         <defs>
           <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -42,32 +43,19 @@
             from {
               transform: translateX(-330px);
             }
-
             to {
               transform: translateX(0);
             }
           }
 
           @keyframes drawWave {
-            0% {
-              stroke-dashoffset: 100;
-            }
-
-            100% {
-              stroke-dashoffset: 0;
-            }
+            0% { stroke-dashoffset: 100; }
+            100% { stroke-dashoffset: 0; }
           }
 
           @keyframes revealWavePoint {
-
-            0%,
-            75% {
-              opacity: 0;
-            }
-
-            100% {
-              opacity: 1;
-            }
+            0%, 75% { opacity: 0; }
+            100% { opacity: 1; }
           }
 
           @keyframes slideFromLeft {
@@ -75,7 +63,6 @@
               opacity: 0;
               transform: translateX(-30px);
             }
-
             100% {
               opacity: 1;
               transform: translateX(0);
@@ -87,7 +74,6 @@
               opacity: 0;
               transform: translateX(30px);
             }
-
             100% {
               opacity: 1;
               transform: translateX(0);
@@ -99,7 +85,6 @@
               opacity: 0;
               transform: translateY(8px);
             }
-
             100% {
               opacity: 1;
               transform: translateY(0);
@@ -143,28 +128,25 @@
           <!-- Le "P" / Loupe fixe -->
           <g class="anim-lens" filter="url(#glassShadow)">
             <g transform="translate(395, 92) scale(0.82)">
-              <circle cx="-21.62" cy="6.285" r="15" fill="#F0F9FF"
-                transform="matrix(1.687151, 0, 0, 1.695531, 25.666264, -6.508281)" />
+              <circle cx="-21.62" cy="6.285" r="15" fill="#F0F9FF" transform="matrix(1.687151, 0, 0, 1.695531, 25.666264, -6.508281)" />
               <line x1="-30.81" y1="-4.972" x2="9.19" y2="-4.972" stroke="#BAE6FD" stroke-width="1" />
               <line x1="-31.038" y1="3.269" x2="11.18" y2="3.269" stroke="#BAE6FD" stroke-width="1" />
               <line x1="-30.81" y1="12.513" x2="9.19" y2="12.513" stroke="#BAE6FD" stroke-width="1" />
-              <polyline points="-31.073 8.268 -21.073 8.268 -16.073 -4.732 -9.073 12.268 -1.073 0.268 5.927 0.268" fill="none"
-                stroke="url(#accentGrad)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"
-                class="anim-wave" />
+              <polyline points="-31.073 8.268 -21.073 8.268 -16.073 -4.732 -9.073 12.268 -1.073 0.268 5.927 0.268" fill="none" stroke="url(#accentGrad)" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" class="anim-wave" />
               <circle cx="8.441" cy="-0.235" r="3.5" fill="#0284C7" class="anim-wave-point" />
-              <path d="M -30.056 -8.47 C -22.887 -18.851 -8.904 -21.91 1.944 -15.47" fill="none" stroke="#38BDF8"
-                stroke-width="2.5" stroke-linecap="round" />
+              <path d="M -30.056 -8.47 C -22.887 -18.851 -8.904 -21.91 1.944 -15.47" fill="none" stroke="#38BDF8" stroke-width="2.5" stroke-linecap="round" />
               <g transform="translate(-4, 4) translate(7.671, 29.034) scale(1.18) translate(-7.671, -29.034)">
-                <line x1="7.671" y1="29.034" x2="25.671" y2="56.034" stroke="#0F172A" stroke-width="13"
-                  stroke-linecap="round" />
+                <line x1="7.671" y1="29.034" x2="25.671" y2="56.034" stroke="#0F172A" stroke-width="13" stroke-linecap="round" />
                 <line x1="13.9" y1="38.536" x2="22.4" y2="51.536" stroke="#0EA5E9" stroke-width="5" stroke-linecap="round" />
               </g>
             </g>
           </g>
           <!-- Texte JARVIS épuré avec l'effet lumineux exclusif -->
-          <text x="338" y="147" text-anchor="middle" class="jarvis-text anim-tagline" filter="url(#jarvisGlow)">JARVIS</text>
+          <text x="338" y="154" text-anchor="middle" class="jarvis-text anim-tagline" filter="url(#jarvisGlow)">JARVIS</text>
         </g>
       </svg>
+
+
     </div>
 
     <div class="nav-main">
