@@ -107,8 +107,6 @@ class DashboardNewComponent implements OnInit, OnDestroy {
       const start = this.periodFilterForm.getRawValue().start;
       const end = this.periodFilterForm.getRawValue().end;
 
-      if (!start || !end) return;
-
       if (!(this.period instanceof IStep) && !(this.period instanceof IStepFrom)) {
         this.period = new IPeriod(
             start,
