@@ -15,7 +15,7 @@ import {
     getQuickRangeDates,
     getQuickRangeStep,
     isDefaultTodayPeriod,
-    PERIOD_QUICK_RANGES,
+    DEFAULT_PERIOD_QUICK_RANGES,
     PeriodQuickRange,
     toDisplayedPeriodEnd
 } from '../../shared/period-filter';
@@ -118,7 +118,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     nameDataList: any[];
     groupedBy: string;
     period: IPeriod | IStep | IStepFrom;
-    readonly periodQuickRanges = PERIOD_QUICK_RANGES;
+    readonly periodQuickRanges = DEFAULT_PERIOD_QUICK_RANGES;
     readonly eventSkeletonRows = [1, 2];
 
     serverHealthData: LastServerStart[] = [];

@@ -22,7 +22,7 @@ import {
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {PulseDialogComponent} from "../../../shared/_component/pulse/dialog/pulse-dialog.component";
 import {PageTitleService} from '../../../service/page-title.service';
-import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
+import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, DEFAULT_PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
 import {IPeriod, IStep, IStepFrom} from '../../../model/conf.model';
 import {shallowEqual} from '../../search/session/rest/search-rest.view';
 
@@ -171,7 +171,7 @@ export class ServerSupervisionView implements OnInit, OnDestroy {
   isLoadingInstances = false;
   reloadInstances = true;
   selectedPeriod: Partial<{start: Date, end: Date}>;
-  readonly periodQuickRanges = PERIOD_QUICK_RANGES;
+  readonly periodQuickRanges = DEFAULT_PERIOD_QUICK_RANGES;
   period: IPeriod | IStep | IStepFrom;
   currentQueryParams: {[key: string]: any} = {};
 

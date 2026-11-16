@@ -21,7 +21,7 @@ import {FtpRequestService} from "../../../service/jquery/ftp-request.service";
 import {SmtpRequestService} from "../../../service/jquery/smtp-request.service";
 import {LdapRequestService} from "../../../service/jquery/ldap-request.service";
 import {PageTitleService} from "../../../service/page-title.service";
-import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
+import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, DEFAULT_PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
 
 @Component({
   templateUrl: './search-request.view.html',
@@ -64,7 +64,7 @@ export class SearchRequestView implements OnInit, OnDestroy {
     })
   });
 
-  readonly periodQuickRanges = PERIOD_QUICK_RANGES;
+  readonly periodQuickRanges = DEFAULT_PERIOD_QUICK_RANGES;
   emptyLabel = null;
   queryParams: Partial<QueryParams> = {};
   params: Partial<Params> = {};

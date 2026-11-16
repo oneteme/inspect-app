@@ -11,7 +11,7 @@ import {EnvRouter} from "../../../../service/router.service";
 import {ActivatedRoute, Params} from "@angular/router";
 import {
     getDefaultRelativePeriod, getQuickRangeDates, getQuickRangeStep,
-    isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange,
+    isDefaultRelativePeriod, DEFAULT_PERIOD_QUICK_RANGES, PeriodQuickRange,
     toDisplayedPeriodEnd
 } from "../../../../shared/period-filter";
 import {app} from "../../../../../environments/environment";
@@ -43,7 +43,7 @@ export class SearchMainEventView {
     private readonly _instanceService = inject(InstanceService);
     private readonly _activatedRoute = inject(ActivatedRoute);
     private readonly _location = inject(Location);
-    readonly periodQuickRanges = PERIOD_QUICK_RANGES;
+    readonly periodQuickRanges = DEFAULT_PERIOD_QUICK_RANGES;
     serverNameIsLoading = true;
     nameDataList: any[];
     events: SessionEventDto[];

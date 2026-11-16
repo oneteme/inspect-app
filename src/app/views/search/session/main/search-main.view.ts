@@ -25,7 +25,7 @@ import {
   getQuickRangeDates,
   getQuickRangeStep,
   isDefaultRelativePeriod,
-  PERIOD_QUICK_RANGES,
+  DEFAULT_PERIOD_QUICK_RANGES,
   PeriodQuickRange,
   toDisplayedPeriodEnd
 } from '../../../../shared/period-filter';
@@ -50,7 +50,7 @@ export class SearchMainView implements OnInit, OnDestroy {
   private readonly $destroy = new Subject<void>();
 
   MAPPING_TYPE = Constants.MAPPING_TYPE;
-  readonly periodQuickRanges = PERIOD_QUICK_RANGES;
+  readonly periodQuickRanges = DEFAULT_PERIOD_QUICK_RANGES;
   tableConfig: TableProvider<MainSessionDto> = this.buildTableConfig();
   sessions: MainSessionDto[];
   /** Critères de la requête de base, rejoués avec les colonnes lazy. */

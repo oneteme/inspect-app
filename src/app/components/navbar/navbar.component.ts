@@ -14,7 +14,7 @@ import { EnvRouter } from '../../service/router.service';
 import { InstanceService } from '../../service/jquery/instance.service';
 import { PageTitleService } from '../../service/page-title.service';
 import { PagePanelService } from '../../service/page-panel.service';
-import { PERIOD_QUICK_RANGES, toDisplayedPeriodEnd } from '../../shared/period-filter';
+import { DEFAULT_PERIOD_QUICK_RANGES, toDisplayedPeriodEnd } from '../../shared/period-filter';
 import { DatePipe } from '@angular/common';
 import { AuthService } from 'src/app/auth/auth.service';
 
@@ -219,7 +219,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
   private _buildPeriodLabel(params: Params): string | null {
     if (params['step']) {
       const stepMin = Number(params['step']);
-      const found = PERIOD_QUICK_RANGES.find(r => {
+      const found = DEFAULT_PERIOD_QUICK_RANGES.find(r => {
         const minuteMap: Record<string, number> = { '5m': 5, '15m': 15, '30m': 30, '1h': 60, '3h': 180, '6h': 360, '12h': 720, '24h': 1440, '2d': 2880, '7d': 10080 };
         return minuteMap[r.value] === stepMin;
       });

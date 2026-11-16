@@ -7,7 +7,7 @@ import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-
 import {
   getDefaultTodayPeriod, getQuickRangeDates, getQuickRangeStep,
   isDefaultTodayPeriod,
-  PERIOD_QUICK_RANGES, PeriodQuickRange,
+  DEFAULT_PERIOD_QUICK_RANGES, PeriodQuickRange,
   toDisplayedPeriodEnd
 } from "../../../shared/period-filter";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
@@ -31,7 +31,7 @@ class DashboardNewComponent implements OnInit, OnDestroy {
   private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
   private readonly _router: EnvRouter = inject(EnvRouter);
 
-  protected readonly periodQuickRanges = PERIOD_QUICK_RANGES;
+  protected readonly periodQuickRanges = DEFAULT_PERIOD_QUICK_RANGES;
 
   params: Partial<{ namespace: string, start: Date, end: Date }> = {};
   period: IPeriod | IStep | IStepFrom;

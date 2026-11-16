@@ -24,7 +24,7 @@ import {
   getQuickRangeDates,
   getQuickRangeStep,
   isDefaultRelativePeriod,
-  PERIOD_QUICK_RANGES,
+  DEFAULT_PERIOD_QUICK_RANGES,
   PeriodQuickRange,
   toDisplayedPeriodEnd
 } from '../../../../shared/period-filter';
@@ -69,7 +69,7 @@ export class SearchRestView implements OnInit, OnDestroy {
     { icon: STATUS['0xx'].icon, label: STATUS['0xx'].label, color: STATUS['0xx'].color, value: '0xx' },
     { icon: 'pending', label: 'En cours', color: '', value: 'pending' }
   ];
-  readonly periodQuickRanges = PERIOD_QUICK_RANGES;
+  readonly periodQuickRanges = DEFAULT_PERIOD_QUICK_RANGES;
   queryParams: Partial<QueryParams> = {};
 
   tableConfig: TableProvider<RestSessionDto> = {
