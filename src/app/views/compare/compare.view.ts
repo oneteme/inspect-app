@@ -123,9 +123,10 @@ export class CompareView implements OnInit, AfterViewChecked, OnDestroy {
 
   private getStatusColor(status: number): string {
     if (status == null) return '#3b82f6';            // ongoing/unknown
-    if (status >= 500 || status === 0) return '#ef4444'; // server error
+    if (status >= 500) return '#ef4444';             // server error
     if (status >= 400) return '#f9ad4e';             // client error
-    return '#22c55e';                                 // success
+    if (status >= 200) return '#22c55e';             // success
+    return '#94a3b8';                                // 0 -> 199
   }
 
   private extractException(ex: { type?: string; message?: string } | string | { type?: string; message?: string }[] | string[] | undefined): string | null {
