@@ -47,9 +47,7 @@ export class SearchMainView implements OnInit, OnDestroy {
   private readonly _pageTitleService = inject(PageTitleService);
   private readonly _activatedRoute = inject(ActivatedRoute);
   private readonly _location = inject(Location);
-  /** Annule la requête en cours lors d'un nouveau chargement. */
   private readonly $destroy = new Subject<void>();
-  /** Libère la subscription aux routes à la destruction du composant. */
   private readonly _viewDestroyed = new Subject<void>();
 
   MAPPING_TYPE = Constants.MAPPING_TYPE;
@@ -85,7 +83,6 @@ export class SearchMainView implements OnInit, OnDestroy {
       this._activatedRoute.params,
       this._activatedRoute.queryParams
     ]).pipe(
-      // Angular émet queryParams puis params lors d'une navigation : on fusionne les émissions synchrones
       debounceTime(0),
       takeUntil(this._viewDestroyed)
     ).subscribe({

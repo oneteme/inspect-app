@@ -115,7 +115,6 @@ export class SearchRequestView implements OnInit, OnDestroy {
       this._activatedRoute.params,
       this._activatedRoute.queryParams
       ]).pipe(
-      // Angular émet queryParams puis params lors d'une navigation : on fusionne les émissions synchrones
       debounceTime(0)
       ).subscribe({
       next: ([params, queryParams]) => {
