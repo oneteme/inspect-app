@@ -12,7 +12,7 @@ import {ExceptionInfo, HttpRequestStage, InstanceEnvironment, RestRequest} from 
 import {DataGroup, DataItem, TimelineOptions} from "vis-timeline";
 import {DatePipe} from "@angular/common";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
-import {TabData} from "../../session/_component/detail-session.component";
+import {TabData} from "../../../../shared/_component/vertical-tabs/vertical-tabs.component";
 import {MatDialog} from "@angular/material/dialog";
 import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
 

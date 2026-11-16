@@ -1,0 +1,40 @@
+<div class="vertical-tabs-shell" [class.collapsed]="collapsed">
+  <div class="vertical-tabs"
+       role="tablist"
+       aria-orientation="vertical"
+       [attr.aria-label]="label"
+       (keydown)="onKeydown($event)">
+    <ng-container *ngFor="let tab of tabs; let i = index">
+      <button #tabEl
+              type="button"
+              role="tab"
+              class="tab-button"
+              [class.active]="selectedIndex === i"
+              [class.has-error]="tab.hasError && tab.errorCount > 0"
+              [class.hidden]="!tab.visible"
+              [attr.aria-selected]="selectedIndex === i"
+              [attr.tabindex]="selectedIndex === i ? 0 : -1"
+              [matTooltip]="collapsed ? tab.label : null"
+              matTooltipPosition="right"
+              (click)="select(i)">
+        <mat-icon class="material-symbols-outlined" aria-hidden="true">{{ tab.icon }}</mat-icon>
+        <span class="tab-label">{{ tab.label }}</span>
+        <span class="error-badge" *ngIf="tab.hasError && tab.errorCount > 0" aria-hidden="true">{{ tab.errorCount }}</span>
+        <span class="visually-hidden" *ngIf="tab.hasError && tab.errorCount > 0">, {{ tab.errorCount }} erreur(s)</span>
+        <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
+      </button>
+    </ng-container>
+  </div>
+
+  <div class="tabs-footer">
+    <button type="button"
+            class="collapse-toggle"
+            [attr.aria-expanded]="!collapsed"
+            [attr.aria-label]="collapsed ? 'Développer la navigation' : 'Réduire la navigation'"
+            [matTooltip]="collapsed ? 'Développer la navigation' : 'Réduire la navigation'"
+            matTooltipPosition="right"
+            (click)="toggleCollapsed()">
+      <mat-icon class="material-symbols-outlined" aria-hidden="true">{{ collapsed ? 'left_panel_open' : 'left_panel_close' }}</mat-icon>
+    </button>
+  </div>
+</div>

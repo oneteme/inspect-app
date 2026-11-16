@@ -62,19 +62,7 @@
   </div>
 
   <div class="tabs-container">
-    <div class="vertical-tabs">
-      <div *ngFor="let tab of tabs; let i = index"
-           class="tab-button" [class.active]="selectedTabIndex === i" [class.hidden]="!tab.visible"
-           (click)="selectedTabIndex = i">
-        <mat-icon class="material-symbols-outlined">{{ tab.icon }}</mat-icon>
-        <div class="tab-label-container">
-          <span class="tab-label">{{ tab.label }}</span>
-          <mat-icon *ngIf="tab.hasError && tab.errorCount > 0" class="error-indicator material-symbols-outlined"
-                    [matTooltip]="tab.errorCount + ' erreur(s)'" matTooltipPosition="right">error</mat-icon>
-        </div>
-        <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
-      </div>
-    </div>
+    <app-vertical-tabs [tabs]="tabs" [(selectedIndex)]="selectedTabIndex"></app-vertical-tabs>
     <div class="tab-content">
       <div *ngIf="tabs[selectedTabIndex]?.type === 'stage'" class="tab-panel">
         <stage-table [requests]="stages"></stage-table>

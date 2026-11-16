@@ -12,7 +12,7 @@ import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {Constants, INFINITY, STATUS} from "../../../constants";
 import {ExceptionInfo, FtpRequest, FtpRequestStage, InstanceEnvironment} from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
-import {TabData} from "../../session/_component/detail-session.component";
+import {TabData} from "../../../../shared/_component/vertical-tabs/vertical-tabs.component";
 import {MatDialog} from "@angular/material/dialog";
 import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
 

@@ -28,7 +28,7 @@ import {
 } from './dashboard/components/protocol-exception-modal/protocol-exception-modal.component';
 import {ArchitectureView} from "./architecture/architecture.view";
 import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
-import {NumberFormatterPipe, CompactNumberPipe} from '../shared/pipe/number.pipe';
+import {CompactNumberPipe} from '../shared/pipe/number.pipe';
 import {SearchRequestView} from "./search/request/search-request.view";
 import {DetailTimelineComponent} from "./detail/session/_component/timeline/detail-timeline.component";
 import {DetailRequestView} from "./detail/request/detail-request.view";
@@ -111,7 +111,6 @@ import {SearchMainEventView} from "./search/event/main/search-main-event.view";
     ProtocolExceptionComponent,
     ArchitectureView,
     TreeView,
-    NumberFormatterPipe,
     CompactNumberPipe,
     SearchRequestView,
     MailTableComponent,

@@ -22,7 +22,6 @@ import {DashboardComponent} from "./views/dashboard/dashboard.component";
 import {EnvRouter} from "./service/router.service";
 import {DurationPipe} from "./shared/pipe/duration.pipe";
 import {ArchitectureView} from "./views/architecture/architecture.view";
-import {NumberFormatterPipe} from './shared/pipe/number.pipe';
 import {TreeView} from './views/tree/tree.view';
 import {SizePipe} from "./shared/pipe/size.pipe";
 import {Interceptor} from "./shared/interceptor/interceptor";
@@ -276,7 +275,6 @@ const routes: Route[] = [
     I18nPluralPipe,
     EnvRouter,
     {provide: LOCALE_ID, useValue: 'fr-FR'},
-    NumberFormatterPipe,
     {
       provide: APP_INITIALIZER,
       useFactory: initializeAuth,

@@ -8,17 +8,7 @@ import {DatabaseRequestService} from "../../../../service/jquery/database-reques
 import {FtpRequestService} from "../../../../service/jquery/ftp-request.service";
 import {SmtpRequestService} from "../../../../service/jquery/smtp-request.service";
 import {LdapRequestService} from "../../../../service/jquery/ldap-request.service";
-
-export interface TabData {
-  label: string;
-  icon: string;
-  count: number;
-  visible: boolean;
-  type: string;
-  hasError: boolean;
-  errorCount: number;
-}
-
+import {TabData} from "../../../../shared/_component/vertical-tabs/vertical-tabs.component";
 
 @Component({
   selector: 'detail-session',

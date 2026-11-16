@@ -7,7 +7,7 @@ import {DatePipe} from "@angular/common";
 import {DurationPipe} from "../../../shared/pipe/duration.pipe";
 import {InstanceService} from "../../../service/jquery/instance.service";
 import {groupByColor} from "../../../shared/util";
-import {TabData} from "../session/_component/detail-session.component";
+import {TabData} from "../../../shared/_component/vertical-tabs/vertical-tabs.component";
 import {EnvRouter} from "../../../service/router.service";
 import {TraceService} from "../../../service/trace.service";
 import {PageTitleService} from "../../../service/page-title.service";

@@ -13,7 +13,7 @@ import {getErrorClassName, showifnotnull, getDataForRange} from '../../../../sha
 import {Constants, INFINITY, STATUS} from "../../../constants";
 import {DatabaseRequest, DatabaseRequestStage, ExceptionInfo, InstanceEnvironment} from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
-import {TabData} from "../../session/_component/detail-session.component";
+import {TabData} from "../../../../shared/_component/vertical-tabs/vertical-tabs.component";
 import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
 import {MatDialog} from "@angular/material/dialog";
 
