@@ -86,7 +86,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  border-radius: 12px;
+  border-radius: 8px;
   background: #ffffff;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.05);
   overflow: hidden;
@@ -397,7 +397,7 @@
   justify-content: space-between;
   gap: 1em;
   padding: 0 16px;
-  height: 52px;
+  height: 40px;
   flex-shrink: 0;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   background: #f8fafc;

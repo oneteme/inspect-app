@@ -2,7 +2,7 @@
   <div class="vertical-tabs"
        role="tablist"
        aria-orientation="vertical"
-       [attr.aria-label]="label"
+       aria-label="Navigation des onglets"
        (keydown)="onKeydown($event)">
     <ng-container *ngFor="let tab of tabs; let i = index">
       <button #tabEl

@@ -18,7 +18,6 @@ export interface TabData {
 export class VerticalTabsComponent {
   @Input() tabs: TabData[] = [];
   @Input() selectedIndex: number = 0;
-  @Input() label: string = 'Navigation des onglets';
   @Output() selectedIndexChange = new EventEmitter<number>();
 
   collapsed = false;

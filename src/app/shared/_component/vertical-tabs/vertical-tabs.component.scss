@@ -1,6 +1,6 @@
 :host {
   display: contents;
-  --tab-radius: 12px;
+  --tab-radius: 8px;
   --tab-rail-width: 160px;
   --tab-rail-collapsed-width: 56px;
   --tab-motion: 280ms;
@@ -22,8 +22,10 @@
   display: flex;
   align-items: center;
   justify-content: flex-end;
+  box-sizing: border-box;
   flex: none;
-  padding: 8px 12px;
+  height: 42px; // même hauteur que la barre de pied du tableau (bordures comprises)
+  padding: 0 12px;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
   transition: padding var(--tab-motion) var(--tab-ease);
 }
@@ -54,7 +56,7 @@
   }
 
   &:focus-visible {
-    outline: 2px solid #7c3aed;
+    outline: 2px solid #4f46e5;
     outline-offset: 2px;
   }
 }
@@ -73,7 +75,7 @@
   width: var(--tab-rail-collapsed-width);
 
   .tabs-footer {
-    padding: 8px 14px;
+    padding: 0 14px;
   }
 
   .vertical-tabs {
@@ -127,20 +129,20 @@
   }
 
   &:focus-visible {
-    outline: 2px solid #7c3aed;
+    outline: 2px solid #4f46e5;
     outline-offset: 2px;
   }
 
   &.active {
-    background: rgba(124, 58, 237, 0.1);
-    color: #6d28d9;
+    background: rgba(79, 70, 229, 0.1);
+    color: #4338ca;
 
     mat-icon {
-      color: #7c3aed;
+      color: #4f46e5;
     }
 
     .tab-count {
-      background: #7c3aed;
+      background: #4f46e5;
       color: #fff;
     }
   }
@@ -195,7 +197,7 @@
   padding: 0 8px;
   overflow: hidden;
   line-height: 20px;
-  border-radius: 999px;
+  border-radius: 6px;
   background: #f1f5f9;
   color: #64748b;
   font-size: 0.9em;
@@ -203,8 +205,7 @@
   text-align: center;
   font-variant-numeric: tabular-nums;
   transition: max-width var(--tab-motion) var(--tab-ease), min-width var(--tab-motion) var(--tab-ease),
-    padding var(--tab-motion) var(--tab-ease), opacity var(--tab-motion) var(--tab-ease),
-    background-color 0.15s, color 0.15s;
+    padding var(--tab-motion) var(--tab-ease), opacity var(--tab-motion) var(--tab-ease);
 }
 
 .vertical-tabs-shell.collapsed .tab-count {
@@ -223,7 +224,7 @@
   padding: 0 6px;
   overflow: hidden;
   line-height: 20px;
-  border-radius: 999px;
+  border-radius: 6px;
   background: #fee2e2;
   color: #b91c1c;
   font-size: 0.9em;
