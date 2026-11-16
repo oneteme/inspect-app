@@ -81,7 +81,14 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   align-items: center;
   cursor: pointer;
-  padding: 6px 0 0;
+  flex: 0 0 auto;
+  padding: 0;
+}
+
+.nav-brand-logo {
+  display: block;
+  width: clamp(90px, 11vw, 130px);
+  height: auto;
 }
 
 .brand-logo {

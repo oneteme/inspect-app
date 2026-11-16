@@ -16,6 +16,9 @@
 
   .kpi-chart-badge {
     align-self: center;
+    &.database {
+      cursor: pointer;
+    }
   }
 
   chart,

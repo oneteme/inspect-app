@@ -10,10 +10,11 @@ import {TableProvider} from '@oneteme/jquery-table';
 import {catchError, EMPTY, finalize, merge, Subject, switchMap, takeUntil, tap} from 'rxjs';
 import {LogEntry} from '../../../model/trace.model';
 import {LogEntryService} from '../../../service/jquery/log-entry.service';
-import {DatabaseInfo, InstanceTraceService, parseSizeToBytes, SequenceLossEvent} from '../../../service/jquery/instance-trace.service';
+import {InstanceTraceService, SequenceLossEvent} from '../../../service/jquery/instance-trace.service';
 import {PageTitleService} from '../../../service/page-title.service';
 import {InstanceService} from '../../../service/jquery/instance.service';
 import {StacktraceDialogComponent} from '../../../shared/_component/exception-display/stacktrace-dialog/stacktrace-dialog.component';
+import {DatabaseInfoModalComponent} from '../_component/database-info-modal/database-info-modal.component';
 import {LOG_TABLE_CONFIG} from '../../../shared/_component/table/table.config';
 import {app} from '../../../../environments/environment';
 import {getDefaultRelativePeriod} from '../../../shared/period-filter';
@@ -21,7 +22,9 @@ import {IPeriod} from '../../../model/conf.model';
 import {CustomDateAdapter} from '../../../shared/material/custom-date-adapter';
 import {CustomDateRangeSelectionStrategy} from '../../../shared/material/custom-date-range-selection-strategy';
 import {MY_DATE_FORMATS} from '../../../shared/shared.module';
-import {ActivityPeriodGroup, activityPeriodManagement} from '../../../shared/util';
+import {ActivityPeriodGroup, activityPeriodManagement, parseSizeToBytes} from '../../../shared/util';
+import {DatabaseInfo} from "../../../model/request.model";
+import {DatabaseRequestService} from "../../../service/jquery/database-request.service";
 
 interface ActivityFilters {
   namespace: string;
@@ -54,6 +57,7 @@ interface SequenceLossRow {
 })
 export class ServerActivityView implements OnDestroy {
   private readonly _route = inject(ActivatedRoute);
+  private readonly _databaseRequestService = inject(DatabaseRequestService);
   private readonly _router = inject(Router);
   private readonly _logEntryService = inject(LogEntryService);
   private readonly _instanceTraceService = inject(InstanceTraceService);
@@ -88,11 +92,13 @@ export class ServerActivityView implements OnDestroy {
   isLoadingLogs = false;
 
   databaseInfo: DatabaseInfo | null = null;
+  isLoadingDatabaseInfo = true;
   schemaSize = 0;
   databaseSize = 0;
+  schemaName = '';
   schemaSizeMb = '';
   databaseSizeMb = '';
-  databaseRatio = '0 %';
+  databaseRatio = '...';
 
   readonly USAGE_INSTANCE_TRACE_BY_PERIOD_LINE: ChartProvider<string, number> = {
     height: 335,
@@ -150,21 +156,22 @@ export class ServerActivityView implements OnDestroy {
 
   constructor() {
     this._pageTitleService.set({icon: 'troubleshoot', iconOutlined: true, title: 'Diagnostic'});
-    this._instanceTraceService.getDatabaseInfo().pipe(
+    this._databaseRequestService.getDatabaseInfo().pipe(
         tap(info => {
-          const first = info?.[0];
-          if (first) {
-            this.databaseInfo = first;
-            this.schemaSizeMb = first.size_schema;
-            this.databaseSizeMb = first.size_database;
-            this.schemaSize = parseSizeToBytes(first.size_schema);
-            this.databaseSize = parseSizeToBytes(first.size_database);
+          if (info?.[0]) {
+            this.databaseInfo = info[0];
+            this.schemaName = info[0].schema;
+            this.schemaSizeMb = info[0].size_schema;
+            this.databaseSizeMb = info[0].size_database;
+            this.schemaSize = parseSizeToBytes(info[0].size_schema);
+            this.databaseSize = parseSizeToBytes(info[0].size_database);
             this.databaseRatio = this.databaseSize
                 ? `${((this.schemaSize / this.databaseSize) * 100).toFixed(2)} %`
-                : '0 %';
+                : '...';
           }
         }),
         catchError(() => EMPTY),
+        finalize(() => this.isLoadingDatabaseInfo = false),
         takeUntil(this._destroy$)
     ).subscribe();
     this._route.queryParams.pipe(
@@ -269,6 +276,13 @@ export class ServerActivityView implements OnDestroy {
   openLogStacktrace(row: LogEntry): void {
     this._dialog.open(StacktraceDialogComponent, {
       data: {message: row.message, stack: row.stacktrace}
+    });
+  }
+
+  openDatabaseInfo(): void {
+    this._dialog.open(DatabaseInfoModalComponent, {
+      width: '70vw',
+      height: '70vh'
     });
   }
 

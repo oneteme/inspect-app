@@ -102,6 +102,7 @@ export interface UserAction {
   name: string;
   nodeName: string;
   type: string;
+  scope?: string;
   start: Date;
 }
 

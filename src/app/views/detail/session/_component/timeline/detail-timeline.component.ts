@@ -229,20 +229,26 @@ export class DetailTimelineComponent implements OnChanges {
             case 'DOMContentLoaded':
                 return 'language';
             case 'click':
+            case 'Click':
                 return 'ads_click';
             case 'dblclick':
+            case 'Dblclick':
                 return 'mouse';
             case 'scroll':
+            case 'Scroll':
                 return 'swap_vert';
             case 'resize':
+            case 'Resize':
                 return 'open_in_full';
             case 'zoom':
                 return 'zoom_in';
             case 'DOC_HIDDEN':
+            case 'Tab-blur':
                 return 'visibility_off';
             case 'DOC_VISIBLE':
+            case 'Tab-focus':
                 return 'visibility';
-            case 'change':
+            case 'Change':
                 return 'edit';
             case 'info':
             case 'INFO':

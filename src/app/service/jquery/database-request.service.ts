@@ -2,7 +2,7 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable, map} from "rxjs";
 import {JdbcExceptionsByPeriodAndAppname} from "../../model/jquery.model";
-import {DatabaseRequestDto} from "../../model/request.model";
+import {DatabaseInfo, DatabaseRequestDto, DatabaseTableInfo} from "../../model/request.model";
 import {ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
 import {DATE_HOUR_COLUMNS, fetchGroupedRows, groupColumn, groupOrder, isDateHour, packDateHour} from "./kpi-date-granularity";
 
@@ -102,5 +102,13 @@ export class DatabaseRequestService {
         return this.getDatabaseRequest<any[]>(args).pipe(
             map(rows => dateHour ? packDateHour(rows, filter.jquery.buildAlias()) : rows)
         );
+    }
+
+    getDatabaseInfo(params?: any): Observable<DatabaseInfo[]> {
+        return this.http.get<DatabaseInfo[]>(`${this.server}/database`, { params: params });
+    }
+
+    getDatabaseTablesInfo(params?: any): Observable<DatabaseTableInfo[]> {
+        return this.http.get<DatabaseTableInfo[]>(`${this.server}/database/table`, { params: params });
     }
 }

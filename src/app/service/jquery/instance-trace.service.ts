@@ -11,28 +11,6 @@ export interface SequenceLossEvent {
   seq: number;
   atm: number;
 }
-const SIZE_UNIT_MULTIPLIERS: Record<string, number> = {
-  B: 1,
-  KB: 1000,
-  MB: 1000 ** 2,
-  GB: 1000 ** 3,
-  TB: 1000 ** 4
-};
-
-export function parseSizeToBytes(value: string): number {
-  const match = /^([\d.,]+)\s*([A-Za-z]+)$/.exec(value?.trim() ?? '');
-  if (!match) return 0;
-  const amount = Number(match[1].replace(',', '.'));
-  const unit = match[2].toUpperCase();
-  const multiplier = SIZE_UNIT_MULTIPLIERS[unit] ?? 1;
-  return Number.isFinite(amount) ? amount * multiplier : 0;
-}
-
-export interface DatabaseInfo {
-  schema: string;
-  size_schema: string;
-  size_database: string;
-}
 
 @Injectable({ providedIn: 'root' })
 export class InstanceTraceService {
@@ -43,11 +21,6 @@ export class InstanceTraceService {
   getInstanceTrace<T>(params: any): Observable<T> {
     const url = `${localStorage.getItem('server')}/jquery/instance/trace`;
     return this.http.get<T>(url, { params: params });
-  }
-
-  getDatabaseInfo(params?: any): Observable<DatabaseInfo[]> {
-    const url = `${localStorage.getItem('server')}/v5/trace/database`;
-    return this.http.get<DatabaseInfo[]>(url, { params: params });
   }
 
 

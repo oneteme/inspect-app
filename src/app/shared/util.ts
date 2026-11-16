@@ -437,6 +437,23 @@ export function volumeSubtitle(rows: any[], distinctSingular: string, distinctPl
   return `${distinct} ${distinct > 1 ? distinctPlural : distinctSingular}`;
 }
 
+const SIZE_UNIT_MULTIPLIERS: Record<string, number> = {
+    B: 1,
+    KB: 1000,
+    MB: 1000 ** 2,
+    GB: 1000 ** 3,
+    TB: 1000 ** 4
+};
+
+export function parseSizeToBytes(value: string): number {
+    const match = /^([\d.,]+)\s*([A-Za-z]+)$/.exec(value?.trim() ?? '');
+    if (!match) return 0;
+    const amount = Number(match[1].replace(',', '.'));
+    const unit = match[2].toUpperCase();
+    const multiplier = SIZE_UNIT_MULTIPLIERS[unit] ?? 1;
+    return Number.isFinite(amount) ? amount * multiplier : 0;
+}
+
 export function shallowEqual(
     a: {[key: string | symbol]: any},
     b: {[key: string | symbol]: any},

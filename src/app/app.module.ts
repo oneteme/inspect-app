@@ -200,7 +200,7 @@ const routes: Route[] = [
     , canActivate: [authGuard]
   },
   {
-    path: 'analytics/:user',
+    path: 'analytics/:id',
     component: AnalyticsView,
     title: 'Parcours Utilisateur',
     canActivate: [authGuard]

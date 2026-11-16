@@ -3,25 +3,30 @@ import {UserAction} from "../model/trace.model";
 
 export const INFINITY = new Date(9999,12,31).getTime();
 
+const defaultText = (param: UserAction) => {
+    const label = ANALYTIC_MAPPING[param.type]?.label ?? param.type;
+    const suffix = param.scope ? `, scope: ${param.scope}` : '';
+    return param.name ? `${label}:"${param.name}"${suffix}` : `${label}${suffix}`;
+};
+
 export const ANALYTIC_MAPPING : {[key: string]: {label: string, text: (param: UserAction) => string}} = {
     DOMContentLoaded: {
         label: 'Initialisation',
-        text: (param: UserAction) => `Chargement de la page.`
+        text: defaultText
     },
-    click: {
+    Click: {
         label: 'Click',
-        text: (param: UserAction) => `Clique sur l'êlement "${param.name}" de type "${param.nodeName}".`
+        text: defaultText
     },
-    scrollend: {
+    Scroll: {
         label: 'Scroll',
-        text: (param: UserAction) => `Scroll sur l'êlement "${param.nodeName}".`
+        text: defaultText
     },
-    change: {
+    Change: {
         label: 'Change',
-        text: (param: UserAction) => `Changement sur l'êlement "${param.name}" de type "${param.nodeName}".`
+        text: defaultText
     }
 };
-
 // Tech Stack Catalog
 
 export type TechCategory = 'backend' | 'data' | 'integration' | 'client' | 'frontend' | 'infra';

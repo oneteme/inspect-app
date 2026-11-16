@@ -86,3 +86,15 @@ export interface MainSessionType {
   id: string;
   type: string;
 }
+
+export interface DatabaseInfo {
+  schema: string;
+  size_schema: string;
+  size_database: string;
+}
+
+export interface DatabaseTableInfo {
+  schema: string;
+  table_name: string;
+  size: string;
+}

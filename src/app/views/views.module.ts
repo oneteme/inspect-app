@@ -36,6 +36,9 @@ import {
 } from "./supervision/_component/server-instance-selector-dialog/server-instance-selector-dialog.component";
 import {ServerSupervisionView} from "./supervision/server-supervision/server-supervision.view";
 import {ServerActivityView} from "./supervision/server-activity/server-activity.view";
+import {
+  DatabaseInfoModalComponent
+} from "./supervision/_component/database-info-modal/database-info-modal.component";
 import {InstanceComponent} from './detail/instance/instance.component';
 import {InstanceTableComponent} from './detail/instance/_component/instance-table/instance-table.component';
 import {ParameterTableComponent} from "./detail/instance/_component/parameter-table/parameter-table.component";
@@ -111,6 +114,7 @@ import DashboardNewComponent from "./dashboard/new/dashboard-new.component";
     ServerInstanceSelectorDialogComponent,
     ServerSupervisionView,
     ServerActivityView,
+    DatabaseInfoModalComponent,
     InstanceComponent,
     InstanceTableComponent,
     ParameterTableComponent,
