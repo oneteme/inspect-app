@@ -1,4 +1,4 @@
-<div class="server-card">
+<div class="server-card" [ngClass]="_status?.class || 'unavailable'">
 
 
   <div class="server-card-inner">
@@ -7,7 +7,6 @@
     <div class="server-header">
       <div class="server-title-row">
         <div class="server-icon-wrap"
-             [ngClass]="_status?.class"
              [matTooltip]="_status ? _status.tooltip : ''"
              (click)="navigate($event)">
           <mat-icon class="material-symbols-outlined server-icon">

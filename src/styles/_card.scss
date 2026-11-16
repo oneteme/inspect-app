@@ -80,6 +80,28 @@
   }
 }
 
+// PALETTE DE STATUT PARTAGÉE (session-card et server-card)
+// Code coloré + teinte de fond ; server-card utilise online→success, pending→warning, offline→unavailable
+.session-card,
+.server-card {
+  --hero-color: #16a34a;
+  --hero-text: #15803d;
+  --hero-tint: #f0fdf4;
+
+  &.warning,
+  &.pending     { --hero-color: #d97706; --hero-text: #b45309; --hero-tint: #fff7ed; }
+  &.fail        { --hero-color: #dc2626; --hero-text: #b91c1c; --hero-tint: #fff5f5; }
+  &.unavailable,
+  &.offline     { --hero-color: #64748b; --hero-text: #475569; --hero-tint: #f8fafc; }
+  &.in-progress { --hero-color: #4f46e5; --hero-text: #4338ca; --hero-tint: #f0f7ff; }
+}
+
+// Dégradé d'en-tête selon le statut (comme kpi-stat-card)
+.session-card .session-header,
+.server-card .server-header {
+  background: linear-gradient(to bottom, var(--hero-tint) 0%, #ffffff 60%);
+}
+
 // CARTE SESSION REST
 .session-card {
   flex: 1 1 60%;
@@ -94,20 +116,6 @@
 
   &:hover {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12), 0 0 0 1px rgba(0, 0, 0, 0.06);
-  }
-
-  // Statut : code coloré + libellé en petites capitales, sur un léger dégradé (comme kpi-stat-card)
-  --hero-color: #16a34a;
-  --hero-text: #15803d;
-  --hero-tint: #f0fdf4;
-
-  &.warning     { --hero-color: #d97706; --hero-text: #b45309; --hero-tint: #fff7ed; }
-  &.fail        { --hero-color: #dc2626; --hero-text: #b91c1c; --hero-tint: #fff5f5; }
-  &.unavailable { --hero-color: #64748b; --hero-text: #475569; --hero-tint: #f8fafc; }
-  &.in-progress { --hero-color: #4f46e5; --hero-text: #4338ca; --hero-tint: #f0f7ff; }
-
-  .session-header {
-    background: linear-gradient(to bottom, var(--hero-tint) 0%, #ffffff 60%);
   }
 
   .session-title-row {
