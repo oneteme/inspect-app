@@ -1,9 +1,7 @@
-import {Component, EventEmitter, Input, OnDestroy, Output} from "@angular/core";
+import {Component, EventEmitter, Input, Output} from "@angular/core";
 import {RestRequestDto} from "../../../../../model/request.model";
 import {TableProvider} from '@oneteme/jquery-table';
 import {REST_REQUEST_TABLE_CONFIG} from "../../../../../shared/_component/table/table.config";
-import {QueryParams} from "../../../../../model/conf.model";
-import {AbstractRequest} from "../../../../../model/trace.model";
 
 @Component({
   selector: 'rest-table',
