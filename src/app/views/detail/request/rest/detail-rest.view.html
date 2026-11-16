@@ -152,8 +152,8 @@
 <mat-menu #menuHost="matMenu" class="card-menu">
     <div mat-menu-item
          class="inspect-track-target"
-         [ngStyle]="{'pointer-events': request && request.status != 0 && !request.linked ? 'none' : ''}"
-         [disabled]="request && request.status != 0 && !request.linked"
+         [ngStyle]="{'pointer-events': request && request.status > 100 && !request.linked ? 'none' : ''}"
+         [disabled]="request && request.status > 100 && !request.linked"
          (click)="navigate($event, 'remote')"
          data-inspect-track="Service Distant" data-inspect-scope="Menu contextuel">
         <mat-icon class="material-symbols-outlined">link</mat-icon>Service Distant
