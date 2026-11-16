@@ -44,11 +44,11 @@
                                         <span>Voir la stacktrace</span>
                                       </button>
                                     </span>
-                                    <span *ngIf="item.exception?.message"
+                                  <span
                                           class="exception-message"
                                           [class.collapsed]="isExceptionMessageCollapsed(item)">
-                                        {{item.exception?.message}}
-                                    </span>
+                                            « {{ item.exception?.message ?? '' }} »
+                                  </span>
                                     <button *ngIf="hasLongExceptionMessage(item)"
                                             class="exception-toggle"
                                             (click)="$event.stopPropagation(); toggleExceptionMessage(item)"
