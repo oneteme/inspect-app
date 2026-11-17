@@ -1,7 +1,7 @@
 :host {
   display: contents;
   --tab-radius: 8px;
-  --tab-rail-width: 160px;
+  --tab-rail-width: 192px;
   --tab-rail-collapsed-width: 56px;
   --tab-motion: 280ms;
   --tab-motion-fast: 200ms;
@@ -215,31 +215,44 @@
   opacity: 0;
 }
 
-.error-badge {
-  flex-shrink: 0;
-  box-sizing: border-box;
-  min-width: 20px;
-  max-width: 48px;
-  height: 20px;
-  padding: 0 6px;
-  overflow: hidden;
-  line-height: 20px;
-  border-radius: 6px;
-  background: #fee2e2;
-  color: #b91c1c;
-  font-size: 0.9em;
-  font-weight: 700;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-  transition: max-width var(--tab-motion) var(--tab-ease), min-width var(--tab-motion) var(--tab-ease),
-    padding var(--tab-motion) var(--tab-ease), opacity var(--tab-motion) var(--tab-ease);
+.tab-label-container {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 1;
+  min-width: 0;
+  transition: opacity var(--tab-motion) var(--tab-ease);
 }
 
-.vertical-tabs-shell.collapsed .error-badge {
-  min-width: 0;
-  max-width: 0;
-  padding: 0;
+.tab-label-container .tab-label {
+  flex: 0 1 auto;
+}
+
+.tab-button mat-icon.error-indicator {
+  flex-shrink: 0;
+  width: 14px;
+  height: 14px;
+  font-size: 14px;
+  line-height: 14px;
+  color: #db2828;
+  animation: pulse-error 2s infinite;
+  transition: opacity var(--tab-motion) var(--tab-ease);
+}
+
+.vertical-tabs-shell.collapsed .tab-label-container {
+  flex: 0;
   opacity: 0;
+}
+
+.vertical-tabs-shell.collapsed .error-indicator {
+  opacity: 0;
+  animation: none;
+  pointer-events: none;
+}
+
+@keyframes pulse-error {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
 .visually-hidden {
