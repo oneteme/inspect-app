@@ -39,86 +39,92 @@
             text-transform: uppercase;
           }
 
-          @keyframes scanLeftToRight {
+          @keyframes revealWordmark {
             from {
-              transform: translateX(-330px);
+              opacity: 0;
+              clip-path: inset(0 100% 0 0);
             }
             to {
-              transform: translateX(0);
+              opacity: 1;
+              clip-path: inset(0 0 0 0);
             }
+          }
+
+          @keyframes scanAndSettle {
+            0% { transform: translateX(-330px); }
+            88% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
           }
 
           @keyframes drawWave {
-            0% { stroke-dashoffset: 100; }
-            100% { stroke-dashoffset: 0; }
+            from { stroke-dashoffset: 100; }
+            to { stroke-dashoffset: 0; }
           }
 
           @keyframes revealWavePoint {
-            0%, 75% { opacity: 0; }
-            100% { opacity: 1; }
-          }
-
-          @keyframes slideFromLeft {
-            0% {
+            0%, 70% {
               opacity: 0;
-              transform: translateX(-30px);
+              transform: scale(0.65);
             }
-            100% {
+            to {
               opacity: 1;
-              transform: translateX(0);
+              transform: scale(1);
             }
           }
 
-          @keyframes slideFromRight {
-            0% {
+          @keyframes revealTagline {
+            from {
               opacity: 0;
-              transform: translateX(30px);
+              transform: translateY(6px);
             }
-            100% {
-              opacity: 1;
-              transform: translateX(0);
-            }
-          }
-
-          @keyframes fadeIn {
-            0% {
-              opacity: 0;
-              transform: translateY(8px);
-            }
-            100% {
+            to {
               opacity: 1;
               transform: translateY(0);
             }
           }
 
           .anim-lens {
-            animation: scanLeftToRight 2.4s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+            animation: scanAndSettle 2.6s cubic-bezier(0.4, 0, 0.2, 1) 0.15s both;
           }
 
           .anim-wave {
             stroke-dasharray: 100;
             stroke-dashoffset: 100;
-            animation: drawWave 0.8s ease-in-out 2.6s forwards;
+            animation: drawWave 0.7s cubic-bezier(0.4, 0, 0.2, 1) 2.6s both;
           }
 
           .anim-wave-point {
             opacity: 0;
-            animation: revealWavePoint 0.8s ease-out 2.6s forwards;
+            transform-box: fill-box;
+            transform-origin: center;
+            animation: revealWavePoint 0.7s cubic-bezier(0.4, 0, 0.2, 1) 2.6s both;
           }
 
           .anim-ins {
             opacity: 0;
-            animation: slideFromLeft 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
-          }
-
-          .anim-ect {
-            opacity: 0;
-            animation: slideFromRight 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards;
+            animation: revealWordmark 1.6s cubic-bezier(0.4, 0, 0.2, 1) 0.4s both;
           }
 
           .anim-tagline {
             opacity: 0;
-            animation: fadeIn 0.8s ease-out 2.6s forwards;
+            animation: revealTagline 0.7s cubic-bezier(0.4, 0, 0.2, 1) 2.6s both;
+          }
+
+          @media (prefers-reduced-motion: reduce) {
+            .anim-lens,
+            .anim-wave,
+            .anim-wave-point,
+            .anim-ins,
+            .anim-tagline {
+              animation: none;
+              opacity: 1;
+              transform: none;
+              clip-path: none;
+            }
+
+            .anim-wave {
+              stroke-dashoffset: 0;
+            }
           }
         </style>
         <g transform="translate(13, 10)">
