@@ -153,6 +153,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscriptions.forEach(s => s.unsubscribe());
+    clearTimeout(this._copyResetTimer);
   }
 
   gotoHome(event: MouseEvent) {
@@ -224,6 +225,8 @@ export class NavbarComponent implements OnInit, OnDestroy {
       this.pageIdCopied = true;
       clearTimeout(this._copyResetTimer);
       this._copyResetTimer = setTimeout(() => this.pageIdCopied = false, 1500);
+    }).catch(() => {
+      this.pageIdCopied = false;
     });
   }
 
