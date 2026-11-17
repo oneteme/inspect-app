@@ -233,6 +233,16 @@
           <div class="npt-text">
             <div class="npt-top-row">
               <span class="npt-label">{{ pt.title }}</span>
+              <ng-container *ngIf="pt.copyValue">
+                <span class="npt-sep">•</span>
+                <button class="npt-copy" type="button"
+                        [class.npt-copy--done]="pageIdCopied"
+                        [matTooltip]="pageIdCopied ? 'Copié' : 'Copier l\'identifiant'"
+                        (click)="copyPageId(pt.copyValue)">
+                  <span>{{ pt.copyValue }}</span>
+                  <mat-icon>{{ pageIdCopied ? 'check' : 'content_copy' }}</mat-icon>
+                </button>
+              </ng-container>
             </div>
             <span class="npt-sub" *ngIf="pt.subtitle">{{ pt.subtitle }}</span>
           </div>

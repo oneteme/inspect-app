@@ -63,7 +63,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([params, queryParams]) => {
         this.params = {idSmtp: params.id_request, namespace: queryParams.namespace || app.defaultNamespace};
-        this._pageTitleService.set({ icon: 'outgoing_mail', iconOutlined: true, title: 'Flux SMTP • ' + params.id_request, subtitle: 'Communications externes' });
+        this._pageTitleService.set({ icon: 'outgoing_mail', iconOutlined: true, title: 'Flux SMTP', copyValue: params.id_request, subtitle: 'Communications externes' });
         this.getRequest();
       }
     });

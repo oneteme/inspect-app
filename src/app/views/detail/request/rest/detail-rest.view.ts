@@ -55,7 +55,7 @@ export class DetailRestView implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([params, queryParams]) => {
         this.params = {idRest: params.id_request, namespace: queryParams.namespace || app.defaultNamespace};
-        this._pageTitleService.set({ icon: 'public', iconOutlined: true, title: 'Flux HTTP • ' + params.id_request, subtitle: 'Communications externes' });
+        this._pageTitleService.set({ icon: 'public', iconOutlined: true, title: 'Flux HTTP', copyValue: params.id_request, subtitle: 'Communications externes' });
         this.getRequest();
       }
     });

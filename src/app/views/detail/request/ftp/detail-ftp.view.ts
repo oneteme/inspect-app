@@ -57,7 +57,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([params, queryParams]) => {
         this.params = {idFtp: params.id_request, namespace: queryParams.namespace || app.defaultNamespace};
-        this._pageTitleService.set({ icon: 'smb_share', iconOutlined: true, title: 'Flux FTP • ' + params.id_request, subtitle: 'Communications externes' });
+        this._pageTitleService.set({ icon: 'smb_share', iconOutlined: true, title: 'Flux FTP', copyValue: params.id_request, subtitle: 'Communications externes' });
         this.getRequest();
       }
     });

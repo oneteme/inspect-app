@@ -61,7 +61,7 @@ export class DetailLdapView implements OnInit, OnDestroy {
         ]).subscribe({
             next: ([params, queryParams]) => {
                 this.params = {idLdap: params.id_request, namespace: queryParams.namespace || app.defaultNamespace};
-        this._pageTitleService.set({ icon: 'user_attributes', iconOutlined: true, title: 'Flux LDAP • ' + params.id_request, subtitle: 'Communications externes' });
+        this._pageTitleService.set({ icon: 'user_attributes', iconOutlined: true, title: 'Flux LDAP', copyValue: params.id_request, subtitle: 'Communications externes' });
                 this.getRequest();
             }
         });

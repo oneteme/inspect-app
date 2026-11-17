@@ -6,6 +6,7 @@ export interface PageTitleConfig {
     icon: string;
     iconOutlined?: boolean;
     subtitle?: string;
+    copyValue?: string;
 }
 
 @Injectable({ providedIn: 'root' })

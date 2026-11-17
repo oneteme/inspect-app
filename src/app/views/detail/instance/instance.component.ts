@@ -58,7 +58,7 @@ export class InstanceComponent implements OnInit, OnDestroy {
       next: ([params, queryParams]) => {
         this.params.id = params.id_instance;
         this.params.namespace = queryParams.namespace;
-        this._pageTitleService.set({ icon: 'history', iconOutlined: true, title: 'Instance • ' + this.params.id, subtitle: 'Historique des démarrages' });
+        this._pageTitleService.set({ icon: 'history', iconOutlined: true, title: 'Instance', copyValue: this.params.id, subtitle: 'Historique des démarrages' });
         this.getRequest();
       }
     });
