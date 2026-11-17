@@ -29,6 +29,10 @@ export class VerticalTabsComponent {
     this.selectedIndexChange.emit(index);
   }
 
+  errorText(tab: TabData): string {
+    return tab.errorCount + (tab.errorCount > 1 ? ' erreurs' : ' erreur');
+  }
+
   toggleCollapsed() {
     this.collapsed = !this.collapsed;
   }

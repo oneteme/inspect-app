@@ -14,19 +14,16 @@
               [class.hidden]="!tab.visible"
               [attr.aria-selected]="selectedIndex === i"
               [attr.tabindex]="selectedIndex === i ? 0 : -1"
-              [matTooltip]="collapsed ? tab.label : null"
+              [matTooltip]="collapsed ? (tab.label + (tab.hasError && tab.errorCount > 0 ? ' · ' + errorText(tab) : '')) : null"
               matTooltipPosition="right"
               (click)="select(i)">
-        <mat-icon class="material-symbols-outlined" aria-hidden="true">{{ tab.icon }}</mat-icon>
+        <mat-icon class="material-symbols-outlined" aria-hidden="true"
+                  [matTooltip]="!collapsed && tab.hasError && tab.errorCount > 0 ? errorText(tab) : null"
+                  matTooltipPosition="right">{{ tab.icon }}</mat-icon>
         <span class="tab-label-container">
           <span class="tab-label">{{ tab.label }}</span>
         </span>
-        <mat-icon *ngIf="tab.hasError && tab.errorCount > 0"
-                  class="error-indicator material-symbols-outlined"
-                  aria-hidden="true"
-                  [matTooltip]="collapsed ? null : tab.errorCount + (tab.errorCount > 1 ? ' erreurs' : ' erreur')"
-                  matTooltipPosition="right">error</mat-icon>
-        <span class="visually-hidden" *ngIf="tab.hasError && tab.errorCount > 0">, {{ tab.errorCount }} {{ tab.errorCount > 1 ? 'erreurs' : 'erreur' }}</span>
+        <span class="visually-hidden" *ngIf="tab.hasError && tab.errorCount > 0">, {{ errorText(tab) }}</span>
         <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
       </button>
     </ng-container>

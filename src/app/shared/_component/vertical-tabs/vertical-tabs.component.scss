@@ -1,7 +1,7 @@
 :host {
   display: contents;
   --tab-radius: 8px;
-  --tab-rail-width: 192px;
+  --tab-rail-width: 176px;
   --tab-rail-collapsed-width: 56px;
   --tab-motion: 280ms;
   --tab-motion-fast: 200ms;
@@ -147,6 +147,10 @@
     }
   }
 
+  &.has-error > mat-icon {
+    color: #db2828;
+  }
+
   &.hidden {
     display: none;
   }
@@ -228,31 +232,9 @@
   flex: 0 1 auto;
 }
 
-.tab-button mat-icon.error-indicator {
-  flex-shrink: 0;
-  width: 14px;
-  height: 14px;
-  font-size: 14px;
-  line-height: 14px;
-  color: #db2828;
-  animation: pulse-error 2s infinite;
-  transition: opacity var(--tab-motion) var(--tab-ease);
-}
-
 .vertical-tabs-shell.collapsed .tab-label-container {
   flex: 0;
   opacity: 0;
-}
-
-.vertical-tabs-shell.collapsed .error-indicator {
-  opacity: 0;
-  animation: none;
-  pointer-events: none;
-}
-
-@keyframes pulse-error {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
 }
 
 .visually-hidden {
