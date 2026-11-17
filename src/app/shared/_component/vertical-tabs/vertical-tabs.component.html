@@ -33,8 +33,8 @@
     <button type="button"
             class="collapse-toggle"
             [attr.aria-expanded]="!collapsed"
-            [attr.aria-label]="collapsed ? 'Développer la navigation' : 'Réduire la navigation'"
-            [matTooltip]="collapsed ? 'Développer la navigation' : 'Réduire la navigation'"
+            [attr.aria-label]="collapsed ? 'Agrandir la navigation' : 'Réduire la navigation'"
+            [matTooltip]="collapsed ? 'Agrandir la navigation' : 'Réduire la navigation'"
             matTooltipPosition="right"
             (click)="toggleCollapsed()">
       <mat-icon class="material-symbols-outlined" aria-hidden="true">{{ collapsed ? 'left_panel_open' : 'left_panel_close' }}</mat-icon>
