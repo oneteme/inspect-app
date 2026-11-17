@@ -1,5 +1,9 @@
 ﻿import {ChartProvider, field} from "@oneteme/jquery-core";
 import {UserAction} from "../model/trace.model";
+import {TableProvider} from "@oneteme/jquery-table";
+import {DatabaseTableInfo} from "../model/request.model";
+import {DEFAULT_TABLE_CONFIG} from "../shared/_component/table/table.config";
+import {parseSizeToBytes} from "../shared/util";
 
 export const INFINITY = new Date(9999,12,31).getTime();
 
@@ -356,3 +360,17 @@ export const EVENT_USER = {
     "Zoom": {label: "Zoom", color: `hsl(180, 40%, 50%)`},
     "Resize": {label: "Redimensionnement", color: `hsl(170, 50%, 60%)`}
 }
+
+export const DATABASE_MODAL_TABLE: TableProvider<DatabaseTableInfo> = {
+    ...DEFAULT_TABLE_CONFIG,
+    view: { enabled: false },
+    columns: [
+        { key: 'table_name', header: 'Nom de la table', icon: 'list' },
+        {key: 'table_size', header: 'Volume de la table', icon: 'table_rows',
+            sortValue: (row: DatabaseTableInfo) => parseSizeToBytes((row.table_size))},
+        { key: 'indexes_size', header: 'Volume des index', icon: 'table',
+            sortValue: (row: DatabaseTableInfo) => parseSizeToBytes((row.indexes_size))},
+        { key: 'total_size', header: 'Volume total', icon: 'memory',
+            sortValue: (row: DatabaseTableInfo) => parseSizeToBytes((row.total_size))},
+    ]
+};
