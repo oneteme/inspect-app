@@ -45,13 +45,4 @@
   }
 }
 
-// Responsive
-@media (max-width: 1024px) {
-  .tabs-container {
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .tab-content { padding-left: 0; padding-top: 12px; }
-}
 
