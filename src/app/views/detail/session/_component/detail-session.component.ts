@@ -107,15 +107,6 @@ export class DetailSessionComponent implements OnChanges {
         errorCount: this.getLocalErrorCount()
       },
       {
-        label: 'Stages',
-        icon: 'view_object_track',
-        count: 0,
-        visible: !!this.session['httpSessionStages']?.length,
-        type: 'stage',
-        hasError: false,
-        errorCount: 0
-      },
-      {
         label: 'Événements',
         icon: Constants.MAPPING_TYPE['event'].icon,
         count: this.sessionEvents?.length + this.sessionExceptions?.length,
@@ -123,6 +114,15 @@ export class DetailSessionComponent implements OnChanges {
         type: 'action',
         hasError: this.sessionExceptions?.length > 0,
         errorCount: this.sessionExceptions?.length || 0
+      },
+      {
+        label: 'Stages',
+        icon: 'view_object_track',
+        count: 0,
+        visible: !!this.session['httpSessionStages']?.length,
+        type: 'stage',
+        hasError: false,
+        errorCount: 0
       },
       {
         label: 'Chronologie',
