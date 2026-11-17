@@ -332,12 +332,18 @@
   flex: 1;
 }
 
+// Colonnes : date | nom (optionnel, extensible) | durée toujours en dernière colonne
 .session-name-row {
-  display: flex;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
   align-items: center;
   gap: 10px;
   min-width: 0;
   min-height: 26px;
+
+  .session-duration {
+    grid-column: 3;
+  }
 }
 
 .session-name {
