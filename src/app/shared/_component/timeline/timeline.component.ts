@@ -19,6 +19,7 @@ import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
 export class TimelineComponent implements OnChanges, OnInit, OnDestroy {
     private timeline: Timeline;
     private resizeObserver: ResizeObserver;
+    private redrawTimer: ReturnType<typeof setTimeout>;
 
     @ViewChild('timeline', {static: true}) timelineElement: ElementRef;
 
@@ -29,7 +30,11 @@ export class TimelineComponent implements OnChanges, OnInit, OnDestroy {
     @Output() onItemCLicked = new EventEmitter<any>();
 
     ngOnInit() {
-        this.resizeObserver = new ResizeObserver(() => this.timeline?.redraw());
+        // redraw() est coûteux : on attend la fin des changements de taille (animation de la sidenav)
+        this.resizeObserver = new ResizeObserver(() => {
+            clearTimeout(this.redrawTimer);
+            this.redrawTimer = setTimeout(() => this.timeline?.redraw(), 100);
+        });
         this.resizeObserver.observe(this.timelineElement.nativeElement);
     }
 
@@ -44,6 +49,7 @@ export class TimelineComponent implements OnChanges, OnInit, OnDestroy {
 
     ngOnDestroy() {
         this.resizeObserver?.disconnect();
+        clearTimeout(this.redrawTimer);
         this.destroy();
     }
 
