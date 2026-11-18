@@ -41,9 +41,7 @@
         </div>
         <span class="kpi-chart-badge" *ngIf="isLoadingDatabaseInfo" matTooltip="Chargement...">...</span>
         <div class="kpi-chart-badge database" *ngIf="!isLoadingDatabaseInfo">
-            <span class="kpi-chart-badge">Volume schéma / Volume total</span>
-            <br>
-            <span class="kpi-chart-badge database" (click)="openDatabaseInfo()" matTooltip="Nom du schéma : {{ schemaName }}&#10;Volume : {{ schemaSizeMb }}&#10;Volume de la base : {{ databaseSizeMb }}">{{ databaseRatio }}</span>
+            <span class="kpi-chart-badge database" (click)="openDatabaseInfo()" matTooltip="Nom du schéma : {{ schemaName }}&#10;Volume : {{ schemaSizeMb }}&#10;Volume de la base : {{ databaseSizeMb }}"> Stockage : {{ databaseRatio }}</span>
         </div>
       </div>
       <div class="kpi-chart-body">
