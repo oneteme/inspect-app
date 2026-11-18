@@ -698,38 +698,7 @@ export const REST_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig =>
   },
   indicators: PERFORMANCE_INDICATORS(),
   groups: REST_GROUPS_CONFIG(groupedBy),
-  filters: REST_FILTERS_CONFIG(groupedBy),
-  templates: [
-    {
-      id: 'perf-percentile-by-host',
-      label: 'P95 (Hôte)',
-      icon: 'show_chart',
-      xField: 'date',
-      yField: 'Durées',
-      yAggregate: 'percentile',
-      groupBy: 'host',
-      selectedSlices: []
-    },
-    {
-      id: 'perf-avg-by-api',
-      label: 'Latence (API)',
-      icon: 'api',
-      xField: 'media',
-      yField: 'Durées',
-      yAggregate: 'avg',
-      groupBy: 'host',
-      selectedSlices: []
-    },
-    {
-      id: 'perf-count-by-tranche',
-      label: 'Trafic (Tranche)',
-      icon: 'trending_up',
-      xField: 'method',
-      yField: 'count',
-      groupBy: 'performance_tranche',
-      selectedSlices: []
-    }
-  ]
+  filters: REST_FILTERS_CONFIG(groupedBy)
 });
 
 export const REST_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
@@ -793,27 +762,7 @@ export const REST_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
     }]
   },
   groups: REST_GROUPS_CONFIG(groupedBy),
-  filters: REST_FILTERS_CONFIG(groupedBy),
-  templates: [
-    {
-      id: 'status-by-host',
-      label: 'Statut / Hôte',
-      icon: 'computer',
-      xField: 'host',
-      yField: 'count',
-      groupBy: 'status_stack',
-      selectedSlices: ["host"]
-    },
-    {
-      id: 'status-by-api-tranche',
-      label: 'Tranche / API',
-      icon: 'api',
-      xField: 'media',
-      yField: 'count',
-      groupBy: 'status_tranche',
-      // selectedSlices: []
-    }
-  ]
+  filters: REST_FILTERS_CONFIG(groupedBy)
 });
 
 export const REST_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartConfig => ( {
@@ -1002,39 +951,7 @@ export const REST_LATENCY_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
     }]
   },
   groups: REST_GROUPS_CONFIG(groupedBy),
-  filters: REST_FILTERS_CONFIG(groupedBy),
-  templates: [
-    {
-      id: 'latency-avg-by-host',
-      label: 'Moyenne (Hôte)',
-      icon: 'schedule',
-      xField: 'date',
-      yField: 'Durées',
-      yAggregate: 'avg',
-      groupBy: 'host',
-      selectedSlices: []
-    },
-    {
-      id: 'latency-max-by-api',
-      label: 'Maximum (API)',
-      icon: 'api',
-      xField: 'media',
-      yField: 'Durées',
-      yAggregate: 'max',
-      groupBy: 'host',
-      selectedSlices: []
-    },
-    {
-      id: 'latency-min-by-method',
-      label: 'Minimum (Méthode)',
-      icon: 'trending_down',
-      xField: 'date',
-      yField: 'Durées',
-      yAggregate: 'min',
-      groupBy: 'method',
-      selectedSlices: []
-    }
-  ]
+  filters: REST_FILTERS_CONFIG(groupedBy)
 });
 
 export const REST_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
@@ -2258,7 +2175,6 @@ export interface ChartConfig {
   indicators: ChartSection<IndicatorExtra>;
   groups: ChartSection;
   filters?: ChartSection;
-  templates?: any[];
 }
 
 export interface MenuConfig {
