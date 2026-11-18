@@ -36,17 +36,39 @@ export const DEFAULT_TABLE_CONFIG: TableProvider = {
 
 export const DEFAULT_SORT_CONFIG: { active: string; direction: 'asc' | 'desc'; } = { active: 'start', direction: 'desc' };
 
+/** Plages de durée (en secondes) partagées par les filtres « Temps de Réponse » et « Traitement Asynchrone ». */
+function durationRangeCategories(seconds: (row: any) => number | null | undefined) {
+  const inRange = (min: number, max: number) => (row: any) => {
+    const s = seconds(row);
+    return s != null && s >= min && s < max;
+  };
+  return [
+    { key: '<100ms', label: '< 100ms', filter: inRange(0, 0.1) },
+    { key: '100-500ms', label: '100ms - 500ms', filter: inRange(0.1, 0.5) },
+    { key: '500ms-1s', label: '500ms - 1s', filter: inRange(0.5, 1) },
+    { key: '1s-5s', label: '1s - 5s', filter: inRange(1, 5) },
+    { key: '>5s', label: '> 5s', filter: inRange(5, Infinity) }
+  ];
+}
+
 export const DEFAULT_DURATION_SLICE_CONFIG: SliceConfig = {
-  title: 'Durée',
+  title: 'Temps de Réponse',
   columnKey: 'duration',
   hidden: true,
   categories: [
-    { key: '<100ms', label: '< 100ms', filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
-    { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1 && (row.end - row.start) < 0.5 },
-    { key: '500ms-1s', label: '500ms - 1s', filter: (row) => row.end != null && (row.end - row.start) >= 0.5 && (row.end - row.start) < 1 },
-    { key: '1s-5s', label: '1s - 5s', filter: (row) => row.end != null && (row.end - row.start) >= 1 && (row.end - row.start) < 5 },
-    { key: '>5s', label: '> 5s', filter: (row) => row.end != null && (row.end - row.start) >= 5 },
+    ...durationRangeCategories((row) => row.end == null ? null : row.end - row.start),
     { key: 'in-progress', label: 'En cours...', filter: (row) => row.end == null }
+  ]
+};
+
+/** asyncDuration est en millisecondes ; absent ou négatif = pas de traitement asynchrone. */
+export const ASYNC_DURATION_SLICE_CONFIG: SliceConfig = {
+  title: 'Traitement Asynchrone',
+  columnKey: 'asyncDuration',
+  hidden: true,
+  categories: [
+    ...durationRangeCategories((row) => row.asyncDuration == null || row.asyncDuration < 0 ? null : row.asyncDuration / 1000),
+    { key: 'none', label: 'Sans traitement asynchrone', filter: (row) => row.asyncDuration == null || row.asyncDuration < 0 }
   ]
 };
 
@@ -93,10 +115,11 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
+    DEFAULT_DURATION_SLICE_CONFIG,
+    ASYNC_DURATION_SLICE_CONFIG,
     { title: 'Méthode', columnKey: 'method', hidden: true },
     { title: 'Status', columnKey: 'status', hidden: true }
   ],
-  defaultSort: { active: 'start', direction: 'desc' },
   rowClass: (row: RestSessionDto) => {
     const code = row.status;
     if (code >= 500) return 'row-ko';
@@ -137,6 +160,8 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
+    DEFAULT_DURATION_SLICE_CONFIG,
+    ASYNC_DURATION_SLICE_CONFIG,
     { title: 'Status', columnKey: 'status', hidden: true }
   ],
   defaultSort: { active: 'start', direction: 'desc' },
@@ -180,7 +205,7 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
       }
     },
     { key: 'query', header: 'Query', icon: 'search', lazy: true, minWidth: 160, groupable: false, sliceable: false },
-    { key: 'bodyContent', header: 'Réponse', icon: 'reply', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 150 },
+    { key: 'bodyContent', header: 'Réponse', icon: 'reply', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 150, groupable: false, sliceable: false },
     { key: 'outDataSize', header: 'Données envoyées', icon: 'arrow_upward', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 170, groupable: false, sliceable: false },
     { key: 'inDataSize', header: 'Données lues', icon: 'arrow_downward', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 170, groupable: false, sliceable: false },
     { key: 'contentType', header: 'Content-Type', icon: 'description', lazy: true, minWidth: 130 },
@@ -189,6 +214,7 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
+    DEFAULT_DURATION_SLICE_CONFIG,
     { title: 'Méthode', columnKey: 'method', hidden: true },
     { title: 'Point d\'accès', columnKey: 'path', hidden: true },
     { title: 'Status', columnKey: 'status', hidden: true }
@@ -237,6 +263,7 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
+    DEFAULT_DURATION_SLICE_CONFIG,
     { title: 'Commande', columnKey: 'command', hidden: true },
     { title: 'Status', columnKey: 'status', hidden: true }
   ],
@@ -283,6 +310,7 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
+    DEFAULT_DURATION_SLICE_CONFIG,
     { title: 'Commande', columnKey: 'command', hidden: true },
     { title: 'Status', columnKey: 'status', hidden: true }
   ],
@@ -329,6 +357,7 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
+    DEFAULT_DURATION_SLICE_CONFIG,
     { title: 'Commande', columnKey: 'command', hidden: true },
     { title: 'Status', columnKey: 'status', hidden: true }
   ],
@@ -372,6 +401,7 @@ export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', minWidth: 150, value: (row) => row.exception?.type }
   ],
   slices: [
+    DEFAULT_DURATION_SLICE_CONFIG,
     { title: 'Commande', columnKey: 'command', hidden: true },
     { title: 'Status', columnKey: 'status', hidden: true }
   ],
@@ -417,6 +447,7 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
+    DEFAULT_DURATION_SLICE_CONFIG,
     { title: 'Commande', columnKey: 'command', hidden: true },
     { title: 'Status', columnKey: 'status', hidden: true }
   ],
@@ -444,15 +475,12 @@ export const STAGE_TABLE_CONFIG: TableProvider<AbstractStage> = {
       key: 'duration', header: 'Temps de Réponse', icon: 'timer', groupable: false, sliceable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
     },
+    { key: 'command', header: 'Commande', icon: 'keyboard_command_key', optional: true, minWidth: 130 },
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
   ],
   slices: [
-    {
-      title: 'Commande',
-      columnKey: 'command',
-      icon: 'keyboard_command_key',
-      hidden: true
-    }
+    DEFAULT_DURATION_SLICE_CONFIG,
+    { title: 'Commande', columnKey: 'command', hidden: true }
   ],
   defaultSort: { active: 'start', direction: 'asc' },
   rowClass: (row: AbstractStage) => {
