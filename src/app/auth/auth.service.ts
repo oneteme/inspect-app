@@ -8,6 +8,7 @@ import { initDebug, isImplicitId } from '../model/auth.model';
 export class AuthService {
 
     private initialized = false;
+    private loginInProgress = false;
 
     constructor(private oauthService: OAuthService, private router: Router) { }
 
@@ -34,9 +35,14 @@ export class AuthService {
         return this.initialized;
     }
 
-    login() {
-        const hash = window.location.hash;
-        this.oauthService.initLoginFlow(hash ? hash.slice(1) : "/");
+    login(returnUrl: string = this.router.url) {
+        if (this.loginInProgress) {
+            return;
+        }
+
+        this.loginInProgress = true;
+
+        this.oauthService.initLoginFlow(returnUrl || "/");
     }
 
     logout() {
