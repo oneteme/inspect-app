@@ -549,7 +549,7 @@ export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'appName', header: 'Application', width: '13%', minWidth: 120, icon:'widgets' },
-    { key: 'type', header: 'Type', icon: 'label', minWidth: 100, optional: true, groupable: true, sliceable: true },
+    { key: 'type', header: 'Type', icon: 'question_exchange', iconFontSet: 'material-symbols-outlined', minWidth: 100, optional: true, groupable: true, sliceable: true },
     {
       key: 'instant', header: 'Date', icon: 'schedule', width: '10%', minWidth: 280, groupable: false, sliceable: false,
       searchValue: (row: SessionEventDto) => fmtStart(row.instant)
