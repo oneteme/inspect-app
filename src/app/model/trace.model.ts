@@ -214,7 +214,7 @@ export interface LogEntry {
   message: string;
   thread: string;
   action: string;
-  stacktrace: string;
+  stacktrace: string | null;
 }
 
 export interface StagePayload {

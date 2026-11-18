@@ -34,7 +34,7 @@ export class LogEntryService {
       level: row.level ?? '',
       action: row. action ?? '',
       thread: row.thread ?? '',
-      stacktrace: row.stacktrace?.value ?? []
+      stacktrace: row.stacktrace ?? null
     }))));
   }
 }
