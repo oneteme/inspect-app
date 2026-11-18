@@ -24,6 +24,7 @@ function fmtStart(startSec: number): string {
 function fmtDuration(start: number, end: number | null | undefined): string {
   return end == null ? 'En cours...' : formatDuration(end - start);
 }
+const TAG_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-tag"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M6.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M3 6v5.172a2 2 0 0 0 .586 1.414l7.71 7.71a2.41 2.41 0 0 0 3.408 0l5.592 -5.592a2.41 2.41 0 0 0 0 -3.408l-7.71 -7.71a2 2 0 0 0 -1.414 -.586h-5.172a3 3 0 0 0 -3 3" /></svg>';
 
 export const DEFAULT_TABLE_CONFIG: TableProvider = {
   search: { enabled: true },
@@ -53,20 +54,28 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
   columns: [
     { key: 'appName', header: 'Application', icon: 'widgets', width: '18%', minWidth: 150 },
     {
-      key: 'resource', header: 'Ressource', groupable: false, sliceable: false, icon: 'category', minWidth: 300,
+      key: 'resource', header: 'Ressource', icon: 'extension', minWidth: 300,
+      value: (row: RestSessionDto) => fmtMethod(row.method) + ' ' + (row.path || ''),
       searchValue: (row: RestSessionDto) => fmtMethod(row.method) + ' ' + (row.path || '')
     },
-    { key: 'query', header: 'Query', icon: 'search', lazy: true, minWidth: 160 },
     {
-      key: 'start', header: 'Début', icon: 'schedule', width: '17%', groupable: false, sliceable: false, minWidth: 170,
+      key: 'start', header: 'Début', icon: 'schedule', width: '13%', minWidth: 150, groupable: false, sliceable: false,
       searchValue: (row: RestSessionDto) => fmtStart(row.start)
     },
     {
-      key: 'duration', header: 'Durée', icon: 'timer', width: '13%', groupable: false, minWidth: 100,
+      key: 'duration', header: 'Temps de Réponse', icon: 'timer', width: '17%', minWidth: 180, groupable: false, sliceable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: RestSessionDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'badge', width: '15%', minWidth: 120 },
+    { key: 'name', header: 'Nom', icon: 'label', iconSvg: TAG_ICON_SVG, lazy: true, minWidth: 150 },
+    { key: 'method', header: 'Méthode', icon: 'api', optional: true, minWidth: 110 },
+    { key: 'query', header: 'Query', icon: 'search', lazy: true, minWidth: 160, groupable: false, sliceable: false },
+    {
+      key: 'asyncDuration', header: 'Traitement Asynchrone', icon: 'time_auto', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 180, groupable: false, sliceable: false,
+      sortValue: (row: RestSessionDto) => row.asyncDuration != null && row.asyncDuration >= 0 ? row.asyncDuration : -1,
+      value: (row: RestSessionDto) => row.asyncDuration != null && row.asyncDuration >= 0 ? formatDuration(row.asyncDuration / 1000) : '--'
+    },
     {
       key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%', minWidth: 110,
       value: (row: RestSessionDto) => {
@@ -74,32 +83,18 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
         return row.status;
       }
     },
+    { key: 'host', header: 'Hôte HTTP', lazy: true, icon: 'language', minWidth: 160 },
+    { key: 'inDataSize', header: 'Données Reçues', icon: 'arrow_upward', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 170, groupable: false, sliceable: false },
+    { key: 'outDataSize', header: 'Données Envoyées', icon: 'arrow_downward', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 170, groupable: false, sliceable: false },
     { key: 'userAgent', header: 'User-Agent', lazy: true, icon: 'devices', width: '15%', minWidth: 260 },
-    { key: 'host', header: 'Host HTTP', lazy: true, icon: 'language', minWidth: 160 },
     { key: 'contentType', header: 'Content-Type', lazy: true, icon: 'description', minWidth: 150 },
-    { key: 'inDataSize', header: 'Données Reçues', icon: 'arrow_upward', iconFontSet: 'material-symbols-outlined', lazy: true, groupable: false, sliceable: false, minWidth: 170 },
-    { key: 'outDataSize', header: 'Données Envoyées', icon: 'arrow_downward', iconFontSet: 'material-symbols-outlined', lazy: true, groupable: false, sliceable: false, minWidth: 170 },
     { key: 'threadName', header: 'Thread', lazy: true, icon: 'call_split', minWidth: 150 },
-    { key: 'cacheControl', header: 'Cache-Control', lazy: true, icon: 'cached', groupable: false, sliceable: false, minWidth: 150 }
+    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
-    { title: 'Status', columnKey: 'status', hidden: true },
-    { title: 'Hôte', columnKey: 'appName', hidden: true },
     { title: 'Méthode', columnKey: 'method', icon: 'label', hidden: true },
-    { title: 'Chemin', columnKey: 'path', icon: 'route', hidden: true },
-    {
-      title: 'Durée',
-      columnKey: 'duration',
-      hidden: true,
-      categories: [
-        { key: '<100ms', label: '< 100ms', filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
-        { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1 && (row.end - row.start) < 0.5 },
-        { key: '500ms-1s', label: '500ms - 1s', filter: (row) => row.end != null && (row.end - row.start) >= 0.5 && (row.end - row.start) < 1 },
-        { key: '1s-5s', label: '1s - 5s', filter: (row) => row.end != null && (row.end - row.start) >= 1 && (row.end - row.start) < 5 },
-        { key: '> 5s', label: '> 5s', filter: (row) => row.end != null && (row.end - row.start) >= 5 },
-        { key: 'in-progress', label: 'En cours...', filter: (row) => row.end == null }
-      ]
-    }],
+    { title: 'Status', columnKey: 'status', hidden: true }
+  ],
   defaultSort: { active: 'start', direction: 'desc' },
   rowClass: (row: RestSessionDto) => {
     const code = row.status;
