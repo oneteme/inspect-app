@@ -25,6 +25,7 @@ function fmtDuration(start: number, end: number | null | undefined): string {
   return end == null ? 'En cours...' : formatDuration(end - start);
 }
 const TAG_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-tag"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M6.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M3 6v5.172a2 2 0 0 0 .586 1.414l7.71 7.71a2.41 2.41 0 0 0 3.408 0l5.592 -5.592a2.41 2.41 0 0 0 0 -3.408l-7.71 -7.71a2 2 0 0 0 -1.414 -.586h-5.172a3 3 0 0 0 -3 3" /></svg>';
+const DATABASE_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-database"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 6a8 3 0 1 0 16 0a8 3 0 1 0 -16 0" /><path d="M4 6v6a8 3 0 0 0 16 0v-6" /><path d="M4 12v6a8 3 0 0 0 16 0v-6" /></svg>';
 
 export const DEFAULT_TABLE_CONFIG: TableProvider = {
   search: { enabled: true },
@@ -208,41 +209,36 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
   columns: [
     { key: 'host', header: 'Serveur', icon: 'dns', width: '15%', minWidth: 140 },
     {
-      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false, width: '30%', minWidth: 220,
+      key: 'resource', header: 'Ressource', icon: 'extension', sliceable: false, groupable: false, width: '30%', minWidth: 220,
       searchValue: (row: DatabaseRequestDto) => fmtMethod(row.command) + ' ' + (row.schema || row.name || 'N/A')
     },
     {
-      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false, width: '12%', minWidth: 150,
+      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false, width: '13%', minWidth: 150,
       searchValue: (row: DatabaseRequestDto) => fmtStart(row.start)
     },
     {
-      key: 'duration', header: 'Durée', icon: 'timer', groupable: false, width: '8%', minWidth: 100,
+      key: 'duration', header: 'Temps de Réponse', icon: 'timer', groupable: false, sliceable: false, width: '17%', minWidth: 180,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: DatabaseRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'badge', width: '10%', minWidth: 120 },
-    { key: 'productName', header: 'Base de données', icon: 'table_rows', lazy: true, minWidth: 180 },
+    { key: 'productName', header: 'Base de données', icon: 'table_rows', iconSvg: DATABASE_ICON_SVG, lazy: true, minWidth: 180 },
+    { key: 'command', header: 'Commande', icon: 'keyboard_command_key', optional: true, minWidth: 130 },
     {
-      key: 'status', header: 'Statut', optional: true, icon: 'task_alt', minWidth: 110,
+      key: 'status', header: 'Status', optional: true, icon: 'task_alt', minWidth: 110,
       value: (row: DatabaseRequestDto) => {
         if (!row.end) return 'En cours...';
         return row.status;
       }
     },
-    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true, minWidth: 150 },
     { key: 'scheme', header: 'Éditeur', icon: 'hub', lazy: true, minWidth: 130 },
+    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true, minWidth: 150 },
     { key: 'appName', header: 'Application', icon: 'widgets', lazy: true, minWidth: 150 },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
-    DEFAULT_DURATION_SLICE_CONFIG,
-    {
-      title: 'Commande',
-      columnKey: 'command',
-      icon: 'label',
-      hidden: true
-    },
-    { title: 'Chemin', columnKey: 'path', icon: 'route', hidden: true }
+    { title: 'Commande', columnKey: 'command', hidden: true },
+    { title: 'Status', columnKey: 'status', hidden: true }
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: DatabaseRequestDto) => {
@@ -258,23 +254,24 @@ export const DATABASE_REQUEST_TABLE_CONFIG: TableProvider<DatabaseRequestDto> = 
 export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'host', header: 'SERVEUR', icon: 'dns', width: '15%', minWidth: 140 },
+    { key: 'host', header: 'Serveur', icon: 'dns', width: '15%', minWidth: 140 },
     {
-      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false, width: '30%', minWidth: 220,
+      key: 'resource', header: 'Ressource', icon: 'extension', sliceable: false, groupable: false, width: '30%', minWidth: 220,
       searchValue: (row: FtpRequestDto) => fmtMethod(row.command)
     },
     {
-      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false, width: '12%', minWidth: 150,
+      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false, width: '13%', minWidth: 150,
       searchValue: (row: FtpRequestDto) => fmtStart(row.start)
     },
     {
-      key: 'duration', header: 'Durée', icon: 'timer', groupable: false, width: '8%', minWidth: 100,
+      key: 'duration', header: 'Temps de Réponse', icon: 'timer', groupable: false, sliceable: false, width: '17%', minWidth: 180,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: FtpRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'badge', width: '10%', minWidth: 120 },
+    { key: 'command', header: 'Commande', icon: 'keyboard_command_key', optional: true, minWidth: 130 },
     {
-      key: 'status', header: 'Statut', optional: true, icon: 'task_alt', minWidth: 110,
+      key: 'status', header: 'Status', optional: true, icon: 'task_alt', minWidth: 110,
       value: (row: FtpRequestDto) => {
         if (!row.end) return 'En cours...';
         return row.status;
@@ -286,13 +283,8 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
-    DEFAULT_DURATION_SLICE_CONFIG,
-    {
-      title: 'Commande',
-      columnKey: 'command',
-      icon: 'label',
-      hidden: true
-    }
+    { title: 'Commande', columnKey: 'command', hidden: true },
+    { title: 'Status', columnKey: 'status', hidden: true }
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: FtpRequestDto) => {
@@ -308,23 +300,24 @@ export const FTP_REQUEST_TABLE_CONFIG: TableProvider<FtpRequestDto> = {
 export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'host', header: 'SERVEUR', icon: 'dns', width: '15%', minWidth: 140 },
+    { key: 'host', header: 'Serveur', icon: 'dns', width: '15%', minWidth: 140 },
     {
-      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false, width: '30%', minWidth: 220,
+      key: 'resource', header: 'Ressource', icon: 'extension', sliceable: false, groupable: false, width: '30%', minWidth: 220,
       searchValue: (row: DirectoryRequestDto) => fmtMethod(row.command)
     },
     {
-      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false, width: '12%', minWidth: 150,
+      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false, width: '13%', minWidth: 150,
       searchValue: (row: DirectoryRequestDto) => fmtStart(row.start)
     },
     {
-      key: 'duration', header: 'Durée', icon: 'timer', groupable: false, width: '8%', minWidth: 100,
+      key: 'duration', header: 'Temps de Réponse', icon: 'timer', groupable: false, sliceable: false, width: '17%', minWidth: 180,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: DirectoryRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'badge', width: '10%', minWidth: 120 },
+    { key: 'command', header: 'Commande', icon: 'keyboard_command_key', optional: true, minWidth: 130 },
     {
-      key: 'status', header: 'Statut', optional: true, icon: 'task_alt', minWidth: 110,
+      key: 'status', header: 'Status', optional: true, icon: 'task_alt', minWidth: 110,
       value: (row: DirectoryRequestDto) => {
         if (!row.end) return 'En cours...';
         return row.status;
@@ -336,13 +329,8 @@ export const LDAP_REQUEST_TABLE_CONFIG: TableProvider<DirectoryRequestDto> = {
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
-    DEFAULT_DURATION_SLICE_CONFIG,
-    {
-      title: 'Commande',
-      columnKey: 'command',
-      icon: 'label',
-      hidden: true
-    }
+    { title: 'Commande', columnKey: 'command', hidden: true },
+    { title: 'Status', columnKey: 'status', hidden: true }
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: DirectoryRequestDto) => {
@@ -360,21 +348,22 @@ export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
   columns: [
     { key: 'host', header: 'Hôte', icon: 'dns', width: '15%', minWidth: 140 },
     {
-      key: 'resource', header: 'Ressource', icon: 'category', width: '30%', minWidth: 220,
+      key: 'resource', header: 'Ressource', icon: 'extension', width: '30%', minWidth: 220,
       searchValue: (row: LocalRequest) => fmtMethod((row as any).type) + ' ' + ((row as any).name || 'N/A')
     },
     {
-      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false, width: '12%', minWidth: 150,
+      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false, width: '13%', minWidth: 150,
       searchValue: (row: LocalRequest) => fmtStart(row.start)
     },
     {
-      key: 'duration', header: 'Durée', icon: 'timer', groupable: false, width: '8%', minWidth: 100,
+      key: 'duration', header: 'Temps de Réponse', icon: 'timer', groupable: false, sliceable: false, width: '17%', minWidth: 180,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: LocalRequest) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'badge', width: '10%', minWidth: 120 },
+    { key: 'command', header: 'Commande', icon: 'keyboard_command_key', optional: true, minWidth: 130 },
     {
-      key: 'status', header: 'Statut', optional: true, icon: 'task_alt', minWidth: 110,
+      key: 'status', header: 'Status', optional: true, icon: 'task_alt', minWidth: 110,
       value: (row: LocalRequest) => {
         if (!row.end) return 'En cours...';
         return row.status;
@@ -383,13 +372,8 @@ export const LOCAL_REQUEST_TABLE_CONFIG: TableProvider<LocalRequest> = {
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', minWidth: 150, value: (row) => row.exception?.type }
   ],
   slices: [
-    DEFAULT_DURATION_SLICE_CONFIG,
-    {
-      title: 'Commande',
-      columnKey: 'command',
-      icon: 'label',
-      hidden: true
-    }
+    { title: 'Commande', columnKey: 'command', hidden: true },
+    { title: 'Status', columnKey: 'status', hidden: true }
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: LocalRequest) => {
@@ -407,21 +391,22 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
   columns: [
     { key: 'host', header: 'Serveur', icon: 'dns', width: '15%', minWidth: 140 },
     {
-      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false, width: '30%', minWidth: 220,
+      key: 'resource', header: 'Ressource', icon: 'extension', sliceable: false, groupable: false, width: '30%', minWidth: 220,
       searchValue: (row: MailRequestDto) => fmtMethod((row as any).command)
     },
     {
-      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false, width: '12%', minWidth: 150,
+      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false, width: '13%', minWidth: 150,
       searchValue: (row: MailRequestDto) => fmtStart(row.start)
     },
     {
-      key: 'duration', header: 'Durée', icon: 'timer', groupable: false, width: '8%', minWidth: 100,
+      key: 'duration', header: 'Temps de Réponse', icon: 'timer', groupable: false, sliceable: false, width: '17%', minWidth: 180,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: MailRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'badge', width: '10%', minWidth: 120 },
+    { key: 'command', header: 'Commande', icon: 'keyboard_command_key', optional: true, minWidth: 130 },
     {
-      key: 'status', header: 'Statut', optional: true, icon: 'task_alt', minWidth: 110,
+      key: 'status', header: 'Status', optional: true, icon: 'task_alt', minWidth: 110,
       value: (row: MailRequestDto) => {
         if (!row.end) return 'En cours...';
         return row.status;
@@ -432,13 +417,8 @@ export const SMTP_REQUEST_TABLE_CONFIG: TableProvider<MailRequestDto> = {
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
-    DEFAULT_DURATION_SLICE_CONFIG,
-    {
-      title: 'Commande',
-      columnKey: 'command',
-      icon: 'label',
-      hidden: true
-    }
+    { title: 'Commande', columnKey: 'command', hidden: true },
+    { title: 'Status', columnKey: 'status', hidden: true }
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: MailRequestDto) => {
@@ -461,17 +441,16 @@ export const STAGE_TABLE_CONFIG: TableProvider<AbstractStage> = {
     },
     { key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false },
     {
-      key: 'duration', header: 'Durée', icon: 'timer', groupable: false,
+      key: 'duration', header: 'Temps de Réponse', icon: 'timer', groupable: false, sliceable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
     },
     { key: 'exception', header: 'Exception', optional: true, icon: 'error_outline', value: (row) => row.exception?.type }
   ],
   slices: [
-    DEFAULT_DURATION_SLICE_CONFIG,
     {
       title: 'Commande',
       columnKey: 'command',
-      icon: 'label',
+      icon: 'keyboard_command_key',
       hidden: true
     }
   ],
