@@ -92,7 +92,7 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
-    { title: 'Méthode', columnKey: 'method', icon: 'label', hidden: true },
+    { title: 'Méthode', columnKey: 'method', hidden: true },
     { title: 'Status', columnKey: 'status', hidden: true }
   ],
   defaultSort: { active: 'start', direction: 'desc' },
@@ -154,19 +154,23 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
   columns: [
     { key: 'host', header: 'Serveur', icon: 'dns', width: '15%', minWidth: 140 },
     {
-      key: 'resource', header: 'Ressource', icon: 'category', sliceable: false, groupable: false, width: '30%', minWidth: 220,
+      key: 'resource', header: 'Ressource', icon: 'extension', width: '30%', minWidth: 220,
+      value: (row: RestRequestDto) => fmtMethod(row.method) + ' ' + (row.path || ''),
       searchValue: (row: RestRequestDto) => fmtMethod(row.method) + ' ' + (row.path || '')
     },
     {
-      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false, width: '12%', minWidth: 150,
+      key: 'start', header: 'Début', icon: 'schedule', sliceable: false, groupable: false, width: '13%', minWidth: 150,
       searchValue: (row: RestRequestDto) => fmtStart(row.start)
     },
     {
-      key: 'duration', header: 'Durée', icon: 'timer', groupable: false, width: '8%', minWidth: 100,
+      key: 'duration', header: 'Temps de Réponse', icon: 'timer', groupable: false, sliceable: false, width: '17%', minWidth: 180,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE,
       searchValue: (row: RestRequestDto) => fmtDuration(row.start, row.end)
     },
     { key: 'user', header: 'Utilisateur', icon: 'badge', width: '10%', minWidth: 120 },
+    { key: 'action', width: '10%', minWidth: 60, sliceable: false, groupable: false, sortable: false, inFieldsMenu: false },
+    { key: 'method', header: 'Méthode', icon: 'api', optional: true, minWidth: 110 },
+    { key: 'path', header: 'Point d\'accès', icon: 'route', optional: true, minWidth: 160 },
     {
       key: 'status', header: 'Status', sortable: true, optional: true, icon: 'task_alt', minWidth: 110,
       value: (row: RestSessionDto) => {
@@ -174,21 +178,19 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
         return row.status;
       }
     },
-    { key: 'action', width: '10%', minWidth: 60, sliceable: false, groupable: false, sortable: false, inFieldsMenu: false },
-    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true, minWidth: 150 },
-    { key: 'protocol', header: 'Protocole', icon: 'lan', optional: true, minWidth: 110 },
-    { key: 'query', header: 'Query', icon: 'search', lazy: true, minWidth: 120 },
-    { key: 'contentType', header: 'Content-Type', icon: 'description', lazy: true, minWidth: 130 },
-    { key: 'outDataSize', header: 'Données envoyées', icon: 'arrow_upward', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 170 },
-    { key: 'inDataSize', header: 'Données lues', icon: 'arrow_downward', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 170 },
+    { key: 'query', header: 'Query', icon: 'search', lazy: true, minWidth: 160, groupable: false, sliceable: false },
     { key: 'bodyContent', header: 'Réponse', icon: 'reply', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 150 },
+    { key: 'outDataSize', header: 'Données envoyées', icon: 'arrow_upward', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 170, groupable: false, sliceable: false },
+    { key: 'inDataSize', header: 'Données lues', icon: 'arrow_downward', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 170, groupable: false, sliceable: false },
+    { key: 'contentType', header: 'Content-Type', icon: 'description', lazy: true, minWidth: 130 },
+    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true, minWidth: 150 },
     { key: 'appName', header: 'Application', icon: 'widgets', lazy: true, minWidth: 150 },
     { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
-    DEFAULT_DURATION_SLICE_CONFIG,
-    { title: 'Méthode', columnKey: 'method', icon: 'label', hidden: true },
-    { title: 'Chemin', columnKey: 'path', icon: 'route', hidden: true }
+    { title: 'Méthode', columnKey: 'method', hidden: true },
+    { title: 'Point d\'accès', columnKey: 'path', hidden: true },
+    { title: 'Status', columnKey: 'status', hidden: true }
   ],
   defaultSort: DEFAULT_SORT_CONFIG,
   rowClass: (row: RestSessionDto) => {
