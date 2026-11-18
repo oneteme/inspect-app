@@ -110,7 +110,7 @@ export class SearchMainEventView {
                 this.patchServerValue(this.queryParams.appname);
                 this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
-                this._instanceService.getApplications('SERVER', this.queryParams.namespace)
+                this._instanceService.getAllApplications(this.queryParams.namespace)
                     .pipe(finalize(() => this.serverNameIsLoading = false))
                     .subscribe({
                         next: res => {
