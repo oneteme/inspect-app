@@ -109,40 +109,35 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
 export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
-    { key: 'appName', header: 'Application', icon: 'widgets', width: '13%', minWidth: 150 },
-    { key: 'name', header: 'Nom', icon: 'label', width: '13%', minWidth: 150 },
-    { key: 'location', header: 'Ressource', icon: 'category', minWidth: 220 },
-    { key: 'start', header: 'Début', groupable: false, sliceable: false, icon: 'schedule', width: '13%', minWidth: 150 },
+    { key: 'appName', header: 'Application', icon: 'widgets', width: '18%', minWidth: 150 },
+    { key: 'location', header: 'Ressource', icon: 'extension', minWidth: 220 },
+    { key: 'start', header: 'Début', icon: 'schedule', width: '13%', minWidth: 150, groupable: false, sliceable: false },
     {
-      key: 'duration', header: 'Durée', groupable: false, icon: 'timer', width: '13%', minWidth: 100,
+      key: 'duration', header: 'Temps de Réponse', icon: 'timer', width: '17%', minWidth: 180, groupable: false, sliceable: false,
       sortValue: (row) => row.end != null ? row.end - row.start : Number.MAX_VALUE
     },
-    { key: 'user', header: 'Utilisateur', icon: 'badge', width: '13%', minWidth: 120 },
-    { key: 'address', header: 'Adresse', icon: 'fingerprint', width: '13%', optional: true, minWidth: 150 },
-    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true, minWidth: 150 },
-    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 },
+    { key: 'user', header: 'Utilisateur', icon: 'badge', width: '15%', minWidth: 120 },
+    {
+      key: 'name', header: 'Nom', icon: 'label', iconSvg: TAG_ICON_SVG, lazy: true, minWidth: 150, groupable: false, sliceable: false
+    },
+    {
+      key: 'asyncDuration', header: 'Traitement Asynchrone', icon: 'time_auto', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 180, groupable: false, sliceable: false,
+      sortValue: (row: MainSessionDto) => row.asyncDuration != null && row.asyncDuration >= 0 ? row.asyncDuration : -1,
+      value: (row: MainSessionDto) => row.asyncDuration != null && row.asyncDuration >= 0 ? formatDuration(row.asyncDuration / 1000) : '--'
+    },
     {
       key: 'status', header: 'Status', optional: true, icon: 'task_alt', width: '13%', minWidth: 110,
       value: (row: RestSessionDto) => {
         if (!row.end) return 'En cours...';
         return row.status;
       }
-    }
+    },
+    { key: 'threadName', header: 'Thread', icon: 'call_split', lazy: true, minWidth: 150 },
+    { key: 'appVersion', header: 'Version', icon: 'label', lazy: true, minWidth: 100 }
   ],
   slices: [
-    {
-      title: 'Durée',
-      columnKey: 'duration',
-      hidden: true,
-      categories: [
-        { key: '<100ms', label: '< 100ms', filter: (row) => row.end != null && (row.end - row.start) < 0.1 },
-        { key: '100-500ms', label: '100ms - 500ms', filter: (row) => row.end != null && (row.end - row.start) >= 0.1 && (row.end - row.start) < 0.5 },
-        { key: '500ms-1s', label: '500ms - 1s', filter: (row) => row.end != null && (row.end - row.start) >= 0.5 && (row.end - row.start) < 1 },
-        { key: '1s-5s', label: '1s - 5s', filter: (row) => row.end != null && (row.end - row.start) >= 1 && (row.end - row.start) < 5 },
-        { key: '>5s', label: '> 5s', filter: (row) => row.end != null && (row.end - row.start) >= 5 },
-        { key: 'in-progress', label: 'En cours...', filter: (row) => row.end == null },
-      ]
-    }],
+    { title: 'Status', columnKey: 'status', hidden: true }
+  ],
   defaultSort: { active: 'start', direction: 'desc' },
   rowClass: (row: MainSessionDto) => {
     const code = row.status;
