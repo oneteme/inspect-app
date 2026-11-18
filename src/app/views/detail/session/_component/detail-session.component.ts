@@ -8,17 +8,7 @@ import {DatabaseRequestService} from "../../../../service/jquery/database-reques
 import {FtpRequestService} from "../../../../service/jquery/ftp-request.service";
 import {SmtpRequestService} from "../../../../service/jquery/smtp-request.service";
 import {LdapRequestService} from "../../../../service/jquery/ldap-request.service";
-
-export interface TabData {
-  label: string;
-  icon: string;
-  count: number;
-  visible: boolean;
-  type: string;
-  hasError: boolean;
-  errorCount: number;
-}
-
+import {TabData} from "../../../../shared/_component/vertical-tabs/vertical-tabs.component";
 
 @Component({
   selector: 'detail-session',
@@ -117,15 +107,6 @@ export class DetailSessionComponent implements OnChanges {
         errorCount: this.getLocalErrorCount()
       },
       {
-        label: 'Stages',
-        icon: 'view_object_track',
-        count: 0,
-        visible: !!this.session['httpSessionStages']?.length,
-        type: 'stage',
-        hasError: false,
-        errorCount: 0
-      },
-      {
         label: 'Événements',
         icon: Constants.MAPPING_TYPE['event'].icon,
         count: this.sessionEvents?.length + this.sessionExceptions?.length,
@@ -133,6 +114,15 @@ export class DetailSessionComponent implements OnChanges {
         type: 'action',
         hasError: this.sessionExceptions?.length > 0,
         errorCount: this.sessionExceptions?.length || 0
+      },
+      {
+        label: 'Stages',
+        icon: 'view_object_track',
+        count: 0,
+        visible: !!this.session['httpSessionStages']?.length,
+        type: 'stage',
+        hasError: false,
+        errorCount: 0
       },
       {
         label: 'Chronologie',

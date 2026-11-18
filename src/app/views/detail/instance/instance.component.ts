@@ -7,7 +7,7 @@ import {DatePipe} from "@angular/common";
 import {DurationPipe} from "../../../shared/pipe/duration.pipe";
 import {InstanceService} from "../../../service/jquery/instance.service";
 import {groupByColor} from "../../../shared/util";
-import {TabData} from "../session/_component/detail-session.component";
+import {TabData} from "../../../shared/_component/vertical-tabs/vertical-tabs.component";
 import {EnvRouter} from "../../../service/router.service";
 import {TraceService} from "../../../service/trace.service";
 import {PageTitleService} from "../../../service/page-title.service";
@@ -58,7 +58,7 @@ export class InstanceComponent implements OnInit, OnDestroy {
       next: ([params, queryParams]) => {
         this.params.id = params.id_instance;
         this.params.namespace = queryParams.namespace;
-        this._pageTitleService.set({ icon: 'history', iconOutlined: true, title: 'Instance • ' + this.params.id, subtitle: 'Historique des démarrages' });
+        this._pageTitleService.set({ icon: 'history', iconOutlined: true, title: 'Instance', copyValue: this.params.id, subtitle: 'Historique des démarrages' });
         this.getRequest();
       }
     });

@@ -208,6 +208,57 @@ $transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
   line-height: 1.3;
 }
 
+.npt-sep {
+  font-size: 13px;
+  color: $text-secondary;
+  flex-shrink: 0;
+}
+
+.npt-copy {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  height: 22px;
+  padding: 0 4px;
+  margin: 0 -4px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  color: $text-primary;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+    line-height: 14px;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+  }
+
+  &:hover,
+  &:focus-visible,
+  &--done {
+    background: rgba($primary, 0.08);
+    color: $primary;
+  }
+
+  &:hover mat-icon,
+  &:focus-visible mat-icon,
+  &--done mat-icon {
+    opacity: 1;
+  }
+
+  &--done {
+    color: #059669;
+  }
+}
+
 .nav-instance-info {
   display: flex;
   align-items: center;

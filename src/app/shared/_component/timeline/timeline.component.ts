@@ -5,6 +5,7 @@ import {
     Input,
     OnChanges,
     OnDestroy,
+    OnInit,
     Output,
     SimpleChanges,
     ViewChild
@@ -15,8 +16,9 @@ import {DataGroup, DataItem, Timeline, TimelineOptions} from "vis-timeline";
     selector: 'app-timeline',
     templateUrl: './timeline.component.html'
 })
-export class TimelineComponent implements OnChanges, OnDestroy {
+export class TimelineComponent implements OnChanges, OnInit, OnDestroy {
     private timeline: Timeline;
+    private resizeObserver: ResizeObserver;
 
     @ViewChild('timeline', {static: true}) timelineElement: ElementRef;
 
@@ -25,6 +27,12 @@ export class TimelineComponent implements OnChanges, OnDestroy {
     @Input() items: DataItem[];
     @Output() onTimelineCreated = new EventEmitter<Timeline>();
     @Output() onItemCLicked = new EventEmitter<any>();
+
+    ngOnInit() {
+        this.resizeObserver = new ResizeObserver(() => this.timeline?.redraw());
+        this.resizeObserver.observe(this.timelineElement.nativeElement);
+    }
+
     ngOnChanges(changes: SimpleChanges) {
         if(changes.items || changes.groups || changes.options) {
             if(this.items && this.groups && this.options) {
@@ -35,6 +43,7 @@ export class TimelineComponent implements OnChanges, OnDestroy {
     }
 
     ngOnDestroy() {
+        this.resizeObserver?.disconnect();
         this.destroy();
     }
 

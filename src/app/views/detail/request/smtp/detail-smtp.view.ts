@@ -19,7 +19,7 @@ import {
 } from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
 import {getDataForRange, getErrorClassName, showifnotnull} from "../../../../shared/util";
-import {TabData} from "../../session/_component/detail-session.component";
+import {TabData} from "../../../../shared/_component/vertical-tabs/vertical-tabs.component";
 import {MatDialog} from "@angular/material/dialog";
 import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
 
@@ -63,7 +63,7 @@ export class DetailSmtpView implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([params, queryParams]) => {
         this.params = {idSmtp: params.id_request, namespace: queryParams.namespace || app.defaultNamespace};
-        this._pageTitleService.set({ icon: 'outgoing_mail', iconOutlined: true, title: 'Flux SMTP • ' + params.id_request, subtitle: 'Communications externes' });
+        this._pageTitleService.set({ icon: 'outgoing_mail', iconOutlined: true, title: 'Flux SMTP', copyValue: params.id_request, subtitle: 'Communications externes' });
         this.getRequest();
       }
     });

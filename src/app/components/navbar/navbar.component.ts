@@ -57,6 +57,9 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   MAPPING_TYPE = Constants.MAPPING_TYPE;
 
+  pageIdCopied = false;
+  private _copyResetTimer: ReturnType<typeof setTimeout>;
+
   namespaces: string[] = [];
   namespace: FormControl<string> = new FormControl();
   isLoadingNamespace = false;
@@ -150,6 +153,7 @@ export class NavbarComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.subscriptions.forEach(s => s.unsubscribe());
+    clearTimeout(this._copyResetTimer);
   }
 
   gotoHome(event: MouseEvent) {
@@ -215,6 +219,16 @@ export class NavbarComponent implements OnInit, OnDestroy {
   }
 
   onFilterClick(): void { this._panelSvc.toggle(); }
+
+  copyPageId(value: string): void {
+    navigator.clipboard.writeText(value).then(() => {
+      this.pageIdCopied = true;
+      clearTimeout(this._copyResetTimer);
+      this._copyResetTimer = setTimeout(() => this.pageIdCopied = false, 1500);
+    }).catch(() => {
+      this.pageIdCopied = false;
+    });
+  }
 
   private _buildPeriodLabel(params: Params): string | null {
     if (params['step']) {

@@ -25,6 +25,8 @@ import {ConfigDialogComponent} from './_component/config-dialog/config-dialog.co
 import {PagePanelComponent} from './_component/page-panel/page-panel.component';
 
 import {SessionTimelineComponent} from './_component/session-timeline/session-timeline.component';
+import {VerticalTabsComponent} from './_component/vertical-tabs/vertical-tabs.component';
+import {NumberFormatterPipe} from './pipe/number.pipe';
 export const MY_DATE_FORMATS = {
   parse: {
     dateInput: 'MM/YYYY',
@@ -57,6 +59,7 @@ export const MY_DATE_FORMATS = {
     ExceptionTypePipe,
     TruncStringPipe,
     TypeColumnFormatPipe,
+    NumberFormatterPipe,
     TimelineComponent,
     StacktraceDialogComponent,
     VersionBadgeComponent,
@@ -70,7 +73,8 @@ export const MY_DATE_FORMATS = {
     ExceptionsTableComponent,
     ConfigDialogComponent,
     PagePanelComponent,
-    SessionTimelineComponent
+    SessionTimelineComponent,
+    VerticalTabsComponent
   ],
   exports: [
     MaterialModule,
@@ -80,6 +84,7 @@ export const MY_DATE_FORMATS = {
     ExceptionTypePipe,
     TruncStringPipe,
     TypeColumnFormatPipe,
+    NumberFormatterPipe,
     TimelineComponent,
     VersionBadgeComponent,
     BranchChipComponent,
@@ -93,7 +98,8 @@ export const MY_DATE_FORMATS = {
     ExceptionsTableComponent,
     ConfigDialogComponent,
     PagePanelComponent,
-    SessionTimelineComponent
+    SessionTimelineComponent,
+    VerticalTabsComponent
   ]
 })
 export class SharedModule { }
