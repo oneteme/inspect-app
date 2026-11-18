@@ -37,6 +37,17 @@ export class InstanceService {
     return this.getInstance(args);
   }
 
+  getAllApplications(namespace: string): Observable<{ appName: string }[]> {
+    let args = {
+      'select': 'app_name:appName',
+      'distinct': true,
+      'app_name.notNull': '',
+      'namespace': namespace,
+      'order': 'app_name.asc'
+    }
+    return this.getInstance(args);
+  }
+
   getLastServerStart(filters: { namespace: string }): Observable<LastServerStart[]> {
     return this.getInstance<any>({
       'select': `view1.id,view1.appName,view1.version,view1.namespace:namespace,view1.type,view1.branch,view1.hash,view1.start,view1.end,view1.collector,view1.configuration,view1.restart,view1.minStart,view1.lastStart,view1.os,view1.re,view1.address,view1.user`,
