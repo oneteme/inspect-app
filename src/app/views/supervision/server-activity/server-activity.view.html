@@ -40,7 +40,11 @@
           <h2 id="activity-traces-title" class="kpi-chart-title">Volume des opérations</h2>
         </div>
         <span class="kpi-chart-badge" *ngIf="isLoadingDatabaseInfo" matTooltip="Chargement...">...</span>
-        <span class="kpi-chart-badge database" *ngIf="!isLoadingDatabaseInfo" (click)="openDatabaseInfo()" matTooltip="Nom du schéma : {{ schemaName }}&#10;Volume : {{ schemaSizeMb }}&#10;Volume de la base : {{ databaseSizeMb }}">{{ databaseRatio }}</span>
+        <div class="kpi-chart-badge database" *ngIf="!isLoadingDatabaseInfo">
+            <span class="kpi-chart-badge">Volume schéma / Volume total</span>
+            <br>
+            <span class="kpi-chart-badge database" (click)="openDatabaseInfo()" matTooltip="Nom du schéma : {{ schemaName }}&#10;Volume : {{ schemaSizeMb }}&#10;Volume de la base : {{ databaseSizeMb }}">{{ databaseRatio }}</span>
+        </div>
       </div>
       <div class="kpi-chart-body">
         <chart type="line" [config]="USAGE_INSTANCE_TRACE_BY_PERIOD_LINE"
@@ -86,13 +90,12 @@
           <ng-template jqtCellDef="message" let-row>
             <span [title]="row.message">{{ row.message }}</span>
           </ng-template>
-
-          <ng-template jqtCellDef="stack" let-row>
-            <button mat-icon-button color="primary" [class.hidden]="!row.stackRows?.length"
-                    (click)="openLogStacktrace(row)" matTooltip="Consulter la Stack">
-              <mat-icon class="material-symbols-outlined">visibility</mat-icon>
-            </button>
-          </ng-template>
+            <ng-template jqtCellDef="stack" let-row>
+                <button mat-icon-button color="primary" [class.hidden]="!row.stacktrace"
+                        (click)="openLogStacktrace(row)" matTooltip="Consulter la Stack">
+                    <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
+                </button>
+            </ng-template>
         </jquery-table>
       </div>
     </section>

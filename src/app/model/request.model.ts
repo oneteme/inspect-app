@@ -95,5 +95,7 @@ export interface DatabaseInfo {
 export interface DatabaseTableInfo {
   schema: string;
   table_name: string;
-  size: string;
+  table_size: string;
+  indexes_size: string;
+  total_size: string;
 }
