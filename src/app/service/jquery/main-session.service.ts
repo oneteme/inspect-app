@@ -7,10 +7,12 @@ import {DATE_HOUR_COLUMNS, fetchGroupedRows, groupColumn, groupOrder, isDateHour
 import {MainSessionDto} from "../../model/request.model";
 
 /** Colonnes de base de la liste des sessions principales ; l'alias (`colonne:alias`) donne la clé de la réponse. */
-const MAIN_SESSION_LIST_COLUMNS = 'id,name,location,start,end,user,status,instance.app_name:appName,instance.address:address';
+const MAIN_SESSION_LIST_COLUMNS = 'id,location,start,end,user,status,instance.app_name:appName';
 
 /** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
 const LAZY_MAIN_SESSION_COLUMNS: Record<string, string> = {
+    name: 'name',
+    asyncDuration: 'async_duration:asyncDuration',
     threadName: 'thread:threadName',
     appVersion: 'instance.version:appVersion'
 };

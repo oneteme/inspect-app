@@ -7,17 +7,19 @@ import {RestSessionDto} from "../../model/request.model";
 import {DATE_HOUR_COLUMNS, fetchGroupedRows, groupColumn, groupOrder, isDateHour, packDateHour} from "./kpi-date-granularity";
 
 /** Colonnes de base de la liste REST ; l'alias (`colonne:alias`) donne la clé de la réponse. */
-const REST_SESSION_LIST_COLUMNS = 'id,api_name:name,method,protocol,path,status,start,end,user,instance.app_name:appName';
+const REST_SESSION_LIST_COLUMNS = 'id,method,protocol,path,status,start,end,user,instance.app_name:appName';
 
 /** Colonnes lazy : clé de table vers expression jquery (`colonne:alias`, l'alias est la clé de la réponse). */
 const LAZY_REST_SESSION_COLUMNS: Record<string, string> = {
+    name: 'api_name:name',
     userAgent: 'user_agt:userAgent',
     host: 'host',
     contentType: 'media:contentType',
     inDataSize: 'size_in:inDataSize',
     outDataSize: 'size_out:outDataSize',
     threadName: 'thread:threadName',
-    cacheControl: 'cache_control:cacheControl',
+    asyncDuration: 'async_duration:asyncDuration',
+    appVersion: 'instance.version:appVersion',
     query: 'query'
 };
 
