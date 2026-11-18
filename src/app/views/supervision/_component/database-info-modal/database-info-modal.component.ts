@@ -3,7 +3,7 @@ import {catchError, finalize, of, Subject, takeUntil} from 'rxjs';
 import {TableProvider} from '@oneteme/jquery-table';
 import {DatabaseRequestService} from '../../../../service/jquery/database-request.service';
 import {DatabaseTableInfo} from '../../../../model/request.model';
-import {DATABASE_MODAL_TABLE} from "../../../constants";
+import {DATABASE_MODAL_TABLE} from "../../../../shared/_component/table/table.config";
 
 @Component({
   templateUrl: './database-info-modal.component.html',

@@ -1,8 +1,9 @@
 import { SliceConfig, TableProvider } from '@oneteme/jquery-table';
-import { DatabaseRequestDto, DirectoryRequestDto, FtpRequestDto, MailRequestDto, MainSessionDto, RestRequestDto, RestSessionDto, SessionEventDto } from '../../../model/request.model';
+import { DatabaseTableInfo, DatabaseRequestDto, DirectoryRequestDto, FtpRequestDto, MailRequestDto, MainSessionDto, RestRequestDto, RestSessionDto, SessionEventDto } from '../../../model/request.model';
 import { AbstractStage, LocalRequest, LogEntry } from "../../../model/trace.model";
 import { LastServerStart } from "../../../model/jquery.model";
 import { formatDuration } from '../../pipe/duration.pipe';
+import { parseSizeToBytes } from "../../util";
 
 /** Equivalent de typeColumnFormatPipe utilisable hors template. */
 function fmtMethod(value: string | null | undefined): string {
@@ -569,3 +570,18 @@ export const SESSION_EVENT_TABLE_CONFIG: TableProvider<SessionEventDto> = {
     return 'row-standard';
   }
 }
+
+export const DATABASE_MODAL_TABLE: TableProvider<DatabaseTableInfo> = {
+  ...DEFAULT_TABLE_CONFIG,
+  view: { enabled: false },
+  columns: [
+    { key: 'table_name', header: 'Table', icon: 'list' },
+    {key: 'table_size', header: 'Données', icon: 'table_rows',
+      sortValue: (row: DatabaseTableInfo) => parseSizeToBytes((row.table_size))},
+    { key: 'indexes_size', header: 'Index', icon: 'table',
+      sortValue: (row: DatabaseTableInfo) => parseSizeToBytes((row.indexes_size))},
+    { key: 'total_size', header: 'Total', icon: 'memory',
+      sortValue: (row: DatabaseTableInfo) => parseSizeToBytes((row.total_size))},
+  ],
+  defaultSort: { active: 'total_size', direction: 'desc' },
+};
