@@ -330,7 +330,7 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
       label: 'Api'
     },
     jquery: {
-      value: () => `api_name.coalesce("No Name")`,
+      value: () => `api_name.coalesce("Unknown")`,
       buildAlias: () => 'name',
       order: 'name.asc'
     }
@@ -363,7 +363,7 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
       label: 'Media'
     },
     jquery: {
-      value: () => `method.coalesce("No Content")`,
+      value: () => `media.coalesce("No Content")`,
       buildAlias: () => 'media',
       order: 'media.asc'
     }
@@ -376,7 +376,7 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
     jquery: {
       value: () => `auth.coalesce("No Auth")`,
       buildAlias: () => 'auth',
-      order: 'asc'
+      order: 'auth.asc'
     }
   }]
 });
