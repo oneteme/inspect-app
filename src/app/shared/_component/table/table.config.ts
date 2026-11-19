@@ -176,6 +176,15 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
   }
 }
 
+export const SCHEDULE_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
+  ...MAIN_SESSION_TABLE_CONFIG,
+  columns: MAIN_SESSION_TABLE_CONFIG.columns.flatMap(column => {
+    if (column.key === 'name') return [];
+    if (column.key === 'location') return [{ key: 'name', header: 'Nom', icon: 'label', iconSvg: TAG_ICON_SVG, minWidth: 150 }, column];
+    return [column];
+  })
+};
+
 export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [

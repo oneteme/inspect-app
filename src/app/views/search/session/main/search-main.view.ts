@@ -19,7 +19,7 @@ import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../../model/conf.mod
 import {shallowEqual} from "../rest/search-rest.view";
 import {MainSessionDto} from "../../../../model/request.model";
 import {TableProvider} from "@oneteme/jquery-table";
-import {MAIN_SESSION_TABLE_CONFIG} from "../../../../shared/_component/table/table.config";
+import {MAIN_SESSION_TABLE_CONFIG, SCHEDULE_SESSION_TABLE_CONFIG} from "../../../../shared/_component/table/table.config";
 import {
   getDefaultRelativePeriod,
   getQuickRangeDates,
@@ -178,7 +178,7 @@ export class SearchMainView implements OnInit, OnDestroy {
 
     this.isLoading = true;
     this.sessions = [];
-    this._mainSessionService.getMainSessionList(this._criteria, this._lazyColumns)
+    this._mainSessionService.getMainSessionList(this._criteria, this.withScheduleBaseColumns(this._lazyColumns))
     .pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false))
     .subscribe({
       next: d => {
@@ -193,23 +193,27 @@ export class SearchMainView implements OnInit, OnDestroy {
   }
 
   private buildTableConfig(initialQuery?: string): TableProvider<MainSessionDto> {
+    const config = this.type === 'schedule' ? SCHEDULE_SESSION_TABLE_CONFIG : MAIN_SESSION_TABLE_CONFIG;
     return {
-      ...MAIN_SESSION_TABLE_CONFIG,
+      ...config,
       clearSearchInput: this.type || null,
       search: initialQuery
-        ? { ...MAIN_SESSION_TABLE_CONFIG.search, initialQuery, searchColumns: ['exception'] }
-        : MAIN_SESSION_TABLE_CONFIG.search,
+        ? { ...config.search, initialQuery, searchColumns: ['exception'] }
+        : config.search,
       onRowSelected: (row, event) => this.selectedRequest(event, row),
       lazyLoader: columns => this.loadLazyColumns(columns)
     };
   }
 
-  /** Colonnes lazy déjà demandées : la requête de base les inclut, pour que `data` les contienne. */
   private _lazyColumns: string[] = [];
+  
+  private withScheduleBaseColumns(columns: string[]): string[] {
+    return this.type === 'schedule' ? ['name', ...columns] : columns;
+  }
 
   private loadLazyColumns(columns: string[]): Observable<MainSessionDto[]> {
     this._lazyColumns = [...columns];
-    return this._mainSessionService.getMainSessionList(this._criteria, columns);
+    return this._mainSessionService.getMainSessionList(this._criteria, this.withScheduleBaseColumns(columns));
   }
 
 
