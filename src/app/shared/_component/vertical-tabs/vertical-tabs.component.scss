@@ -87,12 +87,6 @@
     gap: 0;
     padding: 6px 0;
   }
-
-  .tab-button.has-error::after {
-    top: 4px;
-    left: auto;
-    right: 4px;
-  }
 }
 
 .tab-button {
@@ -154,27 +148,6 @@
   &.hidden {
     display: none;
   }
-}
-
-.tab-button::after {
-  content: '';
-  position: absolute;
-  top: 5px;
-  left: 24px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #ef4444;
-  box-shadow: 0 0 0 2px #fff;
-  opacity: 0;
-  transform: scale(0.4);
-  pointer-events: none;
-  transition: opacity var(--tab-motion) var(--tab-ease), transform var(--tab-motion) var(--tab-ease);
-}
-
-.vertical-tabs-shell.collapsed .tab-button.has-error::after {
-  opacity: 1;
-  transform: scale(1);
 }
 
 .tab-label {
@@ -251,8 +224,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .vertical-tabs-shell,
-  .vertical-tabs-shell *,
-  .tab-button::after {
+  .vertical-tabs-shell * {
     transition: none !important;
   }
 }

@@ -3,6 +3,7 @@ import {Component, ElementRef, EventEmitter, Input, Output, QueryList, ViewChild
 export interface TabData {
   label: string;
   icon: string;
+  svgIcon?: string;
   count: number;
   visible: boolean;
   type: string;

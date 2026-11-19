@@ -1,4 +1,6 @@
 import {Component, inject, Input, OnChanges, SimpleChanges} from "@angular/core";
+import {DomSanitizer} from "@angular/platform-browser";
+import {MatIconRegistry} from "@angular/material/icon";
 import {EnvRouter} from "../../../../service/router.service";
 import {MainSessionView, RestSessionView} from "../../../../model/request.model";
 import {ExceptionInfo, InstanceEnvironment, SessionEvent} from "../../../../model/trace.model";
@@ -22,6 +24,10 @@ export class DetailSessionComponent implements OnChanges {
   private readonly _ftpRequestService = inject(FtpRequestService);
   private readonly _smtpRequestService = inject(SmtpRequestService);
   private readonly _ldapRequestService = inject(LdapRequestService);
+
+  constructor() {
+    inject(MatIconRegistry).addSvgIcon('local-code', inject(DomSanitizer).bypassSecurityTrustResourceUrl('./assets/local-code.svg'));
+  }
 
   readonly restLazyLoader = (columns: string[]) => this._restRequestService.getRequestList({'join': 'instance', 'parent.eq': this.session.id}, columns);
   readonly databaseLazyLoader = (columns: string[]) => this._databaseRequestService.getRequestList({'join': 'instance', 'parent.eq': this.session.id}, columns);
@@ -99,7 +105,8 @@ export class DetailSessionComponent implements OnChanges {
       },
       {
         label: 'LOCAL',
-        icon: 'memory',
+        icon: '',
+        svgIcon: 'local-code',
         count: this.session.localRequests?.length || 0,
         visible: (this.session.requestsMask & 1) > 0,
         type: 'local',
