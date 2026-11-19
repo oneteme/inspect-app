@@ -143,7 +143,7 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
     },
     { key: 'user', header: 'Utilisateur', icon: 'badge', width: '15%', minWidth: 120 },
     {
-      key: 'name', header: 'Nom', icon: 'label', iconSvg: TAG_ICON_SVG, lazy: true, minWidth: 150, groupable: false, sliceable: false
+      key: 'name', header: 'Nom', icon: 'label', iconSvg: TAG_ICON_SVG, lazy: true, minWidth: 150
     },
     {
       key: 'asyncDuration', header: 'Traitement Asynchrone', icon: 'time_auto', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 180, groupable: false, sliceable: false,
