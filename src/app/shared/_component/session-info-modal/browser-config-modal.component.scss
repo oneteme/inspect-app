@@ -1,13 +1,9 @@
 :host {
   display: flex;
   flex-direction: column;
-  height: 100%;
   overflow: hidden;
 }
 
-.modal {
-  height: 100%;
-}
 
 .modal-body {
   overflow-y: auto;
@@ -53,8 +49,8 @@
 }
 
 .device-frame {
-  width: 80%;
-  height: 80%;
+  width: 100%;
+  height: 100%;
 
   .device-shell {
     fill: #cbd5e1;
