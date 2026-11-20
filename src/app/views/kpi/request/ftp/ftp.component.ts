@@ -4,12 +4,12 @@ import {ChartComponent, selectBestScale} from "@oneteme/jquery-echarts";
 import {QueryParams} from "../../../../model/conf.model";
 import {FtpRequestService} from "../../../../service/jquery/ftp-request.service";
 import {finalize, Observable, of} from "rxjs";
-import {buildFilterSelections, toFilterValues,buildSeries,ChartConfig,lineTypeOptions,pivotByStack,FTP_STATUS_CHART_CONFIG,FTP_PERFORMANCE_CHART_CONFIG} from "../../kpi.config";
-import {formatChartDates, periodManagement, buildPeriodSliceDisplay, resolvePeriodGranularity, volumeSubtitle} from "../../../../shared/util";
+import {buildFilterSelections, toFilterValues,buildSeries,ChartConfig,lineTypeOptions,pivotByStack,AUDIENCE_CHART_CONFIG,FTP_STATUS_CHART_CONFIG,FTP_PERFORMANCE_CHART_CONFIG,FTP_GROUPS_CONFIG,FTP_FILTERS_CONFIG} from "../../kpi.config";
+import {formatChartDates, periodManagement, PeriodGranularities, resolvePeriodSliceDisplay, resolveViewGranularity, volumeSubtitle} from "../../../../shared/util";
 import {ChartProvider, field, buildPeriodOptions, remapSliceKeys} from "@oneteme/jquery-core";
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, OrganizerXOption, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
-import {withKpiChartTypes} from "../../kpi-chart-type";
+import {withKpiChartTypes, kpiStackBreadcrumbLabel} from "../../kpi-chart-type";
 
 @Component({
   templateUrl: './ftp.component.html',
@@ -24,9 +24,11 @@ export class FtpComponent implements OnInit {
 
   @ViewChild('statusChart') private _statusChart: ChartComponent<any, any>;
   @ViewChild('performanceChart') private _performanceChart: ChartComponent<any, any>;
+  @ViewChild('audienceChart') private _audienceChart: ChartComponent<any, any>;
 
   // Chart state
   $statusRepartition: Partial<{data: any[], rawData: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = { data: [], loading: true };
+  readonly kpiStackBreadcrumbLabel = kpiStackBreadcrumbLabel;
   $statusOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $statusView: 'chart' | 'table' = 'chart';
   $statusSlice: OrganizerSliceState | null = null;
@@ -39,8 +41,12 @@ export class FtpComponent implements OnInit {
   $performanceFilterValues: Record<string, string[]> = {};
   $performanceDisplayUnit = '';
 
+  $audienceRepartition: Partial<{data: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = { data: [], loading: true };
+  $audienceOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
+  $audienceSlice: OrganizerSliceState | null = null;
+  $audienceFilterValues: Record<string, string[]> = {};
+
   $commandRepartition: { data: any[], loading: boolean } = { data: [], loading: true };
-  $userRepartition: { data: any[], loading: boolean } = { data: [], loading: true };
   $dependencyRepartition: { data: any[], loading: boolean } = { data: [], loading: true };
   $globalStatistic = { totalRequest: 0, totalRequestError: 0, percentError: 0, elapsedPercentile: 0 };
 
@@ -56,11 +62,14 @@ export class FtpComponent implements OnInit {
 
   $statusChartType = 'column';
   $performanceChartType = 'column';
+  $audienceChartType = 'line';
 
   params: QueryParams;
   groupedBy: string = '';
-  $statusGranularity: string = '';
-  $performanceGranularity: string = '';
+  // Granularité par graphique : axe (X ou Grouper par) et filtre Date, chacun avec son sous-menu
+  $statusGranularity: PeriodGranularities = {axis: '', filter: ''};
+  $performanceGranularity: PeriodGranularities = {axis: '', filter: ''};
+  $audienceGranularity: PeriodGranularities = {axis: '', filter: ''};
 
   @Input() set queryParams(value: QueryParams) {
     if (value) {
@@ -68,16 +77,18 @@ export class FtpComponent implements OnInit {
       this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
 
       // Initialize ChartConfigs and OrganizerConfigs
-      this.$statusGranularity = this.groupedBy;
-      this.$performanceGranularity = this.groupedBy;
+      const defaultGranularity: PeriodGranularities = {axis: this.groupedBy, filter: this.groupedBy};
+      this.$statusGranularity = defaultGranularity;
+      this.$performanceGranularity = defaultGranularity;
+      this.$audienceGranularity = defaultGranularity;
       this.$statusRepartition.chartConfig = FTP_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = FTP_PERFORMANCE_CHART_CONFIG(this.groupedBy);
+      this.$audienceRepartition.chartConfig = AUDIENCE_CHART_CONFIG(FTP_GROUPS_CONFIG(this.groupedBy), FTP_FILTERS_CONFIG(this.groupedBy));
 
       this._rebuildOrganizerConfigs();
 
       this._fetchAllCharts();
       this.getCommands();
-      this.getUser();
       this.getDependencies();
       this.getGlobalStatistics();
     }
@@ -95,10 +106,10 @@ export class FtpComponent implements OnInit {
     if (event.type === 'viewSwitched') {
       this.$statusView = event.state.viewMode ?? 'chart';
     }
-    const granularity = this._resolveGranularityAfterX(event, this.$statusGranularity);
+    const granularity = resolveViewGranularity(event.state, this.$statusGranularity, this.params.period.start, this.params.period.end);
     if (granularity !== this.$statusGranularity) {
       this.$statusGranularity = granularity;
-      this.$statusRepartition.chartConfig = FTP_STATUS_CHART_CONFIG(granularity);
+      this.$statusRepartition.chartConfig = FTP_STATUS_CHART_CONFIG(granularity.axis, granularity.filter);
     }
     const result = this._handleOrganizerEvent(event, this.$statusRepartition.chartConfig, this.$statusOrganizer, this._statusOrganizerOptions());
     this.$statusOrganizer = withKpiChartTypes(result.binding, this.$statusChartType);
@@ -125,10 +136,10 @@ export class FtpComponent implements OnInit {
       this._cdr.markForCheck();
       return;
     }
-    const granularity = this._resolveGranularityAfterX(event, this.$performanceGranularity);
+    const granularity = resolveViewGranularity(event.state, this.$performanceGranularity, this.params.period.start, this.params.period.end);
     if (granularity !== this.$performanceGranularity) {
       this.$performanceGranularity = granularity;
-      this.$performanceRepartition.chartConfig = FTP_PERFORMANCE_CHART_CONFIG(granularity);
+      this.$performanceRepartition.chartConfig = FTP_PERFORMANCE_CHART_CONFIG(granularity.axis, granularity.filter);
     }
     const result = this._handleOrganizerEvent(event, this.$performanceRepartition.chartConfig, this.$performanceOrganizer, this._performanceOrganizerOptions());
     this.$performanceOrganizer = withKpiChartTypes(result.binding, this.$performanceChartType);
@@ -160,6 +171,42 @@ export class FtpComponent implements OnInit {
     this._fetchPerformance();
   }
 
+  onAudienceViewChange(event: OrganizerButtonEvent): void {
+    if (event.type === 'chartTypeSelected') {
+      this.$audienceChartType = event.state.selectedChartType ?? this.$audienceChartType;
+      this.$audienceOrganizer = withKpiChartTypes(this.$audienceOrganizer, this.$audienceChartType);
+      this._cdr.markForCheck();
+      return;
+    }
+    const granularity = resolveViewGranularity(event.state, this.$audienceGranularity, this.params.period.start, this.params.period.end);
+    if (granularity !== this.$audienceGranularity) {
+      this.$audienceGranularity = granularity;
+      this.$audienceRepartition.chartConfig = AUDIENCE_CHART_CONFIG(FTP_GROUPS_CONFIG(granularity.axis), FTP_FILTERS_CONFIG(granularity.filter));
+    }
+    const result = this._handleOrganizerEvent(event, this.$audienceRepartition.chartConfig, this.$audienceOrganizer, this._audienceOrganizerOptions());
+    this.$audienceOrganizer = withKpiChartTypes(result.binding, this.$audienceChartType);
+    if (result.shouldRefetch) {
+      this._fetchAudience();
+    }
+    this._cdr.markForCheck();
+  }
+
+  onAudienceSliceChange(sliceState: OrganizerSliceState | null): void {
+    this.$audienceSlice = sliceState;
+    if (!sliceState) {
+      this.$audienceFilterValues = {};
+    }
+    if (sliceState?.filterApplied === true) {
+      this._fetchAudience();
+    }
+  }
+
+  onAudienceFilterChange(activeKeys: string[][]): void {
+    if (!this.$audienceSlice) return;
+    this.$audienceFilterValues = toFilterValues(this.$audienceSlice.sliceConfigs, activeKeys);
+    this._fetchAudience();
+  }
+
   private _fetchSliceData(chartConfig: ChartConfig, filterKey: string, granularity: string): Observable<any[]> {
     const filter = chartConfig.filters?.items?.find(item => item.key === filterKey);
     if (!filter) {
@@ -175,6 +222,7 @@ export class FtpComponent implements OnInit {
   private _fetchAllCharts(): void {
     this._fetchStatus();
     this._fetchPerformance();
+    this._fetchAudience();
   }
 
   private _fetchStatus(): void {
@@ -187,11 +235,11 @@ export class FtpComponent implements OnInit {
     this.$statusRepartition.data = [];
     this._ftpRequestService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$statusGranularity, selections: buildFilterSelections(cfg, this.$statusFilterValues) }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$statusGranularity.axis, selections: buildFilterSelections(cfg, this.$statusFilterValues) }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
-      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$statusGranularity, this.datePipe, this.params.period.start) : data;
-      const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
+      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$statusGranularity.axis, this.datePipe, this.params.period.start) : data;
+            const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData, cfg.stacked);
       const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
       this.$statusRepartition.rawData = formattedData;
       this.$statusRepartition.data = pivoted;
@@ -215,11 +263,11 @@ export class FtpComponent implements OnInit {
     this.$performanceRepartition.data = [];
     this._ftpRequestService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$performanceGranularity, selections: buildFilterSelections(cfg, this.$performanceFilterValues) }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$performanceGranularity.axis, selections: buildFilterSelections(cfg, this.$performanceFilterValues) }
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
-      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$performanceGranularity, this.datePipe, this.params.period.start) : data;
-      const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
+      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$performanceGranularity.axis, this.datePipe, this.params.period.start) : data;
+            const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData, cfg.stacked);
       const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
       this.$performanceRepartition.data = pivoted;
       const yAlias = ind?.jquery.buildAlias(cfg.series.items.find(s => s.selected)?.jquery.buildAlias() ?? '') ?? '';
@@ -228,6 +276,31 @@ export class FtpComponent implements OnInit {
         ...this.STATUS_CHART_PROVIDER_BASE,
         series,
         yUnit: ind?.unit,
+        optionsByType: lineTypeOptions(series)
+      } as ChartProvider<string, number>;
+      this._cdr.markForCheck();
+    });
+  }
+
+  private _fetchAudience(): void {
+    const cfg = this.$audienceRepartition.chartConfig;
+    const ind = cfg.indicators.items.find(i => i.selected);
+    const grp = cfg.groups.items.find(g => g.selected);
+    const stk = ind?.extra?.stacks?.items?.find(s => s.selected);
+    this.$audienceRepartition.loading = true;
+    this.$audienceRepartition.data = [];
+    this._ftpRequestService.getCustom(
+      { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$audienceGranularity.axis, selections: buildFilterSelections(cfg, this.$audienceFilterValues) }
+    ).pipe(finalize(() => this.$audienceRepartition.loading = false))
+    .subscribe(data => {
+      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$audienceGranularity.axis, this.datePipe, this.params.period.start) : data;
+      const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData, false);
+      const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
+      this.$audienceRepartition.data = pivoted;
+      this.$audienceRepartition.chartProvider = {
+        ...this.STATUS_CHART_PROVIDER_BASE,
+        series,
         optionsByType: lineTypeOptions(series)
       } as ChartProvider<string, number>;
       this._cdr.markForCheck();
@@ -284,24 +357,6 @@ export class FtpComponent implements OnInit {
     .subscribe({ next: (res: any[]) => { this.$dependencyRepartition.data = res; } });
   }
 
-  getUser(): void {
-    const args: any = {
-      'select': `count(user.distinct):count,start.${this.groupedBy}.varchar:date`,
-      'join': 'instance',
-      'instance.namespace': this.params.namespace,
-      'start.ge': this.params.period.start.toISOString(),
-      'start.lt': this.params.period.end.toISOString(),
-      'order': `start.${this.groupedBy}.asc`
-    }
-    if(this.params.hosts?.length){
-      args['host.in'] = this.params.hosts.map(value => `"${value}"`).join(',');
-    }
-    this.$userRepartition.loading = true;
-    this._ftpRequestService.getFtp(args)
-    .pipe(finalize(() => this.$userRepartition.loading = false))
-    .subscribe({ next: (res: any[]) => { this.$userRepartition.data = formatChartDates(res, this.groupedBy, this.datePipe, this.params.period.start); } });
-  }
-
   getGlobalStatistics() {
     const args: any = {
       'select': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error`,
@@ -326,12 +381,14 @@ export class FtpComponent implements OnInit {
   private _rebuildOrganizerConfigs(): void {
     this.$statusOrganizer = withKpiChartTypes(buildOrganizerChartBinding(this.$statusRepartition.chartConfig, this._statusOrganizerOptions()), this.$statusChartType);
     this.$performanceOrganizer = withKpiChartTypes(buildOrganizerChartBinding(this.$performanceRepartition.chartConfig, this._performanceOrganizerOptions()), this.$performanceChartType);
+    this.$audienceOrganizer = withKpiChartTypes(buildOrganizerChartBinding(this.$audienceRepartition.chartConfig, this._audienceOrganizerOptions()), this.$audienceChartType);
   }
 
   private _statusOrganizerOptions(): OrganizerChartBridgeOptions {
     return {
-      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$statusRepartition.chartConfig, filterKey, this.$statusGranularity),
-      resolveSliceDisplay: (filterKey: string) => this._resolvePeriodSliceDisplay(filterKey, this.$statusGranularity),
+      showStack: true,
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$statusRepartition.chartConfig, filterKey, this.$statusGranularity.filter),
+      resolveSliceDisplay: (filterKey: string, menu) => resolvePeriodSliceDisplay(filterKey, menu === 'group' ? this.$statusGranularity.axis : this.$statusGranularity.filter, this.params.period.start),
       resolveXOptions: (groupKey: string) => this._resolveXOptions(groupKey),
       remapSliceSelection: remapSliceKeys,
       onExportVisual: () => this._statusChart?.exportImage('disponibilite'),
@@ -341,8 +398,9 @@ export class FtpComponent implements OnInit {
 
   private _performanceOrganizerOptions(): OrganizerChartBridgeOptions {
     return {
-      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$performanceRepartition.chartConfig, filterKey, this.$performanceGranularity),
-      resolveSliceDisplay: (filterKey: string) => this._resolvePeriodSliceDisplay(filterKey, this.$performanceGranularity),
+      showStack: true,
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$performanceRepartition.chartConfig, filterKey, this.$performanceGranularity.filter),
+      resolveSliceDisplay: (filterKey: string, menu) => resolvePeriodSliceDisplay(filterKey, menu === 'group' ? this.$performanceGranularity.axis : this.$performanceGranularity.filter, this.params.period.start),
       resolveXOptions: (groupKey: string) => this._resolveXOptions(groupKey),
       remapSliceSelection: remapSliceKeys,
       onExportVisual: () => this._performanceChart?.exportImage('performance'),
@@ -350,19 +408,20 @@ export class FtpComponent implements OnInit {
     };
   }
 
-  private _resolvePeriodSliceDisplay(filterKey: string, granularity: string) {
-    return filterKey === 'date' ? buildPeriodSliceDisplay(granularity, this.params.period.start) : undefined;
+  private _audienceOrganizerOptions(): OrganizerChartBridgeOptions {
+    return {
+      showStack: false,
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$audienceRepartition.chartConfig, filterKey, this.$audienceGranularity.filter),
+      resolveSliceDisplay: (filterKey: string, menu) => resolvePeriodSliceDisplay(filterKey, menu === 'group' ? this.$audienceGranularity.axis : this.$audienceGranularity.filter, this.params.period.start),
+      resolveXOptions: (groupKey: string) => this._resolveXOptions(groupKey),
+      remapSliceSelection: remapSliceKeys,
+      onExportVisual: () => this._audienceChart?.exportImage('audience'),
+      onExportData: () => this._audienceChart?.exportData('audience'),
+    };
   }
 
   private _resolveXOptions(groupKey: string): OrganizerXOption[] | undefined {
     return groupKey === 'date' ? buildPeriodOptions() : undefined;
-  }
-
-  private _resolveGranularityAfterX(event: OrganizerButtonEvent, current: string): string {
-    if (event.type !== 'xSelected' || event.state.selectedX !== 'date') {
-      return current;
-    }
-    return resolvePeriodGranularity(event.state.selectedXOption, this.params.period.start, this.params.period.end);
   }
 
   private _handleOrganizerEvent(

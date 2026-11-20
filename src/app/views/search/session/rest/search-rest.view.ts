@@ -74,6 +74,7 @@ export class SearchRestView implements OnInit, OnDestroy {
 
   tableConfig: TableProvider<RestSessionDto> = {
     ...REST_SESSION_TABLE_CONFIG,
+    labels: { ...REST_SESSION_TABLE_CONFIG.labels },
     onRowSelected: (row, event) => this.selectedRequest(event, row),
     lazyLoader: columns => this.loadLazyColumns(columns)
   };
@@ -188,6 +189,7 @@ export class SearchRestView implements OnInit, OnDestroy {
 
     this.isLoading = true;
     this.sessions = [];
+    this.tableConfig.labels.empty = REST_SESSION_TABLE_CONFIG.labels.empty;
     this._restSessionService.getRestSessionList(this._criteria, this._lazyColumns)
       .pipe(takeUntil(this.$destroy), finalize(() => this.isLoading = false))
       .subscribe({

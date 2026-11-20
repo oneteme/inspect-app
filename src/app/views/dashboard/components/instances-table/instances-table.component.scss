@@ -9,6 +9,11 @@
   height: calc(100vh - 80px);
 }
 
+jquery-table.dov-table {
+  --jqt-header-height: 44px;
+  --jqt-footer-height: 44px;
+}
+
 // Cellules
 .dov-server-cell {
   display: flex;
