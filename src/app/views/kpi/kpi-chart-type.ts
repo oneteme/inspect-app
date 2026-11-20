@@ -8,7 +8,9 @@ const KPI_CHART_TYPE_LABELS: Record<string, string> = {
   line: 'Courbe',
   spline: 'Courbe lissée',
   area: 'Aire',
-  areaspline: 'Aire lissée'
+  areaspline: 'Aire lissée',
+  treemap: 'Treemap',
+  heatmap: 'Heatmap'
 };
 
 const KPI_CHART_TYPE_IDS = ['column', 'bar', 'pie', 'donut', 'line', 'spline', 'area', 'areaspline', 'treemap', 'heatmap'];
