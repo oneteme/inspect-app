@@ -274,8 +274,12 @@ export class ServerActivityView implements OnDestroy {
   }
 
   openLogStacktrace(row: LogEntry): void {
-    this._dialog.open(StacktraceDialogComponent, {
-      data: {message: row.message, stack: row.stacktrace}
+    this._logEntryService.getStacktrace(row.instanceEnv, row.startMs).subscribe(stack => {
+      this._dialog.open(StacktraceDialogComponent, {
+        width: '80vw',
+        height: '60vh',
+        data: {message: row.message, stack}
+      });
     });
   }
 

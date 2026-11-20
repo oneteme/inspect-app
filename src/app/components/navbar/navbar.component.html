@@ -164,7 +164,6 @@
         <ng-container *ngFor="let item of navItems">
           <button
              mat-menu-item
-             class="inspect-track-target"
             *ngIf="item.children"
             [matMenuTriggerFor]="subMenu"
             [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
@@ -178,7 +177,7 @@
           <mat-menu #subMenu="matMenu" class="sub-nav-menu">
             <button
               mat-menu-item
-              class="nav-item-with-kpi inspect-track-target"
+              class="nav-item-with-kpi"
               *ngFor="let subItem of item.children"
               [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
               data-inspect-scope="Menu principal"
@@ -273,7 +272,7 @@
     <div class="nav-actions">
       <div class="nav-divider"></div>
 
-        <button class="env-trigger inspect-track-target" [matMenuTriggerFor]="envMenu" [ngClass]="'env-' + getEnvClass(namespace.value)" matTooltip="Changer l'environnement">
+        <button class="env-trigger" [matMenuTriggerFor]="envMenu" [ngClass]="'env-' + getEnvClass(namespace.value)" matTooltip="Changer l'environnement">
             <span class="env-letter">{{ namespace.value?.charAt(0) | uppercase }}</span>
             <span class="env-label">{{ namespace.value | uppercase }}</span>
             <mat-icon>expand_more</mat-icon>
@@ -281,14 +280,14 @@
         </button>
 
         <mat-menu #envMenu="matMenu" class="env-menu-panel">
-            <button mat-menu-item class="inspect-track-target" *ngFor="let e of namespaces" (click)="selectNamespace(e)"
+            <button mat-menu-item *ngFor="let e of namespaces" (click)="selectNamespace(e)"
                     [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
                     data-inspect-scope="Namespace"
                     [attr.data-inspect-track]="e">
                 <mat-icon [style.visibility]="namespace.value === e ? 'visible' : 'hidden'">check</mat-icon>
                 <span>{{ e | uppercase }}</span>
             </button>
-            <button mat-menu-item class="inspect-track-target" (click)="openAddNamespaceDialog()" *ngIf="auth.enabled"
+            <button mat-menu-item  (click)="openAddNamespaceDialog()" *ngIf="auth.enabled"
                     [attr.data-inspect-location]="(pageTitle$ | async)?.title || 'Navigation'"
                     data-inspect-scope="Namespace"
                     data-inspect-track="Ajouter un namespace">

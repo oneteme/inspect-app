@@ -43,6 +43,9 @@ export class SearchMainEventView {
     private readonly _instanceService = inject(InstanceService);
     private readonly _activatedRoute = inject(ActivatedRoute);
     private readonly _location = inject(Location);
+    readonly sessionLinkIcon = this._activatedRoute.snapshot.data['isLogRoute']
+        ? 'move_up'
+        : 'link';
     readonly periodQuickRanges = PERIOD_QUICK_RANGES;
     serverNameIsLoading = true;
     nameDataList: any[];

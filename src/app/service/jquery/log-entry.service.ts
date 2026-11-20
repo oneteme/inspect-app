@@ -17,7 +17,7 @@ export class LogEntryService {
 
   getActivityByPeriod(filters: {namespace: string, start: Date, end: Date, app_name?: string[]}): Observable<LogEntry[]> {
     const args: any = {
-      'select': 'start:instant,instance.app_name:appName,log_message,thread,action,stacktrace:stacktrace',
+      'select': 'instance_env,start:instant,instance.app_name:appName,log_message,thread,action,has_stack:hasStack',
       'join': 'left_instance',
       'instance.namespace': filters.namespace, // todo remove this once @usf fixes the namespace issue in server
       'start.ge': filters.start.toISOString(),
@@ -34,7 +34,22 @@ export class LogEntryService {
       level: row.level ?? '',
       action: row. action ?? '',
       thread: row.thread ?? '',
-      stacktrace: row.stacktrace ?? null
+      instanceEnv: row.instanceEnv ?? '',
+      startMs: row.instant,
+      hasStack: row.hasStack ?? false
     }))));
+  }
+
+
+  getStacktrace(instanceEnv: string, startMs: number): Observable<string | null> {
+    return this.getLogEntry<any[]>({
+      select: 'stacktrace:stacktrace',
+      instance_env: instanceEnv,
+      'start.ge': new Date(startMs).toISOString(),
+      'start.lt': new Date(startMs + 1).toISOString()
+    }).pipe(map(rows => {
+      const stack = rows[0]?.stacktrace;
+      return (stack && typeof stack === 'object' ? stack.value : stack) ?? null;
+    }));
   }
 }
