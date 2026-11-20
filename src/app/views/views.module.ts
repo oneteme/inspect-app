@@ -68,7 +68,6 @@ import {DependencyChartComponent} from "./kpi/_component/dependency-chart/depend
 import {MediaTypeChartComponent} from "./kpi/_component/media-type-chart/media-type-chart.component";
 import {DependentChartComponent} from "./kpi/_component/dependent-chart/dependent-chart.component";
 import {StartupComponent} from "./kpi/session/startup/startup.component";
-import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.component";
 import {CompareView} from "./compare/compare.view";
 import {AnalyticsView} from "./analytics/analytics.view";
 import {SearchMainEventView} from "./search/event/main/search-main-event.view";
@@ -144,7 +143,6 @@ import {SearchMainEventView} from "./search/event/main/search-main-event.view";
     DependencyChartComponent,
     DependentChartComponent,
     MediaTypeChartComponent,
-    UserChartComponent,
     CompareView,
       AnalyticsView
   ]

@@ -1255,6 +1255,41 @@ export const REST_VOLUMETRY_CHART_CONFIG = (groupedBy: string, filterGroupedBy: 
   filters: REST_FILTERS_CONFIG(filterGroupedBy)
 });
 
+// Audience : nombre d'utilisateurs distincts. Empiler est proposé par l'organizer à partir du groupement choisi.
+export const AUDIENCE_CHART_CONFIG = (groups: ChartSection, filters?: ChartSection): ChartConfig => ({
+  series: {
+    optional: false,
+    items: [{
+      key: 'user',
+      selected: true,
+      menu: {
+        label: ''
+      },
+      jquery: {
+        value: () => 'user.distinct',
+        buildAlias: () => 'user'
+      }
+    }]
+  },
+  indicators: {
+    optional: false,
+    items: [{
+      key: 'count',
+      selected: true,
+      menu: {
+        label: 'Utilisateurs'
+      },
+      jquery: {
+        value: (s: string) => `count(${s})`,
+        buildAlias: () => 'count',
+        buildName: () => 'Utilisateurs'
+      }
+    }]
+  },
+  groups,
+  filters
+});
+
 export const REST_LATENCY_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
   series: {
     optional: false,
