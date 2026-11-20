@@ -506,10 +506,10 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
     { key: 'instant', header: 'Horodate', icon: 'schedule', sliceable: false, groupable: false, width: '11%' },
-    { key: 'appName', header: 'Application', icon: 'widgets', sliceable: false, groupable: false, width: '12%' },
-    { key: 'message', header: 'Message', icon: 'subject', sliceable: false, groupable: false, width: '35%' },
-    { key: 'thread', header: 'Thread', sliceable: false, groupable: false, width: '16%' },
-    { key: 'action', header: 'Détails', sliceable: false, groupable: false, width: '17%' },
+    { key: 'appName', header: 'Application', icon: 'subject', width: '12%' },
+    { key: 'message', header: 'Message', icon: 'chat', sliceable: false, groupable: false, width: '35%' },
+    { key: 'thread', header: 'Thread', icon: 'call_split', width: '16%' },
+    { key: 'action', header: 'Action', icon: 'info', width: '17%' },
     { key: 'stack', sliceable: false, groupable: false, sortable: false, width: '9%' }
   ],
   slices: [
