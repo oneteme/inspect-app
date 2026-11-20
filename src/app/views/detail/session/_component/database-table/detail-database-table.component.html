@@ -1,9 +1,14 @@
 <jquery-table class="flex-table"
               [config]="tableConfig" [data]="_requests" [isLoading]="isLoading">
   <ng-template jqtCellDef="resource" let-row>
-    <span style="font-weight: bold;">{{ row.command | typeColumnFormat }}</span>
-    <br>
-    {{ row.schema || row.name || 'N/A' }}
+    <div data-inspect-scope="Flux JDBC view"
+         data-inspect-track="Flux JDBC • Détails">
+      <span style="font-weight: bold;"
+            data-inspect-scope="Flux JDBC view"
+            data-inspect-track="Flux JDBC • Détails">{{ row.command | typeColumnFormat }}</span>
+      <br>
+      {{ row.schema || row.name || 'N/A' }}
+    </div>
   </ng-template>
 
   <ng-template jqtCellDef="start" let-row>
