@@ -1,12 +1,17 @@
+
 import { Injectable } from '@angular/core';
-import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
+import {
+    HttpEvent,
+    HttpHandler,
+    HttpInterceptor,
+    HttpRequest
+} from '@angular/common/http';
 import { EMPTY, Observable } from 'rxjs';
 import { AuthService } from './auth.service';
 import { Router } from '@angular/router';
 import { resolvedAuth } from './auth-code-flow.config';
 
 @Injectable()
-
 export class AuthInterceptor implements HttpInterceptor {
 
     constructor(
@@ -15,36 +20,34 @@ export class AuthInterceptor implements HttpInterceptor {
     ) {}
 
     intercept(
-        req: HttpRequest<any>,
+        req: HttpRequest<unknown>,
         next: HttpHandler
-    ): Observable<HttpEvent<any>> {
+    ): Observable<HttpEvent<unknown>> {
 
-        if (!resolvedAuth.enabled) {
+        if (!resolvedAuth.enabled || !this.authService.isInitialized()) {
             return next.handle(req);
         }
 
-        // Do not interfere with OAuth initialization requests
-        if (!this.authService.isInitialized()) {
-            return next.handle(req);
-        }
+        const token = this.authService.getToken();
 
-        // token expiré ou supprimé
-        if (!this.authService.isLogged()) {
-            this.authService.login(this.router.url);
-            return EMPTY;
-        }
+        // not logged in OR no token (expired or deleted)
+        if (!this.authService.isLogged() || !token) {
 
-        const accessToken = this.authService.getAccessToken();
-
-        if (!accessToken) {
-            this.authService.login(this.router.url);
-            return EMPTY;
-        }
-
-        return next.handle(req.clone({
-            setHeaders: {
-                Authorization: `Bearer ${accessToken}`
+            // Initial navigation is handled by the auth guard.
+            if (!this.router.navigated) {
+                return EMPTY;
             }
-        }));
+
+            this.authService.login(this.router.url);
+            return EMPTY;
+        }
+
+        return next.handle(
+            req.clone({
+                setHeaders: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+        );
     }
 }
