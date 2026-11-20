@@ -73,6 +73,37 @@ const STATUS_FILTER_ITEMS = (): ChartItem[] => [{
   }
 }];
 
+const USER_AGENT_SUBMENU: SubmenuConfig = { id: 'userAgent', label: 'User-Agent' };
+
+// Entrées « Valeur » et « Produit » (agent connu ou « Autre ») du menu User-Agent.
+const USER_AGENT_ITEMS = (): ChartItem[] => [{
+  key: 'userAgent',
+  selected: false,
+  submenu: USER_AGENT_SUBMENU,
+  menu: {
+    label: 'Valeur'
+  },
+  jquery: {
+    value: () => `user_agt.coalesce("Unknown")`,
+    buildAlias: () => 'userAgent',
+    buildName: (chartItem, value: string) => value,
+    order: 'userAgent.asc'
+  }
+}, {
+  key: 'userAgentProduct',
+  selected: false,
+  submenu: USER_AGENT_SUBMENU,
+  menu: {
+    label: 'Produit'
+  },
+  jquery: {
+    value: () => 'user_agt_product',
+    buildAlias: () => 'userAgentProduct',
+    buildName: (chartItem, value: string) => value,
+    order: 'userAgentProduct.asc'
+  }
+}];
+
 export const statusTrancheLabel = (value: string): string => STATUS[value]?.label ?? value;
 
 export const REST_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
@@ -124,7 +155,10 @@ export const REST_SESSION_STATUS_CHART_CONFIG = (groupedBy: string, filterGroupe
         buildAlias: () => 'count'
       },
       extra: {
-        stacks: STATUS_STACKS()
+        stacks: {
+          optional: false,
+          items: [...STATUS_STACKS().items, ...USER_AGENT_ITEMS()]
+        }
       }
     }]
   },
@@ -332,18 +366,7 @@ export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => (
       buildAlias: () => 'httpHost',
       order: 'httpHost.asc'
     }
-  }, {
-    key: 'userAgent',
-    selected: false,
-    menu: {
-      label: 'User-Agent'
-    },
-    jquery: {
-      value: () => `user_agt.coalesce("Unknown")`,
-      buildAlias: () => 'userAgent',
-      order: 'userAgent.asc'
-    }
-  }, {
+  }, ...USER_AGENT_ITEMS(), {
     key: 'media',
     selected: false,
     menu: {
@@ -469,18 +492,7 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
       buildAlias: () => 'httpHost',
       order: 'httpHost.asc'
     }
-  }, {
-    key: 'userAgent',
-    selected: false,
-    menu: {
-      label: 'User-Agent'
-    },
-    jquery: {
-      value: () => `user_agt.coalesce("Unknown")`,
-      buildAlias: () => 'userAgent',
-      order: 'userAgent.asc'
-    }
-  }, {
+  }, ...USER_AGENT_ITEMS(), {
     key: 'media',
     selected: false,
     menu: {
