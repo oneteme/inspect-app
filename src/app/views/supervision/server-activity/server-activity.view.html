@@ -89,7 +89,7 @@
             <span [title]="row.message">{{ row.message }}</span>
           </ng-template>
             <ng-template jqtCellDef="stack" let-row>
-                <button mat-icon-button color="primary" [class.hidden]="!row.stacktrace"
+                <button mat-icon-button color="primary" [class.hidden]="!row.hasStack"
                         (click)="openLogStacktrace(row)" matTooltip="Consulter la Stack">
                     <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
                 </button>
