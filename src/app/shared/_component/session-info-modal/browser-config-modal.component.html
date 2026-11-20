@@ -1,0 +1,99 @@
+<div class="modal">
+    <div class="modal-header">
+        <div class="modal-header-left" *ngIf="!isLoading && configs.length">
+            <div class="modal-icon">
+                <mat-icon>computer</mat-icon>
+            </div>
+            <div class="modal-info">
+                <div class="modal-title">Détails Poste</div>
+            </div>
+        </div>
+        <button class="modal-close" mat-dialog-close>
+            <mat-icon>close</mat-icon>
+        </button>
+    </div>
+
+    <div class="modal-body">
+        <div *ngIf="isLoading" class="state-message">
+            <mat-spinner diameter="32"></mat-spinner>
+        </div>
+
+        <div *ngIf="!isLoading && !configs.length" class="state-message">
+            Aucune information disponible
+        </div>
+
+
+        <div *ngIf="!isLoading && configs.length" class="device-frame-wrapper">
+            <div *ngFor="let config of configs" class="browser-config-card">
+                <div style="text-align: center">
+                    <svg *ngIf="config.isLandscape" class="device-frame" viewBox="0 3 48 42"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <path class="device-shell"
+                              d="M16.7,42V39H21V34H7q-1.2,0-2.1-0.9T4,31V9Q4,7.8 4.9,6.9T7,6H41q1.2,0 2.1,0.9T44,9V31q0,1.2-0.9,2.1T41,34H27v5h4.3v3H16.7ZM7,31H41V9H7V31Zm0,0V9V31Z"/>
+                        <rect class="device-screen" height="22" rx="1" width="34" x="7" y="9"/>
+                        <foreignObject height="22" width="34" x="7" y="9">
+                            <ng-container
+                                    *ngTemplateOutlet="deviceScreenContent; context: { config: config }"></ng-container>
+                        </foreignObject>
+                    </svg>
+
+                    <svg *ngIf="!config.isLandscape" class="device-frame" viewBox="0 5 48 42"
+                         xmlns="http://www.w3.org/2000/svg">
+                        <rect class="device-shell" height="38" rx="3" width="26" x="11" y="7"/>
+                        <rect class="device-screen" height="34" rx="1" width="22" x="13" y="9"/>
+                        <foreignObject height="34" width="22" x="13" y="9">
+                            <ng-container
+                                    *ngTemplateOutlet="deviceScreenContent; context: { config: config }"></ng-container>
+                        </foreignObject>
+                    </svg>
+                </div>
+
+                <div class="card-footer">
+                    {{ config.os || 'OS inconnu' }} - {{ config.re || 'RE inconnu' }}
+                </div>
+            </div>
+
+            <ng-template #deviceScreenContent let-config="config">
+                <div class="device-screen-content" xmlns="http://www.w3.org/1999/xhtml">
+                    <div class="top-row">
+                        <span [class.dark]="config.userTheme === 'dark'"
+                              [matTooltip]=" userTheme(config.userTheme)"
+                              class="theme-chip">
+                            <mat-icon>{{ config.userTheme === 'dark' ? 'dark_mode' : 'light_mode' }}</mat-icon>
+                        </span>
+                        <div class="language" matTooltip="Langue">
+                            <mat-icon>language</mat-icon>
+                            {{ config.userLanguage | uppercase }}
+                        </div>
+                        <div class="connectivity-badge"
+                        [matTooltip]="config.deviceConnectivity != 'unknown' ? 'Réseau' : 'Réseau inconnu'">
+                            <mat-icon fontSet="material-symbols-outlined" *ngIf="config.deviceConnectivity != 'unknown'">
+                                signal_cellular_{{ config.connectivityQuality }}_bar
+                            </mat-icon>
+                            <mat-icon fontSet="material-symbols-outlined" *ngIf="config.deviceConnectivity == 'unknown'">signal_wifi_statusbar_not_connected</mat-icon>
+                            {{ config.connectivityLabel }}
+                        </div>
+                    </div>
+                    <div class="screen-resolution">
+                        <span class="resolution-screen" matTooltip="Résolution de l'écran">
+                        <mat-icon>aspect_ratio</mat-icon>
+                            {{ config.deviceDisplayResolution }}
+                        </span>
+                        <span class="resolution-browser" matTooltip="Résolution de la page">
+                            <ng-icon *ngIf="isInBrowsers(config.re)" [name]="'bootstrapBrowser' + config.re" />
+                            <mat-icon *ngIf="!isInBrowsers(config.re)">computer</mat-icon>
+                            {{ config.windowViewportBounds }}
+                        </span>
+                    </div>
+                    <div class="windows-os" *ngIf="isWindows(config.os)" [matTooltip]="'OS : ' + config.os">
+                        <ng-icon name="bootstrapWindows" />
+                    </div>
+                    <div class="zoom-size" matTooltip="Zoom">
+                        <mat-icon>zoom_in</mat-icon>
+                        x{{ config.windowZoomLevel }}
+                    </div>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</div>
