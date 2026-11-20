@@ -62,9 +62,11 @@
              [matTooltip]="_instance?.branch + ' - ' + _instance?.hash">
           <mat-icon class="material-symbols-outlined">code_blocks</mat-icon>
         </div>
-        <div class="meta-icon-btn"
-             [class.disabled]="!_instance?.os"
-             [matTooltip]="_instance?.os + ' - ' + _instance?.re">
+          <div class="browser-icon-btn"
+               [class.disabled]="!_instance?.os"
+               [class.clickable]="!isInstanceServer(_instance?.type)"
+               [matTooltip]="isInstanceServer(_instance.type) ?  (_instance?.os + ' - ' + _instance?.re) : 'Détails Poste'"
+               (click)="!isInstanceServer(_instance.type) && openBrowserInfo()">
           <mat-icon class="material-symbols-outlined">{{ _instance.type === 'CLIENT' ? 'devices' : 'data_table' }}</mat-icon>
         </div>
       </div>
