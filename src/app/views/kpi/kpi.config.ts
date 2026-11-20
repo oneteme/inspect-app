@@ -12,7 +12,70 @@ const DURATION_UNIT: UnitConfig = {
   ]
 };
 
-export const REST_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+const STATUS_SUBMENU: SubmenuConfig = { id: 'statut', label: 'Statut' };
+
+// Empilement des indicateurs de session par statut (valeur brute ou tranche).
+const STATUS_STACKS = (): ChartSection => ({
+  optional: false,
+  items: [{
+    key: 'status_stack',
+    selected: false,
+    menu: {
+      label: 'Statut'
+    },
+    submenu: { ...STATUS_SUBMENU, itemLabel: 'Valeur' },
+    jquery: {
+      value: () => 'status',
+      buildAlias: () => 'status',
+      buildName: (chartItem, value: string) => value,
+      buildColor: (value: string) => statusColor(value)
+    }
+  }, {
+    key: 'status_tranche',
+    selected: true,
+    menu: {
+      label: 'Tranche'
+    },
+    submenu: STATUS_SUBMENU,
+    jquery: {
+      value: () => 'status_tranche',
+      buildAlias: () => 'status_tranche',
+      buildColor: (value: string) => STATUS[value].color,
+      buildName: (chartItem, value) => STATUS[value].label
+    }
+  }]
+});
+
+// Entrées « Valeur » et « Tranche » du menu Filtrer par des pages de session.
+const STATUS_FILTER_ITEMS = (): ChartItem[] => [{
+  key: 'status',
+  selected: false,
+  submenu: STATUS_SUBMENU,
+  menu: {
+    label: 'Valeur'
+  },
+  jquery: {
+    value: () => 'status',
+    buildAlias: () => 'status',
+    order: 'status.asc'
+  }
+}, {
+  key: 'status_tranche',
+  selected: false,
+  submenu: STATUS_SUBMENU,
+  menu: {
+    label: 'Tranche'
+  },
+  jquery: {
+    value: () => 'status_tranche',
+    buildAlias: () => 'status_tranche',
+    order: 'status_tranche.asc'
+  }
+}];
+
+export const statusTrancheLabel = (value: string): string => STATUS[value]?.label ?? value;
+
+export const REST_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -29,10 +92,10 @@ export const REST_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartC
   },
   indicators: PERFORMANCE_INDICATORS(),
   groups: REST_SESSION_GROUPS_CONFIG(groupedBy),
-  filters: REST_SESSION_FILTERS_CONFIG(groupedBy)
+  filters: REST_SESSION_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const REST_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+export const REST_SESSION_STATUS_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -61,42 +124,15 @@ export const REST_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig
         buildAlias: () => 'count'
       },
       extra: {
-        stacks: {
-          optional: false,
-          items: [{
-            key: 'status_stack',
-            selected: false,
-            menu: {
-              label: 'Statut'
-            },
-            jquery: {
-              value: () => 'status',
-              buildAlias: () => 'status',
-              buildName: (chartItem, value: string) => value,
-              buildColor: (value: string) => statusColor(value)
-            }
-          }, {
-            key: 'status_tranche',
-            selected: true,
-            menu: {
-              label: 'Tranche'
-            },
-            jquery: {
-              value: () => 'status_tranche',
-              buildAlias: () => 'status_tranche',
-              buildColor: (value: string) => STATUS[value].color,
-              buildName: (chartItem, value) => STATUS[value].label
-            }
-          }]
-        }
+        stacks: STATUS_STACKS()
       }
     }]
   },
   groups: REST_SESSION_GROUPS_CONFIG(groupedBy),
-  filters: REST_SESSION_FILTERS_CONFIG(groupedBy)
+  filters: REST_SESSION_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const REST_SESSION_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartConfig => ( {
+export const REST_SESSION_VOLUMETRY_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ( {
   series: {
     optional: false,
     items: [{
@@ -214,7 +250,7 @@ export const REST_SESSION_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartCon
     }]
   },
   groups: REST_SESSION_GROUPS_CONFIG(groupedBy),
-  filters: REST_SESSION_FILTERS_CONFIG(groupedBy)
+  filters: REST_SESSION_FILTERS_CONFIG(filterGroupedBy)
 });
 
 export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
@@ -234,7 +270,7 @@ export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => (
     key: 'host',
     selected: false,
     menu: {
-      label: 'Hôte'
+      label: 'Application'
     },
     jquery: {
       value: () => `instance.app_name`,
@@ -242,15 +278,15 @@ export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => (
       order: 'host.asc'
     }
   }, {
-    key: 'name',
+    key: 'resource',
     selected: false,
     menu: {
-      label: 'Api'
+      label: 'Ressource'
     },
     jquery: {
-      value: () => `api_name.coalesce("Unknown")`,
-      buildAlias: () => 'name',
-      order: 'name.asc'
+      value: () => `path.coalesce("Unknown")`,
+      buildAlias: () => 'resource',
+      order: 'resource.asc'
     }
   }, {
     key: 'user',
@@ -264,10 +300,21 @@ export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => (
       order: 'user.asc'
     }
   }, {
+    key: 'name',
+    selected: false,
+    menu: {
+      label: 'Nom'
+    },
+    jquery: {
+      value: () => `api_name.coalesce("Unknown")`,
+      buildAlias: () => 'name',
+      order: 'name.asc'
+    }
+  }, {
     key: 'method',
     selected: false,
     menu: {
-      label: 'Method'
+      label: 'Méthode'
     },
     jquery: {
       value: () => `method.coalesce("Unknown")`,
@@ -275,15 +322,59 @@ export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => (
       order: 'method.asc'
     }
   }, {
+    key: 'httpHost',
+    selected: false,
+    menu: {
+      label: 'Hôte HTTP'
+    },
+    jquery: {
+      value: () => `host.coalesce("Unknown")`,
+      buildAlias: () => 'httpHost',
+      order: 'httpHost.asc'
+    }
+  }, {
+    key: 'userAgent',
+    selected: false,
+    menu: {
+      label: 'User-Agent'
+    },
+    jquery: {
+      value: () => `user_agt.coalesce("Unknown")`,
+      buildAlias: () => 'userAgent',
+      order: 'userAgent.asc'
+    }
+  }, {
     key: 'media',
     selected: false,
     menu: {
-      label: 'Media'
+      label: 'Content-Type'
     },
     jquery: {
       value: () => `media.coalesce("No Content")`,
       buildAlias: () => 'media',
       order: 'media.asc'
+    }
+  }, {
+    key: 'thread',
+    selected: false,
+    menu: {
+      label: 'Thread'
+    },
+    jquery: {
+      value: () => `thread.coalesce("Unknown")`,
+      buildAlias: () => 'thread',
+      order: 'thread.asc'
+    }
+  }, {
+    key: 'version',
+    selected: false,
+    menu: {
+      label: 'Version'
+    },
+    jquery: {
+      value: () => `instance.version.coalesce("Unknown")`,
+      buildAlias: () => 'version',
+      order: 'version.asc'
     }
   }, {
     key: 'auth',
@@ -316,7 +407,7 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
     key: 'host',
     selected: false,
     menu: {
-      label: 'Hôte'
+      label: 'Application'
     },
     jquery: {
       value: () => `instance.app_name`,
@@ -324,15 +415,15 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
       order: 'host.asc'
     }
   }, {
-    key: 'name',
+    key: 'resource',
     selected: false,
     menu: {
-      label: 'Api'
+      label: 'Ressource'
     },
     jquery: {
-      value: () => `api_name.coalesce("Unknown")`,
-      buildAlias: () => 'name',
-      order: 'name.asc'
+      value: () => `path.coalesce("Unknown")`,
+      buildAlias: () => 'resource',
+      order: 'resource.asc'
     }
   }, {
     key: 'user',
@@ -346,10 +437,21 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
       order: 'user.asc'
     }
   }, {
+    key: 'name',
+    selected: false,
+    menu: {
+      label: 'Nom'
+    },
+    jquery: {
+      value: () => `api_name.coalesce("Unknown")`,
+      buildAlias: () => 'name',
+      order: 'name.asc'
+    }
+  }, {
     key: 'method',
     selected: false,
     menu: {
-      label: 'Method'
+      label: 'Méthode'
     },
     jquery: {
       value: () => `method.coalesce("Unknown")`,
@@ -357,15 +459,59 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
       order: 'method.asc'
     }
   }, {
+    key: 'httpHost',
+    selected: false,
+    menu: {
+      label: 'Hôte HTTP'
+    },
+    jquery: {
+      value: () => `host.coalesce("Unknown")`,
+      buildAlias: () => 'httpHost',
+      order: 'httpHost.asc'
+    }
+  }, {
+    key: 'userAgent',
+    selected: false,
+    menu: {
+      label: 'User-Agent'
+    },
+    jquery: {
+      value: () => `user_agt.coalesce("Unknown")`,
+      buildAlias: () => 'userAgent',
+      order: 'userAgent.asc'
+    }
+  }, {
     key: 'media',
     selected: false,
     menu: {
-      label: 'Media'
+      label: 'Content-Type'
     },
     jquery: {
       value: () => `media.coalesce("No Content")`,
       buildAlias: () => 'media',
       order: 'media.asc'
+    }
+  }, {
+    key: 'thread',
+    selected: false,
+    menu: {
+      label: 'Thread'
+    },
+    jquery: {
+      value: () => `thread.coalesce("Unknown")`,
+      buildAlias: () => 'thread',
+      order: 'thread.asc'
+    }
+  }, {
+    key: 'version',
+    selected: false,
+    menu: {
+      label: 'Version'
+    },
+    jquery: {
+      value: () => `instance.version.coalesce("Unknown")`,
+      buildAlias: () => 'version',
+      order: 'version.asc'
     }
   }, {
     key: 'auth',
@@ -378,10 +524,10 @@ export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => 
       buildAlias: () => 'auth',
       order: 'auth.asc'
     }
-  }]
+  }, ...STATUS_FILTER_ITEMS()]
 });
 
-export const SCHEDULE_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+export const SCHEDULE_SESSION_STATUS_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -411,42 +557,15 @@ export const SCHEDULE_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartCo
         buildName: () => 'Nombre de lancement'
       },
       extra: {
-        stacks: {
-          optional: false,
-          items: [{
-            key: 'status_stack',
-            selected: false,
-            menu: {
-              label: 'Statut'
-            },
-            jquery: {
-              value: () => 'status',
-              buildAlias: () => 'status',
-              buildName: (chartItem, value: string) => value,
-              buildColor: (value: string) => statusColor(value)
-            }
-          }, {
-            key: 'status_tranche',
-            selected: true,
-            menu: {
-              label: 'Tranche'
-            },
-            jquery: {
-              value: () => 'status_tranche',
-              buildAlias: () => 'status_tranche',
-              buildColor: (value: string) => STATUS[value].color,
-              buildName: (chartItem, value) => STATUS[value].label
-            }
-          }]
-        }
+        stacks: STATUS_STACKS()
       }
     }]
   },
   groups: SCHEDULE_SESSION_GROUPS_CONFIG(groupedBy),
-  filters: SCHEDULE_SESSION_FILTERS_CONFIG(groupedBy)
+  filters: SCHEDULE_SESSION_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const SCHEDULE_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+export const SCHEDULE_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -463,7 +582,7 @@ export const SCHEDULE_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): Ch
   },
   indicators: PERFORMANCE_INDICATORS(),
   groups: SCHEDULE_SESSION_GROUPS_CONFIG(groupedBy),
-  filters: SCHEDULE_SESSION_FILTERS_CONFIG(groupedBy)
+  filters: SCHEDULE_SESSION_FILTERS_CONFIG(filterGroupedBy)
 });
 
 export const SCHEDULE_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
@@ -483,7 +602,7 @@ export const SCHEDULE_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection 
     key: 'host',
     selected: false,
     menu: {
-      label: 'Hôte'
+      label: 'Application'
     },
     jquery: {
       value: () => `instance.app_name`,
@@ -494,12 +613,56 @@ export const SCHEDULE_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection 
     key: 'schedule',
     selected: false,
     menu: {
-      label: 'Tâches planifiées'
+      label: 'Nom'
     },
     jquery: {
       value: () => `name`,
       buildAlias: () => 'name',
       order: 'name.asc'
+    }
+  }, {
+    key: 'resource',
+    selected: false,
+    menu: {
+      label: 'Ressource'
+    },
+    jquery: {
+      value: () => `location`,
+      buildAlias: () => 'resource',
+      order: 'resource.asc'
+    }
+  }, {
+    key: 'user',
+    selected: false,
+    menu: {
+      label: 'Utilisateur'
+    },
+    jquery: {
+      value: () => `user.coalesce("Unknown")`,
+      buildAlias: () => 'user',
+      order: 'user.asc'
+    }
+  }, {
+    key: 'thread',
+    selected: false,
+    menu: {
+      label: 'Thread'
+    },
+    jquery: {
+      value: () => `thread.coalesce("Unknown")`,
+      buildAlias: () => 'thread',
+      order: 'thread.asc'
+    }
+  }, {
+    key: 'version',
+    selected: false,
+    menu: {
+      label: 'Version'
+    },
+    jquery: {
+      value: () => `instance.version.coalesce("Unknown")`,
+      buildAlias: () => 'version',
+      order: 'version.asc'
     }
   }]
 });
@@ -521,7 +684,7 @@ export const SCHEDULE_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection
     key: 'host',
     selected: false,
     menu: {
-      label: 'Hôte'
+      label: 'Application'
     },
     jquery: {
       value: () => `instance.app_name`,
@@ -529,20 +692,64 @@ export const SCHEDULE_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection
       order: 'host.asc'
     }
   }, {
+    key: 'resource',
+    selected: false,
+    menu: {
+      label: 'Ressource'
+    },
+    jquery: {
+      value: () => `location`,
+      buildAlias: () => 'resource',
+      order: 'resource.asc'
+    }
+  }, {
+    key: 'user',
+    selected: false,
+    menu: {
+      label: 'Utilisateur'
+    },
+    jquery: {
+      value: () => `user.coalesce("Unknown")`,
+      buildAlias: () => 'user',
+      order: 'user.asc'
+    }
+  }, {
     key: 'schedule',
     selected: false,
     menu: {
-      label: 'Tâches planifiées'
+      label: 'Nom'
     },
     jquery: {
       value: () => `name`,
       buildAlias: () => 'schedule',
       order: 'name.asc'
     }
-  }]
+  }, {
+    key: 'thread',
+    selected: false,
+    menu: {
+      label: 'Thread'
+    },
+    jquery: {
+      value: () => `thread.coalesce("Unknown")`,
+      buildAlias: () => 'thread',
+      order: 'thread.asc'
+    }
+  }, {
+    key: 'version',
+    selected: false,
+    menu: {
+      label: 'Version'
+    },
+    jquery: {
+      value: () => `instance.version.coalesce("Unknown")`,
+      buildAlias: () => 'version',
+      order: 'version.asc'
+    }
+  }, ...STATUS_FILTER_ITEMS()]
 });
 
-export const STARTUP_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+export const STARTUP_SESSION_STATUS_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -572,42 +779,15 @@ export const STARTUP_SESSION_STATUS_CHART_CONFIG = (groupedBy: string): ChartCon
         buildName: () => 'Nombre de lancement'
       },
       extra: {
-        stacks: {
-          optional: false,
-          items: [{
-            key: 'status_stack',
-            selected: false,
-            menu: {
-              label: 'Statut'
-            },
-            jquery: {
-              value: () => 'status',
-              buildAlias: () => 'status',
-              buildName: (chartItem, value: string) => value,
-              buildColor: (value: string) => statusColor(value)
-            }
-          }, {
-            key: 'status_tranche',
-            selected: true,
-            menu: {
-              label: 'Tranche'
-            },
-            jquery: {
-              value: () => 'status_tranche',
-              buildAlias: () => 'status_tranche',
-              buildColor: (value: string) => STATUS[value].color,
-              buildName: (chartItem, value) => STATUS[value].label
-            }
-          }]
-        }
+        stacks: STATUS_STACKS()
       }
     }]
   },
   groups: STARTUP_SESSION_GROUPS_CONFIG(groupedBy),
-  filters: STARTUP_SESSION_FILTERS_CONFIG(groupedBy)
+  filters: STARTUP_SESSION_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const STARTUP_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+export const STARTUP_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -624,7 +804,7 @@ export const STARTUP_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string): Cha
   },
   indicators: PERFORMANCE_INDICATORS(),
   groups: STARTUP_SESSION_GROUPS_CONFIG(groupedBy),
-  filters: STARTUP_SESSION_FILTERS_CONFIG(groupedBy)
+  filters: STARTUP_SESSION_FILTERS_CONFIG(filterGroupedBy)
 });
 
 export const STARTUP_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
@@ -644,12 +824,67 @@ export const STARTUP_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection =
     key: 'host',
     selected: false,
     menu: {
-      label: 'Hôte'
+      label: 'Application'
     },
     jquery: {
       value: () => `instance.app_name`,
       buildAlias: () => 'host',
       order: 'host.asc'
+    }
+  }, {
+    key: 'resource',
+    selected: false,
+    menu: {
+      label: 'Ressource'
+    },
+    jquery: {
+      value: () => `location`,
+      buildAlias: () => 'resource',
+      order: 'resource.asc'
+    }
+  }, {
+    key: 'user',
+    selected: false,
+    menu: {
+      label: 'Utilisateur'
+    },
+    jquery: {
+      value: () => `user.coalesce("Unknown")`,
+      buildAlias: () => 'user',
+      order: 'user.asc'
+    }
+  }, {
+    key: 'name',
+    selected: false,
+    menu: {
+      label: 'Nom'
+    },
+    jquery: {
+      value: () => `name`,
+      buildAlias: () => 'name',
+      order: 'name.asc'
+    }
+  }, {
+    key: 'thread',
+    selected: false,
+    menu: {
+      label: 'Thread'
+    },
+    jquery: {
+      value: () => `thread.coalesce("Unknown")`,
+      buildAlias: () => 'thread',
+      order: 'thread.asc'
+    }
+  }, {
+    key: 'version',
+    selected: false,
+    menu: {
+      label: 'Version'
+    },
+    jquery: {
+      value: () => `instance.version.coalesce("Unknown")`,
+      buildAlias: () => 'version',
+      order: 'version.asc'
     }
   }]
 });
@@ -671,14 +906,69 @@ export const STARTUP_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection 
     key: 'host',
     selected: false,
     menu: {
-      label: 'Hôte'
+      label: 'Application'
     },
     jquery: {
       value: () => `instance.app_name`,
       buildAlias: () => 'host',
       order: 'host.asc'
     }
-  }]
+  }, {
+    key: 'resource',
+    selected: false,
+    menu: {
+      label: 'Ressource'
+    },
+    jquery: {
+      value: () => `location`,
+      buildAlias: () => 'resource',
+      order: 'resource.asc'
+    }
+  }, {
+    key: 'user',
+    selected: false,
+    menu: {
+      label: 'Utilisateur'
+    },
+    jquery: {
+      value: () => `user.coalesce("Unknown")`,
+      buildAlias: () => 'user',
+      order: 'user.asc'
+    }
+  }, {
+    key: 'name',
+    selected: false,
+    menu: {
+      label: 'Nom'
+    },
+    jquery: {
+      value: () => `name`,
+      buildAlias: () => 'name',
+      order: 'name.asc'
+    }
+  }, {
+    key: 'thread',
+    selected: false,
+    menu: {
+      label: 'Thread'
+    },
+    jquery: {
+      value: () => `thread.coalesce("Unknown")`,
+      buildAlias: () => 'thread',
+      order: 'thread.asc'
+    }
+  }, {
+    key: 'version',
+    selected: false,
+    menu: {
+      label: 'Version'
+    },
+    jquery: {
+      value: () => `instance.version.coalesce("Unknown")`,
+      buildAlias: () => 'version',
+      order: 'version.asc'
+    }
+  }, ...STATUS_FILTER_ITEMS()]
 });
 
 export const REST_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
@@ -2106,12 +2396,19 @@ const SIZE_TRANCHE = {
   '4': { label: '≥ 300o', color: '#f97316' }
 }
 
+export interface SubmenuConfig {
+  id: string;
+  label: string;
+  itemLabel?: string;  // libellé de l'entrée dans le sous-menu, sans toucher à l'axe X
+}
+
 export interface ChartItem<TExtra = {}> {
   key: string;
   selected: boolean;
   menu: MenuConfig;  // affichage
   jquery: JQueryConfig;  // requête
   group?: string;  // regroupement indicateurs ex "Durées"
+  submenu?: SubmenuConfig;  // sous-menu commun dans « Grouper par » / « Filtrer par »
   unit?: string | UnitConfig;  // unité simple ('ms', 'o', '%') ou config dynamique avec auto-scaling
   extra?: TExtra;  // données spécifiques au type d'item
 }

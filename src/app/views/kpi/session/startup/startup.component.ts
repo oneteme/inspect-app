@@ -9,7 +9,7 @@ import {buildFilterSelections, toFilterValues,
   lineTypeOptions,
   pivotByStack
 } from "../../kpi.config";
-import {periodManagement, formatChartDates, buildPeriodSliceDisplay, resolvePeriodGranularity} from "../../../../shared/util";
+import {periodManagement, formatChartDates, PeriodGranularities, resolveViewGranularity, resolvePeriodSliceDisplay} from "../../../../shared/util";
 import {MainSessionService} from "../../../../service/jquery/main-session.service";
 import {ChartComponent, selectBestScale} from "@oneteme/jquery-echarts";
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, OrganizerXOption, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
@@ -52,8 +52,8 @@ export class StartupComponent {
   $performanceChartType = 'column';
 
   groupedBy: string = '';
-  $statusGranularity: string = '';
-  $performanceGranularity: string = '';
+  $statusGranularity: PeriodGranularities = {axis: '', filter: ''};
+  $performanceGranularity: PeriodGranularities = {axis: '', filter: ''};
   params: QueryParams;
 
   @Input() set queryParams(value: QueryParams) {
@@ -62,8 +62,9 @@ export class StartupComponent {
       this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
 
       // Initialize ChartConfigs and OrganizerConfigs
-      this.$statusGranularity = this.groupedBy;
-      this.$performanceGranularity = this.groupedBy;
+      const defaultGranularity: PeriodGranularities = {axis: this.groupedBy, filter: this.groupedBy};
+      this.$statusGranularity = defaultGranularity;
+      this.$performanceGranularity = defaultGranularity;
       this.$statusRepartition.chartConfig = STARTUP_SESSION_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = STARTUP_SESSION_PERFORMANCE_CHART_CONFIG(this.groupedBy);
 
@@ -86,10 +87,10 @@ export class StartupComponent {
     if (event.type === 'viewSwitched') {
       this.$statusView = event.state.viewMode ?? 'chart';
     }
-    const granularity = this._resolveGranularityAfterX(event, this.$statusGranularity);
+    const granularity = resolveViewGranularity(event.state, this.$statusGranularity, this.params.period.start, this.params.period.end);
     if (granularity !== this.$statusGranularity) {
       this.$statusGranularity = granularity;
-      this.$statusRepartition.chartConfig = STARTUP_SESSION_STATUS_CHART_CONFIG(granularity);
+      this.$statusRepartition.chartConfig = STARTUP_SESSION_STATUS_CHART_CONFIG(granularity.axis, granularity.filter);
     }
     const result = this._handleOrganizerEvent(event, this.$statusRepartition.chartConfig, this.$statusOrganizer, this._statusOrganizerOptions());
     this.$statusOrganizer = withKpiChartTypes(result.binding, this.$statusChartType);
@@ -116,10 +117,10 @@ export class StartupComponent {
       this._cdr.markForCheck();
       return;
     }
-    const granularity = this._resolveGranularityAfterX(event, this.$performanceGranularity);
+    const granularity = resolveViewGranularity(event.state, this.$performanceGranularity, this.params.period.start, this.params.period.end);
     if (granularity !== this.$performanceGranularity) {
       this.$performanceGranularity = granularity;
-      this.$performanceRepartition.chartConfig = STARTUP_SESSION_PERFORMANCE_CHART_CONFIG(granularity);
+      this.$performanceRepartition.chartConfig = STARTUP_SESSION_PERFORMANCE_CHART_CONFIG(granularity.axis, granularity.filter);
     }
     const result = this._handleOrganizerEvent(event, this.$performanceRepartition.chartConfig, this.$performanceOrganizer, this._performanceOrganizerOptions());
     this.$performanceOrganizer = withKpiChartTypes(result.binding, this.$performanceChartType);
@@ -178,10 +179,10 @@ export class StartupComponent {
     this.$statusRepartition.data = [];
     this._mainSessionService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$statusGranularity, selections: buildFilterSelections(cfg, this.$statusFilterValues), type: 'STARTUP' }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$statusGranularity.axis, selections: buildFilterSelections(cfg, this.$statusFilterValues), type: 'STARTUP' }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
-      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$statusGranularity, this.datePipe, this.params.period.start) : data;
+      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$statusGranularity.axis, this.datePipe, this.params.period.start) : data;
       const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
       const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
       this.$statusRepartition.rawData = formattedData;
@@ -206,10 +207,10 @@ export class StartupComponent {
     this.$performanceRepartition.data = [];
     this._mainSessionService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$performanceGranularity, selections: buildFilterSelections(cfg, this.$performanceFilterValues), type: 'STARTUP' }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$performanceGranularity.axis, selections: buildFilterSelections(cfg, this.$performanceFilterValues), type: 'STARTUP' }
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
-      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$performanceGranularity, this.datePipe, this.params.period.start) : data;
+      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$performanceGranularity.axis, this.datePipe, this.params.period.start) : data;
       const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
       const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
       this.$performanceRepartition.data = pivoted;
@@ -246,8 +247,8 @@ export class StartupComponent {
 
   private _statusOrganizerOptions(): OrganizerChartBridgeOptions {
     return {
-      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$statusRepartition.chartConfig, filterKey, this.$statusGranularity),
-      resolveSliceDisplay: (filterKey: string) => this._resolvePeriodSliceDisplay(filterKey, this.$statusGranularity),
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$statusRepartition.chartConfig, filterKey, this.$statusGranularity.filter),
+      resolveSliceDisplay: (filterKey: string, menu) => resolvePeriodSliceDisplay(filterKey, menu === 'group' ? this.$statusGranularity.axis : this.$statusGranularity.filter, this.params.period.start),
       resolveXOptions: (groupKey: string) => this._resolveXOptions(groupKey),
       remapSliceSelection: remapSliceKeys,
       onExportVisual: () => this._statusChart?.exportImage('status'),
@@ -257,8 +258,8 @@ export class StartupComponent {
 
   private _performanceOrganizerOptions(): OrganizerChartBridgeOptions {
     return {
-      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$performanceRepartition.chartConfig, filterKey, this.$performanceGranularity),
-      resolveSliceDisplay: (filterKey: string) => this._resolvePeriodSliceDisplay(filterKey, this.$performanceGranularity),
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$performanceRepartition.chartConfig, filterKey, this.$performanceGranularity.filter),
+      resolveSliceDisplay: (filterKey: string, menu) => resolvePeriodSliceDisplay(filterKey, menu === 'group' ? this.$performanceGranularity.axis : this.$performanceGranularity.filter, this.params.period.start),
       resolveXOptions: (groupKey: string) => this._resolveXOptions(groupKey),
       remapSliceSelection: remapSliceKeys,
       onExportVisual: () => this._performanceChart?.exportImage('performance'),
@@ -266,19 +267,8 @@ export class StartupComponent {
     };
   }
 
-  private _resolvePeriodSliceDisplay(filterKey: string, granularity: string) {
-    return filterKey === 'date' ? buildPeriodSliceDisplay(granularity, this.params.period.start) : undefined;
-  }
-
   private _resolveXOptions(groupKey: string): OrganizerXOption[] | undefined {
     return groupKey === 'date' ? buildPeriodOptions() : undefined;
-  }
-
-  private _resolveGranularityAfterX(event: OrganizerButtonEvent, current: string): string {
-    if (event.type !== 'xSelected' || event.state.selectedX !== 'date') {
-      return current;
-    }
-    return resolvePeriodGranularity(event.state.selectedXOption, this.params.period.start, this.params.period.end);
   }
 
   private _handleOrganizerEvent(

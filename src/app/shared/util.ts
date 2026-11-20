@@ -2,6 +2,7 @@ import { ChartPeriodGranularity, comparePeriodLabels, formatPeriodLabel, PERIOD_
 import { DatePipe } from "@angular/common";
 import {ChartGroup} from "../model/chart.model";
 import { Filter, FilterMap, Operation } from "../views/constants";
+import { statusTrancheLabel } from "../views/kpi/kpi.config";
 import { makeDateTimePeriod, makeDateTimePeriodFrom } from "src/environments/environment";
 
 export class Utils {
@@ -302,6 +303,31 @@ export function resolvePeriodGranularity(optionId: string | undefined, start: Da
     return SERVER_GROUP_BY_PERIOD_OPTION[optionId] ?? optionId;
 }
 
+/** Granularités serveur d'un graphique : `axis` pour la Date de l'axe (X ou Grouper par, jamais les deux) et `filter` pour le filtre Date. */
+export interface PeriodGranularities {
+    axis: string;
+    filter: string;
+}
+
+export interface PeriodGranularityState {
+    selectedX?: string;
+    selectedXOption?: string;
+    selectedGroupBy?: string;
+    selectedGroupByOption?: string;
+    selectedSliceOptions?: Record<string, string>;
+}
+
+/** Chaque menu garde sa propre variante ; une variante non choisie vaut « Automatique ». */
+export function resolvePeriodGranularities(state: PeriodGranularityState, start: Date, end: Date): PeriodGranularities {
+    const axisOption = state.selectedX === 'date'
+        ? state.selectedXOption
+        : (state.selectedGroupBy === 'date' ? state.selectedGroupByOption : undefined);
+    return {
+        axis: resolvePeriodGranularity(axisOption, start, end),
+        filter: resolvePeriodGranularity(state.selectedSliceOptions?.['date'], start, end)
+    };
+}
+
 /**
  * Formate les libellés de période (buckets UTC renvoyés par le serveur) en français et les trie chronologiquement.
  * `datePipe` n'est plus utilisé, il reste accepté pour les appelants existants.
@@ -328,6 +354,20 @@ export function buildPeriodSliceDisplay(groupedBy: string, from?: Date): { forma
         formatLabel: raw => formatPeriodLabel(raw, granularity),
         compareKeys: (a, b) => comparePeriodLabels(a, b, granularity, from),
     };
+}
+
+/** Renvoie `current` à l'identique si la granularité n'a pas changé, pour éviter de reconstruire le graphique. */
+export function resolveViewGranularity(state: PeriodGranularityState, current: PeriodGranularities, start: Date, end: Date): PeriodGranularities {
+    const next = resolvePeriodGranularities(state, start, end);
+    return next.axis === current.axis && next.filter === current.filter ? current : next;
+}
+
+/** Libellés et tri des tranches d'un menu : statut (`status_tranche`) ou date selon la granularité du menu. */
+export function resolvePeriodSliceDisplay(filterKey: string, granularity: string, from?: Date) {
+    if (filterKey === 'status_tranche') {
+        return { formatLabel: statusTrancheLabel, compareKeys: (a: string, b: string) => a.localeCompare(b) };
+    }
+    return filterKey === 'date' ? buildPeriodSliceDisplay(granularity, from) : undefined;
 }
 
 

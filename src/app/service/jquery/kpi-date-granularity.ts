@@ -4,6 +4,7 @@ import {applyFilterSelections, ChartFilterSelection, ChartItem} from "../../view
 /** Granularité composite « jour + heure » (une requête par jour pour un filtre exact, cf. buildSelectionRequests). */
 export const DATE_HOUR_GROUPED_BY = 'dateHour';
 export const DATE_HOUR_COLUMNS = 'start.monthDay.varchar:day,start.hour.varchar:hour';
+export const DATE_HOUR_DAY_ALIAS = 'day';
 export const DATE_HOUR_ORDER = 'start.monthDay.asc,start.hour.asc';
 
 /** Le serveur ne groupe pas sur jour + heure en une seule colonne : on groupe sur deux colonnes, puis on les assemble en `MM-dd HH`. */
@@ -21,6 +22,37 @@ export function groupColumn(group: ChartItem, dateHour: boolean): string {
 
 export function groupOrder(group: ChartItem, dateHour: boolean): string | undefined {
     return dateHour ? DATE_HOUR_ORDER : group.jquery.order;
+}
+
+/** Contexte d'une requête groupée : axe et pile en « jour + heure » ou non, et alias recevant la valeur composite. */
+export interface GroupedRequestContext {
+    groupDateHour: boolean;
+    stackDateHour: boolean;
+    dateHour: boolean;
+    packAlias: string;
+}
+
+/** La granularité de la pile (stack) est aussi en « jour + heure » : elle doit être traitée comme l'axe, sinon le serveur rejette `dateHour`. */
+export function groupedRequestContext(data: { group: ChartItem, stack?: ChartItem }, filters: { groupedBy?: string }): GroupedRequestContext {
+    const groupDateHour = isDateHour(filters.groupedBy, data.group.key);
+    const stackDateHour = !!data.stack && isDateHour(filters.groupedBy, data.stack.key);
+    return {
+        groupDateHour,
+        stackDateHour,
+        dateHour: groupDateHour || stackDateHour,
+        packAlias: stackDateHour ? data.stack!.jquery.buildAlias() : data.group.jquery.buildAlias()
+    };
+}
+
+/** Ajoute la pile (colonnes date/heure ou valeur `stackSelect`) et le tri de l'axe aux arguments. */
+export function applyGroupOptions(args: any, data: { group: ChartItem, stack?: ChartItem }, ctx: GroupedRequestContext, stackSelect?: string): void {
+    if (data.stack) {
+        args['select'] += ctx.stackDateHour ? `,${DATE_HOUR_COLUMNS}` : `,${stackSelect}`;
+        args[`${ctx.stackDateHour ? DATE_HOUR_DAY_ALIAS : data.stack.jquery.buildAlias()}.notNull`] = '';
+    }
+    if (data.group.jquery.order) {
+        args['order'] = groupOrder(data.group, ctx.groupDateHour);
+    }
 }
 
 /**
@@ -47,13 +79,13 @@ export function buildSelectionRequests(args: any, selections: ChartFilterSelecti
     });
 }
 
-/** Envoie les requêtes (une par jour en « jour + heure ») et fusionne les lignes ; `groupAlias` reçoit la valeur composite. */
+/** Envoie les requêtes (une par jour en « jour + heure ») et fusionne les lignes ; `packAlias` (groupe ou stack) reçoit la valeur composite. */
 export function fetchGroupedRows(send: (args: any) => Observable<any[]>, args: any, selections: ChartFilterSelection[] | undefined,
-                                 dateHour: boolean, groupAlias: string): Observable<any[]> {
+                                 dateHour: boolean, packAlias: string): Observable<any[]> {
     return forkJoin(buildSelectionRequests(args, selections, dateHour).map(request => send(request))).pipe(
         map(results => {
             const rows = results.flat();
-            return dateHour ? packDateHour(rows, groupAlias) : rows;
+            return dateHour ? packDateHour(rows, packAlias) : rows;
         })
     );
 }
