@@ -1,4 +1,4 @@
-import {OrganizerChartBinding, OrganizerChartType} from "@oneteme/jquery-organizer";
+import {OrganizerChartBinding, OrganizerChartType, OrganizerState} from "@oneteme/jquery-organizer";
 
 const KPI_CHART_TYPE_LABELS: Record<string, string> = {
   column: 'Colonne',
@@ -22,4 +22,12 @@ export function withKpiChartTypes(binding: OrganizerChartBinding, selected: stri
     config: {...binding.config, chartTypes, stackChartTypes: KPI_STACKABLE_CHART_TYPES},
     state: {...binding.state, selectedChartType: selected}
   };
+}
+
+export function isKpiStacked(state: OrganizerState): boolean {
+  return state.stacked !== false && KPI_STACKABLE_CHART_TYPES.includes(state.selectedChartType ?? '');
+}
+
+export function kpiStackBreadcrumbLabel(state: OrganizerState): string {
+  return isKpiStacked(state) ? 'Regroupé et empilé par:' : 'Regroupé par:';
 }

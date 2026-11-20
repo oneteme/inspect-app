@@ -16,7 +16,7 @@ import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, Org
 import {DatePipe} from "@angular/common";
 import {ChartProvider, buildPeriodOptions, remapSliceKeys} from "@oneteme/jquery-core";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
-import {withKpiChartTypes} from "../../kpi-chart-type";
+import {withKpiChartTypes, kpiStackBreadcrumbLabel} from "../../kpi-chart-type";
 
 @Component({
   templateUrl: './startup.component.html',
@@ -31,6 +31,7 @@ export class StartupComponent {
   @ViewChild('performanceChart') private readonly _performanceChart: ChartComponent<any, any>;
 
   $statusRepartition: Partial<{data: any[], rawData: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = { data: [], loading: true};
+  readonly kpiStackBreadcrumbLabel = kpiStackBreadcrumbLabel;
   $statusOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $statusView: 'chart' | 'table' = 'chart';
   $statusSlice: OrganizerSliceState | null = null;

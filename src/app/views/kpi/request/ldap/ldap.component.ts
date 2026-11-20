@@ -9,7 +9,7 @@ import {formatChartDates, periodManagement, PeriodGranularities, resolvePeriodSl
 import {ChartProvider, field, buildPeriodOptions, remapSliceKeys} from "@oneteme/jquery-core";
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, OrganizerXOption, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
-import {withKpiChartTypes} from "../../kpi-chart-type";
+import {withKpiChartTypes, kpiStackBreadcrumbLabel} from "../../kpi-chart-type";
 
 @Component({
   templateUrl: './ldap.component.html',
@@ -27,6 +27,7 @@ export class LdapComponent implements OnInit {
 
   // Chart state
   $statusRepartition: Partial<{data: any[], rawData: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = { data: [], loading: true };
+  readonly kpiStackBreadcrumbLabel = kpiStackBreadcrumbLabel;
   $statusOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $statusView: 'chart' | 'table' = 'chart';
   $statusSlice: OrganizerSliceState | null = null;

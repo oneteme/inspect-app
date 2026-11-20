@@ -68,7 +68,7 @@
             </ng-container>
             <ng-container *ngIf="activeStackLabel($statusRepartition.chartConfig)">
               <span class="kpi-breadcrumb-sep">·</span>
-              <span class="kpi-breadcrumb-label">Empilé par:</span>
+              <span class="kpi-breadcrumb-label">{{ kpiStackBreadcrumbLabel($statusOrganizer.state) }}</span>
               <span class="kpi-breadcrumb-item purple">{{ activeStackLabel($statusRepartition.chartConfig) }}</span>
             </ng-container>
           </nav>
@@ -137,7 +137,7 @@
             </ng-container>
             <ng-container *ngIf="activeStackLabel($performanceRepartition.chartConfig)">
               <span class="kpi-breadcrumb-sep">·</span>
-              <span class="kpi-breadcrumb-label">Empilé par:</span>
+              <span class="kpi-breadcrumb-label">{{ kpiStackBreadcrumbLabel($performanceOrganizer.state) }}</span>
               <span class="kpi-breadcrumb-item purple">{{ activeStackLabel($performanceRepartition.chartConfig) }}</span>
             </ng-container>
           </nav>

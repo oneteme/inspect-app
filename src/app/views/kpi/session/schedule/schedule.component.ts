@@ -3,7 +3,7 @@ import {QueryParams} from "../../../../model/conf.model";
 import {finalize, Observable, of} from "rxjs";
 import {buildFilterSelections, toFilterValues,SCHEDULE_SESSION_PERFORMANCE_CHART_CONFIG, SCHEDULE_SESSION_STATUS_CHART_CONFIG, ChartConfig, buildSeries, lineTypeOptions, pivotByStack} from "../../kpi.config";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
-import {withKpiChartTypes} from "../../kpi-chart-type";
+import {withKpiChartTypes, kpiStackBreadcrumbLabel} from "../../kpi-chart-type";
 import {formatChartDates, periodManagement, PeriodGranularities, resolveViewGranularity, resolvePeriodSliceDisplay} from "../../../../shared/util";
 import {MainSessionService} from "../../../../service/jquery/main-session.service";
 import {ChartComponent, selectBestScale} from "@oneteme/jquery-echarts";
@@ -24,6 +24,7 @@ export class ScheduleComponent {
   @ViewChild('performanceChart') private readonly _performanceChart: ChartComponent<any, any>;
 
   $statusRepartition: Partial<{data: any[], rawData: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = { data: [], loading: true};
+  readonly kpiStackBreadcrumbLabel = kpiStackBreadcrumbLabel;
   $statusOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $statusView: 'chart' | 'table' = 'chart';
   $statusSlice: OrganizerSliceState | null = null;

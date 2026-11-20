@@ -11,7 +11,7 @@ import {buildFilterSelections, toFilterValues,
   pivotByStack
 } from "../../kpi.config";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
-import {withKpiChartTypes} from "../../kpi-chart-type";
+import {withKpiChartTypes, kpiStackBreadcrumbLabel} from "../../kpi-chart-type";
 import {periodManagement, formatChartDates, PeriodGranularities, resolveViewGranularity, resolvePeriodSliceDisplay, volumeSubtitle} from "../../../../shared/util";
 import {ChartProvider, field, buildPeriodOptions, remapSliceKeys} from "@oneteme/jquery-core";
 import {RestSessionService} from "../../../../service/jquery/rest-session.service";
@@ -89,6 +89,7 @@ export class RestComponent implements OnInit {
   $volumetryChartType = 'column';
 
   $statusRepartition: Partial<{data: any[], rawData: any[], loading: boolean, chartConfig: ChartConfig, chartProvider: ChartProvider<string, number>}> = { data: [], loading: true};
+  readonly kpiStackBreadcrumbLabel = kpiStackBreadcrumbLabel;
   $statusOrganizer: {config: OrganizerConfig, state: OrganizerState} = { config: {}, state: {} };
   $statusView: 'chart' | 'table' = 'chart';
   $statusSlice: OrganizerSliceState | null = null;
