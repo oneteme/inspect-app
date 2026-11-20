@@ -983,7 +983,7 @@ export const STARTUP_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection 
   }, ...STATUS_FILTER_ITEMS()]
 });
 
-export const REST_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+export const REST_PERFORMANCE_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -1000,10 +1000,10 @@ export const REST_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig =>
   },
   indicators: PERFORMANCE_INDICATORS(),
   groups: REST_GROUPS_CONFIG(groupedBy),
-  filters: REST_FILTERS_CONFIG(groupedBy)
+  filters: REST_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const REST_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+export const REST_STATUS_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -1032,42 +1032,15 @@ export const REST_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
         buildAlias: () => 'count'
       },
       extra: {
-        stacks: {
-          optional: false,
-          items: [{
-            key: 'status_stack',
-            selected: false,
-            menu: {
-              label: 'Statut'
-            },
-            jquery: {
-              value: () => 'status',
-              buildAlias: () => 'status',
-              buildName: (chartItem, value: string) => value,
-              buildColor: (value: string) => statusColor(value)
-            }
-          }, {
-            key: 'status_tranche',
-            selected: true,
-            menu: {
-              label: 'Tranche'
-            },
-            jquery: {
-              value: () => 'status_tranche',
-              buildAlias: () => 'status_tranche',
-              buildColor: (value: string) => STATUS[value].color,
-              buildName: (chartItem, value) => STATUS[value].label
-            }
-          }]
-        }
+        stacks: STATUS_STACKS()
       }
     }]
   },
   groups: REST_GROUPS_CONFIG(groupedBy),
-  filters: REST_FILTERS_CONFIG(groupedBy)
+  filters: REST_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const REST_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartConfig => ( {
+export const REST_VOLUMETRY_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ( {
   series: {
     optional: false,
     items: [{
@@ -1188,10 +1161,10 @@ export const REST_VOLUMETRY_CHART_CONFIG = (groupedBy: string): ChartConfig => (
     }]
   },
   groups: REST_GROUPS_CONFIG(groupedBy),
-  filters: REST_FILTERS_CONFIG(groupedBy)
+  filters: REST_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const REST_LATENCY_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+export const REST_LATENCY_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -1253,7 +1226,7 @@ export const REST_LATENCY_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
     }]
   },
   groups: REST_GROUPS_CONFIG(groupedBy),
-  filters: REST_FILTERS_CONFIG(groupedBy)
+  filters: REST_FILTERS_CONFIG(filterGroupedBy)
 });
 
 export const REST_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
@@ -1273,7 +1246,7 @@ export const REST_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
     key: 'host',
     selected: false,
     menu: {
-      label: 'Hôte'
+      label: 'Serveur'
     },
     jquery: {
       value: () => `host`,
@@ -1295,7 +1268,7 @@ export const REST_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
     key: 'method',
     selected: false,
     menu: {
-      label: 'Method'
+      label: 'Méthode'
     },
     jquery: {
       value: () => `method.coalesce("Unknown")`,
@@ -1303,10 +1276,21 @@ export const REST_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       order: 'method.asc'
     }
   }, {
+    key: 'path',
+    selected: false,
+    menu: {
+      label: 'Point d\'accès'
+    },
+    jquery: {
+      value: () => `path.coalesce("Unknown")`,
+      buildAlias: () => 'path',
+      order: 'path.asc'
+    }
+  }, {
     key: 'media',
     selected: false,
     menu: {
-      label: 'Media'
+      label: 'Content-Type'
     },
     jquery: {
       value: () => `media.coalesce("No Content")`,
@@ -1323,6 +1307,39 @@ export const REST_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       value: () => `auth.coalesce("No Auth")`,
       buildAlias: () => 'auth',
       order: 'auth.asc'
+    }
+  }, {
+    key: 'thread',
+    selected: false,
+    menu: {
+      label: 'Thread'
+    },
+    jquery: {
+      value: () => `thread.coalesce("Unknown")`,
+      buildAlias: () => 'thread',
+      order: 'thread.asc'
+    }
+  }, {
+    key: 'application',
+    selected: false,
+    menu: {
+      label: 'Application'
+    },
+    jquery: {
+      value: () => `instance.app_name`,
+      buildAlias: () => 'application',
+      order: 'application.asc'
+    }
+  }, {
+    key: 'version',
+    selected: false,
+    menu: {
+      label: 'Version'
+    },
+    jquery: {
+      value: () => `instance.version.coalesce("Unknown")`,
+      buildAlias: () => 'version',
+      order: 'version.asc'
     }
   }]
 });
@@ -1344,7 +1361,7 @@ export const REST_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
     key: 'host',
     selected: false,
     menu: {
-      label: 'Hôte'
+      label: 'Serveur'
     },
     jquery: {
       value: () => `host`,
@@ -1366,7 +1383,7 @@ export const REST_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
     key: 'method',
     selected: false,
     menu: {
-      label: 'Method'
+      label: 'Méthode'
     },
     jquery: {
       value: () => `method.coalesce("Unknown")`,
@@ -1374,10 +1391,21 @@ export const REST_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       order: 'method.asc'
     }
   }, {
+    key: 'path',
+    selected: false,
+    menu: {
+      label: 'Point d\'accès'
+    },
+    jquery: {
+      value: () => `path.coalesce("Unknown")`,
+      buildAlias: () => 'path',
+      order: 'path.asc'
+    }
+  }, {
     key: 'media',
     selected: false,
     menu: {
-      label: 'Media'
+      label: 'Content-Type'
     },
     jquery: {
       value: () => `media.coalesce("No Content")`,
@@ -1395,10 +1423,43 @@ export const REST_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       buildAlias: () => 'auth',
       order: 'auth.asc'
     }
-  }]
+  }, {
+    key: 'thread',
+    selected: false,
+    menu: {
+      label: 'Thread'
+    },
+    jquery: {
+      value: () => `thread.coalesce("Unknown")`,
+      buildAlias: () => 'thread',
+      order: 'thread.asc'
+    }
+  }, {
+    key: 'application',
+    selected: false,
+    menu: {
+      label: 'Application'
+    },
+    jquery: {
+      value: () => `instance.app_name`,
+      buildAlias: () => 'application',
+      order: 'application.asc'
+    }
+  }, {
+    key: 'version',
+    selected: false,
+    menu: {
+      label: 'Version'
+    },
+    jquery: {
+      value: () => `instance.version.coalesce("Unknown")`,
+      buildAlias: () => 'version',
+      order: 'version.asc'
+    }
+  }, ...STATUS_FILTER_ITEMS()]
 });
 
-export const JDBC_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+export const JDBC_STATUS_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -1427,42 +1488,15 @@ export const JDBC_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
         buildAlias: () => 'count'
       },
       extra: {
-        stacks: {
-          optional: false,
-          items: [{
-            key: 'status_stack',
-            selected: false,
-            menu: {
-              label: 'Statut'
-            },
-            jquery: {
-              value: () => 'status',
-              buildAlias: () => 'status',
-              buildName: (chartItem, value: string) => value,
-              buildColor: (value: string) => statusColor(value)
-            }
-          }, {
-            key: 'status_tranche',
-            selected: true,
-            menu: {
-              label: 'Tranche'
-            },
-            jquery: {
-              value: () => 'status_tranche',
-              buildAlias: () => 'status_tranche',
-              buildColor: (value: string) => STATUS[value].color,
-              buildName: (chartItem, value) => STATUS[value].label
-            }
-          }]
-        }
+        stacks: STATUS_STACKS()
       }
     }]
   },
   groups: JDBC_GROUPS_CONFIG(groupedBy),
-  filters: JDBC_FILTERS_CONFIG(groupedBy)
+  filters: JDBC_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const JDBC_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+export const JDBC_PERFORMANCE_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -1480,7 +1514,7 @@ export const JDBC_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig =>
   },
   indicators: PERFORMANCE_INDICATORS(),
   groups: JDBC_GROUPS_CONFIG(groupedBy),
-  filters: JDBC_FILTERS_CONFIG(groupedBy)
+  filters: JDBC_FILTERS_CONFIG(filterGroupedBy)
 });
 
 export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
@@ -1500,12 +1534,34 @@ export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
     key: 'host',
     selected: false,
     menu: {
-      label: 'Hôte'
+      label: 'Serveur'
     },
     jquery: {
       value: () => `host`,
       buildAlias: () => 'host',
       order: 'host.asc'
+    }
+  }, {
+    key: 'user',
+    selected: false,
+    menu: {
+      label: 'Utilisateur'
+    },
+    jquery: {
+      value: () => `user.coalesce("Unknown")`,
+      buildAlias: () => 'user',
+      order: 'user.asc',
+    }
+  }, {
+    key: 'db_name',
+    selected: false,
+    menu: {
+      label: 'Base de données'
+    },
+    jquery: {
+      value: () => `db_name.coalesce("Unknown")`,
+      buildAlias: () => 'db_name',
+      order: 'db_name.asc',
     }
   }, {
     key: 'command',
@@ -1530,28 +1586,6 @@ export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       order: 'schema.asc',
     }
   }, {
-    key: 'user',
-    selected: false,
-    menu: {
-      label: 'Utilisateur'
-    },
-    jquery: {
-      value: () => `user.coalesce("Unknown")`,
-      buildAlias: () => 'user',
-      order: 'user.asc',
-    }
-  }, {
-    key: 'db_name',
-    selected: false,
-    menu: {
-      label: 'Nom de la base de données'
-    },
-    jquery: {
-      value: () => `db_name.coalesce("Unknown")`,
-      buildAlias: () => 'db_name',
-      order: 'db_name.asc',
-    }
-  }, {
     key: 'db_version',
     selected: false,
     menu: {
@@ -1572,6 +1606,50 @@ export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       value: () => `driver.coalesce("Unknown")`,
       buildAlias: () => 'driver',
       order: 'driver.asc',
+    }
+  }, {
+    key: 'scheme',
+    selected: false,
+    menu: {
+      label: 'Éditeur'
+    },
+    jquery: {
+      value: () => `scheme.coalesce("Unknown")`,
+      buildAlias: () => 'scheme',
+      order: 'scheme.asc',
+    }
+  }, {
+    key: 'thread',
+    selected: false,
+    menu: {
+      label: 'Thread'
+    },
+    jquery: {
+      value: () => `thread.coalesce("Unknown")`,
+      buildAlias: () => 'thread',
+      order: 'thread.asc',
+    }
+  }, {
+    key: 'application',
+    selected: false,
+    menu: {
+      label: 'Application'
+    },
+    jquery: {
+      value: () => `instance.app_name`,
+      buildAlias: () => 'application',
+      order: 'application.asc',
+    }
+  }, {
+    key: 'version',
+    selected: false,
+    menu: {
+      label: 'Version'
+    },
+    jquery: {
+      value: () => `instance.version.coalesce("Unknown")`,
+      buildAlias: () => 'version',
+      order: 'version.asc',
     }
   }]
 });
@@ -1593,12 +1671,34 @@ export const JDBC_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
     key: 'host',
     selected: false,
     menu: {
-      label: 'Hôte'
+      label: 'Serveur'
     },
     jquery: {
       value: () => `host`,
       buildAlias: () => 'host',
       order: 'host.asc'
+    }
+  }, {
+    key: 'user',
+    selected: false,
+    menu: {
+      label: 'Utilisateur'
+    },
+    jquery: {
+      value: () => `user.coalesce("Unknown")`,
+      buildAlias: () => 'user',
+      order: 'user.asc',
+    }
+  }, {
+    key: 'db_name',
+    selected: false,
+    menu: {
+      label: 'Base de données'
+    },
+    jquery: {
+      value: () => `db_name.coalesce("Unknown")`,
+      buildAlias: () => 'db_name',
+      order: 'db_name.asc',
     }
   }, {
     key: 'command',
@@ -1623,28 +1723,6 @@ export const JDBC_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       order: 'schema.asc',
     }
   }, {
-    key: 'user',
-    selected: false,
-    menu: {
-      label: 'Utilisateur'
-    },
-    jquery: {
-      value: () => `user.coalesce("Unknown")`,
-      buildAlias: () => 'user',
-      order: 'user.asc',
-    }
-  }, {
-    key: 'db_name',
-    selected: false,
-    menu: {
-      label: 'Nom de la base de données'
-    },
-    jquery: {
-      value: () => `db_name.coalesce("Unknown")`,
-      buildAlias: () => 'db_name',
-      order: 'db_name.asc',
-    }
-  }, {
     key: 'db_version',
     selected: false,
     menu: {
@@ -1666,10 +1744,54 @@ export const JDBC_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       buildAlias: () => 'driver',
       order: 'driver.asc',
     }
-  }]
+  }, {
+    key: 'scheme',
+    selected: false,
+    menu: {
+      label: 'Éditeur'
+    },
+    jquery: {
+      value: () => `scheme.coalesce("Unknown")`,
+      buildAlias: () => 'scheme',
+      order: 'scheme.asc',
+    }
+  }, {
+    key: 'thread',
+    selected: false,
+    menu: {
+      label: 'Thread'
+    },
+    jquery: {
+      value: () => `thread.coalesce("Unknown")`,
+      buildAlias: () => 'thread',
+      order: 'thread.asc',
+    }
+  }, {
+    key: 'application',
+    selected: false,
+    menu: {
+      label: 'Application'
+    },
+    jquery: {
+      value: () => `instance.app_name`,
+      buildAlias: () => 'application',
+      order: 'application.asc',
+    }
+  }, {
+    key: 'version',
+    selected: false,
+    menu: {
+      label: 'Version'
+    },
+    jquery: {
+      value: () => `instance.version.coalesce("Unknown")`,
+      buildAlias: () => 'version',
+      order: 'version.asc',
+    }
+  }, ...STATUS_FILTER_ITEMS()]
 });
 
-export const FTP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+export const FTP_STATUS_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -1698,42 +1820,15 @@ export const FTP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
         buildAlias: () => 'count'
       },
       extra: {
-        stacks: {
-          optional: false,
-          items: [{
-            key: 'status_stack',
-            selected: false,
-            menu: {
-              label: 'Statut'
-            },
-            jquery: {
-              value: () => 'status',
-              buildAlias: () => 'status',
-              buildName: (chartItem, value: string) => value,
-              buildColor: (value: string) => statusColor(value)
-            }
-          }, {
-            key: 'status_tranche',
-            selected: true,
-            menu: {
-              label: 'Tranche'
-            },
-            jquery: {
-              value: () => 'status_tranche',
-              buildAlias: () => 'status_tranche',
-              buildColor: (value: string) => STATUS[value].color,
-              buildName: (chartItem, value) => STATUS[value].label
-            }
-          }]
-        }
+        stacks: STATUS_STACKS()
       }
     }]
   },
   groups: FTP_GROUPS_CONFIG(groupedBy),
-  filters: FTP_FILTERS_CONFIG(groupedBy)
+  filters: FTP_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const FTP_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+export const FTP_PERFORMANCE_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -1751,7 +1846,7 @@ export const FTP_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => 
   },
   indicators: PERFORMANCE_INDICATORS(),
   groups: FTP_GROUPS_CONFIG(groupedBy),
-  filters: FTP_FILTERS_CONFIG(groupedBy)
+  filters: FTP_FILTERS_CONFIG(filterGroupedBy)
 });
 
 export const FTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
@@ -1771,23 +1866,12 @@ export const FTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
     key: 'host',
     selected: false,
     menu: {
-      label: 'Hôte'
+      label: 'Serveur'
     },
     jquery: {
       value: () => `host`,
       buildAlias: () => 'host',
       order: 'host.asc'
-    }
-  }, {
-    key: 'command',
-    selected: false,
-    menu: {
-      label: 'Commande'
-    },
-    jquery: {
-      value: () => `command.coalesce("Unknown")`,
-      buildAlias: () => 'command',
-      order: 'command.asc',
     }
   }, {
     key: 'user',
@@ -1799,6 +1883,17 @@ export const FTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       value: () => `user.coalesce("Unknown")`,
       buildAlias: () => 'user',
       order: 'user.asc',
+    }
+  }, {
+    key: 'command',
+    selected: false,
+    menu: {
+      label: 'Commande'
+    },
+    jquery: {
+      value: () => `command.coalesce("Unknown")`,
+      buildAlias: () => 'command',
+      order: 'command.asc',
     }
   }, {
     key: 'server_version',
@@ -1821,6 +1916,50 @@ export const FTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       value: () => `client_version.coalesce("Unknown")`,
       buildAlias: () => 'client_version',
       order: 'client_version.asc',
+    }
+  }, {
+    key: 'thread',
+    selected: false,
+    menu: {
+      label: 'Thread'
+    },
+    jquery: {
+      value: () => `thread.coalesce("Unknown")`,
+      buildAlias: () => 'thread',
+      order: 'thread.asc',
+    }
+  }, {
+    key: 'protocol',
+    selected: false,
+    menu: {
+      label: 'Protocole'
+    },
+    jquery: {
+      value: () => `protocol.coalesce("Unknown")`,
+      buildAlias: () => 'protocol',
+      order: 'protocol.asc',
+    }
+  }, {
+    key: 'application',
+    selected: false,
+    menu: {
+      label: 'Application'
+    },
+    jquery: {
+      value: () => `instance.app_name`,
+      buildAlias: () => 'application',
+      order: 'application.asc',
+    }
+  }, {
+    key: 'version',
+    selected: false,
+    menu: {
+      label: 'Version'
+    },
+    jquery: {
+      value: () => `instance.version.coalesce("Unknown")`,
+      buildAlias: () => 'version',
+      order: 'version.asc',
     }
   }]
 });
@@ -1842,23 +1981,12 @@ export const FTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
     key: 'host',
     selected: false,
     menu: {
-      label: 'Hôte'
+      label: 'Serveur'
     },
     jquery: {
       value: () => `host`,
       buildAlias: () => 'host',
       order: 'host.asc'
-    }
-  }, {
-    key: 'command',
-    selected: false,
-    menu: {
-      label: 'Commande'
-    },
-    jquery: {
-      value: () => `command.coalesce("Unknown")`,
-      buildAlias: () => 'command',
-      order: 'command.asc',
     }
   }, {
     key: 'user',
@@ -1870,6 +1998,17 @@ export const FTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       value: () => `user.coalesce("Unknown")`,
       buildAlias: () => 'user',
       order: 'user.asc',
+    }
+  }, {
+    key: 'command',
+    selected: false,
+    menu: {
+      label: 'Commande'
+    },
+    jquery: {
+      value: () => `command.coalesce("Unknown")`,
+      buildAlias: () => 'command',
+      order: 'command.asc',
     }
   }, {
     key: 'server_version',
@@ -1893,10 +2032,54 @@ export const FTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       buildAlias: () => 'client_version',
       order: 'client_version.asc',
     }
-  }]
+  }, {
+    key: 'thread',
+    selected: false,
+    menu: {
+      label: 'Thread'
+    },
+    jquery: {
+      value: () => `thread.coalesce("Unknown")`,
+      buildAlias: () => 'thread',
+      order: 'thread.asc',
+    }
+  }, {
+    key: 'protocol',
+    selected: false,
+    menu: {
+      label: 'Protocole'
+    },
+    jquery: {
+      value: () => `protocol.coalesce("Unknown")`,
+      buildAlias: () => 'protocol',
+      order: 'protocol.asc',
+    }
+  }, {
+    key: 'application',
+    selected: false,
+    menu: {
+      label: 'Application'
+    },
+    jquery: {
+      value: () => `instance.app_name`,
+      buildAlias: () => 'application',
+      order: 'application.asc',
+    }
+  }, {
+    key: 'version',
+    selected: false,
+    menu: {
+      label: 'Version'
+    },
+    jquery: {
+      value: () => `instance.version.coalesce("Unknown")`,
+      buildAlias: () => 'version',
+      order: 'version.asc',
+    }
+  }, ...STATUS_FILTER_ITEMS()]
 });
 
-export const LDAP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+export const LDAP_STATUS_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -1925,42 +2108,15 @@ export const LDAP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
         buildAlias: () => 'count'
       },
       extra: {
-        stacks: {
-          optional: false,
-          items: [{
-            key: 'status_stack',
-            selected: false,
-            menu: {
-              label: 'Statut'
-            },
-            jquery: {
-              value: () => 'status',
-              buildAlias: () => 'status',
-              buildName: (chartItem, value: string) => value,
-              buildColor: (value: string) => statusColor(value)
-            }
-          }, {
-            key: 'status_tranche',
-            selected: true,
-            menu: {
-              label: 'Tranche'
-            },
-            jquery: {
-              value: () => 'status_tranche',
-              buildAlias: () => 'status_tranche',
-              buildColor: (value: string) => STATUS[value].color,
-              buildName: (chartItem, value) => STATUS[value].label
-            }
-          }]
-        }
+        stacks: STATUS_STACKS()
       }
     }]
   },
   groups: LDAP_GROUPS_CONFIG(groupedBy),
-  filters: LDAP_FILTERS_CONFIG(groupedBy)
+  filters: LDAP_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const LDAP_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+export const LDAP_PERFORMANCE_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -1978,7 +2134,7 @@ export const LDAP_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig =>
   },
   indicators: PERFORMANCE_INDICATORS(),
   groups: LDAP_GROUPS_CONFIG(groupedBy),
-  filters: LDAP_FILTERS_CONFIG(groupedBy)
+  filters: LDAP_FILTERS_CONFIG(filterGroupedBy)
 });
 
 export const LDAP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
@@ -1998,12 +2154,23 @@ export const LDAP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
     key: 'host',
     selected: false,
     menu: {
-      label: 'Hôte'
+      label: 'Serveur'
     },
     jquery: {
       value: () => `host`,
       buildAlias: () => 'host',
       order: 'host.asc'
+    }
+  }, {
+    key: 'user',
+    selected: false,
+    menu: {
+      label: 'Utilisateur'
+    },
+    jquery: {
+      value: () => `user.coalesce("Unknown")`,
+      buildAlias: () => 'user',
+      order: 'user.asc',
     }
   }, {
     key: 'command',
@@ -2017,15 +2184,48 @@ export const LDAP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       order: 'command.asc',
     }
   }, {
-    key: 'user',
+    key: 'thread',
     selected: false,
     menu: {
-      label: 'Utilisateur'
+      label: 'Thread'
     },
     jquery: {
-      value: () => `user.coalesce("Unknown")`,
-      buildAlias: () => 'user',
-      order: 'user.asc',
+      value: () => `thread.coalesce("Unknown")`,
+      buildAlias: () => 'thread',
+      order: 'thread.asc',
+    }
+  }, {
+    key: 'protocol',
+    selected: false,
+    menu: {
+      label: 'Protocole'
+    },
+    jquery: {
+      value: () => `protocol.coalesce("Unknown")`,
+      buildAlias: () => 'protocol',
+      order: 'protocol.asc',
+    }
+  }, {
+    key: 'application',
+    selected: false,
+    menu: {
+      label: 'Application'
+    },
+    jquery: {
+      value: () => `instance.app_name`,
+      buildAlias: () => 'application',
+      order: 'application.asc',
+    }
+  }, {
+    key: 'version',
+    selected: false,
+    menu: {
+      label: 'Version'
+    },
+    jquery: {
+      value: () => `instance.version.coalesce("Unknown")`,
+      buildAlias: () => 'version',
+      order: 'version.asc',
     }
   }]
 });
@@ -2047,12 +2247,23 @@ export const LDAP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
     key: 'host',
     selected: false,
     menu: {
-      label: 'Hôte'
+      label: 'Serveur'
     },
     jquery: {
       value: () => `host`,
       buildAlias: () => 'host',
       order: 'host.asc'
+    }
+  }, {
+    key: 'user',
+    selected: false,
+    menu: {
+      label: 'Utilisateur'
+    },
+    jquery: {
+      value: () => `user.coalesce("Unknown")`,
+      buildAlias: () => 'user',
+      order: 'user.asc',
     }
   }, {
     key: 'command',
@@ -2066,20 +2277,53 @@ export const LDAP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       order: 'command.asc',
     }
   }, {
-    key: 'user',
+    key: 'thread',
     selected: false,
     menu: {
-      label: 'Utilisateur'
+      label: 'Thread'
     },
     jquery: {
-      value: () => `user.coalesce("Unknown")`,
-      buildAlias: () => 'user',
-      order: 'user.asc',
+      value: () => `thread.coalesce("Unknown")`,
+      buildAlias: () => 'thread',
+      order: 'thread.asc',
     }
-  }]
+  }, {
+    key: 'protocol',
+    selected: false,
+    menu: {
+      label: 'Protocole'
+    },
+    jquery: {
+      value: () => `protocol.coalesce("Unknown")`,
+      buildAlias: () => 'protocol',
+      order: 'protocol.asc',
+    }
+  }, {
+    key: 'application',
+    selected: false,
+    menu: {
+      label: 'Application'
+    },
+    jquery: {
+      value: () => `instance.app_name`,
+      buildAlias: () => 'application',
+      order: 'application.asc',
+    }
+  }, {
+    key: 'version',
+    selected: false,
+    menu: {
+      label: 'Version'
+    },
+    jquery: {
+      value: () => `instance.version.coalesce("Unknown")`,
+      buildAlias: () => 'version',
+      order: 'version.asc',
+    }
+  }, ...STATUS_FILTER_ITEMS()]
 });
 
-export const SMTP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+export const SMTP_STATUS_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -2108,42 +2352,15 @@ export const SMTP_STATUS_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
         buildAlias: () => 'count'
       },
       extra: {
-        stacks: {
-          optional: false,
-          items: [{
-            key: 'status_stack',
-            selected: false,
-            menu: {
-              label: 'Statut'
-            },
-            jquery: {
-              value: () => 'status',
-              buildAlias: () => 'status',
-              buildName: (chartItem, value: string) => value,
-              buildColor: (value: string) => statusColor(value)
-            }
-          }, {
-            key: 'status_tranche',
-            selected: true,
-            menu: {
-              label: 'Tranche'
-            },
-            jquery: {
-              value: () => 'status_tranche',
-              buildAlias: () => 'status_tranche',
-              buildColor: (value: string) => STATUS[value].color,
-              buildName: (chartItem, value) => STATUS[value].label
-            }
-          }]
-        }
+        stacks: STATUS_STACKS()
       }
     }]
   },
   groups: SMTP_GROUPS_CONFIG(groupedBy),
-  filters: SMTP_FILTERS_CONFIG(groupedBy)
+  filters: SMTP_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const SMTP_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig => ({
+export const SMTP_PERFORMANCE_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
   series: {
     optional: false,
     items: [{
@@ -2161,7 +2378,7 @@ export const SMTP_PERFORMANCE_CHART_CONFIG = (groupedBy: string): ChartConfig =>
   },
   indicators: PERFORMANCE_INDICATORS(),
   groups: SMTP_GROUPS_CONFIG(groupedBy),
-  filters: SMTP_FILTERS_CONFIG(groupedBy)
+  filters: SMTP_FILTERS_CONFIG(filterGroupedBy)
 });
 
 export const SMTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
@@ -2181,12 +2398,23 @@ export const SMTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
     key: 'host',
     selected: false,
     menu: {
-      label: 'Hôte'
+      label: 'Serveur'
     },
     jquery: {
       value: () => `host`,
       buildAlias: () => 'host',
       order: 'host.asc'
+    }
+  }, {
+    key: 'user',
+    selected: false,
+    menu: {
+      label: 'Utilisateur'
+    },
+    jquery: {
+      value: () => `user.coalesce("Unknown")`,
+      buildAlias: () => 'user',
+      order: 'user.asc',
     }
   }, {
     key: 'command',
@@ -2200,15 +2428,37 @@ export const SMTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
       order: 'command.asc',
     }
   }, {
-    key: 'user',
+    key: 'thread',
     selected: false,
     menu: {
-      label: 'Utilisateur'
+      label: 'Thread'
     },
     jquery: {
-      value: () => `user.coalesce("Unknown")`,
-      buildAlias: () => 'user',
-      order: 'user.asc',
+      value: () => `thread.coalesce("Unknown")`,
+      buildAlias: () => 'thread',
+      order: 'thread.asc',
+    }
+  }, {
+    key: 'application',
+    selected: false,
+    menu: {
+      label: 'Application'
+    },
+    jquery: {
+      value: () => `instance.app_name`,
+      buildAlias: () => 'application',
+      order: 'application.asc',
+    }
+  }, {
+    key: 'version',
+    selected: false,
+    menu: {
+      label: 'Version'
+    },
+    jquery: {
+      value: () => `instance.version.coalesce("Unknown")`,
+      buildAlias: () => 'version',
+      order: 'version.asc',
     }
   }]
 });
@@ -2230,12 +2480,23 @@ export const SMTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
     key: 'host',
     selected: false,
     menu: {
-      label: 'Hôte'
+      label: 'Serveur'
     },
     jquery: {
       value: () => `host`,
       buildAlias: () => 'host',
       order: 'host.asc'
+    }
+  }, {
+    key: 'user',
+    selected: false,
+    menu: {
+      label: 'Utilisateur'
+    },
+    jquery: {
+      value: () => `user.coalesce("Unknown")`,
+      buildAlias: () => 'user',
+      order: 'user.asc',
     }
   }, {
     key: 'command',
@@ -2249,17 +2510,39 @@ export const SMTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
       order: 'command.asc',
     }
   }, {
-    key: 'user',
+    key: 'thread',
     selected: false,
     menu: {
-      label: 'Utilisateur'
+      label: 'Thread'
     },
     jquery: {
-      value: () => `user.coalesce("Unknown")`,
-      buildAlias: () => 'user',
-      order: 'user.asc',
+      value: () => `thread.coalesce("Unknown")`,
+      buildAlias: () => 'thread',
+      order: 'thread.asc',
     }
-  }]
+  }, {
+    key: 'application',
+    selected: false,
+    menu: {
+      label: 'Application'
+    },
+    jquery: {
+      value: () => `instance.app_name`,
+      buildAlias: () => 'application',
+      order: 'application.asc',
+    }
+  }, {
+    key: 'version',
+    selected: false,
+    menu: {
+      label: 'Version'
+    },
+    jquery: {
+      value: () => `instance.version.coalesce("Unknown")`,
+      buildAlias: () => 'version',
+      order: 'version.asc',
+    }
+  }, ...STATUS_FILTER_ITEMS()]
 });
 
 export const PERFORMANCE_INDICATORS = (): ChartSection => ({

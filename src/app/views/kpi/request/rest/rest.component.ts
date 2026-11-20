@@ -6,7 +6,7 @@ import {QueryParams} from "../../../../model/conf.model";
 import {RestRequestService} from "../../../../service/jquery/rest-request.service";
 import {finalize, Observable, of} from "rxjs";
 import {buildSeries,ChartConfig,buildFilterSelections,toFilterValues,pivotByStack,lineTypeOptions,REST_LATENCY_CHART_CONFIG,REST_PERFORMANCE_CHART_CONFIG,REST_STATUS_CHART_CONFIG,REST_VOLUMETRY_CHART_CONFIG} from "./../../kpi.config";
-import {periodManagement, formatChartDates, buildPeriodSliceDisplay, resolvePeriodGranularity, volumeSubtitle} from "../../../../shared/util";
+import {formatChartDates, periodManagement, PeriodGranularities, resolvePeriodSliceDisplay, resolveViewGranularity, volumeSubtitle} from "../../../../shared/util";
 import {ChartProvider, field, buildPeriodOptions, remapSliceKeys} from "@oneteme/jquery-core";
 import {OrganizerChartBinding, OrganizerChartBridgeOptions, OrganizerConfig, OrganizerButtonEvent, OrganizerSliceState, OrganizerState, OrganizerXOption, buildOrganizerChartBinding, handleOrganizerChartEvent} from "@oneteme/jquery-organizer";
 import {STATUS_CHART_PROVIDER_BASE} from "../../kpi.constants";
@@ -90,10 +90,11 @@ export class RestComponent implements OnInit {
 
   params: QueryParams;
   groupedBy: string = '';
-  $statusGranularity: string = '';
-  $performanceGranularity: string = '';
-  $volumetryGranularity: string = '';
-  $latencyGranularity: string = '';
+  // Granularité par graphique : axe (X ou Grouper par) et filtre Date, chacun avec son sous-menu
+  $statusGranularity: PeriodGranularities = {axis: '', filter: ''};
+  $performanceGranularity: PeriodGranularities = {axis: '', filter: ''};
+  $volumetryGranularity: PeriodGranularities = {axis: '', filter: ''};
+  $latencyGranularity: PeriodGranularities = {axis: '', filter: ''};
 
   @Input() set queryParams(value: QueryParams) {
     if (value) {
@@ -101,10 +102,11 @@ export class RestComponent implements OnInit {
       this.groupedBy = periodManagement(this.params.period.start, this.params.period.end);
 
       // Initialize ChartConfigs and OrganizerConfigs
-      this.$statusGranularity = this.groupedBy;
-      this.$performanceGranularity = this.groupedBy;
-      this.$volumetryGranularity = this.groupedBy;
-      this.$latencyGranularity = this.groupedBy;
+      const defaultGranularity: PeriodGranularities = {axis: this.groupedBy, filter: this.groupedBy};
+      this.$statusGranularity = defaultGranularity;
+      this.$performanceGranularity = defaultGranularity;
+      this.$volumetryGranularity = defaultGranularity;
+      this.$latencyGranularity = defaultGranularity;
       this.$statusRepartition.chartConfig = REST_STATUS_CHART_CONFIG(this.groupedBy);
       this.$performanceRepartition.chartConfig = REST_PERFORMANCE_CHART_CONFIG(this.groupedBy);
       this.$volumetryRepartition.chartConfig = REST_VOLUMETRY_CHART_CONFIG(this.groupedBy);
@@ -135,10 +137,10 @@ export class RestComponent implements OnInit {
     if (event.type === 'viewSwitched') {
       this.$statusView = event.state.viewMode ?? 'chart';
     }
-    const granularity = this._resolveGranularityAfterX(event, this.$statusGranularity);
+    const granularity = resolveViewGranularity(event.state, this.$statusGranularity, this.params.period.start, this.params.period.end);
     if (granularity !== this.$statusGranularity) {
       this.$statusGranularity = granularity;
-      this.$statusRepartition.chartConfig = REST_STATUS_CHART_CONFIG(granularity);
+      this.$statusRepartition.chartConfig = REST_STATUS_CHART_CONFIG(granularity.axis, granularity.filter);
     }
     const result = this._handleOrganizerEvent(event, this.$statusRepartition.chartConfig, this.$statusOrganizer, this._statusOrganizerOptions());
     this.$statusOrganizer = withKpiChartTypes(result.binding, this.$statusChartType);
@@ -166,10 +168,10 @@ export class RestComponent implements OnInit {
       this._cdr.markForCheck();
       return;
     }
-    const granularity = this._resolveGranularityAfterX(event, this.$performanceGranularity);
+    const granularity = resolveViewGranularity(event.state, this.$performanceGranularity, this.params.period.start, this.params.period.end);
     if (granularity !== this.$performanceGranularity) {
       this.$performanceGranularity = granularity;
-      this.$performanceRepartition.chartConfig = REST_PERFORMANCE_CHART_CONFIG(granularity);
+      this.$performanceRepartition.chartConfig = REST_PERFORMANCE_CHART_CONFIG(granularity.axis, granularity.filter);
     }
     const result = this._handleOrganizerEvent(event, this.$performanceRepartition.chartConfig, this.$performanceOrganizer, this._performanceOrganizerOptions());
     this.$performanceOrganizer = withKpiChartTypes(result.binding, this.$performanceChartType);
@@ -197,10 +199,10 @@ export class RestComponent implements OnInit {
       this._cdr.markForCheck();
       return;
     }
-    const granularity = this._resolveGranularityAfterX(event, this.$volumetryGranularity);
+    const granularity = resolveViewGranularity(event.state, this.$volumetryGranularity, this.params.period.start, this.params.period.end);
     if (granularity !== this.$volumetryGranularity) {
       this.$volumetryGranularity = granularity;
-      this.$volumetryRepartition.chartConfig = REST_VOLUMETRY_CHART_CONFIG(granularity);
+      this.$volumetryRepartition.chartConfig = REST_VOLUMETRY_CHART_CONFIG(granularity.axis, granularity.filter);
     }
     const result = this._handleOrganizerEvent(event, this.$volumetryRepartition.chartConfig, this.$volumetryOrganizer, this._volumetryOrganizerOptions());
     this.$volumetryOrganizer = withKpiChartTypes(result.binding, this.$volumetryChartType);
@@ -228,10 +230,10 @@ export class RestComponent implements OnInit {
       this._cdr.markForCheck();
       return;
     }
-    const granularity = this._resolveGranularityAfterX(event, this.$latencyGranularity);
+    const granularity = resolveViewGranularity(event.state, this.$latencyGranularity, this.params.period.start, this.params.period.end);
     if (granularity !== this.$latencyGranularity) {
       this.$latencyGranularity = granularity;
-      this.$latencyRepartition.chartConfig = REST_LATENCY_CHART_CONFIG(granularity);
+      this.$latencyRepartition.chartConfig = REST_LATENCY_CHART_CONFIG(granularity.axis, granularity.filter);
     }
     const result = this._handleOrganizerEvent(event, this.$latencyRepartition.chartConfig, this.$latencyOrganizer, this._latencyOrganizerOptions());
     this.$latencyOrganizer = withKpiChartTypes(result.binding, this.$latencyChartType);
@@ -307,10 +309,10 @@ export class RestComponent implements OnInit {
     this.$statusRepartition.data = [];
     this._httpRequestService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$statusGranularity, selections: buildFilterSelections(cfg, this.$statusFilterValues) }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$statusGranularity.axis, selections: buildFilterSelections(cfg, this.$statusFilterValues) }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
-      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$statusGranularity, this.datePipe, this.params.period.start) : data;
+      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$statusGranularity.axis, this.datePipe, this.params.period.start) : data;
       const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
       const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
       this.$statusRepartition.rawData = formattedData;
@@ -335,10 +337,10 @@ export class RestComponent implements OnInit {
     this.$performanceRepartition.data = [];
     this._httpRequestService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$performanceGranularity, selections: buildFilterSelections(cfg, this.$performanceFilterValues) }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$performanceGranularity.axis, selections: buildFilterSelections(cfg, this.$performanceFilterValues) }
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
-      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$performanceGranularity, this.datePipe, this.params.period.start) : data;
+      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$performanceGranularity.axis, this.datePipe, this.params.period.start) : data;
       const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
       const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
       this.$performanceRepartition.data = pivoted;
@@ -364,10 +366,10 @@ export class RestComponent implements OnInit {
     this.$volumetryRepartition.data = [];
     this._httpRequestService.getSizeCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$volumetryGranularity, selections: buildFilterSelections(cfg, this.$volumetryFilterValues) }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$volumetryGranularity.axis, selections: buildFilterSelections(cfg, this.$volumetryFilterValues) }
     ).pipe(finalize(() => this.$volumetryRepartition.loading = false))
     .subscribe(data => {
-      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$volumetryGranularity, this.datePipe, this.params.period.start) : data;
+      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$volumetryGranularity.axis, this.datePipe, this.params.period.start) : data;
       const selectedSeries = cfg.series.items.filter(s => s.selected);
       const series = buildSeries(selectedSeries, ind, grp, stk, formattedData);
       const pivoted = stk ? pivotByStack(selectedSeries, ind, grp, stk, formattedData) : formattedData;
@@ -394,10 +396,10 @@ export class RestComponent implements OnInit {
     this.$latencyRepartition.data = [];
     this._httpRequestService.getLatency(
       { serie: cfg.series.items[0], indicator: ind, group: grp, stack: stk },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$latencyGranularity, selections: buildFilterSelections(cfg, this.$latencyFilterValues) }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$latencyGranularity.axis, selections: buildFilterSelections(cfg, this.$latencyFilterValues) }
     ).pipe(finalize(() => this.$latencyRepartition.loading = false))
     .subscribe(data => {
-      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$latencyGranularity, this.datePipe, this.params.period.start) : data;
+      const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$latencyGranularity.axis, this.datePipe, this.params.period.start) : data;
       let effectiveStk = stk;
       if (stk && formattedData.length > 0) {
         const stackAlias = stk.jquery.buildAlias();
@@ -515,8 +517,8 @@ export class RestComponent implements OnInit {
 
   private _statusOrganizerOptions(): OrganizerChartBridgeOptions {
     return {
-      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$statusRepartition.chartConfig, filterKey, this.$statusGranularity),
-      resolveSliceDisplay: (filterKey: string) => this._resolvePeriodSliceDisplay(filterKey, this.$statusGranularity),
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$statusRepartition.chartConfig, filterKey, this.$statusGranularity.filter),
+      resolveSliceDisplay: (filterKey: string, menu) => resolvePeriodSliceDisplay(filterKey, menu === 'group' ? this.$statusGranularity.axis : this.$statusGranularity.filter, this.params.period.start),
       resolveXOptions: (groupKey: string) => this._resolveXOptions(groupKey),
       remapSliceSelection: remapSliceKeys,
       onExportVisual: () => this._statusChart?.exportImage('disponibilite'),
@@ -526,8 +528,8 @@ export class RestComponent implements OnInit {
 
   private _performanceOrganizerOptions(): OrganizerChartBridgeOptions {
     return {
-      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$performanceRepartition.chartConfig, filterKey, this.$performanceGranularity),
-      resolveSliceDisplay: (filterKey: string) => this._resolvePeriodSliceDisplay(filterKey, this.$performanceGranularity),
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$performanceRepartition.chartConfig, filterKey, this.$performanceGranularity.filter),
+      resolveSliceDisplay: (filterKey: string, menu) => resolvePeriodSliceDisplay(filterKey, menu === 'group' ? this.$performanceGranularity.axis : this.$performanceGranularity.filter, this.params.period.start),
       resolveXOptions: (groupKey: string) => this._resolveXOptions(groupKey),
       remapSliceSelection: remapSliceKeys,
       onExportVisual: () => this._performanceChart?.exportImage('performance'),
@@ -537,8 +539,8 @@ export class RestComponent implements OnInit {
 
   private _volumetryOrganizerOptions(): OrganizerChartBridgeOptions {
     return {
-      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$volumetryRepartition.chartConfig, filterKey, this.$volumetryGranularity),
-      resolveSliceDisplay: (filterKey: string) => this._resolvePeriodSliceDisplay(filterKey, this.$volumetryGranularity),
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$volumetryRepartition.chartConfig, filterKey, this.$volumetryGranularity.filter),
+      resolveSliceDisplay: (filterKey: string, menu) => resolvePeriodSliceDisplay(filterKey, menu === 'group' ? this.$volumetryGranularity.axis : this.$volumetryGranularity.filter, this.params.period.start),
       resolveXOptions: (groupKey: string) => this._resolveXOptions(groupKey),
       remapSliceSelection: remapSliceKeys,
       onExportVisual: () => this._volumetryChart?.exportImage('volumetrie'),
@@ -548,8 +550,8 @@ export class RestComponent implements OnInit {
 
   private _latencyOrganizerOptions(): OrganizerChartBridgeOptions {
     return {
-      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$latencyRepartition.chartConfig, filterKey, this.$latencyGranularity),
-      resolveSliceDisplay: (filterKey: string) => this._resolvePeriodSliceDisplay(filterKey, this.$latencyGranularity),
+      onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$latencyRepartition.chartConfig, filterKey, this.$latencyGranularity.filter),
+      resolveSliceDisplay: (filterKey: string, menu) => resolvePeriodSliceDisplay(filterKey, menu === 'group' ? this.$latencyGranularity.axis : this.$latencyGranularity.filter, this.params.period.start),
       resolveXOptions: (groupKey: string) => this._resolveXOptions(groupKey),
       remapSliceSelection: remapSliceKeys,
       onExportVisual: () => this._latencyChart?.exportImage('latence'),
@@ -557,19 +559,8 @@ export class RestComponent implements OnInit {
     };
   }
 
-  private _resolvePeriodSliceDisplay(filterKey: string, granularity: string) {
-    return filterKey === 'date' ? buildPeriodSliceDisplay(granularity, this.params.period.start) : undefined;
-  }
-
   private _resolveXOptions(groupKey: string): OrganizerXOption[] | undefined {
     return groupKey === 'date' ? buildPeriodOptions() : undefined;
-  }
-
-  private _resolveGranularityAfterX(event: OrganizerButtonEvent, current: string): string {
-    if (event.type !== 'xSelected' || event.state.selectedX !== 'date') {
-      return current;
-    }
-    return resolvePeriodGranularity(event.state.selectedXOption, this.params.period.start, this.params.period.end);
   }
 
   private _handleOrganizerEvent(
