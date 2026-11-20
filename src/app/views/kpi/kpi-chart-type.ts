@@ -1,4 +1,4 @@
-import {OrganizerChartBinding, OrganizerChartType} from "@oneteme/jquery-organizer";
+import {OrganizerChartBinding, OrganizerChartType, OrganizerState} from "@oneteme/jquery-organizer";
 
 const KPI_CHART_TYPE_LABELS: Record<string, string> = {
   column: 'Colonne',
@@ -8,15 +8,28 @@ const KPI_CHART_TYPE_LABELS: Record<string, string> = {
   line: 'Courbe',
   spline: 'Courbe lissée',
   area: 'Aire',
-  areaspline: 'Aire lissée'
+  areaspline: 'Aire lissée',
+  treemap: 'Treemap',
+  heatmap: 'Heatmap'
 };
 
 const KPI_CHART_TYPE_IDS = ['column', 'bar', 'pie', 'donut', 'line', 'spline', 'area', 'areaspline', 'treemap', 'heatmap'];
 
+// Les courbes ne cumulent pas (voir lineTypeOptions) : seuls les types en barres et aires sont empilables.
+const KPI_STACKABLE_CHART_TYPES = ['column', 'bar', 'area', 'areaspline'];
+
 export function withKpiChartTypes(binding: OrganizerChartBinding, selected: string): OrganizerChartBinding {
   const chartTypes: OrganizerChartType[] = KPI_CHART_TYPE_IDS.map(id => ({id, label: KPI_CHART_TYPE_LABELS[id] ?? id}));
   return {
-    config: {...binding.config, chartTypes},
+    config: {...binding.config, chartTypes, stackChartTypes: KPI_STACKABLE_CHART_TYPES},
     state: {...binding.state, selectedChartType: selected}
   };
+}
+
+export function isKpiStacked(state: OrganizerState): boolean {
+  return state.stacked !== false && KPI_STACKABLE_CHART_TYPES.includes(state.selectedChartType ?? '');
+}
+
+export function kpiStackBreadcrumbLabel(state: OrganizerState): string {
+  return isKpiStacked(state) ? 'Regroupé et empilé par:' : 'Regroupé par:';
 }

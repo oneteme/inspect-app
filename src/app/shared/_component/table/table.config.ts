@@ -25,8 +25,9 @@ function fmtStart(startSec: number): string {
 function fmtDuration(start: number, end: number | null | undefined): string {
   return end == null ? 'En cours...' : formatDuration(end - start);
 }
-const TAG_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-tag"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M6.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M3 6v5.172a2 2 0 0 0 .586 1.414l7.71 7.71a2.41 2.41 0 0 0 3.408 0l5.592 -5.592a2.41 2.41 0 0 0 0 -3.408l-7.71 -7.71a2 2 0 0 0 -1.414 -.586h-5.172a3 3 0 0 0 -3 3" /></svg>';
-const DATABASE_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-database"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 6a8 3 0 1 0 16 0a8 3 0 1 0 -16 0" /><path d="M4 6v6a8 3 0 0 0 16 0v-6" /><path d="M4 12v6a8 3 0 0 0 16 0v-6" /></svg>';
+export const TAG_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-tag"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M6.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0" /><path d="M3 6v5.172a2 2 0 0 0 .586 1.414l7.71 7.71a2.41 2.41 0 0 0 3.408 0l5.592 -5.592a2.41 2.41 0 0 0 0 -3.408l-7.71 -7.71a2 2 0 0 0 -1.414 -.586h-5.172a3 3 0 0 0 -3 3" /></svg>';
+export const DATABASE_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-database"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 6a8 3 0 1 0 16 0a8 3 0 1 0 -16 0" /><path d="M4 6v6a8 3 0 0 0 16 0v-6" /><path d="M4 12v6a8 3 0 0 0 16 0v-6" /></svg>';
+export const DB_VERSION_ICON_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-database-code"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M4 6a8 3 0 1 0 16 0a8 3 0 1 0 -16 0" /><path d="M4 6v6c0 1.575 3.238 2.867 7.354 2.99" /><path d="M19.993 12.125c.005 -.041 .007 -.083 .007 -.125v-6" /><path d="M4 12v6c0 1.322 2.282 2.445 5.45 2.844" /><path d="M20 21l2 -2l-2 -2" /><path d="M17 17l-2 2l2 2" /></svg>';
 
 export const DEFAULT_TABLE_CONFIG: TableProvider = {
   search: { enabled: true },
@@ -143,7 +144,7 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
     },
     { key: 'user', header: 'Utilisateur', icon: 'badge', width: '15%', minWidth: 120 },
     {
-      key: 'name', header: 'Nom', icon: 'label', iconSvg: TAG_ICON_SVG, lazy: true, minWidth: 150, groupable: false, sliceable: false
+      key: 'name', header: 'Nom', icon: 'label', iconSvg: TAG_ICON_SVG, lazy: true, minWidth: 150
     },
     {
       key: 'asyncDuration', header: 'Traitement Asynchrone', icon: 'time_auto', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 180, groupable: false, sliceable: false,
@@ -175,6 +176,15 @@ export const MAIN_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
     return '';
   }
 }
+
+export const SCHEDULE_SESSION_TABLE_CONFIG: TableProvider<MainSessionDto> = {
+  ...MAIN_SESSION_TABLE_CONFIG,
+  columns: MAIN_SESSION_TABLE_CONFIG.columns.flatMap(column => {
+    if (column.key === 'name') return [];
+    if (column.key === 'location') return [{ key: 'name', header: 'Nom', icon: 'label', iconSvg: TAG_ICON_SVG, minWidth: 150 }, column];
+    return [column];
+  })
+};
 
 export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
   ...DEFAULT_TABLE_CONFIG,
@@ -504,9 +514,9 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
   ],
   slices: [
     {
-      title: 'Détails',
+      title: 'Action',
       columnKey: 'action',
-      icon: 'label',
+      icon: 'info',
       hidden: true
     }
   ],

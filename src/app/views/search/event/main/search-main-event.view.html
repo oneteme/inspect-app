@@ -92,9 +92,9 @@
     </ng-template>
 
     <ng-template jqtCellDef="action" let-row>
-        <button matTooltip="Détail de la session" [style.visibility]="row.sessionId ? 'visible' : 'hidden'" mat-icon-button color="primary"
+        <button matTooltip="Contexte de l'appel" [style.visibility]="row.sessionId ? 'visible' : 'hidden'" mat-icon-button color="primary"
                 (click)="selectedRequest($event, row); $event.stopPropagation()">
-            <mat-icon class="material-symbols-outlined">link</mat-icon>
+            <mat-icon class="material-symbols-outlined">{{ sessionLinkIcon }}</mat-icon>
         </button>
     </ng-template>
 

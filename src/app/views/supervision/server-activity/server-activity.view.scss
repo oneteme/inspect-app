@@ -41,6 +41,8 @@
   jquery-table {
     display: flex;
     height: clamp(320px, 50vh, 560px);
+    --jqt-header-height: 40px;
+    --jqt-footer-height: 40px;
   }
 }
 
