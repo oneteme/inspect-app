@@ -294,7 +294,7 @@ export class RestComponent implements OnInit {
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$statusGranularity.axis, this.datePipe, this.params.period.start) : data;
-      const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
+            const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData, cfg.stacked);
       const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
       this.$statusRepartition.rawData = formattedData;
       this.$statusRepartition.data = pivoted;
@@ -322,7 +322,7 @@ export class RestComponent implements OnInit {
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$performanceGranularity.axis, this.datePipe, this.params.period.start) : data;
-      const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
+            const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData, cfg.stacked);
       const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
       this.$performanceRepartition.data = pivoted;
       const yAlias = ind?.jquery.buildAlias(cfg.series.items.find(s => s.selected)?.jquery.buildAlias() ?? '') ?? '';
@@ -351,7 +351,7 @@ export class RestComponent implements OnInit {
     ).pipe(finalize(() => this.$volumetryRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$volumetryGranularity.axis, this.datePipe, this.params.period.start) : data;
-      const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData);
+            const series = buildSeries(cfg.series.items, ind, grp, stk, formattedData, cfg.stacked);
       const pivoted = stk ? pivotByStack(cfg.series.items, ind, grp, stk, formattedData) : formattedData;
       this.$volumetryRepartition.rawData = formattedData;
       this.$volumetryRepartition.data = pivoted;
@@ -388,6 +388,7 @@ export class RestComponent implements OnInit {
 
   private _statusOrganizerOptions(): OrganizerChartBridgeOptions {
     return {
+      showStack: true,
       onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$statusRepartition.chartConfig, filterKey, this.$statusGranularity.filter),
       resolveSliceDisplay: (filterKey: string, menu) => resolvePeriodSliceDisplay(filterKey, menu === 'group' ? this.$statusGranularity.axis : this.$statusGranularity.filter, this.params.period.start),
       resolveXOptions: (groupKey: string) => this._resolveXOptions(groupKey),
@@ -399,6 +400,7 @@ export class RestComponent implements OnInit {
 
   private _performanceOrganizerOptions(): OrganizerChartBridgeOptions {
     return {
+      showStack: true,
       onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$performanceRepartition.chartConfig, filterKey, this.$performanceGranularity.filter),
       resolveSliceDisplay: (filterKey: string, menu) => resolvePeriodSliceDisplay(filterKey, menu === 'group' ? this.$performanceGranularity.axis : this.$performanceGranularity.filter, this.params.period.start),
       resolveXOptions: (groupKey: string) => this._resolveXOptions(groupKey),
@@ -410,6 +412,7 @@ export class RestComponent implements OnInit {
 
   private _volumetryOrganizerOptions(): OrganizerChartBridgeOptions {
     return {
+      showStack: true,
       onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$volumetryRepartition.chartConfig, filterKey, this.$volumetryGranularity.filter),
       resolveSliceDisplay: (filterKey: string, menu) => resolvePeriodSliceDisplay(filterKey, menu === 'group' ? this.$volumetryGranularity.axis : this.$volumetryGranularity.filter, this.params.period.start),
       resolveXOptions: (groupKey: string) => this._resolveXOptions(groupKey),

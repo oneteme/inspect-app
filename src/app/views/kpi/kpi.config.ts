@@ -2767,6 +2767,7 @@ export interface ChartConfig {
   indicators: ChartSection<IndicatorExtra>;
   groups: ChartSection;
   filters?: ChartSection;
+  stacked?: boolean;  // absent = empilé
 }
 
 export interface MenuConfig {
@@ -2812,9 +2813,9 @@ export function isStackable(indicator: ChartItem): boolean {
   return indicator.unit !== DURATION_UNIT;
 }
 
-export function buildSeries(series: ChartItem[], indicator: ChartItem, group: ChartItem, stack: ChartItem, data: any[]): SerieProvider<string, number>[] {
+export function buildSeries(series: ChartItem[], indicator: ChartItem, group: ChartItem, stack: ChartItem, data: any[], stacked = true): SerieProvider<string, number>[] {
   return series.flatMap(s => {
-    return stack ? buildStackSeries(s, stack, data, isStackable(indicator)) : [{ data: { x: field(group.jquery.buildAlias()), y: field(indicator.jquery.buildAlias(s.jquery.buildAlias())) }, stack: s.jquery.buildAlias(), name: indicator.jquery.buildName ? indicator.jquery.buildName(s) : indicator.jquery.buildAlias(s.jquery.buildAlias()), color: s.jquery.buildColor ? s.jquery.buildColor() : '' }];
+    return stack ? buildStackSeries(s, stack, data, stacked && isStackable(indicator)) :  [{ data: { x: field(group.jquery.buildAlias()), y: field(indicator.jquery.buildAlias(s.jquery.buildAlias())) }, stack: s.jquery.buildAlias(), name: indicator.jquery.buildName ? indicator.jquery.buildName(s) : indicator.jquery.buildAlias(s.jquery.buildAlias()), color: s.jquery.buildColor ? s.jquery.buildColor() : '' }];
   });
 }
 
