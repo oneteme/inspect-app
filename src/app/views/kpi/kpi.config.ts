@@ -1,6 +1,7 @@
 import {ChartType, field, UnitConfig} from "@oneteme/jquery-core";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 import {STATUS} from "../constants";
+import {DATABASE_ICON_SVG, TAG_ICON_SVG} from "../../shared/_component/table/table.config";
 
 // Les durées (elapsed_time) sont fournies en secondes par le serveur.
 const DURATION_UNIT: UnitConfig = {
@@ -12,7 +13,7 @@ const DURATION_UNIT: UnitConfig = {
   ]
 };
 
-const STATUS_SUBMENU: SubmenuConfig = { id: 'statut', label: 'Statut' };
+const STATUS_SUBMENU: SubmenuConfig = { id: 'statut', label: 'Statut', icon: 'task_alt' };
 
 // Empilement des indicateurs de session par statut (valeur brute ou tranche).
 const STATUS_STACKS = (): ChartSection => ({
@@ -73,7 +74,7 @@ const STATUS_FILTER_ITEMS = (): ChartItem[] => [{
   }
 }];
 
-const USER_AGENT_SUBMENU: SubmenuConfig = { id: 'userAgent', label: 'User-Agent' };
+const USER_AGENT_SUBMENU: SubmenuConfig = { id: 'userAgent', label: 'User-Agent', icon: 'devices' };
 
 // Entrées « Valeur » et « Produit » (agent connu ou « Autre ») du menu User-Agent.
 const USER_AGENT_ITEMS = (): ChartItem[] => [{
@@ -287,7 +288,97 @@ export const REST_SESSION_VOLUMETRY_CHART_CONFIG = (groupedBy: string, filterGro
   filters: REST_SESSION_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
+type IconSpec = Pick<MenuConfig, 'icon' | 'iconSvg'>;
+
+// Icônes des colonnes classiques (table.config.ts), par clé d'entrée KPI.
+const COMMON_ICONS: Record<string, IconSpec> = {
+  date: { icon: 'schedule' },
+  user: { icon: 'badge' },
+  thread: { icon: 'call_split' },
+  version: { icon: 'label' }
+};
+
+const SESSION_REST_ICONS: Record<string, IconSpec> = {
+  ...COMMON_ICONS,
+  host: { icon: 'widgets' },
+  resource: { icon: 'extension' },
+  name: { icon: 'label', iconSvg: TAG_ICON_SVG },
+  method: { icon: 'api' },
+  httpHost: { icon: 'language' },
+  media: { icon: 'description' },
+  auth: { icon: 'lock' }
+};
+
+const SESSION_SCHEDULE_ICONS: Record<string, IconSpec> = {
+  ...COMMON_ICONS,
+  host: { icon: 'widgets' },
+  resource: { icon: 'extension' },
+  schedule: { icon: 'label', iconSvg: TAG_ICON_SVG }
+};
+
+const SESSION_STARTUP_ICONS: Record<string, IconSpec> = {
+  ...COMMON_ICONS,
+  host: { icon: 'widgets' },
+  resource: { icon: 'extension' },
+  name: { icon: 'label', iconSvg: TAG_ICON_SVG }
+};
+
+const REQUEST_REST_ICONS: Record<string, IconSpec> = {
+  ...COMMON_ICONS,
+  host: { icon: 'dns' },
+  method: { icon: 'api' },
+  path: { icon: 'route' },
+  media: { icon: 'description' },
+  auth: { icon: 'lock' },
+  application: { icon: 'widgets' }
+};
+
+const JDBC_ICONS: Record<string, IconSpec> = {
+  ...COMMON_ICONS,
+  host: { icon: 'dns' },
+  db_name: { icon: 'table_rows', iconSvg: DATABASE_ICON_SVG },
+  command: { icon: 'keyboard_command_key' },
+  schema: { icon: 'schema' },
+  db_version: { icon: 'deployed_code' },
+  driver: { icon: 'settings_ethernet' },
+  scheme: { icon: 'hub' },
+  application: { icon: 'widgets' }
+};
+
+const FTP_ICONS: Record<string, IconSpec> = {
+  ...COMMON_ICONS,
+  host: { icon: 'dns' },
+  command: { icon: 'keyboard_command_key' },
+  server_version: { icon: 'cloud' },
+  client_version: { icon: 'computer' },
+  protocol: { icon: 'lan' },
+  application: { icon: 'widgets' }
+};
+
+const LDAP_ICONS: Record<string, IconSpec> = {
+  ...COMMON_ICONS,
+  host: { icon: 'dns' },
+  command: { icon: 'keyboard_command_key' },
+  protocol: { icon: 'lan' },
+  application: { icon: 'widgets' }
+};
+
+const SMTP_ICONS: Record<string, IconSpec> = {
+  ...COMMON_ICONS,
+  host: { icon: 'dns' },
+  command: { icon: 'keyboard_command_key' },
+  application: { icon: 'widgets' }
+};
+
+/** Renseigne l'icône de chaque entrée du menu selon sa clé ; les entrées sans icône sont inchangées. */
+function withMenuIcons(icons: Record<string, IconSpec>, section: ChartSection): ChartSection {
+  return {
+    ...section,
+    items: section.items.map(item => icons[item.key] ? { ...item, menu: { ...item.menu, ...icons[item.key] } } : item)
+  };
+}
+
+export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(SESSION_REST_ICONS, {
   optional: false,
   items: [{
     key: 'date',
@@ -413,7 +504,7 @@ export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => (
   }]
 });
 
-export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
+export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(SESSION_REST_ICONS, {
   optional: false,
   items: [{
     key: 'date',
@@ -597,7 +688,7 @@ export const SCHEDULE_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string, fil
   filters: SCHEDULE_SESSION_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const SCHEDULE_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
+export const SCHEDULE_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(SESSION_SCHEDULE_ICONS, {
   optional: false,
   items: [{
     key: 'date',
@@ -679,7 +770,7 @@ export const SCHEDULE_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection 
   }]
 });
 
-export const SCHEDULE_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
+export const SCHEDULE_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(SESSION_SCHEDULE_ICONS, {
   optional: false,
   items: [{
     key: 'date',
@@ -819,7 +910,7 @@ export const STARTUP_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string, filt
   filters: STARTUP_SESSION_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const STARTUP_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
+export const STARTUP_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(SESSION_STARTUP_ICONS, {
   optional: false,
   items: [{
     key: 'date',
@@ -901,7 +992,7 @@ export const STARTUP_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection =
   }]
 });
 
-export const STARTUP_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
+export const STARTUP_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(SESSION_STARTUP_ICONS, {
   optional: false,
   items: [{
     key: 'date',
@@ -1229,7 +1320,7 @@ export const REST_LATENCY_CHART_CONFIG = (groupedBy: string, filterGroupedBy: st
   filters: REST_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const REST_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
+export const REST_GROUPS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(REQUEST_REST_ICONS, {
   optional: false,
   items: [{
     key: 'date',
@@ -1344,7 +1435,7 @@ export const REST_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
   }]
 });
 
-export const REST_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
+export const REST_FILTERS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(REQUEST_REST_ICONS, {
   optional: false,
   items: [{
     key: 'date',
@@ -1517,7 +1608,7 @@ export const JDBC_PERFORMANCE_CHART_CONFIG = (groupedBy: string, filterGroupedBy
   filters: JDBC_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
+export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(JDBC_ICONS, {
   optional: false,
   items: [{
     key: 'date',
@@ -1654,7 +1745,7 @@ export const JDBC_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
   }]
 });
 
-export const JDBC_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
+export const JDBC_FILTERS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(JDBC_ICONS, {
   optional: true,
   items: [{
     key: 'date',
@@ -1849,7 +1940,7 @@ export const FTP_PERFORMANCE_CHART_CONFIG = (groupedBy: string, filterGroupedBy:
   filters: FTP_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const FTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
+export const FTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(FTP_ICONS, {
   optional: false,
   items: [{
     key: 'date',
@@ -1964,7 +2055,7 @@ export const FTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
   }]
 });
 
-export const FTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
+export const FTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(FTP_ICONS, {
   optional: true,
   items: [{
     key: 'date',
@@ -2137,7 +2228,7 @@ export const LDAP_PERFORMANCE_CHART_CONFIG = (groupedBy: string, filterGroupedBy
   filters: LDAP_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const LDAP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
+export const LDAP_GROUPS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(LDAP_ICONS, {
   optional: false,
   items: [{
     key: 'date',
@@ -2230,7 +2321,7 @@ export const LDAP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
   }]
 });
 
-export const LDAP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
+export const LDAP_FILTERS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(LDAP_ICONS, {
   optional: true,
   items: [{
     key: 'date',
@@ -2381,7 +2472,7 @@ export const SMTP_PERFORMANCE_CHART_CONFIG = (groupedBy: string, filterGroupedBy
   filters: SMTP_FILTERS_CONFIG(filterGroupedBy)
 });
 
-export const SMTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
+export const SMTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(SMTP_ICONS, {
   optional: false,
   items: [{
     key: 'date',
@@ -2463,7 +2554,7 @@ export const SMTP_GROUPS_CONFIG = (groupedBy: string): ChartSection => ({
   }]
 });
 
-export const SMTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => ({
+export const SMTP_FILTERS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(SMTP_ICONS, {
   optional: true,
   items: [{
     key: 'date',
@@ -2695,6 +2786,8 @@ export interface SubmenuConfig {
   id: string;
   label: string;
   itemLabel?: string;  // libellé de l'entrée dans le sous-menu, sans toucher à l'axe X
+  icon?: string;
+  iconSvg?: string;
 }
 
 export interface ChartItem<TExtra = {}> {
@@ -2773,6 +2866,7 @@ export interface ChartConfig {
 export interface MenuConfig {
   label: string;
   icon?: string;
+  iconSvg?: string;
 }
 
 export interface JQueryConfig {
