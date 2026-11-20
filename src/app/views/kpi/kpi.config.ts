@@ -1,7 +1,7 @@
 import {ChartType, field, UnitConfig} from "@oneteme/jquery-core";
 import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 import {STATUS} from "../constants";
-import {DATABASE_ICON_SVG, TAG_ICON_SVG} from "../../shared/_component/table/table.config";
+import {DATABASE_ICON_SVG, DB_VERSION_ICON_SVG, TAG_ICON_SVG} from "../../shared/_component/table/table.config";
 
 // Les durées (elapsed_time) sont fournies en secondes par le serveur.
 const DURATION_UNIT: UnitConfig = {
@@ -339,7 +339,7 @@ const JDBC_ICONS: Record<string, IconSpec> = {
   db_name: { icon: 'table_rows', iconSvg: DATABASE_ICON_SVG },
   command: { icon: 'keyboard_command_key' },
   schema: { icon: 'schema' },
-  db_version: { icon: 'deployed_code' },
+  db_version: { icon: 'new_releases', iconSvg: DB_VERSION_ICON_SVG },
   driver: { icon: 'settings_ethernet' },
   scheme: { icon: 'hub' },
   application: { icon: 'widgets' }
