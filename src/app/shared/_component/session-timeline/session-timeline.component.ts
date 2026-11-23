@@ -205,6 +205,7 @@ export class SessionTimelineComponent implements OnDestroy {
     getEventLabel(type: string): string {
         switch (type) {
             case 'DOMContentLoaded':
+            case 'Initialisation':
                 return 'Page prête';
             case 'DOC_VISIBLE':
             case 'Tab-focus':
@@ -250,6 +251,7 @@ export class SessionTimelineComponent implements OnDestroy {
     getEventIcon(type: string): string {
         switch (type) {
             case 'DOMContentLoaded':
+            case 'Initialisation':
                 return 'language';
             case 'click':
             case 'Click':
@@ -292,6 +294,7 @@ export class SessionTimelineComponent implements OnDestroy {
             case 'DOMContentLoaded':
             case 'DOC_VISIBLE':
             case 'DOC_HIDDEN':
+            case 'Initialisation':
             case 'Tab-focus':
             case 'Tab-blur':
                 return 'page';
