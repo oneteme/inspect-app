@@ -1,52 +1,9 @@
 import {DURATION_UNIT} from "./common";
-import {PERFORMANCE_TRANCHE1, PERFORMANCE_TRANCHE2} from "./colors";
 import {ChartSection} from "./types";
 
 export const PERFORMANCE_INDICATORS = (): ChartSection => ({
   optional: false,
   items: [{
-    key: 'count',
-    selected: false,
-    menu: {
-      label: 'Nombre d\'Appel'
-    },
-    jquery: {
-      value: () => 'count',
-      buildAlias: () => 'count'
-    },
-    extra: {
-      stacks: {
-        optional: false,
-        items: [{
-          key: 'performance_tranche',
-          selected: false,
-          menu: {
-            label: 'Tranche 1',
-            icon: ''
-          },
-          jquery: {
-            value: () => 'performance_tranche',
-            buildAlias: () => 'performance_tranche',
-            buildName: (chartItem, value) => PERFORMANCE_TRANCHE1[value].label,
-            buildColor: (value: string) => PERFORMANCE_TRANCHE1[value].color
-          }
-        }, {
-          key: 'performance_tranche2',
-          selected: false,
-          menu: {
-            label: 'Tranche 2',
-            icon: ''
-          },
-          jquery: {
-            value: () => 'performance_tranche2',
-            buildAlias: () => 'performance_tranche2',
-            buildName: (chartItem, value) => PERFORMANCE_TRANCHE2[value].label,
-            buildColor: (value: string) => PERFORMANCE_TRANCHE2[value].color
-          }
-        }]
-      }
-    }
-  }, {
     key: 'percentile',
     selected: true,
     group: 'Durées',
