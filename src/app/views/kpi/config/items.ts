@@ -1,4 +1,5 @@
 import {ChartItem} from "./types";
+import {dateHourCriteria} from "./filter-selections";
 
 export interface DimensionOptions {
   selected?: boolean;
@@ -27,8 +28,13 @@ export const dimension = (key: string, label: string, value: string, options: Di
 export const coalesced = (key: string, label: string, fallback: string = 'Unknown'): ChartItem =>
   dimension(key, label, `${key}.coalesce("${fallback}")`);
 
-export const dateDimension = (groupedBy: string, selected: boolean): ChartItem =>
-  dimension('date', 'Date', `start.${groupedBy}.varchar`, {selected, order: `start.${groupedBy}.asc`});
+export const dateDimension = (groupedBy: string, selected: boolean): ChartItem => {
+  const item = dimension('date', 'Date', `start.${groupedBy}.varchar`, {selected, order: `start.${groupedBy}.asc`});
+  if (groupedBy === 'dateHour') {
+    item.jquery.buildCriteria = dateHourCriteria;
+  }
+  return item;
+};
 
 export const applicationDimension = (): ChartItem =>
   dimension('application', 'Application', 'instance.app_name');

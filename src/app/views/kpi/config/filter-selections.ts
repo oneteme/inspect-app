@@ -22,9 +22,27 @@ export function buildFilterSelections(config: ChartConfig, values: Record<string
   return selections.length ? selections : undefined;
 }
 
+/** Critère Date→Heure : un couple (jour, heure) par valeur `MM-dd H`, OU entre couples. Sans couple valide, aucune ligne ne correspond. */
+export function dateHourCriteria(values: string[]): Record<string, string> {
+  const hoursByDay = new Map<string, string[]>();
+  values.map(v => v.split(' ')).forEach(([day, hour]) => {
+    if (day && hour) hoursByDay.set(day, [...(hoursByDay.get(day) ?? []), hour]);
+  });
+  if (!hoursByDay.size) {
+    return { 'start.monthDay.varchar.isNull': '' };
+  }
+  const clauses = [...hoursByDay].map(([day, hours]) =>
+    `start.monthDay.varchar.eq(${day}).and(start.hour.varchar.in(${[...new Set(hours)].join(',')}))`);
+  return { [clauses.reduce((acc, clause) => `${acc}.or(${clause})`)]: '' };
+}
+
 /** Ajoute un critère `<colonne>.in` par filtre sélectionné (ET entre filtres, OU entre valeurs). */
 export function applyFilterSelections(args: Record<string, any>, selections?: ChartFilterSelection[]): void {
   selections?.forEach(s => {
+    if (s.filter.jquery.buildCriteria) {
+      Object.assign(args, s.filter.jquery.buildCriteria(s.values ?? []));
+      return;
+    }
     const column = s.filter.jquery.value();
     const values = s.values ?? [];
     const nonEmpty = values.filter(v => v !== '');

@@ -54,4 +54,5 @@ export interface JQueryConfig {
   buildName?: (chartItem: ChartItem, value?: string | number) => string;
   buildColor?: (value?: string | number) => string;
   order?: string;
+  buildCriteria?: (values: string[]) => Record<string, string>;  // critères serveur d'une sélection, à la place de `<value>.in`
 }

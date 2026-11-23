@@ -325,7 +325,7 @@ export function resolvePeriodGranularities(state: PeriodGranularityState, start:
         : (state.selectedGroupBy === 'date' ? state.selectedGroupByOption : undefined);
     const axis = resolvePeriodGranularity(axisOption, start, end);
     const filter = resolvePeriodGranularity(state.selectedSliceOptions?.['date'], start, end);
-    // Un filtre Date→Heure est un bucket composite (jour + heure) : l'axe doit suivre la même granularité pour éviter un filtre `start.dateHour` non résolu côté serveur.
+    // Le filtre Date→Heure reste en couples jour/heure (cf. dateHourCriteria) ; un axe Date en « Automatique » suit ce bucket composite.
     const promoteAxis = axisIsDate && axis === 'hour' && filter === 'dateHour';
     return { axis: promoteAxis ? 'dateHour' : axis, filter };
 }
