@@ -319,13 +319,15 @@ export interface PeriodGranularityState {
 
 /** Chaque menu garde sa propre variante ; une variante non choisie vaut « Automatique ». */
 export function resolvePeriodGranularities(state: PeriodGranularityState, start: Date, end: Date): PeriodGranularities {
+    const axisIsDate = state.selectedX === 'date' || state.selectedGroupBy === 'date';
     const axisOption = state.selectedX === 'date'
         ? state.selectedXOption
         : (state.selectedGroupBy === 'date' ? state.selectedGroupByOption : undefined);
-    return {
-        axis: resolvePeriodGranularity(axisOption, start, end),
-        filter: resolvePeriodGranularity(state.selectedSliceOptions?.['date'], start, end)
-    };
+    const axis = resolvePeriodGranularity(axisOption, start, end);
+    const filter = resolvePeriodGranularity(state.selectedSliceOptions?.['date'], start, end);
+    // Un filtre Date→Heure est un bucket composite (jour + heure) : l'axe doit suivre la même granularité pour éviter un filtre `start.dateHour` non résolu côté serveur.
+    const promoteAxis = axisIsDate && axis === 'hour' && filter === 'dateHour';
+    return { axis: promoteAxis ? 'dateHour' : axis, filter };
 }
 
 /**
