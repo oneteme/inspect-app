@@ -65,8 +65,6 @@ import {CompareView} from "./compare/compare.view";
 import {AnalyticsView} from "./analytics/analytics.view";
 import {SearchMainEventView} from "./search/event/main/search-main-event.view";
 import {BrowserConfigModalComponent} from "../shared/_component/session-info-modal/browser-config-modal.component";
-import { NgIcon, provideIcons } from '@ng-icons/core';
-import { bootstrapWindows, bootstrapBrowserChrome, bootstrapBrowserFirefox, bootstrapBrowserEdge, bootstrapBrowserSafari } from '@ng-icons/bootstrap-icons';
 
 @NgModule({
   imports: [
@@ -77,14 +75,10 @@ import { bootstrapWindows, bootstrapBrowserChrome, bootstrapBrowserFirefox, boot
     BrowserModule,
     BrowserAnimationsModule,
     SharedModule,
-    NgIcon,
     ChartComponent,
     SlicePanelComponent,
     TableComponent,
     OrganizerButtonModule
-  ],
-  providers: [
-    provideIcons({ bootstrapWindows, bootstrapBrowserChrome, bootstrapBrowserEdge, bootstrapBrowserFirefox, bootstrapBrowserSafari }),
   ],
   declarations: [
     SearchRestView,

@@ -22,8 +22,6 @@ export class BrowserConfigModalComponent implements OnInit, OnDestroy {
     private readonly _data = inject<{ instanceId: string, os: string, re: string }>(MAT_DIALOG_DATA);
     private readonly _destroy$ = new Subject<void>();
 
-    // List of supported browsers for ng-icons
-    browsers: string[] = ['Chrome', 'Firefox', 'Edge', 'Safari'];
     isLoading = true;
     configs: BrowserConfigView[] = [];
 
@@ -58,16 +56,6 @@ export class BrowserConfigModalComponent implements OnInit, OnDestroy {
 
     private getBrowser(re: string): string {
         return re.toLowerCase().split('/')[0].trim();
-    }
-
-    isInBrowsers(re: string): boolean {
-        const browserName = re.toLowerCase().split('/')[0].trim();
-        return this.browsers.some(b => b.toLowerCase() === browserName);
-    }
-
-    // Windows is the only icon available
-    isWindows(os: string): boolean {
-        return os.toLowerCase().includes('windows');
     }
 
     userTheme(userTheme: string): string {

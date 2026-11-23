@@ -1,6 +1,6 @@
 <div class="modal">
     <div class="modal-header">
-        <div class="modal-header-left" *ngIf="!isLoading && configs.length">
+        <div *ngIf="!isLoading && configs.length" class="modal-header-left">
             <div class="modal-icon">
                 <mat-icon>computer</mat-icon>
             </div>
@@ -62,31 +62,27 @@
                             <mat-icon>{{ config.userTheme === 'dark' ? 'dark_mode' : 'light_mode' }}</mat-icon>
                         </span>
                         <div class="language" matTooltip="Langue">
-                            <mat-icon>language</mat-icon>
+                            <mat-icon style="justify-content: center">language</mat-icon>
                             {{ config.userLanguage | uppercase }}
                         </div>
-                        <div class="connectivity-badge"
-                        [matTooltip]="config.deviceConnectivity != 'unknown' ? 'Réseau' : 'Réseau inconnu'">
-                            <mat-icon fontSet="material-symbols-outlined" *ngIf="config.deviceConnectivity != 'unknown'">
+                        <div [matTooltip]="config.deviceConnectivity != 'unknown' ? 'Réseau' : 'Réseau inconnu'"
+                             class="connectivity-badge">
+                            <mat-icon *ngIf="config.deviceConnectivity != 'unknown'"
+                                      fontSet="material-symbols-outlined">
                                 signal_cellular_{{ config.connectivityQuality }}_bar
                             </mat-icon>
-                            <mat-icon fontSet="material-symbols-outlined" *ngIf="config.deviceConnectivity == 'unknown'">signal_wifi_statusbar_not_connected</mat-icon>
-                            {{ config.connectivityLabel }}
+                            <mat-icon *ngIf="config.deviceConnectivity == 'unknown'"
+                                      fontSet="material-symbols-outlined">signal_wifi_statusbar_not_connected
+                            </mat-icon>
+                            <span>{{ config.connectivityLabel }}</span>
                         </div>
                     </div>
-                    <div class="screen-resolution">
-                        <span class="resolution-screen" matTooltip="Résolution de l'écran">
+                    <div class="screen-resolution" matTooltip="Résolution de l'écran">
                         <mat-icon>aspect_ratio</mat-icon>
-                            {{ config.deviceDisplayResolution }}
-                        </span>
-                        <span class="resolution-browser" matTooltip="Résolution de la page">
-                            <ng-icon *ngIf="isInBrowsers(config.re)" [name]="'bootstrapBrowser' + config.re" />
-                            <mat-icon *ngIf="!isInBrowsers(config.re)">computer</mat-icon>
-                            {{ config.windowViewportBounds }}
-                        </span>
+                        {{ config.deviceDisplayResolution }}
                     </div>
-                    <div class="windows-os" *ngIf="isWindows(config.os)" [matTooltip]="'OS : ' + config.os">
-                        <ng-icon name="bootstrapWindows" />
+                    <div class="resolution-browser" matTooltip="Résolution de la page">
+                        {{ config.windowViewportBounds }}
                     </div>
                     <div class="zoom-size" matTooltip="Zoom">
                         <mat-icon>zoom_in</mat-icon>

@@ -77,7 +77,7 @@
 
   .screen-resolution {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
     gap: 0.6px;
     font-size: 2.5px;
@@ -93,13 +93,10 @@
 
   .resolution-screen {
     display: flex;
-    align-items: center;
     gap: 0.7px;
     font-size: 2.8px;
 
     .mat-icon {
-      display: flex;
-      align-items: center;
       width: 2.8px;
       height: 2.8px;
     }
@@ -107,16 +104,8 @@
 
   .resolution-browser {
     display: flex;
-    align-items: center;
     gap: 0.6px;
-    font-size: 2px;
-
-    ng-icon {
-      display: flex;
-      align-items: center;
-      width: 2px;
-      height: 2px;
-    }
+    font-size: 1.8px;
   }
 
   .top-row {
@@ -151,7 +140,7 @@
   .language {
     display: flex;
     align-items: center;
-    font-size: 2.5px;
+    font-size: 2px;
     font-weight: 600;
     color: #475569;
     gap: 0.6px;
@@ -165,9 +154,7 @@
 
   .connectivity-badge {
     display: flex;
-    align-items: center;
-    gap: 0.6px;
-    font-size: 2.5px;
+    font-size: 2px;
     font-weight: 600;
     color: #475569;
 
@@ -222,4 +209,5 @@
   justify-content: center;
   text-align: center;
   flex-shrink: 0;
+  color: #475569;
 }
