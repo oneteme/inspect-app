@@ -93,11 +93,11 @@
                         <mat-icon>zoom_in</mat-icon>
                         x{{ config.windowZoomLevel }}
                     </div>
-                    <div class="browser-logo"
-                         *ngIf="getBrowserSvg(config.re) as browserSvg"
+                    <img class="browser-logo"
+                         *ngIf="getBrowserIconPath(config.re) as iconPath"
+                         [src]="iconPath"
                          [matTooltip]="config.re"
-                         [innerHTML]="browserSvg">
-                    </div>
+                         alt="{{ config.re }}">
                 </div>
             </ng-template>
         </div>

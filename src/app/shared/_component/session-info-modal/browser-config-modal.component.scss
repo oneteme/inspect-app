@@ -186,9 +186,9 @@
   .browser-logo {
     position: absolute;
     bottom: 1px;
-    display: flex;
-    align-items: center;
-    color: #475569;
+    width: 2px;
+    height: 2px;
+    display: block;
   }
 
   .windows-os {
