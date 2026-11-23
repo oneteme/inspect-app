@@ -84,9 +84,19 @@
                     <div class="resolution-browser" matTooltip="Résolution de la page">
                         {{ config.windowViewportBounds }}
                     </div>
+                    <div class="windows-os" *ngIf="isWindows(config.os)" [matTooltip]="'OS : ' + config.os">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor">
+                            <path d="M6.555 1.375 0 2.237v5.45h6.555zM0 13.795l6.555.933V8.313H0zm7.278-5.4.026 6.378L16 16V8.395zM16 0 7.33 1.244v6.414H16z"/>
+                        </svg>
+                    </div>
                     <div class="zoom-size" matTooltip="Zoom">
                         <mat-icon>zoom_in</mat-icon>
                         x{{ config.windowZoomLevel }}
+                    </div>
+                    <div class="browser-logo"
+                         *ngIf="getBrowserSvg(config.re) as browserSvg"
+                         [matTooltip]="config.re"
+                         [innerHTML]="browserSvg">
                     </div>
                 </div>
             </ng-template>

@@ -183,6 +183,14 @@
     }
   }
 
+  .browser-logo {
+    position: absolute;
+    bottom: 1px;
+    display: flex;
+    align-items: center;
+    color: #475569;
+  }
+
   .windows-os {
     position: absolute;
     bottom: 1px;
@@ -194,11 +202,11 @@
     color: #475569;
     gap: 0.6px;
 
-    mat-icon {
-      width: 3px;
-      height: 3px;
-      font-size: 3px;
+    svg {
+      width: 2px;
+      height: 2px;
     }
+
   }
 
 }
