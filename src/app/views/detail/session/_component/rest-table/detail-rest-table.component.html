@@ -1,9 +1,17 @@
 <jquery-table class="flex-table"
              [config]="tableConfig" [data]="_requests" [isLoading]="isLoading">
   <ng-template jqtCellDef="resource" let-row>
-    <span style="font-weight: bold;" [ngStyle]="{'color': row.protocol=='https' ? 'green':'gray'}">{{ row.method | typeColumnFormat }} </span>
-    <br>
-    <span [title]="row.path">{{ row.path }}</span>
+    <div data-inspect-scope="Flux HTTP view"
+         data-inspect-track="Flux HTTP • Détails"
+         [title]="row.path">
+      <span style="font-weight: bold;"
+            data-inspect-scope="Flux HTTP view"
+            data-inspect-track="Flux HTTP • Détails"
+            [ngStyle]="{'color': row.protocol=='https' ? 'green':'gray'}">{{ row.method | typeColumnFormat }} </span>
+      <br>
+      <span data-inspect-scope="Flux HTTP view"
+            data-inspect-track="Flux HTTP • Détails">{{ row.path }}</span>
+    </div>
   </ng-template>
 
   <ng-template jqtCellDef="start" let-row>
