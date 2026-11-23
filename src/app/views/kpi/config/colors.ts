@@ -15,9 +15,9 @@ export const PERFORMANCE_TRANCHE1 = {
 }
 
 export const PERFORMANCE_TRANCHE2 = {
-  '1': { label: '< 5s', color: '#84cc16' },  // vert    – excellent
-  '2': { label: '[5-10s[', color: '#f97316' },  // lime    – bon
-  '3': { label: '≥ 10s', color: '#ef4444' }  // jaune   – acceptable
+  '1': { label: '< 5s', color: '#84cc16' },  // lime    – bon
+  '2': { label: '[5-10s[', color: '#f97316' },  // orange  – lent
+  '3': { label: '≥ 10s', color: '#ef4444' }  // rouge   – très lent
 }
 
 export const SIZE_TRANCHE = {
