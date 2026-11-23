@@ -41,8 +41,8 @@ export const STATUS_STACKS = (): ChartSection => ({
     jquery: {
       value: () => 'status_tranche',
       buildAlias: () => 'status_tranche',
-      buildColor: (value: string) => STATUS[value].color,
-      buildName: (chartItem, value) => STATUS[value].label
+      buildColor: (value: string) => STATUS[value]?.color ?? statusColor(value),
+      buildName: (chartItem, value) => statusTrancheLabel(String(value))
     }
   }]
 });

@@ -116,8 +116,8 @@ export const REST_VOLUMETRY_CHART_CONFIG = (groupedBy: string, filterGroupedBy: 
             jquery: {
               value: (serieAlias: string) => serieAlias + '_tranche',
               buildAlias: () => 'size_tranche',
-              buildName: (chartItem, value) => chartItem.menu.label + " " + SIZE_TRANCHE[value].label,
-              buildColor: (value) => SIZE_TRANCHE[value].color
+              buildName: (chartItem, value) => chartItem.menu.label + " " + (SIZE_TRANCHE[value]?.label ?? value),
+              buildColor: (value) => SIZE_TRANCHE[value]?.color ?? '#94a3b8'
             }
           }]
         }
