@@ -13,6 +13,17 @@ export const DURATION_UNIT: UnitConfig = {
   ]
 };
 
+// Les tailles (size_in, size_out) sont fournies en octets.
+export const SIZE_UNIT: UnitConfig = {
+  baseUnit: 'o',
+  scales: [
+    { unit: 'o', scale: 1, threshold: 1024 },
+    { unit: 'Ko', scale: 1/1024, threshold: 1024 * 1024 },
+    { unit: 'Mo', scale: 1/(1024 * 1024), threshold: 1024 * 1024 * 1024 },
+    { unit: 'Go', scale: 1/(1024 * 1024 * 1024), threshold: Infinity }
+  ]
+};
+
 const STATUS_SUBMENU: SubmenuConfig = { id: 'statut', label: 'Statut', icon: 'task_alt' };
 
 // Empilement des indicateurs de session par statut (valeur brute ou tranche).

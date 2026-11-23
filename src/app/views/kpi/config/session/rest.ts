@@ -1,8 +1,8 @@
-import {SIZE_TRANCHE} from "../colors";
 import {STATUS_STACKS, USER_AGENT_ITEMS, STATUS_FILTER_ITEMS} from "../common";
 import {SESSION_REST_ICONS, withMenuIcons} from "../icons";
 import {dateDimension} from "../items";
 import {PERFORMANCE_INDICATORS} from "../performance-indicators";
+import {VOLUMETRY_INDICATORS} from "../volumetry-indicators";
 import {ChartConfig, ChartSection} from "../types";
 
 export const REST_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string, filterGroupedBy: string = groupedBy): ChartConfig => ({
@@ -90,98 +90,7 @@ export const REST_SESSION_VOLUMETRY_CHART_CONFIG = (groupedBy: string, filterGro
       }
     }]
   },
-  indicators: {
-    optional: false,
-    items: [{
-      key: 'count',
-      selected: true,
-      menu: {
-        label: 'Nombre d\'Appel'
-      },
-      jquery: {
-        value: () => 'count',
-        buildAlias: (value: string) => 'count_' + value
-      },
-      extra: {
-        stacks: {
-          optional: false,
-          items: [{
-            key: 'size_tranche',
-            selected: true,
-            menu: {
-              label: 'Tranche'
-            },
-            jquery: {
-              value: (serieAlias: string) => serieAlias + '_tranche',
-              buildAlias: () => 'size_tranche',
-              buildName: (chartItem, value) => chartItem.menu.label + " " + (SIZE_TRANCHE[value]?.label ?? value),
-              buildColor: (value) => SIZE_TRANCHE[value]?.color ?? '#94a3b8'
-            }
-          }]
-        }
-      }
-    }, {
-      key: 'sum',
-      selected: false,
-      unit: {
-        baseUnit: 'o',
-        scales: [
-          { unit: 'o', scale: 1, threshold: 1024 },
-          { unit: 'Ko', scale: 1/1024, threshold: 1024 * 1024 },
-          { unit: 'Mo', scale: 1/(1024 * 1024), threshold: 1024 * 1024 * 1024 },
-          { unit: 'Go', scale: 1/(1024 * 1024 * 1024), threshold: Infinity }
-        ]
-      },
-      menu: {
-        label: 'Total'
-      },
-      jquery: {
-        value:  (s: string) => `${s}.sum`,
-        buildAlias: (value) => 'sum_' + value,
-        buildName: (chartItem, value) => chartItem.menu.label,
-      }
-    }, {
-      key: 'min',
-      selected: false,
-      unit: {
-        baseUnit: 'o',
-        scales: [
-          { unit: 'o', scale: 1, threshold: 1024 },
-          { unit: 'Ko', scale: 1/1024, threshold: 1024 * 1024 },
-          { unit: 'Mo', scale: 1/(1024 * 1024), threshold: 1024 * 1024 * 1024 },
-          { unit: 'Go', scale: 1/(1024 * 1024 * 1024), threshold: Infinity }
-        ]
-      },
-      menu: {
-        label: 'Minimum'
-      },
-      jquery: {
-        value:  (s: string) => `${s}.min`,
-        buildAlias: (value) => 'min_' + value,
-        buildName: (chartItem, value) => chartItem.menu.label,
-      }
-    }, {
-      key: 'max',
-      selected: false,
-      unit: {
-        baseUnit: 'o',
-        scales: [
-          { unit: 'o', scale: 1, threshold: 1024 },
-          { unit: 'Ko', scale: 1/1024, threshold: 1024 * 1024 },
-          { unit: 'Mo', scale: 1/(1024 * 1024), threshold: 1024 * 1024 * 1024 },
-          { unit: 'Go', scale: 1/(1024 * 1024 * 1024), threshold: Infinity }
-        ]
-      },
-      menu: {
-        label: 'Maximum'
-      },
-      jquery: {
-        value:  (s: string) => `${s}.max`,
-        buildAlias: (value) => 'max_' + value,
-        buildName: (chartItem) => chartItem?.menu?.label ?? '',
-      }
-    }]
-  },
+  indicators: VOLUMETRY_INDICATORS(),
   groups: REST_SESSION_GROUPS_CONFIG(groupedBy),
   filters: REST_SESSION_FILTERS_CONFIG(filterGroupedBy)
 });
