@@ -1,6 +1,7 @@
 import {SIZE_TRANCHE} from "../colors";
 import {STATUS_STACKS, USER_AGENT_ITEMS, STATUS_FILTER_ITEMS} from "../common";
 import {SESSION_REST_ICONS, withMenuIcons} from "../icons";
+import {dateDimension} from "../items";
 import {PERFORMANCE_INDICATORS} from "../performance-indicators";
 import {ChartConfig, ChartSection} from "../types";
 
@@ -187,18 +188,7 @@ export const REST_SESSION_VOLUMETRY_CHART_CONFIG = (groupedBy: string, filterGro
 
 export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(SESSION_REST_ICONS, {
   optional: false,
-  items: [{
-    key: 'date',
-    selected: true,
-    menu: {
-      label: 'Date'
-    },
-    jquery: {
-      value: () => `start.${groupedBy}.varchar`,
-      buildAlias: () => 'date',
-      order: `start.${groupedBy}.asc`
-    }
-  }, {
+  items: [dateDimension(groupedBy, true), {
     key: 'host',
     selected: false,
     menu: {
@@ -313,18 +303,7 @@ export const REST_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => w
 
 export const REST_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(SESSION_REST_ICONS, {
   optional: false,
-  items: [{
-    key: 'date',
-    selected: false,
-    menu: {
-      label: 'Date'
-    },
-    jquery: {
-      value: () => `start.${groupedBy}.varchar`,
-      buildAlias: () => 'date',
-      order: `start.${groupedBy}.asc`
-    }
-  }, {
+  items: [dateDimension(groupedBy, false), {
     key: 'host',
     selected: false,
     menu: {

@@ -200,10 +200,15 @@ export function recreateDate(chartGroup: string, row: any, start: Date): {start:
     }
 }
 
+function isSameLocalDay(a: Date, b: Date): boolean {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
 export function periodManagement(start: Date, end: Date): string {
     var dayDiff = (end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000);
 
-    if (dayDiff <= 1) { // 24 heures
+    // Une fenêtre de moins de 24 h à cheval sur deux jours garde les jours : les heures ne doivent pas fusionner.
+    if (dayDiff <= 1 && isSameLocalDay(start, new Date(end.getTime() - 1))) { // 24 heures
         return ChartGroup.byHour;
     }
     if (dayDiff <= 24) {

@@ -1,5 +1,6 @@
 import {STATUS_STACKS, STATUS_FILTER_ITEMS} from "../common";
 import {SESSION_STARTUP_ICONS, withMenuIcons} from "../icons";
+import {dateDimension} from "../items";
 import {PERFORMANCE_INDICATORS} from "../performance-indicators";
 import {ChartConfig, ChartSection} from "../types";
 
@@ -63,18 +64,7 @@ export const STARTUP_SESSION_PERFORMANCE_CHART_CONFIG = (groupedBy: string, filt
 
 export const STARTUP_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(SESSION_STARTUP_ICONS, {
   optional: false,
-  items: [{
-    key: 'date',
-    selected: true,
-    menu: {
-      label: 'Date'
-    },
-    jquery: {
-      value: () => `start.${groupedBy}.varchar`,
-      buildAlias: () => 'date',
-      order: `start.${groupedBy}.asc`
-    }
-  }, {
+  items: [dateDimension(groupedBy, true), {
     key: 'host',
     selected: false,
     menu: {
@@ -145,18 +135,7 @@ export const STARTUP_SESSION_GROUPS_CONFIG = (groupedBy: string): ChartSection =
 
 export const STARTUP_SESSION_FILTERS_CONFIG = (groupedBy: string): ChartSection => withMenuIcons(SESSION_STARTUP_ICONS, {
   optional: false,
-  items: [{
-    key: 'date',
-    selected: false,
-    menu: {
-      label: 'Date'
-    },
-    jquery: {
-      value: () => `start.${groupedBy}.varchar`,
-      buildAlias: () => 'date',
-      order: `start.${groupedBy}.asc`
-    }
-  }, {
+  items: [dateDimension(groupedBy, false), {
     key: 'host',
     selected: false,
     menu: {
