@@ -17,9 +17,11 @@ interface BrowserConfigView extends BrowserConfigDto {
     isLandscape: boolean;
     connectivityLabel: string;
     connectivityQuality: number;
-    os: string;
-    re: string;
+    os?: string;
+    re?: string;
     browser: string;
+    osTooltip?: string;
+    reTooltip?: string;
 }
 
 @Component({
@@ -28,11 +30,13 @@ interface BrowserConfigView extends BrowserConfigDto {
 })
 export class BrowserConfigModalComponent implements OnInit, OnDestroy {
     private readonly _jqueryService = inject(JQueryService);
-    private readonly _data = inject<{ instanceId: string, os: string, re: string }>(MAT_DIALOG_DATA);
+    private readonly _data = inject<{ instanceId: string, os?: string, re?: string }>(MAT_DIALOG_DATA);
     private readonly _destroy$ = new Subject<void>();
 
     isLoading = true;
     configs: BrowserConfigView[] = [];
+    osTooltip: string = "Résolution de l'écran";
+    reTooltip: string = "Résolution de la page";
 
     ngOnInit(): void {
         this._jqueryService.getBrowserConfig({instanceId: [this._data.instanceId]})
@@ -50,26 +54,29 @@ export class BrowserConfigModalComponent implements OnInit, OnDestroy {
     }
 
     private toView(config: BrowserConfigDto): BrowserConfigView {
+        const connectivity = config.deviceConnectivity;
         return {
             ...config,
             os: this._data.os,
             re: this._data.re,
+            osTooltip: this.isWindows(this._data.os) ? `Résolution de l'écran (${this._data.os})` : this.osTooltip,
+            reTooltip: this.getBrowserIconPath(this._data.re) ? `Résolution de la page (${this._data.re})` : this.reTooltip,
             browser: this.getBrowser(this._data.re),
             isLandscape: (config.deviceOrientation || '').startsWith('landscape'),
-            connectivityLabel: config.deviceConnectivity !== 'unknown'
-                ? config.deviceConnectivity.replace(/^\D*/, '').toUpperCase()
+            connectivityLabel: connectivity && connectivity !== 'unknown'
+                ? connectivity.replace(/^\D*/, '').toUpperCase()
                 : '',
-            connectivityQuality: (config.deviceConnectivity !== 'slow-2g' ? Number((config.deviceConnectivity[0])) : 2)
+            connectivityQuality: connectivity && connectivity !== 'slow-2g' ? Number(connectivity[0]) : 2
         };
     }
 
     private getBrowser(re: string): string {
-        return re.toLowerCase().split('/')[0].trim();
+        return (re || '').toLowerCase().split('/')[0].trim();
     }
 
     // Windows is the only icon available
     isWindows(os: string): boolean {
-        return os.toLowerCase().includes('windows');
+        return (os || '').toLowerCase().includes('windows');
     }
 
     userTheme(userTheme: string): string {

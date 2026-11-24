@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  max-width: 100%;
 }
 
 
@@ -18,204 +19,338 @@
   font-size: 13px;
 }
 
+.device-frame-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 20px;
+}
 
 .browser-config-card {
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 0;
-}
-
-.card-header {
-  display: flex;
   align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-
-.icon {
-  display: flex;
-  align-items: center;
-  font-weight: 600;
-  color: #475569;
-}
-
-.device-frame-wrapper {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.device-frame {
   width: 100%;
-  height: 100%;
+}
 
-  .device-shell {
-    fill: #cbd5e1;
+.device-container {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+// LANDSCAPE
+.monitor-device {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 470px;
+
+  .monitor-bezel {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    min-height: 210px;
+    background: #cbd5e1;
+    border: 2px solid #94a3b8;
+    border-radius: 9px;
+    padding: 10px 10px 14px 10px;
+    box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+    display: flex;
+    flex-direction: column;
   }
 
-  .device-screen {
-    fill: #f8fafc;
+  .screen-content {
+    flex: 1;
+    background: #f8fafc;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+}
+
+// PORTRAIT
+.phone-device {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 260px;
+
+
+  .phone-bezel {
+    width: 100%;
+    min-height: 380px;
+    background: #cbd5e1;
+    border: 2px solid #94a3b8;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    padding: 10px 10px 14px 10px;
+  }
+
+  .screen-content {
+    flex: 1;
+    background: #f8fafc;
+    border-radius: 18px;
+    border: 1px solid #e2e8f0;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .device-screen-inner {
+    display: flex;
+    height: 100%;
+    min-height: 100%;
+    justify-content: space-between;
+    padding: 4px 8px;
+
+  }
+
+  .top-row,
+  .bottom-row {
+    position: static;
+    width: 100%;
   }
 }
 
-.device-screen-content {
-  position: relative;
+/* ================= Landscape ================= */
+.device-screen-inner {
+  position: absolute;
   width: 100%;
   height: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: 2.6px;
-  line-height: 1.3;
-  color: #334155;
-  text-align: center;
-  overflow: hidden;
-
-  .screen-resolution {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 0.6px;
-    font-size: 2.5px;
-    font-weight: 600;
-    color: #475569;
-
-    mat-icon {
-      width: 3px;
-      height: 3px;
-      font-size: 3px;
-    }
-  }
-
-  .resolution-screen {
-    display: flex;
-    gap: 0.7px;
-    font-size: 2.8px;
-
-    .mat-icon {
-      width: 2.8px;
-      height: 2.8px;
-    }
-  }
-
-  .resolution-browser {
-    display: flex;
-    gap: 0.6px;
-    font-size: 1.8px;
-  }
-
-  .top-row {
-    position: absolute;
-    top: 1px;
-    left: 1px;
-    right: 1px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-
-  .theme-chip {
-    display: flex;
-    align-items: center;
-    font-weight: 600;
-    font-size: 2.5px;
-    color: #f59e0b;
-    flex-shrink: 0;
-
-    &.dark {
-      color: #6366f1;
-    }
-
-    mat-icon {
-      width: 3px;
-      height: 3px;
-      font-size: 3px;
-    }
-  }
-
-  .language {
-    display: flex;
-    align-items: center;
-    font-size: 2px;
-    font-weight: 600;
-    color: #475569;
-    gap: 0.6px;
-
-    mat-icon {
-      width: 3px;
-      height: 3px;
-      font-size: 3px;
-    }
-  }
-
-  .connectivity-badge {
-    display: flex;
-    font-size: 2px;
-    font-weight: 600;
-    color: #475569;
-
-    mat-icon {
-      width: 3px;
-      height: 3px;
-      font-size: 3px;
-    }
-  }
-
-  .zoom-size {
-    position: absolute;
-    bottom: 1px;
-    right: 1px;
-    display: flex;
-    align-items: center;
-    font-size: 1.8px;
-    font-weight: 600;
-    color: #475569;
-    gap: 0.6px;
-
-    mat-icon {
-      width: 3px;
-      height: 3px;
-      font-size: 3px;
-    }
-  }
-
-  .browser-logo {
-    position: absolute;
-    bottom: 1px;
-    width: 2px;
-    height: 2px;
-    display: block;
-  }
-
-  .windows-os {
-    position: absolute;
-    bottom: 1px;
-    left: 1px;
-    display: flex;
-    align-items: center;
-    font-size: 2px;
-    font-weight: 600;
-    color: #475569;
-    gap: 0.6px;
-
-    svg {
-      width: 2px;
-      height: 2px;
-    }
-
-  }
-
+  box-sizing: border-box;
 }
 
-.card-footer {
+.top-row {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+  right: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  .top-left {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 0;
+  }
+
+  .top-center {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .top-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+}
+
+.theme-chip {
+  display: inline-flex;
+  align-items: center;
+  color: #f59e0b;
+  cursor: default;
+
+  &.dark {
+    color: #6366f1;
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.language {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+  letter-spacing: 0.5px;
+
+  mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+
+    @media (max-width: 480px) {
+      font-size: 15px;
+      width: 15px;
+      height: 15px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    font-size: 11px;
+    gap: 2px;
+  }
+}
+
+.connectivity-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #475569;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+
+    @media (max-width: 480px) {
+      font-size: 16px;
+      width: 16px;
+      height: 16px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    font-size: 11px;
+    gap: 2px;
+  }
+}
+
+.center-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  text-align: center;
+  user-select: text;
+  max-width: 100%;
+}
+
+.screen-resolution {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #1e293b;
+  white-space: nowrap;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: #475569;
+  }
+}
+
+.resolution-browser {
+  font-size: 13px;
+  font-weight: 500;
+  color: #64748b;
+  gap: 6px;
+  display: flex;
+}
+
+.bottom-row {
+  position: absolute;
+  bottom: 10px;
+  left: 12px;
+  right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+
+  .bottom-left {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    min-width: 0;
+  }
+
+  .bottom-center {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .bottom-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    min-width: 0;
+  }
+}
+
+.windows-os {
+  display: inline-flex;
+  align-items: center;
+  color: #475569;
+  gap: 8px;
+
+  svg {
+    width: 18px;
+    height: 18px;
+
+    @media (max-width: 480px) {
+      width: 15px;
+      height: 15px;
+    }
+  }
+}
+
+.browser-logo {
+  width: 14px;
+  height: 14px;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  flex-shrink: 0;
   color: #475569;
+
+  @media (max-width: 480px) {
+    width: 10px;
+    height: 10px;
+  }
+}
+
+.zoom-size {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
 }

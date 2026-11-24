@@ -62,11 +62,14 @@ export class ServerCardComponent {
 
   openBrowserInfo(): void {
     this._dialog.open(BrowserConfigModalComponent, {
+      width: '580px',
+      maxWidth: '94vw',
+      maxHeight: '90vh',
       data: {
-      instanceId: this._instance.id,
-      os: this._instance.os,
-      re: this._instance.re
-    }
+        instanceId: this._instance.id,
+        os: this._instance.os || null,
+        re: this._instance.re || null
+      }
     });
   }
 
