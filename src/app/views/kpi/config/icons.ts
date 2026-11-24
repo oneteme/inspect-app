@@ -16,7 +16,7 @@ export const SESSION_REST_ICONS: Record<string, IconSpec> = {
   host: { icon: 'widgets' },
   resource: { icon: 'extension' },
   name: { icon: 'label', iconSvg: TAG_ICON_SVG },
-  method: { icon: 'api' },
+  method: { icon: 'code' },
   httpHost: { icon: 'language' },
   media: { icon: 'description' },
   auth: { icon: 'lock' }
@@ -39,7 +39,7 @@ export const SESSION_STARTUP_ICONS: Record<string, IconSpec> = {
 export const REQUEST_REST_ICONS: Record<string, IconSpec> = {
   ...COMMON_ICONS,
   host: { icon: 'dns' },
-  method: { icon: 'api' },
+  method: { icon: 'code' },
   path: { icon: 'route' },
   media: { icon: 'description' },
   auth: { icon: 'lock' },
