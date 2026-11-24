@@ -34,7 +34,8 @@ export function withKpiChartTypes(binding: OrganizerChartBinding, selected: stri
     types.map(id => ({id, label: KPI_CHART_TYPE_LABELS[id] ?? id, submenu})));
   return {
     config: {...binding.config, chartTypes, stackChartTypes: KPI_STACKABLE_CHART_TYPES},
-    state: {...binding.state, selectedChartType: selected}
+    // Sans option « Empiler », le graphique n'est jamais empilé (libellé du fil d'Ariane compris).
+    state: {...binding.state, selectedChartType: selected, ...(binding.config.showStack ? {} : {stacked: false})}
   };
 }
 
