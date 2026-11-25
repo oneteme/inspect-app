@@ -203,3 +203,46 @@
   background: #f8fafc;
   flex-wrap: wrap;
 }
+
+
+.browser-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  cursor: help;
+  border-radius: 8px;
+  transition: background 0.15s ease, color 0.15s ease;
+  color: #475569;
+  background: #f1f5f9;
+  border: none;
+
+  &.clickable {
+    cursor: pointer;
+  }
+
+  mat-icon {
+    font-size: 17px;
+    width: 17px;
+    height: 17px;
+
+    &.content-type-icon {
+      font-size: 21px;
+      width: 21px;
+      height: 21px;
+      overflow: visible;
+    }
+  }
+
+  &:hover:not(.disabled) {
+    background: #e2e8f0;
+    color: #1e293b;
+  }
+
+  &.disabled {
+    opacity: 0.35;
+    pointer-events: none;
+    filter: grayscale(1);
+  }
+}

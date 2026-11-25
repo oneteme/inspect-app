@@ -1,4 +1,4 @@
-<div class="server-card" [ngClass]="_status?.class || 'unavailable'">
+<div [ngClass]="_status?.class || 'unavailable'" class="server-card">
 
 
   <div class="server-card-inner">
@@ -6,9 +6,9 @@
     <!-- En-tête -->
     <div class="server-header">
       <div class="server-title-row">
-        <div class="server-icon-wrap"
+        <div (click)="navigate($event)"
              [matTooltip]="_status ? _status.tooltip : ''"
-             (click)="navigate($event)">
+             class="server-icon-wrap">
           <mat-icon class="material-symbols-outlined server-icon">
             {{ _instance.type === 'CLIENT' ? 'devices' : 'widgets' }}
           </mat-icon>
@@ -20,30 +20,31 @@
               <span class="date-day">{{ (_instance.instant * 1000) | date: 'dd/MM/yyyy' }}&nbsp;</span>
               <span class="date-time">{{ (_instance.instant * 1000) | date: 'HH:mm:ss' }}</span>
             </div>
-            <span class="server-name" (click)="navigateOnServerClick($event)">
+            <span (click)="navigateOnServerClick($event)" class="server-name">
               {{ _instance.name }}
             </span>
           </div>
           <div class="server-version-row">
             <div class="server-env-row">
-              <span class="env-badge" *ngIf="_instance.env; else noEnv">{{ _instance.env }}</span>
+              <span *ngIf="_instance.env; else noEnv" class="env-badge">{{ _instance.env }}</span>
               <ng-template #noEnv>
                 <span class="env-badge empty" matTooltip="Environnement non renseigné">Env. N/A</span>
               </ng-template>
             </div>
-            <span class="version-empty" *ngIf="!_instance?.version" matTooltip="Version non renseignée">Version N/A</span>
+            <span *ngIf="!_instance?.version" class="version-empty"
+                  matTooltip="Version non renseignée">Version N/A</span>
             <app-version-badge
-              class="server-version"
-              [version]="_instance?.version"
-              [collector]="_instance?.collector"
-              [configuration]="_instance?.configuration"
-              [name]="_instance?.name">
+                [collector]="_instance?.collector"
+                [configuration]="_instance?.configuration"
+                [name]="_instance?.name"
+                [version]="_instance?.version"
+                class="server-version">
             </app-version-badge>
           </div>
         </div>
       </div>
 
-      <button mat-icon-button *ngIf="menu" [matMenuTriggerFor]="menu" class="menu-btn">
+      <button *ngIf="menu" [matMenuTriggerFor]="menu" class="menu-btn" mat-icon-button>
         <mat-icon>more_vert</mat-icon>
       </button>
     </div>
@@ -57,15 +58,18 @@
         </div>
       </div>
       <div class="footer-section">
-        <div class="meta-icon-btn"
-             [class.disabled]="!_instance?.branch"
-             [matTooltip]="_instance?.branch + ' - ' + _instance?.hash">
+        <div [class.disabled]="!_instance?.branch"
+             [matTooltip]="_instance?.branch + ' - ' + _instance?.hash"
+             class="meta-icon-btn">
           <mat-icon class="material-symbols-outlined">code_blocks</mat-icon>
         </div>
-        <div class="meta-icon-btn"
-             [class.disabled]="!_instance?.os"
-             [matTooltip]="_instance?.os + ' - ' + _instance?.re">
-          <mat-icon class="material-symbols-outlined">{{ _instance.type === 'CLIENT' ? 'devices' : 'data_table' }}</mat-icon>
+        <div (click)="!isInstanceServer(_instance.type) && openBrowserInfo()"
+             [class.clickable]="!isInstanceServer(_instance?.type)"
+             [class.disabled]="isInstanceServer(_instance?.type) && !_instance?.os"
+             [matTooltip]="isInstanceServer(_instance.type) ?  (_instance?.os + ' - ' + _instance?.re) : 'Détails Poste'"
+             class="browser-icon-btn">
+          <mat-icon class="material-symbols-outlined">{{ _instance.type === 'CLIENT' ? 'devices' : 'data_table' }}
+          </mat-icon>
         </div>
       </div>
     </div>

@@ -226,6 +226,7 @@ export class DetailTimelineComponent implements OnChanges {
     };
     getEventIcon(type: string): string {
         switch (type) {
+            case 'Initialisation':
             case 'DOMContentLoaded':
                 return 'language';
             case 'click':

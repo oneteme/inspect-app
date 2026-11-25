@@ -6,7 +6,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {SharedModule} from '../shared/shared.module';
 import {ChartComponent} from "@oneteme/jquery-echarts";
-import {OrganizerButtonModule} from "@oneteme/jquery-organizer";
+import {OrganizerButtonModule, SlicePanelComponent} from "@oneteme/jquery-organizer";
 import {SearchRestView} from "./search/session/rest/search-rest.view";
 import {SearchMainView} from "./search/session/main/search-main.view";
 import {DetailSessionRestView} from "./detail/session/rest/detail-session-rest.view";
@@ -23,9 +23,7 @@ import {DetailLdapTableComponent} from "./detail/session/_component/ldap-table/d
 import {DetailSessionComponent} from "./detail/session/_component/detail-session.component";
 import {TreeView} from "./tree/tree.view";
 import {DashboardComponent} from "./dashboard/dashboard.component";
-import {
-  ProtocolExceptionComponent
-} from './dashboard/components/protocol-exception-modal/protocol-exception-modal.component';
+import {ProtocolExceptionComponent} from './dashboard/components/protocol-exception-modal/protocol-exception-modal.component';
 import {ArchitectureView} from "./architecture/architecture.view";
 import {DetailLocalTableComponent} from "./detail/session/_component/local-table/detail-local-table.component";
 import {CompactNumberPipe} from '../shared/pipe/number.pipe';
@@ -34,14 +32,10 @@ import {DetailTimelineComponent} from "./detail/session/_component/timeline/deta
 import {DetailRequestView} from "./detail/request/detail-request.view";
 import {DetailRestView} from "./detail/request/rest/detail-rest.view";
 import {MailTableComponent} from "./detail/request/smtp/_component/mail-table/mail-table.component";
-import {
-  ServerInstanceSelectorDialogComponent
-} from "./supervision/_component/server-instance-selector-dialog/server-instance-selector-dialog.component";
+import {ServerInstanceSelectorDialogComponent} from "./supervision/_component/server-instance-selector-dialog/server-instance-selector-dialog.component";
 import {ServerSupervisionView} from "./supervision/server-supervision/server-supervision.view";
 import {ServerActivityView} from "./supervision/server-activity/server-activity.view";
-import {
-  DatabaseInfoModalComponent
-} from "./supervision/_component/database-info-modal/database-info-modal.component";
+import {DatabaseInfoModalComponent} from "./supervision/_component/database-info-modal/database-info-modal.component";
 import {InstanceComponent} from './detail/instance/instance.component';
 import {InstanceTableComponent} from './detail/instance/_component/instance-table/instance-table.component';
 import {ParameterTableComponent} from "./detail/instance/_component/parameter-table/parameter-table.component";
@@ -55,7 +49,6 @@ import {PerformanceChartComponent} from "./kpi/_component/performance-chart/perf
 import {VolumetryChartComponent} from "./kpi/_component/volumetry-chart/volumetry-chart.component";
 import {ChartMenuComponent} from "./kpi/_component/chart-menu/chart-menu.component";
 import {LatencyChartComponent} from "./kpi/_component/latency-chart/latency-chart.component";
-import {SlicePanelComponent} from "@oneteme/jquery-organizer";
 import {TableComponent} from "@oneteme/jquery-table";
 import {JdbcComponent} from "./kpi/request/jdbc/jdbc.component";
 import {FtpComponent} from "./kpi/request/ftp/ftp.component";
@@ -71,6 +64,7 @@ import {StartupComponent} from "./kpi/session/startup/startup.component";
 import {CompareView} from "./compare/compare.view";
 import {AnalyticsView} from "./analytics/analytics.view";
 import {SearchMainEventView} from "./search/event/main/search-main-event.view";
+import {BrowserConfigModalComponent} from "../shared/_component/session-info-modal/browser-config-modal.component";
 
 @NgModule({
   imports: [
@@ -116,12 +110,13 @@ import {SearchMainEventView} from "./search/event/main/search-main-event.view";
     ServerInstanceSelectorDialogComponent,
     ServerSupervisionView,
     ServerActivityView,
-    DatabaseInfoModalComponent,
     InstanceComponent,
     InstanceTableComponent,
     ParameterTableComponent,
     DashboardInstancesTableComponent,
     DashboardDetailViewComponent,
+    DatabaseInfoModalComponent,
+    BrowserConfigModalComponent,
 
     // New
     RequestKpiView,
@@ -144,7 +139,7 @@ import {SearchMainEventView} from "./search/event/main/search-main-event.view";
     DependentChartComponent,
     MediaTypeChartComponent,
     CompareView,
-      AnalyticsView
+    AnalyticsView
   ]
 })
 export class ViewsModule { }

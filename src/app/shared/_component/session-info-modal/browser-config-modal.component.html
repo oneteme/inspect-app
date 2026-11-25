@@ -1,0 +1,119 @@
+<div class="modal">
+    <div class="modal-header">
+        <div class="modal-header-left">
+            <div class="modal-icon">
+                <mat-icon fontSet="material-symbols-outlined">computer</mat-icon>
+            </div>
+            <div class="modal-info">
+                <div class="modal-title">Détails Poste</div>
+            </div>
+        </div>
+        <button class="modal-close" mat-dialog-close>
+            <mat-icon fontSet="material-symbols-outlined">close</mat-icon>
+        </button>
+    </div>
+
+    <div class="modal-body">
+        <div *ngIf="isLoading" class="state-message">
+            <mat-spinner diameter="32"></mat-spinner>
+        </div>
+
+        <div *ngIf="!isLoading && !configs.length" class="state-message">
+            Aucune information disponible
+        </div>
+
+        <div *ngIf="!isLoading && configs.length" class="device-frame-wrapper">
+            <div *ngFor="let config of configs" class="browser-config-card">
+                <div class="device-container">
+                    <!-- LANDSCAPE -->
+                    <div *ngIf="config.isLandscape" class="monitor-device">
+                        <div class="monitor-bezel">
+                            <div class="screen-content">
+                                <ng-container
+                                        *ngTemplateOutlet="deviceScreenContent; context: { config: config }"></ng-container>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- PORTRAIT -->
+                    <div *ngIf="!config.isLandscape" class="phone-device">
+                        <div class="phone-bezel">
+                            <div class="screen-content">
+                                <ng-container
+                                        *ngTemplateOutlet="deviceScreenContent; context: { config: config }"></ng-container>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <ng-template #deviceScreenContent let-config="config">
+                <div class="device-screen-inner">
+                    <!-- Barre supérieure -->
+                    <div class="top-row">
+                        <div class="top-left">
+                            <span [class.dark]="config.userTheme === 'dark'"
+                                  [matTooltip]="userTheme(config.userTheme)"
+                                  class="theme-chip">
+                                <mat-icon
+                                        fontSet="material-symbols-outlined">{{ config.userTheme === 'dark' ? 'dark_mode' : 'light_mode' }}</mat-icon>
+                            </span>
+                        </div>
+                        <div class="top-center">
+                            <div *ngIf="config.userLanguage" class="language" matTooltip="Langue">
+                                <mat-icon fontSet="material-symbols-outlined">language</mat-icon>
+                                <span>{{ config.userLanguage | uppercase }}</span>
+                            </div>
+                        </div>
+                        <div class="top-right">
+                            <div [matTooltip]="config.deviceConnectivity != 'unknown' ? 'Réseau' : 'Réseau inconnu'"
+                                 class="connectivity-badge">
+                                <mat-icon *ngIf="config.deviceConnectivity != 'unknown'"
+                                          fontSet="material-symbols-outlined">
+                                    signal_cellular_{{ config.connectivityQuality }}_bar
+                                </mat-icon>
+                                <mat-icon *ngIf="config.deviceConnectivity == 'unknown'"
+                                          fontSet="material-symbols-outlined">
+                                    signal_wifi_statusbar_not_connected
+                                </mat-icon>
+                                <span *ngIf="config.connectivityLabel">{{ config.connectivityLabel }}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Centre : Résolutions -->
+                    <div class="center-content">
+                        <div *ngIf="config.deviceDisplayResolution" class="screen-resolution"
+                             [matTooltip]="config.osTooltip">
+                            <div *ngIf="isWindows(config.os)" class="windows-os">
+                                <svg fill="currentColor" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M6.555 1.375 0 2.237v5.45h6.555zM0 13.795l6.555.933V8.313H0zm7.278-5.4.026 6.378L16 16V8.395zM16 0 7.33 1.244v6.414H16z"/>
+                                </svg>
+                                <mat-icon fontSet="material-symbols-outlined" *ngIf="!isWindows(config.os)">aspect_ratio</mat-icon>
+                                <span>{{ config.deviceDisplayResolution }}</span>
+                            </div>
+                        </div>
+                        <div *ngIf="config.windowViewportBounds" class="resolution-browser"
+                             [matTooltip]="config.reTooltip">
+                            <img *ngIf="getBrowserIconPath(config.re) as iconPath"
+                                 [src]="iconPath"
+                                 alt="{{ config.re }}"
+                                 class="browser-logo">
+                            {{ config.windowViewportBounds }}
+                        </div>
+                    </div>
+
+                    <!-- Barre inférieure -->
+                    <div class="bottom-row">
+                        <div class="bottom-right">
+                            <div *ngIf="config.windowZoomLevel" class="zoom-size" matTooltip="Zoom">
+                                <mat-icon fontSet="material-symbols-outlined">zoom_in</mat-icon>
+                                <span>x{{ config.windowZoomLevel }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </ng-template>
+        </div>
+    </div>
+</div>
