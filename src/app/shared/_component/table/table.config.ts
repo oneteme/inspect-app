@@ -510,7 +510,7 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
     { key: 'message', header: 'Message', icon: 'subject', sliceable: false, groupable: false, width: '35%' },
     { key: 'thread', header: 'Thread', icon: 'call_split', width: '16%' },
     { key: 'action', header: 'Action', icon: 'info', width: '17%' },
-    { key: 'stack', sliceable: false, groupable: false, sortable: false, width: '9%' }
+    { key: 'stack', sliceable: false, groupable: false, sortable: false, width: '9%', inFieldsMenu: false }
   ],
   slices: [
     {
