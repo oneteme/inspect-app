@@ -523,6 +523,26 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
   defaultSort: { active: 'instant', direction: 'desc' }
 };
 
+export const LOG_SYSTEM_TABLE_CONFIG: TableProvider<LogEntry> = {
+  ...DEFAULT_TABLE_CONFIG,
+  columns: [
+    { key: 'instant', header: 'Horodate', icon: 'schedule', sliceable: false, groupable: false, width: '11%' },
+    { key: 'message', header: 'Message', icon: 'subject', sliceable: false, groupable: false, width: '35%' },
+    { key: 'thread', header: 'Thread', icon: 'call_split', width: '16%' },
+    { key: 'action', header: 'Action', icon: 'info', width: '17%' },
+    { key: 'stack', sliceable: false, groupable: false, sortable: false, width: '9%' }
+  ],
+  slices: [
+    {
+      title: 'Action',
+      columnKey: 'action',
+      icon: 'info',
+      hidden: true
+    }
+  ],
+  defaultSort: { active: 'instant', direction: 'desc' }
+};
+
 export const DEPLOIEMENT_TABLE_CONFIG: TableProvider<LastServerStart & { lastTrace?: number }> = {
   ...DEFAULT_TABLE_CONFIG,
   columns: [
