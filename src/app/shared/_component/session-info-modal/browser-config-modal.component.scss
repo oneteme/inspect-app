@@ -199,17 +199,6 @@
     font-size: 17px;
     width: 17px;
     height: 17px;
-
-    @media (max-width: 480px) {
-      font-size: 15px;
-      width: 15px;
-      height: 15px;
-    }
-  }
-
-  @media (max-width: 480px) {
-    font-size: 11px;
-    gap: 2px;
   }
 }
 
@@ -225,17 +214,6 @@
     font-size: 18px;
     width: 18px;
     height: 18px;
-
-    @media (max-width: 480px) {
-      font-size: 16px;
-      width: 16px;
-      height: 16px;
-    }
-  }
-
-  @media (max-width: 480px) {
-    font-size: 11px;
-    gap: 2px;
   }
 }
 
@@ -318,11 +296,6 @@
   svg {
     width: 18px;
     height: 18px;
-
-    @media (max-width: 480px) {
-      width: 15px;
-      height: 15px;
-    }
   }
 }
 
@@ -333,11 +306,6 @@
   align-items: center;
   justify-content: center;
   color: #475569;
-
-  @media (max-width: 480px) {
-    width: 10px;
-    height: 10px;
-  }
 }
 
 .zoom-size {
