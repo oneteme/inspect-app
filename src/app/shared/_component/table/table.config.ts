@@ -94,7 +94,7 @@ export const REST_SESSION_TABLE_CONFIG: TableProvider<RestSessionDto> = {
     },
     { key: 'user', header: 'Utilisateur', icon: 'badge', width: '15%', minWidth: 120 },
     { key: 'name', header: 'Nom', icon: 'label', iconSvg: TAG_ICON_SVG, lazy: true, minWidth: 150 },
-    { key: 'method', header: 'Méthode', icon: 'api', optional: true, minWidth: 110 },
+    { key: 'method', header: 'Méthode', icon: 'code', optional: true, minWidth: 110 },
     { key: 'query', header: 'Query', icon: 'search', lazy: true, minWidth: 160, groupable: false, sliceable: false },
     {
       key: 'asyncDuration', header: 'Traitement Asynchrone', icon: 'time_auto', iconFontSet: 'material-symbols-outlined', lazy: true, minWidth: 180, groupable: false, sliceable: false,
@@ -206,7 +206,7 @@ export const REST_REQUEST_TABLE_CONFIG: TableProvider<RestRequestDto> = {
     },
     { key: 'user', header: 'Utilisateur', icon: 'badge', width: '10%', minWidth: 120 },
     { key: 'action', width: '10%', minWidth: 60, sliceable: false, groupable: false, sortable: false, inFieldsMenu: false },
-    { key: 'method', header: 'Méthode', icon: 'api', optional: true, minWidth: 110 },
+    { key: 'method', header: 'Méthode', icon: 'code', optional: true, minWidth: 110 },
     { key: 'path', header: 'Point d\'accès', icon: 'route', optional: true, minWidth: 160 },
     {
       key: 'status', header: 'Status', sortable: true, optional: true, icon: 'task_alt', minWidth: 110,
@@ -510,7 +510,7 @@ export const LOG_TABLE_CONFIG: TableProvider<LogEntry> = {
     { key: 'message', header: 'Message', icon: 'subject', sliceable: false, groupable: false, width: '35%' },
     { key: 'thread', header: 'Thread', icon: 'call_split', width: '16%' },
     { key: 'action', header: 'Action', icon: 'info', width: '17%' },
-    { key: 'stack', sliceable: false, groupable: false, sortable: false, width: '9%' }
+    { key: 'stack', sliceable: false, groupable: false, sortable: false, width: '9%', inFieldsMenu: false }
   ],
   slices: [
     {

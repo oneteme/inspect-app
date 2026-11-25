@@ -200,10 +200,15 @@ export function recreateDate(chartGroup: string, row: any, start: Date): {start:
     }
 }
 
+function isSameLocalDay(a: Date, b: Date): boolean {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
 export function periodManagement(start: Date, end: Date): string {
     var dayDiff = (end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000);
 
-    if (dayDiff <= 1) { // 24 heures
+    // Une fenêtre de moins de 24 h à cheval sur deux jours garde les jours : les heures ne doivent pas fusionner.
+    if (dayDiff <= 1 && isSameLocalDay(start, new Date(end.getTime() - 1))) { // 24 heures
         return ChartGroup.byHour;
     }
     if (dayDiff <= 24) {
@@ -319,13 +324,15 @@ export interface PeriodGranularityState {
 
 /** Chaque menu garde sa propre variante ; une variante non choisie vaut « Automatique ». */
 export function resolvePeriodGranularities(state: PeriodGranularityState, start: Date, end: Date): PeriodGranularities {
+    const axisIsDate = state.selectedX === 'date' || state.selectedGroupBy === 'date';
     const axisOption = state.selectedX === 'date'
         ? state.selectedXOption
         : (state.selectedGroupBy === 'date' ? state.selectedGroupByOption : undefined);
-    return {
-        axis: resolvePeriodGranularity(axisOption, start, end),
-        filter: resolvePeriodGranularity(state.selectedSliceOptions?.['date'], start, end)
-    };
+    const axis = resolvePeriodGranularity(axisOption, start, end);
+    const filter = resolvePeriodGranularity(state.selectedSliceOptions?.['date'], start, end);
+    // Le filtre Date→Heure reste en couples jour/heure (cf. dateHourCriteria) ; un axe Date en « Automatique » suit ce bucket composite.
+    const promoteAxis = axisIsDate && axis === 'hour' && filter === 'dateHour';
+    return { axis: promoteAxis ? 'dateHour' : axis, filter };
 }
 
 /**

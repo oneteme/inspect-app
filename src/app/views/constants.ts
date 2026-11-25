@@ -333,7 +333,9 @@ export const Operation = {
 export const STATUS = {
     "-1": {icon: 'hourglass_empty', label: "En cours", color: '#4f46e5', class: 'in-progress'},
     "0xx": {icon: 'priority_high', label: "Erreur de connexion", color: '#94A3B8', class: 'unavailable'},
+    "1xx": {icon: 'info', label: "Information", color: '#06B6D4', class: 'redirect'},
     "2xx": {icon: 'done', label: "Succès", color: '#4CAF50', class: 'success'},
+    "3xx": {icon: 'alt_route', label: "Redirection", color: '#06B6D4', class: 'redirect'},
     "4xx": {icon: 'error', label: "Erreur applicative", color: '#F9AD4E', class: 'warning'},
     "5xx": {icon: 'warning', label: "Erreur d'interface", color: '#F44336', class: 'fail'}
 };

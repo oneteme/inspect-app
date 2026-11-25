@@ -333,7 +333,7 @@ export class StartupComponent {
 
   private _performanceOrganizerOptions(): OrganizerChartBridgeOptions {
     return {
-      showStack: true,
+      showStack: false,
       onFetchSliceData: (filterKey: string) => this._fetchSliceData(this.$performanceRepartition.chartConfig, filterKey, this.$performanceGranularity.filter),
       resolveSliceDisplay: (filterKey: string, menu) => resolvePeriodSliceDisplay(filterKey, menu === 'group' ? this.$performanceGranularity.axis : this.$performanceGranularity.filter, this.params.period.start),
       resolveXOptions: (groupKey: string) => this._resolveXOptions(groupKey),
