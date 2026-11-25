@@ -41,6 +41,54 @@
            (click)="toggleFilter('action')">
         <span class="chip-dot"></span>Action
       </div>
+      <div *ngIf="request['sessionEvents']?.length" class="chip event"
+          [class.inactive]="!isFilterActive('event')"
+          (click)="toggleFilter('event')">
+      <span class="chip-dot"></span>EVENT
     </div>
+    </div>
+    <div class="timeline-search">
+      <mat-icon class="material-symbols-outlined">search</mat-icon>
+      <input type="search"
+             [ngModel]="searchTerm"
+             (ngModelChange)="updateSearchTerm($event)"
+             placeholder="Filtrer..."
+             aria-label="Filtrer les éléments de la timeline"
+             autocomplete="off">
+      <button *ngIf="searchTerm"
+              type="button"
+              class="timeline-search-clear"
+              (click)="clearSearch()"
+              aria-label="Effacer le filtre">
+        <mat-icon>close</mat-icon>
+      </button>
+    </div>
+    <button type="button"
+            mat-icon-button
+            class="group-menu-trigger"
+            [class.grouping-active]="groupBy !== 'threadName'"
+            [matMenuTriggerFor]="timelineMenu"
+            matTooltip="Timeline settings"
+            aria-label="Timeline settings">
+      <mat-icon>settings</mat-icon>
+    </button>
+    <mat-menu #timelineMenu="matMenu" class="card-menu">
+      <a mat-menu-item [matMenuTriggerFor]="groupByMenu">
+        Grouper par
+      </a>
+    </mat-menu>
+    <mat-menu #groupByMenu="matMenu" class="card-menu">
+      <a mat-menu-item
+         *ngFor="let option of groupingOptions"
+         (click)="changeGroupBy(option.value)">
+        <mat-icon *ngIf="groupBy === option.value" class="material-symbols-outlined">
+          check
+        </mat-icon>
+        <mat-icon class="material-symbols-outlined">
+          {{ option.icon }}
+        </mat-icon>
+        {{ option.label }}
+      </a>
+    </mat-menu>
   </div>
 </app-timeline>
