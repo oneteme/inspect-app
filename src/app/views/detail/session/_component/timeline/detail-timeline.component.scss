@@ -6,7 +6,8 @@ $colors: (
   ldap:   #00BCD4,
   bdd:    #a5673f,
   local:  #3b3b38,
-  action: #FF6F61
+  action: #FF6F61,
+  event: #4CAF50,
 );
 
 .legend {
@@ -15,13 +16,104 @@ $colors: (
   align-items: center;
   justify-content: flex-end;
   gap: 0.75rem;
-  padding: 0.5rem 0.75rem;
+  padding: 0.5rem 0rem 0.5rem 0rem;
 
   .legend-chips {
     display: flex;
     flex-wrap: wrap;
     gap: 0.4rem;
     align-items: center;
+  }
+
+  .timeline-search {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    order: -1;
+    flex: 1 1 0;
+    min-width: 130px;
+    height: 28px;
+    padding: 0 0.5rem;
+    border: 1px solid rgba(15, 23, 42, 0.14);
+    border-radius: 6px;
+    background: #ffffff;
+    color: rgba(15, 23, 42, 0.55);
+    transition: border-color 0.15s ease, box-shadow 0.15s ease;
+
+    &:focus-within {
+      border-color: var(--na-primary, #3f51b5);
+      box-shadow: 0 0 0 2px rgba(63, 81, 181, 0.12);
+    }
+
+    > mat-icon {
+      width: 16px;
+      height: 16px;
+      flex: 0 0 16px;
+      font-size: 16px;
+      line-height: 16px;
+    }
+
+    input {
+      min-width: 0;
+      width: 100%;
+      border: 0;
+      outline: 0;
+      padding: 0;
+      background: transparent;
+      color: rgba(15, 23, 42, 0.8);
+      font: inherit;
+      font-size: 0.75rem;
+
+      &::placeholder {
+        color: rgba(15, 23, 42, 0.45);
+      }
+    }
+
+    .timeline-search-clear {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex: 0 0 18px;
+      width: 18px;
+      height: 18px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+
+      mat-icon {
+        width: 16px;
+        height: 16px;
+        font-size: 16px;
+        line-height: 16px;
+      }
+    }
+  }
+
+  .group-menu-trigger {
+    width: 28px !important;
+    height: 28px !important;
+    min-width: 28px !important;
+    line-height: 28px !important;
+    padding: 0 !important;
+    flex: 0 0 auto;
+    color: black;
+    opacity: 0.7;
+    transition: color 0.15s ease, opacity 0.15s ease;
+
+    mat-icon {
+      width: 18px;
+      height: 18px;
+      font-size: 18px;
+      line-height: 18px;
+    }
+
+    &:hover,
+    &.grouping-active {
+      color: var(--na-primary, #3f51b5);
+      opacity: 1;
+    }
   }
 
   .chip {
