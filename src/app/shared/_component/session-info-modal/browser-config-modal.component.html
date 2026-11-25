@@ -62,7 +62,7 @@
                         <div class="top-center">
                             <div *ngIf="config.userLanguage" class="language" matTooltip="Langue">
                                 <mat-icon fontSet="material-symbols-outlined">language</mat-icon>
-                                <span>{{ config.userLanguage | uppercase }}</span>
+                                <span>{{ (config.userLanguage | slice:0:2) | uppercase }}</span>
                             </div>
                         </div>
                         <div class="top-right">
