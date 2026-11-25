@@ -64,6 +64,6 @@
   },
   "overrides": {
     "@oneteme/jquery-core": "^0.0.40",
-    "@oneteme/jquery-organizer": "^0.0.12"
+    "@oneteme/jquery-organizer": "^0.0.13"
   }
 }
