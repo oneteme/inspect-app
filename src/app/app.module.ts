@@ -1,54 +1,52 @@
-import {BrowserModule} from '@angular/platform-browser';
-import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {APP_INITIALIZER, LOCALE_ID, NgModule} from '@angular/core';
-import {FormsModule, ReactiveFormsModule} from '@angular/forms';
-import {ActivatedRouteSnapshot, Route, RouterModule, RouterStateSnapshot} from '@angular/router';
-import {AppComponent} from './app.component';
+import { BrowserModule } from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
+import { APP_INITIALIZER, LOCALE_ID, NgModule } from '@angular/core';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRouteSnapshot, Route, RouterModule, RouterStateSnapshot } from '@angular/router';
+import { AppComponent } from './app.component';
 
-import {ViewsModule} from './views/views.module';
-import {SharedModule} from './shared/shared.module';
+import { ViewsModule } from './views/views.module';
+import { SharedModule } from './shared/shared.module';
 
 
 // main layout
-import {HTTP_INTERCEPTORS, HttpClientModule} from '@angular/common/http';
+import { HTTP_INTERCEPTORS, HttpClientModule } from '@angular/common/http';
 
-import {DatePipe, DecimalPipe, I18nPluralPipe, registerLocaleData} from '@angular/common';
+import { DatePipe, DecimalPipe, I18nPluralPipe, registerLocaleData } from '@angular/common';
 import localeFr from '@angular/common/locales/fr';
-import {SearchRestView} from "./views/search/session/rest/search-rest.view";
-import {DetailSessionRestView} from "./views/detail/session/rest/detail-session-rest.view";
-import {SearchMainView} from "./views/search/session/main/search-main.view";
-import {DetailSessionMainView} from "./views/detail/session/main/detail-session-main.view";
-import {DashboardComponent} from "./views/dashboard/dashboard.component";
-import {EnvRouter} from "./service/router.service";
-import {DurationPipe} from "./shared/pipe/duration.pipe";
-import {ArchitectureView} from "./views/architecture/architecture.view";
-import {NumberFormatterPipe} from './shared/pipe/number.pipe';
-import {TreeView} from './views/tree/tree.view';
-import {SizePipe} from "./shared/pipe/size.pipe";
-import {Interceptor} from "./shared/interceptor/interceptor";
-import {SearchRequestView} from "./views/search/request/search-request.view";
-import {Constants} from "./views/constants";
-import {DetailRequestView} from "./views/detail/request/detail-request.view";
-import {InstanceComponent} from './views/detail/instance/instance.component';
-import {NavbarComponent} from './components/navbar/navbar.component';
-import {AboutDialogComponent} from './components/about/about-dialog.component';
-import {AddEnvironmentDialogComponent} from './components/environment/add-environment-dialog.component';
-import {ServerSupervisionView} from "./views/supervision/server-supervision/server-supervision.view";
-import {ServerActivityView} from "./views/supervision/server-activity/server-activity.view";
-import {RequestKpiView} from "./views/kpi/request/request-kpi.view";
-import {SessionKpiView} from "./views/kpi/session/session-kpi.view";
-import {CompareView} from "./views/compare/compare.view";
-import {AuthService} from "./auth/auth.service";
-import {authGuard} from "./auth/auth.guard";
-import {OAuthModule} from "angular-oauth2-oidc";
-import {AuthInterceptor} from "./auth/auth.interceptor";
-import {AnalyticsView} from "./views/analytics/analytics.view";
-import {SearchMainEventView} from "./views/search/event/main/search-main-event.view";
-import {NgCollectorModule} from "@oneteme/inspect-ng-collector";
-import {environment} from "../environments/environment";
-import {DashboardNewComponent} from "./views/dashboard/new/dashboard-new.component";
+import { SearchRestView } from "./views/search/session/rest/search-rest.view";
+import { DetailSessionRestView } from "./views/detail/session/rest/detail-session-rest.view";
+import { SearchMainView } from "./views/search/session/main/search-main.view";
+import { DetailSessionMainView } from "./views/detail/session/main/detail-session-main.view";
+import { DashboardComponent } from "./views/dashboard/dashboard.component";
+import { EnvRouter } from "./service/router.service";
+import { DurationPipe } from "./shared/pipe/duration.pipe";
+import { ArchitectureView } from "./views/architecture/architecture.view";
+import { TreeView } from './views/tree/tree.view';
+import { SizePipe } from "./shared/pipe/size.pipe";
+import { Interceptor } from "./shared/interceptor/interceptor";
+import { SearchRequestView } from "./views/search/request/search-request.view";
+import { Constants } from "./views/constants";
+import { DetailRequestView } from "./views/detail/request/detail-request.view";
+import { InstanceComponent } from './views/detail/instance/instance.component';
+import { NavbarComponent } from './components/navbar/navbar.component';
+import { AboutDialogComponent } from './components/about/about-dialog.component';
+import { AddEnvironmentDialogComponent } from './components/environment/add-environment-dialog.component';
+import { ServerSupervisionView } from "./views/supervision/server-supervision/server-supervision.view";
+import { ServerActivityView } from "./views/supervision/server-activity/server-activity.view";
+import { RequestKpiView } from "./views/kpi/request/request-kpi.view";
+import { SessionKpiView } from "./views/kpi/session/session-kpi.view";
+import { CompareView } from "./views/compare/compare.view";
+import { AuthService } from "./auth/auth.service";
+import { authGuard } from "./auth/auth.guard";
+import { OAuthModule } from "angular-oauth2-oidc";
+import { AuthInterceptor } from "./auth/auth.interceptor";
+import { AnalyticsView } from "./views/analytics/analytics.view";
+import { SearchMainEventView } from "./views/search/event/main/search-main-event.view";
+import { NgCollectorModule } from "@oneteme/inspect-ng-collector";
+import { environment } from "../environments/environment";
 
-const InspectNgCollectorModule= NgCollectorModule.forRoot(environment.inspect);
+const InspectNgCollectorModule = NgCollectorModule.forRoot(environment.inspect);
 registerLocaleData(localeFr, 'fr-FR');
 
 export function initializeAuth(authService: AuthService) {
@@ -57,210 +55,193 @@ export function initializeAuth(authService: AuthService) {
 
 const routes: Route[] = [
   {
-    path: 'request', children: [
+    path: '',
+    canActivateChild: [authGuard],
+    children: [
       {
-        path: ':type',
-        children: [
+        path: 'request', children: [
           {
-            path: '',
-            component: SearchRequestView,
-            title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' • Suivi',
-          },
-          {
-            path: ':id_request',
+            path: ':type',
             children: [
               {
                 path: '',
-                component: DetailRequestView,
-                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-                  return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' • Détail'
-                }
+                component: SearchRequestView,
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' • Suivi',
               },
               {
-                path: 'compare',
-                component: CompareView,
-                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-                  return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' • Décryptage du Flux';
-                }
+                path: ':id_request',
+                children: [
+                  {
+                    path: '',
+                    component: DetailRequestView,
+                    title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                      return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' • Détail'
+                    }
+                  },
+                  {
+                    path: 'compare',
+                    component: CompareView,
+                    title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                      return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('type')].title + ' • Décryptage du Flux';
+                    }
+                  }
+                ]
               }
             ]
-            , canActivate: [authGuard]
+          },
+          { path: '**', pathMatch: 'full', redirectTo: `/request/rest` }
+        ]
+      },
+      {
+        path: 'session', children: [
+          {
+            path: 'rest',
+            children: [
+              {
+                path: '',
+                component: SearchRestView,
+                title: Constants.MAPPING_TYPE['rest'].title + ' • Suivi'
+              },
+              {
+                path: ':id_session',
+                children: [
+                  {
+                    path: '',
+                    component: DetailSessionRestView,
+                    title: Constants.MAPPING_TYPE['rest'].title + ' • Détail'
+                  },
+                  {
+                    path: 'tree',
+                    data: { type: 'rest' },
+                    component: TreeView,
+                    title: Constants.MAPPING_TYPE['rest'].title + ' • Arbre d\'Appels'
+                  },
+                  {
+                    path: 'compare',
+                    component: CompareView,
+                    title: Constants.MAPPING_TYPE['rest'].title + ' • Décryptage du Flux'
+                  },
+                  { path: '**', pathMatch: 'full', redirectTo: `/session/rest/:id_session` }
+                ]
+              },
+              { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
+            ]
+          },
+          {
+            path: ':type_main',
+            children: [
+              {
+                path: '',
+                component: SearchMainView,
+                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                  return Constants.MAPPING_TYPE[route.paramMap.get('type_main')].title + ' • Suivi';
+                }
+              },
+              {
+                path: ':id_session',
+                children: [
+                  {
+                    path: '',
+                    component: DetailSessionMainView,
+                    title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                      return Constants.MAPPING_TYPE[route.paramMap.get('type_main')].title + ' • Détail';
+                    }
+                  },
+                  {
+                    path: 'tree',
+                    data: { type: 'main' },
+                    component: TreeView,
+                    title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+                      return 'Arbre d\'Appels'; // TODO ajouter le type dans le titre
+                    }
+                  },
+                  { path: '**', pathMatch: 'full', redirectTo: `/main/:type_main/:id_session` }
+                ]
+              },
+              { path: '**', pathMatch: 'full', redirectTo: `/main/:type_main` }
+            ]
+          },
+          { path: '**', pathMatch: 'full', redirectTo: `/session/rest` }
+        ]
+      },
+      {
+        path: 'instance',
+        children: [
+          {
+            path: 'detail/:id_instance',
+            component: InstanceComponent,
+            title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+              return `Instance • ${route.paramMap.get('id_instance')}`;
+            }
           }
         ]
-        , canActivate: [authGuard]
       },
-      {path: '**', pathMatch: 'full', redirectTo: `/request/rest`}
-    ], canActivate: [authGuard]
-  },
-  {
-    path: 'session', children: [
       {
-        path: 'rest',
-
+        path: 'event',
         children: [
           {
-            path: '',
-            component: SearchRestView,
-            title: Constants.MAPPING_TYPE['rest'].title + ' • Suivi'
-
+            title: 'Logs Applicatifs',
+            path: 'log',
+            component: SearchMainEventView,
+            data: { isLogRoute: true }
           },
           {
-            path: ':id_session',
-            children: [
-              {
-                path: '',
-                component: DetailSessionRestView,
-                title: Constants.MAPPING_TYPE['rest'].title + ' • Détail'
-              },
-              {
-                path: 'tree',
-                data: {type: 'rest'},
-                component: TreeView,
-                title: Constants.MAPPING_TYPE['rest'].title + ' • Arbre d\'Appels'
-              },
-              {
-                path: 'compare',
-                component: CompareView,
-                title: Constants.MAPPING_TYPE['rest'].title +  ' • Décryptage du Flux'
-              },
-              {path: '**', pathMatch: 'full', redirectTo: `/session/rest/:id_session`}
-            ]
-            , canActivate: [authGuard]
-          },
-          {path: '**', pathMatch: 'full', redirectTo: `/session/rest`}
+            title: 'Actions Utilisateur',
+            path: 'user',
+            component: SearchMainEventView,
+            data: { isLogRoute: false }
+          }
         ]
-        , canActivate: [authGuard]
       },
       {
-        path: ':type_main',
-        children: [
-          {
-            path: '',
-            component: SearchMainView,
-            title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-              return Constants.MAPPING_TYPE[route.paramMap.get('type_main')].title + ' • Suivi';
-            }
-          },
-          {
-            path: ':id_session',
-            children: [
-              {
-                path: '',
-                component: DetailSessionMainView,
-                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-                  return Constants.MAPPING_TYPE[route.paramMap.get('type_main')].title + ' • Détail';
-                }
-              },
-              {
-                path: 'tree',
-                data: {type: 'main'},
-                component: TreeView,
-                title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-                  return 'Arbre d\'Appels'; // TODO ajouter le type dans le titre
-                }
-              },
-              {path: '**', pathMatch: 'full', redirectTo: `/main/:type_main/:id_session`}
-            ]
-          },
-          {path: '**', pathMatch: 'full', redirectTo: `/main/:type_main`}
-        ]
-        , canActivate: [authGuard]
+        path: 'analytics/:id',
+        component: AnalyticsView,
+        title: 'Parcours Utilisateur'
       },
-      {path: '**', pathMatch: 'full', redirectTo: `/session/rest`}
-    ], canActivate: [authGuard]
-  },
-  {
-    path: 'instance',
-    children: [
       {
-        path: 'detail/:id_instance',
-        component: InstanceComponent,
+        path: 'home',
+        component: DashboardComponent,
+        title: 'Tableau de bord'
+      },
+      {
+        path: 'architecture',
+        component: ArchitectureView,
+        title: Constants.MAPPING_TYPE['architecture'].title
+      },
+      {
+        path: 'diagnostic',
+        component: ServerActivityView,
+        title: 'Diagnostic'
+      },
+      {
+        path: 'supervision/server/:instance',
+        component: ServerSupervisionView,
+        title: 'Supervision • Application'
+      },
+      {
+        path: 'kpi/request/:request_type',
+        component: RequestKpiView,
         title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-          return `Instance • ${route.paramMap.get('id_instance')}`;
+          return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('request_type')].title + ' • KPI';
         }
-      }
-    ],
-    canActivate: [authGuard]
-  },
-  {
-    path: 'event',
-    children: [
-      {
-        title: 'Logs Applicatifs',
-        path: 'log',
-        component: SearchMainEventView,
-        data: { isLogRoute: true }
       },
       {
-        title: 'Actions Utilisateur',
-        path: 'user',
-        component: SearchMainEventView,
-        data: { isLogRoute: false }
-      }
+        path: 'kpi/session/:session_type',
+        component: SessionKpiView,
+        title: (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
+          return Constants.MAPPING_TYPE[route.paramMap.get('session_type')].title + ' • KPI';
+        }
+      },
+      { path: '**', pathMatch: 'full', redirectTo: `/home` }
     ]
-    , canActivate: [authGuard]
-  },
-  {
-    path: 'analytics/:id',
-    component: AnalyticsView,
-    title: 'Parcours Utilisateur',
-    canActivate: [authGuard]
-  },
-  {
-    path: 'home',
-    component: DashboardComponent,
-    title: 'Tableau de bord',
-    canActivate: [authGuard]
-  },
-  {
-    path: 'home/new',
-    component: DashboardNewComponent,
-    title: 'Tableau de bord',
-    canActivate: [authGuard]
-  },
-  {
-    path: 'architecture',
-    component: ArchitectureView,
-    title: Constants.MAPPING_TYPE['architecture'].title,
-    canActivate: [authGuard]
-  },
-  {
-    path: 'diagnostic',
-    component: ServerActivityView,
-    title: 'Diagnostic',
-    canActivate: [authGuard]
-  },
-  {
-    path: 'supervision/server/:instance',
-    component: ServerSupervisionView,
-    title: 'Supervision • Application',
-    canActivate: [authGuard]
-  },
-  {
-    
-    path: 'kpi/request/:request_type',
-    component: RequestKpiView,
-    title:  (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-      return Constants.REQUEST_MAPPING_TYPE[route.paramMap.get('request_type')].title + ' • KPI';
-    },
-    canActivate: [authGuard]
-  },
-  {
-    path: 'kpi/session/:session_type',
-    component: SessionKpiView,
-    title:  (route: ActivatedRouteSnapshot, state: RouterStateSnapshot) => {
-      return Constants.MAPPING_TYPE[route.paramMap.get('session_type')].title + ' • KPI';
-    },
-    canActivate: [authGuard]
-  },
-  {path: '**', pathMatch: 'full', redirectTo: `/home`}
+  }
 ];
 
 @NgModule({
   imports: [
     BrowserModule,
     BrowserAnimationsModule,
-    RouterModule.forRoot(routes, {useHash: true}),
+    RouterModule.forRoot(routes, { useHash: true }),
     InspectNgCollectorModule,
     FormsModule,
     HttpClientModule,
@@ -282,15 +263,14 @@ const routes: Route[] = [
     DurationPipe,
     I18nPluralPipe,
     EnvRouter,
-    {provide: LOCALE_ID, useValue: 'fr-FR'},
-    NumberFormatterPipe,
+    { provide: LOCALE_ID, useValue: 'fr-FR' },
     {
       provide: APP_INITIALIZER,
       useFactory: initializeAuth,
       deps: [AuthService],
       multi: true
     },
-    {provide: HTTP_INTERCEPTORS, useClass: Interceptor, multi: true},
+    { provide: HTTP_INTERCEPTORS, useClass: Interceptor, multi: true },
     { provide: HTTP_INTERCEPTORS, useClass: AuthInterceptor, multi: true }
 
   ],

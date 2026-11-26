@@ -40,7 +40,9 @@
           <h2 id="activity-traces-title" class="kpi-chart-title">Volume des opérations</h2>
         </div>
         <span class="kpi-chart-badge" *ngIf="isLoadingDatabaseInfo" matTooltip="Chargement...">...</span>
-        <span class="kpi-chart-badge database" *ngIf="!isLoadingDatabaseInfo" (click)="openDatabaseInfo()" matTooltip="Nom du schéma : {{ schemaName }}&#10;Volume : {{ schemaSizeMb }}&#10;Volume de la base : {{ databaseSizeMb }}">{{ databaseRatio }}</span>
+        <div class="kpi-chart-badge database" *ngIf="!isLoadingDatabaseInfo">
+            <span class="kpi-chart-badge database" (click)="openDatabaseInfo()" matTooltip="Nom du schéma : {{ schemaName }}&#10;Volume : {{ schemaSizeMb }}&#10;Volume de la base : {{ databaseSizeMb }}"> Stockage : {{ databaseRatio }}</span>
+        </div>
       </div>
       <div class="kpi-chart-body">
         <chart type="line" [config]="USAGE_INSTANCE_TRACE_BY_PERIOD_LINE"
@@ -71,8 +73,13 @@
           <h2 id="activity-reports-title" class="kpi-chart-title">Anomalies</h2>
         </div>
       </div>
+      <mat-tab-group (selectedIndexChange)="selectedTabIndex = $event" [selectedIndex]="selectedTabIndex"
+                     class="activity-reports-tabs" mat-stretch-tabs="false">
+        <mat-tab label="Applicatives"></mat-tab>
+        <mat-tab label="INSPECT"></mat-tab>
+      </mat-tab-group>
       <div class="kpi-chart-body">
-        <jquery-table class="flex-table" [config]="tableConfig" [data]="logEntryByPeriod" [isLoading]="isLoadingLogs">
+        <jquery-table *ngIf="selectedTabIndex === 0" class="flex-table" [config]="anomalyAppTabConfig" [data]="logEntryByPeriod" [isLoading]="isLoadingLogs">
           <ng-template jqtCellDef="instant" let-row>
             {{ row.instant * 1000 | date:'dd/MM/yyyy' }}
             <br>
@@ -86,13 +93,28 @@
           <ng-template jqtCellDef="message" let-row>
             <span [title]="row.message">{{ row.message }}</span>
           </ng-template>
-
-          <ng-template jqtCellDef="stack" let-row>
-            <button mat-icon-button color="primary" [class.hidden]="!row.stackRows?.length"
-                    (click)="openLogStacktrace(row)" matTooltip="Consulter la Stack">
-              <mat-icon class="material-symbols-outlined">visibility</mat-icon>
-            </button>
+            <ng-template jqtCellDef="stack" let-row>
+                <button mat-icon-button color="primary" [class.hidden]="!row.hasStack"
+                        (click)="openLogStacktrace(row)" matTooltip="Consulter la Stack">
+                    <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
+                </button>
+            </ng-template>
+        </jquery-table>
+        <jquery-table *ngIf="selectedTabIndex === 1" class="flex-table" [config]="anomalySystemTabConfig" [data]="logSystemByPeriod" [isLoading]="isLoadingLogs">
+          <ng-template jqtCellDef="instant" let-row>
+            {{ row.instant * 1000 | date:'dd/MM/yyyy' }}
+            <br>
+            {{ row.instant * 1000 | date:'HH:mm:ss.SSS' }}
           </ng-template>
+          <ng-template jqtCellDef="message" let-row>
+            <span [title]="row.message">{{ row.message }}</span>
+          </ng-template>
+            <ng-template jqtCellDef="stack" let-row>
+                <button mat-icon-button color="primary" [class.hidden]="!row.hasStack"
+                        (click)="openLogStacktrace(row)" matTooltip="Consulter la Stack">
+                    <mat-icon class="material-symbols-outlined">frame_inspect</mat-icon>
+                </button>
+            </ng-template>
         </jquery-table>
       </div>
     </section>

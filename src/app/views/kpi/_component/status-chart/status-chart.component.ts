@@ -109,7 +109,7 @@ export class StatusChartComponent {
 
   @Input() set data(value: any[]) {
     if(value && this.jqueryConfig) {
-      const series = buildSeries(this.jqueryConfig.series.items, this.actualIndicator, this.actualGroup, this.actualStack, value);
+      const series = buildSeries(this.jqueryConfig.series.items, this.actualIndicator, this.actualGroup, this.actualStack, value, this.jqueryConfig.stacked);
       this.chartProvider = {
         ...this.chartProvider,
         series,

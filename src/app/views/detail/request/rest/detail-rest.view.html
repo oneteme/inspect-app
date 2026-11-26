@@ -57,7 +57,7 @@
           <!-- Utilisateur -->
           <div class="footer-section">
             <div class="meta-chip">
-              <mat-icon class="material-symbols-outlined meta-icon">person</mat-icon>
+              <mat-icon class="material-symbols-outlined meta-icon">badge</mat-icon>
               <span>{{ request.user || 'N/A' }}</span>
             </div>
           </div>
@@ -105,25 +105,7 @@
 
   <!-- Onglets -->
   <div class="tabs-container">
-    <div class="vertical-tabs">
-      <div *ngFor="let tab of tabs; let i = index"
-           class="tab-button"
-           [class.active]="selectedTabIndex === i"
-           [class.hidden]="!tab.visible"
-           (click)="selectedTabIndex = i">
-        <mat-icon class="material-symbols-outlined">{{ tab.icon }}</mat-icon>
-        <div class="tab-label-container">
-          <span class="tab-label">{{ tab.label }}</span>
-          <mat-icon *ngIf="tab.hasError && tab.errorCount > 0"
-                    class="error-indicator material-symbols-outlined"
-                    [matTooltip]="tab.errorCount + ' erreur(s)'"
-                    matTooltipPosition="right">
-            error
-          </mat-icon>
-        </div>
-        <span class="tab-count" *ngIf="tab.count > 0">{{ tab.count | numberFormat:0:'≈' }}</span>
-      </div>
-    </div>
+    <app-vertical-tabs [tabs]="tabs" [(selectedIndex)]="selectedTabIndex"></app-vertical-tabs>
     <div class="tab-content">
       <div *ngIf="tabs[selectedTabIndex]?.type === 'stage'" class="tab-panel">
         <stage-table [requests]="stages"></stage-table>
@@ -152,8 +134,8 @@
 <mat-menu #menuHost="matMenu" class="card-menu">
     <div mat-menu-item
          class="inspect-track-target"
-         [ngStyle]="{'pointer-events': request && request.status != 0 && !request.linked ? 'none' : ''}"
-         [disabled]="request && request.status != 0 && !request.linked"
+         [ngStyle]="{'pointer-events': request && request.status >= 100 && !request.linked ? 'none' : ''}"
+         [disabled]="request && request.status >= 100 && !request.linked"
          (click)="navigate($event, 'remote')"
          data-inspect-track="Service Distant" data-inspect-scope="Menu contextuel">
         <mat-icon class="material-symbols-outlined">link</mat-icon>Service Distant

@@ -7,6 +7,8 @@ import {MainSessionView, RestSessionView} from "../../../../../model/request.mod
 import {InstanceEnvironment} from "../../../../../model/trace.model";
 import {EnvRouter} from "../../../../../service/router.service";
 
+type TimelineGroupBy = 'threadName' | 'nodeName' | 'typeTimeline';
+
 let options: any = {
     clickToUse: true,
     selectable : false,
@@ -52,6 +54,7 @@ export class DetailTimelineComponent implements OnChanges {
         'smtp'         : (c:any,i:number) => this.mapother(c,i),
         'ldap'         : (c:any,i:number) => this.mapother(c,i),
         'jdbc'         : (c:any,i:number) => this.mapother(c,i),
+        'event'        : (c:any,i:number) => this.mapother(c,i),
         'local'        : (c:any,i:number) => this.mapother(c,i),
         'log'          : (c:any,i:number) => this.mapLog(c,i)
     }
@@ -65,10 +68,31 @@ export class DetailTimelineComponent implements OnChanges {
     timelineEnd: number;
 
     private visTimeline: Timeline | null = null;
-    activeFilters = new Set<string>(['rest', 'ftp', 'smtp', 'ldap', 'jdbc', 'local', 'action']);
+    groupBy: TimelineGroupBy = 'threadName';
+    readonly groupingOptions: { value: TimelineGroupBy, label: string, icon: string }[] = [
+        {value: 'threadName', label: 'Thread', icon: 'call_split'},
+        {value: 'nodeName', label: 'host', icon: 'dns'},
+        {value: 'typeTimeline', label: 'Type', icon: 'category'}
+    ];
+    activeFilters = new Set<string>(['rest', 'ftp', 'smtp', 'ldap', 'jdbc', 'local', 'event']);
+    searchTerm = '';
 
     isFilterActive(type: string): boolean {
         return this.activeFilters.has(type);
+    }
+
+    changeGroupBy(groupBy: TimelineGroupBy): void {
+        this.groupBy = groupBy;
+        const groups = this.buildDataGroups();
+        const items = this.computeDataItems();
+
+        if (this.visTimeline) {
+            this.visTimeline.setGroups(groups);
+            this.visTimeline.setItems(items);
+        } else {
+            this.dataGroups = groups;
+            this.dataItems = items;
+        }
     }
 
     toggleFilter(type: string): void {
@@ -85,10 +109,59 @@ export class DetailTimelineComponent implements OnChanges {
         }
     }
 
+    updateSearchTerm(searchTerm: string): void {
+        this.searchTerm = searchTerm;
+        const items = this.computeDataItems();
+        if (this.visTimeline) {
+            this.visTimeline.setItems(items);
+        } else {
+            this.dataItems = items;
+        }
+    }
+
+    clearSearch(): void {
+        this.updateSearchTerm('');
+    }
+
     private getFilteredArray(): any[] {
         const alwaysVisible = ['session-stage', 'log'];
         return this.dataArray.filter(c =>
-            alwaysVisible.includes(c.typeTimeline) || this.activeFilters.has(c.typeTimeline)
+            (alwaysVisible.includes(c.typeTimeline) || this.activeFilters.has(c.typeTimeline))
+            && this.matchesSearch(c)
+        );
+    }
+
+    private matchesSearch(item: any): boolean {
+        const term = this.searchTerm.trim().toLowerCase();
+        if (!term) {
+            return true;
+        }
+
+        const searchableValues = [
+            item.id,
+            item.name,
+            item.value,
+            item.type,
+            item.typeTimeline,
+            item.threadName,
+            item.scope,
+            item.thread,
+            item.nodeName,
+            item.location,
+            item.host,
+            item.protocol,
+            item.scheme,
+            item.path,
+            item.method,
+            item.command,
+            item.schema,
+            item.productName,
+            item.level,
+            item.message
+        ];
+
+        return searchableValues.some(value =>
+            value != null && String(value).toLowerCase().includes(term)
         );
     }
 
@@ -101,6 +174,51 @@ export class DetailTimelineComponent implements OnChanges {
         return filtered.map((c: any, i: number) => this.maptype[c.typeTimeline](c, i));
     }
 
+    private buildDataGroups(): DataGroup[] {
+        if (this.isWebApp && this.groupBy === 'threadName') {
+            return [{id: 0, content: this.instance.re}];
+        }
+
+        const groupIds = [...new Set(
+            this.dataArray
+                .filter(c => c.typeTimeline !== 'session-stage' && c.typeTimeline !== 'log')
+                .map(c => this.getGroupId(c))
+        )];
+
+        return groupIds.map(id => ({
+            id,
+            content: this.getGroupLabel(id)
+        }));
+    }
+
+    private getGroupId(item: any): string | number {
+        if (this.isWebApp && this.groupBy === 'threadName') {
+            return 0;
+        }
+
+        switch (this.groupBy) {
+            case 'nodeName':
+                return item.nodeName || item.location || item.host || '?';
+            case 'typeTimeline':
+                return item.typeTimeline || '?';
+            case 'threadName':
+            default:
+                return item.threadName || item.scope || item.thread || '?';
+        }
+    }
+
+    private getGroupLabel(id: string | number): string {
+        if (id === 0 && this.isWebApp && this.groupBy === 'threadName') {
+            return this.instance.re;
+        }
+
+        if (this.groupBy === 'typeTimeline') {
+            return String(id).toUpperCase();
+        }
+
+        return String(id);
+    }
+
     @Input() instance: InstanceEnvironment;
     @Input() request: MainSessionView | RestSessionView;
 
@@ -111,7 +229,7 @@ export class DetailTimelineComponent implements OnChanges {
                 this.timelineEnd = this.request.end ? this.request.end * 1000 : this.timelineStart + 3600000;
                 let padding = (Math.ceil((this.timelineEnd - this.timelineStart) * 0.01))
                 this.dataArray = [].concat(
-                    (this.request.sessionEvents ?? []).map(r => ({...r, start: r.instant, name: r.value, nodeName: r.location, threadName: r.scope, typeTimeline: 'action'})),
+                    (this.request.sessionEvents ?? []).map(r => ({...r, start: r.instant, name: r.value, nodeName: r.location, threadName: r.scope, typeTimeline: 'event'})),
                     (this.request.restRequests ?? []).map(r => ({...r, typeTimeline: 'rest'})),
                     (this.request.ftpRequests ?? []).map(r => ({...r, typeTimeline: 'ftp'})),
                     (this.request.mailRequests ?? []).map(r => ({...r, typeTimeline: 'smtp'})),
@@ -120,12 +238,8 @@ export class DetailTimelineComponent implements OnChanges {
                     (this.request.localRequests ?? []).map(r => ({...r, typeTimeline: 'local'})),
                     (this.request.httpSessionStages ?? []).map(r => ({...r, typeTimeline: 'session-stage'})));
                 this.sortInnerArrayByDate(this.dataArray);
-                if (this.request['type'] != null && this.request['type'] === "VIEW") {
-                    this.dataGroups = [{ id: 0, content: this.instance.re }];
-                    this.isWebApp = true;
-                } else {
-                    this.dataGroups = [...new Set(this.dataArray.filter(c => c.typeTimeline != 'session-stage' && c.typeTimeline != 'log').map(c => c.threadName || '?'))].map((c: any) => ({ id: c, content: c }))
-                }
+                this.isWebApp = this.request['type'] === "VIEW";
+                this.dataGroups = this.buildDataGroups();
                 if(this.dataArray.length > 50 ){
                     this.timelineEnd = (this.dataArray[51].start || this.dataArray[51].instant) * 1000;
                 }
@@ -176,10 +290,10 @@ export class DetailTimelineComponent implements OnChanges {
     }
 
     mapother(c:any, id:number) : DataItem{
-        const isInProgress = !c.end && c.typeTimeline != 'action';
-        let end = c.typeTimeline == 'action' ? c.start * 1000 :
+        const isInProgress = !c.end && c.typeTimeline != 'event';
+        let end = c.typeTimeline == 'event' ? c.start * 1000 :
             c.end ? c.end * 1000 :  new Date().getTime();
-        const analytic = c.typeTimeline === 'action'
+        const analytic = c.typeTimeline === 'event'
             ? this.ANALYTIC_MAPPING[c.type]
             : undefined;
 
@@ -191,17 +305,17 @@ export class DetailTimelineComponent implements OnChanges {
 
         let o = {
             id: c.id ?`${c.id}_${c.typeTimeline}_${id}`: id,
-            group: this.isWebApp ? 0 : c.threadName || '?',
-            content: c.typeTimeline === 'action' ? this.buildActionContent(c) : (c.schema || c.name || c.host || c.level || 'N/A'),
+            group: this.getGroupId(c),
+            content: c.typeTimeline === 'event' ? this.buildActionContent(c) : (c.schema || c.name || c.host || c.level || 'N/A'),
             start: c.start * 1000,
             end: end,
-            title: c.typeTimeline == 'action' ?
+            title: c.typeTimeline == 'event' ?
                 `${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')}</span><br>
                      <h4>${actionText}</h4>` :
                 `${this.pipe.transform(new Date(c.start * 1000), 'HH:mm:ss.SSS')} - ${c.end ? this.pipe.transform(new Date(end), 'HH:mm:ss.SSS'):"En cours..."}</span> ${c.end ? `(${this.durationPipe.transform({start: c.start, end: end / 1000})})`:""}<br>
                  <h4>${c['path'] || ''}</h4>`,
             className: c.typeTimeline
-                + (c.typeTimeline === 'action' ? ' level-icon' : ''),
+                + (c.typeTimeline === 'event' ? ' level-icon' : ''),
             type: ''
         }
         o.type = o.end == o.start ? 'point' : 'range';
@@ -226,6 +340,7 @@ export class DetailTimelineComponent implements OnChanges {
     };
     getEventIcon(type: string): string {
         switch (type) {
+            case 'Initialisation':
             case 'DOMContentLoaded':
                 return 'language';
             case 'click':
@@ -286,7 +401,7 @@ export class DetailTimelineComponent implements OnChanges {
         el.innerHTML = `<span class="material-icons ${le.level.toLowerCase()}" >${le.level.toLowerCase()}</span>`
         return {
             id: le.id ?`${le.id}_${le.typeTimeline}` : `${id}_log`,
-            group:  this.isWebApp ? 0 : this.dataArray[0].threadName,
+            group: this.getGroupId(le),
             content: el as unknown as any,
             start: le.instant * 1000,
             title: `${this.pipe.transform(new Date(le.instant * 1000), 'HH:mm:ss.SSS')}</span><br><h4>${le.message || ''}</h4>`,

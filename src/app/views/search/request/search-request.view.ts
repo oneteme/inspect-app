@@ -2,7 +2,7 @@ import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {Location} from '@angular/common';
 import {ActivatedRoute, Params} from '@angular/router';
-import {combineLatest, finalize, Observable, Subscription} from 'rxjs';
+import {combineLatest, debounceTime, finalize, Observable, Subscription} from 'rxjs';
 import {extractPeriod} from 'src/app/shared/util';
 import {app} from 'src/environments/environment';
 import {Constants, STATUS} from '../../constants';
@@ -104,7 +104,9 @@ export class SearchRequestView implements OnInit, OnDestroy {
     this.subscriptions.push(combineLatest([
       this._activatedRoute.params,
       this._activatedRoute.queryParams
-      ]).subscribe({
+      ]).pipe(
+      debounceTime(0)
+      ).subscribe({
       next: ([params, queryParams]) => {
           const type = params.type || 'rest';
           if (type !== this.params.type) this._lazyColumns = [];

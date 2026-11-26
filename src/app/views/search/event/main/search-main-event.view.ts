@@ -10,12 +10,8 @@ import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../../model/conf.mod
 import {EnvRouter} from "../../../../service/router.service";
 import {ActivatedRoute, Params} from "@angular/router";
 import {
-    DEFAULT_PERIOD_QUICK_RANGES,
-    getDefaultRelativePeriod,
-    getQuickRangeDates,
-    getQuickRangeStep,
-    isDefaultRelativePeriod,
-    PeriodQuickRange,
+    getDefaultRelativePeriod, getQuickRangeDates, getQuickRangeStep,
+    isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange,
     toDisplayedPeriodEnd
 } from "../../../../shared/period-filter";
 import {app} from "../../../../../environments/environment";
@@ -24,20 +20,33 @@ import {Constants, EVENT_LOG, EVENT_USER} from "../../../constants";
 import {InstanceService} from "../../../../service/jquery/instance.service";
 import {Location} from "@angular/common";
 import {PageTitleService} from "../../../../service/page-title.service";
-import {EventSessionService} from "../../../../service/event-session.service";
+import {SessionEventService} from "../../../../service/session-event.service";
+import {DateAdapter, MAT_DATE_FORMATS} from "@angular/material/core";
+import {CustomDateAdapter} from "../../../../shared/material/custom-date-adapter";
+import {MY_DATE_FORMATS} from "../../../../shared/shared.module";
+import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
+import {CustomDateRangeSelectionStrategy} from "../../../../shared/material/custom-date-range-selection-strategy";
 
 @Component({
     templateUrl: './search-main-event.view.html',
-    styleUrls: ['./search-main-event.view.scss']
+    styleUrls: ['./search-main-event.view.scss'],
+    providers: [
+        { provide: DateAdapter, useClass: CustomDateAdapter },
+        { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
+        { provide: MAT_DATE_RANGE_SELECTION_STRATEGY, useClass: CustomDateRangeSelectionStrategy }
+    ]
 })
 export class SearchMainEventView {
     private readonly _router = inject(EnvRouter);
     private readonly _pageTitleService = inject(PageTitleService);
-    private readonly _sessionEventService = inject(EventSessionService);
+    private readonly _sessionEventService = inject(SessionEventService);
     private readonly _instanceService = inject(InstanceService);
     private readonly _activatedRoute = inject(ActivatedRoute);
     private readonly _location = inject(Location);
-    readonly periodQuickRanges = DEFAULT_PERIOD_QUICK_RANGES;
+    readonly sessionLinkIcon = this._activatedRoute.snapshot.data['isLogRoute']
+        ? 'move_up'
+        : 'link';
+    readonly periodQuickRanges = PERIOD_QUICK_RANGES;
     serverNameIsLoading = true;
     nameDataList: any[];
     events: SessionEventDto[];
@@ -104,7 +113,7 @@ export class SearchMainEventView {
                 this.patchServerValue(this.queryParams.appname);
                 this.patchDateValue(this.queryParams.period.start, new Date(this.queryParams.period.end.getFullYear(), this.queryParams.period.end.getMonth(), this.queryParams.period.end.getDate(), this.queryParams.period.end.getHours(), this.queryParams.period.end.getMinutes(), this.queryParams.period.end.getSeconds(), this.queryParams.period.end.getMilliseconds() - 1));
 
-                this._instanceService.getApplications('SERVER', this.queryParams.namespace)
+                this._instanceService.getAllApplications(this.queryParams.namespace)
                     .pipe(finalize(() => this.serverNameIsLoading = false))
                     .subscribe({
                         next: res => {

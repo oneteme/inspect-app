@@ -1,6 +1,4 @@
 import { Pipe, PipeTransform } from "@angular/core";
-import { Filter } from "src/app/views/constants";
-import { groupingBy } from "../util";
 
 @Pipe({
     name: 'numberFormat'

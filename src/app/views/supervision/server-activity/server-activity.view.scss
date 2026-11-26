@@ -18,6 +18,7 @@
     align-self: center;
     &.database {
       cursor: pointer;
+      text-align: center;
     }
   }
 
@@ -40,6 +41,8 @@
   jquery-table {
     display: flex;
     height: clamp(320px, 50vh, 560px);
+    --jqt-header-height: 40px;
+    --jqt-footer-height: 40px;
   }
 }
 
@@ -50,5 +53,18 @@
 
   .activity-page {
     padding: 12px;
+  }
+}
+
+.activity-reports-tabs {
+  ::ng-deep .mdc-tab {
+    padding: 0 16px;
+    min-width: 0;
+    margin: 16px;
+    gap: 8px;
+  }
+
+  ::ng-deep .mdc-tab__text-label {
+    letter-spacing: normal;
   }
 }

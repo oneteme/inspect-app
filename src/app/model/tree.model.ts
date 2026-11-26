@@ -433,7 +433,7 @@ export class RestRequestNode implements Node<Label>, Link<Label> {
     if (this.nodeObject?.path)     rows.push({ icon: 'route',    label: 'Chemin',   value: this.nodeObject.path, color: '#0ea5e9' });
     if (this.nodeObject?.protocol) rows.push({ icon: 'lock',     label: 'Protocole', value: this.nodeObject.protocol, color: '#8b5cf6' });
     if (this.nodeObject?.authScheme) rows.push({ icon: 'security', label: 'Auth',    value: this.nodeObject.authScheme, color: '#10b981' });
-    if (this.nodeObject?.user)     rows.push({ icon: 'person',   label: 'Utilisateur', value: this.nodeObject.user, color: '#f59e0b' });
+    if (this.nodeObject?.user)     rows.push({ icon: 'badge',    label: 'Utilisateur', value: this.nodeObject.user, color: '#f59e0b' });
     return rows;
   }
 

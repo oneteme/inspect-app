@@ -12,7 +12,7 @@ import {ExceptionInfo, HttpRequestStage, InstanceEnvironment, RestRequest} from 
 import {DataGroup, DataItem, TimelineOptions} from "vis-timeline";
 import {DatePipe} from "@angular/common";
 import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
-import {TabData} from "../../session/_component/detail-session.component";
+import {TabData} from "../../../../shared/_component/vertical-tabs/vertical-tabs.component";
 import {MatDialog} from "@angular/material/dialog";
 import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
 
@@ -55,7 +55,7 @@ export class DetailRestView implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([params, queryParams]) => {
         this.params = {idRest: params.id_request, namespace: queryParams.namespace || app.defaultNamespace};
-        this._pageTitleService.set({ icon: 'public', iconOutlined: true, title: 'Flux HTTP • ' + params.id_request, subtitle: 'Communications externes' });
+        this._pageTitleService.set({ icon: 'public', iconOutlined: true, title: 'Flux HTTP', copyValue: params.id_request, subtitle: 'Communications externes' });
         this.getRequest();
       }
     });

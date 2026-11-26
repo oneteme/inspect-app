@@ -214,10 +214,24 @@ export interface LogEntry {
   message: string;
   thread: string;
   action: string;
-  stacktrace: string;
+  instanceEnv: string;
+  startMs: number;
+  hasStack: boolean;
 }
 
 export interface StagePayload {
   args: string[];
   count: number[];
+}
+
+export interface BrowserConfigDto {
+  deviceDisplayResolution: string;
+  deviceOrientation: string;
+  deviceConnectivity: string;
+  saveData: boolean;
+  windowViewportBounds: string;
+  windowZoomLevel: string;
+  userLanguage: string;
+  userTheme: string;
+  instanceId: string;
 }

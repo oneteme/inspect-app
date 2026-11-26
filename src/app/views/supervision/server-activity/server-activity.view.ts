@@ -15,7 +15,7 @@ import {
   StacktraceDialogComponent
 } from '../../../shared/_component/exception-display/stacktrace-dialog/stacktrace-dialog.component';
 import {DatabaseInfoModalComponent} from '../_component/database-info-modal/database-info-modal.component';
-import {LOG_TABLE_CONFIG} from '../../../shared/_component/table/table.config';
+import {LOG_TABLE_CONFIG, LOG_SYSTEM_TABLE_CONFIG} from '../../../shared/_component/table/table.config';
 import {app} from '../../../../environments/environment';
 import {getDefaultRelativePeriod} from '../../../shared/period-filter';
 import {IPeriod} from '../../../model/conf.model';
@@ -59,7 +59,8 @@ export class ServerActivityView implements OnDestroy {
   private readonly _dialog = inject(MatDialog);
   private readonly _destroy$ = new Subject<void>();
 
-  readonly tableConfig: TableProvider<LogEntry> = LOG_TABLE_CONFIG;
+  readonly anomalyAppTabConfig: TableProvider<LogEntry> = LOG_TABLE_CONFIG;
+  readonly anomalySystemTabConfig: TableProvider<LogEntry> = LOG_SYSTEM_TABLE_CONFIG;
   readonly formGroup = new FormGroup({
     range: new FormGroup({
       start: new FormControl<Date | null>(null, [Validators.required]),
@@ -77,6 +78,7 @@ export class ServerActivityView implements OnDestroy {
   instanceTraceByPeriod: PeriodTraceRow[] = [];
   sequenceLossData: SequenceLossRow[] = [];
   logEntryByPeriod: LogEntry[] = [];
+  logSystemByPeriod: LogEntry[] = [];
   traceStat = 0;
   isLoading = false;
   isLoadingTrace = false;
@@ -91,6 +93,7 @@ export class ServerActivityView implements OnDestroy {
   schemaSizeMb = '';
   databaseSizeMb = '';
   databaseRatio = '...';
+  selectedTabIndex: number = 0;
 
   readonly USAGE_INSTANCE_TRACE_BY_PERIOD_LINE: ChartProvider<string, number> = {
     height: 335,
@@ -226,6 +229,11 @@ export class ServerActivityView implements OnDestroy {
                   catchError(() => EMPTY),
                   finalize(() => this.isLoadingLogs = false)
               ),
+              this._logEntryService.getSystemActivityLogs(this.params).pipe(
+                  tap(logs => this.logSystemByPeriod = logs),
+                  catchError(() => EMPTY),
+                  finalize(() => this.isLoadingLogs = false)
+              ),
               this._instanceService.getInstancesByPeriod({namespace: this.params.namespace, start, end}).pipe(
                   tap(instances => {
                     this.appNames = [...new Set(instances.map(instance => instance.appName).filter(Boolean))];
@@ -266,8 +274,12 @@ export class ServerActivityView implements OnDestroy {
   }
 
   openLogStacktrace(row: LogEntry): void {
-    this._dialog.open(StacktraceDialogComponent, {
-      data: {message: row.message, stack: row.stacktrace}
+    this._logEntryService.getStacktrace(row.instanceEnv, row.startMs).subscribe(stack => {
+      this._dialog.open(StacktraceDialogComponent, {
+        width: '80vw',
+        height: '60vh',
+        data: {message: row.message, stack}
+      });
     });
   }
 

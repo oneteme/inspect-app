@@ -12,7 +12,7 @@ import {DurationPipe} from "../../../../shared/pipe/duration.pipe";
 import {Constants, INFINITY, STATUS} from "../../../constants";
 import {ExceptionInfo, FtpRequest, FtpRequestStage, InstanceEnvironment} from "../../../../model/trace.model";
 import {RequestType} from "../../../../model/request.model";
-import {TabData} from "../../session/_component/detail-session.component";
+import {TabData} from "../../../../shared/_component/vertical-tabs/vertical-tabs.component";
 import {MatDialog} from "@angular/material/dialog";
 import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
 
@@ -57,7 +57,7 @@ export class DetailFtpView implements OnInit, OnDestroy {
     ]).subscribe({
       next: ([params, queryParams]) => {
         this.params = {idFtp: params.id_request, namespace: queryParams.namespace || app.defaultNamespace};
-        this._pageTitleService.set({ icon: 'smb_share', iconOutlined: true, title: 'Flux FTP • ' + params.id_request, subtitle: 'Communications externes' });
+        this._pageTitleService.set({ icon: 'smb_share', iconOutlined: true, title: 'Flux FTP', copyValue: params.id_request, subtitle: 'Communications externes' });
         this.getRequest();
       }
     });

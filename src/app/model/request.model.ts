@@ -14,7 +14,6 @@ export interface RestSessionDto extends RestSession {
 
 export interface MainSessionDto extends MainSession {
   appName: string;
-  address: string;
   status: number;
 }
 
@@ -96,5 +95,7 @@ export interface DatabaseInfo {
 export interface DatabaseTableInfo {
   schema: string;
   table_name: string;
-  size: string;
+  table_size: string;
+  indexes_size: string;
+  total_size: string;
 }

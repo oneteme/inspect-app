@@ -2,6 +2,7 @@ import { ChartPeriodGranularity, comparePeriodLabels, formatPeriodLabel, PERIOD_
 import { DatePipe } from "@angular/common";
 import {ChartGroup} from "../model/chart.model";
 import { Filter, FilterMap, Operation } from "../views/constants";
+import { statusTrancheLabel } from "../views/kpi/kpi.config";
 import { makeDateTimePeriod, makeDateTimePeriodFrom } from "src/environments/environment";
 
 export class Utils {
@@ -199,10 +200,15 @@ export function recreateDate(chartGroup: string, row: any, start: Date): {start:
     }
 }
 
+function isSameLocalDay(a: Date, b: Date): boolean {
+    return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
 export function periodManagement(start: Date, end: Date): string {
     var dayDiff = (end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000);
 
-    if (dayDiff <= 1) { // 24 heures
+    // Une fenêtre de moins de 24 h à cheval sur deux jours garde les jours : les heures ne doivent pas fusionner.
+    if (dayDiff <= 1 && isSameLocalDay(start, new Date(end.getTime() - 1))) { // 24 heures
         return ChartGroup.byHour;
     }
     if (dayDiff <= 24) {
@@ -302,6 +308,33 @@ export function resolvePeriodGranularity(optionId: string | undefined, start: Da
     return SERVER_GROUP_BY_PERIOD_OPTION[optionId] ?? optionId;
 }
 
+/** Granularités serveur d'un graphique : `axis` pour la Date de l'axe (X ou Grouper par, jamais les deux) et `filter` pour le filtre Date. */
+export interface PeriodGranularities {
+    axis: string;
+    filter: string;
+}
+
+export interface PeriodGranularityState {
+    selectedX?: string;
+    selectedXOption?: string;
+    selectedGroupBy?: string;
+    selectedGroupByOption?: string;
+    selectedSliceOptions?: Record<string, string>;
+}
+
+/** Chaque menu garde sa propre variante ; une variante non choisie vaut « Automatique ». */
+export function resolvePeriodGranularities(state: PeriodGranularityState, start: Date, end: Date): PeriodGranularities {
+    const axisIsDate = state.selectedX === 'date' || state.selectedGroupBy === 'date';
+    const axisOption = state.selectedX === 'date'
+        ? state.selectedXOption
+        : (state.selectedGroupBy === 'date' ? state.selectedGroupByOption : undefined);
+    const axis = resolvePeriodGranularity(axisOption, start, end);
+    const filter = resolvePeriodGranularity(state.selectedSliceOptions?.['date'], start, end);
+    // Le filtre Date→Heure reste en couples jour/heure (cf. dateHourCriteria) ; un axe Date en « Automatique » suit ce bucket composite.
+    const promoteAxis = axisIsDate && axis === 'hour' && filter === 'dateHour';
+    return { axis: promoteAxis ? 'dateHour' : axis, filter };
+}
+
 /**
  * Formate les libellés de période (buckets UTC renvoyés par le serveur) en français et les trie chronologiquement.
  * `datePipe` n'est plus utilisé, il reste accepté pour les appelants existants.
@@ -328,6 +361,20 @@ export function buildPeriodSliceDisplay(groupedBy: string, from?: Date): { forma
         formatLabel: raw => formatPeriodLabel(raw, granularity),
         compareKeys: (a, b) => comparePeriodLabels(a, b, granularity, from),
     };
+}
+
+/** Renvoie `current` à l'identique si la granularité n'a pas changé, pour éviter de reconstruire le graphique. */
+export function resolveViewGranularity(state: PeriodGranularityState, current: PeriodGranularities, start: Date, end: Date): PeriodGranularities {
+    const next = resolvePeriodGranularities(state, start, end);
+    return next.axis === current.axis && next.filter === current.filter ? current : next;
+}
+
+/** Libellés et tri des tranches d'un menu : statut (`status_tranche`) ou date selon la granularité du menu. */
+export function resolvePeriodSliceDisplay(filterKey: string, granularity: string, from?: Date) {
+    if (filterKey === 'status_tranche') {
+        return { formatLabel: statusTrancheLabel, compareKeys: (a: string, b: string) => a.localeCompare(b) };
+    }
+    return filterKey === 'date' ? buildPeriodSliceDisplay(granularity, from) : undefined;
 }
 
 

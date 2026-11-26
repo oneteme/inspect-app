@@ -4,7 +4,7 @@ import {RouterModule} from '@angular/router';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {MY_DATE_FORMATS, SharedModule} from '../shared/shared.module';
+import {SharedModule} from '../shared/shared.module';
 import {ChartComponent} from "@oneteme/jquery-echarts";
 import {OrganizerButtonModule, SlicePanelComponent} from "@oneteme/jquery-organizer";
 import {SearchRestView} from "./search/session/rest/search-rest.view";
@@ -31,14 +31,10 @@ import {DetailTimelineComponent} from "./detail/session/_component/timeline/deta
 import {DetailRequestView} from "./detail/request/detail-request.view";
 import {DetailRestView} from "./detail/request/rest/detail-rest.view";
 import {MailTableComponent} from "./detail/request/smtp/_component/mail-table/mail-table.component";
-import {
-  ServerInstanceSelectorDialogComponent
-} from "./supervision/_component/server-instance-selector-dialog/server-instance-selector-dialog.component";
+import {ServerInstanceSelectorDialogComponent} from "./supervision/_component/server-instance-selector-dialog/server-instance-selector-dialog.component";
 import {ServerSupervisionView} from "./supervision/server-supervision/server-supervision.view";
 import {ServerActivityView} from "./supervision/server-activity/server-activity.view";
-import {
-  DatabaseInfoModalComponent
-} from "./supervision/_component/database-info-modal/database-info-modal.component";
+import {DatabaseInfoModalComponent} from "./supervision/_component/database-info-modal/database-info-modal.component";
 import {InstanceComponent} from './detail/instance/instance.component';
 import {InstanceTableComponent} from './detail/instance/_component/instance-table/instance-table.component';
 import {ParameterTableComponent} from "./detail/instance/_component/parameter-table/parameter-table.component";
@@ -64,10 +60,10 @@ import {DependencyChartComponent} from "./kpi/_component/dependency-chart/depend
 import {MediaTypeChartComponent} from "./kpi/_component/media-type-chart/media-type-chart.component";
 import {DependentChartComponent} from "./kpi/_component/dependent-chart/dependent-chart.component";
 import {StartupComponent} from "./kpi/session/startup/startup.component";
-import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.component";
 import {CompareView} from "./compare/compare.view";
 import {AnalyticsView} from "./analytics/analytics.view";
 import {SearchMainEventView} from "./search/event/main/search-main-event.view";
+import {BrowserConfigModalComponent} from "../shared/_component/session-info-modal/browser-config-modal.component";
 import { DashboardNewComponent } from "./dashboard/new/dashboard-new.component";
 import {DateAdapter, MAT_DATE_FORMATS} from "@angular/material/core";
 import {CustomDateAdapter} from "../shared/material/custom-date-adapter";
@@ -112,19 +108,19 @@ import {DashboardDetailViewNewComponent} from "./dashboard/new/component/detail-
     DashboardComponent,
     ArchitectureView,
     TreeView,
-    NumberFormatterPipe,
     CompactNumberPipe,
     SearchRequestView,
     MailTableComponent,
     ServerInstanceSelectorDialogComponent,
     ServerSupervisionView,
     ServerActivityView,
-    DatabaseInfoModalComponent,
     InstanceComponent,
     InstanceTableComponent,
     ParameterTableComponent,
     DashboardInstancesTableComponent,
     DashboardDetailViewComponent,
+    DatabaseInfoModalComponent,
+    BrowserConfigModalComponent,
     DashboardNewComponent,
     DashboardDetailViewNewComponent,
 
@@ -148,7 +144,6 @@ import {DashboardDetailViewNewComponent} from "./dashboard/new/component/detail-
     DependencyChartComponent,
     DependentChartComponent,
     MediaTypeChartComponent,
-    UserChartComponent,
     CompareView,
     AnalyticsView
   ],

@@ -1,4 +1,6 @@
 import {Component, inject, Input, OnChanges, SimpleChanges} from "@angular/core";
+import {DomSanitizer} from "@angular/platform-browser";
+import {MatIconRegistry} from "@angular/material/icon";
 import {EnvRouter} from "../../../../service/router.service";
 import {MainSessionView, RestSessionView} from "../../../../model/request.model";
 import {ExceptionInfo, InstanceEnvironment, SessionEvent} from "../../../../model/trace.model";
@@ -8,17 +10,7 @@ import {DatabaseRequestService} from "../../../../service/jquery/database-reques
 import {FtpRequestService} from "../../../../service/jquery/ftp-request.service";
 import {SmtpRequestService} from "../../../../service/jquery/smtp-request.service";
 import {LdapRequestService} from "../../../../service/jquery/ldap-request.service";
-
-export interface TabData {
-  label: string;
-  icon: string;
-  count: number;
-  visible: boolean;
-  type: string;
-  hasError: boolean;
-  errorCount: number;
-}
-
+import {TabData} from "../../../../shared/_component/vertical-tabs/vertical-tabs.component";
 
 @Component({
   selector: 'detail-session',
@@ -32,6 +24,10 @@ export class DetailSessionComponent implements OnChanges {
   private readonly _ftpRequestService = inject(FtpRequestService);
   private readonly _smtpRequestService = inject(SmtpRequestService);
   private readonly _ldapRequestService = inject(LdapRequestService);
+
+  constructor() {
+    inject(MatIconRegistry).addSvgIcon('local-code', inject(DomSanitizer).bypassSecurityTrustResourceUrl('./assets/local-code.svg'));
+  }
 
   readonly restLazyLoader = (columns: string[]) => this._restRequestService.getRequestList({'join': 'instance', 'parent.eq': this.session.id}, columns);
   readonly databaseLazyLoader = (columns: string[]) => this._databaseRequestService.getRequestList({'join': 'instance', 'parent.eq': this.session.id}, columns);
@@ -109,21 +105,13 @@ export class DetailSessionComponent implements OnChanges {
       },
       {
         label: 'LOCAL',
-        icon: 'memory',
+        icon: '',
+        svgIcon: 'local-code',
         count: this.session.localRequests?.length || 0,
         visible: (this.session.requestsMask & 1) > 0,
         type: 'local',
         hasError: this.hasLocalErrors(),
         errorCount: this.getLocalErrorCount()
-      },
-      {
-        label: 'Stages',
-        icon: 'view_object_track',
-        count: 0,
-        visible: !!this.session['httpSessionStages']?.length,
-        type: 'stage',
-        hasError: false,
-        errorCount: 0
       },
       {
         label: 'Événements',
@@ -133,6 +121,15 @@ export class DetailSessionComponent implements OnChanges {
         type: 'action',
         hasError: this.sessionExceptions?.length > 0,
         errorCount: this.sessionExceptions?.length || 0
+      },
+      {
+        label: 'Stages',
+        icon: 'view_object_track',
+        count: 0,
+        visible: !!this.session['httpSessionStages']?.length,
+        type: 'stage',
+        hasError: false,
+        errorCount: 0
       },
       {
         label: 'Chronologie',

@@ -4,7 +4,7 @@ import {Observable, map} from "rxjs";
 import {JdbcExceptionsByPeriodAndAppname} from "../../model/jquery.model";
 import {DatabaseInfo, DatabaseRequestDto, DatabaseTableInfo} from "../../model/request.model";
 import {ChartFilterSelection, ChartItem} from "../../views/kpi/kpi.config";
-import {DATE_HOUR_COLUMNS, fetchGroupedRows, groupColumn, groupOrder, isDateHour, packDateHour} from "./kpi-date-granularity";
+import {applyGroupOptions, DATE_HOUR_COLUMNS, fetchGroupedRows, groupColumn, groupedRequestContext, isDateHour, packDateHour} from "./kpi-date-granularity";
 
 /** Colonnes de base de la liste JDBC ; l'alias (`colonne:alias`) donne la clé de la réponse. */
 const DATABASE_REQUEST_LIST_COLUMNS = 'id,host,db:name,command,schema,status,start,end,user';
@@ -74,26 +74,19 @@ export class DatabaseRequestService {
 
     getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem },
               filters: {namespace: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], selections?: ChartFilterSelection[] }): Observable<any[]> {
-        const groupAlias = data.group.jquery.buildAlias();
-        const dateHour = isDateHour(filters.groupedBy, data.group.key);
+        const ctx = groupedRequestContext(data, filters);
         let args: any = {
-            'select': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${groupColumn(data.group, dateHour)}`,
+            'select': `${data.series.map(d => data.indicator.jquery.value(d.jquery.value()) + ':' + data.indicator.jquery.buildAlias(d.jquery.buildAlias())).join(',')},${groupColumn(data.group, ctx.groupDateHour)}`,
             'instance_env': 'instance.id',
             'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
-        if(data.stack) {
-            args['select'] += `,${data.stack.jquery.value()}:${data.stack.jquery.buildAlias()}`;
-            args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
-        }
-        if(data.group.jquery.order){
-            args['order'] = groupOrder(data.group, dateHour);
-        }
+        applyGroupOptions(args, data, ctx, data.stack ? `${data.stack.jquery.value()}:${data.stack.jquery.buildAlias()}` : undefined);
         if(filters.hosts?.length && !args['host.in']){
             args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
         }
-        return fetchGroupedRows(request => this.getDatabaseRequest<any[]>(request), args, filters.selections, dateHour, groupAlias);
+        return fetchGroupedRows(request => this.getDatabaseRequest<any[]>(request), args, filters.selections, ctx.dateHour, ctx.packAlias);
     }
 
     getFilters(filter: ChartItem, filters: {namespace: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], method?: string[] }) {

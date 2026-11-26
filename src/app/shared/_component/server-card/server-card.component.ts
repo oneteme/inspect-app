@@ -7,6 +7,8 @@ import {MatMenu} from "@angular/material/menu";
 import {EnvRouter} from "../../../service/router.service";
 import {DatePipe} from "@angular/common";
 import {resolveInstanceStatus} from "../status-indicator/status-indicator.component";
+import {BrowserConfigModalComponent} from "../session-info-modal/browser-config-modal.component";
+import {MatDialog} from "@angular/material/dialog";
 
 @Component({
   selector: 'app-server-card',
@@ -18,6 +20,7 @@ export class ServerCardComponent {
   private readonly _datePipe = inject(DatePipe);
   protected readonly _router: EnvRouter = inject(EnvRouter);
   private readonly _activatedRoute = inject(ActivatedRoute);
+  private readonly _dialog = inject(MatDialog);
 
   date = new Date();
   _instance: InstanceEnvironment;
@@ -57,6 +60,19 @@ export class ServerCardComponent {
     this._router.navigateOnClick(event, ['/instance/detail', this._instance.id], { queryParams: {namespace: this._instance.namespace} });
   }
 
+  openBrowserInfo(): void {
+    this._dialog.open(BrowserConfigModalComponent, {
+      width: '580px',
+      maxWidth: '94vw',
+      maxHeight: '90vh',
+      data: {
+        instanceId: this._instance.id,
+        os: this._instance.os || null,
+        re: this._instance.re || null
+      }
+    });
+  }
+
   private buildSupervisionQueryParams(): Params {
     if (this.supervisionQueryParams) {
       return {
@@ -89,5 +105,9 @@ export class ServerCardComponent {
     }
 
     return queryParams;
+  }
+
+  isInstanceServer(type: string): boolean {
+    return type === 'SERVER';
   }
 }

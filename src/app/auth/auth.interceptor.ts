@@ -1,29 +1,53 @@
+
 import { Injectable } from '@angular/core';
-import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import {
+    HttpEvent,
+    HttpHandler,
+    HttpInterceptor,
+    HttpRequest
+} from '@angular/common/http';
+import { EMPTY, Observable } from 'rxjs';
 import { AuthService } from './auth.service';
+import { Router } from '@angular/router';
+import { resolvedAuth } from './auth-code-flow.config';
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-  constructor(private authService: AuthService) {}
+    constructor(
+        private authService: AuthService,
+        private router: Router
+    ) {}
 
-  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    intercept(
+        req: HttpRequest<unknown>,
+        next: HttpHandler
+    ): Observable<HttpEvent<unknown>> {
 
-    const accessToken = this.authService.getAccessToken();
-
-    // On ajoute le token uniquement si présent
-    if (accessToken) {
-
-      const authReq = req.clone({
-        setHeaders: {
-          Authorization: `Bearer ${accessToken}`
+        if (!resolvedAuth.enabled || !this.authService.isInitialized()) {
+            return next.handle(req);
         }
-      });
 
-      return next.handle(authReq);
+        const token = this.authService.getToken();
+
+        // not logged in OR no token (expired or deleted)
+        if (!this.authService.isLogged() || !token) {
+
+            // Initial navigation is handled by the auth guard.
+            if (!this.router.navigated) {
+                return EMPTY;
+            }
+
+            this.authService.login(this.router.url);
+            return EMPTY;
+        }
+
+        return next.handle(
+            req.clone({
+                setHeaders: {
+                    Authorization: `Bearer ${token}`
+                }
+            })
+        );
     }
-
-    return next.handle(req);
-  }
 }
