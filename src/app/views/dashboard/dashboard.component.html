@@ -113,18 +113,16 @@
                             [attr.data-inspect-location]="MAPPING_TYPE['deploiment'].title + ' • ' + MAPPING_TYPE['dashboard'].title"
                             data-inspect-scope="Menu latéral"
                             data-inspect-track="Instances actives en attente"
-                            (click)="selectServerStatus('pending')"
                             [class.dov-stat-sb-active]="serverStatusFilter === 'pending' && showOverview">
-                        <span class="dov-stat-sb-val">{{ hasNoData ? '--' : pendingServerStat }}</span>
+                        <span class="dov-stat-sb-val">--</span>
                         <span class="dov-stat-sb-lbl">En attente</span>
                     </button>
                     <button type="button" class="dov-stat-sb sb-offline"
                             [attr.data-inspect-location]="MAPPING_TYPE['deploiment'].title + ' • ' + MAPPING_TYPE['dashboard'].title"
                             data-inspect-scope="Menu latéral"
                             data-inspect-track="Instances actives hors ligne"
-                            (click)="selectServerStatus('offline')"
                             [class.dov-stat-sb-active]="serverStatusFilter === 'offline' && showOverview">
-                        <span class="dov-stat-sb-val">{{ hasNoData ? '--' : offlineServerStat }}</span>
+                        <span class="dov-stat-sb-val">--</span>
                         <span class="dov-stat-sb-lbl">Hors ligne</span>
                     </button>
                 </div>
