@@ -1,5 +1,5 @@
 import {Component, inject, OnDestroy} from "@angular/core";
-import {SessionEventService} from "../../service/session-event.service";
+import {EventSessionService} from "../../service/event-session.service";
 import {ActivatedRoute} from "@angular/router";
 import {EnvRouter} from "../../service/router.service";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
@@ -27,7 +27,7 @@ import {TraceService} from "../../service/trace.service";
     ]
 })
 export class AnalyticsView implements OnDestroy {
-    private readonly _sessionEventService = inject(SessionEventService);
+    private readonly _sessionEventService = inject(EventSessionService);
     private readonly _activatedRoute = inject(ActivatedRoute);
     private readonly _router = inject(EnvRouter);
     private readonly _mainSessionService = inject(MainSessionService);

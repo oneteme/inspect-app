@@ -96,7 +96,7 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getSessionExceptions(filters: {namespace: string, start: Date, end: Date, groupedBy: string}): Observable<ExceptionsByPeriodAndAppname[]> {
+    getExceptionByDate(filters: {namespace: string, start: Date, end: Date, groupedBy: string}): Observable<ExceptionsByPeriodAndAppname[]> {
         let args: any = {
             "select": `start.${filters.groupedBy}:date,error_type:errorType,count:count,count.sum.over(partition(date)):countok,start.year:year`,
             'join': 'instance',
@@ -107,6 +107,33 @@ export class RestSessionService {
             "order": "date.desc,count.desc"
         }
         return this.getRestSession(args);
+    }
+
+    getExceptionByDateNew(namespace: string, start: Date, end: Date, groupedBy: string): Observable<{date: string, year: number, label: string, count: number, countTotal: number}[]> {
+        let args: any = {
+            'select': `start.${groupedBy}:date,error_type:label,count:count,count.sum.over(partition(date)):countTotal,start.year:year`,
+            'join': 'instance',
+            'start.ge': start.toISOString(),
+            'start.lt': end.toISOString(),
+            'instance.namespace': namespace,
+            'label.notNull': '',
+            'order': 'date.desc,count.desc'
+        }
+        return this.getRestSession(args);
+    }
+
+    getCountException(filters: { namespace: string, start: Date, end: Date }): Observable<{countError: number, countTotal: number, type: string}> {
+        let args = {
+            'select': `count_error:countError,count:countTotal`,
+            'join': 'instance',
+            'instance.namespace': filters.namespace,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'count.gt': 0
+        }
+        return this.getRestSession(args).pipe(map(data => {
+           return {...data[0], type: 'rest'};
+        }));
     }
 
     getCountByNamespace(filters: {namespace: string, start: Date, end: Date}): Observable<{total: number, errors: number}> {

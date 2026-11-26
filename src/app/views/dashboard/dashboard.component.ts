@@ -35,7 +35,7 @@ import {CustomDateAdapter} from '../../shared/material/custom-date-adapter';
 import {MY_DATE_FORMATS} from '../../shared/shared.module';
 import {MAT_DATE_RANGE_SELECTION_STRATEGY} from '@angular/material/datepicker';
 import {CustomDateRangeSelectionStrategy} from '../../shared/material/custom-date-range-selection-strategy';
-import {SessionEventService} from "../../service/session-event.service";
+import {EventSessionService} from "../../service/event-session.service";
 
 @Component({
     templateUrl: './dashboard.component.html',
@@ -64,7 +64,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     private readonly _instanceTraceService = inject(InstanceTraceService);
     private readonly _cdr = inject(ChangeDetectorRef);
     private readonly _pageTitleService = inject(PageTitleService);
-    private readonly _sessionEventService = inject(SessionEventService);
+    private readonly _sessionEventService = inject(EventSessionService);
 
     constants = Constants;
 
@@ -848,7 +848,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.serverHealthData = [];
         this.deployTableRows = [];
         this._serverHealthSub?.unsubscribe();
-        this._serverHealthSub = this._instanceService.getLastServerStart({ namespace })
+        this._serverHealthSub = this._instanceService.getLastServerStart(namespace)
             .pipe(
                 tap((servers: LastServerStart[]) => {
                     this.serverHealthLoading = false;
@@ -1607,14 +1607,14 @@ export class DashboardComponent implements OnInit, OnDestroy {
             sessionExceptionsTable: {
                 loaded: false,
                 isLoading: false,
-                observable: this._sessionService.getSessionExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy })
+                observable: this._sessionService.getExceptionByDate({ namespace: namespace, start: start, end: end, groupedBy: groupedBy })
                     .pipe(map((result: any[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
                         return result;
                     }))
             },
             scheduleExceptionTable: {
-                observable: this._mainService.getMainExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, mainType: 'SCHEDULE' })
+                observable: this._mainService.getExceptionByDate({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, mainType: 'SCHEDULE' })
                     .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
                         const dateMap = new Map<string, number>();
@@ -1627,7 +1627,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     }))
             },
             viewExceptionTable: {
-                observable: this._mainService.getMainExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, mainType: 'VIEW' })
+                observable: this._mainService.getExceptionByDate({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, mainType: 'VIEW' })
                     .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
                         const dateMap = new Map<string, number>();
@@ -1640,7 +1640,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
                     }))
             },
             startupExceptionTable: {
-                observable: this._mainService.getMainExceptions({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, mainType: 'STARTUP' })
+                observable: this._mainService.getExceptionByDate({ namespace: namespace, start: start, end: end, groupedBy: groupedBy, mainType: 'STARTUP' })
                     .pipe(map((result: ExceptionsByPeriodAndAppname[]) => {
                         formatters[groupedBy](result, this._datePipe, 'stringDate');
                         const dateMap = new Map<string, number>();
@@ -1658,11 +1658,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
         const groupedBy = periodManagement(start, end);
         const p = { namespace, start, end, groupedBy, app_name };
         return {
-            restRequestExceptionsTable: { observable: this.buildExceptionObservable(this._restService.getRestExceptions(p), groupedBy, 'REST', 'rest', start, end) },
-            databaseRequestExceptionsTable: { observable: this.buildExceptionObservable(this._datebaseService.getJdbcExceptions(p), groupedBy, 'JDBC', 'jdbc', start, end) },
-            ftpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ftpService.getFtpExceptions(p), groupedBy, 'FTP', 'ftp', start, end) },
-            smtpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._smtpService.getSmtpExceptions(p), groupedBy, 'SMTP', 'smtp', start, end) },
-            ldapRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ldapService.getLdapExceptions(p), groupedBy, 'LDAP', 'ldap', start, end) },
+            restRequestExceptionsTable: { observable: this.buildExceptionObservable(this._restService.getExceptionByDate(p), groupedBy, 'REST', 'rest', start, end) },
+            databaseRequestExceptionsTable: { observable: this.buildExceptionObservable(this._datebaseService.getExceptionByDate(p), groupedBy, 'JDBC', 'jdbc', start, end) },
+            ftpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ftpService.getExceptionByDate(p), groupedBy, 'FTP', 'ftp', start, end) },
+            smtpRequestExceptionsTable: { observable: this.buildExceptionObservable(this._smtpService.getExceptionByDate(p), groupedBy, 'SMTP', 'smtp', start, end) },
+            ldapRequestExceptionsTable: { observable: this.buildExceptionObservable(this._ldapService.getExceptionByDate(p), groupedBy, 'LDAP', 'ldap', start, end) },
         };
     }
 

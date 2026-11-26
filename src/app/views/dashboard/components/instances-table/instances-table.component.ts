@@ -20,7 +20,6 @@ export class DashboardInstancesTableComponent implements OnChanges {
     @Input() isStatusLoading = true;
     @Input() today: Date = new Date();
     @Input() versionColor: Record<string, string> = {};
-    @Input() instanceSearchQuery = '';
 
     @Output() statusIndicatorClick = new EventEmitter<{ event: MouseEvent; row: any }>();
     @Output() serverClick = new EventEmitter<{ event: MouseEvent; row: any }>();
@@ -32,7 +31,7 @@ export class DashboardInstancesTableComponent implements OnChanges {
             const nowMs = this.today.getTime();
             this.tableConfig = {
                 ...DEPLOIEMENT_TABLE_CONFIG,
-                search: { enabled: true, initialQuery: this.instanceSearchQuery || undefined },
+                search: { enabled: true },
                 columns: DEPLOIEMENT_TABLE_CONFIG.columns?.map(col =>
                     col.key === 'duration'
                         ? { ...col, searchValue: (row: any) => formatDuration((nowMs - row.start) / 1000) }

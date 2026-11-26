@@ -9,11 +9,6 @@ import {MachineUsageService} from "../../../service/jquery/resource-usage.servic
 import {ChartProvider, field} from "@oneteme/jquery-core";
 import {InstanceTraceService} from "../../../service/jquery/instance-trace.service";
 import {MatDialog} from "@angular/material/dialog";
-import {DateAdapter, MAT_DATE_FORMATS} from "@angular/material/core";
-import {CustomDateAdapter} from "../../../shared/material/custom-date-adapter";
-import {MY_DATE_FORMATS} from "../../../shared/shared.module";
-import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
-import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-date-range-selection-strategy";
 import {EnvRouter} from "../../../service/router.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
 import {
@@ -22,18 +17,21 @@ import {
 import {MatSnackBar} from "@angular/material/snack-bar";
 import {PulseDialogComponent} from "../../../shared/_component/pulse/dialog/pulse-dialog.component";
 import {PageTitleService} from '../../../service/page-title.service';
-import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, DEFAULT_PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
+import {
+  DEFAULT_PERIOD_QUICK_RANGES,
+  getDefaultRelativePeriod,
+  getQuickRangeDates,
+  getQuickRangeStep,
+  isDefaultRelativePeriod,
+  PeriodQuickRange,
+  toDisplayedPeriodEnd
+} from '../../../shared/period-filter';
 import {IPeriod, IStep, IStepFrom} from '../../../model/conf.model';
 import {shallowEqual} from '../../search/session/rest/search-rest.view';
 
 @Component({
   templateUrl: './server-supervision.view.html',
-  styleUrls: ['./server-supervision.view.scss'],
-  providers: [
-    {provide: DateAdapter, useClass: CustomDateAdapter},
-    {provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS},
-    {provide: MAT_DATE_RANGE_SELECTION_STRATEGY, useClass: CustomDateRangeSelectionStrategy}
-  ]
+  styleUrls: ['./server-supervision.view.scss']
 })
 export class ServerSupervisionView implements OnInit, OnDestroy {
   private readonly _router = inject(EnvRouter);

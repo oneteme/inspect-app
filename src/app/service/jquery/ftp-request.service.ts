@@ -29,13 +29,13 @@ export class FtpRequestService {
 
     getFtp<T>(params: any): Observable<T> {
         let url = `${localStorage.getItem('server')}/jquery/request/ftp`;
-        return this.http.get<T>(url, { params: params });
+        return this.http.get<T>(url, {params: params});
     }
 
     /** Liste FTP : colonnes de base + colonnes lazy demandées. jquery renvoie start/end en ms, la page les attend en secondes. */
     getRequestList(criteria: Record<string, any>, lazyColumns: readonly string[] = []): Observable<FtpRequestDto[]> {
         const select = [FTP_REQUEST_LIST_COLUMNS, ...lazyColumns.map(c => LAZY_FTP_REQUEST_COLUMNS[c])].join(',');
-        return this.getFtp<any[]>({ ...criteria, select }).pipe(
+        return this.getFtp<any[]>({...criteria, select}).pipe(
             map(rows => rows.map(row => ({
                 ...row,
                 start: row.start / 1000,
@@ -45,10 +45,16 @@ export class FtpRequestService {
     }
 
     getHost(type: string, filters: any): Observable<{ host: string }[]> {
-        return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, { params: filters });
+        return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, {params: filters});
     }
 
-    getFtpExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<FtpSessionExceptionsByPeriodAndappname[]> {
+    getExceptionByDate(filters: {
+        namespace: string,
+        start: Date,
+        end: Date,
+        groupedBy: string,
+        app_name: string
+    }): Observable<FtpSessionExceptionsByPeriodAndappname[]> {
         let args = {
             'select': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,error_type:errorType,start.${filters.groupedBy}:date,start.year:year`,
             'join': 'instance',
@@ -57,14 +63,31 @@ export class FtpRequestService {
             'start.lt': filters.end.toISOString(),
             'order': 'date.asc'
         }
-        if(filters.app_name) {
-            args['instance.app_name.in'] = filters.app_name;
+        return this.getFtp(args);
+    }
+
+    getExceptionByDateNew(namespace: string, start: Date, end: Date, groupedBy: string): Observable<{date: string, year: number, label: string, count: number, countTotal: number}[]> {
+        let args = {
+            'select': `start.${groupedBy}:date,start.year:year,count:count,count.sum.over(partition(date)):countTotal,error_type:label`,
+            'join': 'instance',
+            'instance.namespace': namespace,
+            'start.ge': start.toISOString(),
+            'start.lt': end.toISOString(),
+            'label.notNull': '',
+            'order': 'date.asc'
         }
         return this.getFtp(args);
     }
 
-    getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem },
-              filters: {namespace: string, start: Date, end: Date, groupedBy?: string, hosts?: string[], selections?: ChartFilterSelection[] }): Observable<any[]> {
+    getCustom(data: { series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem },
+              filters: {
+                  namespace: string,
+                  start: Date,
+                  end: Date,
+                  groupedBy?: string,
+                  hosts?: string[],
+                  selections?: ChartFilterSelection[]
+              }): Observable<any[]> {
         const groupAlias = data.group.jquery.buildAlias();
         const dateHour = isDateHour(filters.groupedBy, data.group.key);
         let args: any = {
@@ -74,20 +97,26 @@ export class FtpRequestService {
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
-        if(data.stack) {
+        if (data.stack) {
             args['select'] += `,${data.stack.jquery.value()}:${data.stack.jquery.buildAlias()}`;
             args[`${data.stack.jquery.buildAlias()}.notNull`] = ''
         }
-        if(data.group.jquery.order){
+        if (data.group.jquery.order) {
             args['order'] = groupOrder(data.group, dateHour);
         }
-        if(filters.hosts?.length && !args['host.in']){
+        if (filters.hosts?.length && !args['host.in']) {
             args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
         }
         return fetchGroupedRows(request => this.getFtp<any[]>(request), args, filters.selections, dateHour, groupAlias);
     }
 
-    getFilters(filter: ChartItem, filters: {namespace: string, start: Date, end: Date, hosts: string[], groupedBy?: string }) {
+    getFilters(filter: ChartItem, filters: {
+        namespace: string,
+        start: Date,
+        end: Date,
+        hosts: string[],
+        groupedBy?: string
+    }) {
         const dateHour = isDateHour(filters.groupedBy, filter.key);
         let args: any = {
             'select': dateHour ? DATE_HOUR_COLUMNS : `${filter.jquery.value()}:${filter.jquery.buildAlias()}`,
@@ -97,11 +126,29 @@ export class FtpRequestService {
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString()
         }
-        if(filters.hosts?.length){
+        if (filters.hosts?.length) {
             args['host.in'] = filters.hosts.map(value => `"${value}"`).join(',');
         }
         return this.getFtp<any[]>(args).pipe(
             map(rows => dateHour ? packDateHour(rows, filter.jquery.buildAlias()) : rows)
         );
+    }
+
+    getCountException(filters: { namespace: string, start: Date, end: Date }): Observable<{
+        countError: number,
+        countTotal: number,
+        type: string
+    }> {
+        let args = {
+            'select': `count_error:countError,count:countTotal`,
+            'join': 'instance',
+            'instance.namespace': filters.namespace,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'count.gt': 0
+        }
+        return this.getFtp(args).pipe(map(data => {
+            return {...data[0], type: 'ftp'};
+        }));
     }
 }

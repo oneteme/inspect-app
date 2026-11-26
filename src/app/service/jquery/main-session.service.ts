@@ -53,7 +53,7 @@ export class MainSessionService {
         return this.getMainSession(args);
     }
 
-    getMainExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, mainType: string}): Observable<ExceptionsByPeriodAndAppname[]> {
+    getExceptionByDate(filters: { namespace: string, start: Date, end: Date, groupedBy: string, mainType: string}): Observable<ExceptionsByPeriodAndAppname[]> {
         let args = {
             "select": `start.${filters.groupedBy}:date,error_type,count:count,count.sum.over(partition(date)):countok,start.year:year,type:type`,
             'main_session.type': filters.mainType,
@@ -62,6 +62,32 @@ export class MainSessionService {
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             "order": "date.desc,count.desc"
+        }
+        return this.getMainSession(args);
+    }
+
+    getExceptionByDateNew(namespace: string, start: Date, end: Date, groupedBy: string, mainType: string): Observable<{date: string, year: number, label: string, count: number, countTotal: number, type: string}[]> {
+        let args = {
+            'select': `start.${groupedBy}:date,error_type:label,count:count,count.sum.over(partition(date)):countTotal,start.year:year,type:type`,
+            'main_session.type': mainType,
+            'join': 'instance',
+            'instance.namespace': namespace,
+            'start.ge': start.toISOString(),
+            'start.lt': end.toISOString(),
+            'label.notNull': '',
+            'order': 'date.desc'
+        }
+        return this.getMainSession(args);
+    }
+
+    getCountExceptionByType(filters: { namespace: string, start: Date, end: Date }): Observable<{countError: number, countTotal: number, type: string}[]> {
+        let args = {
+            'select': `count_error:countError,count:countTotal,main_session.type.lower:type`,
+            'join': 'instance',
+            'instance.namespace': filters.namespace,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'count.gt': 0
         }
         return this.getMainSession(args);
     }

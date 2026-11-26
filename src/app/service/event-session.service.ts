@@ -13,7 +13,7 @@ const LAZY_SESSION_EVENT_COLUMNS: Record<string, string> = {
 };
 
 @Injectable({ providedIn: 'root' })
-export class SessionEventService {
+export class EventSessionService {
     server = `${localStorage.getItem('server')}/v3/query`;
 
     constructor(private http: HttpClient) {
@@ -57,4 +57,48 @@ export class SessionEventService {
         return this.http.get<MainSessionType>(`${this.server}/session/main/${idSession}`);
     }
 
+    getCountByCategory(filters: { namespace: string, start: Date, end: Date }): Observable<{
+        countWarn: number,
+        countError: number,
+        countInfo: number,
+        countAction: number
+    }> {
+        let args = {
+            'select': `count_warn:countWarn,count_error:countError,count_info:countInfo,count_action:countAction`,
+            'join': 'instance',
+            'instance.namespace': filters.namespace,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString()
+        }
+        return this.http.get<{countWarn: number, countError: number, countInfo: number, countAction: number}>(`${localStorage.getItem('server')}/jquery/session/event`, {params: args})
+            .pipe(map(data => {
+                return data[0];
+            }));
+    }
+
+    getUserEventByDate(namespace: string, start: Date, end: Date, groupedBy: string): Observable<{date: string, year: number, label: string, count: number, countTotal: number}[]> {
+        let args = {
+            'select': `start.${groupedBy}:date,start.year:year,type:label,count:count,count.sum.over(partition(date)):countTotal`,
+            'join': 'instance',
+            'instance.namespace': namespace,
+            'start.ge': start.toISOString(),
+            'start.lt': end.toISOString(),
+            'label': 'Initialisation,Click,Dblclick,Scroll,Change,Tab-focus,Tab-blur,Zoom,Resize',
+            'order': 'date.asc'
+        }
+        return this.http.get<{date: string, year: number, label: string, count: number, countTotal: number}[]>(`${localStorage.getItem('server')}/jquery/session/event`, {params: args});
+    }
+
+    getLogEventByDate(namespace: string, start: Date, end: Date, groupedBy: string): Observable<{date: string, year: number, label: string, count: number, countTotal: number}[]> {
+        let args = {
+            'select': `start.${groupedBy}:date,start.year:year,type:label,count:count,count.sum.over(partition(date)):countTotal`,
+            'join': 'instance',
+            'instance.namespace': namespace,
+            'start.ge': start.toISOString(),
+            'start.lt': end.toISOString(),
+            'label': 'INFO,WARN,ERROR',
+            'order': 'date.asc'
+        }
+        return this.http.get<{date: string, year: number, label: string, count: number, countTotal: number}[]>(`${localStorage.getItem('server')}/jquery/session/event`, {params: args});
+    }
 }

@@ -186,7 +186,7 @@ export class RestRequestService {
         );
     }
 
-    getRestExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<RestSessionExceptionsByPeriodAndappname[]> {
+    getExceptionByDate(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<RestSessionExceptionsByPeriodAndappname[]> {
         let args = {
             'select': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,error_type:errorType,start.${filters.groupedBy}:date,start.year:year`,
             'join': 'instance',
@@ -195,9 +195,33 @@ export class RestRequestService {
             'start.lt': filters.end.toISOString(),
             'order': 'date.asc'
         }
-        if(filters.app_name) {
-            args['instance.app_name.in'] = filters.app_name;
+        return this.getRestRequest(args);
+    }
+
+    getExceptionByDateNew(namespace: string, start: Date, end: Date, groupedBy: string): Observable<{date: string, year: number, label: string, count: number, countTotal: number}[]> {
+        let args = {
+            'select': `start.${groupedBy}:date,start.year:year,count:count,count.sum.over(partition(date)):countTotal,error_type:label`,
+            'join': 'instance',
+            'instance.namespace': namespace,
+            'start.ge': start.toISOString(),
+            'start.lt': end.toISOString(),
+            'label.notNull': '',
+            'order': 'date.asc'
         }
         return this.getRestRequest(args);
+    }
+
+    getCountException(filters: { namespace: string, start: Date, end: Date }): Observable<{countError: number, countTotal: number, type: string}> {
+        let args = {
+            'select': `count_error:countError,count:countTotal`,
+            'join': 'instance',
+            'instance.namespace': filters.namespace,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'count.gt': 0
+        }
+        return this.getRestRequest(args).pipe(map(data => {
+            return {...data[0], type: 'rest'};
+        }));
     }
 }

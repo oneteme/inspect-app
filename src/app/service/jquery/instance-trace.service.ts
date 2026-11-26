@@ -81,8 +81,6 @@ export class InstanceTraceService {
     return this.getInstanceTrace(args);
   }
 
-
-
   getLastInstanceTrace(filters: {instance: string[]}): Observable<{id: string, date: number}[]> {
     let args: any = {
       'select': 'instance_env:id,start:date',
@@ -91,4 +89,6 @@ export class InstanceTraceService {
     }
     return this.getInstanceTrace(args);
   }
+
+
 }

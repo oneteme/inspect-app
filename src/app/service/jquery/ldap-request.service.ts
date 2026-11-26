@@ -48,7 +48,7 @@ export class LdapRequestService {
         return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, { params: filters });
     }
 
-    getLdapExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string, host?: string[],command?: string[]  }): Observable<LdapSessionExceptionsByPeriodAndappname[]> {
+    getExceptionByDate(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string, host?: string[],command?: string[]  }): Observable<LdapSessionExceptionsByPeriodAndappname[]> {
         let args = {
             'select': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,error_type:errorType,start.${filters.groupedBy}:date,start.year:year`,
             'join': 'instance',
@@ -56,8 +56,18 @@ export class LdapRequestService {
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
         }
-        if(filters.command){
-            args['command'] = filters.command.toString();
+        return this.getLdap(args);
+    }
+
+    getExceptionByDateNew(namespace: string, start: Date, end: Date, groupedBy: string): Observable<{date: string, year: number, label: string, count: number, countTotal: number}[]> {
+        let args = {
+            'select': `start.${groupedBy}:date,start.year:year,count:count,count.sum.over(partition(date)):countTotal,error_type:label`,
+            'join': 'instance',
+            'instance.namespace': namespace,
+            'start.ge': start.toISOString(),
+            'start.lt': end.toISOString(),
+            'label.notNull': '',
+            'order': 'date.asc'
         }
         return this.getLdap(args);
     }
@@ -102,5 +112,23 @@ export class LdapRequestService {
         return this.getLdap<any[]>(args).pipe(
             map(rows => dateHour ? packDateHour(rows, filter.jquery.buildAlias()) : rows)
         );
+    }
+
+    getCountException(filters: { namespace: string, start: Date, end: Date }): Observable<{
+        countError: number,
+        countTotal: number,
+        type: string
+    }> {
+        let args = {
+            'select': `count_error:countError,count:countTotal`,
+            'join': 'instance',
+            'instance.namespace': filters.namespace,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'count.gt': 0
+        }
+        return this.getLdap(args).pipe(map(data => {
+            return {...data[0], type: 'ldap'};
+        }));
     }
 }

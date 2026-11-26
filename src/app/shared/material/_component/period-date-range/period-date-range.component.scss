@@ -1,119 +1,85 @@
-.period-filter-wrapper {
-  display: flex;
-  align-items: center;
-  pointer-events: auto;
-  position: relative;
-  z-index: 1;
-}
-
 mat-form-field {
-  width: auto !important;
   min-width: 180px;
   max-width: 240px;
-  flex: 0 0 auto;
   pointer-events: auto;
-}
 
-mat-form-field.period-wide {
-  flex: 0 0 var(--period-field-width, 372px);
-  flex-basis: var(--period-field-width, 372px);
-  max-width: var(--period-field-width, 372px);
-  width: var(--period-field-width, 372px) !important;
-  min-width: var(--period-field-width, 372px);
-  transition: flex-basis .18s ease, max-width .18s ease, width .18s ease;
-  overflow: visible;
-}
+  &.period-wide-test {
+    flex: 0 0 var(--period-field-width, 372px);
+    flex-basis: var(--period-field-width, 372px);
+    max-width: var(--period-field-width, 372px);
+    width: var(--period-field-width, 372px) !important;
+    min-width: var(--period-field-width, 372px);
+    transition: min-width .18s ease, width .18s ease, max-width .18s ease, flex-basis .18s ease;
+    overflow: visible;
 
-mat-form-field.period-wide mat-date-range-input {
-  pointer-events: auto;
-  overflow: visible;
-}
+    ::ng-deep .mat-mdc-form-field-icon-suffix {
+      display: inline-flex;
+      align-items: center;
+      gap: 2px;
+      padding-right: 4px;
 
-mat-form-field.period-wide input {
-  pointer-events: auto;
-}
+      .period-inline-separator {
+        width: 1px;
+        height: 24px;
+        background: rgba(0, 0, 0, 0.12);
+      }
 
-.period-field {
-  width: var(--period-field-width, 372px) !important;
-  transition: width .18s ease, max-width .18s ease, flex-basis .18s ease;
+      .period-action-btn-test {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 36px;
+        height: 36px;
+        min-width: 36px;
+        padding: 0;
+        border-radius: 10px;
+        color: rgba(0, 0, 0, 0.68);
+        transition: color .15s ease;
 
-  .mat-mdc-form-field-icon-suffix {
-    display: inline-flex;
-    align-items: center;
-    gap: 2px;
-    padding-right: 8px;
-  }
+        &:hover {
+          color: rgba(0, 0, 0, 0.82);
+        }
 
-  .mat-datepicker-toggle {
-    margin-right: 2px;
-  }
-}
+        .mat-icon {
+          width: 20px;
+          height: 20px;
+          font-size: 20px;
+        }
 
-.period-inline-separator {
-  width: 1px;
-  height: 24px;
-  margin: 0 2px 0 4px;
-  background: rgba(0, 0, 0, 0.12);
-}
-
-.period-action-btn {
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  width: 36px !important;
-  height: 36px !important;
-  min-width: 36px !important;
-  padding: 0 !important;
-  border-radius: 10px !important;
-  color: rgba(0, 0, 0, 0.68);
-  transition: color .15s ease !important;
-
-  &:hover {
-    color: rgba(0, 0, 0, 0.82);
-  }
-
-  .mat-icon {
-    display: inline-flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    width: 20px !important;
-    height: 20px !important;
-    line-height: 20px !important;
-    font-size: 20px !important;
-    margin: 0 !important;
-  }
-
-  .mat-mdc-button-persistent-ripple,
-  .mdc-icon-button__ripple,
-  .mat-mdc-button-touch-target {
-    width: 36px !important;
-    height: 36px !important;
-    top: 50% !important;
-    left: 50% !important;
-    transform: translate(-50%, -50%) !important;
-    border-radius: 10px !important;
+        .mat-mdc-button-persistent-ripple,
+        .mdc-icon-button__ripple,
+        .mat-mdc-button-touch-target {
+          width: 36px;
+          height: 36px;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          border-radius: 10px;
+        }
+      }
+    }
   }
 }
 
 .period-quick-ranges-menu.mat-mdc-menu-panel,
 .period-quick-ranges-menu.mat-menu-panel {
-  border-radius: 14px !important;
-  min-width: 240px !important;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, .12), 0 0 0 1px rgba(0, 0, 0, .06) !important;
+  border-radius: 14px;
+  min-width: 240px;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, .12), 0 0 0 1px rgba(0, 0, 0, .06);
   overflow: hidden;
 }
 
 .period-quick-ranges-menu .mat-mdc-menu-content,
 .period-quick-ranges-menu .mat-menu-content {
-  padding: 6px !important;
+  padding: 6px;
 }
 
 .period-quick-ranges-menu .mat-mdc-menu-item,
 .period-quick-ranges-menu .mat-menu-item {
-  min-height: 42px !important;
+  min-height: 42px;
   margin: 2px 0;
-  padding: 0 14px !important;
-  border-radius: 10px !important;
+  padding: 0 14px;
+  border-radius: 10px;
 
   .mdc-list-item__primary-text,
   .mat-mdc-menu-item-text,
@@ -127,6 +93,6 @@ mat-form-field.period-wide input {
   }
 
   &:hover:not([disabled]) {
-    background: #f8fafc !important;
+    background: #f8fafc;
   }
 }

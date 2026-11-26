@@ -7,7 +7,7 @@ import {Location} from "@angular/common";
 import {catchError, combineLatest, defer, finalize, map, merge, of, Subject, switchMap, takeUntil} from "rxjs";
 import {app} from "../../../../../environments/environment";
 import {Constants, STATUS} from "../../../constants";
-import {SessionEventService} from "../../../../service/session-event.service";
+import {EventSessionService} from "../../../../service/event-session.service";
 import {MainSessionView} from "../../../../model/request.model";
 import {InstanceEnvironment} from "../../../../model/trace.model";
 import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
@@ -21,7 +21,7 @@ import {ExceptionService} from "../../../../service/jquery/exception.service";
 export class DetailSessionMainView implements OnInit, OnDestroy {
     private readonly _activatedRoute = inject(ActivatedRoute);
     private readonly _traceService = inject(TraceService);
-    private readonly _sessionEventService = inject(SessionEventService);
+    private readonly _sessionEventService = inject(EventSessionService);
     private readonly _exceptionService: ExceptionService = inject(ExceptionService);
     private readonly $destroy = new Subject<void>();
     private readonly _dialog = inject(MatDialog);

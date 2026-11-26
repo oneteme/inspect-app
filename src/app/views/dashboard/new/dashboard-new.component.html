@@ -1,46 +1,121 @@
 <page-panel panelTitle="Filtres">
   <form class="panel-filter">
-    <div class="period-filter-wrapper">
-      <mat-form-field class="no-subscript period-wide period-field"
-                      [style.--period-field-width]="isDefaultPeriod() ? '372px' : '408px'"
-                      appearance="outline">
-        <mat-label>Période</mat-label>
-        <mat-date-range-input [formGroup]="periodFilterForm" [rangePicker]="picker">
-          <input matStartDate formControlName="start" placeholder="Start date" (dateChange)="onChangeStart($event)">
-          <input matEndDate formControlName="end" placeholder="End date" (dateChange)="onChangeEnd($event)">
-        </mat-date-range-input>
-        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-        <span matSuffix class="period-inline-separator" aria-hidden="true"></span>
-        <button mat-icon-button
-                matSuffix
-                type="button"
-                [matMenuTriggerFor]="quickRangesMenu"
-                matTooltip="Plages de temps rapides"
-                class="period-action-btn">
-          <mat-icon class="material-symbols-outlined">schedule</mat-icon>
-        </button>
-        <button *ngIf="!isDefaultPeriod()"
-                mat-icon-button
-                matSuffix
-                type="button"
-                matTooltip="Réinitialiser à la date du jour"
-                (click)="resetPeriod()"
-                class="period-action-btn">
-          <mat-icon class="material-symbols-outlined">restart_alt</mat-icon>
-        </button>
-        <mat-date-range-picker #picker></mat-date-range-picker>
-      </mat-form-field>
-      <mat-menu #quickRangesMenu="matMenu" class="period-quick-ranges-menu">
-        <button *ngFor="let quickRange of periodQuickRanges" mat-menu-item (click)="applyQuickRange(quickRange.value)">
-          <span>{{ quickRange.label }}</span>
-        </button>
-      </mat-menu>
-    </div>
-
+    <app-period-date-range [formGroup]="periodFilterForm"></app-period-date-range>
     <div class="pp-actions">
-      <button mat-mini-fab color="primary" (click)="search()">
+      <button mat-mini-fab color="primary" (click)="search($event)">
         <mat-icon matSuffix>search</mat-icon>
       </button>
     </div>
   </form>
 </page-panel>
+
+<div class="db-grid">
+  <aside class="db-sidebar">
+    <div class="sb-block sb-distribution-block">
+      <div class="sbd-title">Traitements</div>
+      <div class="sbd-empty" *ngIf="sessionSummaries.length === 0 && !isMainSessionLoading && !isRestSessionLoading">
+        <mat-icon>info_outline</mat-icon>
+        <span>Aucun traitement sur la période</span>
+      </div>
+      <ng-container *ngFor="let s of sessionSummaries">
+        <div class="sbd-row"
+             [class.sbd-row-clickable]="true"
+             [title]="(s.countTotal | number: '1.0-0') + ' sessions · ' + (s.countError | number: '1.0-0') + ' erreurs'"
+             tabindex="0"
+             (click)="onClickSessionSummary(s)"
+             (keydown.enter)="onClickSessionSummary(s)">
+          <div class="sbd-main"
+               [attr.data-inspect-location]="'Traitements • ' + MAPPING_TYPE['dashboard'].title"
+               data-inspect-scope="Menu latéral"
+               [attr.data-inspect-track]="'Taux ' + MAPPING_TYPE[s.type].title">
+            <div class="sbd-top">
+              <span class="sbd-label">{{ MAPPING_TYPE[s.type].title }}</span>
+              <span class="sbd-count">{{ s.countTotal | compact }}</span>
+            </div>
+            <div class="sbd-track" [class.track-active]="s.countTotal > 0">
+              <div class="sbd-fill" [style.width.%]="s.countTotal > 0 ? (100 - (s.countError * 100) / s.countTotal) : 0"></div>
+            </div>
+          </div>
+          <span class="sbd-rate" [class.c-ok]="s.countTotal > 0 && (s.countError * 100) / s.countTotal === 0" [class.c-err]="(s.countError * 100) / s.countTotal > 0"
+                [attr.data-inspect-location]="'Traitements • ' + MAPPING_TYPE['dashboard'].title"
+                data-inspect-scope="Menu latéral"
+                [attr.data-inspect-track]="'Taux ' + MAPPING_TYPE[s.type].title">{{ (s.countError * 100) / s.countTotal === 0 ? '100%' : ((s.countError * 100) / s.countTotal | number:'1.2-2') + '%' }}</span>
+        </div>
+      </ng-container>
+    </div>
+
+    <div class="sb-block sb-distribution-block">
+      <div class="sbd-title">Flux</div>
+      <div class="sbd-empty" *ngIf="requestSummaries.length === 0 && !isRestRequestLoading && !isDatabaseRequestLoading && !isFtpRequestLoading && !isSmtpRequestLoading && !isLdapRequestLoading">
+        <mat-icon>info_outline</mat-icon>
+        <span>Aucun flux sur la période</span>
+      </div>
+      <ng-container *ngFor="let s of requestSummaries">
+        <div class="sbd-row"
+             [class.sbd-row-clickable]="true"
+             [title]="(s.countTotal | number: '1.0-0') + ' flux · ' + (s.countError | number: '1.0-0') + ' erreurs'"
+             tabindex="0"
+             (click)="onClickRequestSummary(s)"
+             (keydown.enter)="onClickRequestSummary(s)">
+          <div class="sbd-main"
+               [attr.data-inspect-location]="'Traitements • ' + MAPPING_TYPE['dashboard'].title"
+               data-inspect-scope="Menu latéral"
+               [attr.data-inspect-track]="'Taux ' + REQUEST_MAPPING_TYPE[s.type].title">
+            <div class="sbd-top">
+              <span class="sbd-label">{{ REQUEST_MAPPING_TYPE[s.type].title }}</span>
+              <span class="sbd-count">{{ s.countTotal | compact }}</span>
+            </div>
+            <div class="sbd-track" [class.track-active]="s.countTotal > 0">
+              <div class="sbd-fill" [style.width.%]="s.countTotal > 0 ? (100 - (s.countError * 100) / s.countTotal) : 0"></div>
+            </div>
+          </div>
+          <span class="sbd-rate" [class.c-ok]="s.countTotal > 0 && (s.countError * 100) / s.countTotal === 0" [class.c-err]="(s.countError * 100) / s.countTotal > 0"
+                [attr.data-inspect-location]="'Traitements • ' + MAPPING_TYPE['dashboard'].title"
+                data-inspect-scope="Menu latéral"
+                [attr.data-inspect-track]="'Taux ' + REQUEST_MAPPING_TYPE[s.type].title">{{ (s.countError * 100) / s.countTotal === 0 ? '100%' : ((s.countError * 100) / s.countTotal | number:'1.2-2') + '%' }}</span>
+        </div>
+      </ng-container>
+    </div>
+
+    <div class="sb-block sb-distribution-block">
+      <div class="sbd-title">Événements</div>
+      <div class="sbd-empty" *ngIf="eventSummaries.length === 0 && !isMainSessionLoading && !isRestSessionLoading">
+        <mat-icon>info_outline</mat-icon>
+        <span>Aucun événement sur la période</span>
+      </div>
+      <ng-container *ngFor="let s of eventSummaries">
+        <div class="sbd-row"
+             [class.sbd-row-clickable]="true"
+             [title]="(s.countTotal | number: '1.0-0') + ' événements · ' + (s.countError | number: '1.0-0') + ' erreurs'"
+             tabindex="0"
+             (click)="onClickEventSummary(s)"
+             (keydown.enter)="onClickEventSummary(s)">
+          <div class="sbd-main"
+               [attr.data-inspect-location]="'Traitements • ' + MAPPING_TYPE['dashboard'].title"
+               data-inspect-scope="Menu latéral"
+               [attr.data-inspect-track]="'Taux ' + MAPPING_TYPE[s.type].title">
+            <div class="sbd-top">
+              <span class="sbd-label">{{ MAPPING_TYPE[s.type].title }}</span>
+              <span class="sbd-count">{{ s.countTotal | compact }}</span>
+            </div>
+            <div class="sbd-track sbd-track-split">
+              <div class="sbd-fill-info" [style.width.%]="((s.countTotal - (s.countError + s.countWarn)) * 100) / s.countTotal"></div>
+              <div class="sbd-fill-warn" [style.width.%]="(s.countWarn * 100) / s.countTotal"></div>
+              <div class="sbd-fill-error" [style.width.%]="(s.countError * 100) / s.countTotal"></div>
+            </div>
+          </div>
+          <span class="sbd-rate" [class.c-ok]="s.countWarn === 0 && s.countError === 0" [class.c-warn]="s.countWarn > s.countError" [class.c-err]="s.countError >= s.countWarn"
+                [attr.data-inspect-location]="'Traitements • ' + MAPPING_TYPE['dashboard'].title"
+                data-inspect-scope="Menu latéral"
+                [attr.data-inspect-track]="'Taux ' + MAPPING_TYPE[s.type].title">{{ s.countWarn === 0 && s.countError === 0 ? '100%' : s.countError >= s.countWarn ? (((s.countError * 100) / s.countTotal | number:'1.2-2') + '%') : (((s.countWarn * 100) / s.countTotal | number:'1.2-2') + '%') }}</span>
+        </div>
+      </ng-container>
+    </div>
+  </aside>
+  <section class="db-main">
+    <dashboard-detail-view-new
+        [isLoading]="isSummaryLoading"
+        [selectedSummary]="selectedSummary"
+        (onNavigateSearch)="onNavigateSearch($event.event, $event.row)"></dashboard-detail-view-new>
+  </section>
+</div>

@@ -4,7 +4,7 @@ import {RouterModule} from '@angular/router';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {BrowserModule} from '@angular/platform-browser';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
-import {SharedModule} from '../shared/shared.module';
+import {MY_DATE_FORMATS, SharedModule} from '../shared/shared.module';
 import {ChartComponent} from "@oneteme/jquery-echarts";
 import {OrganizerButtonModule, SlicePanelComponent} from "@oneteme/jquery-organizer";
 import {SearchRestView} from "./search/session/rest/search-rest.view";
@@ -68,7 +68,12 @@ import {UserChartComponent} from "./kpi/_component/user-chart/user-chart.compone
 import {CompareView} from "./compare/compare.view";
 import {AnalyticsView} from "./analytics/analytics.view";
 import {SearchMainEventView} from "./search/event/main/search-main-event.view";
-import DashboardNewComponent from "./dashboard/new/dashboard-new.component";
+import { DashboardNewComponent } from "./dashboard/new/dashboard-new.component";
+import {DateAdapter, MAT_DATE_FORMATS} from "@angular/material/core";
+import {CustomDateAdapter} from "../shared/material/custom-date-adapter";
+import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
+import {CustomDateRangeSelectionStrategy} from "../shared/material/custom-date-range-selection-strategy";
+import {DashboardDetailViewNewComponent} from "./dashboard/new/component/detail-view-new/detail-view-new.component";
 
 @NgModule({
   imports: [
@@ -121,6 +126,7 @@ import DashboardNewComponent from "./dashboard/new/dashboard-new.component";
     DashboardInstancesTableComponent,
     DashboardDetailViewComponent,
     DashboardNewComponent,
+    DashboardDetailViewNewComponent,
 
     // New
     RequestKpiView,
@@ -145,6 +151,11 @@ import DashboardNewComponent from "./dashboard/new/dashboard-new.component";
     UserChartComponent,
     CompareView,
     AnalyticsView
+  ],
+  providers: [
+    { provide: DateAdapter, useClass: CustomDateAdapter },
+    { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
+    { provide: MAT_DATE_RANGE_SELECTION_STRATEGY, useClass: CustomDateRangeSelectionStrategy }
   ]
 })
 export class ViewsModule { }

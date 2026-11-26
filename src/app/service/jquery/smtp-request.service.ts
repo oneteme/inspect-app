@@ -45,7 +45,7 @@ export class SmtpRequestService {
         return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, { params: filters });
     }
 
-    getSmtpExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string,host?: string[],command?: string[] }): Observable<SmtpSessionExceptionsByPeriodAndappname[]> {
+    getExceptionByDate(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string,host?: string[],command?: string[] }): Observable<SmtpSessionExceptionsByPeriodAndappname[]> {
         let args = {
             'select': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,error_type:errorType,start.${filters.groupedBy}:date,start.year:year`,
             'join': 'instance',
@@ -54,14 +54,18 @@ export class SmtpRequestService {
             'start.lt': filters.end.toISOString(),
             'order': 'date.asc'
         }
-        if(filters.app_name) {
-            args['instance.app_name.in'] = filters.app_name;
-        }
-        if(filters.host){
-            args['host'] = `"${filters.host}"`;
-        }
-        if(filters.command){
-            args['command'] = filters.command.toString();
+        return this.getSmtp(args);
+    }
+
+    getExceptionByDateNew(namespace: string, start: Date, end: Date, groupedBy: string): Observable<{date: string, year: number, label: string, count: number, countTotal: number}[]> {
+        let args = {
+            'select': `start.${groupedBy}:date,start.year:year,count:count,count.sum.over(partition(date)):countTotal,error_type:label`,
+            'join': 'instance',
+            'instance.namespace': namespace,
+            'start.ge': start.toISOString(),
+            'start.lt': end.toISOString(),
+            'label.notNull': '',
+            'order': 'date.asc'
         }
         return this.getSmtp(args);
     }
@@ -106,5 +110,23 @@ export class SmtpRequestService {
         return this.getSmtp<any[]>(args).pipe(
             map(rows => dateHour ? packDateHour(rows, filter.jquery.buildAlias()) : rows)
         );
+    }
+
+    getCountException(filters: { namespace: string, start: Date, end: Date }): Observable<{
+        countError: number,
+        countTotal: number,
+        type: string
+    }> {
+        let args = {
+            'select': `count_error:countError,count:countTotal`,
+            'join': 'instance',
+            'instance.namespace': filters.namespace,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'count.gt': 0
+        }
+        return this.getSmtp(args).pipe(map(data => {
+            return {...data[0], type: 'smtp'};
+        }));
     }
 }

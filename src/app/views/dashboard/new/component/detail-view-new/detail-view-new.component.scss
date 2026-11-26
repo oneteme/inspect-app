@@ -1,0 +1,235 @@
+.db-clear-state {
+  min-height: calc(100dvh - 167px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 3em 2em;
+  border-radius: 10px;
+  border: 1px solid rgba(33, 186, 69, .18);
+  background: rgba(33, 186, 69, .03);
+  text-align: center;
+
+  .db-clear-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: rgba(33, 186, 69, .1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    mat-icon { font-size: 34px; width: 34px; height: 34px; color: #21ba45; }
+
+    @media (min-width: 1600px) {
+      width: 82px;
+      height: 82px;
+      mat-icon { font-size: 44px; width: 44px; height: 44px; }
+    }
+  }
+
+  .db-clear-title {
+    font-size: 1.05em;
+    font-weight: 700;
+    color: rgba(0, 0, 0, .72);
+    letter-spacing: .02em;
+
+    @media (min-width: 1600px) { font-size: 1.35em; }
+  }
+
+  .db-clear-label {
+    font-size: .87em;
+    font-weight: 700;
+    color: #21ba45;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    opacity: .85;
+
+    @media (min-width: 1600px) { font-size: 1.05em; }
+  }
+
+
+  .db-clear-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    margin-top: 16px;
+    font-size: .88em;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    border: 1px solid rgba(33, 186, 69, .3);
+    border-radius: 4px;
+    background: transparent;
+    color: rgba(33, 186, 69, 1);
+    cursor: pointer;
+    transition: background .2s, border-color .2s;
+
+    mat-icon {
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+
+    &:hover {
+      background: rgba(33, 186, 69, .05);
+      border-color: rgba(33, 186, 69, .5);
+    }
+
+    &:active {
+      background: rgba(33, 186, 69, .1);
+    }
+  }
+}
+
+.db-detail-view {
+  display: flex;
+  flex-direction: column;
+  gap: .75em;
+
+  .db-proto-wrap {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+
+    .db-insights-hdr {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 0 2px 6px;
+      border-bottom: 2px solid rgba(34,36,38,.08);
+      margin-bottom: 10px;
+      background: var(--mat-sidenav-content-background-color, #fff);
+      flex-shrink: 0;
+
+      .dih-title { font-size: .72em; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; color: rgba(0,0,0,.55); }
+      .dih-sub   { font-size: .65em; color: rgba(0,0,0,.35); font-style: italic; }
+    }
+
+    .pr-chart {
+      height: 250px;
+      border-radius: 6px;
+      border: 1px solid rgba(34,36,38,.11);
+      background: var(--mat-sidenav-content-background-color, #fff);
+      chart { display: block; height: 100%; }
+
+      svg { overflow: hidden; }
+    }
+  }
+
+  .db-clt-block {
+    border-radius: 8px;
+    border: 1px solid rgba(34, 36, 38, .11);
+    background: var(--mat-sidenav-content-background-color, #fff);
+
+    .sb-block-head {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      height: 36px;
+      padding: 0 .75em;
+      font-size: .7em;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      opacity: .65;
+      border-bottom: 1px solid rgba(34, 36, 38, .07);
+      background: rgba(34, 36, 38, .018);
+    }
+
+    .clt-body {
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+      overflow-y: auto;
+      max-height: 440px;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(34,36,38,.18) transparent;
+      &::-webkit-scrollbar { width: 4px; }
+      &::-webkit-scrollbar-track { background: transparent; }
+      &::-webkit-scrollbar-thumb { background: rgba(34,36,38,.18); border-radius: 2px; }
+
+      .clt-loading {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 220px;
+        font-size: .85em;
+        color: rgba(0,0,0,.65);
+      }
+
+      .db-insights {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        max-height: 220px;
+        overflow-y: auto;
+        &::-webkit-scrollbar { width: 3px; }
+        &::-webkit-scrollbar-track { background: transparent; }
+        &::-webkit-scrollbar-thumb { background: rgba(34, 36, 38, .2); border-radius: 2px;}
+        scrollbar-width: thin;
+        scrollbar-color: rgba(34, 36, 38, .2) transparent;
+
+
+        .dbi-row {
+          display: flex;
+          align-items: center;
+          gap: 7px;
+          padding: 6px .75em;
+          border-bottom: 1px solid rgba(34,36,38,.05);
+          &:last-child { border-bottom: none; }
+          &[type="button"] { width: 100%; border: none; background: transparent; font: inherit; color: inherit; text-align: left; }
+
+          &.dbi-row-link {
+            cursor: pointer;
+            transition: background .1s;
+            &:hover { background: rgba(34,36,38,.03); }
+            &:hover .dbi-nav { opacity: .7; }
+
+            .dbi-dot {
+              width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; background: rgba(34,36,38,.18);
+            }
+
+            .dbi-name {
+              font-size: .74em;
+              color: rgba(0,0,0,.72);
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              flex: 2 0 0;
+              min-width: 0;
+            }
+
+            .dbi-bar-wrap {
+              flex: 3 1 0; height: 3px; border-radius: 2px; background: rgba(34,36,38,.07); overflow: hidden; min-width: 40px;
+
+              .dbi-bar {
+                height: 100%;
+                border-radius: 2px;
+                min-width: 3px;
+                transition: width .3s ease;
+              }
+            }
+
+            .dbi-badge {
+              font-size: .7em;
+              font-weight: 600;
+              color: rgba(0,0,0,.55);
+              flex: 0 0 44px;
+              text-align: right;
+
+              &.dbi-badge-warn { font-weight: 700; }
+            }
+
+            .dbi-nav { font-size: 14px; width: 14px; height: 14px; flex-shrink: 0; opacity: .2; transition: opacity .1s; color: rgba(0,0,0,.5); }
+          }
+        }
+      }
+    }
+  }
+}

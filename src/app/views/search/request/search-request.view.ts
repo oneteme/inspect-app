@@ -1,7 +1,5 @@
-import {Component, inject, OnDestroy, OnInit, ViewChild} from '@angular/core';
+import {Component, inject, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {MatPaginator} from '@angular/material/paginator';
-import {MatSort} from '@angular/material/sort'
 import {Location} from '@angular/common';
 import {ActivatedRoute, Params} from '@angular/router';
 import {combineLatest, finalize, Observable, Subscription} from 'rxjs';
@@ -9,11 +7,6 @@ import {extractPeriod} from 'src/app/shared/util';
 import {app} from 'src/environments/environment';
 import {Constants, STATUS} from '../../constants';
 import {EnvRouter} from "../../../service/router.service";
-import {DateAdapter, MAT_DATE_FORMATS,} from "@angular/material/core";
-import {CustomDateAdapter} from "../../../shared/material/custom-date-adapter";
-import {MY_DATE_FORMATS} from "../../../shared/shared.module";
-import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
-import {CustomDateRangeSelectionStrategy} from "../../../shared/material/custom-date-range-selection-strategy";
 import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../model/conf.model";
 import {RestRequestService} from "../../../service/jquery/rest-request.service";
 import {DatabaseRequestService} from "../../../service/jquery/database-request.service";
@@ -21,22 +14,19 @@ import {FtpRequestService} from "../../../service/jquery/ftp-request.service";
 import {SmtpRequestService} from "../../../service/jquery/smtp-request.service";
 import {LdapRequestService} from "../../../service/jquery/ldap-request.service";
 import {PageTitleService} from "../../../service/page-title.service";
-import {getDefaultRelativePeriod, getQuickRangeStep, getQuickRangeDates, isDefaultRelativePeriod, DEFAULT_PERIOD_QUICK_RANGES, PeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
+import {
+  DEFAULT_PERIOD_QUICK_RANGES,
+  getDefaultRelativePeriod,
+  getQuickRangeDates,
+  getQuickRangeStep,
+  isDefaultRelativePeriod,
+  PeriodQuickRange,
+  toDisplayedPeriodEnd
+} from '../../../shared/period-filter';
 
 @Component({
   templateUrl: './search-request.view.html',
-  styleUrls: ['./search-request.view.scss'],
-  providers: [
-    {
-      provide: DateAdapter, useClass: CustomDateAdapter
-    },
-    {
-      provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS
-    },
-    {
-      provide: MAT_DATE_RANGE_SELECTION_STRATEGY, useClass: CustomDateRangeSelectionStrategy
-    }
-  ]
+  styleUrls: ['./search-request.view.scss']
 })
 export class SearchRequestView implements OnInit, OnDestroy {
   private readonly _router = inject(EnvRouter);

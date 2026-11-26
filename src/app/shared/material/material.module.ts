@@ -52,6 +52,7 @@ import {CommonModule} from "@angular/common";
 import {LabelChipComponent} from "./_component/label-chip/label-chip.component";
 import {AutocompleteChipComponent} from "./_component/autocomplete-chip/autocomplete-chip.component";
 import {ReactiveFormsModule} from "@angular/forms";
+import {PeriodDateRangeComponent} from "./_component/period-date-range/period-date-range.component";
 
 @NgModule({
   imports: [
@@ -60,9 +61,12 @@ import {ReactiveFormsModule} from "@angular/forms";
     ReactiveFormsModule,
     MatChipsModule,
     MatAutocompleteModule,
-    MatInputModule
+    MatInputModule,
+    MatMenuModule,
+    MatDatepickerModule,
+    MatButtonModule
   ],
-  declarations: [LabelIconComponent, LabelChipComponent, AutocompleteChipComponent],
+  declarations: [LabelIconComponent, LabelChipComponent, AutocompleteChipComponent, PeriodDateRangeComponent],
   exports: [
     BrowserAnimationsModule,
     A11yModule,
@@ -116,7 +120,8 @@ import {ReactiveFormsModule} from "@angular/forms";
     DialogModule,
     LabelIconComponent,
     LabelChipComponent,
-    AutocompleteChipComponent
+    AutocompleteChipComponent,
+    PeriodDateRangeComponent
   ]
 })
 export class MaterialModule {}

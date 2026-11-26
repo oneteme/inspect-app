@@ -12,7 +12,7 @@ import {HttpSessionStage, InstanceEnvironment} from "../../../../model/trace.mod
 import {MatDialog} from "@angular/material/dialog";
 import {PulseDialogComponent} from "../../../../shared/_component/pulse/dialog/pulse-dialog.component";
 import {Constants, STATUS} from "../../../constants";
-import {SessionEventService} from "../../../../service/session-event.service";
+import {EventSessionService} from "../../../../service/event-session.service";
 import {ExceptionService} from "../../../../service/jquery/exception.service";
 
 @Component({
@@ -23,7 +23,7 @@ export class DetailSessionRestView implements OnInit, OnDestroy {
     private readonly _activatedRoute: ActivatedRoute = inject(ActivatedRoute);
     private readonly _traceService: TraceService = inject(TraceService);
     private readonly _exceptionService: ExceptionService = inject(ExceptionService);
-    private readonly _sessionEventService = inject(SessionEventService);
+    private readonly _sessionEventService = inject(EventSessionService);
     private readonly $destroy = new Subject<void>();
     protected readonly _router: EnvRouter = inject(EnvRouter);
     private readonly _dialog = inject(MatDialog);

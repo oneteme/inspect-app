@@ -1,10 +1,8 @@
 import {Component, inject, OnDestroy, OnInit, ViewContainerRef} from "@angular/core";
 import {FormControl, FormGroup, Validators} from "@angular/forms";
-import {DateAdapter, MAT_DATE_FORMATS} from '@angular/material/core';
 import {ActivatedRoute, Params} from "@angular/router";
 import {combineLatest, finalize, Subscription} from "rxjs";
 import {Location} from "@angular/common";
-import {MAT_DATE_RANGE_SELECTION_STRATEGY} from '@angular/material/datepicker';
 import {SessionKpiComponentResolverService} from "./session-kpi-component-resolver.service";
 import {EnvRouter} from "../../../service/router.service";
 import {IPeriod, IStep, IStepFrom, Period, QueryParams} from "../../../model/conf.model";
@@ -13,20 +11,19 @@ import {Constants} from "../../constants";
 import {PageTitleService} from "../../../service/page-title.service";
 import {RestSessionService} from "../../../service/jquery/rest-session.service";
 import {MainSessionService} from "../../../service/jquery/main-session.service";
-import {CustomDateAdapter} from '../../../shared/material/custom-date-adapter';
-import {MY_DATE_FORMATS} from '../../../shared/shared.module';
-import {CustomDateRangeSelectionStrategy} from '../../../shared/material/custom-date-range-selection-strategy';
-import {getDefaultTodayPeriod, getKpiQuickRangeDates, isDefaultTodayPeriod, KPI_PERIOD_QUICK_RANGES, KpiPeriodQuickRange, toDisplayedPeriodEnd} from '../../../shared/period-filter';
+import {
+  getDefaultTodayPeriod,
+  getKpiQuickRangeDates,
+  isDefaultTodayPeriod,
+  KPI_PERIOD_QUICK_RANGES,
+  KpiPeriodQuickRange,
+  toDisplayedPeriodEnd
+} from '../../../shared/period-filter';
 
 @Component({
   templateUrl: './session-kpi.view.html',
   styleUrls: ['./session-kpi.view.scss'],
-  host: { 'data-view': 'session-kpi' },
-  providers: [
-    { provide: DateAdapter, useClass: CustomDateAdapter },
-    { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
-    { provide: MAT_DATE_RANGE_SELECTION_STRATEGY, useClass: CustomDateRangeSelectionStrategy }
-  ]
+  host: { 'data-view': 'session-kpi' }
 })
 export class SessionKpiView implements OnInit, OnDestroy {
   private readonly _activatedRoute = inject(ActivatedRoute);

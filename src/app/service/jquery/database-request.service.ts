@@ -47,7 +47,7 @@ export class DatabaseRequestService {
         return this.http.get<{ host: string }[]>(`${this.server}/request/${type}/hosts`, { params: filters });
     }
 
-    getJdbcExceptions(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<JdbcExceptionsByPeriodAndAppname[]> {
+    getExceptionByDate(filters: { namespace: string, start: Date, end: Date, groupedBy: string, app_name: string }): Observable<JdbcExceptionsByPeriodAndAppname[]> {
       let args = {
         'select': `count:count,count.sum.over(partition(start.${filters.groupedBy}:date,start.year)):countok,error_type:errorType,start.${filters.groupedBy}:date,start.year:year`,
         'join': 'instance',
@@ -56,10 +56,20 @@ export class DatabaseRequestService {
         'start.lt': filters.end.toISOString(),
         'order': 'date.asc'
       }
-      if(filters.app_name) {
-        args['instance.app_name.in'] = filters.app_name;
-      }
       return this.getDatabaseRequest(args);
+    }
+
+    getExceptionByDateNew(namespace: string, start: Date, end: Date, groupedBy: string): Observable<{date: string, year: number, label: string, count: number, countTotal: number}[]> {
+        let args = {
+            'select': `start.${groupedBy}:date,start.year:year,count:count,count.sum.over(partition(date)):countTotal,error_type:label`,
+            'join': 'instance',
+            'instance.namespace': namespace,
+            'start.ge': start.toISOString(),
+            'start.lt': end.toISOString(),
+            'label.notNull': '',
+            'order': 'date.asc'
+        }
+        return this.getDatabaseRequest(args);
     }
 
     getCustom(data: {series: ChartItem[], indicator: ChartItem, group: ChartItem, stack?: ChartItem },
@@ -110,5 +120,19 @@ export class DatabaseRequestService {
 
     getDatabaseTablesInfo(params?: any): Observable<DatabaseTableInfo[]> {
         return this.http.get<DatabaseTableInfo[]>(`${this.server}/database/table`, { params: params });
+    }
+
+    getCountException(filters: { namespace: string, start: Date, end: Date }): Observable<{countError: number, countTotal: number, type: string}> {
+        let args = {
+            'select': `count_error:countError,count:countTotal`,
+            'join': 'instance',
+            'instance.namespace': filters.namespace,
+            'start.ge': filters.start.toISOString(),
+            'start.lt': filters.end.toISOString(),
+            'count.gt': 0
+        }
+        return this.getDatabaseRequest(args).pipe(map(data => {
+            return {...data[0], type: 'jdbc'};
+        }));
     }
 }

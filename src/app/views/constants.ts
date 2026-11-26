@@ -106,17 +106,17 @@ export class Constants {
         dashboard: {title:'Tableau de bord', icon: 'home'},
         deploiment: {title:'Instances Actives', subtitle: 'Suivi des applications en cours d\'exécution', icon:'deployed_code'},
         event: {title: 'Événements', icon: 'flash_on'},
-        log: {title: 'Événements', subtitle: 'Logs Applicatifs', icon: 'bolt_boost'},
-        user: {title: 'Événements', subtitle: 'Actions Utilisateurs', icon: 'recent_patient'},
+        log: {title: 'Logs Applicatifs', subtitle: 'Traces d\'exécution et journaux applicatifs', icon: 'bolt_boost'},
+        user: {title: 'Actions Utilisateurs', subtitle: 'Interactions d\'interface et actions fonctionnelles', icon: 'recent_patient'},
         architecture: {title: 'Architecture', icon: 'lan'},
         tree: {title: 'Arborescence des ressources', subtitle: 'Diagramme de bout en bout des flux d\'exécution', icon: 'account_tree'},
     }
     static readonly REQUEST_MAPPING_TYPE: {[key: string]: Partial<{title: string, subtitle: string, icon: string}>} = {
-        rest: {title: 'Flux HTTP', subtitle: 'Communications externes', icon: 'public'},
-        jdbc: {title: 'Flux JDBC', subtitle: 'Communications externes', icon: 'database'},
-        ftp: {title: 'Flux FTP', subtitle: 'Communications externes', icon: 'smb_share'},
-        smtp: {title: 'Flux SMTP', subtitle: 'Communications externes', icon: 'outgoing_mail'},
-        ldap: {title: 'Flux LDAP', subtitle: 'Communications externes', icon: 'user_attributes'},
+        rest: {title: 'HTTP', subtitle: 'Communications externes', icon: 'public'},
+        jdbc: {title: 'JDBC', subtitle: 'Communications externes', icon: 'database'},
+        ftp: {title: 'FTP', subtitle: 'Communications externes', icon: 'smb_share'},
+        smtp: {title: 'SMTP', subtitle: 'Communications externes', icon: 'outgoing_mail'},
+        ldap: {title: 'LDAP', subtitle: 'Communications externes', icon: 'user_attributes'},
     }
     
     static readonly REST_REQUEST_EXCEPTION_BY_PERIOD_LINE: ChartProvider<string, number> = {

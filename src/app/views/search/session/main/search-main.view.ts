@@ -10,22 +10,17 @@ import {Constants, STATUS} from '../../../constants';
 import {EnvRouter} from "../../../../service/router.service";
 import {InstanceService} from "../../../../service/jquery/instance.service";
 import {PageTitleService} from "../../../../service/page-title.service";
-import {DateAdapter, MAT_DATE_FORMATS} from "@angular/material/core";
-import {CustomDateAdapter} from "../../../../shared/material/custom-date-adapter";
-import {MY_DATE_FORMATS} from "../../../../shared/shared.module";
-import {MAT_DATE_RANGE_SELECTION_STRATEGY} from "@angular/material/datepicker";
-import {CustomDateRangeSelectionStrategy} from "../../../../shared/material/custom-date-range-selection-strategy";
 import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../../model/conf.model";
 import {shallowEqual} from "../rest/search-rest.view";
 import {MainSessionDto} from "../../../../model/request.model";
 import {TableProvider} from "@oneteme/jquery-table";
 import {MAIN_SESSION_TABLE_CONFIG} from "../../../../shared/_component/table/table.config";
 import {
+  DEFAULT_PERIOD_QUICK_RANGES,
   getDefaultRelativePeriod,
   getQuickRangeDates,
   getQuickRangeStep,
   isDefaultRelativePeriod,
-  DEFAULT_PERIOD_QUICK_RANGES,
   PeriodQuickRange,
   toDisplayedPeriodEnd
 } from '../../../../shared/period-filter';
@@ -33,12 +28,7 @@ import {HttpErrorResponse} from "@angular/common/http";
 
 @Component({
   templateUrl: './search-main.view.html',
-  styleUrls: ['./search-main.view.scss'],
-  providers: [
-    { provide: DateAdapter, useClass: CustomDateAdapter },
-    { provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS },
-    { provide: MAT_DATE_RANGE_SELECTION_STRATEGY, useClass: CustomDateRangeSelectionStrategy }
-  ]
+  styleUrls: ['./search-main.view.scss']
 })
 export class SearchMainView implements OnInit, OnDestroy {
   private readonly _router = inject(EnvRouter);

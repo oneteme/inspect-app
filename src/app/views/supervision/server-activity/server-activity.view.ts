@@ -2,8 +2,6 @@ import {DecimalPipe} from '@angular/common';
 import {Component, inject, OnDestroy} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
 import {ActivatedRoute, Router} from '@angular/router';
-import {DateAdapter, MAT_DATE_FORMATS} from '@angular/material/core';
-import {MAT_DATE_RANGE_SELECTION_STRATEGY} from '@angular/material/datepicker';
 import {MatDialog} from '@angular/material/dialog';
 import {ChartProvider, field} from '@oneteme/jquery-core';
 import {TableProvider} from '@oneteme/jquery-table';
@@ -13,15 +11,14 @@ import {LogEntryService} from '../../../service/jquery/log-entry.service';
 import {InstanceTraceService, SequenceLossEvent} from '../../../service/jquery/instance-trace.service';
 import {PageTitleService} from '../../../service/page-title.service';
 import {InstanceService} from '../../../service/jquery/instance.service';
-import {StacktraceDialogComponent} from '../../../shared/_component/exception-display/stacktrace-dialog/stacktrace-dialog.component';
+import {
+  StacktraceDialogComponent
+} from '../../../shared/_component/exception-display/stacktrace-dialog/stacktrace-dialog.component';
 import {DatabaseInfoModalComponent} from '../_component/database-info-modal/database-info-modal.component';
 import {LOG_TABLE_CONFIG} from '../../../shared/_component/table/table.config';
 import {app} from '../../../../environments/environment';
 import {getDefaultRelativePeriod} from '../../../shared/period-filter';
 import {IPeriod} from '../../../model/conf.model';
-import {CustomDateAdapter} from '../../../shared/material/custom-date-adapter';
-import {CustomDateRangeSelectionStrategy} from '../../../shared/material/custom-date-range-selection-strategy';
-import {MY_DATE_FORMATS} from '../../../shared/shared.module';
 import {ActivityPeriodGroup, activityPeriodManagement, parseSizeToBytes} from '../../../shared/util';
 import {DatabaseInfo} from "../../../model/request.model";
 import {DatabaseRequestService} from "../../../service/jquery/database-request.service";
@@ -48,12 +45,7 @@ interface SequenceLossRow {
 
 @Component({
   templateUrl: './server-activity.view.html',
-  styleUrls: ['./server-activity.view.scss'],
-  providers: [
-    {provide: DateAdapter, useClass: CustomDateAdapter},
-    {provide: MAT_DATE_FORMATS, useValue: MY_DATE_FORMATS},
-    {provide: MAT_DATE_RANGE_SELECTION_STRATEGY, useClass: CustomDateRangeSelectionStrategy}
-  ]
+  styleUrls: ['./server-activity.view.scss']
 })
 export class ServerActivityView implements OnDestroy {
   private readonly _route = inject(ActivatedRoute);

@@ -46,6 +46,7 @@ import {AnalyticsView} from "./views/analytics/analytics.view";
 import {SearchMainEventView} from "./views/search/event/main/search-main-event.view";
 import {NgCollectorModule} from "@oneteme/inspect-ng-collector";
 import {environment} from "../environments/environment";
+import {DashboardNewComponent} from "./views/dashboard/new/dashboard-new.component";
 
 const InspectNgCollectorModule= NgCollectorModule.forRoot(environment.inspect);
 registerLocaleData(localeFr, 'fr-FR');
@@ -208,6 +209,12 @@ const routes: Route[] = [
   {
     path: 'home',
     component: DashboardComponent,
+    title: 'Tableau de bord',
+    canActivate: [authGuard]
+  },
+  {
+    path: 'home/new',
+    component: DashboardNewComponent,
     title: 'Tableau de bord',
     canActivate: [authGuard]
   },
