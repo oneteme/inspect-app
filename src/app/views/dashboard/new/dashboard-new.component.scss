@@ -23,6 +23,83 @@
     gap: .75em;
     padding-top: 2px;
 
+    .dov-stats-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      border-radius: 6px;
+      border: 1px solid rgba(34, 36, 38, .11);
+      background: var(--mat-sidenav-content-background-color, #fff);
+      padding: 0 9px 7px;
+      overflow: hidden;
+
+      .dov-stats-lbl {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: .67em;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: .07em;
+        color: rgba(0,0,0,.55);
+        padding: 9px 0 4px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid rgba(34, 36, 38, .08);
+
+        .dov-stats-lbl-info {
+          font-size: 13px;
+          width: 13px;
+          height: 13px;
+          color: rgba(0, 0, 0, .3);
+          cursor: help;
+          flex-shrink: 0;
+          margin-left: auto;
+        }
+      }
+
+      .dov-stats-sidebar {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4px;
+
+        .dov-stat-sb {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 3px;
+          padding: 9px 4px 8px;
+          border-radius: 5px;
+          cursor: pointer;
+          border: none;
+          font: inherit;
+
+          .dov-stat-sb-val {
+            font-size: 1.05em;
+            font-weight: 700;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+          }
+
+          .dov-stat-sb-lbl {
+            font-size: .56em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: .04em;
+            white-space: nowrap;
+          }
+
+          &.sb-pending { background: rgba(245, 158, 11, .07);  color: #b45309; .dov-stat-sb-val { color: #b45309; } .dov-stat-sb-lbl { color: #92400e; } }
+          &.sb-offline { background: rgba(100, 116, 139, .07); color: #475569; .dov-stat-sb-val { color: #475569; } .dov-stat-sb-lbl { color: #475569; } }
+          &.sb-total   { background: rgba(59, 130, 246, .07);  color: #1d4ed8; .dov-stat-sb-val { color: #1d4ed8; } .dov-stat-sb-lbl { color: #1d4ed8; } }
+
+          &.dov-stat-sb-active {
+            filter: brightness(.93) saturate(1.4);
+            box-shadow: inset 0 0 0 1.5px currentColor;
+          }
+        }
+      }
+    }
+
     .sb-block {
       border-radius: 6px;
       border: 1px solid rgba(34, 36, 38, .11);

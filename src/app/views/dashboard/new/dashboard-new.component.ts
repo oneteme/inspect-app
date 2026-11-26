@@ -303,7 +303,7 @@ export class DashboardNewComponent implements OnInit, OnDestroy {
         });
   }
 
-  onClickSessionSummary(summary: { type: string, countError: number, countTotal: number }) {
+  onClickSessionSummary(summary: Partial<Summary>) {
     this.selectedSummary = [];
     this.isSummaryLoading = true;
     this.SESSION(this.params.namespace, this.params.period.start, this.params.period.end, periodManagement(this.params.period.start, this.params.period.end))[summary.type]
@@ -317,7 +317,7 @@ export class DashboardNewComponent implements OnInit, OnDestroy {
         });
   }
 
-  onClickRequestSummary(summary: { type: string, countError: number, countTotal: number }) {
+  onClickRequestSummary(summary: Partial<Summary>) {
     this.selectedSummary = [];
     this.isSummaryLoading = true;
     this.REQUEST(this.params.namespace, this.params.period.start, this.params.period.end, periodManagement(this.params.period.start, this.params.period.end))[summary.type]
@@ -331,7 +331,7 @@ export class DashboardNewComponent implements OnInit, OnDestroy {
         });
   }
 
-  onClickEventSummary(summary: { type: string, countError: number, countTotal: number }) {
+  onClickEventSummary(summary: Partial<Summary>) {
     this.selectedSummary = [];
     this.isSummaryLoading = true;
     this.EVENT(this.params.namespace, this.params.period.start, this.params.period.end, periodManagement(this.params.period.start, this.params.period.end))[summary.type]
