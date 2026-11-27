@@ -1,4 +1,4 @@
-<div class="db-clear-state" *ngIf="!isLoading && !_selectedSummary.length">
+<div class="db-clear-state" *ngIf="!isLoading && !_selectedSummary.data?.length">
   <div class="db-clear-icon">
     <mat-icon class="material-symbols-outlined">verified</mat-icon>
   </div>
@@ -10,7 +10,7 @@
   </button>
 </div>
 
-<div class="db-detail-view" *ngIf="isLoading || _selectedSummary.length">
+<div class="db-detail-view" *ngIf="isLoading || _selectedSummary.data?.length">
   <div class="db-proto-wrap">
     <div class="db-insights-hdr">
       <span class="dih-title">Pourcentage d'incidents sur la période</span>
@@ -18,7 +18,7 @@
     </div>
     <div class="pr-chart">
       <chart type="area" [config]="CHART_CONFIG"
-             [data]="_selectedSummary"
+             [data]="_selectedSummary.data || []"
              [isLoading]="isLoading" />
     </div>
   </div>
@@ -28,12 +28,12 @@
       <div class="clt-loading" *ngIf="isLoading">Chargement des données...</div>
       <div class="db-insights" *ngIf="!isLoading">
         <button type="button" class="dbi-row dbi-row-link"
-                *ngFor="let e of _selectedSummaryGrouped;"
-                (click)="onNavigateSearch.emit({ event: $event, row: e })">
-          <span class="dbi-dot" [style.background]="Status[e.label].color"></span>
-          <span class="dbi-name" [title]="e.label">{{ Status[e.label].label }}</span>
-          <div class="dbi-bar-wrap"><div class="dbi-bar" [style.background]="Status[e.label].color" [style.width.%]="((e.count / e.totalCount) * 100)"></div></div>
-          <span class="dbi-badge dbi-badge-warn" [style.color]="Status[e.label].color">{{ e.count | compact }}</span>
+                *ngFor="let _s of _selectedSummaryGrouped;"
+                (click)="onNavigateSearch.emit({ event: $event, row: {category: _selectedSummary.category, type: _selectedSummary.type, label: _s.label} })">
+          <span class="dbi-dot" [style.background]="Status[_s.label].color"></span>
+          <span class="dbi-name" [title]="_s.label">{{ Status[_s.label].label }}</span>
+          <div class="dbi-bar-wrap"><div class="dbi-bar" [style.background]="Status[_s.label].color" [style.width.%]="((_s.count / _s.totalCount) * 100)"></div></div>
+          <span class="dbi-badge dbi-badge-warn" [style.color]="Status[_s.label].color">{{ _s.count | compact }}</span>
           <mat-icon class="dbi-nav material-symbols-outlined">chevron_right</mat-icon>
         </button>
       </div>

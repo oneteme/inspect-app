@@ -20,23 +20,63 @@ import {LdapRequestService} from "../../../service/jquery/ldap-request.service";
 import {EventSessionService} from "../../../service/event-session.service";
 import {InstanceService} from "../../../service/jquery/instance.service";
 import {LastServerStart} from "../../../model/jquery.model";
+import {SerieProvider} from "@oneteme/jquery-core/lib/jquery-core.model";
 
-interface Summary {
+export interface SummaryOverview {
+  category: string;
   type: string;
+  data: {
+    date: string;
+    year: number;
+    label: string;
+    count: number;
+    countTotal: number;
+  }[];
+  series: SerieProvider<string, number>[];
+}
+
+export interface Summary {
+  category: 'session' | 'request' | 'event';
+  label: string;
+  subSummaries: SubSummary[];
+  hasNoData: boolean;
+}
+
+export interface SubSummary {
+  type: string;
+  label: string;
   countError: number;
   countWarn: number;
   countTotal: number;
+  isLoading: boolean;
 }
 
-interface SummaryOverview {
-  category: string;
-  type: string;
-  date: string;
-  year: number;
-  label: string;
-  count: number;
-  countTotal: number;
-}
+export const INIT_SUMMARIES: Summary[] = [
+  {
+    category: 'session',
+    label: Constants.MAPPING_TYPE['treatment'].title,
+    subSummaries: [
+      {type: 'rest', label: Constants.MAPPING_TYPE['rest'].title, countError: 0, countWarn: 0, countTotal: 0, isLoading: false},
+      {type: 'schedule', label: Constants.MAPPING_TYPE['schedule'].title, countError: 0, countWarn: 0, countTotal: 0, isLoading: false},
+      {type: 'startup', label: Constants.MAPPING_TYPE['startup'].title, countError: 0, countWarn: 0, countTotal: 0, isLoading: false},
+      {type: 'view', label: Constants.MAPPING_TYPE['view'].title, countError: 0, countWarn: 0, countTotal: 0, isLoading: false},
+      {type: 'test', label: Constants.MAPPING_TYPE['test'].title, countError: 0, countWarn: 0, countTotal: 0, isLoading: false}
+    ],
+    hasNoData: false
+  },
+  {
+    category: 'request',
+    label: Constants.MAPPING_TYPE['request'].title,
+    subSummaries: [
+      {type: 'rest', label: Constants.REQUEST_MAPPING_TYPE['rest'].title, countError: 0, countWarn: 0, countTotal: 0, isLoading: false},
+      {type: 'jdbc', label: Constants.REQUEST_MAPPING_TYPE['jdbc'].title, countError: 0, countWarn: 0, countTotal: 0, isLoading: false},
+      {type: 'smtp', label: Constants.REQUEST_MAPPING_TYPE['smtp'].title, countError: 0, countWarn: 0, countTotal: 0, isLoading: false},
+      {type: 'ftp', label: Constants.REQUEST_MAPPING_TYPE['ftp'].title, countError: 0, countWarn: 0, countTotal: 0, isLoading: false},
+      {type: 'ldap', label: Constants.REQUEST_MAPPING_TYPE['ldap'].title, countError: 0, countWarn: 0, countTotal: 0, isLoading: false}
+    ],
+    hasNoData: false
+  }
+]
 
 @Component({
   templateUrl: './dashboard-new.component.html',
@@ -61,7 +101,7 @@ export class DashboardNewComponent implements OnInit, OnDestroy {
   MAPPING_TYPE = Constants.MAPPING_TYPE;
   REQUEST_MAPPING_TYPE = Constants.REQUEST_MAPPING_TYPE;
 
-  params: Partial<{ namespace: string, period: IPeriod}> = {};
+  params: Partial<{ namespace: string, period: IPeriod }> = {};
 
   periodFilterForm = new FormGroup({
     start: new FormControl<Date | null>(null, [Validators.required]),
@@ -71,22 +111,11 @@ export class DashboardNewComponent implements OnInit, OnDestroy {
   versionColor: any = {};
 
   instanceRows: LastServerStart[] = [];
+  selectedSummary: SummaryOverview = {category: '', type: '', data: [], series: []};
 
-  sessionSummaries: Partial<Summary>[] = [];
-  requestSummaries: Partial<Summary>[] = [];
-  eventSummaries: Partial<Summary>[] = [];
-
-  selectedSummary: SummaryOverview[] = [];
+  summaries = INIT_SUMMARIES;
 
   isInstanceLoading = false;
-  isMainSessionLoading = false;
-  isRestSessionLoading = false;
-  isRestRequestLoading = false;
-  isDatabaseRequestLoading = false;
-  isFtpRequestLoading = false;
-  isSmtpRequestLoading = false;
-  isLdapRequestLoading = false;
-  isEventSessionLoading = false;
   isSummaryLoading = false;
 
   ngOnInit(): void {
@@ -108,7 +137,7 @@ export class DashboardNewComponent implements OnInit, OnDestroy {
     this.periodFilterForm.patchValue({
       start: start,
       end: end
-    }, { emitEvent: false });
+    }, {emitEvent: false});
   }
 
   search(event: MouseEvent) {
@@ -125,13 +154,13 @@ export class DashboardNewComponent implements OnInit, OnDestroy {
 
   private initTitlePage() {
     this._pageTitleService.set({
-      icon: Constants.MAPPING_TYPE['dashboard']?.icon || 'deployed_code',
-      title: Constants.MAPPING_TYPE['dashboard']?.title || 'Vue d\'ensemble',
+      icon: Constants.MAPPING_TYPE['dashboard']?.icon,
+      title: Constants.MAPPING_TYPE['dashboard']?.title,
       iconOutlined: true
     });
   }
 
-  private buildParams(queryParams: Params):  Partial<{ namespace: string, period: IPeriod }> {
+  private buildParams(queryParams: Params): Partial<{ namespace: string, period: IPeriod }> {
     let params: Partial<{ namespace: string, period: IPeriod | IStep | IStepFrom }> = {};
     params.namespace = queryParams.namespace || app.defaultNamespace;
     if (queryParams.start && queryParams.end) {
@@ -143,7 +172,7 @@ export class DashboardNewComponent implements OnInit, OnDestroy {
     } else {
       params.period = getDefaultTodayPeriod();
     }
-    return {namespace: params.namespace, period: new IPeriod(params.period.start, params.period.end) };
+    return {namespace: params.namespace, period: new IPeriod(params.period.start, params.period.end)};
   }
 
   private buildQueryParams(params: Partial<{ namespace: string, period: IPeriod }>): Params {
@@ -154,9 +183,7 @@ export class DashboardNewComponent implements OnInit, OnDestroy {
   }
 
   private initSidebar() {
-    this.sessionSummaries = [];
-    this.requestSummaries = [];
-    this.eventSummaries = [];
+    this.summaries = INIT_SUMMARIES;
     this.getLastInstances();
     this.getRestSessionCountExceptions();
     this.getMainSessionCountExceptions();
@@ -165,7 +192,19 @@ export class DashboardNewComponent implements OnInit, OnDestroy {
     this.getFtpRequestCountExceptions();
     this.getSmtpRequestCountExceptions();
     this.getLdapRequestCountExceptions();
-    this.getEventSessionCountExceptions();
+    //this.getEventSessionCountExceptions();
+  }
+
+  get sessionSummary() {
+    return this.summaries.find(s => s.category === 'session');
+  }
+
+  get requestSummary() {
+    return this.summaries.find(s => s.category === 'request');
+  }
+
+  get eventSummary() {
+    return this.summaries.find(s => s.category === 'event');
   }
 
   getLastInstances() {
@@ -185,104 +224,202 @@ export class DashboardNewComponent implements OnInit, OnDestroy {
   }
 
   getMainSessionCountExceptions() {
-    this.isMainSessionLoading = true;
-    this._mainSessionService.getCountExceptionByType({ namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end })
+    this.sessionSummary.subSummaries.filter(summary => summary.type != 'rest').forEach(summary => {
+      summary.isLoading = true
+    });
+    this._mainSessionService.getCountExceptionByType({
+      namespace: this.params.namespace,
+      start: this.params.period.start,
+      end: this.params.period.end
+    })
         .pipe(
             takeUntil(this.$destroy),
-            finalize(() => this.isMainSessionLoading = false)
+            finalize(() => this.sessionSummary.subSummaries.filter(summary => summary.type != 'rest').forEach(summary => {
+              summary.isLoading = false
+            }))
         )
         .subscribe({
           next: res => {
-            this.sessionSummaries.push(...res);
+            this.sessionSummary.subSummaries.filter(summary => summary.type != 'rest').forEach(summary => {
+              const found = res.find(r => r.type === summary.type);
+              if (found) {
+                summary.countError = found.countError;
+                summary.countTotal = found.countTotal;
+              }
+            });
           }
         });
   }
 
   getRestSessionCountExceptions() {
-    this.isRestSessionLoading = true;
-    this._restSessionService.getCountException({ namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end })
+    this.sessionSummary.subSummaries.filter(summary => summary.type === 'rest').forEach(summary => {
+      summary.isLoading = true
+    });
+    this._restSessionService.getCountException({
+      namespace: this.params.namespace,
+      start: this.params.period.start,
+      end: this.params.period.end
+    })
         .pipe(
             takeUntil(this.$destroy),
-            finalize(() => this.isRestSessionLoading = false)
+            finalize(() => this.sessionSummary.subSummaries.filter(summary => summary.type === 'rest').forEach(summary => {
+              summary.isLoading = false
+            }))
         )
         .subscribe({
           next: res => {
-            this.sessionSummaries.push(res);
+            this.sessionSummary.subSummaries.filter(summary => summary.type === 'rest').forEach(summary => {
+              const found = res.find(r => r.type === summary.type);
+              if (found) {
+                summary.countError = found.countError;
+                summary.countTotal = found.countTotal;
+              }
+            });
           }
         });
   }
 
   getRestRequestCountExceptions() {
-    this.isRestRequestLoading = true;
-    this._restRequestService.getCountException({ namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end })
+    this.requestSummary.subSummaries.filter(summary => summary.type === 'rest').forEach(summary => {
+      summary.isLoading = true
+    });
+    this._restRequestService.getCountException({
+      namespace: this.params.namespace,
+      start: this.params.period.start,
+      end: this.params.period.end
+    })
         .pipe(
             takeUntil(this.$destroy),
-            finalize(() => this.isRestRequestLoading = false)
+            finalize(() => this.requestSummary.subSummaries.filter(summary => summary.type === 'rest').forEach(summary => {
+              summary.isLoading = false
+            }))
         )
         .subscribe({
           next: res => {
-            this.requestSummaries.push(res);
+            this.requestSummary.subSummaries.filter(summary => summary.type === 'rest').forEach(summary => {
+              const found = res.find(r => r.type === summary.type);
+              if (found) {
+                summary.countError = found.countError;
+                summary.countTotal = found.countTotal;
+              }
+            });
           }
         });
   }
 
   getDatabaseRequestCountExceptions() {
-    this.isDatabaseRequestLoading = true;
-    this._databaseRequestService.getCountException({ namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end })
+    this.requestSummary.subSummaries.filter(summary => summary.type === 'jdbc').forEach(summary => {
+      summary.isLoading = true
+    });
+    this._databaseRequestService.getCountException({
+      namespace: this.params.namespace,
+      start: this.params.period.start,
+      end: this.params.period.end
+    })
         .pipe(
             takeUntil(this.$destroy),
-            finalize(() => this.isDatabaseRequestLoading = false)
+            finalize(() => this.requestSummary.subSummaries.filter(summary => summary.type === 'jdbc').forEach(summary => {
+              summary.isLoading = false
+            }))
         )
         .subscribe({
           next: res => {
-            this.requestSummaries.push(res);
+            this.requestSummary.subSummaries.filter(summary => summary.type === 'jdbc').forEach(summary => {
+              const found = res.find(r => r.type === summary.type);
+              if (found) {
+                summary.countError = found.countError;
+                summary.countTotal = found.countTotal;
+              }
+            });
           }
         });
   }
 
   getLdapRequestCountExceptions() {
-    this.isLdapRequestLoading = true;
-    this._ldapRequestService.getCountException({ namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end })
+    this.requestSummary.subSummaries.filter(summary => summary.type === 'ldap').forEach(summary => {
+      summary.isLoading = true
+    });
+    this._ldapRequestService.getCountException({
+      namespace: this.params.namespace,
+      start: this.params.period.start,
+      end: this.params.period.end
+    })
         .pipe(
             takeUntil(this.$destroy),
-            finalize(() => this.isLdapRequestLoading = false)
+            finalize(() => this.requestSummary.subSummaries.filter(summary => summary.type === 'ldap').forEach(summary => {
+              summary.isLoading = false
+            }))
         )
         .subscribe({
           next: res => {
-            this.requestSummaries.push(res);
+            this.requestSummary.subSummaries.filter(summary => summary.type === 'ldap').forEach(summary => {
+              const found = res.find(r => r.type === summary.type);
+              if (found) {
+                summary.countError = found.countError;
+                summary.countTotal = found.countTotal;
+              }
+            });
           }
         });
   }
 
   getFtpRequestCountExceptions() {
-    this.isFtpRequestLoading = true;
-    this._ftpRequestService.getCountException({ namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end })
+    this.requestSummary.subSummaries.filter(summary => summary.type === 'ftp').forEach(summary => {
+      summary.isLoading = true
+    });
+    this._ftpRequestService.getCountException({
+      namespace: this.params.namespace,
+      start: this.params.period.start,
+      end: this.params.period.end
+    })
         .pipe(
             takeUntil(this.$destroy),
-            finalize(() => this.isFtpRequestLoading = false)
+            finalize(() => this.requestSummary.subSummaries.filter(summary => summary.type === 'ftp').forEach(summary => {
+              summary.isLoading = false
+            }))
         )
         .subscribe({
           next: res => {
-            this.requestSummaries.push(res);
+            this.requestSummary.subSummaries.filter(summary => summary.type === 'ftp').forEach(summary => {
+              const found = res.find(r => r.type === summary.type);
+              if (found) {
+                summary.countError = found.countError;
+                summary.countTotal = found.countTotal;
+              }
+            });
           }
         });
   }
 
   getSmtpRequestCountExceptions() {
-    this.isSmtpRequestLoading = true;
-    this._smtpRequestService.getCountException({ namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end })
+    this.requestSummary.subSummaries.filter(summary => summary.type === 'smtp').forEach(summary => {
+      summary.isLoading = true
+    });
+    this._smtpRequestService.getCountException({
+      namespace: this.params.namespace,
+      start: this.params.period.start,
+      end: this.params.period.end
+    })
         .pipe(
             takeUntil(this.$destroy),
-            finalize(() => this.isSmtpRequestLoading = false)
+            finalize(() => this.requestSummary.subSummaries.filter(summary => summary.type === 'smtp').forEach(summary => {
+              summary.isLoading = false
+            }))
         )
         .subscribe({
           next: res => {
-            this.requestSummaries.push(res);
+            this.requestSummary.subSummaries.filter(summary => summary.type === 'smtp').forEach(summary => {
+              const found = res.find(r => r.type === summary.type);
+              if (found) {
+                summary.countError = found.countError;
+                summary.countTotal = found.countTotal;
+              }
+            });
           }
         });
   }
 
-  getEventSessionCountExceptions() {
+  /*getEventSessionCountExceptions() {
     this.isEventSessionLoading = true;
     this._eventSessionService.getCountByCategory({ namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end })
         .pipe(
@@ -301,51 +438,30 @@ export class DashboardNewComponent implements OnInit, OnDestroy {
             }
           }
         });
-  }
+  }*/
 
-  onClickSessionSummary(summary: Partial<Summary>) {
-    this.selectedSummary = [];
+  onClickSummary(category: string, summary: Partial<SubSummary>) {
+    this.selectedSummary = {category: category, type: summary.type, data: [], series: []};
+    console.log('onClickSummary', this.selectedSummary);
     this.isSummaryLoading = true;
-    this.SESSION(this.params.namespace, this.params.period.start, this.params.period.end, periodManagement(this.params.period.start, this.params.period.end))[summary.type]
+    this.CATEGORY(this.params.namespace, this.params.period.start, this.params.period.end, periodManagement(this.params.period.start, this.params.period.end))[category][summary.type]
         .pipe(
             finalize(() => this.isSummaryLoading = false)
         )
         .subscribe({
           next: res => {
-            this.selectedSummary = res.map(r => ({...r, category: 'session', type: summary.type}));
+            this.selectedSummary = {...this.selectedSummary, data: res};
           }
         });
   }
 
-  onClickRequestSummary(summary: Partial<Summary>) {
-    this.selectedSummary = [];
-    this.isSummaryLoading = true;
-    this.REQUEST(this.params.namespace, this.params.period.start, this.params.period.end, periodManagement(this.params.period.start, this.params.period.end))[summary.type]
-        .pipe(
-            finalize(() => this.isSummaryLoading = false)
-        )
-        .subscribe({
-          next: res => {
-            this.selectedSummary = res.map(r => ({...r, category: 'request', type: summary.type}));
-          }
-        });
-  }
-
-  onClickEventSummary(summary: Partial<Summary>) {
-    this.selectedSummary = [];
-    this.isSummaryLoading = true;
-    this.EVENT(this.params.namespace, this.params.period.start, this.params.period.end, periodManagement(this.params.period.start, this.params.period.end))[summary.type]
-        .pipe(
-            finalize(() => this.isSummaryLoading = false)
-        )
-        .subscribe({
-          next: res => {
-            this.selectedSummary = res.map(r => ({...r, category: 'event', type: summary.type}));
-          }
-        });
-  }
-
-  onNavigateSearch(event: MouseEvent, row: {category: string, type: string, label: string, count: number, totalCount: number}) {
+  onNavigateSearch(event: MouseEvent, row: {
+    category: string,
+    type: string,
+    label: string,
+    count: number,
+    totalCount: number
+  }) {
     console.log(row)
     let queryParams = row.category == 'event' ? {
       ...this.buildQueryParams(this.params),
@@ -358,6 +474,19 @@ export class DashboardNewComponent implements OnInit, OnDestroy {
       queryParams
     });
   }
+
+  private CATEGORY = (namespace: string, start: Date, end: Date, groupedBy: string): {
+    [key: string]: {
+      [key: string]: Observable<{ date: string, year: number, label: string, count: number, countTotal: number }[]>
+    }
+  } => {
+    return {
+      session: this.SESSION(namespace, start, end, groupedBy),
+      request: this.REQUEST(namespace, start, end, groupedBy),
+      event: this.EVENT(namespace, start, end, groupedBy)
+    };
+  }
+
 
   private SESSION = (namespace: string, start: Date, end: Date, groupedBy: string): { [key: string]: Observable<{date: string, year: number, label: string, count: number, countTotal: number}[]> } => {
     return {

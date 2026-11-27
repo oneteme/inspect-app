@@ -109,17 +109,15 @@ export class SmtpRequestService {
         countError: number,
         countTotal: number,
         type: string
-    }> {
+    }[]> {
         let args = {
-            'select': `count_error:countError,count:countTotal`,
+            'select': `count_error:countError,count:countTotal,varchar(smtp):type`,
             'join': 'instance',
             'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'count.gt': 0
         }
-        return this.getSmtp(args).pipe(map(data => {
-            return {...data[0], type: 'smtp'};
-        }));
+        return this.getSmtp(args);
     }
 }

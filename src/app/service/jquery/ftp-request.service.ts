@@ -118,17 +118,15 @@ export class FtpRequestService {
         countError: number,
         countTotal: number,
         type: string
-    }> {
+    }[]> {
         let args = {
-            'select': `count_error:countError,count:countTotal`,
+            'select': `count_error:countError,count:countTotal,varchar(ftp):type`,
             'join': 'instance',
             'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'count.gt': 0
         }
-        return this.getFtp(args).pipe(map(data => {
-            return {...data[0], type: 'ftp'};
-        }));
+        return this.getFtp(args);
     }
 }

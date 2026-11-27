@@ -113,7 +113,7 @@ export class RestSessionService {
 
     getExceptionByDateNew(namespace: string, start: Date, end: Date, groupedBy: string): Observable<{date: string, year: number, label: string, count: number, countTotal: number}[]> {
         let args: any = {
-            'select': `start.${groupedBy}:date,error_type:label,count:count,count.sum.over(partition(date)):countTotal,start.year:year`,
+            'select': `count:count,start.${groupedBy}:date,start.year:year,status_tranche:label`,
             'join': 'instance',
             'start.ge': start.toISOString(),
             'start.lt': end.toISOString(),
@@ -124,18 +124,16 @@ export class RestSessionService {
         return this.getRestSession(args);
     }
 
-    getCountException(filters: { namespace: string, start: Date, end: Date }): Observable<{countError: number, countTotal: number, type: string}> {
+    getCountException(filters: { namespace: string, start: Date, end: Date }): Observable<{countError: number, countTotal: number, type: string}[]> {
         let args = {
-            'select': `count_error:countError,count:countTotal`,
+            'select': `count_error:countError,count:countTotal,varchar(rest):type`,
             'join': 'instance',
             'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'count.gt': 0
         }
-        return this.getRestSession(args).pipe(map(data => {
-           return {...data[0], type: 'rest'};
-        }));
+        return this.getRestSession(args);
     }
 
     getCountByNamespace(filters: {namespace: string, start: Date, end: Date}): Observable<{total: number, errors: number}> {

@@ -10,8 +10,9 @@ import {IPeriod, IStep, IStepFrom, QueryParams} from "../../../../model/conf.mod
 import {EnvRouter} from "../../../../service/router.service";
 import {ActivatedRoute, Params} from "@angular/router";
 import {
+    DEFAULT_PERIOD_QUICK_RANGES,
     getDefaultRelativePeriod, getQuickRangeDates, getQuickRangeStep,
-    isDefaultRelativePeriod, PERIOD_QUICK_RANGES, PeriodQuickRange,
+    isDefaultRelativePeriod, PeriodQuickRange,
     toDisplayedPeriodEnd
 } from "../../../../shared/period-filter";
 import {app} from "../../../../../environments/environment";
@@ -20,7 +21,7 @@ import {Constants, EVENT_LOG, EVENT_USER} from "../../../constants";
 import {InstanceService} from "../../../../service/jquery/instance.service";
 import {Location} from "@angular/common";
 import {PageTitleService} from "../../../../service/page-title.service";
-import {SessionEventService} from "../../../../service/session-event.service";
+import {EventSessionService} from "../../../../service/event-session.service";
 import {DateAdapter, MAT_DATE_FORMATS} from "@angular/material/core";
 import {CustomDateAdapter} from "../../../../shared/material/custom-date-adapter";
 import {MY_DATE_FORMATS} from "../../../../shared/shared.module";
@@ -39,14 +40,14 @@ import {CustomDateRangeSelectionStrategy} from "../../../../shared/material/cust
 export class SearchMainEventView {
     private readonly _router = inject(EnvRouter);
     private readonly _pageTitleService = inject(PageTitleService);
-    private readonly _sessionEventService = inject(SessionEventService);
+    private readonly _sessionEventService = inject(EventSessionService);
     private readonly _instanceService = inject(InstanceService);
     private readonly _activatedRoute = inject(ActivatedRoute);
     private readonly _location = inject(Location);
     readonly sessionLinkIcon = this._activatedRoute.snapshot.data['isLogRoute']
         ? 'move_up'
         : 'link';
-    readonly periodQuickRanges = PERIOD_QUICK_RANGES;
+    readonly periodQuickRanges = DEFAULT_PERIOD_QUICK_RANGES;
     serverNameIsLoading = true;
     nameDataList: any[];
     events: SessionEventDto[];

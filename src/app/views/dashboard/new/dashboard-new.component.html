@@ -40,106 +40,55 @@
         </button>
       </div>
     </div>
-    <div class="sb-block sb-distribution-block">
-      <div class="sbd-title">Traitements</div>
-      <div class="sbd-empty" *ngIf="sessionSummaries.length === 0 && !isMainSessionLoading && !isRestSessionLoading">
-        <mat-icon>info_outline</mat-icon>
-        <span>Aucun traitement sur la période</span>
-      </div>
-      <ng-container *ngFor="let s of sessionSummaries">
-        <div class="sbd-row"
-             [class.sbd-row-clickable]="true"
-             [title]="(s.countTotal | number: '1.0-0') + ' sessions · ' + (s.countError | number: '1.0-0') + ' erreurs'"
-             tabindex="0"
-             (click)="onClickSessionSummary(s)"
-             (keydown.enter)="onClickSessionSummary(s)">
-          <div class="sbd-main"
-               [attr.data-inspect-location]="'Traitements • ' + MAPPING_TYPE['dashboard'].title"
-               data-inspect-scope="Menu latéral"
-               [attr.data-inspect-track]="'Taux ' + MAPPING_TYPE[s.type].title">
-            <div class="sbd-top">
-              <span class="sbd-label">{{ MAPPING_TYPE[s.type].title }}</span>
-              <span class="sbd-count">{{ s.countTotal | compact }}</span>
-            </div>
-            <div class="sbd-track" [class.track-active]="s.countTotal > 0">
-              <div class="sbd-fill" [style.width.%]="s.countTotal > 0 ? (100 - (s.countError * 100) / s.countTotal) : 0"></div>
-            </div>
-          </div>
-          <span class="sbd-rate" [class.c-ok]="s.countTotal > 0 && (s.countError * 100) / s.countTotal === 0" [class.c-err]="(s.countError * 100) / s.countTotal > 0"
-                [attr.data-inspect-location]="'Traitements • ' + MAPPING_TYPE['dashboard'].title"
-                data-inspect-scope="Menu latéral"
-                [attr.data-inspect-track]="'Taux ' + MAPPING_TYPE[s.type].title">{{ (s.countError * 100) / s.countTotal === 0 ? '100%' : ((s.countError * 100) / s.countTotal | number:'1.2-2') + '%' }}</span>
+    <ng-container *ngFor="let s of summaries">
+      <div class="sb-block sb-distribution-block">
+        <div class="sbd-title">{{ s.label }}</div>
+        <div class="sbd-empty" *ngIf="s.hasNoData">
+          <mat-icon>info_outline</mat-icon>
+          <span>Aucun traitement sur la période</span>
         </div>
-      </ng-container>
-    </div>
-
-    <div class="sb-block sb-distribution-block">
-      <div class="sbd-title">Flux</div>
-      <div class="sbd-empty" *ngIf="requestSummaries.length === 0 && !isRestRequestLoading && !isDatabaseRequestLoading && !isFtpRequestLoading && !isSmtpRequestLoading && !isLdapRequestLoading">
-        <mat-icon>info_outline</mat-icon>
-        <span>Aucun flux sur la période</span>
+        <ng-container *ngFor="let sub of s.subSummaries">
+          <ng-container *ngIf="sub.isLoading && sub.countTotal == 0; else sessionBlock">
+            <div class="sbd-skel-main">
+              <div class="sbd-skel-top">
+                <div class="sbd-skel-label"></div>
+                <div class="sbd-skel-count"></div>
+              </div>
+              <div class="sbd-skel-track"></div>
+            </div>
+            <div class="sbd-skel-rate"></div>
+          </ng-container>
+          <ng-template #sessionBlock>
+            <div class="sbd-row" *ngIf="sub.countTotal > 0"
+                 [class.sbd-row-selected]="selectedSummary.category === s.category && selectedSummary.type === sub.type"
+                 [class.sbd-row-clickable]="true"
+                 [title]="(sub.countTotal | number: '1.0-0') + ' sessions · ' + (sub.countError | number: '1.0-0') + ' erreurs'"
+                 tabindex="0"
+                 (click)="onClickSummary(s.category, sub)"
+                 (keydown.enter)="onClickSummary(s.category, sub)">
+              <div class="sbd-main"
+                   [attr.data-inspect-location]="s.label + ' • ' + MAPPING_TYPE['dashboard'].title"
+                   data-inspect-scope="Menu latéral"
+                   [attr.data-inspect-track]="'Taux ' + sub.label">
+                <div class="sbd-top">
+                  <span class="sbd-label">{{ sub.label }}</span>
+                  <span class="sbd-count">{{ sub.countTotal | compact }}</span>
+                </div>
+                <div class="sbd-track sbd-track-split">
+                  <div class="sbd-fill-success" [style.width.%]="((sub.countTotal - (sub.countError + sub.countWarn)) * 100) / sub.countTotal"></div>
+                  <div class="sbd-fill-warn" [style.width.%]="(sub.countWarn * 100) / sub.countTotal"></div>
+                  <div class="sbd-fill-error" [style.width.%]="(sub.countError * 100) / sub.countTotal"></div>
+                </div>
+              </div>
+              <span class="sbd-rate" [class.c-ok]="sub.countTotal > 0 && (sub.countError * 100) / sub.countTotal === 0" [class.c-err]="(sub.countError * 100) / sub.countTotal > 0"
+                    [attr.data-inspect-location]="s.label + ' • ' + MAPPING_TYPE['dashboard'].title"
+                    data-inspect-scope="Menu latéral"
+                    [attr.data-inspect-track]="'Taux ' + sub.label">{{ (sub.countError * 100) / sub.countTotal === 0 ? '100%' : ((sub.countError * 100) / sub.countTotal | number:'1.2-2') + '%' }}</span>
+            </div>
+          </ng-template>
+        </ng-container>
       </div>
-      <ng-container *ngFor="let s of requestSummaries">
-        <div class="sbd-row"
-             [class.sbd-row-clickable]="true"
-             [title]="(s.countTotal | number: '1.0-0') + ' flux · ' + (s.countError | number: '1.0-0') + ' erreurs'"
-             tabindex="0"
-             (click)="onClickRequestSummary(s)"
-             (keydown.enter)="onClickRequestSummary(s)">
-          <div class="sbd-main"
-               [attr.data-inspect-location]="'Traitements • ' + MAPPING_TYPE['dashboard'].title"
-               data-inspect-scope="Menu latéral"
-               [attr.data-inspect-track]="'Taux ' + REQUEST_MAPPING_TYPE[s.type].title">
-            <div class="sbd-top">
-              <span class="sbd-label">{{ REQUEST_MAPPING_TYPE[s.type].title }}</span>
-              <span class="sbd-count">{{ s.countTotal | compact }}</span>
-            </div>
-            <div class="sbd-track" [class.track-active]="s.countTotal > 0">
-              <div class="sbd-fill" [style.width.%]="s.countTotal > 0 ? (100 - (s.countError * 100) / s.countTotal) : 0"></div>
-            </div>
-          </div>
-          <span class="sbd-rate" [class.c-ok]="s.countTotal > 0 && (s.countError * 100) / s.countTotal === 0" [class.c-err]="(s.countError * 100) / s.countTotal > 0"
-                [attr.data-inspect-location]="'Traitements • ' + MAPPING_TYPE['dashboard'].title"
-                data-inspect-scope="Menu latéral"
-                [attr.data-inspect-track]="'Taux ' + REQUEST_MAPPING_TYPE[s.type].title">{{ (s.countError * 100) / s.countTotal === 0 ? '100%' : ((s.countError * 100) / s.countTotal | number:'1.2-2') + '%' }}</span>
-        </div>
-      </ng-container>
-    </div>
-
-    <div class="sb-block sb-distribution-block">
-      <div class="sbd-title">Événements</div>
-      <div class="sbd-empty" *ngIf="eventSummaries.length === 0 && !isMainSessionLoading && !isRestSessionLoading">
-        <mat-icon>info_outline</mat-icon>
-        <span>Aucun événement sur la période</span>
-      </div>
-      <ng-container *ngFor="let s of eventSummaries">
-        <div class="sbd-row"
-             [class.sbd-row-clickable]="true"
-             [title]="(s.countTotal | number: '1.0-0') + ' événements · ' + (s.countError | number: '1.0-0') + ' erreurs'"
-             tabindex="0"
-             (click)="onClickEventSummary(s)"
-             (keydown.enter)="onClickEventSummary(s)">
-          <div class="sbd-main"
-               [attr.data-inspect-location]="'Traitements • ' + MAPPING_TYPE['dashboard'].title"
-               data-inspect-scope="Menu latéral"
-               [attr.data-inspect-track]="'Taux ' + MAPPING_TYPE[s.type].title">
-            <div class="sbd-top">
-              <span class="sbd-label">{{ MAPPING_TYPE[s.type].title }}</span>
-              <span class="sbd-count">{{ s.countTotal | compact }}</span>
-            </div>
-            <div class="sbd-track sbd-track-split">
-              <div class="sbd-fill-info" [style.width.%]="((s.countTotal - (s.countError + s.countWarn)) * 100) / s.countTotal"></div>
-              <div class="sbd-fill-warn" [style.width.%]="(s.countWarn * 100) / s.countTotal"></div>
-              <div class="sbd-fill-error" [style.width.%]="(s.countError * 100) / s.countTotal"></div>
-            </div>
-          </div>
-          <span class="sbd-rate" [class.c-ok]="s.countWarn === 0 && s.countError === 0" [class.c-warn]="s.countWarn > s.countError" [class.c-err]="s.countError >= s.countWarn"
-                [attr.data-inspect-location]="'Traitements • ' + MAPPING_TYPE['dashboard'].title"
-                data-inspect-scope="Menu latéral"
-                [attr.data-inspect-track]="'Taux ' + MAPPING_TYPE[s.type].title">{{ s.countWarn === 0 && s.countError === 0 ? '100%' : s.countError >= s.countWarn ? (((s.countError * 100) / s.countTotal | number:'1.2-2') + '%') : (((s.countWarn * 100) / s.countTotal | number:'1.2-2') + '%') }}</span>
-        </div>
-      </ng-container>
-    </div>
+    </ng-container>
   </aside>
   <section class="db-main">
     <dashboard-detail-view-new

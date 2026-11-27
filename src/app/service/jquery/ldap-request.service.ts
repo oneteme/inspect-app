@@ -111,17 +111,15 @@ export class LdapRequestService {
         countError: number,
         countTotal: number,
         type: string
-    }> {
+    }[]> {
         let args = {
-            'select': `count_error:countError,count:countTotal`,
+            'select': `count_error:countError,count:countTotal,varchar(ldap):type`,
             'join': 'instance',
             'instance.namespace': filters.namespace,
             'start.ge': filters.start.toISOString(),
             'start.lt': filters.end.toISOString(),
             'count.gt': 0
         }
-        return this.getLdap(args).pipe(map(data => {
-            return {...data[0], type: 'ldap'};
-        }));
+        return this.getLdap(args);
     }
 }

@@ -5,6 +5,13 @@
   gap: .5em;
 }
 
+%skel-base {
+  background: linear-gradient(90deg, rgba(34,36,38,.06) 25%, rgba(34,36,38,.11) 50%, rgba(34,36,38,.06) 75%);
+  background-size: 200% 100%;
+  animation: sb-shimmer 1.4s ease-in-out infinite;
+  border-radius: 4px;
+}
+
 .db-grid {
   padding: .4em .2em 0;
   display: grid;
@@ -160,9 +167,9 @@
           &.sbd-row-clickable:hover > * { opacity: .7; }
 
           &.sbd-row-selected {
-            .sbd-label { opacity: 1; color: rgba(0, 0, 0, .82); }
-            .sbd-rate  { opacity: 1; }
-            .sbd-count { opacity: .75; }
+            .sbd-main .sbd-top .sbd-label { opacity: 1; color: rgba(0, 0, 0, .82); }
+            .sbd-main .sbd-top .sbd-rate  { opacity: 1; }
+            .sbd-main .sbd-top .sbd-count { opacity: .75; }
           }
 
           .sbd-main {
@@ -226,7 +233,7 @@
                   background: #db2828;
                 }
 
-                .sbd-fill-info {
+                .sbd-fill-success {
                   height: 100%;
                   background: #21ba45;
                 }
@@ -245,6 +252,45 @@
             &.c-err { color: #db2828; }
             &.c-warn { color: #f59e0b; }
           }
+        }
+
+        .sbd-skel-main {
+          display: flex;
+          flex-direction: column;
+          gap: 5px;
+          min-width: 0;
+
+          .sbd-skel-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+
+            .sbd-skel-label {
+              @extend %skel-base;
+              height: 9px;
+              width: 55%;
+            }
+
+            .sbd-skel-count {
+              @extend %skel-base;
+              height: 9px;
+              width: 28px;
+            }
+          }
+
+          .sbd-skel-track {
+            @extend %skel-base;
+            height: 6px;
+            border-radius: 3px;
+          }
+        }
+
+        .sbd-skel-rate {
+          @extend %skel-base;
+          height: 9px;
+          width: 36px;
+          justify-self: end;
+          align-self: flex-end;
         }
       }
     }
