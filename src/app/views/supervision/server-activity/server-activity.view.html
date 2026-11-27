@@ -70,14 +70,15 @@
         <div class="kpi-chart-title-group">
           <span class="kpi-accent-bar orange-bar"></span>
           <mat-icon class="kpi-chart-icon material-symbols-outlined" aria-hidden="true">bug_report</mat-icon>
-          <h2 id="activity-reports-title" class="kpi-chart-title">Anomalies</h2>
+          <h2 id="activity-reports-title" class="kpi-chart-title">Anomalies
+          </h2>
+            <mat-tab-group (selectedIndexChange)="selectedTabIndex = $event" [selectedIndex]="selectedTabIndex"
+                           class="activity-reports-tabs" mat-stretch-tabs="false">
+                <mat-tab label="Applicatives"></mat-tab>
+                <mat-tab label="INSPECT"></mat-tab>
+            </mat-tab-group>
         </div>
       </div>
-      <mat-tab-group (selectedIndexChange)="selectedTabIndex = $event" [selectedIndex]="selectedTabIndex"
-                     class="activity-reports-tabs" mat-stretch-tabs="false">
-        <mat-tab label="Applicatives"></mat-tab>
-        <mat-tab label="INSPECT"></mat-tab>
-      </mat-tab-group>
       <div class="kpi-chart-body">
         <jquery-table *ngIf="selectedTabIndex === 0" class="flex-table" [config]="anomalyAppTabConfig" [data]="logEntryByPeriod" [isLoading]="isLoadingLogs">
           <ng-template jqtCellDef="instant" let-row>
