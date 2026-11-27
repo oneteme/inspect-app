@@ -94,9 +94,15 @@ export class RestComponent implements OnInit {
   };
 
   readonly STATUS_CHART_PROVIDER_BASE = STATUS_CHART_PROVIDER_BASE;
+  readonly DEFAULT_INSTANCE_TYPE = 'SERVER';
 
   params: QueryParams;
   groupedBy: string = '';
+
+  private get instanceType(): string {
+    return this.params.optional?.instanceType || this.DEFAULT_INSTANCE_TYPE;
+  }
+
   // Granularité par graphique : axe (X ou Grouper par) et filtre Date, chacun avec son sous-menu
   $statusGranularity: PeriodGranularities = {axis: '', filter: ''};
   $performanceGranularity: PeriodGranularities = {axis: '', filter: ''};
@@ -121,6 +127,17 @@ export class RestComponent implements OnInit {
       this.$volumetryRepartition.chartConfig = REST_VOLUMETRY_CHART_CONFIG(this.groupedBy);
       this.$latencyRepartition.chartConfig = REST_LATENCY_CHART_CONFIG(this.groupedBy);
       this.$audienceRepartition.chartConfig = AUDIENCE_CHART_CONFIG(REST_GROUPS_CONFIG(this.groupedBy), REST_FILTERS_CONFIG(this.groupedBy));
+
+      this.$statusSlice = null;
+      this.$statusFilterValues = {};
+      this.$performanceSlice = null;
+      this.$performanceFilterValues = {};
+      this.$volumetrySlice = null;
+      this.$volumetryFilterValues = {};
+      this.$latencySlice = null;
+      this.$latencyFilterValues = {};
+      this.$audienceSlice = null;
+      this.$audienceFilterValues = {};
 
       this._rebuildOrganizerConfigs();
 
@@ -160,12 +177,13 @@ export class RestComponent implements OnInit {
   }
 
   onStatusSliceChange(sliceState: OrganizerSliceState | null): void {
+    const hadFilter = Object.keys(this.$statusFilterValues).length > 0;
     this.$statusSlice = sliceState;
     if (!sliceState) {
       this.$statusFilterValues = {};
     }
-    // Refetch seulement si un filtre a été effectivement sélectionné
-    if (sliceState?.filterApplied === true) {
+    // Refetch si un filtre a été sélectionné ou si le filtre précédent a été effacé
+    if (sliceState?.filterApplied === true || (!sliceState && hadFilter)) {
       this._fetchStatus();
     }
   }
@@ -191,12 +209,12 @@ export class RestComponent implements OnInit {
   }
 
   onPerformanceSliceChange(sliceState: OrganizerSliceState | null): void {
+    const hadFilter = Object.keys(this.$performanceFilterValues).length > 0;
     this.$performanceSlice = sliceState;
     if (!sliceState) {
       this.$performanceFilterValues = {};
     }
-    // Refetch seulement si un filtre a été effectivement sélectionné
-    if (sliceState?.filterApplied === true) {
+    if (sliceState?.filterApplied === true || (!sliceState && hadFilter)) {
       this._fetchPerformance();
     }
   }
@@ -222,12 +240,12 @@ export class RestComponent implements OnInit {
   }
 
   onVolumetrySliceChange(sliceState: OrganizerSliceState | null): void {
+    const hadFilter = Object.keys(this.$volumetryFilterValues).length > 0;
     this.$volumetrySlice = sliceState;
     if (!sliceState) {
       this.$volumetryFilterValues = {};
     }
-    // Refetch seulement si un filtre a été effectivement sélectionné
-    if (sliceState?.filterApplied === true) {
+    if (sliceState?.filterApplied === true || (!sliceState && hadFilter)) {
       this._fetchVolumetry();
     }
   }
@@ -253,12 +271,12 @@ export class RestComponent implements OnInit {
   }
 
   onLatencySliceChange(sliceState: OrganizerSliceState | null): void {
+    const hadFilter = Object.keys(this.$latencyFilterValues).length > 0;
     this.$latencySlice = sliceState;
     if (!sliceState) {
       this.$latencyFilterValues = {};
     }
-    // Refetch seulement si un filtre a été effectivement sélectionné
-    if (sliceState?.filterApplied === true) {
+    if (sliceState?.filterApplied === true || (!sliceState && hadFilter)) {
       this._fetchLatency();
     }
   }
@@ -284,12 +302,12 @@ export class RestComponent implements OnInit {
   }
 
   onAudienceSliceChange(sliceState: OrganizerSliceState | null): void {
+    const hadFilter = Object.keys(this.$audienceFilterValues).length > 0;
     this.$audienceSlice = sliceState;
     if (!sliceState) {
       this.$audienceFilterValues = {};
     }
-    // Refetch seulement si un filtre a été effectivement sélectionné
-    if (sliceState?.filterApplied === true) {
+    if (sliceState?.filterApplied === true || (!sliceState && hadFilter)) {
       this._fetchAudience();
     }
   }
@@ -332,7 +350,7 @@ export class RestComponent implements OnInit {
 
     return this._httpRequestService.getFilters(
       filter,
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: granularity }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, instanceType: this.instanceType, groupedBy: granularity }
     ) as Observable<any[]>;
   }
 
@@ -356,7 +374,7 @@ export class RestComponent implements OnInit {
     this.$statusRepartition.data = [];
     this._httpRequestService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$statusGranularity.axis, selections: buildFilterSelections(cfg, this.$statusFilterValues) }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, instanceType: this.instanceType, groupedBy: this.$statusGranularity.axis, selections: buildFilterSelections(cfg, this.$statusFilterValues) }
     ).pipe(finalize(() => this.$statusRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$statusGranularity.axis, this.datePipe, this.params.period.start) : data;
@@ -384,7 +402,7 @@ export class RestComponent implements OnInit {
     this.$performanceRepartition.data = [];
     this._httpRequestService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$performanceGranularity.axis, selections: buildFilterSelections(cfg, this.$performanceFilterValues) }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, instanceType: this.instanceType, groupedBy: this.$performanceGranularity.axis, selections: buildFilterSelections(cfg, this.$performanceFilterValues) }
     ).pipe(finalize(() => this.$performanceRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$performanceGranularity.axis, this.datePipe, this.params.period.start) : data;
@@ -413,7 +431,7 @@ export class RestComponent implements OnInit {
     this.$volumetryRepartition.data = [];
     this._httpRequestService.getSizeCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$volumetryGranularity.axis, selections: buildFilterSelections(cfg, this.$volumetryFilterValues) }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, instanceType: this.instanceType, groupedBy: this.$volumetryGranularity.axis, selections: buildFilterSelections(cfg, this.$volumetryFilterValues) }
     ).pipe(finalize(() => this.$volumetryRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$volumetryGranularity.axis, this.datePipe, this.params.period.start) : data;
@@ -443,7 +461,7 @@ export class RestComponent implements OnInit {
     this.$latencyRepartition.data = [];
     this._httpRequestService.getLatency(
       { serie: cfg.series.items[0], indicator: ind, group: grp, stack: stk },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, groupedBy: this.$latencyGranularity.axis, selections: buildFilterSelections(cfg, this.$latencyFilterValues) }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, instanceType: this.instanceType, groupedBy: this.$latencyGranularity.axis, selections: buildFilterSelections(cfg, this.$latencyFilterValues) }
     ).pipe(finalize(() => this.$latencyRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$latencyGranularity.axis, this.datePipe, this.params.period.start) : data;
@@ -479,7 +497,7 @@ export class RestComponent implements OnInit {
     this.$audienceRepartition.data = [];
     this._httpRequestService.getCustom(
       { series: cfg.series.items, indicator: ind, group: grp, stack: stk },
-      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, instanceType: this.params.optional?.instanceType, groupedBy: this.$audienceGranularity.axis, selections: buildFilterSelections(cfg, this.$audienceFilterValues) }
+      { namespace: this.params.namespace, start: this.params.period.start, end: this.params.period.end, hosts: this.params.hosts, instanceType: this.instanceType, groupedBy: this.$audienceGranularity.axis, selections: buildFilterSelections(cfg, this.$audienceFilterValues) }
     ).pipe(finalize(() => this.$audienceRepartition.loading = false))
     .subscribe(data => {
       const formattedData = grp?.key === 'date' ? formatChartDates(data, this.$audienceGranularity.axis, this.datePipe, this.params.period.start) : data;
@@ -528,6 +546,7 @@ export class RestComponent implements OnInit {
       args['instance.type'] = instanceType;
     }
     this.$mediaRepartition.loading = true;
+    this.$mediaRepartition.data = [];
     this._httpRequestService.getRestRequest(args)
       .pipe(finalize(() => this.$mediaRepartition.loading = false))
       .subscribe({ next: (res: any[]) => { this.$mediaRepartition.data = res; } });
@@ -550,12 +569,14 @@ export class RestComponent implements OnInit {
       args['instance.type'] = instanceType;
     }
     this.$methodRepartition.loading = true;
+    this.$methodRepartition.data = [];
     this._httpRequestService.getRestRequest(args)
       .pipe(finalize(() => this.$methodRepartition.loading = false))
       .subscribe({ next: (res: any[]) => { this.$methodRepartition.data = res; } });
   }
 
   getGlobalStatistics() {
+    this.$globalStatistic = { totalRequest: 0, totalRequestError: 0, percentError: 0, elapsedPercentile: 0 };
     const instanceType = this.params.optional?.instanceType;
     const args: any = {
       'select': `percentileDisc(0.95).within(group.order(elapsed_time)):elapsedPercentile,count:count_request,count_error:count_error`,
@@ -726,6 +747,7 @@ export class RestComponent implements OnInit {
       args['instance.type'] = instanceType;
     }
     this.$dependencyRepartition.loading = true;
+    this.$dependencyRepartition.data = [];
     this._httpRequestService.getRestRequest(args)
       .pipe(finalize(() => this.$dependencyRepartition.loading = false))
       .subscribe({ next: (res: any[]) => { this.$dependencyRepartition.data = res; } });

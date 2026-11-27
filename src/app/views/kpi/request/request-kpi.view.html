@@ -28,7 +28,7 @@
                 class="period-action-btn">
           <mat-icon class="material-symbols-outlined">restart_alt</mat-icon>
         </button>
-        <mat-date-range-picker #picker></mat-date-range-picker>
+        <mat-date-range-picker #picker (closed)="search()"></mat-date-range-picker>
       </mat-form-field>
       <mat-menu #quickRangesMenu="matMenu" class="period-quick-ranges-menu">
         <button *ngFor="let quickRange of periodQuickRanges" mat-menu-item (click)="applyQuickRange(quickRange.value)">
@@ -38,7 +38,7 @@
     </div>
    <mat-form-field class="no-subscript md-3 host-kpi-filter" appearance="outline" [class.loading]="serverNameIsLoading" >
        <mat-label>Hôte</mat-label>
-       <mat-select [formControl]="filterForm.controls.host" multiple (openedChange)="onHostopenedChange()" (selectionChange)="onChangeHost()">
+       <mat-select [formControl]="filterForm.controls.host" multiple (openedChange)="onHostopenedChange($event)" (selectionChange)="onChangeHost()">
            <span *ngIf="filterForm && params.queryParams.appname && params.queryParams.appname[0]!=''"><mat-option *ngFor="let s of params.queryParams.appname">{{s}}</mat-option></span>
            <mat-option *ngFor="let d of nameDataList" [value]="d" >{{d}}</mat-option>
        </mat-select>
